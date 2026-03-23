@@ -191,14 +191,10 @@ body.dark .dtog-in{transform:translateX(24px)}
 .rec-ico{width:36px;height:36px;background:var(--or-lt);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
 .rec-nm{font-size:13px;font-weight:700;color:var(--tx);display:flex;align-items:center;gap:5px;flex-wrap:wrap}
 .rec-day-tag{font-size:9px;font-weight:800;padding:2px 7px;border-radius:5px;white-space:nowrap;line-height:1.4}
-.rec-day-tag.day-today{background:#EEF2FF;color:#4F46E5}
-.rec-day-tag.day-1{background:#F0FDF4;color:#16A34A}
-.rec-day-tag.day-2{background:#FFF7ED;color:#EA580C}
-.rec-day-tag.day-old{background:#F1F5F9;color:#64748B}
-body.dark .rec-day-tag.day-today{background:#312E81;color:#A5B4FC}
-body.dark .rec-day-tag.day-1{background:#14532D;color:#86EFAC}
-body.dark .rec-day-tag.day-2{background:#7C2D12;color:#FDBA74}
-body.dark .rec-day-tag.day-old{background:#334155;color:#94A3B8}
+.rec-day-tag.day-today{background:#FFF7ED;color:#EA580C}
+.rec-day-tag.day-1{background:#EEF2FF;color:#4F46E5}
+body.dark .rec-day-tag.day-today{background:#7C2D12;color:#FDBA74}
+body.dark .rec-day-tag.day-1{background:#312E81;color:#A5B4FC}
 .rec-tm{font-size:10px;color:var(--tx3);font-weight:600;margin-top:1px}
 
 /* ADMIN */
@@ -325,6 +321,9 @@ body.dark .today-summary-card .ts-msg{background:linear-gradient(135deg,#312E81,
 .sel-row{display:flex;gap:7px;flex-wrap:wrap}
 .sel-btn{padding:7px 12px;background:var(--bg);border-radius:20px;font-size:12px;font-weight:800;color:var(--tx2);cursor:pointer;border:1.5px solid transparent;transition:.15s}
 .sel-btn.on{background:var(--or-lt);color:var(--or);border-color:var(--or)}
+.day-sel-row{display:flex;gap:5px}
+.day-btn{width:36px;height:36px;border-radius:50%;font-size:13px;font-weight:800;color:var(--tx2);background:var(--bg);border:1.5px solid var(--bdr);cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:center;padding:0}
+.day-btn.on{background:#6366F1;color:#fff;border-color:#6366F1}
 
 /* EMOJI PREVIEW */
 .ep{width:100%;height:52px;background:var(--bg);border:1.5px solid var(--bdr);border-radius:10px;display:flex;align-items:center;gap:10px;padding:0 12px;cursor:pointer;font-size:28px;transition:border .2s}
@@ -1100,6 +1099,22 @@ body.dark .nav-profile{border-color:rgba(255,255,255,.4)}
           <div class="sel-btn" data-v="none" onclick="pickCycle(this)">안함</div>
         </div>
       </div>
+      <div class="field" id="act-days-field" style="display:none">
+        <label>특정 요일에만 활성화</label>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <button class="tog off" id="act-days-tog" onclick="toggleDaysMode()"><div class="tog-dot"></div></button>
+          <span style="font-size:12px;font-weight:700;color:var(--tx2)" id="act-days-tog-lbl">전체 요일</span>
+        </div>
+        <div class="day-sel-row" id="act-days-row" style="display:none">
+          <button class="day-btn" data-d="0" onclick="toggleDay(this)">일</button>
+          <button class="day-btn" data-d="1" onclick="toggleDay(this)">월</button>
+          <button class="day-btn" data-d="2" onclick="toggleDay(this)">화</button>
+          <button class="day-btn" data-d="3" onclick="toggleDay(this)">수</button>
+          <button class="day-btn" data-d="4" onclick="toggleDay(this)">목</button>
+          <button class="day-btn" data-d="5" onclick="toggleDay(this)">금</button>
+          <button class="day-btn" data-d="6" onclick="toggleDay(this)">토</button>
+        </div>
+      </div>
       <input type="hidden" id="act-eid">
     </div>
     <div class="sheet-foot">
@@ -1834,8 +1849,13 @@ function countDone(act){
   return rec.count||0;
 }
 
+function isAvailableToday(act){
+  if(!act.days||act.days.length===0)return true;
+  return act.days.includes(new Date().getDay());
+}
 function canDo(act){
   if(!act.active)return false;
+  if(!isAvailableToday(act))return false;
   if(act.maxDay===0)return true; // unlimited
   return countDone(act)<act.maxDay;
 }
@@ -1917,9 +1937,9 @@ function getCardState(act){
 
 function renderHomeGrid(){
   const g=document.getElementById('home-grid');
-  // showHome이 true인 활동만 표시 (없으면 active 상위 6개 fallback)
-  let acts=S.acts.filter(a=>a.active&&a.showHome);
-  if(acts.length===0) acts=S.acts.filter(a=>a.active).slice(0,6);
+  // showHome이 true이고 오늘 요일에 활성화된 활동만 표시
+  let acts=S.acts.filter(a=>a.active&&a.showHome&&isAvailableToday(a));
+  if(acts.length===0) acts=S.acts.filter(a=>a.active&&isAvailableToday(a)).slice(0,6);
   g.innerHTML=acts.map(a=>{
     const st=getCardState(a);
     const timer=countdownStr(a);
@@ -1940,7 +1960,7 @@ function renderHomeGrid(){
 
 function renderLogList(){
   const el=document.getElementById('log-list');
-  const acts=S.acts.filter(a=>a.active);
+  const acts=S.acts.filter(a=>a.active&&isAvailableToday(a));
   el.innerHTML=acts.map(a=>{
     const done=countDone(a);
     const max=a.maxDay;
@@ -1983,15 +2003,13 @@ function getDayLabel(ts){
   const diffDays=Math.round((todayStart-dayStart)/86400000);
   if(diffDays===0)return '오늘';
   if(diffDays===1)return '어제';
-  if(diffDays===2)return '그제';
-  if(diffDays<=5)return diffDays+'일 전';
-  return null; // 5일 넘은 건 제외
+  return null; // 어제까지만 표시
 }
 
 function renderRecent(){
   const el=document.getElementById('rec-list');
-  // 5일 전까지만 필터링
-  const cutoff=new Date();cutoff.setDate(cutoff.getDate()-5);cutoff.setHours(0,0,0,0);
+  // 어제까지만 필터링
+  const cutoff=new Date();cutoff.setDate(cutoff.getDate()-1);cutoff.setHours(0,0,0,0);
   const items=S.log.filter(i=>i.ts>=cutoff.getTime());
 
   if(!items.length){el.innerHTML='<div class="empty">아직 활동이 없어요. 시작해봐요! 🚀</div>';return;}
@@ -2002,7 +2020,7 @@ function renderRecent(){
     if(!label)return;
     const h=new Date(i.ts).getHours(),m=String(new Date(i.ts).getMinutes()).padStart(2,'0'),ap=h>=12?'오후':'오전',h12=h>12?h-12:h===0?12:h;
     const timeStr=`${ap} ${h12}:${m}`;
-    const tagCls=label==='오늘'?'day-today':label==='어제'?'day-1':label==='그제'?'day-2':'day-old';
+    const tagCls=label==='오늘'?'day-today':'day-1';
     const labelHtml=`<span class="rec-day-tag ${tagCls}">${label}</span>`;
     html+=`<div class="rec-item">
       <div class="rec-ico">${i.emoji}</div>
@@ -2271,7 +2289,8 @@ function renderAdmActList(){
       <div class="m-emoji">${a.emoji}</div>
       <div class="m-info" style="min-width:100px">
         <div class="m-nm">${a.name}</div>
-        <div class="m-sub">${a.pts}점 · ${a.maxDay===0?'제한없음':a.maxDay+'회/'+CYCLE_LABEL[a.cycle]}</div>
+        <div class="m-sub">${a.pts}점 · ${a.maxDay===0?'제한없음':a.maxDay+'회/'+CYCLE_LABEL[a.cycle]}${a.days&&a.days.length>0&&a.days.length<7?' · '+a.days.map(d=>['일','월','화','수','목','금','토'][d]).join(''):''}
+        </div>
       </div>
       <div class="m-btns-row" style="flex-wrap:wrap;gap:6px;margin-left:auto">
         <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
@@ -2490,10 +2509,42 @@ function openActForm(id){
   document.getElementById('act-maxday').value=a?.maxDay!==undefined?a.maxDay:1;
   const cyc=a?.cycle||'daily';
   document.querySelectorAll('#cycle-row .sel-btn').forEach(b=>b.classList.toggle('on',b.dataset.v===cyc));
+  // 요일 설정
+  const daysField=document.getElementById('act-days-field');
+  const daysTog=document.getElementById('act-days-tog');
+  const daysRow=document.getElementById('act-days-row');
+  daysField.style.display=(cyc==='daily')?'block':'none';
+  const hasDays=a?.days&&a.days.length>0&&a.days.length<7;
+  daysTog.classList.toggle('off',!hasDays);
+  document.getElementById('act-days-tog-lbl').textContent=hasDays?'선택한 요일만':'전체 요일';
+  daysRow.style.display=hasDays?'flex':'none';
+  document.querySelectorAll('#act-days-row .day-btn').forEach(b=>{
+    b.classList.toggle('on',hasDays&&a.days.includes(parseInt(b.dataset.d)));
+  });
   document.getElementById('act-save-btn').textContent=a?'저장하기':'추가하기';
   openModal('m-act');
 }
-function pickCycle(btn){document.querySelectorAll('#cycle-row .sel-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
+function pickCycle(btn){
+  document.querySelectorAll('#cycle-row .sel-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');
+  // 매일 주기일 때만 요일 선택 표시
+  const cyc=btn.dataset.v;
+  document.getElementById('act-days-field').style.display=(cyc==='daily')?'block':'none';
+}
+function toggleDaysMode(){
+  const tog=document.getElementById('act-days-tog');
+  const isOn=tog.classList.contains('off');
+  tog.classList.toggle('off',!isOn);
+  document.getElementById('act-days-tog-lbl').textContent=isOn?'선택한 요일만':'전체 요일';
+  document.getElementById('act-days-row').style.display=isOn?'flex':'none';
+  if(isOn){
+    // 기본으로 평일 선택
+    document.querySelectorAll('#act-days-row .day-btn').forEach(b=>{
+      const d=parseInt(b.dataset.d);
+      b.classList.toggle('on',d>=1&&d<=5);
+    });
+  }
+}
+function toggleDay(btn){btn.classList.toggle('on');}
 function saveActivity(){
   const name=document.getElementById('act-name').value.trim();
   if(!name){toast('❗ 활동 이름을 입력해주세요');return;}
@@ -2503,8 +2554,15 @@ function saveActivity(){
   const pts=Math.max(1,parseInt(document.getElementById('act-pts').value)||1);
   const maxDay=Math.max(0,parseInt(document.getElementById('act-maxday').value)||0);
   const cycle=document.querySelector('#cycle-row .sel-btn.on')?.dataset.v||'daily';
-  if(id){const a=S.acts.find(x=>x.id===id);if(a)Object.assign(a,{emoji,name,desc,pts,maxDay,cycle});}
-  else S.acts.push({id:'a_'+Date.now(),emoji,name,desc,pts,maxDay,cycle,active:true,showHome:false});
+  // 요일 설정
+  let days=null;
+  if(cycle==='daily'&&!document.getElementById('act-days-tog').classList.contains('off')){
+    days=[];
+    document.querySelectorAll('#act-days-row .day-btn.on').forEach(b=>days.push(parseInt(b.dataset.d)));
+    if(days.length===0||days.length===7)days=null; // 전체 선택이면 null
+  }
+  if(id){const a=S.acts.find(x=>x.id===id);if(a)Object.assign(a,{emoji,name,desc,pts,maxDay,cycle,days});}
+  else S.acts.push({id:'a_'+Date.now(),emoji,name,desc,pts,maxDay,cycle,days,active:true,showHome:false});
   save();renderAll();closeModal('m-act');
   toast(id?'✏️ 활동이 수정됐어요':'✅ 새 활동이 추가됐어요!');
 }
@@ -2925,7 +2983,7 @@ Object.assign(window, {
   giveBonus, deductPts, togAct, togActHome, delAct, delRwd,
   togSetting, saveSettings, saveGreeting,
   resetToday, simulateDayPass, resetAll, backupData, restoreData,
-  openActForm, saveActivity, pickCycle,
+  openActForm, saveActivity, pickCycle, toggleDaysMode, toggleDay,
   openRwdForm, saveReward, setGoalT,
   openEP, closeEP, epSearch, pickE, showEpCat, switchEpCat,
   setPeriod, pk, startChangePIN, lockAdmin,
