@@ -90,12 +90,12 @@ body.dark .dtog-in{transform:translateX(24px)}
 .prog-row{display:flex;justify-content:space-between;margin-top:5px;font-size:11px;opacity:.75;font-weight:700;transition:all .25s}
 
 /* HERO compact state */
-.hero.compact{padding:12px 20px 14px}
+.hero.compact{padding:12px 20px 14px;padding-top:calc(12px + env(safe-area-inset-top))}
 .hero.compact .hero-lbl{font-size:10px}
 .hero.compact .hero-pts{font-size:32px}
 .hero.compact .hero-unit{font-size:14px}
 .hero.compact .hero-goal{max-height:0;margin-top:0;opacity:0}
-.hero.compact .streak-pill{top:12px;padding:4px 10px;font-size:11px}
+.hero.compact .streak-pill{top:calc(12px + env(safe-area-inset-top));padding:4px 10px;font-size:11px}
 .hero.compact .prog-track{margin-top:10px;height:5px}
 .hero.compact .prog-row{margin-top:3px;font-size:10px}
 
@@ -757,7 +757,7 @@ body.dark .dtog-in{transform:translateX(24px)}
 // MEGA EMOJI DATA
 // ═══════════════════════════════════════════════
 const EMOJIS = {
-  '⭐ 추천':['⭐','🌟','💫','✨','🎯','🏆','🥇','🎖️','🎗️','🏅','💎','👑','🔥','💪','🌈','🎉','🎊','🎁','🎀','🫶'],
+  '⭐ 추천':['⭐','🌟','💫','✨','🎯','🏆','🥇','🎖️','🎗️','🏅','💎','👑','🔥','💪','🌈','🎉','🎊','🎁','🎀','🫶','📺','▶️','🎬','🦎'],
   '🏃 운동·스포츠':['🏃','🚴','⚽','🏊','🤸','💪','🏋️','🎯','🤾','🧗','⛷️','🏄','🥊','🎽','🛹','⛸️','🏀','⚾','🎾','🏸','🏓','🏒','🥅','🎿','🛷','🏇','🤺','🥋','🤼','🤸','🏌️','🏹','🎣','🤿','🥌'],
   '📚 학습·공부':['📚','📖','✏️','🎓','📝','🔬','💻','🎵','🎨','📐','🖊️','🔭','🧮','📏','🗒️','📒','📓','📔','📕','📗','📘','📙','🗂️','📋','📌','📍','🖇️','📎','✂️','🔍','🧩','🎲','♟️','🖋️','📜'],
   '🦷 건강·위생':['🦷','💊','🥗','🍎','💧','😴','🧼','🪥','🛁','🌿','❤️','🏥','🧴','🪞','🫁','🧘','🛌','🌙','☀️','🌬️','🫀','🧬','💉','🩺','🩹','🩻','🫶','🥦','🥕','🥑','🍇','🍓','🫐','🥝','🍊'],
@@ -766,7 +766,8 @@ const EMOJIS = {
   '🎮 놀이·장난감':['🎮','🧱','🚗','✈️','🚀','🎲','🃏','🎳','🪀','🪁','🔫','🧸','🪆','🎪','🎡','🎠','🎢','🎭','🎬','🎤','🎧','🎸','🎹','🥁','🎺','🎷','🪕','🎻','🎯','🎱','🔮','🪄','🎴','🀄','🎰'],
   '🍕 음식·간식':['🍕','🍔','🍟','🌮','🍜','🍣','🍦','🎂','🍰','🧁','🍩','🍪','🍫','🍬','🍭','🥤','🧃','🍺','🥛','☕','🍵','🧋','🥞','🧇','🥓','🍳','🥚','🧆','🌯','🥪','🍱','🍛','🍲','🥘','🫕'],
   '🚲 탈것·이동':['🚲','🛴','🛹','🚗','🏎️','🚕','🚌','🚎','🏍️','🛵','🚑','🚒','🚓','🛻','🚐','🚚','🚛','🚜','🏗️','🚁','✈️','🚀','🛸','⛵','🚤','🛥️','⛴️','🛳️','🚢','🚂','🚃','🚄','🚅','🚆','🚇'],
-  '🐶 동물·자연':['🐶','🐱','🐻','🐼','🐨','🐯','🦁','🐸','🐙','🦋','🌸','🌺','🌻','🌹','🍀','🌿','🌱','🪴','🎋','🎍','🌾','🍁','🍂','🍃','🌊','🌋','⛰️','🗻','🏔️','🌅','🌄','🌠','⭐','🌙','☀️'],
+  '🐶 동물·자연':['🐶','🐱','🐻','🐼','🐨','🐯','🦁','🐸','🐙','🦋','🦎','🦖','🐊','🐢','🐍','🌸','🌺','🌻','🌹','🍀','🌿','🌱','🪴','🎋','🎍','🌾','🍁','🍂','🍃','🌊','🌋','⛰️','🗻','🏔️','🌅'],
+  '📺 미디어':['📺','▶️','⏯️','🎬','🎥','📹','🎞️','📽️','📀','💿','📻','🎙️','🎚️','🎛️','📱','💻','🖥️','🖨️','⌨️','🖱️','📷','📸','🔊','🔉','🔈','🔇','📡','🎧','🎤','🎵','🎶','🔔','🔕'],
   '🏠 장소·건물':['🏠','🏡','🏢','🏣','🏤','🏥','🏦','🏧','🏨','🏩','🏪','🏫','🏬','🏭','🏯','🏰','💒','⛪','🕌','🕍','⛩️','🗼','🗽','⛲','🎠','🎡','🎢','🎪','🛖','🏕️','🏖️','🏗️','🌃','🌆','🌇'],
   '💼 도구·사물':['💼','👜','👝','🎒','🧳','💰','💳','🔑','🗝️','🔓','🔐','🔒','🔨','⚒️','🛠️','⛏️','🔧','🔩','🪛','🪝','🗜️','⚙️','🔗','⛓️','🪜','🧲','🔭','🔬','🩺','💊','🩹','🧪','🧫','🧬'],
 };
@@ -890,7 +891,7 @@ function hideLoading(){
   if(el) el.remove();
 }
 
-// ── DARK ──────────────────────────────────────
+// ── DARK (localStorage - 개인 브라우저 설정) ──────
 function applyDark(v){
   document.body.classList.toggle('dark',v);
   document.querySelectorAll('.dtog-in').forEach(el=>el.textContent=v?'🌙':'☀️');
@@ -909,7 +910,17 @@ function applyDark(v){
     }
   }
 }
-function toggleDark(){S.dark=!S.dark;applyDark(S.dark);save();}
+function toggleDark(){
+  const isDark=!document.body.classList.contains('dark');
+  localStorage.setItem('taemin_dark',isDark?'1':'0');
+  applyDark(isDark);
+}
+function loadDarkPref(){
+  const saved=localStorage.getItem('taemin_dark');
+  if(saved!==null){
+    applyDark(saved==='1');
+  }
+}
 
 // ── SMART MESSAGE SYSTEM ─────────────────────
 const DAILY_MSGS=['오늘도 멋진 하루 보내자! 💪','화이팅! 넌 할 수 있어! ⭐','좋은 아침이야! 🌅','잘 잤어? 오늘도 파이팅! 💫','태민아, 오늘도 응원해! 🎯','새로운 하루가 시작됐어! 🌈'];
@@ -1188,13 +1199,14 @@ function getLogsForDate(dateStr){
 }
 
 function isDayComplete(dateStr){
-  // 해당 날짜에 활성화된 daily 활동 중 maxDay>0인 것들이 모두 완료되었는지 체크
+  // 홈에 표시된 활성 활동들(showHome=true, active=true) 중 
+  // maxDay>0인 것들이 모두 완료되었는지 체크
   const logs=getLogsForDate(dateStr);
-  const dailyActs=S.acts.filter(a=>a.active&&a.cycle==='daily'&&a.maxDay>0);
-  if(dailyActs.length===0)return false;
+  const homeActs=S.acts.filter(a=>a.active&&a.showHome!==false&&a.maxDay>0);
+  if(homeActs.length===0)return false;
   
-  // 각 daily 활동별로 해당 날짜에 maxDay만큼 완료했는지 확인
-  for(const act of dailyActs){
+  // 각 홈 활동별로 해당 날짜에 maxDay만큼 완료했는지 확인
+  for(const act of homeActs){
     const actLogs=logs.filter(l=>l.actId===act.id);
     if(actLogs.length<act.maxDay)return false;
   }
@@ -1366,7 +1378,7 @@ function renderAdmRwdList(){
 }
 function renderAdmSettings(){
   const ts=document.getElementById('tog-streak');if(ts)ts.classList.toggle('off',!S.settings.streakBonus);
-  const td=document.getElementById('tog-dark');if(td)td.classList.toggle('off',!S.dark);
+  const td=document.getElementById('tog-dark');if(td)td.classList.toggle('off',!document.body.classList.contains('dark'));
   const bi=document.getElementById('bonus-pts-inp');if(bi)bi.value=S.settings.streakBonusPts||100;
   const gi=document.getElementById('greeting-inp');if(gi)gi.value=S.greeting||'';
 }
@@ -1740,7 +1752,7 @@ Object.assign(window, {
   hideLoading();
 
   document.getElementById('greeting-txt').textContent = S.greeting||'안녕, 태민아! 👋';
-  applyDark(S.dark);
+  loadDarkPref(); // localStorage에서 개인 다크모드 설정 로드
   renderAll();
   
   // 날씨/미세먼지 데이터 가져오기
