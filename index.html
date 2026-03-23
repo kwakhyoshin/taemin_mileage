@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="googlebot" content="noindex, nofollow">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="태민 마일리지">
@@ -12,6 +14,7 @@
 <title>태민이 마일리지 🏆</title>
 <link rel="manifest" href="data:application/json,%7B%22display%22%3A%22standalone%22%2C%22orientation%22%3A%22portrait%22%7D">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/pretendard/1.3.9/variable/pretendardvariable.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha512/0.8.0/sha512.min.js"></script>
 <style>
 :root {
   --or:#6366F1;--or-lt:#EEF2FF;--or-md:#C7D2FE;
@@ -340,6 +343,40 @@ body.dark .dtog-in{transform:translateX(24px)}
 .pin-key.ck{font-size:12px;color:var(--tx2);font-weight:700;background:transparent}
 .pin-key.dk{color:var(--rd)}
 
+/* AUTH SCREENS */
+.auth-screen{position:fixed;inset:0;background:linear-gradient(135deg,#6366F1,#818CF8);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+.auth-screen.hidden{display:none}
+.auth-card{background:#fff;border-radius:24px;padding:32px 28px;width:100%;max-width:340px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.auth-logo{font-size:48px;margin-bottom:12px}
+.auth-title{font-size:24px;font-weight:900;color:#1E293B;margin-bottom:6px}
+.auth-sub{font-size:13px;color:#64748B;margin-bottom:24px;line-height:1.5}
+.auth-input{width:100%;padding:14px 16px;border:2px solid #E2E8F0;border-radius:12px;font-size:15px;font-weight:600;margin-bottom:12px;outline:none;transition:border .2s;font-family:inherit;background:#fff;color:#1E293B}
+.auth-input:focus{border-color:#6366F1}
+.auth-btn{width:100%;padding:14px;background:#6366F1;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:8px;transition:opacity .2s}
+.auth-btn:active{opacity:.8}
+.auth-btn.secondary{background:#E2E8F0;color:#64748B}
+.auth-link{font-size:13px;color:#6366F1;font-weight:700;margin-top:16px;cursor:pointer}
+.auth-error{font-size:12px;color:#EF4444;font-weight:600;margin-top:8px;min-height:18px}
+
+/* MEMBER SELECT */
+.member-grid{display:flex;flex-direction:column;gap:10px;margin:20px 0}
+.member-card{display:flex;align-items:center;gap:14px;padding:16px;background:#F8FAFC;border:2px solid transparent;border-radius:14px;cursor:pointer;transition:all .2s}
+.member-card:hover{background:#EEF2FF}
+.member-card.selected{border-color:#6366F1;background:#EEF2FF}
+.member-avatar{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.member-avatar svg{width:100%;height:100%}
+.member-info{text-align:left}
+.member-name{font-size:16px;font-weight:800;color:#1E293B}
+.member-role{font-size:12px;color:#64748B;font-weight:600}
+
+/* PROFILE ICON IN NAV */
+.nav-profile{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;overflow:hidden;background:rgba(255,255,255,.15);box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.nav-profile svg{width:100%;height:100%}
+
+/* PROFILE ICON IN ADMIN */
+.profile-avatar{width:40px;height:40px;border-radius:50%;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.profile-avatar svg{width:100%;height:100%}
+
 /* TOAST */
 .toast{position:fixed;top:18px;left:50%;transform:translateX(-50%) translateY(-80px);background:var(--tx);color:var(--bg);padding:11px 20px;border-radius:28px;font-size:13px;font-weight:800;z-index:999;white-space:nowrap;transition:transform .3s cubic-bezier(.34,1.5,.64,1),opacity .3s;opacity:0;max-width:88vw;text-align:center}
 .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
@@ -350,6 +387,48 @@ body.dark .dtog-in{transform:translateX(24px)}
 </style>
 </head>
 <body>
+
+<!-- AUTH: 로그인 화면 -->
+<div class="auth-screen" id="auth-login">
+  <div class="auth-card">
+    <div class="auth-logo">🏆</div>
+    <div class="auth-title">태민이 마일리지</div>
+    <div class="auth-sub">가족 계정으로 로그인하세요</div>
+    <input type="text" class="auth-input" id="login-id" placeholder="아이디" autocomplete="username">
+    <input type="password" class="auth-input" id="login-pwd" placeholder="비밀번호" autocomplete="current-password">
+    <div class="auth-error" id="login-error"></div>
+    <button class="auth-btn" onclick="doLogin()">로그인</button>
+    <div class="auth-link" id="register-link" onclick="showAuthScreen('member')">처음이신가요? 가입하기</div>
+  </div>
+</div>
+
+<!-- AUTH: 가족 선택 화면 -->
+<div class="auth-screen hidden" id="auth-member">
+  <div class="auth-card">
+    <div class="auth-logo">👨‍👩‍👦</div>
+    <div class="auth-title">누구세요?</div>
+    <div class="auth-sub">가족 구성원을 선택해주세요</div>
+    <div class="member-grid" id="member-grid">
+      <!-- 동적으로 렌더링 -->
+    </div>
+    <button class="auth-btn secondary" onclick="showAuthScreen('login')">← 로그인으로 돌아가기</button>
+  </div>
+</div>
+
+<!-- AUTH: 회원가입 화면 -->
+<div class="auth-screen hidden" id="auth-register">
+  <div class="auth-card">
+    <div class="auth-logo" id="reg-avatar" style="width:80px;height:80px;margin:0 auto 12px;border-radius:50%;overflow:hidden">👦</div>
+    <div class="auth-title" id="reg-title">태민이 계정 만들기</div>
+    <div class="auth-sub">아이디와 비밀번호를 설정해주세요</div>
+    <input type="text" class="auth-input" id="reg-id" placeholder="아이디 (4자 이상)" autocomplete="username">
+    <input type="password" class="auth-input" id="reg-pwd" placeholder="비밀번호 (4자 이상)" autocomplete="new-password">
+    <input type="password" class="auth-input" id="reg-pwd2" placeholder="비밀번호 확인" autocomplete="new-password">
+    <div class="auth-error" id="reg-error"></div>
+    <button class="auth-btn" onclick="doRegister()">가입 완료</button>
+    <button class="auth-btn secondary" onclick="showAuthScreen('member')" style="margin-top:8px">← 다시 선택하기</button>
+  </div>
+</div>
 
 <!-- 가로모드 차단 -->
 <div class="landscape-block">
@@ -608,6 +687,21 @@ body.dark .dtog-in{transform:translateX(24px)}
         </div>
       </div>
     </div>
+    <div class="adm-sec">
+      <div class="adm-sec-lbl">계정</div>
+      <div class="adm-card">
+        <div class="adm-row">
+          <div class="adm-row-l" style="display:flex;align-items:center;gap:12px">
+            <div class="profile-avatar" id="profile-icon-adm">👤</div>
+            <div>
+              <div class="adm-row-nm" id="profile-name-adm">로그인 필요</div>
+              <div class="adm-row-sub" id="profile-role-adm">-</div>
+            </div>
+          </div>
+          <button class="btn-sm rd" onclick="logout()">로그아웃</button>
+        </div>
+      </div>
+    </div>
     <div style="height:16px"></div>
   </div>
 </div>
@@ -632,7 +726,7 @@ body.dark .dtog-in{transform:translateX(24px)}
       <span class="nav-label">기록</span>
     </div>
     <div class="nav-item" data-tab="adm" id="tab-adm" onclick="goTab('adm')">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      <div class="nav-profile" id="nav-profile-icon">👤</div>
       <span class="nav-label">관리</span>
     </div>
   </nav>
@@ -775,6 +869,243 @@ const EMOJIS = {
 // Build flat list for search
 const FLAT = [];
 Object.entries(EMOJIS).forEach(([cat,arr])=>arr.forEach(e=>FLAT.push({e,cat})));
+
+// ═══════════════════════════════════════════════
+// AUTH SYSTEM
+// ═══════════════════════════════════════════════
+// SVG 아바타 아이콘
+const AVATARS = {
+  taemin: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="20" cy="20" r="20" fill="#FEF3C7"/>
+    <circle cx="20" cy="16" r="8" fill="#FBBF24"/>
+    <ellipse cx="20" cy="35" rx="12" ry="10" fill="#60A5FA"/>
+    <circle cx="20" cy="15" r="6" fill="#FDE68A"/>
+    <circle cx="17" cy="14" r="1.2" fill="#1E293B"/>
+    <circle cx="23" cy="14" r="1.2" fill="#1E293B"/>
+    <path d="M18 17.5c0 0 1 1.5 2 1.5s2-1.5 2-1.5" stroke="#1E293B" stroke-width="0.8" stroke-linecap="round"/>
+    <path d="M14 10c0-4 3-6 6-6s6 2 6 6" stroke="#FBBF24" stroke-width="3" stroke-linecap="round"/>
+  </svg>`,
+  dad: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="20" cy="20" r="20" fill="#DBEAFE"/>
+    <circle cx="20" cy="16" r="8" fill="#3B82F6"/>
+    <ellipse cx="20" cy="35" rx="12" ry="10" fill="#1E40AF"/>
+    <circle cx="20" cy="15" r="6" fill="#FDE68A"/>
+    <circle cx="17" cy="14" r="1.2" fill="#1E293B"/>
+    <circle cx="23" cy="14" r="1.2" fill="#1E293B"/>
+    <path d="M17 18c0 0 1.5 1 3 1s3-1 3-1" stroke="#1E293B" stroke-width="0.8" stroke-linecap="round"/>
+    <rect x="14" y="8" width="12" height="4" rx="1" fill="#1E293B"/>
+    <rect x="16" y="6" width="8" height="3" rx="1" fill="#1E293B"/>
+  </svg>`,
+  mom: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="20" cy="20" r="20" fill="#FCE7F3"/>
+    <circle cx="20" cy="16" r="8" fill="#EC4899"/>
+    <ellipse cx="20" cy="35" rx="12" ry="10" fill="#DB2777"/>
+    <circle cx="20" cy="15" r="6" fill="#FDE68A"/>
+    <circle cx="17" cy="14" r="1.2" fill="#1E293B"/>
+    <circle cx="23" cy="14" r="1.2" fill="#1E293B"/>
+    <path d="M17 17c0 0 1.5 1.5 3 1.5s3-1.5 3-1.5" stroke="#1E293B" stroke-width="0.8" stroke-linecap="round"/>
+    <path d="M12 12c0-5 4-8 8-8s8 3 8 8c0 1-0.5 2-1 2.5" stroke="#1E293B" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+    <circle cx="26" cy="13" r="1.5" fill="#F472B6"/>
+  </svg>`
+};
+
+const MEMBERS = {
+  taemin: { name: '태민이', icon: '👦', greeting: '안녕, 태민아! 👋', role: '우리집 마일리지 스타 ⭐', color: '#FEF3C7' },
+  dad: { name: '아빠', icon: '👨', greeting: '안녕하세요, 효신님! 👋', role: '곽효신', color: '#DBEAFE' },
+  mom: { name: '엄마', icon: '👩', greeting: '안녕하세요, 은혜님! 👋', role: '배은혜', color: '#FCE7F3' }
+};
+
+let currentUser = null;
+let selectedMember = null;
+
+function showAuthScreen(screen) {
+  document.getElementById('auth-login').classList.toggle('hidden', screen !== 'login');
+  document.getElementById('auth-member').classList.toggle('hidden', screen !== 'member');
+  document.getElementById('auth-register').classList.toggle('hidden', screen !== 'register');
+  // Clear errors
+  document.getElementById('login-error').textContent = '';
+  document.getElementById('reg-error').textContent = '';
+  
+  // Render member grid with SVG avatars
+  if (screen === 'member') {
+    renderMemberGrid();
+  }
+}
+
+function renderMemberGrid() {
+  const grid = document.getElementById('member-grid');
+  const users = JSON.parse(localStorage.getItem('taemin_users') || '{}');
+  
+  grid.innerHTML = Object.entries(MEMBERS).map(([id, m]) => {
+    const registered = users[id];
+    return `<div class="member-card${registered ? ' registered' : ''}" onclick="selectMember('${id}')">
+      <div class="member-avatar">${AVATARS[id]}</div>
+      <div class="member-info">
+        <div class="member-name">${m.name} ${registered ? '<span style="color:#10B981;font-size:12px">✓ 가입완료</span>' : ''}</div>
+        <div class="member-role">${m.role}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function selectMember(memberId) {
+  selectedMember = memberId;
+  const member = MEMBERS[memberId];
+  
+  // Update register screen with SVG avatar
+  document.getElementById('reg-avatar').innerHTML = AVATARS[memberId];
+  document.getElementById('reg-title').textContent = `${member.name} 계정 만들기`;
+  
+  // Check if already registered
+  const users = JSON.parse(localStorage.getItem('taemin_users') || '{}');
+  if (users[memberId]) {
+    toast(`${member.name}은(는) 이미 가입했어요! 로그인하세요.`);
+    showAuthScreen('login');
+    return;
+  }
+  
+  showAuthScreen('register');
+}
+
+function doRegister() {
+  const id = document.getElementById('reg-id').value.trim();
+  const pwd = document.getElementById('reg-pwd').value;
+  const pwd2 = document.getElementById('reg-pwd2').value;
+  const errorEl = document.getElementById('reg-error');
+  
+  if (id.length < 4) {
+    errorEl.textContent = '아이디는 4자 이상이어야 해요';
+    return;
+  }
+  if (pwd.length < 4) {
+    errorEl.textContent = '비밀번호는 4자 이상이어야 해요';
+    return;
+  }
+  if (pwd !== pwd2) {
+    errorEl.textContent = '비밀번호가 일치하지 않아요';
+    return;
+  }
+  
+  const users = JSON.parse(localStorage.getItem('taemin_users') || '{}');
+  
+  // Check if ID already taken
+  for (const m in users) {
+    if (users[m].id === id) {
+      errorEl.textContent = '이미 사용중인 아이디예요';
+      return;
+    }
+  }
+  
+  // Hash password with SHA-512
+  const pwdHash = sha512(pwd);
+  
+  users[selectedMember] = { id, pwdHash };
+  localStorage.setItem('taemin_users', JSON.stringify(users));
+  
+  // Auto login
+  currentUser = selectedMember;
+  localStorage.setItem('taemin_current_user', selectedMember);
+  
+  toast(`${MEMBERS[selectedMember].name} 가입 완료! 🎉`);
+  hideAllAuth();
+  applyUserProfile();
+}
+
+function doLogin() {
+  const id = document.getElementById('login-id').value.trim();
+  const pwd = document.getElementById('login-pwd').value;
+  const errorEl = document.getElementById('login-error');
+  
+  if (!id || !pwd) {
+    errorEl.textContent = '아이디와 비밀번호를 입력해주세요';
+    return;
+  }
+  
+  const users = JSON.parse(localStorage.getItem('taemin_users') || '{}');
+  const pwdHash = sha512(pwd);
+  
+  for (const memberId in users) {
+    if (users[memberId].id === id && users[memberId].pwdHash === pwdHash) {
+      currentUser = memberId;
+      localStorage.setItem('taemin_current_user', memberId);
+      toast(`${MEMBERS[memberId].name}, 환영해요! 🎉`);
+      hideAllAuth();
+      applyUserProfile();
+      return;
+    }
+  }
+  
+  errorEl.textContent = '아이디 또는 비밀번호가 틀렸어요';
+}
+
+function hideAllAuth() {
+  document.getElementById('auth-login').classList.add('hidden');
+  document.getElementById('auth-member').classList.add('hidden');
+  document.getElementById('auth-register').classList.add('hidden');
+}
+
+function applyUserProfile() {
+  if (!currentUser) return;
+  const member = MEMBERS[currentUser];
+  
+  // Update nav profile icon with SVG avatar
+  const navIcon = document.getElementById('nav-profile-icon');
+  if (navIcon) navIcon.innerHTML = AVATARS[currentUser];
+  
+  // Update greeting (use custom greeting if set, else use member default)
+  const greetingEl = document.getElementById('greeting-txt');
+  if (greetingEl) {
+    const customGreeting = S.greeting;
+    if (customGreeting && currentUser === 'taemin') {
+      greetingEl.textContent = customGreeting;
+    } else {
+      greetingEl.textContent = member.greeting;
+    }
+  }
+  
+  // Update admin tab profile section with SVG avatar
+  const admIcon = document.getElementById('profile-icon-adm');
+  const admName = document.getElementById('profile-name-adm');
+  const admRole = document.getElementById('profile-role-adm');
+  if (admIcon) admIcon.innerHTML = AVATARS[currentUser];
+  if (admName) admName.textContent = member.name;
+  if (admRole) admRole.textContent = member.role;
+}
+
+function logout() {
+  if (!confirm('로그아웃 하시겠어요?')) return;
+  currentUser = null;
+  localStorage.removeItem('taemin_current_user');
+  showAuthScreen('login');
+  document.getElementById('login-id').value = '';
+  document.getElementById('login-pwd').value = '';
+}
+
+function checkAuth() {
+  const savedUser = localStorage.getItem('taemin_current_user');
+  const users = JSON.parse(localStorage.getItem('taemin_users') || '{}');
+  
+  // 3명 모두 가입했으면 회원가입 링크 숨김
+  const registerLink = document.getElementById('register-link');
+  if (registerLink) {
+    registerLink.style.display = Object.keys(users).length >= 3 ? 'none' : 'block';
+  }
+  
+  if (savedUser && users[savedUser]) {
+    currentUser = savedUser;
+    hideAllAuth();
+    applyUserProfile();
+    return true;
+  }
+  
+  // Check if any users exist
+  if (Object.keys(users).length === 0) {
+    showAuthScreen('member');
+  } else {
+    showAuthScreen('login');
+  }
+  return false;
+}
 
 // ═══════════════════════════════════════════════
 // STATE
@@ -1719,6 +2050,8 @@ Object.assign(window, {
   saveMsgMode, saveCustomMsg,
   calPrev, calNext, selectCalDay,
   admTab,
+  // Auth functions
+  showAuthScreen, selectMember, doRegister, doLogin, logout,
 });
 
 // ── INIT (Firebase async) ─────────────────────
@@ -1751,8 +2084,12 @@ Object.assign(window, {
 
   hideLoading();
 
+  // 인증 체크 - 로그인 안되어 있으면 로그인 화면 표시
+  checkAuth();
+  
   document.getElementById('greeting-txt').textContent = S.greeting||'안녕, 태민아! 👋';
   loadDarkPref(); // localStorage에서 개인 다크모드 설정 로드
+  applyUserProfile(); // 로그인된 사용자 프로필 적용
   renderAll();
   
   // 날씨/미세먼지 데이터 가져오기
