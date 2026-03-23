@@ -350,8 +350,12 @@ body.dark .dtog-in{transform:translateX(24px)}
 .auth-logo{font-size:48px;margin-bottom:12px}
 .auth-title{font-size:24px;font-weight:900;color:#1E293B;margin-bottom:6px}
 .auth-sub{font-size:13px;color:#64748B;margin-bottom:24px;line-height:1.5}
-.auth-input{width:100%;padding:14px 16px;border:2px solid #E2E8F0;border-radius:12px;font-size:15px;font-weight:600;margin-bottom:12px;outline:none;transition:border .2s;font-family:inherit;background:#fff;color:#1E293B}
+.auth-input{width:100%;padding:14px 16px;border:2px solid #E2E8F0;border-radius:12px;font-size:15px;font-weight:600;margin-bottom:12px;outline:none;transition:border .2s;font-family:inherit;background:#fff;color:#1E293B;box-sizing:border-box}
 .auth-input:focus{border-color:#6366F1}
+.pwd-wrap{position:relative;width:100%}
+.pwd-wrap .auth-input{padding-right:48px;margin-bottom:12px}
+.pwd-toggle{position:absolute;right:14px;top:50%;transform:translateY(calc(-50% - 6px));background:none;border:none;font-size:18px;cursor:pointer;opacity:.5;transition:opacity .2s}
+.pwd-toggle:hover{opacity:1}
 .auth-btn{width:100%;padding:14px;background:#6366F1;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:8px;transition:opacity .2s}
 .auth-btn:active{opacity:.8}
 .auth-btn.secondary{background:#E2E8F0;color:#64748B}
@@ -395,7 +399,10 @@ body.dark .dtog-in{transform:translateX(24px)}
     <div class="auth-title">태민이 마일리지</div>
     <div class="auth-sub">가족 계정으로 로그인하세요</div>
     <input type="text" class="auth-input" id="login-id" placeholder="아이디" autocomplete="username">
-    <input type="password" class="auth-input" id="login-pwd" placeholder="비밀번호" autocomplete="current-password">
+    <div class="pwd-wrap">
+      <input type="password" class="auth-input" id="login-pwd" placeholder="비밀번호" autocomplete="current-password">
+      <button type="button" class="pwd-toggle" onclick="togglePwd('login-pwd', this)">👁️</button>
+    </div>
     <div class="auth-error" id="login-error"></div>
     <button class="auth-btn" onclick="doLogin()">로그인</button>
     <div class="auth-link" id="register-link" onclick="showAuthScreen('member')">처음이신가요? 가입하기</div>
@@ -422,8 +429,14 @@ body.dark .dtog-in{transform:translateX(24px)}
     <div class="auth-title" id="reg-title">태민이 계정 만들기</div>
     <div class="auth-sub">아이디와 비밀번호를 설정해주세요</div>
     <input type="text" class="auth-input" id="reg-id" placeholder="아이디 (4자 이상)" autocomplete="username">
-    <input type="password" class="auth-input" id="reg-pwd" placeholder="비밀번호 (4자 이상)" autocomplete="new-password">
-    <input type="password" class="auth-input" id="reg-pwd2" placeholder="비밀번호 확인" autocomplete="new-password">
+    <div class="pwd-wrap">
+      <input type="password" class="auth-input" id="reg-pwd" placeholder="비밀번호 (4자 이상)" autocomplete="new-password">
+      <button type="button" class="pwd-toggle" onclick="togglePwd('reg-pwd', this)">👁️</button>
+    </div>
+    <div class="pwd-wrap">
+      <input type="password" class="auth-input" id="reg-pwd2" placeholder="비밀번호 확인" autocomplete="new-password">
+      <button type="button" class="pwd-toggle" onclick="togglePwd('reg-pwd2', this)">👁️</button>
+    </div>
     <div class="auth-error" id="reg-error"></div>
     <button class="auth-btn" onclick="doRegister()">가입 완료</button>
     <button class="auth-btn secondary" onclick="showAuthScreen('member')" style="margin-top:8px">← 다시 선택하기</button>
@@ -878,37 +891,126 @@ Object.entries(EMOJIS).forEach(([cat,arr])=>arr.forEach(e=>FLAT.push({e,cat})));
 // ═══════════════════════════════════════════════
 // SVG 아바타 아이콘
 const AVATARS = {
-  taemin: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="20" cy="20" r="20" fill="#FEF3C7"/>
-    <circle cx="20" cy="16" r="8" fill="#FBBF24"/>
-    <ellipse cx="20" cy="35" rx="12" ry="10" fill="#60A5FA"/>
-    <circle cx="20" cy="15" r="6" fill="#FDE68A"/>
-    <circle cx="17" cy="14" r="1.2" fill="#1E293B"/>
-    <circle cx="23" cy="14" r="1.2" fill="#1E293B"/>
-    <path d="M18 17.5c0 0 1 1.5 2 1.5s2-1.5 2-1.5" stroke="#1E293B" stroke-width="0.8" stroke-linecap="round"/>
-    <path d="M14 10c0-4 3-6 6-6s6 2 6 6" stroke="#FBBF24" stroke-width="3" stroke-linecap="round"/>
+  taemin: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="tf1" cx="50%" cy="35%" r="60%"><stop offset="0%" stop-color="#FFECD2"/><stop offset="50%" stop-color="#FFDCB8"/><stop offset="100%" stop-color="#E8B896"/></radialGradient>
+      <radialGradient id="tf2" cx="30%" cy="25%" r="80%"><stop offset="0%" stop-color="#FFF9E6"/><stop offset="100%" stop-color="#FFE066"/></radialGradient>
+      <linearGradient id="th1" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#5D4037"/><stop offset="50%" stop-color="#4E342E"/><stop offset="100%" stop-color="#3E2723"/></linearGradient>
+      <filter id="ts1" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur in="SourceAlpha" stdDeviation="2"/><feOffset dx="0" dy="2"/><feComposite in2="SourceAlpha" operator="arithmetic" k2="-1" k3="1"/><feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.15 0"/><feBlend in2="SourceGraphic"/></filter>
+      <radialGradient id="tc1" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#FFBCBC"/><stop offset="100%" stop-color="#FF8A8A" stop-opacity="0"/></radialGradient>
+    </defs>
+    <circle cx="100" cy="100" r="98" fill="url(#tf2)"/>
+    <ellipse cx="100" cy="115" rx="62" ry="58" fill="url(#tf1)" filter="url(#ts1)"/>
+    <ellipse cx="100" cy="108" rx="58" ry="54" fill="url(#tf1)"/>
+    <path d="M42 82 C48 35 75 22 100 20 C125 22 152 35 158 82 C155 78 145 82 130 88 C115 55 100 50 100 50 C100 50 85 55 70 88 C55 82 45 78 42 82 Z" fill="url(#th1)"/>
+    <ellipse cx="100" cy="32" rx="28" ry="12" fill="#4E342E"/>
+    <path d="M55 75 C52 82 50 90 52 95" stroke="#4E342E" stroke-width="8" stroke-linecap="round" fill="none"/>
+    <path d="M145 75 C148 82 150 90 148 95" stroke="#4E342E" stroke-width="8" stroke-linecap="round" fill="none"/>
+    <ellipse cx="72" cy="98" rx="14" ry="16" fill="#FFFFFE"/>
+    <ellipse cx="128" cy="98" rx="14" ry="16" fill="#FFFFFE"/>
+    <ellipse cx="72" cy="98" rx="12" ry="14" fill="#FFF"/>
+    <ellipse cx="128" cy="98" rx="12" ry="14" fill="#FFF"/>
+    <circle cx="74" cy="100" r="8" fill="#4A3C31"/>
+    <circle cx="130" cy="100" r="8" fill="#4A3C31"/>
+    <circle cx="74" cy="100" r="6" fill="#2D1F14"/>
+    <circle cx="130" cy="100" r="6" fill="#2D1F14"/>
+    <circle cx="77" cy="96" r="3" fill="#FFF"/>
+    <circle cx="133" cy="96" r="3" fill="#FFF"/>
+    <circle cx="72" cy="102" r="1.5" fill="#FFF" opacity="0.5"/>
+    <circle cx="128" cy="102" r="1.5" fill="#FFF" opacity="0.5"/>
+    <path d="M60 84 C68 78 80 80 88 84" stroke="#5D4037" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+    <path d="M112 84 C120 78 132 80 140 84" stroke="#5D4037" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+    <ellipse cx="100" cy="125" rx="7" ry="4" fill="#E8A07E"/>
+    <path d="M100 130 L98 138 L102 138 Z" fill="#E8A07E"/>
+    <path d="M85 152 Q100 168 115 152" stroke="#C9735B" stroke-width="4" stroke-linecap="round" fill="none"/>
+    <path d="M88 150 Q100 162 112 150" fill="#FF8A80"/>
+    <path d="M92 152 Q100 148 108 152" stroke="#E57373" stroke-width="2" fill="none"/>
+    <ellipse cx="55" cy="115" rx="14" ry="10" fill="url(#tc1)"/>
+    <ellipse cx="145" cy="115" rx="14" ry="10" fill="url(#tc1)"/>
+    <ellipse cx="62" cy="145" rx="4" ry="6" fill="url(#tf1)"/>
+    <ellipse cx="138" cy="145" rx="4" ry="6" fill="url(#tf1)"/>
   </svg>`,
-  dad: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="20" cy="20" r="20" fill="#DBEAFE"/>
-    <circle cx="20" cy="16" r="8" fill="#3B82F6"/>
-    <ellipse cx="20" cy="35" rx="12" ry="10" fill="#1E40AF"/>
-    <circle cx="20" cy="15" r="6" fill="#FDE68A"/>
-    <circle cx="17" cy="14" r="1.2" fill="#1E293B"/>
-    <circle cx="23" cy="14" r="1.2" fill="#1E293B"/>
-    <path d="M17 18c0 0 1.5 1 3 1s3-1 3-1" stroke="#1E293B" stroke-width="0.8" stroke-linecap="round"/>
-    <rect x="14" y="8" width="12" height="4" rx="1" fill="#1E293B"/>
-    <rect x="16" y="6" width="8" height="3" rx="1" fill="#1E293B"/>
+  dad: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="df1" cx="50%" cy="35%" r="60%"><stop offset="0%" stop-color="#FFE4D0"/><stop offset="50%" stop-color="#F5D0B8"/><stop offset="100%" stop-color="#D4A882"/></radialGradient>
+      <radialGradient id="df2" cx="30%" cy="25%" r="80%"><stop offset="0%" stop-color="#E3F2FD"/><stop offset="100%" stop-color="#64B5F6"/></radialGradient>
+      <linearGradient id="dh1" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#37474F"/><stop offset="50%" stop-color="#263238"/><stop offset="100%" stop-color="#1A1A1A"/></linearGradient>
+      <filter id="ds1" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur in="SourceAlpha" stdDeviation="2"/><feOffset dx="0" dy="2"/><feComposite in2="SourceAlpha" operator="arithmetic" k2="-1" k3="1"/><feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.15 0"/><feBlend in2="SourceGraphic"/></filter>
+      <linearGradient id="dg1" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#666"/><stop offset="100%" stop-color="#333"/></linearGradient>
+    </defs>
+    <circle cx="100" cy="100" r="98" fill="url(#df2)"/>
+    <ellipse cx="100" cy="118" rx="58" ry="55" fill="url(#df1)" filter="url(#ds1)"/>
+    <ellipse cx="100" cy="112" rx="55" ry="52" fill="url(#df1)"/>
+    <path d="M45 78 C52 38 78 25 100 23 C122 25 148 38 155 78 C152 74 142 78 128 82 C118 55 105 48 100 48 C95 48 82 55 72 82 C58 78 48 74 45 78 Z" fill="url(#dh1)"/>
+    <path d="M48 80 C46 90 46 100 48 108 C44 105 40 95 42 82 Z" fill="url(#dh1)"/>
+    <path d="M152 80 C154 90 154 100 152 108 C156 105 160 95 158 82 Z" fill="url(#dh1)"/>
+    <rect x="52" y="92" width="96" height="32" rx="16" fill="rgba(0,0,0,0.08)"/>
+    <rect x="54" y="94" width="40" height="28" rx="14" stroke="url(#dg1)" stroke-width="4" fill="none"/>
+    <rect x="106" y="94" width="40" height="28" rx="14" stroke="url(#dg1)" stroke-width="4" fill="none"/>
+    <line x1="94" y1="108" x2="106" y2="108" stroke="url(#dg1)" stroke-width="4"/>
+    <path d="M52 94 L48 85" stroke="#555" stroke-width="3" stroke-linecap="round"/>
+    <path d="M148 94 L152 85" stroke="#555" stroke-width="3" stroke-linecap="round"/>
+    <ellipse cx="74" cy="108" rx="10" ry="11" fill="#FFF"/>
+    <ellipse cx="126" cy="108" rx="10" ry="11" fill="#FFF"/>
+    <circle cx="75" cy="109" r="6.5" fill="#4A3C31"/>
+    <circle cx="127" cy="109" r="6.5" fill="#4A3C31"/>
+    <circle cx="75" cy="109" r="4.5" fill="#2D1F14"/>
+    <circle cx="127" cy="109" r="4.5" fill="#2D1F14"/>
+    <circle cx="77" cy="106" r="2" fill="#FFF"/>
+    <circle cx="129" cy="106" r="2" fill="#FFF"/>
+    <ellipse cx="100" cy="132" rx="6" ry="3.5" fill="#D4967A"/>
+    <path d="M100 136 L98 143 L102 143 Z" fill="#D4967A"/>
+    <path d="M88 158 Q100 170 112 158" stroke="#A67C5B" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+    <path d="M90 156 Q100 165 110 156" fill="#C9A086"/>
+    <rect x="50" y="135" width="12" height="20" rx="2" fill="#8B7355" opacity="0.25"/>
+    <rect x="138" y="135" width="12" height="20" rx="2" fill="#8B7355" opacity="0.25"/>
+    <ellipse cx="62" cy="152" rx="4" ry="5" fill="url(#df1)"/>
+    <ellipse cx="138" cy="152" rx="4" ry="5" fill="url(#df1)"/>
   </svg>`,
-  mom: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="20" cy="20" r="20" fill="#FCE7F3"/>
-    <circle cx="20" cy="16" r="8" fill="#EC4899"/>
-    <ellipse cx="20" cy="35" rx="12" ry="10" fill="#DB2777"/>
-    <circle cx="20" cy="15" r="6" fill="#FDE68A"/>
-    <circle cx="17" cy="14" r="1.2" fill="#1E293B"/>
-    <circle cx="23" cy="14" r="1.2" fill="#1E293B"/>
-    <path d="M17 17c0 0 1.5 1.5 3 1.5s3-1.5 3-1.5" stroke="#1E293B" stroke-width="0.8" stroke-linecap="round"/>
-    <path d="M12 12c0-5 4-8 8-8s8 3 8 8c0 1-0.5 2-1 2.5" stroke="#1E293B" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-    <circle cx="26" cy="13" r="1.5" fill="#F472B6"/>
+  mom: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="mf1" cx="50%" cy="35%" r="60%"><stop offset="0%" stop-color="#FFEEE4"/><stop offset="50%" stop-color="#FFE0D0"/><stop offset="100%" stop-color="#E8B8A0"/></radialGradient>
+      <radialGradient id="mf2" cx="30%" cy="25%" r="80%"><stop offset="0%" stop-color="#FFF0F5"/><stop offset="100%" stop-color="#FFB6C1"/></radialGradient>
+      <linearGradient id="mh1" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#4A3728"/><stop offset="50%" stop-color="#3E2723"/><stop offset="100%" stop-color="#2D1F14"/></linearGradient>
+      <filter id="ms1" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur in="SourceAlpha" stdDeviation="2"/><feOffset dx="0" dy="2"/><feComposite in2="SourceAlpha" operator="arithmetic" k2="-1" k3="1"/><feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.15 0"/><feBlend in2="SourceGraphic"/></filter>
+      <radialGradient id="mc1" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#FFB8C0"/><stop offset="100%" stop-color="#FFA0A8" stop-opacity="0"/></radialGradient>
+      <linearGradient id="ml1" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#E57390"/><stop offset="100%" stop-color="#C94F6E"/></linearGradient>
+    </defs>
+    <circle cx="100" cy="100" r="98" fill="url(#mf2)"/>
+    <path d="M25 110 C28 50 65 25 100 22 C135 25 172 50 175 110 C175 150 165 185 155 195 L45 195 C35 185 25 150 25 110 Z" fill="url(#mh1)"/>
+    <path d="M30 105 C32 115 30 130 35 145 C28 140 22 125 25 105 Z" fill="#3E2723"/>
+    <path d="M170 105 C168 115 170 130 165 145 C172 140 178 125 175 105 Z" fill="#3E2723"/>
+    <path d="M35 120 Q38 135 45 145" stroke="#2D1F14" stroke-width="3" fill="none"/>
+    <path d="M165 120 Q162 135 155 145" stroke="#2D1F14" stroke-width="3" fill="none"/>
+    <ellipse cx="100" cy="115" rx="55" ry="52" fill="url(#mf1)" filter="url(#ms1)"/>
+    <ellipse cx="100" cy="110" rx="52" ry="50" fill="url(#mf1)"/>
+    <path d="M48 80 C55 42 78 30 100 28 C122 30 145 42 152 80 C148 75 138 80 125 85 C115 58 105 52 100 52 C95 52 85 58 75 85 C62 80 52 75 48 80 Z" fill="url(#mh1)"/>
+    <ellipse cx="74" cy="100" rx="12" ry="14" fill="#FFF"/>
+    <ellipse cx="126" cy="100" rx="12" ry="14" fill="#FFF"/>
+    <circle cx="75" cy="102" r="7" fill="#4A3C31"/>
+    <circle cx="127" cy="102" r="7" fill="#4A3C31"/>
+    <circle cx="75" cy="102" r="5" fill="#2D1F14"/>
+    <circle cx="127" cy="102" r="5" fill="#2D1F14"/>
+    <circle cx="77.5" cy="99" r="2.5" fill="#FFF"/>
+    <circle cx="129.5" cy="99" r="2.5" fill="#FFF"/>
+    <circle cx="73" cy="104" r="1.2" fill="#FFF" opacity="0.5"/>
+    <circle cx="125" cy="104" r="1.2" fill="#FFF" opacity="0.5"/>
+    <path d="M62 88 C68 82 78 83 86 88" stroke="#5D4037" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+    <path d="M114 88 C120 82 130 83 138 88" stroke="#5D4037" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+    <path d="M58 88 C55 92 56 98 58 102" stroke="#1A1A1A" stroke-width="1.5" fill="none" opacity="0.6"/>
+    <path d="M142 88 C145 92 144 98 142 102" stroke="#1A1A1A" stroke-width="1.5" fill="none" opacity="0.6"/>
+    <ellipse cx="100" cy="125" rx="6" ry="3.5" fill="#E8A08C"/>
+    <path d="M100 129 L98 135 L102 135 Z" fill="#E8A08C"/>
+    <path d="M82 150 Q100 168 118 150" fill="url(#ml1)"/>
+    <path d="M85 148 Q100 162 115 148" fill="#E57390"/>
+    <path d="M90 152 Q100 146 110 152" stroke="#C94F6E" stroke-width="1.5" fill="none"/>
+    <ellipse cx="55" cy="115" rx="14" ry="10" fill="url(#mc1)"/>
+    <ellipse cx="145" cy="115" rx="14" ry="10" fill="url(#mc1)"/>
+    <circle cx="155" cy="55" r="10" fill="#FF69B4"/>
+    <circle cx="155" cy="55" r="7" fill="#FF91C8"/>
+    <ellipse cx="155" cy="52" rx="4" ry="2" fill="#FFF" opacity="0.6"/>
+    <ellipse cx="62" cy="148" rx="4" ry="5" fill="url(#mf1)"/>
+    <ellipse cx="138" cy="148" rx="4" ry="5" fill="url(#mf1)"/>
   </svg>`
 };
 
@@ -937,7 +1039,7 @@ function showAuthScreen(screen) {
 
 function renderMemberGrid() {
   const grid = document.getElementById('member-grid');
-  const users = JSON.parse(localStorage.getItem('taemin_users') || '{}');
+  const users = S.users || {};
   
   grid.innerHTML = Object.entries(MEMBERS).map(([id, m]) => {
     const registered = users[id];
@@ -960,7 +1062,7 @@ function selectMember(memberId) {
   document.getElementById('reg-title').textContent = `${member.name} 계정 만들기`;
   
   // Check if already registered
-  const users = JSON.parse(localStorage.getItem('taemin_users') || '{}');
+  const users = S.users || {};
   if (users[memberId]) {
     toast(`${member.name}은(는) 이미 가입했어요! 로그인하세요.`);
     showAuthScreen('login');
@@ -970,7 +1072,7 @@ function selectMember(memberId) {
   showAuthScreen('register');
 }
 
-function doRegister() {
+async function doRegister() {
   const id = document.getElementById('reg-id').value.trim();
   const pwd = document.getElementById('reg-pwd').value;
   const pwd2 = document.getElementById('reg-pwd2').value;
@@ -989,7 +1091,8 @@ function doRegister() {
     return;
   }
   
-  const users = JSON.parse(localStorage.getItem('taemin_users') || '{}');
+  // S.users에서 확인
+  const users = S.users || {};
   
   // Check if ID already taken
   for (const m in users) {
@@ -1002,19 +1105,29 @@ function doRegister() {
   // Hash password with SHA-512
   const pwdHash = sha512(pwd);
   
-  users[selectedMember] = { id, pwdHash };
-  localStorage.setItem('taemin_users', JSON.stringify(users));
+  // S.users에 저장
+  if (!S.users) S.users = {};
+  S.users[selectedMember] = { id, pwdHash };
+  cachedUsers = S.users;
   
-  // Auto login
-  currentUser = selectedMember;
-  localStorage.setItem('taemin_current_user', selectedMember);
-  
-  toast(`${MEMBERS[selectedMember].name} 가입 완료! 🎉`);
-  hideAllAuth();
-  applyUserProfile();
+  // Firebase에 저장
+  try {
+    await save();
+    
+    // Auto login
+    currentUser = selectedMember;
+    localStorage.setItem('taemin_current_user', selectedMember);
+    
+    toast(`${MEMBERS[selectedMember].name} 가입 완료! 🎉`);
+    hideAllAuth();
+    applyUserProfile();
+  } catch(e) {
+    console.error('Registration failed:', e);
+    errorEl.textContent = '가입 중 오류가 발생했어요. 다시 시도해주세요.';
+  }
 }
 
-function doLogin() {
+async function doLogin() {
   const id = document.getElementById('login-id').value.trim();
   const pwd = document.getElementById('login-pwd').value;
   const errorEl = document.getElementById('login-error');
@@ -1024,7 +1137,10 @@ function doLogin() {
     return;
   }
   
-  const users = JSON.parse(localStorage.getItem('taemin_users') || '{}');
+  // S.users에서 확인
+  const users = S.users || {};
+  cachedUsers = users;
+  
   const pwdHash = sha512(pwd);
   
   for (const memberId in users) {
@@ -1085,16 +1201,18 @@ function logout() {
 }
 
 function checkAuth() {
+  // S.users에서 사용자 데이터 로드
+  cachedUsers = S.users || {};
+  
   const savedUser = localStorage.getItem('taemin_current_user');
-  const users = JSON.parse(localStorage.getItem('taemin_users') || '{}');
   
   // 3명 모두 가입했으면 회원가입 링크 숨김
   const registerLink = document.getElementById('register-link');
   if (registerLink) {
-    registerLink.style.display = Object.keys(users).length >= 3 ? 'none' : 'block';
+    registerLink.style.display = Object.keys(cachedUsers).length >= 3 ? 'none' : 'block';
   }
   
-  if (savedUser && users[savedUser]) {
+  if (savedUser && cachedUsers[savedUser]) {
     currentUser = savedUser;
     hideAllAuth();
     applyUserProfile();
@@ -1102,7 +1220,7 @@ function checkAuth() {
   }
   
   // Check if any users exist
-  if (Object.keys(users).length === 0) {
+  if (Object.keys(cachedUsers).length === 0) {
     showAuthScreen('member');
   } else {
     showAuthScreen('login');
@@ -1162,6 +1280,9 @@ const fbApp = initializeApp(firebaseConfig);
 const db = getFirestore(fbApp);
 const DATA_DOC = doc(db, 'users', 'taemin');
 
+// 캐시된 사용자 데이터 (S.users에서 로드)
+let cachedUsers = null;
+
 function defaultState(){
   return {
     pts:0,streak:0,longest:0,lastDate:null,totalDone:0,
@@ -1172,6 +1293,7 @@ function defaultState(){
     actDone:{},
     dark:false,
     greeting:'안녕, 태민아! 👋',
+    users:{}, // 가입 정보 저장
   };
 }
 
@@ -2121,6 +2243,18 @@ setInterval(()=>{
   renderLogList();
 },60000);
 
+// ── PASSWORD TOGGLE ──────────────────────────
+function togglePwd(inputId, btn) {
+  const input = document.getElementById(inputId);
+  if (input.type === 'password') {
+    input.type = 'text';
+    btn.textContent = '🙈';
+  } else {
+    input.type = 'password';
+    btn.textContent = '👁️';
+  }
+}
+
 // ── EXPOSE FUNCTIONS TO HTML onclick ──────────
 // (required because type="module" isolates scope)
 Object.assign(window, {
@@ -2137,7 +2271,7 @@ Object.assign(window, {
   calPrev, calNext, selectCalDay,
   admTab,
   // Auth functions
-  showAuthScreen, selectMember, doRegister, doLogin, logout,
+  showAuthScreen, selectMember, doRegister, doLogin, logout, togglePwd,
 });
 
 // ── INIT (Firebase async) ─────────────────────
