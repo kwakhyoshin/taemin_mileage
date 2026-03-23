@@ -2681,7 +2681,10 @@ function reallyGoTab(tab){
   document.getElementById('s-'+tab).classList.add('on');
   document.getElementById('tab-'+tab).classList.add('active');
   document.getElementById('s-'+tab).scrollTop=0;
-  window.scrollTo({top:0,behavior:'smooth'});
+  window.scrollTo({top:0});
+  // 홈 탭 진입 시 compact 상태 초기화
+  const hero=document.querySelector('.hero');
+  if(hero) hero.classList.remove('compact');
   
   // 탭별 상단바 색상 변경 (아이폰 사파리) - 모든 탭에서 인디고 유지
   const themeMeta=document.getElementById('theme-color-meta');
