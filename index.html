@@ -83,11 +83,11 @@ body.dark .dtog{background:#334155}
 body.dark .dtog-in{transform:translateX(24px)}
 
 /* HOME TOP - scrolls away */
-.home-top{background:linear-gradient(135deg,#6366F1,#818CF8);padding:16px 20px 14px;padding-top:calc(16px + env(safe-area-inset-top));display:flex;justify-content:space-between;align-items:flex-start}
+.home-top{background:linear-gradient(135deg,#6366F1,#818CF8);padding:16px 20px 0;padding-top:calc(16px + env(safe-area-inset-top));display:flex;justify-content:space-between;align-items:flex-start}
 .home-top h1{font-size:20px;font-weight:900;color:#fff}
 
 /* HERO - Sticky on scroll, full width when stuck */
-.hero{margin:0;background:linear-gradient(135deg,#6366F1,#818CF8);border-radius:0 0 var(--rxl) var(--rxl);padding:18px 20px 22px;color:#fff;position:sticky;top:0;z-index:10;overflow:hidden;box-shadow:0 4px 20px rgba(99,102,241,0.3);transition:padding .25s}
+.hero{margin:0;background:linear-gradient(135deg,#6366F1,#818CF8);border-radius:0 0 var(--rxl) var(--rxl);padding:14px 20px 22px;color:#fff;position:sticky;top:0;z-index:10;overflow:hidden;box-shadow:0 4px 20px rgba(99,102,241,0.3);transition:padding .25s}
 .hero::before{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;background:rgba(255,255,255,.1);border-radius:50%}
 .hero::after{content:'';position:absolute;bottom:-30px;left:20px;width:110px;height:110px;background:rgba(255,255,255,.08);border-radius:50%}
 .hero-lbl{font-size:12px;font-weight:700;opacity:.85;transition:font-size .25s}
@@ -442,14 +442,14 @@ body.dark .nav-profile{border-color:rgba(255,255,255,.4)}
   body{max-width:100%}
 
   /* Wrapper for content area */
-  .scr{max-width:720px;margin:0 auto}
+  .scr{max-width:95vw;margin:0 auto}
 
   /* Bigger hero */
   .hero-pts{font-size:64px}
   .hero-unit{font-size:22px}
 
-  /* 3-column grids */
-  .act-grid{grid-template-columns:repeat(3,1fr);gap:12px;margin:0 20px 16px}
+  /* 4-column grids on tablet */
+  .act-grid{grid-template-columns:repeat(4,1fr);gap:12px;margin:0 20px 16px}
   .rwd-grid{grid-template-columns:repeat(3,1fr);gap:12px;margin:0 20px 16px}
 
   /* Bigger cards */
@@ -480,9 +480,9 @@ body.dark .nav-profile{border-color:rgba(255,255,255,.4)}
   .rec-nm{font-size:14px}
 
   /* Header stickies */
-  .home-top{padding:20px 24px 16px;padding-top:calc(20px + env(safe-area-inset-top))}
+  .home-top{padding:20px 24px 0;padding-top:calc(20px + env(safe-area-inset-top))}
   .home-top h1{font-size:24px}
-  .hero{padding:22px 24px 26px}
+  .hero{padding:22px 24px 26px;position:sticky;top:0;z-index:10}
   .log-header-sticky{padding:20px 24px}
   .log-header-sticky h2{font-size:26px}
   .rwd-header-sticky{padding:20px 24px}
@@ -548,7 +548,7 @@ body.dark .nav-profile{border-color:rgba(255,255,255,.4)}
   .nav-profile{width:36px;height:36px}
 
   /* MAIN CONTENT SHIFT */
-  .scr{margin-left:240px;max-width:860px;padding-bottom:40px!important}
+  .scr{margin-left:240px;max-width:calc(100vw - 280px);padding-bottom:40px!important}
   .auth-screen{margin-left:0}
 
   /* Emoji picker */
@@ -562,15 +562,15 @@ body.dark .nav-profile{border-color:rgba(255,255,255,.4)}
   /* PIN card */
   .pin-card{width:380px}
 
-  /* Hero - horizontal layout */
-  .hero{border-radius:var(--rxl);margin:16px 24px;position:relative}
+  /* Hero - keep sticky, rounded bottom */
+  .hero{border-radius:0 0 var(--rxl) var(--rxl);margin:0;position:sticky;top:0}
   .hero.compact{padding:16px 24px 18px}
   .hero-pts{font-size:68px}
   .hero-unit{font-size:24px}
   .hero-goal{font-size:14px}
 
   /* Home top */
-  .home-top{border-radius:0 0 var(--rxl) var(--rxl);margin-left:0;padding:24px 28px 18px}
+  .home-top{border-radius:0;margin-left:0;padding:24px 28px 0}
   .home-top h1{font-size:26px}
 
   /* 4-column activity grid on desktop */
@@ -660,11 +660,11 @@ body.dark .nav-profile{border-color:rgba(255,255,255,.4)}
   .nav-item svg{width:24px;height:24px}
   .nav-item .nav-label{font-size:15px}
 
-  .scr{margin-left:280px;max-width:960px}
+  .scr{margin-left:280px;max-width:calc(100vw - 320px)}
   .act-grid{grid-template-columns:repeat(4,1fr);gap:16px;margin:0 28px 20px}
   .rwd-grid{grid-template-columns:repeat(4,1fr);gap:16px;margin:0 28px 20px}
 
-  .hero{margin:20px 28px}
+  .hero{margin:0;border-radius:0 0 var(--rxl) var(--rxl);position:sticky;top:0}
   .hero-pts{font-size:76px}
   .sec{margin:22px 28px 16px}
   .card{margin:0 28px 18px}
