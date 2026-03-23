@@ -396,6 +396,19 @@ body.dark .dtog-in{transform:translateX(24px)}
 .divider{height:.5px;background:var(--bdr);margin:0 14px}
 .empty{text-align:center;padding:28px 20px;color:var(--tx3);font-weight:600;font-size:14px}
 
+/* AVATAR CROP */
+.avatar-crop-area{position:relative;width:240px;height:240px;margin:0 auto;overflow:hidden;border-radius:var(--r);background:#000;cursor:grab;touch-action:none;user-select:none}
+.avatar-crop-area:active{cursor:grabbing}
+.avatar-crop-area canvas{position:absolute;top:0;left:0;width:240px;height:240px}
+.avatar-circle-guide{position:absolute;inset:0;border-radius:50%;box-shadow:0 0 0 999px rgba(0,0,0,.55);pointer-events:none;border:2px solid rgba(255,255,255,.6)}
+.avatar-edit-btn{width:100%;padding:10px;background:var(--or-lt);color:var(--or);border:1.5px dashed var(--or);border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:6px;transition:background .15s}
+.avatar-edit-btn:hover{background:var(--or-md)}
+.avatar-preview{width:56px;height:56px;border-radius:50%;overflow:hidden;flex-shrink:0;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.12);border:2px solid var(--bdr);transition:border .2s}
+.avatar-preview:hover{border-color:var(--or)}
+.avatar-preview img{width:100%;height:100%;object-fit:cover}
+.avatar-preview-sm{width:40px;height:40px;border-radius:50%;overflow:hidden;flex-shrink:0;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.avatar-preview-sm img{width:100%;height:100%;object-fit:cover}
+
 /* ========================================
    RESPONSIVE: TABLET (768px+)
    ======================================== */
@@ -949,11 +962,17 @@ body.dark .dtog-in{transform:translateX(24px)}
       </div>
     </div>
     <div class="adm-sec">
+      <div class="adm-sec-lbl">📷 가족 프로필 사진 관리</div>
+      <div class="adm-card" id="adm-member-photos">
+        <!-- 동적으로 렌더링됨 -->
+      </div>
+    </div>
+    <div class="adm-sec">
       <div class="adm-sec-lbl">계정</div>
       <div class="adm-card">
         <div class="adm-row">
           <div class="adm-row-l" style="display:flex;align-items:center;gap:12px">
-            <div class="profile-avatar" id="profile-icon-adm">👤</div>
+            <div class="profile-avatar" id="profile-icon-adm" style="cursor:pointer" onclick="openAvatarEditor()">👤</div>
             <div>
               <div class="adm-row-nm" id="profile-name-adm">로그인 필요</div>
               <div class="adm-row-sub" id="profile-role-adm">-</div>
@@ -1105,6 +1124,32 @@ body.dark .dtog-in{transform:translateX(24px)}
   <div class="ep-grid" id="ep-grid"></div>
 </div>
 
+<!-- MODAL: 프로필 사진 크롭 -->
+<div class="overlay" id="m-avatar">
+  <div class="sheet">
+    <div class="sheet-body">
+      <div class="handle"></div>
+      <div class="sheet-title">프로필 사진 설정</div>
+      <div class="avatar-crop-area" id="avatar-crop-area">
+        <canvas id="avatar-canvas" width="240" height="240"></canvas>
+        <div class="avatar-circle-guide"></div>
+      </div>
+      <p style="text-align:center;font-size:12px;color:var(--tx2);font-weight:600;margin-top:8px">드래그하여 위치 조정, 핀치/스크롤로 확대·축소</p>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:12px">
+        <span style="font-size:18px">🔍</span>
+        <input type="range" id="avatar-zoom" min="100" max="300" value="100" style="flex:1;accent-color:var(--or)">
+        <span style="font-size:18px">🔎</span>
+      </div>
+      <input type="file" id="avatar-file-input" accept="image/*" style="display:none">
+      <button class="s-btn conf" onclick="document.getElementById('avatar-file-input').click()" style="margin-top:12px;background:var(--bl)">📷 사진 선택하기</button>
+    </div>
+    <div class="sheet-foot">
+      <button class="s-btn canc" onclick="closeModal('m-avatar')">취소</button>
+      <button class="s-btn conf" onclick="saveAvatarCrop()">저장하기 ✅</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script type="module">
@@ -1200,7 +1245,7 @@ function renderMemberGrid() {
   grid.innerHTML = Object.entries(MEMBERS).map(([id, m]) => {
     const registered = users[id];
     return `<div class="member-card${registered ? ' registered' : ''}" onclick="selectMember('${id}')">
-      <div class="member-avatar">${AVATARS[id]}</div>
+      <div class="member-avatar">${getAvatarHTML(id, 50)}</div>
       <div class="member-info">
         <div class="member-name">${m.name} ${registered ? '<span style="color:#10B981;font-size:12px">✓ 가입완료</span>' : ''}</div>
         <div class="member-role">${m.role}</div>
@@ -1213,8 +1258,8 @@ function selectMember(memberId) {
   selectedMember = memberId;
   const member = MEMBERS[memberId];
   
-  // Update register screen with SVG avatar
-  document.getElementById('reg-avatar').innerHTML = AVATARS[memberId];
+  // Update register screen with custom photo or SVG avatar
+  document.getElementById('reg-avatar').innerHTML = getAvatarHTML(memberId, 80);
   document.getElementById('reg-title').textContent = `${member.name} 계정 만들기`;
   
   // Check if already registered
@@ -1330,9 +1375,9 @@ function applyUserProfile() {
   
   const member = MEMBERS[currentUser];
   
-  // Update nav profile icon with SVG avatar
+  // Update nav profile icon - custom photo first, fallback to SVG avatar
   const navIcon = document.getElementById('nav-profile-icon');
-  if (navIcon) navIcon.innerHTML = AVATARS[currentUser];
+  if (navIcon) navIcon.innerHTML = getAvatarHTML(currentUser, 28);
   
   // Update greeting - 태민이만 커스텀 인사말 사용, 나머지는 고정
   if (greetingEl) {
@@ -1345,11 +1390,11 @@ function applyUserProfile() {
     }
   }
   
-  // Update admin tab profile section with SVG avatar
+  // Update admin tab profile section - custom photo first
   const admIcon = document.getElementById('profile-icon-adm');
   const admName = document.getElementById('profile-name-adm');
   const admRole = document.getElementById('profile-role-adm');
-  if (admIcon) admIcon.innerHTML = AVATARS[currentUser];
+  if (admIcon) admIcon.innerHTML = getAvatarHTML(currentUser, 40);
   if (admName) admName.textContent = member.name;
   if (admRole) admRole.textContent = member.role;
 }
@@ -1779,7 +1824,7 @@ function renderAll(){
   renderLogList();renderRewardGrid();
   renderHistStats();renderHistList();renderCalendar();
   renderAdmStats();renderAdmActList();renderAdmRwdList();renderAdmSettings();
-  renderMsgSettings();
+  renderMsgSettings();renderAdmMemberPhotos();
 }
 
 function renderHero(){
@@ -2447,6 +2492,210 @@ function togglePwd(inputId, btn) {
   }
 }
 
+// ── AVATAR CROP SYSTEM ────────────────────────
+let avatarImg = null;       // loaded Image object
+let avatarX = 0, avatarY = 0; // pan offset
+let avatarScale = 1;        // zoom scale
+let avatarDragging = false;
+let avatarLastX = 0, avatarLastY = 0;
+let avatarTargetUser = null; // which user we're editing
+const CROP_SIZE = 240;
+const OUTPUT_SIZE = 160;    // final saved image size
+
+function openAvatarEditor(userId) {
+  avatarTargetUser = userId || currentUser;
+  if (!avatarTargetUser) { toast('로그인이 필요해요'); return; }
+
+  // Load existing photo if available
+  const photos = S.photos || {};
+  avatarImg = null;
+  avatarX = 0; avatarY = 0; avatarScale = 1;
+  document.getElementById('avatar-zoom').value = 100;
+
+  const canvas = document.getElementById('avatar-canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, CROP_SIZE, CROP_SIZE);
+  ctx.fillStyle = '#1E293B';
+  ctx.fillRect(0, 0, CROP_SIZE, CROP_SIZE);
+
+  if (photos[avatarTargetUser]) {
+    const img = new Image();
+    img.onload = () => { avatarImg = img; fitAvatar(); drawAvatar(); };
+    img.src = photos[avatarTargetUser];
+  } else {
+    // Draw placeholder
+    ctx.fillStyle = '#475569';
+    ctx.font = '60px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(MEMBERS[avatarTargetUser]?.icon || '📷', CROP_SIZE/2, CROP_SIZE/2);
+  }
+
+  openModal('m-avatar');
+}
+
+function fitAvatar() {
+  if (!avatarImg) return;
+  // Fit image to cover the crop area
+  const ratio = Math.max(CROP_SIZE / avatarImg.width, CROP_SIZE / avatarImg.height);
+  avatarScale = ratio * 100; // convert to percentage for slider
+  document.getElementById('avatar-zoom').value = Math.round(avatarScale);
+  avatarX = (CROP_SIZE - avatarImg.width * ratio) / 2;
+  avatarY = (CROP_SIZE - avatarImg.height * ratio) / 2;
+}
+
+function drawAvatar() {
+  const canvas = document.getElementById('avatar-canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, CROP_SIZE, CROP_SIZE);
+  ctx.fillStyle = '#1E293B';
+  ctx.fillRect(0, 0, CROP_SIZE, CROP_SIZE);
+  if (!avatarImg) return;
+  const sc = avatarScale / 100;
+  const w = avatarImg.width * sc;
+  const h = avatarImg.height * sc;
+  ctx.drawImage(avatarImg, avatarX, avatarY, w, h);
+}
+
+// File input handler
+document.getElementById('avatar-file-input').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const img = new Image();
+    img.onload = () => {
+      avatarImg = img;
+      fitAvatar();
+      drawAvatar();
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+  e.target.value = ''; // reset for re-select
+});
+
+// Zoom slider
+document.getElementById('avatar-zoom').addEventListener('input', function(e) {
+  if (!avatarImg) return;
+  const oldScale = avatarScale / 100;
+  avatarScale = parseInt(e.target.value);
+  const newScale = avatarScale / 100;
+  // Zoom towards center
+  const cx = CROP_SIZE / 2;
+  const cy = CROP_SIZE / 2;
+  avatarX = cx - (cx - avatarX) * (newScale / oldScale);
+  avatarY = cy - (cy - avatarY) * (newScale / oldScale);
+  drawAvatar();
+});
+
+// Drag to pan (mouse)
+const cropArea = document.getElementById('avatar-crop-area');
+cropArea.addEventListener('mousedown', (e) => {
+  if (!avatarImg) return;
+  avatarDragging = true;
+  avatarLastX = e.clientX; avatarLastY = e.clientY;
+});
+window.addEventListener('mousemove', (e) => {
+  if (!avatarDragging) return;
+  avatarX += e.clientX - avatarLastX;
+  avatarY += e.clientY - avatarLastY;
+  avatarLastX = e.clientX; avatarLastY = e.clientY;
+  drawAvatar();
+});
+window.addEventListener('mouseup', () => { avatarDragging = false; });
+
+// Drag to pan (touch)
+cropArea.addEventListener('touchstart', (e) => {
+  if (!avatarImg || e.touches.length !== 1) return;
+  avatarDragging = true;
+  avatarLastX = e.touches[0].clientX;
+  avatarLastY = e.touches[0].clientY;
+}, {passive: true});
+window.addEventListener('touchmove', (e) => {
+  if (!avatarDragging) return;
+  const t = e.touches[0];
+  avatarX += t.clientX - avatarLastX;
+  avatarY += t.clientY - avatarLastY;
+  avatarLastX = t.clientX; avatarLastY = t.clientY;
+  drawAvatar();
+}, {passive: true});
+window.addEventListener('touchend', () => { avatarDragging = false; });
+
+// Mouse wheel zoom on crop area
+cropArea.addEventListener('wheel', (e) => {
+  if (!avatarImg) return;
+  e.preventDefault();
+  const slider = document.getElementById('avatar-zoom');
+  const oldScale = avatarScale / 100;
+  avatarScale = Math.max(100, Math.min(300, avatarScale - e.deltaY * 0.5));
+  slider.value = Math.round(avatarScale);
+  const newScale = avatarScale / 100;
+  const cx = CROP_SIZE / 2;
+  const cy = CROP_SIZE / 2;
+  avatarX = cx - (cx - avatarX) * (newScale / oldScale);
+  avatarY = cy - (cy - avatarY) * (newScale / oldScale);
+  drawAvatar();
+}, {passive: false});
+
+function saveAvatarCrop() {
+  if (!avatarImg) { toast('사진을 먼저 선택해주세요'); return; }
+
+  // Render cropped circle to offscreen canvas
+  const out = document.createElement('canvas');
+  out.width = OUTPUT_SIZE; out.height = OUTPUT_SIZE;
+  const octx = out.getContext('2d');
+
+  // Clip circle
+  octx.beginPath();
+  octx.arc(OUTPUT_SIZE/2, OUTPUT_SIZE/2, OUTPUT_SIZE/2, 0, Math.PI*2);
+  octx.closePath();
+  octx.clip();
+
+  // Scale from crop area to output
+  const ratio = OUTPUT_SIZE / CROP_SIZE;
+  const sc = avatarScale / 100;
+  octx.drawImage(avatarImg, avatarX * ratio, avatarY * ratio, avatarImg.width * sc * ratio, avatarImg.height * sc * ratio);
+
+  // Save as base64
+  const dataUrl = out.toDataURL('image/jpeg', 0.85);
+  if (!S.photos) S.photos = {};
+  S.photos[avatarTargetUser] = dataUrl;
+  save();
+
+  closeModal('m-avatar');
+  applyUserProfile();
+  renderMemberGrid();
+  renderAdmMemberPhotos();
+  toast('📸 프로필 사진이 저장됐어요!');
+}
+
+function getAvatarHTML(userId, size) {
+  const photos = S.photos || {};
+  if (photos[userId]) {
+    return `<img src="${photos[userId]}" alt="profile" style="width:${size}px;height:${size}px;object-fit:cover;border-radius:50%">`;
+  }
+  return AVATARS[userId] || '👤';
+}
+
+function renderAdmMemberPhotos() {
+  const el = document.getElementById('adm-member-photos');
+  if (!el) return;
+  el.innerHTML = Object.entries(MEMBERS).map(([id, m]) => {
+    const hasPhoto = S.photos && S.photos[id];
+    return `<div class="manage-item" style="align-items:center">
+      <div class="avatar-preview" onclick="openAvatarEditor('${id}')">
+        ${hasPhoto ? `<img src="${S.photos[id]}" alt="${m.name}">` : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:${m.color};font-size:24px">${AVATARS[id]}</div>`}
+      </div>
+      <div class="m-info" style="min-width:0;flex:1">
+        <div class="m-nm">${m.name}</div>
+        <div class="m-sub">${m.role}</div>
+      </div>
+      <button class="avatar-edit-btn" style="width:auto;padding:7px 14px;border-radius:9px" onclick="openAvatarEditor('${id}')">📷 사진 변경</button>
+    </div>`;
+  }).join('');
+}
+
 // ── EXPOSE FUNCTIONS TO HTML onclick ──────────
 // (required because type="module" isolates scope)
 Object.assign(window, {
@@ -2464,6 +2713,8 @@ Object.assign(window, {
   admTab,
   // Auth functions
   showAuthScreen, selectMember, doRegister, doLogin, logout, togglePwd,
+  // Avatar functions
+  openAvatarEditor, saveAvatarCrop, renderAdmMemberPhotos,
 });
 
 // ── INIT (Firebase async) ─────────────────────
