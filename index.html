@@ -447,8 +447,11 @@ body.dark .dtog-in{transform:translateX(24px)}
         <div id="weather-badge" style="display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.2);padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;color:#fff">
           <span id="weather-icon">☀️</span><span id="weather-temp">--°</span>
         </div>
-        <div id="dust-badge" style="display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.2);padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;color:#fff">
-          <span id="dust-dot" style="width:5px;height:5px;border-radius:50%;background:#10B981"></span><span id="dust-text">좋음</span>
+        <div id="pm25-badge" style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,.2);padding:2px 8px;border-radius:20px;font-size:9px;font-weight:700;color:#fff;white-space:nowrap">
+          <span id="pm25-dot" style="width:5px;height:5px;border-radius:50%;background:#10B981;flex-shrink:0"></span><span style="opacity:.8">초미세</span><span id="pm25-text">--</span>
+        </div>
+        <div id="pm10-badge" style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,.2);padding:2px 8px;border-radius:20px;font-size:9px;font-weight:700;color:#fff;white-space:nowrap">
+          <span id="pm10-dot" style="width:5px;height:5px;border-radius:50%;background:#10B981;flex-shrink:0"></span><span style="opacity:.8">미세</span><span id="pm10-text">--</span>
         </div>
       </div>
       <p id="smart-msg" style="font-size:11px;color:rgba(255,255,255,.75);margin-top:4px;font-weight:600;line-height:1.3"></p>
@@ -1256,48 +1259,131 @@ function loadDarkPref(){
 // ── SMART MESSAGE SYSTEM ─────────────────────
 const DAILY_MSGS=['오늘도 멋진 하루 보내자! 💪','화이팅! 넌 할 수 있어! ⭐','좋은 아침이야! 🌅','잘 잤어? 오늘도 파이팅! 💫','태민아, 오늘도 응원해! 🎯','새로운 하루가 시작됐어! 🌈'];
 const WEATHER_MSGS={sunny:{icon:'☀️',msg:'날씨가 화창해! 밖에서 놀기 좋은 날이야 🌳'},cloudy:{icon:'☁️',msg:'구름이 많지만 기분은 맑게! ⛅'},rainy:{icon:'🌧️',msg:'비가 오네! 우산 챙겼어? 🌂'},snowy:{icon:'❄️',msg:'눈이 와요! 따뜻하게 입고 다녀! ⛄'}};
-const DUST_MSGS={good:{level:'좋음',color:'var(--gn)',bgColor:'var(--gn-lt)',txtColor:'var(--gn2)'},moderate:{level:'보통',color:'var(--yw)',bgColor:'var(--yw-lt)',txtColor:'#B45309',msg:'미세먼지가 조금 있어요'},bad:{level:'나쁨',color:'var(--or)',bgColor:'var(--or-lt)',txtColor:'var(--or)',msg:'마스크 쓰고 나가자! 😷'},worst:{level:'매우나쁨',color:'var(--rd)',bgColor:'var(--rd-lt)',txtColor:'var(--rd)',msg:'오늘은 실내에서 놀자! 🏠'}};
-let weatherData={temp:null,condition:'sunny',dust:'good'};
+// 미세먼지 기준: PM10(미세) 0-30좋음, 31-80보통, 81-150나쁨, 151+매우나쁨 / PM2.5(초미세) 0-15좋음, 16-35보통, 36-75나쁨, 76+매우나쁨
+const DUST_GRADES={good:{level:'좋음',color:'#10B981',bgColor:'#D1FAE5',txtColor:'#065F46'},moderate:{level:'보통',color:'#FBBF24',bgColor:'#FEF3C7',txtColor:'#92400E'},bad:{level:'나쁨',color:'#F97316',bgColor:'#FFEDD5',txtColor:'#C2410C',msg:'마스크 쓰고 나가자! 😷'},worst:{level:'매우나쁨',color:'#EF4444',bgColor:'#FEE2E2',txtColor:'#B91C1C',msg:'오늘은 실내에서 놀자! 🏠'}};
+let weatherData={temp:null,condition:'sunny',pm10:null,pm25:null,dustGrade:'good'};
+
+// PM10, PM2.5 등급 판정
+function getDustGrade(pm10, pm25){
+  // 둘 중 더 나쁜 등급 적용
+  let pm10Grade='good', pm25Grade='good';
+  if(pm10!==null){
+    if(pm10>150)pm10Grade='worst';
+    else if(pm10>80)pm10Grade='bad';
+    else if(pm10>30)pm10Grade='moderate';
+  }
+  if(pm25!==null){
+    if(pm25>75)pm25Grade='worst';
+    else if(pm25>35)pm25Grade='bad';
+    else if(pm25>15)pm25Grade='moderate';
+  }
+  const grades=['good','moderate','bad','worst'];
+  return grades[Math.max(grades.indexOf(pm10Grade), grades.indexOf(pm25Grade))];
+}
 
 async function fetchWeather(){
+  // 현재 위치 가져오기
+  let lat=37.5665, lon=126.9780; // 기본값: 서울
   try{
-    // wttr.in 무료 날씨 API 사용 (서울)
-    const res=await fetch('https://wttr.in/Seoul?format=j1');
+    const pos=await new Promise((resolve,reject)=>{
+      if(!navigator.geolocation){reject('No geolocation');}
+      navigator.geolocation.getCurrentPosition(resolve,reject,{timeout:5000,maximumAge:300000});
+    });
+    lat=pos.coords.latitude;
+    lon=pos.coords.longitude;
+  }catch(e){console.log('위치 정보 없음, 서울 기준으로 표시');}
+  
+  // 날씨 가져오기
+  try{
+    const res=await fetch(`https://wttr.in/${lat},${lon}?format=j1`);
     if(res.ok){
       const d=await res.json();
       const current=d.current_condition[0];
       weatherData.temp=parseInt(current.temp_C);
       const code=parseInt(current.weatherCode);
-      // weatherCode: 113=맑음, 116=구름조금, 119/122=흐림, 176-311=비, 320+=눈
       if(code>=320)weatherData.condition='snowy';
       else if(code>=176)weatherData.condition='rainy';
       else if(code>=119)weatherData.condition='cloudy';
       else weatherData.condition='sunny';
     }
   }catch(e){
-    console.log('Weather API failed, using fallback');
-    const h=new Date().getHours();
-    const month=new Date().getMonth();
-    // 계절별 기본 온도 (한국 기준)
-    let baseTemp=15;
-    if(month>=5&&month<=8)baseTemp=25; // 여름
-    else if(month>=11||month<=1)baseTemp=0; // 겨울
-    else if(month>=2&&month<=4)baseTemp=12; // 봄
-    else baseTemp=15; // 가을
-    weatherData.temp=baseTemp+Math.round((Math.random()-0.5)*8);
-    weatherData.condition=['sunny','sunny','cloudy','rainy'][Math.floor(Math.random()*4)];
+    console.log('Weather API failed');
+    weatherData.temp=15;
+    weatherData.condition='sunny';
   }
-  // 미세먼지 (실제 API 없이 시뮬레이션)
-  weatherData.dust=['good','good','good','moderate','moderate','bad','worst'][Math.floor(Math.random()*7)];
+  
+  // 미세먼지 가져오기 (WAQI API - 무료)
+  try{
+    const aqiRes=await fetch(`https://api.waqi.info/feed/geo:${lat};${lon}/?token=demo`);
+    if(aqiRes.ok){
+      const aqiData=await aqiRes.json();
+      if(aqiData.status==='ok'&&aqiData.data&&aqiData.data.iaqi){
+        const iaqi=aqiData.data.iaqi;
+        // PM10, PM2.5 값 추출 (AQI 값이 아닌 실제 농도값)
+        weatherData.pm10=iaqi.pm10?.v||null;
+        weatherData.pm25=iaqi.pm25?.v||null;
+        weatherData.dustGrade=getDustGrade(weatherData.pm10, weatherData.pm25);
+      }
+    }
+  }catch(e){
+    console.log('AQI API failed, trying backup');
+    // 백업: OpenWeatherMap Air Pollution (무료 티어)
+    try{
+      const owmRes=await fetch(`https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=demo`);
+      if(owmRes.ok){
+        const owmData=await owmRes.json();
+        if(owmData.list&&owmData.list[0]){
+          const comp=owmData.list[0].components;
+          weatherData.pm10=Math.round(comp.pm10)||null;
+          weatherData.pm25=Math.round(comp.pm2_5)||null;
+          weatherData.dustGrade=getDustGrade(weatherData.pm10, weatherData.pm25);
+        }
+      }
+    }catch(e2){
+      console.log('Backup AQI also failed');
+      weatherData.pm10=null;
+      weatherData.pm25=null;
+      weatherData.dustGrade='good';
+    }
+  }
   updateSmartMessage();
 }
 function updateSmartMessage(){
-  const wIcon=document.getElementById('weather-icon'),wTemp=document.getElementById('weather-temp'),dDot=document.getElementById('dust-dot'),dText=document.getElementById('dust-text'),smartMsg=document.getElementById('smart-msg'),dBadge=document.getElementById('dust-badge');
+  const wIcon=document.getElementById('weather-icon'),wTemp=document.getElementById('weather-temp');
+  const pm25Dot=document.getElementById('pm25-dot'),pm25Text=document.getElementById('pm25-text'),pm25Badge=document.getElementById('pm25-badge');
+  const pm10Dot=document.getElementById('pm10-dot'),pm10Text=document.getElementById('pm10-text'),pm10Badge=document.getElementById('pm10-badge');
+  const smartMsg=document.getElementById('smart-msg');
   if(!wIcon)return;
+  
   const wInfo=WEATHER_MSGS[weatherData.condition]||WEATHER_MSGS.sunny;
-  const dInfo=DUST_MSGS[weatherData.dust]||DUST_MSGS.good;
-  wIcon.textContent=wInfo.icon;wTemp.textContent=weatherData.temp!==null?weatherData.temp+'°':'--°';
-  dDot.style.background=dInfo.color;dText.textContent=dInfo.level;dBadge.style.background=dInfo.bgColor;dBadge.style.color=dInfo.txtColor;
+  const dInfo=DUST_GRADES[weatherData.dustGrade]||DUST_GRADES.good;
+  wIcon.textContent=wInfo.icon;
+  wTemp.textContent=weatherData.temp!==null?weatherData.temp+'°':'--°';
+  
+  // PM2.5 (초미세먼지) 개별 등급 및 표시
+  let pm25Grade='good';
+  if(weatherData.pm25!==null){
+    if(weatherData.pm25>75)pm25Grade='worst';
+    else if(weatherData.pm25>35)pm25Grade='bad';
+    else if(weatherData.pm25>15)pm25Grade='moderate';
+  }
+  const pm25Info=DUST_GRADES[pm25Grade];
+  if(pm25Dot)pm25Dot.style.background=pm25Info.color;
+  if(pm25Text)pm25Text.textContent=weatherData.pm25!==null?Math.round(weatherData.pm25):'--';
+  if(pm25Badge){pm25Badge.style.background=pm25Info.bgColor;pm25Badge.style.color=pm25Info.txtColor;}
+  
+  // PM10 (미세먼지) 개별 등급 및 표시
+  let pm10Grade='good';
+  if(weatherData.pm10!==null){
+    if(weatherData.pm10>150)pm10Grade='worst';
+    else if(weatherData.pm10>80)pm10Grade='bad';
+    else if(weatherData.pm10>30)pm10Grade='moderate';
+  }
+  const pm10Info=DUST_GRADES[pm10Grade];
+  if(pm10Dot)pm10Dot.style.background=pm10Info.color;
+  if(pm10Text)pm10Text.textContent=weatherData.pm10!==null?Math.round(weatherData.pm10):'--';
+  if(pm10Badge){pm10Badge.style.background=pm10Info.bgColor;pm10Badge.style.color=pm10Info.txtColor;}
+  
   const mode=S.settings?.msgMode||'auto';
   if(mode==='custom'&&S.settings?.customMsg){smartMsg.textContent=S.settings.customMsg;return;}
   
@@ -1322,7 +1408,7 @@ function updateSmartMessage(){
   }
   
   // 미세먼지 나쁨 메시지 우선
-  if(weatherData.dust==='bad'||weatherData.dust==='worst'){smartMsg.textContent=dInfo.msg;}
+  if(weatherData.dustGrade==='bad'||weatherData.dustGrade==='worst'){smartMsg.textContent=dInfo.msg;}
   else if(Math.random()>0.5){smartMsg.textContent=wInfo.msg;}
   else{smartMsg.textContent=DAILY_MSGS[Math.floor(Math.random()*DAILY_MSGS.length)];}
 }
