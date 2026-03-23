@@ -129,7 +129,7 @@ body.dark .dtog-in{transform:translateX(24px)}
 .act-card .timer{font-size:10px;font-weight:700;color:var(--tx3);margin-top:2px}
 
 /* LOG HEADER STICKY */
-.log-header-sticky{position:sticky;top:0;z-index:10;background:linear-gradient(135deg,#6366F1,#818CF8);padding:16px 20px 16px;padding-top:calc(16px + env(safe-area-inset-top));margin:0}
+.log-header-sticky{position:sticky;top:0;z-index:10;background:linear-gradient(135deg,#6366F1,#818CF8);padding:16px 20px 16px;padding-top:calc(16px + env(safe-area-inset-top));margin:0 0 14px;border-radius:0 0 var(--rxl) var(--rxl);box-shadow:0 4px 20px rgba(99,102,241,0.3)}
 .log-header-sticky h2{font-size:22px;font-weight:900;color:#fff}
 .log-header-sticky p{font-size:12px;color:rgba(255,255,255,.85);margin-top:2px;font-weight:600}
 
@@ -137,11 +137,11 @@ body.dark .dtog-in{transform:translateX(24px)}
 .log-wrap{background:var(--card);border-radius:var(--r);margin:12px 16px 14px;overflow:hidden;transition:background .25s}
 .log-item{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:.5px solid var(--bdr)}
 .log-item:last-child{border-bottom:none}
-.log-item.done{background:var(--gn-lt)}
-.log-item.partial{background:var(--yw-lt)}
-.log-item.exhausted{background:var(--bg2);opacity:.7}
+.log-item.done{background:var(--gn-lt);border-left:4px solid var(--gn)}
+.log-item.partial{background:var(--yw-lt);border-left:4px solid var(--yw)}
 .log-ico{width:46px;height:46px;background:var(--or-lt);border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;position:relative}
-.log-item.done .log-ico{background:var(--gn-lt)}
+.log-item.done .log-ico{background:var(--gn);box-shadow:0 2px 8px rgba(16,185,129,0.3)}
+.log-item.done .log-ico::after{content:'✓';position:absolute;bottom:-2px;right:-2px;width:16px;height:16px;background:#fff;border-radius:50%;font-size:10px;display:flex;align-items:center;justify-content:center;color:var(--gn);font-weight:900;box-shadow:0 1px 3px rgba(0,0,0,0.2)}
 .log-item.partial .log-ico{background:var(--yw-lt)}
 /* Progress ring on log icon */
 .log-prog-ring{position:absolute;inset:0;border-radius:13px;background:conic-gradient(var(--gn) var(--prog,0%), transparent 0%);opacity:.35;pointer-events:none}
@@ -186,7 +186,7 @@ body.dark .dtog-in{transform:translateX(24px)}
 .rec-tm{font-size:10px;color:var(--tx3);font-weight:600;margin-top:1px}
 
 /* ADMIN */
-.adm-top{background:linear-gradient(135deg,#6366F1,#818CF8);padding:16px 18px 16px;padding-top:calc(16px + env(safe-area-inset-top));position:sticky;top:0;z-index:10;box-shadow:0 4px 20px rgba(99,102,241,0.3)}
+.adm-top{background:linear-gradient(135deg,#6366F1,#818CF8);padding:16px 18px 16px;padding-top:calc(16px + env(safe-area-inset-top));position:sticky;top:0;z-index:10;box-shadow:0 4px 20px rgba(99,102,241,0.3);border-radius:0 0 var(--rxl) var(--rxl);margin-bottom:14px}
 .adm-top h2{font-size:22px;font-weight:900;color:#fff}
 .adm-top p{font-size:12px;color:rgba(255,255,255,.8);margin-top:2px;font-weight:600}
 .adm-lock{position:absolute;top:calc(16px + env(safe-area-inset-top));right:18px;background:rgba(255,255,255,.2);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:700;color:#fff;cursor:pointer;border:none;font-family:inherit}
@@ -1592,16 +1592,20 @@ function renderLogList(){
   el.innerHTML=acts.map(a=>{
     const done=countDone(a);
     const max=a.maxDay;
-    const exhausted=max>0&&done>=max;
-    const partial=max>0&&done>0&&done<max;
-    const cls=exhausted?' exhausted':partial?' partial':done>0?' done':'';
+    const exhausted=max>0&&done>=max; // 횟수 다 채움
+    const partial=max>0&&done>0&&done<max; // 일부만 완료
+    // 완료(exhausted)면 done 클래스, 일부면 partial, 무제한인데 1회이상이면 done
+    let cls='';
+    if(exhausted) cls=' done'; // 완료 = 초록색
+    else if(partial) cls=' partial'; // 일부 = 노란색
+    else if(max===0&&done>0) cls=' done'; // 무제한인데 오늘 했으면 초록색
     const timer=countdownStr(a);
     const pct=max>0?Math.round(done/max*100):0;
     const cc=CYCLE_CHIP[a.cycle]||'c-or';
     const cycleLabel=CYCLE_LABEL[a.cycle]||a.cycle;
     const countLabel=max>0?`${done}/${max}회`:'';
     const canClick=!exhausted;
-    return `<div class="log-item${cls}" onclick="${canClick?'doAct(\''+a.id+'\')':''}">
+    return `<div class="log-item${cls}" onclick="${canClick?'doAct(\''+a.id+'\')':''}" style="${exhausted?'cursor:default':''}">
       <div class="log-ico" style="${pct>0?'--prog:'+pct+'%;':''}">${a.emoji}${pct>0&&pct<100?'<div class="log-prog-ring"></div>':''}</div>
       <div class="log-inf">
         <div class="log-nm">${a.name}</div>
