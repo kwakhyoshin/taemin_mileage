@@ -629,6 +629,20 @@ body.dark .pin-key.ck{background:transparent}
 .msg-send-btn{width:100%;margin-top:10px;padding:12px;background:var(--tab-color,var(--or));color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;transition:opacity .2s}
 .msg-send-btn:active{opacity:.8}
 
+.msg-emotion-bar{margin-bottom:10px}
+.msg-emotion-label{font-size:12px;font-weight:700;color:var(--tx3);margin-bottom:6px}
+.msg-emotion-list{display:flex;gap:6px;flex-wrap:wrap}
+.msg-emo-btn{width:38px;height:38px;border-radius:10px;border:2px solid var(--bdr);background:var(--bg);font-size:20px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;padding:0}
+.msg-emo-btn:hover{border-color:var(--tab-color,var(--or))}
+.msg-emo-btn.selected{border-color:var(--tab-color,var(--or));background:var(--tab-color,var(--or));transform:scale(1.15);box-shadow:0 2px 8px rgba(99,102,241,.3)}
+
+.emotion-anim-overlay{position:fixed;top:0;left:0;width:100%;height:100%;z-index:600;pointer-events:none;display:flex;align-items:center;justify-content:center}
+.emotion-anim-emoji{font-size:80px;animation:emotionBounce 2s ease forwards}
+.emotion-anim-particles{position:absolute;width:100%;height:100%}
+.emotion-particle{position:absolute;font-size:30px;animation:emotionFloat 2s ease-out forwards;opacity:0}
+@keyframes emotionBounce{0%{transform:scale(0);opacity:0}20%{transform:scale(1.3);opacity:1}40%{transform:scale(0.9)}60%{transform:scale(1.1)}80%{transform:scale(1)}100%{transform:scale(1);opacity:0}}
+@keyframes emotionFloat{0%{transform:translateY(0) scale(0.5);opacity:0}20%{opacity:1}100%{transform:translateY(-200px) scale(1);opacity:0}}
+
 /* RECEIVED MESSAGE POPUP */
 .recv-msg-pop{position:fixed;z-index:502;background:var(--card);border-radius:24px;box-shadow:0 12px 40px rgba(0,0,0,.25);padding:28px 24px;width:300px;animation:fadeUpCenter .2s ease;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center}
 .recv-msg-avatar{width:56px;height:56px;border-radius:50%;overflow:hidden;margin:0 auto 10px}
@@ -1764,6 +1778,19 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
     <div class="msg-pop-name" id="msg-pop-name"></div>
     <button class="msg-pop-close" onclick="closeMsgPop()">✕</button>
   </div>
+  <div class="msg-emotion-bar" id="msg-emotion-bar">
+    <div class="msg-emotion-label">감정 선택</div>
+    <div class="msg-emotion-list">
+      <button class="msg-emo-btn" data-emotion="love" onclick="selectMsgEmotion(this,'love')">❤️</button>
+      <button class="msg-emo-btn" data-emotion="happy" onclick="selectMsgEmotion(this,'happy')">😊</button>
+      <button class="msg-emo-btn" data-emotion="cheer" onclick="selectMsgEmotion(this,'cheer')">🎉</button>
+      <button class="msg-emo-btn" data-emotion="hug" onclick="selectMsgEmotion(this,'hug')">🤗</button>
+      <button class="msg-emo-btn" data-emotion="star" onclick="selectMsgEmotion(this,'star')">⭐</button>
+      <button class="msg-emo-btn" data-emotion="sad" onclick="selectMsgEmotion(this,'sad')">😢</button>
+      <button class="msg-emo-btn" data-emotion="angry" onclick="selectMsgEmotion(this,'angry')">😤</button>
+      <button class="msg-emo-btn" data-emotion="laugh" onclick="selectMsgEmotion(this,'laugh')">😂</button>
+    </div>
+  </div>
   <textarea class="msg-input" id="msg-input" placeholder="메시지를 입력하세요..." maxlength="200" rows="3"></textarea>
   <button class="msg-send-btn" onclick="sendFamilyMsg()">보내기</button>
 </div>
@@ -1773,6 +1800,7 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
 <div class="recv-msg-pop" id="recv-msg-pop" style="display:none">
   <div class="recv-msg-avatar" id="recv-msg-avatar"></div>
   <div class="recv-msg-from" id="recv-msg-from"></div>
+  <div class="recv-msg-emotion" id="recv-msg-emotion" style="font-size:48px;margin-bottom:8px;display:none"></div>
   <div class="recv-msg-text" id="recv-msg-text"></div>
   <button class="msg-send-btn" onclick="closeRecvMsg()">닫기</button>
 </div>
@@ -4585,15 +4613,42 @@ function openMsgPop(userId){
   document.getElementById('msg-pop-avatar').innerHTML=getAvatarHTML(userId,36);
   document.getElementById('msg-pop-name').textContent=m.name+'에게 메시지';
   document.getElementById('msg-input').value='';
+  selectedEmotion=null;
+  document.querySelectorAll('.msg-emo-btn').forEach(b=>b.classList.remove('selected'));
   document.getElementById('msg-bg').style.display='block';
   document.getElementById('msg-pop').style.display='block';
   setTimeout(()=>document.getElementById('msg-input').focus(),100);
 }
 window.openMsgPop=openMsgPop;
 
+function adjustMsgPopForKeyboard(){
+  const pop=document.getElementById('msg-pop');
+  if(!pop||pop.style.display==='none')return;
+  if(window.visualViewport){
+    const vh=window.visualViewport.height;
+    const fullH=window.innerHeight;
+    if(fullH-vh>100){
+      pop.style.top=Math.max(window.visualViewport.offsetTop+20, 20)+'px';
+      pop.style.transform='translate(-50%, 0)';
+    }else{
+      pop.style.top='50%';
+      pop.style.transform='translate(-50%,-50%)';
+    }
+  }
+}
+window.adjustMsgPopForKeyboard=adjustMsgPopForKeyboard;
+
+if(window.visualViewport){
+  window.visualViewport.addEventListener('resize',adjustMsgPopForKeyboard);
+  window.visualViewport.addEventListener('scroll',adjustMsgPopForKeyboard);
+}
+
 function closeMsgPop(){
+  const pop=document.getElementById('msg-pop');
   document.getElementById('msg-bg').style.display='none';
-  document.getElementById('msg-pop').style.display='none';
+  pop.style.display='none';
+  pop.style.top='50%';
+  pop.style.transform='translate(-50%,-50%)';
   msgTargetUser=null;
 }
 window.closeMsgPop=closeMsgPop;
@@ -4610,6 +4665,7 @@ function sendFamilyMsg(){
     from:currentUser,
     to:msgTargetUser,
     text:text,
+    emotion:selectedEmotion||null,
     ts:Date.now(),
     read:false
   });
@@ -4729,7 +4785,7 @@ function readMsgFromList(fromId,msgIdx){
     msgs[msgIdx].read=true;
     save();
     closeMsgList();
-    showReceivedMsg(fromId,msgs[msgIdx].text);
+    showReceivedMsg(fromId,msgs[msgIdx].text,msgs[msgIdx].emotion);
     renderNavUsers();
   }
 }
@@ -4741,21 +4797,83 @@ function checkNewMessages(){
   if(unread){
     unread.read=true;
     save();
-    showReceivedMsg(unread.from,unread.text);
+    showReceivedMsg(unread.from,unread.text,unread.emotion);
   }
 }
 window.checkNewMessages=checkNewMessages;
 
-function showReceivedMsg(fromId,text){
+function showReceivedMsg(fromId,text,emotion){
   document.getElementById('recv-msg-avatar').innerHTML=getAvatarHTML(fromId,56);
   document.getElementById('recv-msg-from').textContent=(MEMBERS[fromId]?.name||'가족')+'의 메시지';
   document.getElementById('recv-msg-text').textContent=text;
+  const emotionEl=document.getElementById('recv-msg-emotion');
+  if(emotion&&EMOTION_MAP[emotion]){
+    emotionEl.textContent=EMOTION_MAP[emotion].emoji;
+    emotionEl.style.display='block';
+  }else{
+    emotionEl.style.display='none';
+  }
   document.getElementById('recv-msg-bg').style.display='block';
   document.getElementById('recv-msg-pop').style.display='block';
-  // Go to home tab
+  if(emotion)playEmotionAnimation(emotion);
   reallyGoTab('home');
 }
 window.showReceivedMsg=showReceivedMsg;
+
+let selectedEmotion=null;
+
+function selectMsgEmotion(btn,emotion){
+  document.querySelectorAll('.msg-emo-btn').forEach(b=>b.classList.remove('selected'));
+  if(selectedEmotion===emotion){
+    selectedEmotion=null;
+  }else{
+    btn.classList.add('selected');
+    selectedEmotion=emotion;
+  }
+}
+window.selectMsgEmotion=selectMsgEmotion;
+
+const EMOTION_MAP={
+  love:{emoji:'❤️',particles:['💕','💗','💖','💘','💝','✨']},
+  happy:{emoji:'😊',particles:['✨','🌟','⭐','💫','🌈','☀️']},
+  cheer:{emoji:'🎉',particles:['🎊','🎈','🎆','🎇','✨','🥳']},
+  hug:{emoji:'🤗',particles:['💛','💚','💙','💜','🧡','💗']},
+  star:{emoji:'⭐',particles:['🌟','✨','💫','⚡','🌠','💥']},
+  sad:{emoji:'😢',particles:['💧','🌧️','💦','☁️','🥺','💙']},
+  angry:{emoji:'😤',particles:['💢','🔥','💥','⚡','😠','💨']},
+  laugh:{emoji:'😂',particles:['🤣','😆','😁','✨','💫','🎉']}
+};
+
+function playEmotionAnimation(emotion){
+  const config=EMOTION_MAP[emotion];
+  if(!config)return;
+
+  const overlay=document.createElement('div');
+  overlay.className='emotion-anim-overlay';
+
+  const center=document.createElement('div');
+  center.className='emotion-anim-emoji';
+  center.textContent=config.emoji;
+  overlay.appendChild(center);
+
+  const particleContainer=document.createElement('div');
+  particleContainer.className='emotion-anim-particles';
+  for(let i=0;i<12;i++){
+    const p=document.createElement('div');
+    p.className='emotion-particle';
+    p.textContent=config.particles[i%config.particles.length];
+    p.style.left=Math.random()*80+10+'%';
+    p.style.top=Math.random()*60+20+'%';
+    p.style.animationDelay=(Math.random()*0.8)+'s';
+    p.style.animationDuration=(1.5+Math.random())+'s';
+    particleContainer.appendChild(p);
+  }
+  overlay.appendChild(particleContainer);
+
+  document.body.appendChild(overlay);
+  setTimeout(()=>overlay.remove(),2500);
+}
+window.playEmotionAnimation=playEmotionAnimation;
 
 // Listen for SW notification click messages
 if('serviceWorker' in navigator){
@@ -4763,7 +4881,7 @@ if('serviceWorker' in navigator){
     if(event.data&&event.data.type==='NOTIFICATION_CLICK'){
       const d=event.data.data;
       if(d.type==='family_msg'&&d.from&&d.msgText){
-        showReceivedMsg(d.from,d.msgText);
+        showReceivedMsg(d.from,d.msgText,d.emotion);
       }else if(d.type==='mood_update'){
         // Just go to home, mood badge will be visible
         reallyGoTab('home');
@@ -4783,7 +4901,7 @@ function checkUrlParams(){
       if(msg){
         msg.read=true;
         save();
-        setTimeout(()=>showReceivedMsg(from,msg.text),500);
+        setTimeout(()=>showReceivedMsg(from,msg.text,msg.emotion),500);
       }
     }
     // Clean URL
