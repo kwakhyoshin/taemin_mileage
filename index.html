@@ -57,11 +57,15 @@ body{font-family:'Pretendard Variable',-apple-system,sans-serif;background:var(-
 /* SCREENS */
 .scr{display:none;min-height:100vh;min-height:100dvh;padding-bottom:110px}
 .scr.on{display:block;animation:fadeIn .3s ease}
-.scr.slide-left{display:block;animation:slideInLeft .25s ease forwards}
-.scr.slide-right{display:block;animation:slideInRight .25s ease forwards}
+.scr.slide-left{display:block;animation:slideInLeft .3s cubic-bezier(.25,.46,.45,.94) forwards}
+.scr.slide-right{display:block;animation:slideInRight .3s cubic-bezier(.25,.46,.45,.94) forwards}
+.scr.slide-out-left{display:block;animation:slideOutLeft .3s cubic-bezier(.25,.46,.45,.94) forwards;position:absolute;top:0;left:0;right:0;z-index:1}
+.scr.slide-out-right{display:block;animation:slideOutRight .3s cubic-bezier(.25,.46,.45,.94) forwards;position:absolute;top:0;left:0;right:0;z-index:1}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-@keyframes slideInLeft{from{opacity:0;transform:translateX(60px)}to{opacity:1;transform:translateX(0)}}
-@keyframes slideInRight{from{opacity:0;transform:translateX(-60px)}to{opacity:1;transform:translateX(0)}}
+@keyframes slideInLeft{from{transform:translateX(100%)}to{transform:translateX(0)}}
+@keyframes slideInRight{from{transform:translateX(-100%)}to{transform:translateX(0)}}
+@keyframes slideOutLeft{from{transform:translateX(0)}to{transform:translateX(-100%)}}
+@keyframes slideOutRight{from{transform:translateX(0)}to{transform:translateX(100%)}}
 #s-log{padding:0 0 110px 0;overflow:visible}
 
 /* BOTTOM NAV - Floating Glass Pill with SVG Icons */
@@ -77,10 +81,18 @@ body.dark .bottom-nav{border-color:rgba(255,255,255,0.1)}
 .nav-item:not(.active):hover{background:rgba(99,102,241,0.08)}
 .nav-item:not(.active):active{transform:scale(0.95)}
 
+/* DOCKED NAV STATE */
+.nav-container.docked{bottom:0;left:0;right:0;transform:none;width:100%}
+.nav-container.docked .bottom-nav{border-radius:20px 20px 0 0;padding:8px 16px;gap:6px;width:100%;box-sizing:border-box}
+.nav-container.docked .nav-item{padding:10px 14px;flex:1;justify-content:center}
+.nav-container.docked .nav-users{gap:4px}
+.nav-container.docked .nav-user-wrap{padding:4px 8px}
+.nav-container.docked .nav-divider{margin:0 6px}
+
 /* TOPBAR */
 .top{padding:52px 18px 10px;display:flex;justify-content:space-between;align-items:flex-start}
-.top-l h1{font-size:28px;font-weight:900;color:var(--tx)}
-.top-l p{font-size:13px;color:var(--tx2);margin-top:2px;font-weight:600}
+.top-l h1{font-size:32px;font-weight:900;color:var(--tx)}
+.top-l p{font-size:15px;color:var(--tx2);margin-top:2px;font-weight:600}
 .dtog{width:52px;height:28px;border-radius:14px;background:var(--bdr2);border:none;cursor:pointer;position:relative;margin-top:6px;transition:background .25s;flex-shrink:0}
 body.dark .dtog{background:#334155}
 .dtog-in{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:11px;background:#fff;transition:transform .25s;display:flex;align-items:center;justify-content:center;font-size:13px;line-height:1}
@@ -89,15 +101,15 @@ body.dark .dtog-in{transform:translateX(24px)}
 /* HOME TOP - scrolls away */
 .home-top{background:#6366F1;padding:16px 20px 0;padding-top:calc(16px + env(safe-area-inset-top));display:flex;justify-content:space-between;align-items:flex-start;position:relative;overflow:visible;z-index:11}
 .home-top::after{content:'';position:absolute;bottom:-70px;right:10px;width:160px;height:160px;background:rgba(255,255,255,.1);border-radius:50%;pointer-events:none}
-.home-top h1{font-size:20px;font-weight:900;color:#fff}
+.home-top h1{font-size:24px;font-weight:900;color:#fff}
 
 /* HERO - Sticky on scroll, full width when stuck */
 .hero{margin:0;background:linear-gradient(180deg,#6366F1,#818CF8);border-radius:0 0 var(--rxl) var(--rxl);padding:14px 20px 22px;color:#fff;position:sticky;top:0;z-index:10;overflow:hidden;box-shadow:0 4px 20px rgba(99,102,241,0.3);transition:padding .25s}
 .hero::after{content:'';position:absolute;bottom:-30px;left:20px;width:110px;height:110px;background:rgba(255,255,255,.08);border-radius:50%;pointer-events:none}
-.hero-lbl{font-size:12px;font-weight:700;opacity:.85;transition:font-size .25s}
-.hero-pts{font-size:54px;font-weight:900;letter-spacing:-2px;line-height:1;transition:font-size .25s}
+.hero-lbl{font-size:14px;font-weight:700;opacity:.85;transition:font-size .25s}
+.hero-pts{font-size:58px;font-weight:900;letter-spacing:-2px;line-height:1;transition:font-size .25s}
 .hero-unit{font-size:18px;font-weight:700;opacity:.85;transition:font-size .25s}
-.hero-goal{font-size:13px;opacity:.82;margin-top:6px;font-weight:600;line-height:1.4;transition:all .25s;max-height:50px;overflow:hidden}
+.hero-goal{font-size:15px;opacity:.82;margin-top:6px;font-weight:600;line-height:1.4;transition:all .25s;max-height:50px;overflow:hidden}
 .streak-pill{position:absolute;top:18px;right:18px;background:rgba(255,255,255,.2);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:800;transition:all .25s}
 .prog-track{background:rgba(255,255,255,.25);border-radius:6px;height:6px;margin-top:14px;transition:all .25s}
 .prog-fill{background:#fff;border-radius:6px;height:6px;transition:width .7s}
@@ -114,8 +126,8 @@ body.dark .dtog-in{transform:translateX(24px)}
 .hero.compact .prog-row{margin-top:3px;font-size:10px}
 
 /* SECTION */
-.sec{font-size:15px;font-weight:800;color:var(--tx);margin:14px 16px 10px;display:flex;align-items:center;gap:6px}
-.sec-ico{width:18px;height:18px;fill:none;stroke:#6366F1;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;margin-top:1px}
+.sec{font-size:17px;font-weight:800;color:var(--tx);margin:14px 16px 10px;display:flex;align-items:center;gap:6px}
+.sec-ico{width:20px;height:20px;fill:none;stroke:#6366F1;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;margin-top:1px}
 .dtab-ico{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px}
 .cal-detail-sec{margin:0!important;padding:14px 16px 10px!important;border-bottom:1px solid var(--bdr)}
 .hdr-ico{width:22px;height:22px;fill:none;stroke:rgba(255,255,255,.45);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;margin-left:6px;vertical-align:-3px;display:inline}
@@ -145,8 +157,8 @@ body.dark .dtog-in{transform:translateX(24px)}
 
 /* LOG HEADER STICKY */
 .log-header-sticky{position:sticky;top:0;z-index:10;background:linear-gradient(135deg,#6366F1,#818CF8);padding:16px 20px 16px;padding-top:calc(16px + env(safe-area-inset-top));margin:0 0 14px;border-radius:0 0 var(--rxl) var(--rxl);box-shadow:0 4px 20px rgba(99,102,241,0.3)}
-.log-header-sticky h2{font-size:20px;font-weight:900;color:#fff}
-.log-header-sticky p{font-size:12px;color:rgba(255,255,255,.85);margin-top:2px;font-weight:600}
+.log-header-sticky h2{font-size:24px;font-weight:900;color:#fff}
+.log-header-sticky p{font-size:14px;color:rgba(255,255,255,.85);margin-top:2px;font-weight:600}
 
 /* LOG LIST */
 .log-wrap{background:var(--card);border-radius:var(--r);margin:12px 16px 14px;overflow:hidden;transition:background .25s}
@@ -218,7 +230,7 @@ body.dark .rec-day-tag.day-1{background:#312E81;color:#A5B4FC}
 .adm-tab{flex:1;padding:9px;background:var(--card);border-radius:var(--rsm);border:1.5px solid transparent;font-family:inherit;font-size:12px;font-weight:800;color:var(--tx2);cursor:pointer;transition:background .2s}
 .adm-tab.on{background:var(--or-lt);color:var(--or);border-color:var(--or)}
 .adm-sec{margin:0 16px 12px}
-.adm-sec-lbl{font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:.5px;text-transform:uppercase;margin-bottom:7px}
+.adm-sec-lbl{font-size:13px;font-weight:800;color:var(--tx3);letter-spacing:.5px;text-transform:uppercase;margin-bottom:7px}
 .adm-card{background:var(--card);border-radius:var(--r);overflow:hidden;transition:background .25s}
 .adm-row{display:flex;align-items:center;padding:12px 14px;border-bottom:.5px solid var(--bdr);gap:10px}
 .adm-row:last-child{border-bottom:none}
@@ -266,7 +278,7 @@ body.dark .rec-day-tag.day-1{background:#312E81;color:#A5B4FC}
 .hist-date-inp:focus{border-color:#6366F1}
 .hist-custom-range{font-size:11px;font-weight:700;color:var(--tx3)}
 .today-summary-card{margin:0 16px 12px;padding:16px;background:var(--card);border-radius:var(--r);box-shadow:var(--sh)}
-.today-summary-card .ts-header{display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:15px;font-weight:800;color:var(--tx)}
+.today-summary-card .ts-header{display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:17px;font-weight:800;color:var(--tx)}
 .today-summary-card .ts-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
 .today-summary-card .ts-item{background:var(--bg);border-radius:var(--rsm);padding:10px 12px;text-align:center;border:1px solid var(--bdr)}
 .today-summary-card .ts-item .ts-val{font-size:20px;font-weight:900}
@@ -477,6 +489,19 @@ body.dark .today-summary-card .ts-msg{background:linear-gradient(135deg,#312E81,
 .recv-msg-from{font-size:14px;font-weight:800;color:var(--tx2);margin-bottom:8px}
 .recv-msg-text{font-size:16px;font-weight:700;color:var(--tx);line-height:1.5;padding:16px;background:var(--bg2);border-radius:14px;margin-bottom:14px;word-break:break-word}
 
+/* MESSAGE LIST POPUP */
+.msglist-pop{position:fixed;z-index:502;background:var(--card);border-radius:20px;box-shadow:0 8px 30px rgba(0,0,0,.2);width:320px;max-height:70vh;animation:fadeUp .25s ease;left:50%;top:50%;transform:translate(-50%,-50%);overflow:hidden;display:flex;flex-direction:column}
+.msglist-header{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 12px;border-bottom:1px solid var(--bdr)}
+.msglist-title{font-size:16px;font-weight:900;color:var(--tx)}
+.msglist-body{overflow-y:auto;padding:8px;flex:1}
+.msglist-item{display:flex;align-items:flex-start;gap:10px;padding:12px;border-radius:12px;cursor:pointer;transition:background .15s}
+.msglist-item:active{background:var(--bg2)}
+.msglist-item-text{flex:1;font-size:13px;color:var(--tx);line-height:1.4;word-break:break-word}
+.msglist-item-time{font-size:10px;color:var(--tx3);white-space:nowrap;flex-shrink:0}
+.msglist-item-dot{width:8px;height:8px;border-radius:50%;background:#EF4444;flex-shrink:0;margin-top:4px}
+.msglist-item-dot.read{background:transparent}
+.msglist-empty{padding:24px;text-align:center;color:var(--tx3);font-size:13px}
+
 /* AUTH SCREENS */
 .auth-screen{position:fixed;inset:0;background:linear-gradient(135deg,#6366F1,#818CF8);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
 .auth-screen.hidden{display:none}
@@ -524,6 +549,7 @@ body.dark .nav-profile{border-color:rgba(255,255,255,.4)}
 .nav-user-wrap.me .nav-user-label{color:var(--or)}
 .nav-mood-badge{position:absolute;top:-4px;right:-2px;font-size:10px;line-height:1;pointer-events:none;animation:moodBounce 2s infinite}
 @keyframes moodBounce{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
+.nav-unread-badge{position:absolute;top:-4px;left:-2px;min-width:16px;height:16px;background:#EF4444;color:#fff;font-size:9px;font-weight:900;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 4px;pointer-events:none;box-shadow:0 1px 3px rgba(0,0,0,.3);line-height:1}
 
 /* PROFILE ICON IN ADMIN */
 .profile-avatar{width:40px;height:40px;border-radius:50%;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.1)}
@@ -575,7 +601,7 @@ body.dark .nav-profile{border-color:rgba(255,255,255,.4)}
   .act-card .p{font-size:12px}
 
   /* Section titles */
-  .sec{font-size:19px;margin:18px 20px 12px}
+  .sec{font-size:21px;margin:18px 20px 12px}
   .card{margin:0 20px 14px}
 
   /* Log items bigger */
@@ -600,7 +626,7 @@ body.dark .nav-profile{border-color:rgba(255,255,255,.4)}
   .home-top h1{font-size:24px}
   .hero{padding:22px 24px 26px;position:sticky;top:0;z-index:10}
   .log-header-sticky{padding:20px 24px}
-  .log-header-sticky h2{font-size:22px}
+  .log-header-sticky h2{font-size:26px}
   .rwd-header-sticky{padding:20px 24px}
   .hist-hero{padding:22px 24px 18px}
   .hist-stats-card{margin:0 20px 14px}
@@ -707,7 +733,7 @@ body.dark .nav-profile{border-color:rgba(255,255,255,.4)}
   .rwd-nm{font-size:15px}
 
   /* Section */
-  .sec{margin:20px 24px 14px;font-size:20px}
+  .sec{margin:20px 24px 14px;font-size:22px}
   .card{margin:0 24px 16px;border-radius:var(--rlg)}
 
   /* Log */
@@ -1416,6 +1442,16 @@ body.dark .nav-profile{border-color:rgba(255,255,255,.4)}
   <button class="msg-send-btn" onclick="closeRecvMsg()">닫기</button>
 </div>
 
+<!-- MESSAGE LIST POPUP -->
+<div class="pfm-bg" id="msglist-bg" onclick="closeMsgList()" style="display:none"></div>
+<div class="msglist-pop" id="msglist-pop" style="display:none">
+  <div class="msglist-header">
+    <div class="msglist-title" id="msglist-title">메시지</div>
+    <button class="msg-pop-close" onclick="closeMsgList()">✕</button>
+  </div>
+  <div class="msglist-body" id="msglist-body"></div>
+</div>
+
 <!-- EMOJI PICKER -->
 <div id="ep-bg" onclick="closeEP()"></div>
 <div class="ep-pop" id="ep-pop">
@@ -2041,7 +2077,7 @@ function updateSmartMessage(){
   if(mode==='custom'&&S.settings?.customMsg){smartMsg.textContent=S.settings.customMsg;return;}
   
   // 연속 보너스 알림 (7일 주기)
-  const streak=S.streak||0;
+  const streak=getDisplayStreak();
   const daysUntilBonus=7-(streak%7);
   const bonusPts=S.settings?.streakBonusPts||100;
   const streakBonusEnabled=S.settings?.streakBonus!==false;
@@ -2070,7 +2106,14 @@ function saveCustomMsg(){const v=document.getElementById('custom-msg-inp').value
 function renderMsgSettings(){const mode=S.settings?.msgMode||'auto';const sel=document.getElementById('msg-mode-sel');if(sel)sel.value=mode;const row=document.getElementById('custom-msg-row');if(row)row.style.display=mode==='custom'?'flex':'none';const inp=document.getElementById('custom-msg-inp');if(inp)inp.value=S.settings?.customMsg||'';}
 
 // ── TIME HELPERS ──────────────────────────────
-function todayStr(){return new Date().toISOString().slice(0,10);}
+function todayStr(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+function getDisplayStreak(){
+  const t=todayStr();
+  const d=new Date();d.setDate(d.getDate()-1);
+  const y=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  if(S.lastDate===t||S.lastDate===y)return S.streak;
+  return 0;
+}
 function weekStart(){const d=new Date();d.setDate(d.getDate()-((d.getDay()||7)-1));return d.toISOString().slice(0,10);}
 function monthStr(){return new Date().toISOString().slice(0,7);}
 // midnight of next day timestamp
@@ -2162,7 +2205,7 @@ function renderHero(){
     document.getElementById('greeting-txt').textContent=S.greeting||'안녕, 태민아! 👋';
   }
   document.getElementById('hero-pts').textContent=S.pts.toLocaleString();
-  document.getElementById('streak-pill').textContent=`🔥 ${S.streak}일 연속`;
+  document.getElementById('streak-pill').textContent=`🔥 ${getDisplayStreak()}일 연속`;
   const g=S.rwds.find(r=>r.goal)||S.rwds[0];
   const pct=g?Math.min(100,Math.round(S.pts/g.pts*100)):0;
   document.getElementById('hero-bar').style.width=pct+'%';
@@ -2531,7 +2574,7 @@ function renderDashboard(){
 function renderDashStreak(){
   const el=document.getElementById('dash-streak');
   if(!el)return;
-  const streak=S.streak||0;
+  const streak=getDisplayStreak();
   const longest=S.longest||0;
   const nextMilestone=streak<7?7:streak<14?14:streak<30?30:streak<60?60:streak<100?100:Math.ceil((streak+1)/50)*50;
   const pct=Math.min(100,Math.round(streak/nextMilestone*100));
@@ -2617,8 +2660,11 @@ function renderDashHeatmap(){
     </div>`);
   }
   el.innerHTML=`<div class="heatmap-row">${cells.join('')}</div>
-    <div style="display:flex;justify-content:center;gap:10px;padding:6px 0 4px;font-size:10px;font-weight:700;color:var(--tx3)">
-      <span>⬜ 0</span><span style="color:#818CF8">🟦 1-2</span><span style="color:#6366F1">🟪 3-4</span><span style="color:#4F46E5">🟫 5+</span>
+    <div style="display:flex;justify-content:center;align-items:center;gap:12px;padding:8px 0 4px;font-size:10px;font-weight:700;color:var(--tx3)">
+      <span style="display:flex;align-items:center;gap:3px"><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:var(--bdr)"></span> 0</span>
+      <span style="display:flex;align-items:center;gap:3px"><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#C7D2FE"></span> 1-2</span>
+      <span style="display:flex;align-items:center;gap:3px"><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#818CF8"></span> 3-4</span>
+      <span style="display:flex;align-items:center;gap:3px"><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#6366F1"></span> 5+</span>
     </div>`;
 }
 
@@ -2831,7 +2877,7 @@ function renderHistList(){
     </div>`).join(''):'<div class="empty">아직 내역이 없어요</div>';
 }
 
-function renderAdmStats(){document.getElementById('adm-done').textContent=S.totalDone;document.getElementById('adm-streak').textContent=S.streak;}
+function renderAdmStats(){document.getElementById('adm-done').textContent=S.totalDone;document.getElementById('adm-streak').textContent=getDisplayStreak();}
 function renderAdmActList(){
   const el=document.getElementById('adm-act-list');
   if(!S.acts.length){el.innerHTML='<div class="empty">활동이 없어요</div>';return;}
@@ -2896,7 +2942,7 @@ function doAct(id){
   markDone(a);
 
   // streak
-  const t=todayStr(),y=new Date(Date.now()-86400000).toISOString().slice(0,10);
+  const t=todayStr();const yd=new Date();yd.setDate(yd.getDate()-1);const y=`${yd.getFullYear()}-${String(yd.getMonth()+1).padStart(2,'0')}-${String(yd.getDate()).padStart(2,'0')}`;
   if(S.lastDate===t){}
   else if(S.lastDate===y){S.streak++;}
   else{S.streak=1;}
@@ -3424,8 +3470,10 @@ function renderNavUsers(){
   // Other users (left side)
   otherIds.forEach(id=>{
     const moodEmoji=getMoodEmoji(id);
-    html+=`<div class="nav-user-wrap" onclick="openMsgPop('${id}')">
+    const unreadCount=getUnreadCount(id);
+    html+=`<div class="nav-user-wrap" onclick="onUserIconClick('${id}')">
       ${moodEmoji?`<span class="nav-mood-badge">${moodEmoji}</span>`:''}
+      ${unreadCount>0?`<span class="nav-unread-badge">${unreadCount}</span>`:''}
       <div class="nav-profile">${getAvatarHTML(id,28)}</div>
       <span class="nav-user-label">${userLabels[id]||MEMBERS[id].name}</span>
     </div>`;
@@ -3515,6 +3563,68 @@ function closeRecvMsg(){
 }
 window.closeRecvMsg=closeRecvMsg;
 
+function getUnreadCount(fromId){
+  if(!currentUser||!S.familyMessages)return 0;
+  return S.familyMessages.filter(m=>m.from===fromId&&m.to===currentUser&&!m.read).length;
+}
+window.getUnreadCount=getUnreadCount;
+
+function onUserIconClick(userId){
+  const unread=getUnreadCount(userId);
+  if(unread>0){
+    openMsgList(userId);
+  }else{
+    openMsgPop(userId);
+  }
+}
+window.onUserIconClick=onUserIconClick;
+
+function openMsgList(fromId){
+  const name=MEMBERS[fromId]?.name||'가족';
+  document.getElementById('msglist-title').textContent=name+'의 메시지';
+  const msgs=S.familyMessages?S.familyMessages.filter(m=>m.from===fromId&&m.to===currentUser):[];
+  const body=document.getElementById('msglist-body');
+  if(msgs.length===0){
+    body.innerHTML='<div class="msglist-empty">메시지가 없어요</div>';
+  }else{
+    // Show newest first
+    body.innerHTML=msgs.slice().reverse().map((m,i)=>{
+      const date=new Date(m.ts);
+      const timeStr=(date.getMonth()+1)+'/'+date.getDate()+' '+date.getHours()+':'+String(date.getMinutes()).padStart(2,'0');
+      return `<div class="msglist-item" onclick="readMsgFromList('${fromId}',${msgs.length-1-i})">
+        <div class="msglist-item-dot${m.read?' read':''}"></div>
+        <div class="msglist-item-text">${m.text}</div>
+        <div class="msglist-item-time">${timeStr}</div>
+      </div>`;
+    }).join('');
+  }
+  // Add "새 메시지 보내기" button at bottom
+  body.innerHTML+=`<div style="padding:12px 8px;border-top:1px solid var(--bdr);margin-top:8px">
+    <button class="msg-send-btn" onclick="closeMsgList();openMsgPop('${fromId}')">💌 새 메시지 보내기</button>
+  </div>`;
+  document.getElementById('msglist-bg').style.display='block';
+  document.getElementById('msglist-pop').style.display='flex';
+}
+window.openMsgList=openMsgList;
+
+function closeMsgList(){
+  document.getElementById('msglist-bg').style.display='none';
+  document.getElementById('msglist-pop').style.display='none';
+}
+window.closeMsgList=closeMsgList;
+
+function readMsgFromList(fromId,msgIdx){
+  const msgs=S.familyMessages?S.familyMessages.filter(m=>m.from===fromId&&m.to===currentUser):[];
+  if(msgs[msgIdx]){
+    msgs[msgIdx].read=true;
+    save();
+    closeMsgList();
+    showReceivedMsg(fromId,msgs[msgIdx].text);
+    renderNavUsers();
+  }
+}
+window.readMsgFromList=readMsgFromList;
+
 function checkNewMessages(){
   if(!currentUser||!S.familyMessages)return;
   const unread=S.familyMessages.find(m=>m.to===currentUser&&!m.read);
@@ -3579,6 +3689,10 @@ function reallyGoTab(tab){
   document.getElementById('tab-'+tab).classList.add('active');
   document.getElementById('s-'+tab).scrollTop=0;
   window.scrollTo({top:0});
+  // Reset docked nav state
+  const navC=document.querySelector('.nav-container');
+  if(navC)navC.classList.remove('docked');
+  _navDocked=false;
   // 홈 탭 진입 시 compact 상태 초기화
   const hero=document.querySelector('.hero');
   if(hero) hero.classList.remove('compact');
@@ -3606,13 +3720,33 @@ function getCurrentTab(){
 }
 
 function swipeToTab(tab,animClass){
-  document.querySelectorAll('.scr').forEach(s=>{s.classList.remove('on','slide-left','slide-right');});
+  const oldTab=document.querySelector('.scr.on');
+  document.querySelectorAll('.scr').forEach(s=>{s.classList.remove('slide-left','slide-right','slide-out-left','slide-out-right');});
+
+  // Determine exit animation for old tab
+  const exitClass=animClass==='slide-left'?'slide-out-left':'slide-out-right';
+
+  // Start exit animation on old tab
+  if(oldTab){
+    oldTab.classList.remove('on');
+    oldTab.classList.add(exitClass);
+    oldTab.addEventListener('animationend',function handler(){
+      oldTab.classList.remove(exitClass);
+      oldTab.removeEventListener('animationend',handler);
+    });
+  }
+
+  // Start enter animation on new tab
   document.querySelectorAll('.nav-item').forEach(t=>t.classList.remove('active'));
   const el=document.getElementById('s-'+tab);
   el.classList.add(animClass);
   document.getElementById('tab-'+tab)?.classList.add('active');
   el.scrollTop=0;
   window.scrollTo({top:0});
+  // Reset docked nav state
+  const navC=document.querySelector('.nav-container');
+  if(navC)navC.classList.remove('docked');
+  _navDocked=false;
   // After animation ends, switch to normal 'on' class
   el.addEventListener('animationend',function handler(){
     el.classList.remove(animClass);
@@ -3658,6 +3792,37 @@ document.addEventListener('touchend',function(e){
     swipeToTab(SWIPE_TABS[idx-1],'slide-right');
   }
 },{passive:true});
+
+// ── DOCK NAV ON SCROLL ──────────────────────────
+let _navDocked=false;
+function checkNavDock(){
+  const scrollY=window.scrollY||document.documentElement.scrollTop;
+  const container=document.querySelector('.nav-container');
+  if(!container)return;
+  if(scrollY>60&&!_navDocked){
+    _navDocked=true;
+    container.classList.add('docked');
+  }else if(scrollY<=60&&_navDocked){
+    _navDocked=false;
+    container.classList.remove('docked');
+  }
+}
+window.addEventListener('scroll',checkNavDock,{passive:true});
+// Also check on each visible screen's scroll
+document.querySelectorAll('.scr').forEach(scr=>{
+  scr.addEventListener('scroll',()=>{
+    const scrollY=scr.scrollTop;
+    const container=document.querySelector('.nav-container');
+    if(!container)return;
+    if(scrollY>60&&!_navDocked){
+      _navDocked=true;
+      container.classList.add('docked');
+    }else if(scrollY<=60&&_navDocked){
+      _navDocked=false;
+      container.classList.remove('docked');
+    }
+  },{passive:true});
+});
 
 // ── UTILS ──────────────────────────────────────
 function fmt(ts){
@@ -4165,6 +4330,13 @@ Object.assign(window, {
       if(backup) S = Object.assign(defaultState(), JSON.parse(backup));
     }catch(e2){}
     toast('⚠️ 오프라인 모드 — 인터넷 연결을 확인해주세요');
+  }
+
+  // Validate streak on load
+  const _t=todayStr();const _yd=new Date();_yd.setDate(_yd.getDate()-1);
+  const _ystr=`${_yd.getFullYear()}-${String(_yd.getMonth()+1).padStart(2,'0')}-${String(_yd.getDate()).padStart(2,'0')}`;
+  if(S.lastDate && S.lastDate!==_t && S.lastDate!==_ystr){
+    S.streak=0;
   }
 
   hideLoading();

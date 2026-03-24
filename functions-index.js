@@ -1,0 +1,116 @@
+const { onDocumentUpdated } = require("firebase-functions/v2/firestore");
+const admin = require("firebase-admin");
+const webpush = require("web-push");
+
+admin.initializeApp();
+const db = admin.firestore();
+
+webpush.setVapidDetails(
+  "mailto:nonmarking@gmail.com",
+  "BMqfqNW-_vInMwqdq3H01AKHBepukX3-Lk1RX8ZkZ97jlixIOS7hIZDRJ0gwNy00hARwc2XilfOHnx9WBlcNJfI",
+  "N6--Fo1_AniJRygwzF57hbNaapW26ntk30PnT1LOK1I"
+);
+
+const NAMES = { taemin: "태민이", dad: "아빠", mom: "엄마" };
+
+function sendToDevices(devices, targetUsers, payload) {
+  const promises = [];
+  for (const [deviceId, device] of Object.entries(devices)) {
+    if (device.enabled && targetUsers.includes(device.user)) {
+      try {
+        const sub = JSON.parse(device.subscription);
+        promises.push(
+          webpush.sendNotification(sub, JSON.stringify(payload)).catch((err) => {
+            console.log("Push failed for device", deviceId, err.statusCode);
+            if (err.statusCode === 404 || err.statusCode === 410) {
+              return db.doc("users/taemin").update({
+                [`pushDevices.${deviceId}.enabled`]: false,
+              });
+            }
+          })
+        );
+      } catch (e) {
+        console.log("Invalid subscription for device", deviceId);
+      }
+    }
+  }
+  return Promise.all(promises);
+}
+
+// 1) 가족 메시지 → 수신자에게 푸시
+exports.onFamilyMessage = onDocumentUpdated("users/taemin", async (event) => {
+  const before = event.data.before.data();
+  const after = event.data.after.data();
+  const oldMsgs = before.familyMessages || [];
+  const newMsgs = after.familyMessages || [];
+  if (newMsgs.length <= oldMsgs.length) return null;
+
+  const latestMsg = newMsgs[newMsgs.length - 1];
+  if (!latestMsg || latestMsg.read) return null;
+
+  const devices = after.pushDevices || {};
+  const senderName = NAMES[latestMsg.from] || "가족";
+
+  return sendToDevices(devices, [latestMsg.to], {
+    title: senderName + "에게서 메시지가 도착했어요 💌",
+    body: latestMsg.text,
+    icon: "icon-180.png",
+    tag: "family-msg-" + Date.now(),
+    type: "family_msg",
+    from: latestMsg.from,
+    msgText: latestMsg.text,
+    url: "./"
+  });
+});
+
+// 2) 기분 업데이트 → 다른 가족에게 푸시
+exports.onMoodUpdate = onDocumentUpdated("users/taemin", async (event) => {
+  const before = event.data.before.data();
+  const after = event.data.after.data();
+
+  // moodNotify 필드가 변경됐는지 확인
+  if (!after.moodNotify ||
+    (before.moodNotify && before.moodNotify.ts === after.moodNotify.ts)) {
+    return null;
+  }
+
+  const mn = after.moodNotify;
+  const devices = after.pushDevices || {};
+  const senderName = NAMES[mn.user] || "가족";
+  const allUsers = Object.keys(NAMES);
+  const otherUsers = allUsers.filter(u => u !== mn.user);
+
+  return sendToDevices(devices, otherUsers, {
+    title: senderName + "의 기분이 바뀌었어요 " + mn.emoji,
+    body: senderName + "이(가) 지금 " + mn.label + " 기분이래요!",
+    icon: "icon-180.png",
+    tag: "mood-" + Date.now(),
+    type: "mood_update",
+    from: mn.user,
+    mood: mn.mood,
+    url: "./"
+  });
+});
+
+// 3) 전체 알림 (관리자용)
+exports.onBroadcastPush = onDocumentUpdated("users/taemin", async (event) => {
+  const before = event.data.before.data();
+  const after = event.data.after.data();
+  if (!after.pushBroadcast ||
+    (before.pushBroadcast && before.pushBroadcast.ts === after.pushBroadcast.ts)) {
+    return null;
+  }
+
+  const broadcast = after.pushBroadcast;
+  const devices = after.pushDevices || {};
+  const allUsers = Object.keys(NAMES);
+
+  return sendToDevices(devices, allUsers, {
+    title: broadcast.title || "태민이 마일리지 🌟",
+    body: broadcast.body || "새 알림이 있어요!",
+    icon: "icon-180.png",
+    tag: "broadcast-" + Date.now(),
+    type: "broadcast",
+    url: "./"
+  });
+});
