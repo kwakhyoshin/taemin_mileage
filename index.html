@@ -848,6 +848,7 @@ body.dark .nav-user-label{color:var(--tx2)}
   /* ── 대시보드: Masonry 카드 레이아웃 (tablet) ── */
   #dash-p0 .dash-full-row{display:block;padding:0 20px}
   #dash-p0 .dash-full-row .hist-stats-card{margin:0 0 14px}
+  #dash-p0 .dash-full-row .today-summary-card{margin:0 0 14px}
   #dash-p0 .dash-full-row .dash-streak-card{margin:0 0 14px}
   #dash-p0 .dash-masonry{display:block;columns:2;column-gap:16px;padding:0 20px}
   #dash-p0 .dash-brick{display:inline-block;width:100%;break-inside:avoid;margin-bottom:4px}
@@ -970,6 +971,7 @@ body.dark .nav-user-label{color:var(--tx2)}
   /* ── 대시보드: Masonry 카드 레이아웃 (desktop) ── */
   #dash-p0 .dash-full-row{display:block;padding:0 24px}
   #dash-p0 .dash-full-row .hist-stats-card{margin:0 0 16px}
+  #dash-p0 .dash-full-row .today-summary-card{margin:0 0 16px}
   #dash-p0 .dash-full-row .dash-streak-card{margin:0 0 16px}
   #dash-p0 .dash-masonry{display:block;columns:2;column-gap:20px;padding:0 24px}
   #dash-p0 .dash-brick{display:inline-block;width:100%;break-inside:avoid;margin-bottom:4px}
@@ -1221,9 +1223,7 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
   <div class="dash-panel dash-active" id="dash-p0">
     <!-- 풀 너비 요약 영역 -->
     <div class="dash-full-row">
-      <div class="hist-stats-card">
-        <div class="hist-stat-items" id="hist-stats"></div>
-      </div>
+      <div id="dash-today-summary" class="today-summary-card"></div>
       <div class="card dash-streak-card" id="dash-streak"></div>
     </div>
 
@@ -1802,6 +1802,10 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
   <div class="recv-msg-from" id="recv-msg-from"></div>
   <div class="recv-msg-emotion" id="recv-msg-emotion" style="font-size:48px;margin-bottom:8px;display:none"></div>
   <div class="recv-msg-text" id="recv-msg-text"></div>
+  <div id="recv-msg-actions" style="display:none;gap:8px;margin-bottom:10px">
+    <button class="msg-send-btn" id="recv-msg-approve" style="flex:1;background:#22C55E;margin:0" onclick="handleRewardAction('approve')">✅ 승인</button>
+    <button class="msg-send-btn" id="recv-msg-reject" style="flex:1;background:#EF4444;margin:0" onclick="handleRewardAction('reject')">❌ 거절</button>
+  </div>
   <button class="msg-send-btn" onclick="closeRecvMsg()">닫기</button>
 </div>
 
@@ -2719,7 +2723,6 @@ function renderRecent(){
       <div style="flex:1"><div class="rec-nm">${i.name}${labelHtml}</div><div class="rec-tm">${timeStr}</div></div>
       <div style="display:flex;align-items:center;gap:6px">
         <div style="font-size:14px;font-weight:800;color:${i.pts<0?'var(--rd)':'var(--gn2)'}">${i.pts>0?'+':''}${i.pts} 마일리지</div>
-        ${i.isRedeem?`<button class="undo-btn" onclick="undoRedeem('${i.id}')">취소↩</button>`:''}
       </div>
     </div>`;
   });
@@ -2995,7 +2998,7 @@ function renderTodaySummary(){
 
   const pctBar=totalCount>0?`<div style="margin-top:6px;background:var(--bdr);border-radius:4px;height:6px;overflow:hidden"><div style="width:${completePct}%;height:100%;background:${allDone?'var(--gn)':'var(--or)'};border-radius:4px;transition:width .3s"></div></div>`:'';
 
-  el.innerHTML=`
+  const summaryHTML=`
     <div class="ts-header">${statusSvg} ${dateLabel}의 요약</div>
     <div class="ts-grid">
       <div class="ts-item">
@@ -3011,6 +3014,10 @@ function renderTodaySummary(){
     <div style="font-size:12px;color:${diffColor};font-weight:700;margin-bottom:8px;text-align:center">${diffText}</div>
     <div class="ts-msg">${msg}</div>
   `;
+  el.innerHTML=summaryHTML;
+  // 대시보드 패널에도 동일하게 렌더링
+  const dashEl=document.getElementById('dash-today-summary');
+  if(dashEl)dashEl.innerHTML=summaryHTML;
 }
 
 // ── DASHBOARD SUB-TAB SWITCHING ──────────────────
@@ -3032,6 +3039,7 @@ window.switchDash=switchDash;
 
 // ── DASHBOARD RENDERERS ──────────────────────────
 function renderDashboard(){
+  renderTodaySummary();
   renderDashStreak();
   renderDashHeatmap();
   renderDashTop3();
@@ -3654,11 +3662,6 @@ function fLog(){
 }
 
 function renderHistStats(){
-  const statsHtml=[
-    {n:S.pts.toLocaleString(),l:'보유 마일리지'},{n:S.totalDone,l:'총 완료 횟수'},
-    {n:S.streak,l:'현재 연속'},{n:S.longest||0,l:'최장 연속'},
-  ].map(s=>`<div class="stat-c"><div class="stat-n">${s.n}</div><div class="stat-l">${s.l}</div></div>`).join('');
-  document.getElementById('hist-stats').innerHTML=statsHtml;
   const earned=fLog().reduce((a,l)=>a+(l.pts>0?l.pts:0),0);
   let periodLabel='';
   if(HP==='custom'){
@@ -4761,9 +4764,18 @@ function openMsgList(fromId){
     body.innerHTML=msgs.slice().reverse().map((m,i)=>{
       const date=new Date(m.ts);
       const timeStr=(date.getMonth()+1)+'/'+date.getDate()+' '+date.getHours()+':'+String(date.getMinutes()).padStart(2,'0');
+      let statusTag='';
+      if(m.type==='reward_request'&&m.requestId){
+        const req=S.rewardRequests?S.rewardRequests.find(r=>r.id===m.requestId):null;
+        if(req){
+          if(req.status==='pending')statusTag='<span style="font-size:10px;background:#FCA5A5;color:#7F1D1D;padding:2px 6px;border-radius:6px;font-weight:800;margin-left:4px">승인 대기</span>';
+          else if(req.status==='approved')statusTag='<span style="font-size:10px;background:#86EFAC;color:#14532D;padding:2px 6px;border-radius:6px;font-weight:800;margin-left:4px">승인됨</span>';
+          else if(req.status==='rejected')statusTag='<span style="font-size:10px;background:#D4D4D8;color:#3F3F46;padding:2px 6px;border-radius:6px;font-weight:800;margin-left:4px">거절됨</span>';
+        }
+      }
       return `<div class="msglist-item" onclick="readMsgFromList('${fromId}',${msgs.length-1-i})">
         <div class="msglist-item-dot${m.read?' read':''}"></div>
-        <div class="msglist-item-text">${m.text}</div>
+        <div class="msglist-item-text">${m.text}${statusTag}</div>
         <div class="msglist-item-time">${timeStr}</div>
       </div>`;
     }).join('');
@@ -4789,7 +4801,7 @@ function readMsgFromList(fromId,msgIdx){
     msgs[msgIdx].read=true;
     save();
     closeMsgList();
-    showReceivedMsg(fromId,msgs[msgIdx].text,msgs[msgIdx].emotion);
+    showReceivedMsg(fromId,msgs[msgIdx].text,msgs[msgIdx].emotion,msgs[msgIdx]);
     renderNavUsers();
   }
 }
@@ -4801,12 +4813,14 @@ function checkNewMessages(){
   if(unread){
     unread.read=true;
     save();
-    showReceivedMsg(unread.from,unread.text,unread.emotion);
+    showReceivedMsg(unread.from,unread.text,unread.emotion,unread);
   }
 }
 window.checkNewMessages=checkNewMessages;
 
-function showReceivedMsg(fromId,text,emotion){
+let _currentRecvMsg=null;
+function showReceivedMsg(fromId,text,emotion,msgObj){
+  _currentRecvMsg=msgObj||null;
   document.getElementById('recv-msg-avatar').innerHTML=getAvatarHTML(fromId,56);
   document.getElementById('recv-msg-from').textContent=(MEMBERS[fromId]?.name||'가족')+'의 메시지';
   document.getElementById('recv-msg-text').textContent=text;
@@ -4817,12 +4831,37 @@ function showReceivedMsg(fromId,text,emotion){
   }else{
     emotionEl.style.display='none';
   }
+  // Show approve/reject buttons for reward_request messages
+  const actionsEl=document.getElementById('recv-msg-actions');
+  if(msgObj&&msgObj.type==='reward_request'&&msgObj.requestId){
+    // Check if request is still pending
+    const req=S.rewardRequests?S.rewardRequests.find(r=>r.id===msgObj.requestId):null;
+    if(req&&req.status==='pending'){
+      actionsEl.style.display='flex';
+    }else{
+      actionsEl.style.display='none';
+    }
+  }else{
+    actionsEl.style.display='none';
+  }
   document.getElementById('recv-msg-bg').style.display='block';
   document.getElementById('recv-msg-pop').style.display='block';
   if(emotion)playEmotionAnimation(emotion);
   reallyGoTab('home');
 }
 window.showReceivedMsg=showReceivedMsg;
+
+function handleRewardAction(action){
+  if(!_currentRecvMsg||!_currentRecvMsg.requestId)return;
+  const reqId=_currentRecvMsg.requestId;
+  if(action==='approve'){
+    approveRewardRequest(reqId,currentUser);
+  }else{
+    rejectRewardRequest(reqId,currentUser);
+  }
+  closeRecvMsg();
+}
+window.handleRewardAction=handleRewardAction;
 
 let selectedEmotion=null;
 
