@@ -4066,6 +4066,10 @@ function rejectRewardRequest(reqId,rejector){
   save();renderAll();
   toast(`❌ "${req.rwdName}" 거절됨.`);
 }
+window.useReward=useReward;
+window.refundReward=refundReward;
+window.approveRewardRequest=approveRewardRequest;
+window.rejectRewardRequest=rejectRewardRequest;
 
 // ADMIN
 function giveBonus(){
