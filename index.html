@@ -406,18 +406,28 @@ body.dark .today-summary-card .ts-msg{background:linear-gradient(135deg,#312E81,
 
 /* PIN */
 .pin-wrap{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:600;display:flex;align-items:center;justify-content:center}
-.pin-card{background:var(--card);border-radius:var(--rxl);padding:28px 24px;width:310px;text-align:center;transition:background .25s}
+.pin-card{background:var(--card);border-radius:var(--rxl);padding:28px 20px;width:min(320px,90vw);text-align:center;transition:background .25s}
 .pin-card h3{font-size:20px;font-weight:900;color:var(--tx);margin-bottom:5px}
 .pin-sub{font-size:13px;color:var(--tx2);font-weight:600;margin-bottom:18px;line-height:1.6}
 .pin-dots{display:flex;justify-content:center;gap:14px;margin-bottom:20px}
 .pin-dot{width:15px;height:15px;border-radius:50%;border:2px solid var(--bdr2);background:transparent;transition:.15s}
 .pin-dot.on{background:var(--or);border-color:var(--or)}
 .pin-dot.err{background:var(--rd);border-color:var(--rd)}
-.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
-.pin-key{background:var(--bg2);border:none;border-radius:13px;padding:15px;font-size:22px;font-weight:800;cursor:pointer;font-family:inherit;color:var(--tx);transition:background .1s}
-.pin-key:active{background:var(--bdr2)}
-.pin-key.ck{font-size:12px;color:var(--tx2);font-weight:700;background:transparent}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.pin-key{background:var(--bg2);border:none;border-radius:16px;padding:18px 0;font-size:24px;font-weight:800;cursor:pointer;font-family:inherit;color:var(--tx);transition:background .1s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;min-height:54px;user-select:none}
+.pin-key:active{background:var(--bdr2);transform:scale(.95)}
+.pin-key.ck{font-size:13px;color:var(--tx2);font-weight:700;background:transparent}
 .pin-key.dk{color:var(--rd)}
+
+/* PROFILE FLOATING MENU */
+.pfm-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:500;animation:fadeIn .15s}
+.pfm-menu{position:fixed;bottom:90px;right:16px;z-index:501;background:var(--card);border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.2);overflow:hidden;width:220px;animation:fadeUp .2s ease}
+.pfm-item{display:flex;align-items:center;gap:12px;width:100%;padding:14px 16px;border:none;background:none;cursor:pointer;font-family:inherit;text-align:left;transition:background .15s;-webkit-tap-highlight-color:transparent}
+.pfm-item:active{background:var(--bg2)}
+.pfm-item+.pfm-item{border-top:1px solid var(--bdr)}
+.pfm-ico{width:22px;height:22px;fill:none;stroke:#6366F1;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.pfm-nm{font-size:14px;font-weight:800;color:var(--tx)}
+.pfm-desc{font-size:11px;color:var(--tx3);font-weight:600;margin-top:1px}
 
 /* AUTH SCREENS */
 .auth-screen{position:fixed;inset:0;background:linear-gradient(135deg,#6366F1,#818CF8);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
@@ -1262,6 +1272,19 @@ body.dark .nav-profile{border-color:rgba(255,255,255,.4)}
       <button class="pin-key dk" onclick="pk('del')">⌫</button>
     </div>
   </div>
+</div>
+
+<!-- PROFILE FLOATING MENU -->
+<div class="pfm-bg" id="pfm-bg" onclick="closePfMenu()" style="display:none"></div>
+<div class="pfm-menu" id="pfm-menu" style="display:none">
+  <button class="pfm-item" onclick="pfMenuAction('admin')">
+    <svg class="pfm-ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+    <div class="pfm-txt"><div class="pfm-nm">관리자 페이지</div><div class="pfm-desc">설정 및 활동 관리</div></div>
+  </button>
+  <button class="pfm-item" onclick="pfMenuAction('profile')">
+    <svg class="pfm-ico" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <div class="pfm-txt"><div class="pfm-nm">프로필 사진 변경</div><div class="pfm-desc">내 프로필 사진 바꾸기</div></div>
+  </button>
 </div>
 
 <!-- EMOJI PICKER -->
@@ -2680,7 +2703,10 @@ function renderAdmStats(){document.getElementById('adm-done').textContent=S.tota
 function renderAdmActList(){
   const el=document.getElementById('adm-act-list');
   if(!S.acts.length){el.innerHTML='<div class="empty">활동이 없어요</div>';return;}
-  el.innerHTML=S.acts.map(a=>`
+  el.innerHTML=S.acts.map(a=>{
+    const done=countDone(a);
+    const isDone=a.maxDay>0&&done>=a.maxDay;
+    return `
     <div class="manage-item" style="flex-wrap:wrap;align-items:center;gap:8px;padding:12px 14px">
       <div class="m-emoji">${a.emoji}</div>
       <div class="m-info" style="min-width:100px">
@@ -2689,6 +2715,10 @@ function renderAdmActList(){
         </div>
       </div>
       <div class="m-btns-row" style="flex-wrap:wrap;gap:6px;margin-left:auto">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+          <button class="tog${isDone?'':' off'}" onclick="togActDone('${a.id}')"><div class="tog-dot"></div></button>
+          <span style="font-size:9px;font-weight:800;color:${isDone?'var(--or)':'var(--tx3)'}">오늘완료</span>
+        </div>
         <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
           <button class="tog${a.showHome?' ':' off'}" onclick="togActHome('${a.id}')"><div class="tog-dot"></div></button>
           <span style="font-size:9px;font-weight:800;color:${a.showHome?'var(--gn2)':'var(--tx3)'}">홈표시</span>
@@ -2700,7 +2730,8 @@ function renderAdmActList(){
         <button class="btn-sm gy" style="padding:6px 9px;font-size:11px" onclick="openActForm('${a.id}')">수정</button>
         <button class="btn-sm rd" style="padding:6px 9px;font-size:11px" onclick="delAct('${a.id}')">삭제</button>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 function renderAdmRwdList(){
   document.getElementById('adm-rwd-list').innerHTML=S.rwds.map(r=>`
@@ -2806,6 +2837,25 @@ function deductPts(){
   S.pts=Math.max(0,S.pts-v);
   S.log.unshift({id:'l_'+Date.now(),emoji:'📉',name:`차감 -${v}점`,pts:-v,ts:Date.now(),actId:null});
   save();renderAll();toast(`📉 ${v}점 차감됨`);
+}
+function togActDone(id){
+  const a=S.acts.find(x=>x.id===id);if(!a)return;
+  if(!S.actDone)S.actDone={};
+  const t=todayStr();
+  const rec=S.actDone[id];
+  const done=countDone(a);
+  const isDone=a.maxDay>0&&done>=a.maxDay;
+  if(isDone){
+    // 완료→미완료: actDone 삭제 (마일리지 변동 없음)
+    delete S.actDone[id];
+    save();renderAll();
+    toast(`↩ "${a.name}" 오늘 완료 상태 해제 (마일리지 변동 없음)`);
+  }else{
+    // 미완료→완료: actDone에 maxDay만큼 채움 (마일리지 변동 없음)
+    S.actDone[id]={date:t,count:a.maxDay||1};
+    save();renderAll();
+    toast(`✅ "${a.name}" 오늘 완료 처리됨 (마일리지 변동 없음)`);
+  }
 }
 function togAct(id){const a=S.acts.find(x=>x.id===id);if(a){a.active=!a.active;save();renderAdmActList();renderLogList();renderHomeGrid();}}
 function togActHome(id){const a=S.acts.find(x=>x.id===id);if(a){a.showHome=!a.showHome;save();renderAdmActList();renderHomeGrid();toast(a.showHome?`🏠 "${a.name}" 홈에 표시됩니다`:`➖ "${a.name}" 홈에서 제거됩니다`);}}
@@ -3068,9 +3118,38 @@ function closeEP(){document.getElementById('ep-pop').classList.remove('open');do
 
 // ── TABS / MODAL ──────────────────────────────
 function goTab(tab){
-  if(tab==='adm'&&!adminOK){showPin('auth','🔐 관리자 인증','PIN 4자리를 입력하세요<br><span style="font-size:11px;color:var(--tx3)">(기본 PIN: 1234)</span>');return;}
+  if(tab==='adm'){
+    // 관리 탭은 플로팅 메뉴를 먼저 띄움
+    openPfMenu();
+    return;
+  }
   reallyGoTab(tab);
 }
+
+function openPfMenu(){
+  document.getElementById('pfm-bg').style.display='block';
+  document.getElementById('pfm-menu').style.display='block';
+}
+function closePfMenu(){
+  document.getElementById('pfm-bg').style.display='none';
+  document.getElementById('pfm-menu').style.display='none';
+}
+function pfMenuAction(action){
+  closePfMenu();
+  if(action==='admin'){
+    if(!adminOK){
+      showPin('auth','🔐 관리자 인증','PIN 4자리를 입력하세요<br><span style="font-size:11px;color:var(--tx3)">(기본 PIN: 1234)</span>');
+    }else{
+      reallyGoTab('adm');
+    }
+  }else if(action==='profile'){
+    if(!currentUser){toast('먼저 로그인해주세요');return;}
+    openAvatarEditor(currentUser);
+  }
+}
+window.openPfMenu=openPfMenu;
+window.closePfMenu=closePfMenu;
+window.pfMenuAction=pfMenuAction;
 function reallyGoTab(tab){
   document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
   document.querySelectorAll('.nav-item').forEach(t=>t.classList.remove('active'));
