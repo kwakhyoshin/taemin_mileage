@@ -828,6 +828,24 @@ body.dark .nav-profile{border-color:rgba(255,255,255,.4)}
   .adm-sec{margin:0 28px 18px}
   .adm-tabs{margin:18px 28px}
 }
+
+/* ── DRAG & DROP ────────────────────────────────── */
+.drag-handle{display:flex;align-items:center;justify-content:center;width:24px;height:24px;color:var(--tx3);font-size:18px;cursor:grab;touch-action:none;flex-shrink:0;user-select:none}
+.drag-handle:active{cursor:grabbing}
+.manage-item.dragging{opacity:.5;background:var(--bg2)}
+.manage-item.drag-over{border-top:2px solid var(--tab-color,var(--or))}
+
+/* ── SALE EVENT STYLES ────────────────────────────– */
+.rwd-card.on-sale{border:2px solid #EF4444;background:linear-gradient(135deg,#FFF5F5,#FEE2E2);position:relative;overflow:visible}
+body.dark .rwd-card.on-sale{background:linear-gradient(135deg,rgba(239,68,68,.15),rgba(239,68,68,.08))}
+.sale-ribbon{position:absolute;top:-1px;right:-1px;background:linear-gradient(135deg,#EF4444,#DC2626);color:#fff;font-size:9px;font-weight:900;padding:3px 10px 3px 12px;border-radius:0 var(--rsm) 0 12px;letter-spacing:.3px;animation:salePulse 2s infinite}
+@keyframes salePulse{0%,100%{opacity:1}50%{opacity:.85}}
+.sale-price-wrap{display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:4px}
+.sale-original{font-size:12px;font-weight:700;color:var(--tx3);text-decoration:line-through}
+.sale-badge{background:#EF4444;color:#fff;font-size:10px;font-weight:900;padding:2px 6px;border-radius:6px;line-height:1.2}
+.sale-cost{background:linear-gradient(135deg,#FEE2E2,#FECACA)!important;color:#DC2626!important;font-size:12px!important;font-weight:900!important}
+body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(239,68,68,.15))!important}
+.sale-timer{font-size:10px;font-weight:700;color:#EF4444;margin-bottom:6px}
 </style>
 </head>
 <body data-tab="home">
@@ -1356,6 +1374,27 @@ body.dark .nav-profile{border-color:rgba(255,255,255,.4)}
         <div class="sel-row">
           <div class="sel-btn" id="rwd-goal-y" onclick="setGoalT(true)">🎯 목표로 설정</div>
           <div class="sel-btn on" id="rwd-goal-n" onclick="setGoalT(false)">일반 보상</div>
+        </div>
+      </div>
+      <div class="field" style="margin-top:12px">
+        <label>🏷️ 할인 이벤트</label>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:6px">
+          <button class="sel-btn" id="rwd-sale-y" onclick="setRwdSale(true)">할인 적용</button>
+          <button class="sel-btn on" id="rwd-sale-n" onclick="setRwdSale(false)">없음</button>
+        </div>
+      </div>
+      <div id="rwd-sale-fields" style="display:none;margin-top:10px">
+        <div class="field">
+          <label>할인율 (%)</label>
+          <input type="number" class="num-inp" id="rwd-sale-pct" value="20" min="1" max="90" style="width:80px">
+        </div>
+        <div class="field" style="margin-top:8px">
+          <label>이벤트 종료일</label>
+          <input type="date" class="txt-inp" id="rwd-sale-end" style="width:160px">
+        </div>
+        <div class="field" style="margin-top:8px">
+          <label>이벤트 이름 (선택)</label>
+          <input type="text" class="txt-inp" id="rwd-sale-label" placeholder="예: 봄맞이 할인" maxlength="20">
         </div>
       </div>
       <input type="hidden" id="rwd-eid">
@@ -2351,11 +2390,24 @@ function renderRecent(){
 
 function renderRewardGrid(){
   document.getElementById('rwd-grid').innerHTML=S.rwds.map(r=>{
-    const can=S.pts>=r.pts;const lack=r.pts-S.pts;
-    return `<div class="rwd-card${r.goal?' goal':''}">
+    // Check if sale is active
+    const sale=r.sale&&r.sale.endDate&&new Date(r.sale.endDate+'T23:59:59')>=new Date()?r.sale:null;
+    const actualPts=sale?Math.round(r.pts*(1-sale.percent/100)):r.pts;
+    const can=S.pts>=actualPts;
+    const lack=actualPts-S.pts;
+
+    return `<div class="rwd-card${r.goal?' goal':''}${sale?' on-sale':''}">
       ${r.goal?'<div class="goal-tag">🎯 목표</div>':''}
+      ${sale?`<div class="sale-ribbon">${sale.label||'할인 이벤트'}</div>`:''}
       <div class="rwd-e">${r.emoji}</div><div class="rwd-nm">${r.name}</div>
-      <div class="cost-tag">${r.pts.toLocaleString()}점</div><br>
+      ${sale?`
+        <div class="sale-price-wrap">
+          <span class="sale-original">${r.pts.toLocaleString()}점</span>
+          <span class="sale-badge">-${sale.percent}%</span>
+        </div>
+        <div class="cost-tag sale-cost">${actualPts.toLocaleString()}점</div>
+        <div class="sale-timer">⏰ ~${sale.endDate.slice(5).replace('-','/')}</div>
+      `:`<div class="cost-tag">${r.pts.toLocaleString()}점</div><br>`}
       <button class="rwd-btn${can?'':' locked'}" ${can?`onclick="openRedeem('${r.id}')"`:'disabled'}>
         ${can?'교환하기':'포인트 부족'}</button>
       ${!can?`<div class="rwd-lack">${lack.toLocaleString()}점 더 필요해요</div>`:''}
@@ -2912,6 +2964,7 @@ function renderAdmActList(){
     return `
     <div class="manage-item" style="flex-direction:column;align-items:stretch;gap:0;padding:12px 14px">
       <div style="display:flex;align-items:center;gap:10px">
+        <div class="drag-handle">☰</div>
         <div class="m-emoji">${a.emoji}</div>
         <div class="m-info" style="flex:1;min-width:0">
           <div class="m-nm">${a.name}</div>
@@ -2941,12 +2994,65 @@ function renderAdmActList(){
       </div>
     </div>`;
   }).join('');
+  initActDrag();
 }
+
+// ── ACTIVITY DRAG & DROP ────────────────────────
+let _dragIdx=null;
+function initActDrag(){
+  const container=document.getElementById('adm-act-list');
+  if(!container)return;
+  const items=container.querySelectorAll('.manage-item');
+  items.forEach((item,idx)=>{
+    const handle=item.querySelector('.drag-handle');
+    if(!handle)return;
+
+    // Touch events
+    handle.addEventListener('touchstart',function(e){
+      e.preventDefault();
+      _dragIdx=idx;
+      item.classList.add('dragging');
+    },{passive:false});
+
+    handle.addEventListener('touchmove',function(e){
+      e.preventDefault();
+      const touch=e.touches[0];
+      const els=container.querySelectorAll('.manage-item');
+      els.forEach(el=>el.classList.remove('drag-over'));
+      const target=document.elementFromPoint(touch.clientX,touch.clientY);
+      const targetItem=target?.closest('.manage-item');
+      if(targetItem&&targetItem!==item){
+        targetItem.classList.add('drag-over');
+      }
+    },{passive:false});
+
+    handle.addEventListener('touchend',function(e){
+      const touch=e.changedTouches[0];
+      item.classList.remove('dragging');
+      container.querySelectorAll('.manage-item').forEach(el=>el.classList.remove('drag-over'));
+      const target=document.elementFromPoint(touch.clientX,touch.clientY);
+      const targetItem=target?.closest('.manage-item');
+      if(targetItem&&targetItem!==item){
+        const items=container.querySelectorAll('.manage-item');
+        let targetIdx=-1;
+        items.forEach((el,i)=>{if(el===targetItem)targetIdx=i;});
+        if(targetIdx>=0&&_dragIdx!==null&&_dragIdx!==targetIdx){
+          const moved=S.acts.splice(_dragIdx,1)[0];
+          S.acts.splice(targetIdx,0,moved);
+          save();renderAdmActList();renderHomeGrid();renderLogList();
+          toast('📋 순서가 변경됐어요');
+        }
+      }
+      _dragIdx=null;
+    });
+  });
+}
+
 function renderAdmRwdList(){
   document.getElementById('adm-rwd-list').innerHTML=S.rwds.map(r=>`
     <div class="manage-item">
       <div class="m-emoji">${r.emoji}</div>
-      <div class="m-info"><div class="m-nm">${r.name}${r.goal?' 🎯':''}</div><div class="m-sub">${r.pts.toLocaleString()}점</div></div>
+      <div class="m-info"><div class="m-nm">${r.name}${r.goal?' 🎯':''}</div><div class="m-sub">${r.pts.toLocaleString()}점</div>${r.sale&&r.sale.endDate&&new Date(r.sale.endDate+'T23:59:59')>=new Date()?`<div style="font-size:9px;font-weight:800;color:#EF4444;margin-top:2px">🏷️ ${r.sale.percent}% 할인 중 (~${r.sale.endDate.slice(5).replace('-','/')})</div>`:''}</div>
       <div class="m-btns-row">
         <button class="btn-sm gy" style="padding:6px 9px;font-size:11px" onclick="openRwdForm('${r.id}')">수정</button>
         <button class="btn-sm rd" style="padding:6px 9px;font-size:11px" onclick="delRwd('${r.id}')">삭제</button>
@@ -3006,19 +3112,25 @@ function undoAct(actId){
 // REDEEM
 let pRwdId=null;
 function openRedeem(id){
-  const r=S.rwds.find(x=>x.id===id);if(!r||S.pts<r.pts)return;
-  if(!confirm(`🎁 "${r.name}" 보상을 교환하시겠어요?\n(${r.pts.toLocaleString()}점이 차감됩니다)`))return;
+  const r=S.rwds.find(x=>x.id===id);
+  const sale=r.sale&&r.sale.endDate&&new Date(r.sale.endDate+'T23:59:59')>=new Date()?r.sale:null;
+  const actualPts=sale?Math.round(r.pts*(1-sale.percent/100)):r.pts;
+  if(!r||S.pts<actualPts)return;
+  if(!confirm(`🎁 "${r.name}" 보상을 교환하시겠어요?\n(${actualPts.toLocaleString()}점이 차감됩니다)`))return;
   pRwdId=id;
   document.getElementById('mr-emoji').textContent=r.emoji;
   document.getElementById('mr-title').textContent=r.name+' 교환';
-  document.getElementById('mr-body').textContent=`${r.pts.toLocaleString()}점을 사용할까요?\n현재 ${S.pts.toLocaleString()}점 보유중이에요.`;
+  document.getElementById('mr-body').textContent=`${actualPts.toLocaleString()}점을 사용할까요?\n현재 ${S.pts.toLocaleString()}점 보유중이에요.`;
   openModal('m-redeem');
 }
 function confirmRedeem(){
-  const r=S.rwds.find(x=>x.id===pRwdId);if(!r||S.pts<r.pts)return;
-  S.pts-=r.pts;
+  const r=S.rwds.find(x=>x.id===pRwdId);
+  const sale=r.sale&&r.sale.endDate&&new Date(r.sale.endDate+'T23:59:59')>=new Date()?r.sale:null;
+  const actualPts=sale?Math.round(r.pts*(1-sale.percent/100)):r.pts;
+  if(!r||S.pts<actualPts)return;
+  S.pts-=actualPts;
   const logId='l_'+Date.now();
-  S.log.unshift({id:logId,emoji:r.emoji,name:r.name+' 교환',pts:-r.pts,ts:Date.now(),actId:null,rwdId:r.id,isRedeem:true});
+  S.log.unshift({id:logId,emoji:r.emoji,name:r.name+' 교환',pts:-actualPts,ts:Date.now(),actId:null,rwdId:r.id,isRedeem:true});
   save();closeModal('m-redeem');renderAll();
   toast(`🎉 ${r.emoji} ${r.name} 교환 완료!`);confetti();
 }
@@ -3224,6 +3336,15 @@ function saveActivity(){
 
 // ── REWARD FORM ────────────────────────────────
 let rwdGoal=false;
+let rwdSaleOn=false;
+
+function setRwdSale(v){
+  rwdSaleOn=v;
+  document.getElementById('rwd-sale-y').classList.toggle('on',v);
+  document.getElementById('rwd-sale-n').classList.toggle('on',!v);
+  document.getElementById('rwd-sale-fields').style.display=v?'block':'none';
+}
+
 function openRwdForm(id){
   const r=id?S.rwds.find(x=>x.id===id):null;
   document.getElementById('rwd-form-title').textContent=r?'보상 수정':'새 보상 추가';
@@ -3232,6 +3353,20 @@ function openRwdForm(id){
   document.getElementById('rwd-name').value=r?.name||'';
   document.getElementById('rwd-pts').value=r?.pts||500;
   setGoalT(r?.goal||false);
+
+  // Load sale data
+  const hasSale=r?.sale&&r.sale.endDate&&new Date(r.sale.endDate+'T23:59:59')>=new Date();
+  setRwdSale(!!hasSale);
+  if(hasSale){
+    document.getElementById('rwd-sale-pct').value=r.sale.percent||20;
+    document.getElementById('rwd-sale-end').value=r.sale.endDate||'';
+    document.getElementById('rwd-sale-label').value=r.sale.label||'';
+  }else{
+    document.getElementById('rwd-sale-pct').value=20;
+    document.getElementById('rwd-sale-end').value='';
+    document.getElementById('rwd-sale-label').value='';
+  }
+
   document.getElementById('rwd-save-btn').textContent=r?'저장하기':'추가하기';
   openModal('m-rwd');
 }
@@ -3242,9 +3377,17 @@ function saveReward(){
   const id=document.getElementById('rwd-eid').value;
   const emoji=document.getElementById('rwd-e').textContent;
   const pts=Math.max(1,parseInt(document.getElementById('rwd-pts').value)||100);
+
+  // Add sale data
+  const saleData=rwdSaleOn?{
+    percent:Math.max(1,Math.min(90,parseInt(document.getElementById('rwd-sale-pct').value)||20)),
+    endDate:document.getElementById('rwd-sale-end').value,
+    label:document.getElementById('rwd-sale-label').value.trim()
+  }:null;
+
   if(rwdGoal)S.rwds.forEach(r=>r.goal=false);
-  if(id){const r=S.rwds.find(x=>x.id===id);if(r)Object.assign(r,{emoji,name,pts,goal:rwdGoal});}
-  else S.rwds.push({id:'r_'+Date.now(),emoji,name,pts,goal:rwdGoal});
+  if(id){const r=S.rwds.find(x=>x.id===id);if(r)Object.assign(r,{emoji,name,pts,goal:rwdGoal,sale:saleData});}
+  else S.rwds.push({id:'r_'+Date.now(),emoji,name,pts,goal:rwdGoal,sale:saleData});
   save();renderAll();closeModal('m-rwd');
   toast(id?'✏️ 보상이 수정됐어요':'🎁 새 보상이 추가됐어요!');
 }
@@ -4371,7 +4514,7 @@ Object.assign(window, {
   togSetting, saveSettings, saveGreeting,
   resetToday, simulateDayPass, resetAll, backupData, restoreData,
   openActForm, saveActivity, pickCycle, toggleDaysMode, toggleDay,
-  openRwdForm, saveReward, setGoalT,
+  openRwdForm, saveReward, setGoalT, setRwdSale, initActDrag,
   openEP, closeEP, epSearch, pickE, showEpCat, switchEpCat,
   setPeriod, pk, startChangePIN, lockAdmin,
   saveMsgMode, saveCustomMsg,
