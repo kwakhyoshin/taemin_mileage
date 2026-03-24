@@ -1196,6 +1196,8 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
   <div class="rwd-grid" id="rwd-grid"></div>
   <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg> 보유 보상 목록</div>
   <div id="rwd-inventory"></div>
+  <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> 교환/사용 이력</div>
+  <div id="rwd-history" style="margin:0 16px 14px"></div>
 </div>
 
 <!-- HISTORY -->
@@ -2276,6 +2278,7 @@ function defaultState(){
     users:{}, // 가입 정보 저장
     rewardInventory:[], // Array of {id, rwdId, rwdName, rwdEmoji, purchasedAt, pts, status, requestId, approvedBy, approvedAt}
     rewardRequests:[], // Array of {id, rwdInvId, rwdName, rwdEmoji, fromUser, toUsers, status, requestedAt, approvedBy, approvedAt}
+    rewardLog:[], // Array of {id, emoji, name, pts, ts, rwdId, type('exchange'|'refund'|'use')}
     rewardNotify:null, // Trigger for Cloud Functions
   };
 }
@@ -2604,7 +2607,7 @@ function countdownStr(act){
 // ── RENDER ────────────────────────────────────
 function renderAll(){
   renderHero();renderHomeGrid();renderRecent();
-  renderLogList();renderRewardGrid();renderRewardInventory();
+  renderLogList();renderRewardGrid();renderRewardInventory();renderRewardHistory();
   renderDashboard();renderHistStats();renderHistList();renderCalendar();
   renderAdmStats();renderAdmActList();renderAdmRwdList();renderAdmSettings();
   renderMsgSettings();renderAdmMemberPhotos();
@@ -2846,6 +2849,24 @@ function renderRewardInventory(){
   }).join('');
 }
 
+function renderRewardHistory(){
+  const el=document.getElementById('rwd-history');
+  if(!el)return;
+  const logs=(S.rewardLog||[]).slice(0,20); // show last 20
+  if(logs.length===0){
+    el.innerHTML='<div class="card" style="padding:16px;text-align:center;color:var(--tx3);font-size:13px">아직 교환/사용 이력이 없어요</div>';
+    return;
+  }
+  el.innerHTML='<div class="card" style="padding:0;overflow:hidden">'+logs.map(l=>{
+    const d=new Date(l.ts);
+    const timeStr=(d.getMonth()+1)+'/'+d.getDate()+' '+d.getHours()+':'+String(d.getMinutes()).padStart(2,'0');
+    const typeLabel=l.type==='exchange'?'교환':l.type==='refund'?'환불':l.type==='use'?'사용':'기타';
+    const typeColor=l.type==='exchange'?'var(--rd)':l.type==='refund'?'var(--gn2)':'var(--tx3)';
+    const ptsSign=l.type==='exchange'?'-':'+';
+    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--bdr)"><span style="font-size:20px">'+l.emoji+'</span><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--tx)">'+l.name+'</div><div style="font-size:11px;color:var(--tx3)">'+timeStr+'</div></div><div style="text-align:right"><div style="font-size:13px;font-weight:800;color:'+typeColor+'">'+ptsSign+l.pts.toLocaleString()+' M</div><div style="font-size:10px;color:var(--tx3);font-weight:700">'+typeLabel+'</div></div></div>';
+  }).join('')+'</div>';
+}
+
 // ── CALENDAR ──────────────────────────────────
 function getDateStr(y,m,d){return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;}
 
@@ -2856,7 +2877,7 @@ let calSelected=(function(){const n=new Date();return getDateStr(n.getFullYear()
 function getLogsForDate(dateStr){
   return S.log.filter(l=>{
     const d=new Date(l.ts);
-    return getDateStr(d.getFullYear(),d.getMonth(),d.getDate())===dateStr && l.pts>0;
+    return getDateStr(d.getFullYear(),d.getMonth(),d.getDate())===dateStr && l.pts>0 && !l.isRedeem && !l.name?.includes('환불');
   });
 }
 
@@ -3445,56 +3466,25 @@ function renderInsightCategory(){
 function renderInsightReward(){
   const el=document.getElementById('insight-reward');
   if(!el)return;
-  // 환불된 교환은 제외: 환불 로그가 있는 rwdId 수집
-  const refundedSet=new Set();
-  const refundCount={};
-  S.log.forEach(l=>{
-    if(l.name&&l.name.includes('환불')&&l.rwdId){
-      if(!refundCount[l.rwdId])refundCount[l.rwdId]=0;
-      refundCount[l.rwdId]++;
-    }
-  });
-  const rwdStats={};
-  const redeemCount={};
-  S.log.forEach(l=>{
-    if(!l.isRedeem)return;
+  const logs=S.rewardLog||[];
+  // Count net exchanges per reward (exchange - refund)
+  const stats={};
+  logs.forEach(l=>{
     const key=l.rwdId||l.name;
-    if(!redeemCount[key])redeemCount[key]=0;
-    redeemCount[key]++;
-    // 환불 횟수만큼 최신 교환을 제외
-    const refunds=refundCount[key]||0;
-    const netCount=redeemCount[key]-refunds;
-    if(netCount<=0&&redeemCount[key]<=refunds)return;
+    if(!stats[key])stats[key]={name:l.name,emoji:l.emoji,exchanges:0,refunds:0,totalPts:0};
+    if(l.type==='exchange'){stats[key].exchanges++;stats[key].totalPts+=l.pts;}
+    else if(l.type==='refund'){stats[key].refunds++;stats[key].totalPts-=l.pts;}
   });
-  // 순수 교환 횟수 계산 (교환 - 환불)
-  const netStats={};
-  S.log.forEach(l=>{
-    if(!l.isRedeem)return;
-    const key=l.rwdId||l.name;
-    if(!netStats[key])netStats[key]={name:l.name.replace(' 교환',''),emoji:l.emoji,count:0,totalPts:0};
-    netStats[key].count++;
-    netStats[key].totalPts+=Math.abs(l.pts);
-  });
-  // 환불 횟수 차감
-  Object.entries(refundCount).forEach(([key,cnt])=>{
-    if(netStats[key]){
-      netStats[key].count=Math.max(0,netStats[key].count-cnt);
-      // totalPts도 환불분 제외
-      const refundPts=S.log.filter(l=>l.name&&l.name.includes('환불')&&(l.rwdId||'')==key).reduce((a,l)=>a+Math.abs(l.pts),0);
-      netStats[key].totalPts=Math.max(0,netStats[key].totalPts-refundPts);
-    }
-  });
-  const sorted=Object.values(netStats).filter(r=>r.count>0).sort((a,b)=>b.count-a.count);
+  const sorted=Object.values(stats).map(r=>({...r,count:r.exchanges-r.refunds,netPts:r.totalPts})).filter(r=>r.count>0).sort((a,b)=>b.count-a.count);
   if(sorted.length===0){
-    el.innerHTML=`<div class="insight-empty">아직 교환 기록이 없어요</div>`;
+    el.innerHTML='<div class="insight-empty">아직 교환 기록이 없어요</div>';
     return;
   }
   const maxCnt=sorted[0].count;
-  const listHtml=sorted.slice(0,5).map((r,i)=>{
+  el.innerHTML='<div class="rwd-rank-list">'+sorted.slice(0,5).map((r,i)=>{
     const pct=Math.round(r.count/maxCnt*100);
-    return `<div class="rwd-rank-item"><div class="rwd-rank-num">${i+1}</div><span class="rwd-rank-emoji">${r.emoji}</span><div style="flex:1;min-width:0"><div class="rwd-rank-name">${r.name}</div><div class="rwd-rank-bar"><div class="rwd-rank-fill" style="width:${pct}%"></div></div></div><div class="rwd-rank-cnt">${r.count}회<br><span style="font-size:10px;color:var(--tx3)">${r.totalPts.toLocaleString()} 마일리지</span></div></div>`;
-  }).join('');
-  el.innerHTML=`<div class="rwd-rank-list">${listHtml}</div>`;
+    return '<div class="rwd-rank-item"><div class="rwd-rank-num">'+(i+1)+'</div><span class="rwd-rank-emoji">'+r.emoji+'</span><div style="flex:1;min-width:0"><div class="rwd-rank-name">'+r.name+'</div><div class="rwd-rank-bar"><div class="rwd-rank-fill" style="width:'+pct+'%"></div></div></div><div class="rwd-rank-cnt">'+r.count+'회<br><span style="font-size:10px;color:var(--tx3)">'+r.netPts.toLocaleString()+' 마일리지</span></div></div>';
+  }).join('')+'</div>';
 }
 
 function renderInsightRewardUsed(){
@@ -3752,9 +3742,9 @@ window.applyCustomPeriod=applyCustomPeriod;
 function fLog(){
   if(HP==='custom'&&customStartTs){
     const endTs=Math.min(customStartTs+60*86400000,Date.now());
-    return S.log.filter(l=>l.ts>=customStartTs&&l.ts<=endTs);
+    return S.log.filter(l=>l.ts>=customStartTs&&l.ts<=endTs&&!l.isRedeem&&!l.name?.includes('환불'));
   }
-  return S.log.filter(l=>l.ts>Date.now()-HP*86400000);
+  return S.log.filter(l=>l.ts>Date.now()-HP*86400000&&!l.isRedeem&&!l.name?.includes('환불'));
 }
 
 function renderHistStats(){
@@ -3782,7 +3772,6 @@ function renderHistList(){
       <div style="flex:1"><div class="hist-nm">${i.name}</div><div class="hist-tm">${fmt(i.ts)}</div></div>
       <div style="display:flex;align-items:center;gap:6px">
         <div class="hist-pts${i.pts<0?' neg':''}">${i.pts>0?'+':''}${i.pts} 마일리지</div>
-        ${i.isRedeem?`<button class="undo-btn" onclick="undoRedeem('${i.id}')">취소↩</button>`:''}
       </div>
     </div>`).join(''):'<div class="empty">아직 내역이 없어요</div>';
 }
@@ -3975,34 +3964,34 @@ function confirmRedeem(){
     status:'owned'
   });
 
-  // Also add to log for history
-  const logId='l_'+Date.now();
-  S.log.unshift({id:logId,emoji:r.emoji,name:r.name+' 교환',pts:-actualPts,ts:Date.now(),actId:null,rwdId:r.id,isRedeem:true});
+  // Add to rewardLog instead of activity log
+  if(!S.rewardLog)S.rewardLog=[];
+  S.rewardLog.unshift({id:'rl_'+Date.now(),emoji:r.emoji,name:r.name,pts:actualPts,ts:Date.now(),rwdId:r.id,type:'exchange'});
   save();closeModal('m-redeem');renderAll();
   toast(`🎉 ${r.emoji} ${r.name} 교환 완료!`);confetti();
 }
 function undoRedeem(logId){
-  const idx=S.log.findIndex(l=>l.id===logId);
+  if(!S.rewardLog)S.rewardLog=[];
+  const idx=S.rewardLog.findIndex(l=>l.id===logId);
   if(idx===-1){toast('취소할 내역이 없어요');return;}
-  const entry=S.log[idx];
-  if(!entry.isRedeem){toast('보상 내역이 아니에요');return;}
-  if(!confirm(`"${entry.name}" 교환을 취소하시겠어요?\n(${Math.abs(entry.pts).toLocaleString()} 마일리지가 돌아옵니다)`))return;
-  S.pts+=Math.abs(entry.pts);
+  const entry=S.rewardLog[idx];
+  if(entry.type!=='exchange'){toast('교환 내역이 아니에요');return;}
+  if(!confirm(`"${entry.name}" 교환을 취소하시겠어요?\n(${entry.pts.toLocaleString()} 마일리지가 돌아옵니다)`))return;
+  S.pts+=entry.pts;
   // Remove corresponding inventory item if exists
   if(S.rewardInventory){
     const invIdx=S.rewardInventory.findIndex(x=>x.rwdId===entry.rwdId&&(x.status==='owned'||x.status==='pending'));
     if(invIdx!==-1){
       const inv=S.rewardInventory[invIdx];
-      // If pending, also remove the request
       if(inv.status==='pending'&&inv.requestId&&S.rewardRequests){
         S.rewardRequests=S.rewardRequests.filter(r=>r.id!==inv.requestId);
       }
       S.rewardInventory.splice(invIdx,1);
     }
   }
-  S.log.splice(idx,1);
+  S.rewardLog.splice(idx,1);
   save();renderAll();
-  toast(`↩ ${entry.name} 취소됨 (+${Math.abs(entry.pts)} 마일리지 복구)`);
+  toast(`↩ ${entry.name} 취소됨 (+${entry.pts} 마일리지 복구)`);
 }
 
 // REWARD INVENTORY SYSTEM
@@ -4054,13 +4043,18 @@ function useReward(invId){
     rwdInvId:invId
   });
 
-  // Trigger push notification to parents
+  // Trigger push notification to parents (pushBroadcast as reliable fallback)
   S.rewardNotify={
     type:'request',
     rwdName:item.rwdName,
     rwdEmoji:item.rwdEmoji,
     user:'taemin',
     targetUsers:['dad','mom'],
+    ts:Date.now()
+  };
+  S.pushBroadcast={
+    title:'🎁 보상 사용 요청',
+    body:`태민이가 "${item.rwdName}" 사용을 요청했어요!`,
     ts:Date.now()
   };
 
@@ -4077,7 +4071,8 @@ function refundReward(invId){
 
   S.pts+=item.pts;
   S.rewardInventory.splice(idx,1);
-  S.log.unshift({id:'l_'+Date.now(),emoji:item.rwdEmoji,name:item.rwdName+' 환불',pts:item.pts,ts:Date.now(),actId:null});
+  if(!S.rewardLog)S.rewardLog=[];
+  S.rewardLog.unshift({id:'rl_'+Date.now(),emoji:item.rwdEmoji,name:item.rwdName,pts:item.pts,ts:Date.now(),rwdId:item.rwdId,type:'refund'});
   save();renderAll();
   toast(`↩ ${item.rwdName} 환불 완료! (+${item.pts} 마일리지)`);
 }
@@ -4120,6 +4115,11 @@ function approveRewardRequest(reqId,approver){
     targetUsers:['taemin'],
     ts:Date.now()
   };
+  S.pushBroadcast={
+    title:'✅ 보상 사용 승인',
+    body:`"${req.rwdName}" 사용이 승인됐어요!`,
+    ts:Date.now()
+  };
 
   save();renderAll();
   toast(`✅ "${req.rwdName}" 승인 완료!`);
@@ -4159,6 +4159,11 @@ function rejectRewardRequest(reqId,rejector){
     rwdName:req.rwdName,
     user:'taemin',
     targetUsers:['taemin'],
+    ts:Date.now()
+  };
+  S.pushBroadcast={
+    title:'❌ 보상 사용 거절',
+    body:`"${req.rwdName}" 사용이 거절됐어요.`,
     ts:Date.now()
   };
 
@@ -4912,10 +4917,16 @@ window.readMsgFromList=readMsgFromList;
 
 function checkNewMessages(){
   if(!currentUser||!S.familyMessages)return;
-  // 가장 최근 읽지 않은 메시지를 팝업으로 보여줌 (읽음 처리는 팝업 닫을 때)
-  const unread=S.familyMessages.find(m=>m.to===currentUser&&!m.read);
-  if(unread){
-    showReceivedMsg(unread.from,unread.text,unread.emotion,unread);
+  const unreadMsgs=S.familyMessages.filter(m=>m.to===currentUser&&!m.read);
+  if(unreadMsgs.length>0){
+    // 뱃지 업데이트만 하고 팝업은 띄우지 않음 — 사용자가 아이콘을 클릭해서 직접 확인
+    renderNavUsers();
+    // 토스트로 새 메시지 알림만 표시 (한 번만)
+    if(!window._lastUnreadNotifyTs||Date.now()-window._lastUnreadNotifyTs>3000){
+      const fromNames=[...new Set(unreadMsgs.map(m=>MEMBERS[m.from]?.name||'가족'))];
+      toast(`💌 ${fromNames.join(', ')}에게서 새 메시지 ${unreadMsgs.length}개`);
+      window._lastUnreadNotifyTs=Date.now();
+    }
   }
 }
 window.checkNewMessages=checkNewMessages;
