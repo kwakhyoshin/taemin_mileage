@@ -165,6 +165,15 @@ body.dark .dtog-in{transform:translateX(24px)}
 .log-header-sticky h2{font-size:24px;font-weight:900;color:#fff}
 .log-header-sticky p{font-size:14px;color:rgba(255,255,255,.85);margin-top:2px;font-weight:600}
 
+.hdr-stats{display:flex;align-items:center;justify-content:center;gap:0;margin-top:12px;background:rgba(255,255,255,.15);border-radius:14px;padding:10px 8px}
+.hdr-stats-4{gap:0}
+.hdr-stats-4 .hdr-stat-num{font-size:18px}
+.hdr-stats-4 .hdr-stat-lbl{font-size:9px}
+.hdr-stat{flex:1;text-align:center}
+.hdr-stat-num{font-size:22px;font-weight:900;color:#fff;line-height:1.2}
+.hdr-stat-lbl{font-size:10px;font-weight:700;color:rgba(255,255,255,.7);margin-top:2px}
+.hdr-stat-divider{width:1px;height:28px;background:rgba(255,255,255,.2);flex-shrink:0}
+
 /* LOG LIST */
 .log-wrap{background:var(--card);border-radius:var(--r);margin:12px 16px 14px;overflow:hidden;transition:background .25s}
 .log-item{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:.5px solid var(--bdr)}
@@ -264,7 +273,7 @@ body.dark .rec-day-tag.day-1{background:#312E81;color:#A5B4FC}
 
 /* HISTORY */
 .hist-hero{position:sticky;top:0;z-index:10;background:linear-gradient(135deg,var(--tab-color,#6366F1),var(--tab-color2,#818CF8));border-radius:0 0 var(--rxl) var(--rxl);margin:0 0 14px;padding:18px 20px 16px;padding-top:calc(18px + env(safe-area-inset-top));box-shadow:0 4px 20px var(--tab-shadow,rgba(99,102,241,0.3))}
-.hist-hero h2{font-size:20px;font-weight:900;color:#fff}
+.hist-hero h2{font-size:24px;font-weight:900;color:#fff}
 .hist-hero p{font-size:12px;color:rgba(255,255,255,.85);margin-top:2px;font-weight:600}
 .hist-stats-card{background:var(--card);border-radius:var(--r);margin:0 16px 14px;padding:14px;box-shadow:var(--sh)}
 .hist-stat-items{display:flex;gap:8px;margin-bottom:12px}
@@ -759,7 +768,7 @@ body.dark .nav-user-label{color:var(--tx2)}
   .log-header-sticky h2{font-size:28px}
   .rwd-header-sticky{border-radius:0 0 var(--rxl) var(--rxl);padding:24px 28px}
   .hist-hero{border-radius:0 0 var(--rxl) var(--rxl);padding:26px 28px 20px}
-  .hist-hero h2{font-size:24px}
+  .hist-hero h2{font-size:28px}
   .hist-stats-card{margin:0 24px 14px}
   .adm-top{border-radius:0 0 var(--rxl) var(--rxl);padding:24px 28px}
 
@@ -952,8 +961,13 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
 <!-- LOG -->
 <div class="scr" id="s-log">
   <div class="log-header-sticky">
-    <h2>활동 기록하기 <svg class="hdr-ico" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><path d="M9 15l2 2 4-4"/></svg></h2>
-    <p>탭해서 마일리지를 받아요 — 실수로 눌렀으면 취소!</p>
+    <h2>활동 기록하기</h2>
+    <p>탭해서 마일리지를 받아요</p>
+    <div class="hdr-stats" id="log-hdr-stats">
+      <div class="hdr-stat"><div class="hdr-stat-num" id="log-today-count">0</div><div class="hdr-stat-lbl">오늘 활동</div></div>
+      <div class="hdr-stat-divider"></div>
+      <div class="hdr-stat"><div class="hdr-stat-num" id="log-today-pts">0</div><div class="hdr-stat-lbl">획득 점수</div></div>
+    </div>
   </div>
   <div class="log-wrap" id="log-list"></div>
 </div>
@@ -961,15 +975,12 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
 <!-- REWARDS -->
 <div class="scr" id="s-rwd">
   <div class="rwd-header-sticky">
-    <div style="display:flex;align-items:center;justify-content:space-between">
-      <div>
-        <h2 style="font-size:20px;font-weight:900;color:#fff">보상 상점 <svg class="hdr-ico" viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg></h2>
-        <p style="font-size:12px;color:rgba(255,255,255,.8);margin-top:2px;font-weight:600">모은 마일리지로 교환해요</p>
-      </div>
-      <div style="text-align:right">
-        <div style="font-size:10px;color:rgba(255,255,255,.7);font-weight:700">보유</div>
-        <div><span style="font-size:24px;font-weight:900;color:#fff" id="rwd-bal">0</span><span style="font-size:12px;color:rgba(255,255,255,.8);font-weight:700">점</span></div>
-      </div>
+    <h2 style="font-size:24px;font-weight:900;color:#fff">보상 상점</h2>
+    <p style="font-size:14px;color:rgba(255,255,255,.85);margin-top:2px;font-weight:600">모은 마일리지로 교환해요</p>
+    <div class="hdr-stats" id="rwd-hdr-stats">
+      <div class="hdr-stat"><div class="hdr-stat-num" id="rwd-hdr-pts">0</div><div class="hdr-stat-lbl">보유 마일리지</div></div>
+      <div class="hdr-stat-divider"></div>
+      <div class="hdr-stat"><div class="hdr-stat-num" id="rwd-hdr-avail">0</div><div class="hdr-stat-lbl">교환 가능</div></div>
     </div>
   </div>
   <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg> 교환 가능한 보상</div>
@@ -979,8 +990,17 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
 <!-- HISTORY -->
 <div class="scr" id="s-hist">
   <div class="hist-hero">
-    <h2>활동 통계 <svg class="hdr-ico" viewBox="0 0 24 24"><path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9"/><path d="M21 3l-9 9"/><path d="M15 3h6v6"/></svg></h2>
-    <p>태민이의 활동 인사이트</p>
+    <h2>통계 &amp; Insight</h2>
+    <p>태민이의 활동 분석</p>
+    <div class="hdr-stats hdr-stats-4" id="hist-hdr-stats">
+      <div class="hdr-stat"><div class="hdr-stat-num" id="hist-hdr-pts">0</div><div class="hdr-stat-lbl">보유 마일리지</div></div>
+      <div class="hdr-stat-divider"></div>
+      <div class="hdr-stat"><div class="hdr-stat-num" id="hist-hdr-done">0</div><div class="hdr-stat-lbl">총 완료</div></div>
+      <div class="hdr-stat-divider"></div>
+      <div class="hdr-stat"><div class="hdr-stat-num" id="hist-hdr-streak">0</div><div class="hdr-stat-lbl">현재 연속</div></div>
+      <div class="hdr-stat-divider"></div>
+      <div class="hdr-stat"><div class="hdr-stat-num" id="hist-hdr-longest">0</div><div class="hdr-stat-lbl">최장 연속</div></div>
+    </div>
   </div>
 
   <!-- 서브 메뉴 탭 -->
@@ -2266,6 +2286,7 @@ function renderAll(){
   renderAdmStats();renderAdmActList();renderAdmRwdList();renderAdmSettings();
   renderMsgSettings();renderAdmMemberPhotos();
   renderNavUsers();
+  renderHdrStats();
 }
 
 function renderHero(){
@@ -2280,8 +2301,36 @@ function renderHero(){
   document.getElementById('hero-bar').style.width=pct+'%';
   document.getElementById('hero-bar-lbl').textContent=g?'목표 '+g.pts.toLocaleString()+'점':'';
   document.getElementById('hero-goal').textContent=g?(S.pts>=g.pts?`${g.emoji} ${g.name} 교환 가능해요! 🎉`:`${g.emoji} ${g.name}까지 ${(g.pts-S.pts).toLocaleString()}점 남았어요! 💪`):'';
-  document.getElementById('rwd-bal').textContent=S.pts.toLocaleString();
+  const rwdBal=document.getElementById('rwd-bal');if(rwdBal)rwdBal.textContent=S.pts.toLocaleString();
   document.getElementById('adm-pts').textContent=S.pts.toLocaleString();
+}
+
+function renderHdrStats(){
+  // Log tab: today's activity count and points
+  const t=todayStr();
+  const todayLogs=S.log.filter(l=>{
+    const d=new Date(l.ts);
+    return todayStr()===`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}` && l.pts>0;
+  });
+  const logCount=todayLogs.length;
+  const logPts=todayLogs.reduce((a,l)=>a+(l.pts||0),0);
+  const el1=document.getElementById('log-today-count');if(el1)el1.textContent=logCount;
+  const el2=document.getElementById('log-today-pts');if(el2)el2.textContent=logPts.toLocaleString();
+
+  // Reward tab: current points and available rewards count
+  const el3=document.getElementById('rwd-hdr-pts');if(el3)el3.textContent=S.pts.toLocaleString();
+  const availCount=S.rwds.filter(r=>{
+    const sale=r.sale&&r.sale.endDate&&new Date(r.sale.endDate+'T23:59:59')>=new Date()?r.sale:null;
+    const actualPts=sale?Math.round(r.pts*(1-sale.percent/100)):r.pts;
+    return S.pts>=actualPts;
+  }).length;
+  const el4=document.getElementById('rwd-hdr-avail');if(el4)el4.textContent=availCount;
+
+  // History tab: points, total done, current streak, longest streak
+  const el5=document.getElementById('hist-hdr-pts');if(el5)el5.textContent=S.pts.toLocaleString();
+  const el6=document.getElementById('hist-hdr-done');if(el6)el6.textContent=S.totalDone||0;
+  const el7=document.getElementById('hist-hdr-streak');if(el7)el7.textContent=getDisplayStreak();
+  const el8=document.getElementById('hist-hdr-longest');if(el8)el8.textContent=S.longest||0;
 }
 
 function getCardState(act){
