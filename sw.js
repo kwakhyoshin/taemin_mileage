@@ -2,7 +2,7 @@
 // 태민이 마일리지 — Service Worker (Push + Cache)
 // ═══════════════════════════════════════════════
 
-const CACHE_NAME = 'taemin-v2';
+const CACHE_NAME = 'taemin-v3';
 
 // Install — cache essential files
 self.addEventListener('install', (e) => {

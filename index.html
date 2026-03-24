@@ -2042,8 +2042,20 @@ async function doRegister() {
   }
   
   // Hash password with SHA-512
-  const pwdHash = sha512(pwd);
-  
+  let pwdHash;
+  try {
+    if(typeof sha512 === 'function') pwdHash = sha512(pwd);
+    else if(typeof window.sha512 === 'function') pwdHash = window.sha512(pwd);
+    else {
+      const enc = new TextEncoder().encode(pwd);
+      const buf = await crypto.subtle.digest('SHA-512', enc);
+      pwdHash = Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+    }
+  } catch(e) {
+    errorEl.textContent = '오류가 발생했어요. 새로고침 해주세요.';
+    return;
+  }
+
   // S.users에 저장
   if (!S.users) S.users = {};
   S.users[selectedMember] = { id, pwdHash };
@@ -2070,18 +2082,32 @@ async function doLogin() {
   const id = document.getElementById('login-id').value.trim();
   const pwd = document.getElementById('login-pwd').value;
   const errorEl = document.getElementById('login-error');
-  
+
   if (!id || !pwd) {
     errorEl.textContent = '아이디와 비밀번호를 입력해주세요';
     return;
   }
-  
+
   // S.users에서 확인
   const users = S.users || {};
   cachedUsers = users;
-  
-  const pwdHash = sha512(pwd);
-  
+
+  let pwdHash;
+  try {
+    if(typeof sha512 === 'function') pwdHash = sha512(pwd);
+    else if(typeof window.sha512 === 'function') pwdHash = window.sha512(pwd);
+    else {
+      // Web Crypto API fallback
+      const enc = new TextEncoder().encode(pwd);
+      const buf = await crypto.subtle.digest('SHA-512', enc);
+      pwdHash = Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+    }
+  } catch(e) {
+    console.error('SHA-512 hash failed:', e);
+    errorEl.textContent = '로그인 처리 중 오류가 발생했어요. 새로고침 해주세요.';
+    return;
+  }
+
   for (const memberId in users) {
     if (users[memberId].id === id && users[memberId].pwdHash === pwdHash) {
       currentUser = memberId;
@@ -2092,7 +2118,7 @@ async function doLogin() {
       return;
     }
   }
-  
+
   errorEl.textContent = '아이디 또는 비밀번호가 틀렸어요';
 }
 
@@ -2155,9 +2181,10 @@ function checkAuth() {
   const savedUser = localStorage.getItem('taemin_current_user');
   
   // 3명 모두 가입했으면 회원가입 링크 숨김
+  const allRegistered = Object.keys(MEMBERS).every(id => cachedUsers[id]);
   const registerLink = document.getElementById('register-link');
   if (registerLink) {
-    registerLink.style.display = Object.keys(cachedUsers).length >= 3 ? 'none' : 'block';
+    registerLink.style.display = allRegistered ? 'none' : 'block';
   }
   
   if (savedUser && cachedUsers[savedUser]) {
