@@ -26,7 +26,7 @@
   --rd:#EF4444;--rd-lt:#FEE2E2;
   --pu:#8B5CF6;--pu-lt:#F5F3FF;
   --yw:#F59E0B;--yw-lt:#FEF3C7;
-  --bg:#F8FAFC;--bg2:#F1F5F9;
+  --bg:#EEF2F7;--bg2:#E2E8F0;
   --card:#FFFFFF;--card2:#F8FAFC;
   --tx:#0F172A;--tx2:#64748B;--tx3:#94A3B8;
   --bdr:#E2E8F0;--bdr2:#CBD5E1;
@@ -339,6 +339,8 @@ body.dark .today-summary-card .ts-msg{background:linear-gradient(135deg,#312E81,
 .dash-tabs{display:flex;gap:6px;padding:0 16px;margin-bottom:14px;overflow-x:auto;-webkit-overflow-scrolling:touch}
 .dash-tab{padding:8px 16px;border-radius:20px;font-size:13px;font-weight:800;color:var(--tx2);background:var(--card);border:1.5px solid var(--bdr);cursor:pointer;white-space:nowrap;font-family:inherit;transition:.2s}
 .dash-tab.on{background:var(--tab-color,#6366F1);color:#fff;border-color:var(--tab-color,#6366F1)}
+/* Masonry 래퍼 - 모바일에서는 투명 */
+.dash-full-row,.dash-masonry,.dash-brick{display:contents}
 .dash-panel{animation:fadeUp .25s ease}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fadeUpCenter{from{opacity:0;transform:translate(-50%,-50%) scale(.95)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
@@ -715,10 +717,39 @@ body.dark .nav-user-label{color:var(--tx2)}
    ======================================== */
 @media(min-width:768px){
   html{background:var(--bg)}
-  body{max-width:100%}
+  body{max-width:100%;margin:0;display:flex;flex-direction:row;min-height:100vh}
 
-  /* Wrapper for content area */
-  .scr{max-width:95vw;margin:0 auto}
+  /* ── SIDEBAR NAV (tablet) ── */
+  .nav-container{position:fixed!important;bottom:auto!important;top:0;left:0;transform:none!important;z-index:100;width:200px;height:100vh}
+  .nav-container.docked{bottom:auto!important;left:0!important;right:auto!important;width:200px!important;transform:none!important}
+  .nav-container.docked .bottom-nav{border-radius:0!important;width:100%!important;background:var(--card)!important;border:none!important;border-right:1px solid var(--bdr)!important;justify-content:flex-start!important}
+  body.dark .nav-container.docked .bottom-nav{background:var(--card)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+  .bottom-nav{flex-direction:column;align-items:stretch;gap:4px;border-radius:0;padding:16px 10px;height:100%;background:var(--card);border:none;border-right:1px solid var(--bdr);box-shadow:2px 0 16px rgba(0,0,0,.03);backdrop-filter:none;-webkit-backdrop-filter:none}
+  body.dark .bottom-nav{border-color:var(--bdr);border-right-color:var(--bdr)}
+
+  /* Nav brand */
+  .bottom-nav::before{content:'태민이 마일리지 🏆';display:block;font-size:14px;font-weight:900;color:var(--or);padding:12px 12px 18px;border-bottom:1px solid var(--bdr);margin-bottom:8px;white-space:nowrap}
+
+  .nav-item{padding:12px 12px;border-radius:12px;justify-content:flex-start;gap:10px}
+  .nav-item.active{padding:12px 12px}
+  .nav-item svg{width:20px;height:20px;flex-shrink:0}
+  .nav-item .nav-label{max-width:none!important;opacity:1!important;font-size:13px;font-weight:700;color:var(--tx2);margin-left:0}
+  .nav-item.active .nav-label{color:var(--or)}
+  .nav-item:not(.active) .nav-label{max-width:none!important;opacity:1!important}
+
+  .nav-divider{width:auto;height:1px;background:var(--bdr);margin:6px 0}
+
+  /* ── 사용자 아이콘: 가로 배치 (tablet) ── */
+  .nav-users{flex-direction:row;flex-wrap:wrap;gap:4px;justify-content:center}
+  .nav-user-wrap{flex-direction:column;align-items:center}
+  .nav-user-wrap .nav-profile{width:44px;height:44px}
+  .nav-user-wrap.me .nav-profile{width:48px;height:48px}
+  .nav-user-label{font-size:10px}
+  .nav-profile{width:44px;height:44px}
+
+  /* ── MAIN CONTENT — 사이드바 제외 풀 너비 ── */
+  .scr{margin-left:200px;width:calc(100vw - 200px);max-width:none;padding-bottom:40px!important;box-sizing:border-box}
+  .auth-screen{margin-left:0;width:100vw}
 
   /* Bigger hero */
   .hero-pts{font-size:64px}
@@ -726,7 +757,7 @@ body.dark .nav-user-label{color:var(--tx2)}
 
   /* 4-column grids on tablet */
   .act-grid{grid-template-columns:repeat(4,1fr);gap:12px;margin:0 20px 16px}
-  .rwd-grid{grid-template-columns:repeat(3,1fr);gap:12px;margin:0 20px 16px}
+  .rwd-grid{grid-template-columns:repeat(4,1fr);gap:12px;margin:0 20px 16px}
 
   /* Bigger cards */
   .act-card{padding:16px}
@@ -755,16 +786,16 @@ body.dark .nav-user-label{color:var(--tx2)}
   .rec-ico{width:42px;height:42px;font-size:22px}
   .rec-nm{font-size:14px}
 
-  /* Header stickies */
-  .home-top{padding:20px 24px 0;padding-top:calc(20px + env(safe-area-inset-top))}
+  /* Header stickies — 우측 끝까지 풀 너비 */
+  .home-top{padding:20px 24px 0;padding-top:calc(20px + env(safe-area-inset-top));border-radius:0}
   .home-top h1{font-size:24px}
-  .hero{padding:22px 24px 26px;position:sticky;top:0;z-index:10}
-  .log-header-sticky{padding:20px 24px}
+  .hero{padding:22px 24px 26px;position:sticky;top:0;z-index:10;border-radius:0;box-shadow:0 4px 20px var(--tab-shadow,rgba(99,102,241,0.15))}
+  .log-header-sticky{padding:20px 24px;border-radius:0;margin:0 0 14px}
   .log-header-sticky h2{font-size:26px}
-  .rwd-header-sticky{padding:20px 24px}
-  .hist-hero{padding:22px 24px 18px}
+  .rwd-header-sticky{padding:20px 24px;border-radius:0;margin:0 0 14px}
+  .hist-hero{padding:22px 24px 18px;border-radius:0;margin:0 0 14px}
   .hist-stats-card{margin:0 20px 14px}
-  .adm-top{padding:20px 24px}
+  .adm-top{padding:20px 24px;border-radius:0}
   .adm-top h2{font-size:22px}
 
   /* Reward cards */
@@ -781,19 +812,29 @@ body.dark .nav-user-label{color:var(--tx2)}
   .stat-c{padding:16px}
   .stat-n{font-size:26px}
 
-  /* Log wrap */
+  /* Log wrap — 풀 너비 활용 */
   .log-wrap{margin:12px 20px 16px}
   .rec-list{margin:0 20px 16px}
 
-  /* Bottom nav - wider pill */
-  .nav-container{bottom:24px}
-  .bottom-nav{padding:8px 10px;gap:4px}
-  .nav-item{padding:12px 14px}
-  .nav-item.active{padding:12px 16px}
-  .nav-item svg{width:22px;height:22px}
-  .nav-item .nav-label{font-size:12px}
-  .nav-user-wrap .nav-profile{width:32px;height:32px}
-  .nav-user-wrap.me .nav-profile{width:34px;height:34px}
+  /* 대시보드 탭 패딩 */
+  .dash-tabs{padding:0 20px}
+
+  /* ── 대시보드: Masonry 카드 레이아웃 (tablet) ── */
+  #dash-p0 .dash-full-row{display:block;padding:0 20px}
+  #dash-p0 .dash-full-row .hist-stats-card{margin:0 0 14px}
+  #dash-p0 .dash-full-row .dash-streak-card{margin:0 0 14px}
+  #dash-p0 .dash-masonry{display:block;columns:2;column-gap:16px;padding:0 20px}
+  #dash-p0 .dash-brick{display:inline-block;width:100%;break-inside:avoid;margin-bottom:4px}
+  #dash-p0 .dash-brick .sec{margin:14px 0 10px}
+  #dash-p0 .dash-brick .card{margin:0 0 14px}
+  /* 캘린더/내역 패널은 1컬럼 유지 */
+  #dash-p1.dash-active,#dash-p2.dash-active{display:block!important}
+  #dash-p1 .card,#dash-p2 .card{margin:0 20px 14px}
+  #dash-p2 .hist-stats-card{margin:0 20px 14px}
+
+  /* Modals */
+  .overlay{align-items:center;justify-content:center}
+  .sheet{border-radius:var(--rxl);max-width:480px;margin:auto}
 
   /* Admin section */
   .adm-sec{margin:0 20px 14px}
@@ -826,11 +867,15 @@ body.dark .nav-user-label{color:var(--tx2)}
   .nav-profile{width:36px;height:36px}
 
   .nav-divider{width:auto;height:1px;background:var(--bdr);margin:4px 0}
-  .nav-users{flex-direction:column}
+  /* 사용자 아이콘 가로 배치 (desktop) */
+  .nav-users{flex-direction:row;flex-wrap:wrap;gap:6px;justify-content:center}
+  .nav-user-wrap .nav-profile{width:48px;height:48px}
+  .nav-user-wrap.me .nav-profile{width:52px;height:52px}
+  .nav-user-label{font-size:11px}
 
-  /* MAIN CONTENT SHIFT */
-  .scr{margin-left:240px;max-width:calc(100vw - 280px);padding-bottom:40px!important}
-  .auth-screen{margin-left:0}
+  /* MAIN CONTENT — 풀 너비 */
+  .scr{margin-left:240px;width:calc(100vw - 240px);max-width:none;padding-bottom:40px!important;box-sizing:border-box}
+  .auth-screen{margin-left:0;width:100vw}
 
   /* Emoji picker */
   .ep-pop{max-width:520px}
@@ -843,8 +888,8 @@ body.dark .nav-user-label{color:var(--tx2)}
   /* PIN card */
   .pin-card{width:380px}
 
-  /* Hero - keep sticky, rounded bottom */
-  .hero{border-radius:0 0 var(--rxl) var(--rxl);margin:0;position:sticky;top:0}
+  /* Hero — 풀 너비, 라운딩 없음 */
+  .hero{border-radius:0;margin:0;position:sticky;top:0}
   .hero.compact{padding:16px 24px 18px}
   .hero-pts{font-size:68px}
   .hero-unit{font-size:24px}
@@ -860,8 +905,8 @@ body.dark .nav-user-label{color:var(--tx2)}
   .act-card .e{font-size:34px}
   .act-card .n{font-size:14px}
 
-  /* 3-column reward grid */
-  .rwd-grid{grid-template-columns:repeat(3,1fr);gap:14px;margin:0 24px 18px}
+  /* 4-column reward grid */
+  .rwd-grid{grid-template-columns:repeat(4,1fr);gap:14px;margin:0 24px 18px}
   .rwd-card{padding:20px}
   .rwd-e{font-size:50px}
   .rwd-nm{font-size:15px}
@@ -877,14 +922,14 @@ body.dark .nav-user-label{color:var(--tx2)}
   .log-nm{font-size:16px}
   .log-badge{font-size:14px}
 
-  /* Header stickies - not full width */
-  .log-header-sticky{margin:0 0 16px;border-radius:0 0 var(--rxl) var(--rxl);padding:24px 28px}
+  /* Header stickies — 풀 너비 */
+  .log-header-sticky{margin:0 0 16px;border-radius:0;padding:24px 28px}
   .log-header-sticky h2{font-size:28px}
-  .rwd-header-sticky{border-radius:0 0 var(--rxl) var(--rxl);padding:24px 28px}
-  .hist-hero{border-radius:0 0 var(--rxl) var(--rxl);padding:26px 28px 20px}
+  .rwd-header-sticky{border-radius:0;padding:24px 28px}
+  .hist-hero{border-radius:0;padding:26px 28px 20px}
   .hist-hero h2{font-size:28px}
   .hist-stats-card{margin:0 24px 14px}
-  .adm-top{border-radius:0 0 var(--rxl) var(--rxl);padding:24px 28px}
+  .adm-top{border-radius:0;padding:24px 28px}
 
   /* Recent list */
   .rec-list{margin:0 24px 18px;border-radius:var(--rlg)}
@@ -895,6 +940,19 @@ body.dark .nav-user-label{color:var(--tx2)}
   .stat-c{padding:20px;border-radius:var(--rlg)}
   .stat-n{font-size:28px}
   .stat-l{font-size:11px}
+
+  /* ── 대시보드: Masonry 카드 레이아웃 (desktop) ── */
+  #dash-p0 .dash-full-row{display:block;padding:0 24px}
+  #dash-p0 .dash-full-row .hist-stats-card{margin:0 0 16px}
+  #dash-p0 .dash-full-row .dash-streak-card{margin:0 0 16px}
+  #dash-p0 .dash-masonry{display:block;columns:2;column-gap:20px;padding:0 24px}
+  #dash-p0 .dash-brick{display:inline-block;width:100%;break-inside:avoid;margin-bottom:4px}
+  #dash-p0 .dash-brick .sec{margin:16px 0 12px}
+  #dash-p0 .dash-brick .card{margin:0 0 16px}
+  /* 캘린더/내역 패널은 1컬럼 유지 */
+  #dash-p1.dash-active,#dash-p2.dash-active{display:block!important}
+  #dash-p1 .card,#dash-p2 .card{margin:0 24px 16px}
+  #dash-p2 .hist-stats-card{margin:0 24px 16px}
 
   /* Admin */
   .adm-sec{margin:0 24px 16px}
@@ -940,12 +998,14 @@ body.dark .nav-user-label{color:var(--tx2)}
   .nav-item{padding:16px 18px}
   .nav-item svg{width:24px;height:24px}
   .nav-item .nav-label{font-size:15px}
+  .nav-user-wrap .nav-profile{width:52px;height:52px}
+  .nav-user-wrap.me .nav-profile{width:56px;height:56px}
 
-  .scr{margin-left:280px;max-width:calc(100vw - 320px)}
+  .scr{margin-left:280px;width:calc(100vw - 280px)}
   .act-grid{grid-template-columns:repeat(4,1fr);gap:16px;margin:0 28px 20px}
   .rwd-grid{grid-template-columns:repeat(4,1fr);gap:16px;margin:0 28px 20px}
 
-  .hero{margin:0;border-radius:0 0 var(--rxl) var(--rxl);position:sticky;top:0}
+  .hero{margin:0;border-radius:0;position:sticky;top:0}
   .hero-pts{font-size:76px}
   .sec{margin:22px 28px 16px}
   .card{margin:0 28px 18px}
@@ -954,6 +1014,11 @@ body.dark .nav-user-label{color:var(--tx2)}
   .stat-row{margin:18px 28px 0}
   .adm-sec{margin:0 28px 18px}
   .adm-tabs{margin:18px 28px}
+
+  /* 와이드 데스크탑: Masonry 3컬럼 */
+  #dash-p0 .dash-full-row{padding:0 28px}
+  #dash-p0 .dash-masonry{columns:3;column-gap:24px;padding:0 28px}
+  #dash-p0 .dash-brick .card{margin:0 0 18px}
 }
 
 /* ── DRAG & DROP ────────────────────────────────── */
@@ -1125,62 +1190,89 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
   </div>
 
   <!-- ===== 패널 0: 대시보드 ===== -->
-  <div class="dash-panel" id="dash-p0">
-    <!-- 요약 카드 -->
-    <div class="hist-stats-card">
-      <div class="hist-stat-items" id="hist-stats"></div>
+  <div class="dash-panel dash-active" id="dash-p0">
+    <!-- 풀 너비 요약 영역 -->
+    <div class="dash-full-row">
+      <div class="hist-stats-card">
+        <div class="hist-stat-items" id="hist-stats"></div>
+      </div>
+      <div class="card dash-streak-card" id="dash-streak"></div>
     </div>
 
-    <!-- 연속 달성 트래커 -->
-    <div class="card dash-streak-card" id="dash-streak"></div>
+    <!-- Masonry 카드 영역 -->
+    <div class="dash-masonry">
+      <!-- 주간 히트맵 -->
+      <div class="dash-brick">
+        <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg> 이번 주 활동 히트맵</div>
+        <div class="card" id="dash-heatmap"></div>
+      </div>
 
-    <!-- 주간 히트맵 -->
-    <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg> 이번 주 활동 히트맵</div>
-    <div class="card" id="dash-heatmap"></div>
+      <!-- TOP 3 활동 -->
+      <div class="dash-brick">
+        <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7L12 16.4 5.7 21l2.3-7L2 9.4h7.6z"/></svg> 이번 달 TOP 활동</div>
+        <div class="card" id="dash-top3"></div>
+      </div>
 
-    <!-- TOP 3 활동 -->
-    <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7L12 16.4 5.7 21l2.3-7L2 9.4h7.6z"/></svg> 이번 달 TOP 활동</div>
-    <div class="card" id="dash-top3"></div>
+      <!-- 요일별 패턴 -->
+      <div class="dash-brick">
+        <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 5-6"/></svg> 요일별 활동 패턴</div>
+        <div class="card" id="dash-weekday"></div>
+      </div>
 
-    <!-- 요일별 패턴 -->
-    <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 5-6"/></svg> 요일별 활동 패턴</div>
-    <div class="card" id="dash-weekday"></div>
+      <!-- 월간 추이 -->
+      <div class="dash-brick">
+        <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg> 월별 마일리지 추이</div>
+        <div class="card" id="dash-monthly"></div>
+      </div>
 
-    <!-- 월간 추이 -->
-    <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg> 월별 마일리지 추이</div>
-    <div class="card" id="dash-monthly"></div>
+      <!-- 이번주 vs 지난주 비교 -->
+      <div class="dash-brick">
+        <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/><path d="M17 7l-5 5-5-5"/></svg> 이번 주 vs 지난 주</div>
+        <div class="card" id="insight-weekcmp"></div>
+      </div>
 
-    <!-- 이번주 vs 지난주 비교 -->
-    <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/><path d="M17 7l-5 5-5-5"/></svg> 이번 주 vs 지난 주</div>
-    <div class="card" id="insight-weekcmp"></div>
+      <!-- MVP 활동 -->
+      <div class="dash-brick">
+        <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7L12 16.4 5.7 21l2.3-7L2 9.4h7.6z"/></svg> 누적 득점 TOP 활동</div>
+        <div class="card" id="insight-mvp"></div>
+      </div>
 
-    <!-- MVP 활동 -->
-    <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7L12 16.4 5.7 21l2.3-7L2 9.4h7.6z"/></svg> 누적 득점 TOP 활동</div>
-    <div class="card" id="insight-mvp"></div>
+      <!-- 시간대별 활동 패턴 -->
+      <div class="dash-brick">
+        <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> 시간대별 활동 패턴</div>
+        <div class="card" id="insight-time"></div>
+      </div>
 
-    <!-- 시간대별 활동 패턴 -->
-    <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> 시간대별 활동 패턴</div>
-    <div class="card" id="insight-time"></div>
+      <!-- 활동 유형 분석 -->
+      <div class="dash-brick">
+        <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M21.21 15.89A10 10 0 118 2.83"/><path d="M22 12A10 10 0 0012 2v10z"/></svg> 활동 유형 분석</div>
+        <div class="card" id="insight-category"></div>
+      </div>
 
-    <!-- 활동 유형 분석 -->
-    <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M21.21 15.89A10 10 0 118 2.83"/><path d="M22 12A10 10 0 0012 2v10z"/></svg> 활동 유형 분석</div>
-    <div class="card" id="insight-category"></div>
+      <!-- 보상 사용 TOP -->
+      <div class="dash-brick">
+        <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg> 보상 교환 랭킹</div>
+        <div class="card" id="insight-reward"></div>
+      </div>
 
-    <!-- 보상 사용 TOP -->
-    <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg> 보상 교환 랭킹</div>
-    <div class="card" id="insight-reward"></div>
+      <!-- 기분 변화 그래프 -->
+      <div class="dash-brick">
+        <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M14.828 14.828a4 4 0 01-5.656 0"/><path d="M9 9h.01M15 9h.01"/><circle cx="12" cy="12" r="10"/></svg> 기분 변화 트래커</div>
+        <div class="card" id="insight-mood-timeline"></div>
+      </div>
 
-    <!-- 기분 변화 그래프 -->
-    <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M14.828 14.828a4 4 0 01-5.656 0"/><path d="M9 9h.01M15 9h.01"/><circle cx="12" cy="12" r="10"/></svg> 기분 변화 트래커</div>
-    <div class="card" id="insight-mood-timeline"></div>
+      <!-- 요일별 기분 패턴 -->
+      <div class="dash-brick">
+        <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M3 3v18h18"/><circle cx="9" cy="9" r="2"/><circle cx="15" cy="15" r="2"/><circle cx="18" cy="7" r="2"/></svg> 요일별 기분 패턴</div>
+        <div class="card" id="insight-mood-weekday"></div>
+      </div>
 
-    <!-- 요일별 기분 패턴 -->
-    <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M3 3v18h18"/><circle cx="9" cy="9" r="2"/><circle cx="15" cy="15" r="2"/><circle cx="18" cy="7" r="2"/></svg> 요일별 기분 패턴</div>
-    <div class="card" id="insight-mood-weekday"></div>
-
-    <!-- 감정 순위 -->
-    <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/><circle cx="12" cy="12" r="10"/></svg> 감정 순위 TOP</div>
-    <div class="card" id="insight-mood-rank"></div>
+      <!-- 감정 순위 -->
+      <div class="dash-brick">
+        <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/><circle cx="12" cy="12" r="10"/></svg> 감정 순위 TOP</div>
+        <div class="card" id="insight-mood-rank"></div>
+      </div>
+    </div>
   </div>
 
   <!-- ===== 패널 1: 캘린더 ===== -->
@@ -2832,7 +2924,7 @@ function switchDash(idx,btn){
   else document.querySelectorAll('.dash-tab')[idx]?.classList.add('on');
   for(let i=0;i<3;i++){
     const p=document.getElementById('dash-p'+i);
-    if(p)p.style.display=i===idx?'':'none';
+    if(p){p.style.display=i===idx?'':'none';p.classList.toggle('dash-active',i===idx);}
   }
   if(idx===0)renderDashboard();
   if(idx===1){renderCalendar();renderTodaySummary();}
@@ -4450,10 +4542,12 @@ function reallyGoTab(tab){
   document.getElementById('tab-'+tab).classList.add('active');
   document.getElementById('s-'+tab).scrollTop=0;
   window.scrollTo({top:0});
-  // Reset docked nav state
-  const navC=document.querySelector('.nav-container');
-  if(navC)navC.classList.remove('docked');
-  _navDocked=false;
+  // Reset docked nav state (모바일만)
+  if(!isTabletOrDesktop()){
+    const navC=document.querySelector('.nav-container');
+    if(navC)navC.classList.remove('docked');
+    _navDocked=false;
+  }
   // 모든 탭 compact 상태 초기화
   const hero=document.querySelector('.hero');
   if(hero) hero.classList.remove('compact');
@@ -4514,10 +4608,12 @@ function swipeToTab(tab,animClass){
   document.getElementById('tab-'+tab)?.classList.add('active');
   el.scrollTop=0;
   window.scrollTo({top:0});
-  // Reset docked nav state
-  const navC=document.querySelector('.nav-container');
-  if(navC)navC.classList.remove('docked');
-  _navDocked=false;
+  // Reset docked nav state (모바일만)
+  if(!isTabletOrDesktop()){
+    const navC=document.querySelector('.nav-container');
+    if(navC)navC.classList.remove('docked');
+    _navDocked=false;
+  }
   // After animation ends, switch to normal 'on' class
   el.addEventListener('animationend',function handler(){
     el.classList.remove(animClass);
@@ -4576,9 +4672,11 @@ document.addEventListener('touchend',function(e){
   }
 },{passive:true});
 
-// ── DOCK NAV ON SCROLL ──────────────────────────
+// ── DOCK NAV ON SCROLL (모바일 only) ──────────────────────────
 let _navDocked=false;
+function isTabletOrDesktop(){return window.innerWidth>=768}
 function checkNavDock(){
+  if(isTabletOrDesktop())return; // 태블릿/데스크탑에서는 사이드바 고정
   const scrollY=window.scrollY||document.documentElement.scrollTop;
   const container=document.querySelector('.nav-container');
   if(!container)return;
@@ -4594,6 +4692,7 @@ window.addEventListener('scroll',checkNavDock,{passive:true});
 // Also check on each visible screen's scroll
 document.querySelectorAll('.scr').forEach(scr=>{
   scr.addEventListener('scroll',()=>{
+    if(isTabletOrDesktop())return;
     const scrollY=scr.scrollTop;
     const container=document.querySelector('.nav-container');
     if(!container)return;
@@ -4606,6 +4705,14 @@ document.querySelectorAll('.scr').forEach(scr=>{
     }
   },{passive:true});
 });
+// 태블릿/데스크탑 전환 시 docked 클래스 제거
+window.addEventListener('resize',()=>{
+  if(isTabletOrDesktop()){
+    const c=document.querySelector('.nav-container');
+    if(c)c.classList.remove('docked');
+    _navDocked=false;
+  }
+},{passive:true});
 
 // ── UTILS ──────────────────────────────────────
 function fmt(ts){
