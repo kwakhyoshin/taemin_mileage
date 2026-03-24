@@ -1369,6 +1369,10 @@ body.dark .nav-profile{border-color:rgba(255,255,255,.4)}
     <svg class="pfm-ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
     <div class="pfm-txt"><div class="pfm-nm">기분 표현</div><div class="pfm-desc">지금 기분을 표현해봐요</div></div>
   </button>
+  <button class="pfm-item" onclick="pfMenuAction('selfmsg')">
+    <svg class="pfm-ico" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+    <div class="pfm-txt"><div class="pfm-nm">나한테 메시지 보내기</div><div class="pfm-desc">푸시 알림 테스트</div></div>
+  </button>
 </div>
 
 <!-- MOOD SELECTOR -->
@@ -3299,6 +3303,9 @@ function pfMenuAction(action){
     openAvatarEditor(currentUser);
   }else if(action==='mood'){
     openMoodPop();
+  }else if(action==='selfmsg'){
+    if(!currentUser){toast('먼저 로그인해주세요');return;}
+    openMsgPop(currentUser);
   }
 }
 window.openPfMenu=openPfMenu;
