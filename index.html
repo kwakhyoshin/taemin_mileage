@@ -381,10 +381,6 @@ body.dark .today-summary-card .ts-msg{background:linear-gradient(135deg,#312E81,
 .period-btn.on{background:var(--tab-lt,var(--or-lt));color:var(--tab-color,var(--or));border-color:var(--tab-color,var(--or))}
 
 /* INSIGHT PANELS */
-.insight-grid{display:flex;flex-direction:column;gap:10px;margin:0 16px 14px}
-.insight-card{background:var(--card);border-radius:var(--r);padding:14px 16px;transition:background .25s}
-.insight-title{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:900;color:var(--tx);margin-bottom:10px}
-.insight-title svg{width:18px;height:18px;stroke:var(--tab-color,var(--or));stroke-width:2;fill:none;flex-shrink:0}
 .insight-empty{font-size:12px;color:var(--tx3);text-align:center;padding:8px 0}
 /* MVP Activity */
 .mvp-row{display:flex;align-items:center;gap:12px}
@@ -1117,20 +1113,25 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
     <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg> 월별 마일리지 추이</div>
     <div class="card" id="dash-monthly"></div>
 
-    <!-- ===== 인사이트 섹션 ===== -->
-    <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg> 심층 인사이트</div>
-    <div class="insight-grid">
-      <!-- 이번주 vs 지난주 비교 -->
-      <div class="insight-card" id="insight-weekcmp"></div>
-      <!-- MVP 활동 -->
-      <div class="insight-card" id="insight-mvp"></div>
-      <!-- 시간대별 활동 패턴 -->
-      <div class="insight-card" id="insight-time"></div>
-      <!-- 활동 유형 분석 -->
-      <div class="insight-card" id="insight-category"></div>
-      <!-- 보상 사용 TOP -->
-      <div class="insight-card" id="insight-reward"></div>
-    </div>
+    <!-- 이번주 vs 지난주 비교 -->
+    <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/><path d="M17 7l-5 5-5-5"/></svg> 이번 주 vs 지난 주</div>
+    <div class="card" id="insight-weekcmp"></div>
+
+    <!-- MVP 활동 -->
+    <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7L12 16.4 5.7 21l2.3-7L2 9.4h7.6z"/></svg> 누적 득점 TOP 활동</div>
+    <div class="card" id="insight-mvp"></div>
+
+    <!-- 시간대별 활동 패턴 -->
+    <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> 시간대별 활동 패턴</div>
+    <div class="card" id="insight-time"></div>
+
+    <!-- 활동 유형 분석 -->
+    <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M21.21 15.89A10 10 0 118 2.83"/><path d="M22 12A10 10 0 0012 2v10z"/></svg> 활동 유형 분석</div>
+    <div class="card" id="insight-category"></div>
+
+    <!-- 보상 사용 TOP -->
+    <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg> 보상 교환 랭킹</div>
+    <div class="card" id="insight-reward"></div>
   </div>
 
   <!-- ===== 패널 1: 캘린더 ===== -->
@@ -3053,8 +3054,7 @@ function renderInsightWeekCmp(){
   const diff=twPts-lwPts;
   const diffClass=diff>0?'up':diff<0?'down':'same';
   const diffIcon=diff>0?'▲':diff<0?'▼':'―';
-  el.innerHTML=`<div class="insight-title"><svg viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/><path d="M17 7l-5 5-5-5"/></svg>이번 주 vs 지난 주</div>
-    <div class="week-cmp">
+  el.innerHTML=`<div class="week-cmp">
       <div class="week-cmp-col"><div class="week-cmp-lbl">지난 주</div><div class="week-cmp-val">${lwPts.toLocaleString()}</div><div class="week-cmp-sub">${lwCnt}회 활동</div></div>
       <div class="week-cmp-col current"><div class="week-cmp-lbl">이번 주</div><div class="week-cmp-val">${twPts.toLocaleString()}</div><div class="week-cmp-sub">${twCnt}회 활동</div></div>
     </div>
@@ -3074,13 +3074,12 @@ function renderInsightMVP(){
   });
   const sorted=Object.values(actStats).sort((a,b)=>b.totalPts-a.totalPts);
   if(sorted.length===0){
-    el.innerHTML=`<div class="insight-title"><svg viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7L12 16.4 5.7 21l2.3-7L2 9.4h7.6z"/></svg>MVP 활동</div><div class="insight-empty">아직 활동 기록이 없어요</div>`;
+    el.innerHTML=`<div class="insight-empty">아직 활동 기록이 없어요</div>`;
     return;
   }
   const top=sorted[0];
   const top3html=sorted.slice(0,3).map((a,i)=>`<div style="display:flex;align-items:center;gap:8px;padding:4px 0;${i>0?'opacity:.7':''}"><span style="font-size:12px;font-weight:900;color:var(--tab-color,var(--or));width:16px">${i+1}</span><span style="font-size:16px">${a.emoji}</span><span style="flex:1;font-size:12px;font-weight:700;color:var(--tx)">${a.name}</span><span style="font-size:12px;font-weight:900;color:var(--tx2)">${a.totalPts.toLocaleString()}점 (${a.count}회)</span></div>`).join('');
-  el.innerHTML=`<div class="insight-title"><svg viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7L12 16.4 5.7 21l2.3-7L2 9.4h7.6z"/></svg>누적 득점 TOP 활동</div>
-    <div class="mvp-row" style="margin-bottom:10px">
+  el.innerHTML=`<div class="mvp-row" style="margin-bottom:10px">
       <div class="mvp-emoji">${top.emoji}</div>
       <div class="mvp-info"><div class="mvp-name">${top.name}</div><div class="mvp-detail">${top.count}회 수행 · 1회 평균 ${Math.round(top.totalPts/top.count)}점</div></div>
       <div class="mvp-pts">${top.totalPts.toLocaleString()}<span style="font-size:11px;font-weight:700;color:var(--tx3)">점</span></div>
@@ -3104,7 +3103,7 @@ function renderInsightTime(){
     total++;
   });
   if(total===0){
-    el.innerHTML=`<div class="insight-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>시간대별 활동 패턴</div><div class="insight-empty">아직 데이터가 없어요</div>`;
+    el.innerHTML=`<div class="insight-empty">아직 데이터가 없어요</div>`;
     return;
   }
   const maxSlot=Math.max(...slots,1);
@@ -3113,8 +3112,7 @@ function renderInsightTime(){
   const peakEmoji=peakTime<12?'🌅':peakTime<17?'☀️':peakTime<20?'🌇':'🌙';
   const peakLabel=`${peakTime}시~${peakTime+2}시`;
   const barColors=['#06B6D4','#0EA5E9','#3B82F6','#6366F1','#8B5CF6','#A855F7','#D946EF','#F43F5E','#EF4444'];
-  el.innerHTML=`<div class="insight-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>시간대별 활동 패턴</div>
-    <div class="time-bars">${slots.map((v,i)=>{
+  el.innerHTML=`<div class="time-bars">${slots.map((v,i)=>{
       const h=maxSlot>0?Math.max(2,Math.round(v/maxSlot*100)):2;
       return `<div class="time-bar-col"><div class="time-bar-area"><div class="time-bar" style="height:${h}%;background:${barColors[i]}"></div></div><div class="time-bar-lbl">${slotLabels[i]}</div></div>`;
     }).join('')}</div>
@@ -3133,11 +3131,10 @@ function renderInsightCategory(){
     totalPts+=l.pts;
   });
   if(totalPts===0){
-    el.innerHTML=`<div class="insight-title"><svg viewBox="0 0 24 24"><path d="M21.21 15.89A10 10 0 118 2.83"/><path d="M22 12A10 10 0 0012 2v10z"/></svg>활동 유형 분석</div><div class="insight-empty">아직 데이터가 없어요</div>`;
+    el.innerHTML=`<div class="insight-empty">아직 데이터가 없어요</div>`;
     return;
   }
   const cats=Object.entries(catPts).sort((a,b)=>b[1]-a[1]);
-  // Build conic gradient for donut
   let angle=0;
   const gradParts=[];
   cats.forEach(([cat,pts])=>{
@@ -3151,8 +3148,7 @@ function renderInsightCategory(){
     return `<div class="cat-leg-item"><div class="cat-leg-dot" style="background:${CAT_COLORS[cat]||'#94A3B8'}"></div>${cat}<span class="cat-leg-pct">${pct}%</span></div>`;
   }).join('');
   const topCat=cats[0][0];
-  el.innerHTML=`<div class="insight-title"><svg viewBox="0 0 24 24"><path d="M21.21 15.89A10 10 0 118 2.83"/><path d="M22 12A10 10 0 0012 2v10z"/></svg>활동 유형 분석</div>
-    <div class="cat-row">
+  el.innerHTML=`<div class="cat-row">
       <div class="cat-donut" style="background:${donutBg}"><div class="cat-donut-center" style="background:var(--card);width:44px;height:44px;border-radius:50%"><div style="margin-top:10px">${cats.length}개<br>유형</div></div></div>
       <div class="cat-legend">${legendHtml}</div>
     </div>
@@ -3172,7 +3168,7 @@ function renderInsightReward(){
   });
   const sorted=Object.values(rwdStats).sort((a,b)=>b.count-a.count);
   if(sorted.length===0){
-    el.innerHTML=`<div class="insight-title"><svg viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg>보상 교환 랭킹</div><div class="insight-empty">아직 교환 기록이 없어요</div>`;
+    el.innerHTML=`<div class="insight-empty">아직 교환 기록이 없어요</div>`;
     return;
   }
   const maxCnt=sorted[0].count;
@@ -3180,8 +3176,7 @@ function renderInsightReward(){
     const pct=Math.round(r.count/maxCnt*100);
     return `<div class="rwd-rank-item"><div class="rwd-rank-num">${i+1}</div><span class="rwd-rank-emoji">${r.emoji}</span><div style="flex:1;min-width:0"><div class="rwd-rank-name">${r.name}</div><div class="rwd-rank-bar"><div class="rwd-rank-fill" style="width:${pct}%"></div></div></div><div class="rwd-rank-cnt">${r.count}회<br><span style="font-size:10px;color:var(--tx3)">${r.totalPts.toLocaleString()}점</span></div></div>`;
   }).join('');
-  el.innerHTML=`<div class="insight-title"><svg viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg>보상 교환 랭킹</div>
-    <div class="rwd-rank-list">${listHtml}</div>`;
+  el.innerHTML=`<div class="rwd-rank-list">${listHtml}</div>`;
 }
 
 let HP=7;
