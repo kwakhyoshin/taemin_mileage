@@ -3259,12 +3259,23 @@ let swRegistration = null;
 let pushSubscription = null;
 
 async function initServiceWorker(){
-  if(!('serviceWorker' in navigator))return;
+  if(!('serviceWorker' in navigator)){console.warn('[SW] not supported');return;}
   try{
     swRegistration = await navigator.serviceWorker.register('sw.js');
-    console.log('[SW] registered');
+    console.log('[SW] registered, scope:', swRegistration.scope);
+    // Wait for SW to be active
+    if(!swRegistration.active){
+      await new Promise(resolve=>{
+        swRegistration.addEventListener('statechange',()=>{
+          if(swRegistration.active)resolve();
+        });
+        // Also resolve via .ready
+        navigator.serviceWorker.ready.then(()=>resolve());
+      });
+    }
     // Check existing subscription
     pushSubscription = await swRegistration.pushManager.getSubscription();
+    console.log('[SW] existing push sub:', !!pushSubscription);
     updatePushUI();
   }catch(e){ console.warn('[SW] registration failed:', e); }
 }
@@ -3279,27 +3290,48 @@ function urlBase64ToUint8Array(base64String){
 }
 
 async function subscribePush(){
-  if(!swRegistration){toast('서비스 워커가 준비되지 않았어요');return;}
+  // If swRegistration is not set yet, try to get it now
+  if(!swRegistration){
+    try{
+      swRegistration = await navigator.serviceWorker.ready;
+      console.log('[Push] got SW registration from .ready');
+    }catch(e){
+      toast('서비스 워커가 준비되지 않았어요');return;
+    }
+  }
+  // Step 1: Request notification permission
   try{
     const permission=await Notification.requestPermission();
-    if(permission!=='granted'){toast('알림 권한이 거부됐어요. 설정에서 허용해주세요.');return;}
+    if(permission!=='granted'){toast('알림 권한이 거부됐어요. 브라우저 설정에서 알림을 허용해주세요.');return;}
+  }catch(e){
+    console.error('[Push] permission error:',e);
+    toast('알림 권한 요청 실패: '+e.message);return;
+  }
+  // Step 2: Subscribe to push
+  try{
     pushSubscription=await swRegistration.pushManager.subscribe({
       userVisibleOnly:true,
       applicationServerKey:urlBase64ToUint8Array(VAPID_PUBLIC)
     });
-    // Save subscription to Firestore
+    console.log('[Push] subscribed OK');
+  }catch(e){
+    console.error('[Push] subscribe error:',e);
+    toast('푸시 구독 실패: '+e.message);return;
+  }
+  // Step 3: Save to Firestore (non-blocking)
+  try{
     const subJSON=pushSubscription.toJSON();
     await setDoc(doc(db,'push_subscriptions','taemin'),{
       subscription:JSON.stringify(subJSON),
       updatedAt:Date.now(),
       enabled:true
     });
-    updatePushUI();
-    toast('🔔 알림이 활성화됐어요!');
+    console.log('[Push] saved to Firestore');
   }catch(e){
-    console.error('[Push] subscribe error:',e);
-    toast('알림 구독에 실패했어요: '+e.message);
+    console.warn('[Push] Firestore save failed (subscription still active):',e);
   }
+  updatePushUI();
+  toast('🔔 알림이 활성화됐어요!');
 }
 
 async function unsubscribePush(){
