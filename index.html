@@ -248,6 +248,18 @@ body.dark .dtog-in{transform:translateX(24px)}
 .rwd-btn.locked{background:var(--bdr);color:var(--tx3);cursor:default}
 .rwd-lack{font-size:10px;color:var(--tx3);font-weight:700;margin-top:4px}
 
+/* REWARD INVENTORY */
+#rwd-inventory{margin:0 16px 14px}
+.rwd-inv-card{background:var(--card);border-radius:var(--r);padding:14px;margin-bottom:12px;box-shadow:var(--sh)}
+.rwd-inv-header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.rwd-inv-name{font-size:14px;font-weight:800;color:var(--tx)}
+.rwd-inv-count{font-size:11px;color:var(--tx3);font-weight:600;margin-top:2px}
+.rwd-inv-items{display:flex;flex-direction:column;gap:8px}
+.rwd-inv-item{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg);border-radius:var(--rsm);font-size:12px;color:var(--tx3)}
+.inv-badge{display:inline-block;background:#10B981;color:#fff;font-size:9px;font-weight:800;padding:2px 8px;border-radius:4px;white-space:nowrap;flex-shrink:0}
+.inv-btn{padding:4px 10px;background:var(--tab-color,var(--or));color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0}
+.inv-btn:active{opacity:.8}
+
 /* RECENT */
 .rec-list{background:var(--card);border-radius:var(--r);margin:0 16px 14px;overflow:hidden;transition:background .25s}
 .rec-item{display:flex;align-items:center;gap:11px;padding:11px 14px;border-bottom:.5px solid var(--bdr)}
@@ -1125,7 +1137,7 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
     <div class="streak-pill" id="streak-pill">🔥 0일 연속</div>
     <div class="hero-lbl">태민이의 마일리지</div>
     <div style="display:flex;align-items:flex-end;gap:6px;margin:4px 0">
-      <span class="hero-pts" id="hero-pts">0</span><span class="hero-unit">점</span>
+      <span class="hero-pts" id="hero-pts">0</span><span class="hero-unit">M</span>
     </div>
     <div class="hero-goal" id="hero-goal"></div>
     <div class="prog-track"><div class="prog-fill" id="hero-bar" style="width:0%"></div></div>
@@ -1145,7 +1157,7 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
     <div class="hdr-stats" id="log-hdr-stats">
       <div class="hdr-stat"><div class="hdr-stat-num" id="log-today-count">0</div><div class="hdr-stat-lbl">오늘 활동</div></div>
       <div class="hdr-stat-divider"></div>
-      <div class="hdr-stat"><div class="hdr-stat-num" id="log-today-pts">0</div><div class="hdr-stat-lbl">획득 점수</div></div>
+      <div class="hdr-stat"><div class="hdr-stat-num" id="log-today-pts">0</div><div class="hdr-stat-lbl">획득 마일리지</div></div>
     </div>
   </div>
   <div class="log-wrap" id="log-list"></div>
@@ -1164,6 +1176,8 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
   </div>
   <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg> 교환 가능한 보상</div>
   <div class="rwd-grid" id="rwd-grid"></div>
+  <div class="sec">🎒 보유 보상 목록</div>
+  <div id="rwd-inventory"></div>
 </div>
 
 <!-- HISTORY -->
@@ -1233,7 +1247,7 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
 
       <!-- MVP 활동 -->
       <div class="dash-brick">
-        <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7L12 16.4 5.7 21l2.3-7L2 9.4h7.6z"/></svg> 누적 득점 TOP 활동</div>
+        <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7L12 16.4 5.7 21l2.3-7L2 9.4h7.6z"/></svg> 누적 마일리지 TOP 활동</div>
         <div class="card" id="insight-mvp"></div>
       </div>
 
@@ -1311,7 +1325,7 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
         </div>
         <div class="hist-earned-inline">
           <span id="hist-period-lbl">최근 7일</span>
-          <span class="hist-earned-val" id="hist-earned">+0점</span>
+          <span class="hist-earned-val" id="hist-earned">+0 마일리지</span>
         </div>
       </div>
       <div class="hist-custom-row" id="hist-custom-row" style="display:none">
@@ -1344,7 +1358,7 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
     <div class="adm-sec-lbl">마일리지 조정</div>
     <div class="adm-card">
       <div class="adm-row">
-        <div class="adm-row-l"><div class="adm-row-nm">보너스 지급</div><div class="adm-row-sub">특별 보너스 포인트</div></div>
+        <div class="adm-row-l"><div class="adm-row-nm">보너스 지급</div><div class="adm-row-sub">특별 보너스 마일리지</div></div>
         <input class="num-inp" id="bonus-inp" type="number" value="50" min="1">
         <button class="btn-sm" onclick="giveBonus()">지급</button>
       </div>
@@ -1438,12 +1452,12 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
       <div class="adm-sec-lbl">연속 달성 보너스</div>
       <div class="adm-card">
         <div class="adm-row">
-          <div class="adm-row-l"><div class="adm-row-nm">7일 연속 달성 보너스</div><div class="adm-row-sub">7일 연속 시 추가 점수 지급</div></div>
+          <div class="adm-row-l"><div class="adm-row-nm">7일 연속 달성 보너스</div><div class="adm-row-sub">7일 연속 시 추가 마일리지 지급</div></div>
           <button class="tog" id="tog-streak" onclick="togSetting('streak')"><div class="tog-dot"></div></button>
         </div>
         <div class="divider"></div>
         <div class="adm-row">
-          <div class="adm-row-l"><div class="adm-row-nm">보너스 점수</div></div>
+          <div class="adm-row-l"><div class="adm-row-nm">보너스 마일리지</div></div>
           <input class="num-inp" id="bonus-pts-inp" type="number" value="100" min="1" onchange="saveSettings()">
         </div>
       </div>
@@ -1578,7 +1592,7 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
       </div>
       <div class="field"><label>활동 이름 *</label><input id="act-name" placeholder="예: 피아노 연습" maxlength="20"></div>
       <div class="field"><label>설명</label><input id="act-desc" placeholder="예: 30분 이상 연습"></div>
-      <div class="field"><label>마일리지 점수 (1회당)</label><input id="act-pts" type="number" value="20" min="1" max="999"></div>
+      <div class="field"><label>마일리지 (1회당)</label><input id="act-pts" type="number" value="20" min="1" max="999"></div>
       <div class="field">
         <label>하루 최대 수행 횟수</label>
         <div style="font-size:11px;color:var(--tx3);margin-bottom:6px">0 = 무제한 (몇 번이든 가능)</div>
@@ -2193,6 +2207,9 @@ function defaultState(){
     dark:false,
     greeting:'안녕, 태민아! 👋',
     users:{}, // 가입 정보 저장
+    rewardInventory:[], // Array of {id, rwdId, rwdName, rwdEmoji, purchasedAt, pts, status, requestId, approvedBy, approvedAt}
+    rewardRequests:[], // Array of {id, rwdInvId, rwdName, rwdEmoji, fromUser, toUsers, status, requestedAt, approvedBy, approvedAt}
+    rewardNotify:null, // Trigger for Cloud Functions
   };
 }
 
@@ -2412,11 +2429,11 @@ function updateSmartMessage(){
   // 30% 확률로 연속 보너스 메시지 표시 (보너스 활성화 & 1일 이상 연속 시)
   if(streakBonusEnabled&&streak>0&&Math.random()<0.3){
     if(daysUntilBonus===1){
-      smartMsg.textContent=`🔥 내일만 완료하면 +${bonusPts}점 보너스! 힘내!`;
+      smartMsg.textContent=`🔥 내일만 완료하면 +${bonusPts} 마일리지 보너스! 힘내!`;
     }else if(daysUntilBonus===2){
-      smartMsg.textContent=`🔥 ${daysUntilBonus}일만 더! +${bonusPts}점 보너스가 기다려요!`;
+      smartMsg.textContent=`🔥 ${daysUntilBonus}일만 더! +${bonusPts} 마일리지 보너스가 기다려요!`;
     }else if(daysUntilBonus<=3){
-      smartMsg.textContent=`🔥 ${streak}일 연속 중! ${daysUntilBonus}일 후 보너스 +${bonusPts}점!`;
+      smartMsg.textContent=`🔥 ${streak}일 연속 중! ${daysUntilBonus}일 후 보너스 +${bonusPts} 마일리지!`;
     }else{
       smartMsg.textContent=`🔥 ${streak}일 연속 달성 중! 계속 힘내자! 💪`;
     }
@@ -2520,7 +2537,7 @@ function countdownStr(act){
 // ── RENDER ────────────────────────────────────
 function renderAll(){
   renderHero();renderHomeGrid();renderRecent();
-  renderLogList();renderRewardGrid();
+  renderLogList();renderRewardGrid();renderRewardInventory();
   renderDashboard();renderHistStats();renderHistList();renderCalendar();
   renderAdmStats();renderAdmActList();renderAdmRwdList();renderAdmSettings();
   renderMsgSettings();renderAdmMemberPhotos();
@@ -2538,8 +2555,8 @@ function renderHero(){
   const g=S.rwds.find(r=>r.goal)||S.rwds[0];
   const pct=g?Math.min(100,Math.round(S.pts/g.pts*100)):0;
   document.getElementById('hero-bar').style.width=pct+'%';
-  document.getElementById('hero-bar-lbl').textContent=g?'목표 '+g.pts.toLocaleString()+'점':'';
-  document.getElementById('hero-goal').textContent=g?(S.pts>=g.pts?`${g.emoji} ${g.name} 교환 가능해요! 🎉`:`${g.emoji} ${g.name}까지 ${(g.pts-S.pts).toLocaleString()}점 남았어요! 💪`):'';
+  document.getElementById('hero-bar-lbl').textContent=g?'목표 '+g.pts.toLocaleString()+' 마일리지':'';
+  document.getElementById('hero-goal').textContent=g?(S.pts>=g.pts?`${g.emoji} ${g.name} 교환 가능해요! 🎉`:`${g.emoji} ${g.name}까지 ${(g.pts-S.pts).toLocaleString()} 마일리지 남았어요! 💪`):'';
   const rwdBal=document.getElementById('rwd-bal');if(rwdBal)rwdBal.textContent=S.pts.toLocaleString();
   document.getElementById('adm-pts').textContent=S.pts.toLocaleString();
 }
@@ -2597,7 +2614,7 @@ function renderHomeGrid(){
     return `<div class="act-card${cls}" style="${cursorStyle}" onclick="${onclick}">
       <div class="e">${a.emoji}</div>
       <div class="n">${a.name}</div>
-      <div class="p">+${a.pts}점</div>
+      <div class="p">+${a.pts} 마일리지</div>
       ${a.maxDay>0?`<div class="count-badge">${st.label||'0/'+a.maxDay}</div>`:''}
       ${timer?`<div class="timer">⏰ ${timer}</div>`:''}
       <div class="act-card-prog" style="width:${st.pct}%"></div>
@@ -2636,7 +2653,7 @@ function renderLogList(){
         </div>
       </div>
       <div class="log-right">
-        <span class="log-badge">+${a.pts}점</span>
+        <span class="log-badge">+${a.pts} 마일리지</span>
         ${done>0?`<button class="undo-btn" onclick="event.stopPropagation();undoAct('${a.id}')">취소↩</button>`:''}
       </div>
     </div>`;
@@ -2673,7 +2690,7 @@ function renderRecent(){
       <div class="rec-ico">${i.emoji}</div>
       <div style="flex:1"><div class="rec-nm">${i.name}${labelHtml}</div><div class="rec-tm">${timeStr}</div></div>
       <div style="display:flex;align-items:center;gap:6px">
-        <div style="font-size:14px;font-weight:800;color:${i.pts<0?'var(--rd)':'var(--gn2)'}">${i.pts>0?'+':''}${i.pts}점</div>
+        <div style="font-size:14px;font-weight:800;color:${i.pts<0?'var(--rd)':'var(--gn2)'}">${i.pts>0?'+':''}${i.pts} 마일리지</div>
         ${i.isRedeem?`<button class="undo-btn" onclick="undoRedeem('${i.id}')">취소↩</button>`:''}
       </div>
     </div>`;
@@ -2695,15 +2712,68 @@ function renderRewardGrid(){
       <div class="rwd-e">${r.emoji}</div><div class="rwd-nm">${r.name}</div>
       ${sale?`
         <div class="sale-price-wrap">
-          <span class="sale-original">${r.pts.toLocaleString()}점</span>
+          <span class="sale-original">${r.pts.toLocaleString()} 마일리지</span>
           <span class="sale-badge">-${sale.percent}%</span>
         </div>
-        <div class="cost-tag sale-cost">${actualPts.toLocaleString()}점</div>
+        <div class="cost-tag sale-cost">${actualPts.toLocaleString()} 마일리지</div>
         <div class="sale-timer">⏰ ~${sale.endDate.slice(5).replace('-','/')}</div>
-      `:`<div class="cost-tag">${r.pts.toLocaleString()}점</div><br>`}
+      `:`<div class="cost-tag">${r.pts.toLocaleString()} 마일리지</div><br>`}
       <button class="rwd-btn${can?'':' locked'}" ${can?`onclick="openRedeem('${r.id}')"`:'disabled'}>
-        ${can?'교환하기':'포인트 부족'}</button>
-      ${!can?`<div class="rwd-lack">${lack.toLocaleString()}점 더 필요해요</div>`:''}
+        ${can?'교환하기':'마일리지 부족'}</button>
+      ${!can?`<div class="rwd-lack">${lack.toLocaleString()} 마일리지 더 필요해요</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function renderRewardInventory(){
+  const el=document.getElementById('rwd-inventory');
+  if(!el)return;
+
+  if(!S.rewardInventory||S.rewardInventory.length===0){
+    el.innerHTML='<div style="padding:16px;text-align:center;color:var(--tx3);font-size:13px">아직 보유한 보상이 없어요</div>';
+    return;
+  }
+
+  const grouped={};
+  S.rewardInventory.forEach(item=>{
+    const key=item.rwdId;
+    if(!grouped[key])grouped[key]={items:[],rwdName:item.rwdName,rwdEmoji:item.rwdEmoji};
+    grouped[key].items.push(item);
+  });
+
+  el.innerHTML=Object.entries(grouped).map(([rwdId,group])=>{
+    const owned=group.items.filter(i=>i.status==='owned');
+    const pending=group.items.filter(i=>i.status==='pending');
+    const approved=group.items.filter(i=>i.status==='approved');
+
+    return `<div class="rwd-inv-card">
+      <div class="rwd-inv-header">
+        <span style="font-size:24px">${group.rwdEmoji}</span>
+        <div style="flex:1">
+          <div class="rwd-inv-name">${group.rwdName}</div>
+          <div class="rwd-inv-count">${owned.length}개 보유중</div>
+        </div>
+      </div>
+      ${owned.length>0?`<div class="rwd-inv-items">
+        ${owned.map(item=>`<div class="rwd-inv-item owned">
+          <span class="inv-badge">보유중</span>
+          <div style="flex:1;min-width:0;font-size:12px;color:var(--tx3)">${new Date(item.purchasedAt).toLocaleDateString()}</div>
+          <button class="inv-btn" onclick="useReward('${item.id}')">사용하기</button>
+          <button class="inv-btn" onclick="refundReward('${item.id}')">환불</button>
+        </div>`).join('')}
+      </div>`:''}
+      ${pending.length>0?`<div class="rwd-inv-items">
+        ${pending.map(item=>`<div class="rwd-inv-item pending">
+          <span class="inv-badge" style="background:#FCA5A5">요청중</span>
+          <div style="flex:1;min-width:0;font-size:12px;color:var(--tx3)">승인 대기중</div>
+        </div>`).join('')}
+      </div>`:''}
+      ${approved.length>0?`<div class="rwd-inv-items">
+        ${approved.map(item=>`<div class="rwd-inv-item approved">
+          <span class="inv-badge" style="background:#86EFAC">완료</span>
+          <div style="flex:1;min-width:0;font-size:12px;color:var(--tx3)">${new Date(item.approvedAt).toLocaleDateString()} 승인</div>
+        </div>`).join('')}
+      </div>`:''}
     </div>`;
   }).join('');
 }
@@ -2834,7 +2904,7 @@ function renderCalDetail(dateStr){
       return `<div class="hist-item">
         <div class="hist-ico" style="background:var(--gn-lt)">${l.emoji}</div>
         <div style="flex:1"><div class="hist-nm">${l.name}</div><div class="hist-tm">${ap} ${h12}:${min}</div></div>
-        <div class="hist-pts">+${l.pts}점</div>
+        <div class="hist-pts">+${l.pts} 마일리지</div>
       </div>`;
     }).join('');
   }
@@ -2877,8 +2947,8 @@ function renderTodaySummary(){
   const diff=selPts-prevPts;
   let diffText='',diffColor='';
   if(prevPts===0&&selPts===0){diffText='활동 기록이 없어요';diffColor='var(--tx3)';}
-  else if(diff>0){diffText=`전날보다 +${diff}점 더 획득! 📈`;diffColor='var(--gn)';}
-  else if(diff<0){diffText=`전날보다 ${Math.abs(diff)}점 부족해요 📉`;diffColor='#F97316';}
+  else if(diff>0){diffText=`전날보다 +${diff} 마일리지 더 획득! 📈`;diffColor='var(--gn)';}
+  else if(diff<0){diffText=`전날보다 ${Math.abs(diff)} 마일리지 부족해요 📉`;diffColor='#F97316';}
   else{diffText='전날과 동일한 성과예요 ➡️';diffColor='var(--tx2)';}
 
   // 동기부여 메시지
@@ -3073,7 +3143,7 @@ function renderDashTop3(){
       <div class="top3-emoji">${item.emoji}</div>
       <div class="top3-info">
         <div class="top3-name">${item.name}</div>
-        <div class="top3-sub">${item.count}회 · ${item.pts.toLocaleString()}점</div>
+        <div class="top3-sub">${item.count}회 · ${item.pts.toLocaleString()} 마일리지</div>
         <div class="top3-bar-bg"><div class="top3-bar" style="width:${Math.round(item.count/maxCount*100)}%;background:${barColors[i]||'#818CF8'}"></div></div>
       </div>
     </div>`).join('')+'</div>';
@@ -3201,7 +3271,7 @@ function renderInsightWeekCmp(){
       <div class="week-cmp-col"><div class="week-cmp-lbl">지난 주</div><div class="week-cmp-val">${lwPts.toLocaleString()}</div><div class="week-cmp-sub">${lwCnt}회 활동</div></div>
       <div class="week-cmp-col current"><div class="week-cmp-lbl">이번 주</div><div class="week-cmp-val">${twPts.toLocaleString()}</div><div class="week-cmp-sub">${twCnt}회 활동</div></div>
     </div>
-    <div class="week-cmp-diff ${diffClass}">${diffIcon} ${Math.abs(diff).toLocaleString()}점 ${diff>0?'더 많아요!':diff<0?'줄었어요':'같아요'}</div>`;
+    <div class="week-cmp-diff ${diffClass}">${diffIcon} ${Math.abs(diff).toLocaleString()} 마일리지 ${diff>0?'더 많아요!':diff<0?'줄었어요':'같아요'}</div>`;
 }
 
 function renderInsightMVP(){
@@ -3221,11 +3291,11 @@ function renderInsightMVP(){
     return;
   }
   const top=sorted[0];
-  const top3html=sorted.slice(0,3).map((a,i)=>`<div style="display:flex;align-items:center;gap:8px;padding:4px 0;${i>0?'opacity:.7':''}"><span style="font-size:12px;font-weight:900;color:var(--tab-color,var(--or));width:16px">${i+1}</span><span style="font-size:16px">${a.emoji}</span><span style="flex:1;font-size:12px;font-weight:700;color:var(--tx)">${a.name}</span><span style="font-size:12px;font-weight:900;color:var(--tx2)">${a.totalPts.toLocaleString()}점 (${a.count}회)</span></div>`).join('');
+  const top3html=sorted.slice(0,3).map((a,i)=>`<div style="display:flex;align-items:center;gap:8px;padding:4px 0;${i>0?'opacity:.7':''}"><span style="font-size:12px;font-weight:900;color:var(--tab-color,var(--or));width:16px">${i+1}</span><span style="font-size:16px">${a.emoji}</span><span style="flex:1;font-size:12px;font-weight:700;color:var(--tx)">${a.name}</span><span style="font-size:12px;font-weight:900;color:var(--tx2)">${a.totalPts.toLocaleString()} 마일리지 (${a.count}회)</span></div>`).join('');
   el.innerHTML=`<div class="mvp-row" style="margin-bottom:10px">
       <div class="mvp-emoji">${top.emoji}</div>
-      <div class="mvp-info"><div class="mvp-name">${top.name}</div><div class="mvp-detail">${top.count}회 수행 · 1회 평균 ${Math.round(top.totalPts/top.count)}점</div></div>
-      <div class="mvp-pts">${top.totalPts.toLocaleString()}<span style="font-size:11px;font-weight:700;color:var(--tx3)">점</span></div>
+      <div class="mvp-info"><div class="mvp-name">${top.name}</div><div class="mvp-detail">${top.count}회 수행 · 1회 평균 ${Math.round(top.totalPts/top.count)} 마일리지</div></div>
+      <div class="mvp-pts">${top.totalPts.toLocaleString()}<span style="font-size:11px;font-weight:700;color:var(--tx3)"> 마일리지</span></div>
     </div>
     <div style="border-top:1px solid var(--bdr);padding-top:8px">${top3html}</div>`;
 }
@@ -3317,7 +3387,7 @@ function renderInsightReward(){
   const maxCnt=sorted[0].count;
   const listHtml=sorted.slice(0,5).map((r,i)=>{
     const pct=Math.round(r.count/maxCnt*100);
-    return `<div class="rwd-rank-item"><div class="rwd-rank-num">${i+1}</div><span class="rwd-rank-emoji">${r.emoji}</span><div style="flex:1;min-width:0"><div class="rwd-rank-name">${r.name}</div><div class="rwd-rank-bar"><div class="rwd-rank-fill" style="width:${pct}%"></div></div></div><div class="rwd-rank-cnt">${r.count}회<br><span style="font-size:10px;color:var(--tx3)">${r.totalPts.toLocaleString()}점</span></div></div>`;
+    return `<div class="rwd-rank-item"><div class="rwd-rank-num">${i+1}</div><span class="rwd-rank-emoji">${r.emoji}</span><div style="flex:1;min-width:0"><div class="rwd-rank-name">${r.name}</div><div class="rwd-rank-bar"><div class="rwd-rank-fill" style="width:${pct}%"></div></div></div><div class="rwd-rank-cnt">${r.count}회<br><span style="font-size:10px;color:var(--tx3)">${r.totalPts.toLocaleString()} 마일리지</span></div></div>`;
   }).join('');
   el.innerHTML=`<div class="rwd-rank-list">${listHtml}</div>`;
 }
@@ -3572,7 +3642,7 @@ function renderHistStats(){
   }else if(HP===7){periodLabel='최근 7일';}
   else if(HP===30){periodLabel='최근 30일';}
   document.getElementById('hist-period-lbl').textContent=periodLabel;
-  document.getElementById('hist-earned').textContent='+'+earned.toLocaleString()+'점';
+  document.getElementById('hist-earned').textContent='+'+earned.toLocaleString()+' 마일리지';
   renderTodaySummary();
 }
 function renderHistList(){
@@ -3584,7 +3654,7 @@ function renderHistList(){
       <div class="hist-ico">${i.emoji}</div>
       <div style="flex:1"><div class="hist-nm">${i.name}</div><div class="hist-tm">${fmt(i.ts)}</div></div>
       <div style="display:flex;align-items:center;gap:6px">
-        <div class="hist-pts${i.pts<0?' neg':''}">${i.pts>0?'+':''}${i.pts}점</div>
+        <div class="hist-pts${i.pts<0?' neg':''}">${i.pts>0?'+':''}${i.pts} 마일리지</div>
         ${i.isRedeem?`<button class="undo-btn" onclick="undoRedeem('${i.id}')">취소↩</button>`:''}
       </div>
     </div>`).join(''):'<div class="empty">아직 내역이 없어요</div>';
@@ -3604,7 +3674,7 @@ function renderAdmActList(){
         <div class="m-emoji">${a.emoji}</div>
         <div class="m-info" style="flex:1;min-width:0">
           <div class="m-nm">${a.name}</div>
-          <div class="m-sub">${a.pts}점 · ${a.maxDay===0?'제한없음':a.maxDay+'회/'+CYCLE_LABEL[a.cycle]}${a.days&&a.days.length>0&&a.days.length<7?' · '+a.days.map(d=>['일','월','화','수','목','금','토'][d]).join(''):''}
+          <div class="m-sub">${a.pts} 마일리지 · ${a.maxDay===0?'제한없음':a.maxDay+'회/'+CYCLE_LABEL[a.cycle]}${a.days&&a.days.length>0&&a.days.length<7?' · '+a.days.map(d=>['일','월','화','수','목','금','토'][d]).join(''):''}
           </div>
         </div>
       </div>
@@ -3688,7 +3758,7 @@ function renderAdmRwdList(){
   document.getElementById('adm-rwd-list').innerHTML=S.rwds.map(r=>`
     <div class="manage-item">
       <div class="m-emoji">${r.emoji}</div>
-      <div class="m-info"><div class="m-nm">${r.name}${r.goal?' 🎯':''}</div><div class="m-sub">${r.pts.toLocaleString()}점</div>${r.sale&&r.sale.endDate&&new Date(r.sale.endDate+'T23:59:59')>=new Date()?`<div style="font-size:9px;font-weight:800;color:#EF4444;margin-top:2px">🏷️ ${r.sale.percent}% 할인 중 (~${r.sale.endDate.slice(5).replace('-','/')})</div>`:''}</div>
+      <div class="m-info"><div class="m-nm">${r.name}${r.goal?' 🎯':''}</div><div class="m-sub">${r.pts.toLocaleString()} 마일리지</div>${r.sale&&r.sale.endDate&&new Date(r.sale.endDate+'T23:59:59')>=new Date()?`<div style="font-size:9px;font-weight:800;color:#EF4444;margin-top:2px">🏷️ ${r.sale.percent}% 할인 중 (~${r.sale.endDate.slice(5).replace('-','/')})</div>`:''}</div>
       <div class="m-btns-row">
         <button class="btn-sm gy" style="padding:6px 9px;font-size:11px" onclick="openRwdForm('${r.id}')">수정</button>
         <button class="btn-sm rd" style="padding:6px 9px;font-size:11px" onclick="delRwd('${r.id}')">삭제</button>
@@ -3716,14 +3786,14 @@ function doAct(id){
   S.longest=Math.max(S.longest||0,S.streak);S.lastDate=t;
 
   let bonus=0,sm='';
-  if(S.settings.streakBonus&&S.streak>0&&S.streak%7===0){bonus=S.settings.streakBonusPts||100;sm=` 🔥 ${S.streak}일 연속 +${bonus}점!`;}
+  if(S.settings.streakBonus&&S.streak>0&&S.streak%7===0){bonus=S.settings.streakBonusPts||100;sm=` 🔥 ${S.streak}일 연속 +${bonus} 마일리지!`;}
 
   S.pts+=a.pts+bonus;S.totalDone++;
   // log entry with unique id for undo
   S.log.unshift({id:'l_'+Date.now(),emoji:a.emoji,name:a.name,pts:a.pts+bonus,ts:Date.now(),actId:a.id});
   if(S.log.length>300)S.log=S.log.slice(0,300);
   save();renderAll();
-  toast(`${a.emoji} ${a.name} +${a.pts}점${sm}`);confetti();
+  toast(`${a.emoji} ${a.name} +${a.pts} 마일리지${sm}`);confetti();
 }
 
 function undoAct(actId){
@@ -3742,7 +3812,7 @@ function undoAct(actId){
   S.log.splice(idx,1); // remove from log
   unmarkDone(a);
   save();renderAll();
-  toast(`↩ ${a.name} 취소됨 (-${entry.pts}점)`);
+  toast(`↩ ${a.name} 취소됨 (-${entry.pts} 마일리지)`);
 }
 
 // REDEEM
@@ -3752,11 +3822,11 @@ function openRedeem(id){
   const sale=r.sale&&r.sale.endDate&&new Date(r.sale.endDate+'T23:59:59')>=new Date()?r.sale:null;
   const actualPts=sale?Math.round(r.pts*(1-sale.percent/100)):r.pts;
   if(!r||S.pts<actualPts)return;
-  if(!confirm(`🎁 "${r.name}" 보상을 교환하시겠어요?\n(${actualPts.toLocaleString()}점이 차감됩니다)`))return;
+  if(!confirm(`🎁 "${r.name}" 보상을 교환하시겠어요?\n(${actualPts.toLocaleString()} 마일리지가 차감됩니다)`))return;
   pRwdId=id;
   document.getElementById('mr-emoji').textContent=r.emoji;
   document.getElementById('mr-title').textContent=r.name+' 교환';
-  document.getElementById('mr-body').textContent=`${actualPts.toLocaleString()}점을 사용할까요?\n현재 ${S.pts.toLocaleString()}점 보유중이에요.`;
+  document.getElementById('mr-body').textContent=`${actualPts.toLocaleString()} 마일리지을 사용할까요?\n현재 ${S.pts.toLocaleString()} 마일리지 보유중이에요.`;
   openModal('m-redeem');
 }
 function confirmRedeem(){
@@ -3765,6 +3835,20 @@ function confirmRedeem(){
   const actualPts=sale?Math.round(r.pts*(1-sale.percent/100)):r.pts;
   if(!r||S.pts<actualPts)return;
   S.pts-=actualPts;
+
+  // Add to inventory with 'owned' status
+  if(!S.rewardInventory)S.rewardInventory=[];
+  S.rewardInventory.push({
+    id:'ri_'+Date.now(),
+    rwdId:r.id,
+    rwdName:r.name,
+    rwdEmoji:r.emoji,
+    purchasedAt:Date.now(),
+    pts:actualPts,
+    status:'owned'
+  });
+
+  // Also add to log for history
   const logId='l_'+Date.now();
   S.log.unshift({id:logId,emoji:r.emoji,name:r.name+' 교환',pts:-actualPts,ts:Date.now(),actId:null,rwdId:r.id,isRedeem:true});
   save();closeModal('m-redeem');renderAll();
@@ -3775,25 +3859,198 @@ function undoRedeem(logId){
   if(idx===-1){toast('취소할 내역이 없어요');return;}
   const entry=S.log[idx];
   if(!entry.isRedeem){toast('보상 내역이 아니에요');return;}
-  if(!confirm(`"${entry.name}" 교환을 취소하시겠어요?\n(${Math.abs(entry.pts).toLocaleString()}점이 돌아옵니다)`))return;
+  if(!confirm(`"${entry.name}" 교환을 취소하시겠어요?\n(${Math.abs(entry.pts).toLocaleString()} 마일리지가 돌아옵니다)`))return;
   S.pts+=Math.abs(entry.pts);
+  // Remove corresponding inventory item if exists
+  if(S.rewardInventory){
+    const invIdx=S.rewardInventory.findIndex(x=>x.rwdId===entry.rwdId&&(x.status==='owned'||x.status==='pending'));
+    if(invIdx!==-1){
+      const inv=S.rewardInventory[invIdx];
+      // If pending, also remove the request
+      if(inv.status==='pending'&&inv.requestId&&S.rewardRequests){
+        S.rewardRequests=S.rewardRequests.filter(r=>r.id!==inv.requestId);
+      }
+      S.rewardInventory.splice(invIdx,1);
+    }
+  }
   S.log.splice(idx,1);
   save();renderAll();
-  toast(`↩ ${entry.name} 취소됨 (+${Math.abs(entry.pts)}점 복구)`);
+  toast(`↩ ${entry.name} 취소됨 (+${Math.abs(entry.pts)} 마일리지 복구)`);
+}
+
+// REWARD INVENTORY SYSTEM
+function useReward(invId){
+  if(!S.rewardInventory)return;
+  const item=S.rewardInventory.find(x=>x.id===invId);
+  if(!item||item.status!=='owned')return;
+  if(!confirm(`🎁 "${item.rwdName}" 사용을 요청할까요?`))return;
+
+  // Change status to pending
+  item.status='pending';
+  item.requestId='req_'+Date.now();
+
+  // Create reward request
+  if(!S.rewardRequests)S.rewardRequests=[];
+  S.rewardRequests.push({
+    id:item.requestId,
+    rwdInvId:invId,
+    rwdName:item.rwdName,
+    rwdEmoji:item.rwdEmoji,
+    fromUser:'taemin',
+    toUsers:['dad','mom'],
+    status:'pending',
+    requestedAt:Date.now(),
+    approvedBy:null,
+    approvedAt:null
+  });
+
+  // Add family messages for parents
+  if(!S.familyMessages)S.familyMessages=[];
+  S.familyMessages.push({
+    from:'taemin',
+    to:'dad',
+    text:`🎁 태민이가 "${item.rwdName}" 보상 사용을 요청했어요!`,
+    ts:Date.now(),
+    read:false,
+    type:'reward_request',
+    requestId:item.requestId,
+    rwdInvId:invId
+  });
+  S.familyMessages.push({
+    from:'taemin',
+    to:'mom',
+    text:`🎁 태민이가 "${item.rwdName}" 보상 사용을 요청했어요!`,
+    ts:Date.now(),
+    read:false,
+    type:'reward_request',
+    requestId:item.requestId,
+    rwdInvId:invId
+  });
+
+  // Trigger push notification to parents
+  S.rewardNotify={
+    type:'request',
+    rwdName:item.rwdName,
+    rwdEmoji:item.rwdEmoji,
+    user:'taemin',
+    targetUsers:['dad','mom'],
+    ts:Date.now()
+  };
+
+  save();renderAll();
+  toast(`📲 사용 요청을 보냈어요! 부모님의 승인을 기다려주세요.`);
+}
+
+function refundReward(invId){
+  if(!S.rewardInventory)return;
+  const idx=S.rewardInventory.findIndex(x=>x.id===invId);
+  if(idx===-1||S.rewardInventory[idx].status!=='owned')return;
+  const item=S.rewardInventory[idx];
+  if(!confirm(`🎁 "${item.rwdName}"을(를) 마일리지로 환불할까요?\n(${item.pts.toLocaleString()} 마일리지 복구)`))return;
+
+  S.pts+=item.pts;
+  S.rewardInventory.splice(idx,1);
+  S.log.unshift({id:'l_'+Date.now(),emoji:item.rwdEmoji,name:item.rwdName+' 환불',pts:item.pts,ts:Date.now(),actId:null});
+  save();renderAll();
+  toast(`↩ ${item.rwdName} 환불 완료! (+${item.pts} 마일리지)`);
+}
+
+function approveRewardRequest(reqId,approver){
+  if(!S.rewardRequests)return;
+  const req=S.rewardRequests.find(x=>x.id===reqId);
+  if(!req||req.status!=='pending')return;
+
+  req.status='approved';
+  req.approvedBy=approver;
+  req.approvedAt=Date.now();
+
+  if(!S.rewardInventory)return;
+  const inv=S.rewardInventory.find(x=>x.id===req.rwdInvId);
+  if(inv){
+    inv.status='approved';
+    inv.approvedBy=approver;
+    inv.approvedAt=Date.now();
+  }
+
+  // Add message to taemin
+  if(!S.familyMessages)S.familyMessages=[];
+  const approverName={dad:'아빠',mom:'엄마',taemin:'태민이'}[approver]||approver;
+  S.familyMessages.push({
+    from:approver,
+    to:'taemin',
+    text:`✅ ${approverName}가 "${req.rwdName}" 사용을 승인했어요!`,
+    ts:Date.now(),
+    read:false,
+    type:'reward_approval',
+    requestId:reqId
+  });
+
+  // Trigger push notification
+  S.rewardNotify={
+    type:'approved',
+    rwdName:req.rwdName,
+    user:'taemin',
+    targetUsers:['taemin'],
+    ts:Date.now()
+  };
+
+  save();renderAll();
+  toast(`✅ "${req.rwdName}" 승인 완료!`);
+}
+
+function rejectRewardRequest(reqId,rejector){
+  if(!S.rewardRequests)return;
+  const req=S.rewardRequests.find(x=>x.id===reqId);
+  if(!req||req.status!=='pending')return;
+
+  req.status='rejected';
+  req.approvedBy=rejector;
+  req.approvedAt=Date.now();
+
+  if(!S.rewardInventory)return;
+  const inv=S.rewardInventory.find(x=>x.id===req.rwdInvId);
+  if(inv){
+    inv.status='owned';
+  }
+
+  // Add message to taemin
+  if(!S.familyMessages)S.familyMessages=[];
+  const rejectorName={dad:'아빠',mom:'엄마',taemin:'태민이'}[rejector]||rejector;
+  S.familyMessages.push({
+    from:rejector,
+    to:'taemin',
+    text:`❌ ${rejectorName}가 "${req.rwdName}" 사용을 거절했어요.`,
+    ts:Date.now(),
+    read:false,
+    type:'reward_rejection',
+    requestId:reqId
+  });
+
+  // Trigger push notification
+  S.rewardNotify={
+    type:'rejected',
+    rwdName:req.rwdName,
+    user:'taemin',
+    targetUsers:['taemin'],
+    ts:Date.now()
+  };
+
+  save();renderAll();
+  toast(`❌ "${req.rwdName}" 거절됨.`);
 }
 
 // ADMIN
 function giveBonus(){
   const v=parseInt(document.getElementById('bonus-inp').value)||0;if(v<=0)return;
-  S.pts+=v;S.log.unshift({id:'l_'+Date.now(),emoji:'⭐',name:`보너스 +${v}점`,pts:v,ts:Date.now(),actId:null});
-  save();renderAll();toast(`⭐ 보너스 +${v}점 지급!`);confetti();
+  S.pts+=v;S.log.unshift({id:'l_'+Date.now(),emoji:'⭐',name:`보너스 +${v} 마일리지`,pts:v,ts:Date.now(),actId:null});
+  save();renderAll();toast(`⭐ 보너스 +${v} 마일리지 지급!`);confetti();
 }
 function deductPts(){
   const v=parseInt(document.getElementById('deduct-inp').value)||0;if(v<=0)return;
-  if(!confirm(`${v}점을 차감할까요?`))return;
+  if(!confirm(`${v} 마일리지을 차감할까요?`))return;
   S.pts=Math.max(0,S.pts-v);
-  S.log.unshift({id:'l_'+Date.now(),emoji:'📉',name:`차감 -${v}점`,pts:-v,ts:Date.now(),actId:null});
-  save();renderAll();toast(`📉 ${v}점 차감됨`);
+  S.log.unshift({id:'l_'+Date.now(),emoji:'📉',name:`차감 -${v} 마일리지`,pts:-v,ts:Date.now(),actId:null});
+  save();renderAll();toast(`📉 ${v} 마일리지 차감됨`);
 }
 function togActDone(id){
   const a=S.acts.find(x=>x.id===id);if(!a)return;
@@ -3881,12 +4138,12 @@ function restoreData(input){
       if(typeof data.pts==='undefined'||!Array.isArray(data.acts)||!Array.isArray(data.rwds)){
         toast('❌ 올바른 백업 파일이 아니에요'); input.value=''; return;
       }
-      if(!confirm(`📂 백업 데이터를 불러올까요?\n마일리지: ${(data.pts||0).toLocaleString()}점\n활동: ${(data.acts||[]).length}개\n\n현재 데이터는 사라져요!`)){input.value='';return;}
+      if(!confirm(`📂 백업 데이터를 불러올까요?\n마일리지: ${(data.pts||0).toLocaleString()} 마일리지\n활동: ${(data.acts||[]).length}개\n\n현재 데이터는 사라져요!`)){input.value='';return;}
       S=data;
       save();
       renderAll();
       input.value='';
-      toast('✅ 데이터 복원 완료! 마일리지 '+(S.pts||0).toLocaleString()+'점');
+      toast('✅ 데이터 복원 완료! 마일리지 '+(S.pts||0).toLocaleString()+' 마일리지');
     }catch(err){
       toast('❌ 파일을 읽을 수 없어요: '+err.message);
       input.value='';

@@ -32,6 +32,7 @@ self.addEventListener('push', (e) => {
     badge: 'icon-180.png',
     vibrate: [100, 50, 100],
     tag: data.tag || 'default',
+    renotify: true,
     data: {
       url: data.url || './',
       type: data.type || 'general',

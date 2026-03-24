@@ -55,7 +55,7 @@ exports.onFamilyMessage = onDocumentUpdated("users/taemin", async (event) => {
     title: senderName + "에게서 메시지가 도착했어요 💌",
     body: latestMsg.text,
     icon: "icon-180.png",
-    tag: "family-msg-" + Date.now(),
+    tag: "family-msg-" + latestMsg.from + "-" + latestMsg.to,
     type: "family_msg",
     from: latestMsg.from,
     msgText: latestMsg.text,
@@ -84,7 +84,7 @@ exports.onMoodUpdate = onDocumentUpdated("users/taemin", async (event) => {
     title: senderName + "의 기분이 바뀌었어요 " + mn.emoji,
     body: senderName + "이(가) 지금 " + mn.label + " 기분이래요!",
     icon: "icon-180.png",
-    tag: "mood-" + Date.now(),
+    tag: "mood-" + mn.user,
     type: "mood_update",
     from: mn.user,
     mood: mn.mood,
@@ -109,8 +109,50 @@ exports.onBroadcastPush = onDocumentUpdated("users/taemin", async (event) => {
     title: broadcast.title || "태민이 마일리지 🌟",
     body: broadcast.body || "새 알림이 있어요!",
     icon: "icon-180.png",
-    tag: "broadcast-" + Date.now(),
+    tag: "broadcast",
     type: "broadcast",
+    url: "./"
+  });
+});
+
+// 4) 보상 요청/승인/거절 알림
+exports.onRewardRequest = onDocumentUpdated("users/taemin", async (event) => {
+  const before = event.data.before.data();
+  const after = event.data.after.data();
+
+  // rewardNotify 필드가 변경됐는지 확인
+  if (!after.rewardNotify ||
+    (before.rewardNotify && before.rewardNotify.ts === after.rewardNotify.ts)) {
+    return null;
+  }
+
+  const rn = after.rewardNotify;
+  const devices = after.pushDevices || {};
+  const targetUsers = rn.targetUsers || [];
+
+  let title, body, tag;
+  if (rn.type === 'request') {
+    title = "🎁 보상 사용 요청이 도착했어요!";
+    body = `태민이가 "${rn.rwdName}" 사용을 요청했어요`;
+    tag = "reward-request-" + rn.ts;
+  } else if (rn.type === 'approved') {
+    title = "✅ 보상 사용이 승인되었어요!";
+    body = `"${rn.rwdName}" 사용이 승인됐어요!`;
+    tag = "reward-approved-" + rn.ts;
+  } else if (rn.type === 'rejected') {
+    title = "❌ 보상 사용이 거절되었어요";
+    body = `"${rn.rwdName}" 사용이 거절됐어요`;
+    tag = "reward-rejected-" + rn.ts;
+  } else {
+    return null;
+  }
+
+  return sendToDevices(devices, targetUsers, {
+    title: title,
+    body: body,
+    icon: "icon-180.png",
+    tag: tag,
+    type: "reward_notification",
     url: "./"
   });
 });
