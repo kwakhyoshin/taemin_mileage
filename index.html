@@ -3236,7 +3236,20 @@ const MOOD_POSITIVE=new Set(['happy','love','calm','excited']);
 const MOOD_COLORS={happy:'#10B981',love:'#F43F5E',calm:'#06B6D4',excited:'#F59E0B',annoyed:'#F97316',angry:'#EF4444',sad:'#3B82F6',tired:'#8B5CF6'};
 const MOOD_EMOJI={happy:'😆',love:'🥰',calm:'😌',excited:'🤩',annoyed:'😤',angry:'😠',sad:'😢',tired:'😴'};
 
-function getMoodLog(){return (S.moodLog||[]);}
+function getMoodLog(){
+  const logs=S.moodLog||[];
+  // Fallback: if moodLog is empty but S.moods has data, build temporary entries
+  if(logs.length===0 && S.moods){
+    const tmp=[];
+    Object.entries(S.moods).forEach(([userId,m])=>{
+      if(m && m.mood){
+        tmp.push({mood:m.mood,emoji:MOOD_EMOJI[m.mood]||'😶',label:m.mood,ts:m.ts||Date.now(),user:userId});
+      }
+    });
+    return tmp.sort((a,b)=>b.ts-a.ts);
+  }
+  return logs;
+}
 
 function renderMoodInsights(){
   renderMoodTimeline();
@@ -5126,6 +5139,23 @@ Object.assign(window, {
   const _ystr=`${_yd.getFullYear()}-${String(_yd.getMonth()+1).padStart(2,'0')}-${String(_yd.getDate()).padStart(2,'0')}`;
   if(S.lastDate && S.lastDate!==_t && S.lastDate!==_ystr){
     S.streak=0;
+  }
+
+  // Migrate existing S.moods into moodLog (one-time)
+  if(!S.moodLog)S.moodLog=[];
+  if(S.moods && S.moodLog.length===0){
+    const MOOD_LABELS={happy:'행복해!',love:'사랑스러워',calm:'차분해',excited:'신나!',annoyed:'짜증나',angry:'화나!',sad:'슬퍼',tired:'피곤해'};
+    const MOOD_EMOJIS={happy:'😆',love:'🥰',calm:'😌',excited:'🤩',annoyed:'😤',angry:'😠',sad:'😢',tired:'😴'};
+    Object.entries(S.moods).forEach(([userId,m])=>{
+      if(m && m.mood){
+        S.moodLog.push({mood:m.mood,emoji:MOOD_EMOJIS[m.mood]||'😶',label:MOOD_LABELS[m.mood]||m.mood,ts:m.ts||Date.now(),user:userId});
+      }
+    });
+    if(S.moodLog.length>0){
+      S.moodLog.sort((a,b)=>b.ts-a.ts);
+      save();
+      console.log('📊 기존 기분 데이터를 moodLog로 마이그레이션 완료');
+    }
   }
 
   hideLoading();
