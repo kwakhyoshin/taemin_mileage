@@ -84,7 +84,7 @@ body.dark .dtog-in{transform:translateX(24px)}
 
 /* HOME TOP - scrolls away */
 .home-top{background:#6366F1;padding:16px 20px 0;padding-top:calc(16px + env(safe-area-inset-top));display:flex;justify-content:space-between;align-items:flex-start;position:relative;overflow:visible;z-index:11}
-.home-top::after{content:'';position:absolute;bottom:-70px;right:-20px;width:160px;height:160px;background:rgba(255,255,255,.1);border-radius:50%;pointer-events:none}
+.home-top::after{content:'';position:absolute;bottom:-70px;right:10px;width:160px;height:160px;background:rgba(255,255,255,.1);border-radius:50%;pointer-events:none}
 .home-top h1{font-size:20px;font-weight:900;color:#fff}
 
 /* HERO - Sticky on scroll, full width when stuck */
@@ -456,6 +456,23 @@ body.dark .today-summary-card .ts-msg{background:linear-gradient(135deg,#312E81,
 .mood-particle:nth-child(7){animation-delay:1.8s;left:12px}
 .mood-particle:nth-child(8){animation-delay:2.1s;left:-10px}
 
+/* MESSAGE POPUP */
+.msg-pop{position:fixed;z-index:502;background:var(--card);border-radius:20px;box-shadow:0 8px 30px rgba(0,0,0,.2);padding:20px;width:300px;animation:fadeUp .25s ease;left:50%;top:50%;transform:translate(-50%,-50%)}
+.msg-pop-header{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.msg-pop-avatar{width:36px;height:36px;border-radius:50%;overflow:hidden;flex-shrink:0}
+.msg-pop-name{font-size:15px;font-weight:900;color:var(--tx);flex:1}
+.msg-pop-close{background:none;border:none;font-size:18px;color:var(--tx3);cursor:pointer;padding:4px}
+.msg-input{width:100%;padding:12px;border:2px solid var(--bdr);border-radius:12px;font-size:14px;font-family:inherit;resize:none;outline:none;background:var(--bg);color:var(--tx);box-sizing:border-box;transition:border-color .2s}
+.msg-input:focus{border-color:var(--or)}
+.msg-send-btn{width:100%;margin-top:10px;padding:12px;background:var(--or);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;transition:opacity .2s}
+.msg-send-btn:active{opacity:.8}
+
+/* RECEIVED MESSAGE POPUP */
+.recv-msg-pop{position:fixed;z-index:502;background:var(--card);border-radius:24px;box-shadow:0 12px 40px rgba(0,0,0,.25);padding:28px 24px;width:300px;animation:fadeUp .3s ease;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center}
+.recv-msg-avatar{width:56px;height:56px;border-radius:50%;overflow:hidden;margin:0 auto 10px}
+.recv-msg-from{font-size:14px;font-weight:800;color:var(--tx2);margin-bottom:8px}
+.recv-msg-text{font-size:16px;font-weight:700;color:var(--tx);line-height:1.5;padding:16px;background:var(--bg2);border-radius:14px;margin-bottom:14px;word-break:break-word}
+
 /* AUTH SCREENS */
 .auth-screen{position:fixed;inset:0;background:linear-gradient(135deg,#6366F1,#818CF8);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
 .auth-screen.hidden{display:none}
@@ -492,6 +509,17 @@ body.dark .today-summary-card .ts-msg{background:linear-gradient(135deg,#312E81,
 body.dark .nav-profile{border-color:rgba(255,255,255,.4)}
 .nav-profile svg{width:100%;height:100%}
 .nav-profile img{width:100%;height:100%;object-fit:cover}
+
+.nav-divider{width:1px;height:32px;background:var(--bdr);margin:0 4px;flex-shrink:0}
+.nav-users{display:flex;align-items:center;gap:2px;flex-shrink:0}
+.nav-user-wrap{display:flex;flex-direction:column;align-items:center;gap:1px;cursor:pointer;padding:4px 6px;border-radius:16px;position:relative;-webkit-tap-highlight-color:transparent;transition:background .15s}
+.nav-user-wrap:active{background:rgba(99,102,241,.1)}
+.nav-user-wrap .nav-profile{width:32px;height:32px;border-width:2px}
+.nav-user-wrap.me .nav-profile{width:36px;height:36px;border-color:var(--or)}
+.nav-user-label{font-size:9px;font-weight:800;color:var(--tx3);line-height:1}
+.nav-user-wrap.me .nav-user-label{color:var(--or)}
+.nav-mood-badge{position:absolute;top:-2px;right:-2px;font-size:12px;line-height:1;pointer-events:none;animation:moodBounce 2s infinite}
+@keyframes moodBounce{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
 
 /* PROFILE ICON IN ADMIN */
 .profile-avatar{width:40px;height:40px;border-radius:50%;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.1)}
@@ -630,6 +658,9 @@ body.dark .nav-profile{border-color:rgba(255,255,255,.4)}
   .nav-item:not(.active) .nav-label{max-width:none!important;opacity:1!important}
 
   .nav-profile{width:36px;height:36px}
+
+  .nav-divider{width:auto;height:1px;background:var(--bdr);margin:4px 0}
+  .nav-users{flex-direction:column}
 
   /* MAIN CONTENT SHIFT */
   .scr{margin-left:240px;max-width:calc(100vw - 280px);padding-bottom:40px!important}
@@ -1193,9 +1224,9 @@ body.dark .nav-profile{border-color:rgba(255,255,255,.4)}
       <svg viewBox="0 0 24 24"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
       <span class="nav-label">통계</span>
     </div>
-    <div class="nav-item" data-tab="adm" id="tab-adm" onclick="goTab('adm')">
-      <div class="nav-profile" id="nav-profile-icon">👤</div>
-      <span class="nav-label">관리</span>
+    <div class="nav-divider"></div>
+    <div class="nav-users" id="tab-adm">
+      <!-- Dynamically rendered by renderNavUsers() -->
     </div>
   </nav>
 </div>
@@ -1353,6 +1384,27 @@ body.dark .nav-profile{border-color:rgba(255,255,255,.4)}
 
 <!-- MOOD PARTICLES CONTAINER -->
 <div class="mood-particle-container" id="mood-particles"></div>
+
+<!-- MESSAGE POPUP -->
+<div class="pfm-bg" id="msg-bg" onclick="closeMsgPop()" style="display:none"></div>
+<div class="msg-pop" id="msg-pop" style="display:none">
+  <div class="msg-pop-header">
+    <div class="msg-pop-avatar" id="msg-pop-avatar"></div>
+    <div class="msg-pop-name" id="msg-pop-name"></div>
+    <button class="msg-pop-close" onclick="closeMsgPop()">✕</button>
+  </div>
+  <textarea class="msg-input" id="msg-input" placeholder="메시지를 입력하세요..." maxlength="200" rows="3"></textarea>
+  <button class="msg-send-btn" onclick="sendFamilyMsg()">보내기</button>
+</div>
+
+<!-- RECEIVED MESSAGE POPUP -->
+<div class="pfm-bg" id="recv-msg-bg" onclick="closeRecvMsg()" style="display:none"></div>
+<div class="recv-msg-pop" id="recv-msg-pop" style="display:none">
+  <div class="recv-msg-avatar" id="recv-msg-avatar"></div>
+  <div class="recv-msg-from" id="recv-msg-from"></div>
+  <div class="recv-msg-text" id="recv-msg-text"></div>
+  <button class="msg-send-btn" onclick="closeRecvMsg()">닫기</button>
+</div>
 
 <!-- EMOJI PICKER -->
 <div id="ep-bg" onclick="closeEP()"></div>
@@ -1662,6 +1714,8 @@ function applyUserProfile() {
   if (admIcon) admIcon.innerHTML = getAvatarHTML(currentUser, 40);
   if (admName) admName.textContent = member.name;
   if (admRole) admRole.textContent = member.role;
+
+  renderNavUsers();
 }
 
 function logout() {
@@ -2089,6 +2143,7 @@ function renderAll(){
   renderDashboard();renderHistStats();renderHistList();renderCalendar();
   renderAdmStats();renderAdmActList();renderAdmRwdList();renderAdmSettings();
   renderMsgSettings();renderAdmMemberPhotos();
+  renderNavUsers();
 }
 
 function renderHero(){
@@ -3200,7 +3255,7 @@ function goTab(tab){
 }
 
 function positionMenuAboveIcon(menuEl){
-  const icon=document.getElementById('tab-adm');
+  const icon=document.querySelector('.nav-user-wrap.me')||document.getElementById('tab-adm');
   if(!icon){return;}
   const rect=icon.getBoundingClientRect();
   const menuW=menuEl.offsetWidth||220;
@@ -3284,13 +3339,26 @@ function selectMood(mood){
   if(mood==='none'){
     currentMood=null;
     stopMoodParticles();
+    if(currentUser){
+      if(!S.moods)S.moods={};
+      delete S.moods[currentUser];
+      save();
+    }
     toast('기분 표현을 껐어요');
+    renderNavUsers();
     return;
   }
   currentMood=mood;
   const m=MOOD_DATA[mood];
+  // Save mood to Firestore for other users to see
+  if(currentUser){
+    if(!S.moods)S.moods={};
+    S.moods[currentUser]={mood:mood,date:new Date().toISOString().slice(0,10),ts:Date.now()};
+    save();
+  }
   toast(m.emoji+' '+m.label);
   startMoodParticles();
+  renderNavUsers();
 }
 window.selectMood=selectMood;
 
@@ -3307,7 +3375,7 @@ function stopMoodParticles(){
 
 function emitMoodParticles(){
   if(!currentMood||!MOOD_DATA[currentMood])return;
-  const icon=document.getElementById('tab-adm');
+  const icon=document.querySelector('.nav-user-wrap.me')||document.getElementById('tab-adm');
   if(!icon)return;
   const rect=icon.getBoundingClientRect();
   const container=document.getElementById('mood-particles');
@@ -3328,6 +3396,126 @@ function emitMoodParticles(){
   // Clean up after animation
   setTimeout(()=>{if(container.children.length)container.innerHTML='';},4500);
 }
+
+// ── NAV USERS RENDERING ──────────────────────────
+function renderNavUsers(){
+  const container=document.getElementById('tab-adm');
+  if(!container)return;
+  // Order: other users first (left), then me (right) with "나" label
+  const otherIds=Object.keys(MEMBERS).filter(id=>id!==currentUser);
+  const userLabels={taemin:'태민',dad:'아빠',mom:'엄마'};
+
+  let html='';
+  // Other users (left side)
+  otherIds.forEach(id=>{
+    const moodEmoji=getMoodEmoji(id);
+    html+=`<div class="nav-user-wrap" onclick="openMsgPop('${id}')">
+      ${moodEmoji?`<span class="nav-mood-badge">${moodEmoji}</span>`:''}
+      <div class="nav-profile">${getAvatarHTML(id,32)}</div>
+      <span class="nav-user-label">${userLabels[id]||MEMBERS[id].name}</span>
+    </div>`;
+  });
+  // Me (right side)
+  if(currentUser){
+    const myMood=getMoodEmoji(currentUser);
+    html+=`<div class="nav-user-wrap me" onclick="goTab('adm')">
+      ${myMood?`<span class="nav-mood-badge">${myMood}</span>`:''}
+      <div class="nav-profile" id="nav-profile-icon">${getAvatarHTML(currentUser,36)}</div>
+      <span class="nav-user-label">나</span>
+    </div>`;
+  }else{
+    html+=`<div class="nav-user-wrap me" onclick="goTab('adm')">
+      <div class="nav-profile" id="nav-profile-icon">👤</div>
+      <span class="nav-user-label">나</span>
+    </div>`;
+  }
+  container.innerHTML=html;
+}
+window.renderNavUsers=renderNavUsers;
+
+function getMoodEmoji(userId){
+  if(!S.moods)return null;
+  const m=S.moods[userId];
+  if(!m)return null;
+  // Only show if mood was set today
+  const today=new Date().toISOString().slice(0,10);
+  if(m.date!==today)return null;
+  const MOOD_DATA_MAP={
+    happy:'😆',love:'🥰',calm:'😌',excited:'🤩',
+    annoyed:'😤',angry:'😠',sad:'😢',tired:'😴'
+  };
+  return MOOD_DATA_MAP[m.mood]||null;
+}
+window.getMoodEmoji=getMoodEmoji;
+
+// ── MESSAGE SYSTEM ──────────────────────────
+let msgTargetUser=null;
+
+function openMsgPop(userId){
+  msgTargetUser=userId;
+  const m=MEMBERS[userId];
+  document.getElementById('msg-pop-avatar').innerHTML=getAvatarHTML(userId,36);
+  document.getElementById('msg-pop-name').textContent=m.name+'에게 메시지';
+  document.getElementById('msg-input').value='';
+  document.getElementById('msg-bg').style.display='block';
+  document.getElementById('msg-pop').style.display='block';
+  setTimeout(()=>document.getElementById('msg-input').focus(),100);
+}
+window.openMsgPop=openMsgPop;
+
+function closeMsgPop(){
+  document.getElementById('msg-bg').style.display='none';
+  document.getElementById('msg-pop').style.display='none';
+  msgTargetUser=null;
+}
+window.closeMsgPop=closeMsgPop;
+
+function sendFamilyMsg(){
+  const text=document.getElementById('msg-input').value.trim();
+  if(!text){toast('메시지를 입력해주세요');return;}
+  if(!currentUser){toast('먼저 로그인해주세요');return;}
+  if(!msgTargetUser)return;
+
+  // Save message to shared Firestore doc
+  if(!S.familyMessages)S.familyMessages=[];
+  S.familyMessages.push({
+    from:currentUser,
+    to:msgTargetUser,
+    text:text,
+    ts:Date.now(),
+    read:false
+  });
+  // Keep only last 50 messages
+  if(S.familyMessages.length>50)S.familyMessages=S.familyMessages.slice(-50);
+  save();
+  closeMsgPop();
+  const toName=MEMBERS[msgTargetUser].name;
+  toast(`💌 ${toName}에게 메시지를 보냈어요!`);
+}
+window.sendFamilyMsg=sendFamilyMsg;
+
+function closeRecvMsg(){
+  document.getElementById('recv-msg-bg').style.display='none';
+  document.getElementById('recv-msg-pop').style.display='none';
+}
+window.closeRecvMsg=closeRecvMsg;
+
+function checkNewMessages(){
+  if(!currentUser||!S.familyMessages)return;
+  const unread=S.familyMessages.find(m=>m.to===currentUser&&!m.read);
+  if(unread){
+    unread.read=true;
+    save();
+    // Show received message popup
+    document.getElementById('recv-msg-avatar').innerHTML=getAvatarHTML(unread.from,56);
+    document.getElementById('recv-msg-from').textContent=MEMBERS[unread.from]?.name||'가족';
+    document.getElementById('recv-msg-text').textContent=unread.text;
+    document.getElementById('recv-msg-bg').style.display='block';
+    document.getElementById('recv-msg-pop').style.display='block';
+  }
+}
+window.checkNewMessages=checkNewMessages;
+
 function reallyGoTab(tab){
   document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
   document.querySelectorAll('.nav-item').forEach(t=>t.classList.remove('active'));
@@ -3869,6 +4057,8 @@ Object.assign(window, {
       S = Object.assign(defaultState(), snap.data());
       _lastSavedJSON = incomingJSON;
       renderAll();
+      checkNewMessages();
+      renderNavUsers();
       console.log('🔄 다른 기기에서 데이터가 업데이트됐어요');
     });
   }catch(e){ console.warn('Realtime listener failed:', e); }
