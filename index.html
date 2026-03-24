@@ -57,7 +57,11 @@ body{font-family:'Pretendard Variable',-apple-system,sans-serif;background:var(-
 /* SCREENS */
 .scr{display:none;min-height:100vh;min-height:100dvh;padding-bottom:110px}
 .scr.on{display:block;animation:fadeIn .3s ease}
+.scr.slide-left{display:block;animation:slideInLeft .25s ease forwards}
+.scr.slide-right{display:block;animation:slideInRight .25s ease forwards}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideInLeft{from{opacity:0;transform:translateX(60px)}to{opacity:1;transform:translateX(0)}}
+@keyframes slideInRight{from{opacity:0;transform:translateX(-60px)}to{opacity:1;transform:translateX(0)}}
 #s-log{padding:0 0 110px 0;overflow:visible}
 
 /* BOTTOM NAV - Floating Glass Pill with SVG Icons */
@@ -3352,10 +3356,12 @@ function selectMood(mood){
   }
   currentMood=mood;
   const m=MOOD_DATA[mood];
-  // Save mood to Firestore for other users to see
+  // Save mood to Firestore for other users to see + trigger push to others
   if(currentUser){
     if(!S.moods)S.moods={};
     S.moods[currentUser]={mood:mood,date:new Date().toISOString().slice(0,10),ts:Date.now()};
+    // moodNotify triggers Cloud Function to push to other users
+    S.moodNotify={user:currentUser,mood:mood,emoji:m.emoji,label:m.label,ts:Date.now()};
     save();
   }
   toast(m.emoji+' '+m.label);
@@ -3508,15 +3514,56 @@ function checkNewMessages(){
   if(unread){
     unread.read=true;
     save();
-    // Show received message popup
-    document.getElementById('recv-msg-avatar').innerHTML=getAvatarHTML(unread.from,56);
-    document.getElementById('recv-msg-from').textContent=MEMBERS[unread.from]?.name||'가족';
-    document.getElementById('recv-msg-text').textContent=unread.text;
-    document.getElementById('recv-msg-bg').style.display='block';
-    document.getElementById('recv-msg-pop').style.display='block';
+    showReceivedMsg(unread.from,unread.text);
   }
 }
 window.checkNewMessages=checkNewMessages;
+
+function showReceivedMsg(fromId,text){
+  document.getElementById('recv-msg-avatar').innerHTML=getAvatarHTML(fromId,56);
+  document.getElementById('recv-msg-from').textContent=(MEMBERS[fromId]?.name||'가족')+'의 메시지';
+  document.getElementById('recv-msg-text').textContent=text;
+  document.getElementById('recv-msg-bg').style.display='block';
+  document.getElementById('recv-msg-pop').style.display='block';
+  // Go to home tab
+  reallyGoTab('home');
+}
+window.showReceivedMsg=showReceivedMsg;
+
+// Listen for SW notification click messages
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.addEventListener('message',(event)=>{
+    if(event.data&&event.data.type==='NOTIFICATION_CLICK'){
+      const d=event.data.data;
+      if(d.type==='family_msg'&&d.from&&d.msgText){
+        showReceivedMsg(d.from,d.msgText);
+      }else if(d.type==='mood_update'){
+        // Just go to home, mood badge will be visible
+        reallyGoTab('home');
+      }
+    }
+  });
+}
+
+// Check URL params on load (from notification click opening new window)
+function checkUrlParams(){
+  const params=new URLSearchParams(window.location.search);
+  if(params.get('showMsg')==='1'){
+    const from=params.get('from');
+    // Find the latest message from this user
+    if(from&&S.familyMessages){
+      const msg=S.familyMessages.filter(m=>m.from===from&&m.to===currentUser).pop();
+      if(msg){
+        msg.read=true;
+        save();
+        setTimeout(()=>showReceivedMsg(from,msg.text),500);
+      }
+    }
+    // Clean URL
+    window.history.replaceState({},'',window.location.pathname);
+  }
+}
+window.checkUrlParams=checkUrlParams;
 
 function reallyGoTab(tab){
   document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
@@ -3540,6 +3587,70 @@ function admTab(i){[0,1,2].forEach(j=>{document.getElementById('at-'+j).classLis
 function openModal(id){document.getElementById(id).classList.add('open');}
 function closeModal(id){document.getElementById(id).classList.remove('open');}
 document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
+
+// ── SWIPE NAVIGATION ──────────────────────────
+const SWIPE_TABS=['home','log','rwd','hist'];
+let _swipeStartX=0,_swipeStartY=0,_swiping=false,_swipeCurrentTab=null;
+
+function getCurrentTab(){
+  const active=document.querySelector('.scr.on');
+  if(!active)return'home';
+  return active.id.replace('s-','');
+}
+
+function swipeToTab(tab,animClass){
+  document.querySelectorAll('.scr').forEach(s=>{s.classList.remove('on','slide-left','slide-right');});
+  document.querySelectorAll('.nav-item').forEach(t=>t.classList.remove('active'));
+  const el=document.getElementById('s-'+tab);
+  el.classList.add(animClass);
+  document.getElementById('tab-'+tab)?.classList.add('active');
+  el.scrollTop=0;
+  window.scrollTo({top:0});
+  // After animation ends, switch to normal 'on' class
+  el.addEventListener('animationend',function handler(){
+    el.classList.remove(animClass);
+    el.classList.add('on');
+    el.removeEventListener('animationend',handler);
+  });
+  const hero=document.querySelector('.hero');
+  if(hero)hero.classList.remove('compact');
+  const themeMeta=document.getElementById('theme-color-meta');
+  if(themeMeta){
+    const isDark=document.body.classList.contains('dark');
+    themeMeta.content=isDark?'#1E293B':'#6366F1';
+  }
+}
+
+document.addEventListener('touchstart',function(e){
+  // Don't swipe if interacting with inputs, sliders, modals, etc.
+  const tag=e.target.tagName;
+  if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'||tag==='CANVAS')return;
+  if(e.target.closest('.overlay.open,.pfm-menu,.mood-pop,.msg-pop,.recv-msg-pop,.pin-pad,.ep-pop'))return;
+  if(e.touches.length!==1)return;
+  _swipeStartX=e.touches[0].clientX;
+  _swipeStartY=e.touches[0].clientY;
+  _swiping=true;
+  _swipeCurrentTab=getCurrentTab();
+},{passive:true});
+
+document.addEventListener('touchend',function(e){
+  if(!_swiping)return;
+  _swiping=false;
+  if(!e.changedTouches.length)return;
+  const dx=e.changedTouches[0].clientX-_swipeStartX;
+  const dy=e.changedTouches[0].clientY-_swipeStartY;
+  // Must be horizontal swipe (dx > dy) and minimum 60px
+  if(Math.abs(dx)<60||Math.abs(dy)>Math.abs(dx)*0.7)return;
+  const idx=SWIPE_TABS.indexOf(_swipeCurrentTab);
+  if(idx===-1)return; // adm tab, no swipe
+  if(dx<0&&idx<SWIPE_TABS.length-1){
+    // Swipe left → next tab (content slides in from right)
+    swipeToTab(SWIPE_TABS[idx+1],'slide-left');
+  }else if(dx>0&&idx>0){
+    // Swipe right → previous tab (content slides in from left)
+    swipeToTab(SWIPE_TABS[idx-1],'slide-right');
+  }
+},{passive:true});
 
 // ── UTILS ──────────────────────────────────────
 function fmt(ts){
@@ -3775,6 +3886,8 @@ window.sendTestPush=sendTestPush;
 
 // Initialize SW
 initServiceWorker();
+// Check if opened from notification click
+setTimeout(()=>{ if(typeof checkUrlParams==='function')checkUrlParams(); },1000);
 
 // ── PASSWORD TOGGLE ──────────────────────────
 function togglePwd(inputId, btn) {
