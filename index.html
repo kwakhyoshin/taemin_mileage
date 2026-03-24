@@ -430,6 +430,38 @@ body.dark .today-summary-card .ts-msg{background:linear-gradient(135deg,#312E81,
 .week-cmp-diff.down{color:#EF4444}
 .week-cmp-diff.same{color:var(--tx3)}
 
+/* MOOD INSIGHT */
+.mood-timeline{display:flex;align-items:flex-end;gap:3px;height:80px;padding:4px 0}
+.mood-day-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;height:100%}
+.mood-day-bar{flex:1;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:1px}
+.mood-day-dot{width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;line-height:1}
+.mood-day-lbl{font-size:9px;font-weight:700;color:var(--tx3)}
+.mood-score-line{position:relative;height:60px;margin:10px 0 4px}
+.mood-score-canvas{display:flex;align-items:flex-end;height:100%;gap:0}
+.mood-score-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;position:relative}
+.mood-score-pt{width:10px;height:10px;border-radius:50%;position:absolute;z-index:2}
+.mood-score-stem{width:2px;border-radius:1px;position:absolute;bottom:0}
+.mood-weekday-row{display:flex;justify-content:space-between;padding:0 2px}
+.mood-weekday-lbl{flex:1;text-align:center;font-size:9px;font-weight:700;color:var(--tx3)}
+.mood-rank-list{display:flex;flex-direction:column;gap:4px}
+.mood-rank-item{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg2);border-radius:10px}
+.mood-rank-emoji{font-size:24px}
+.mood-rank-info{flex:1}
+.mood-rank-name{font-size:13px;font-weight:800;color:var(--tx)}
+.mood-rank-bar{height:4px;background:var(--bdr);border-radius:2px;margin-top:3px;overflow:hidden}
+.mood-rank-fill{height:100%;border-radius:2px}
+.mood-rank-cnt{font-size:12px;font-weight:900;color:var(--tx2)}
+.mood-pos-neg{display:flex;gap:8px;margin-bottom:10px}
+.mood-pn-box{flex:1;border-radius:12px;padding:10px;text-align:center}
+.mood-pn-box.pos{background:rgba(16,185,129,.1)}
+.mood-pn-box.neg{background:rgba(239,68,68,.1)}
+.mood-pn-val{font-size:22px;font-weight:900}
+.mood-pn-box.pos .mood-pn-val{color:#10B981}
+.mood-pn-box.neg .mood-pn-val{color:#EF4444}
+.mood-pn-lbl{font-size:10px;font-weight:700;color:var(--tx3);margin-top:2px}
+.mood-summary-msg{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--bg2);border-radius:12px;font-size:12px;font-weight:700;color:var(--tx2);margin-top:8px}
+.mood-summary-ico{font-size:22px;flex-shrink:0}
+
 /* CALENDAR */
 .cal-nav{background:var(--card);border:1.5px solid var(--bdr);border-radius:8px;width:32px;height:32px;font-size:12px;cursor:pointer;color:var(--tx2);font-family:inherit;transition:all .2s}
 .cal-nav:active{background:var(--tab-lt,var(--or-lt));border-color:var(--tab-color,var(--or));color:var(--tab-color,var(--or))}
@@ -524,10 +556,12 @@ body.dark .today-summary-card .ts-msg{background:linear-gradient(135deg,#312E81,
 .pin-dot{width:15px;height:15px;border-radius:50%;border:2px solid var(--bdr2);background:transparent;transition:.15s}
 .pin-dot.on{background:var(--tab-color,var(--or));border-color:var(--tab-color,var(--or))}
 .pin-dot.err{background:var(--rd);border-color:var(--rd)}
-.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.pin-key{background:var(--bg2);border:none;border-radius:16px;padding:18px 0;font-size:24px;font-weight:800;cursor:pointer;font-family:inherit;color:var(--tx);transition:background .1s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;min-height:54px;user-select:none}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.pin-key{background:var(--bg2);border:1.5px solid var(--bdr);border-radius:14px;padding:16px 0;font-size:24px;font-weight:800;cursor:pointer;font-family:inherit;color:var(--tx);transition:background .1s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;min-height:52px;user-select:none}
+body.dark .pin-key{background:var(--card2);border-color:var(--bdr2)}
 .pin-key:active{background:var(--bdr2);transform:scale(.95)}
-.pin-key.ck{font-size:13px;color:var(--tx2);font-weight:700;background:transparent}
+.pin-key.ck{font-size:13px;color:var(--tx2);font-weight:700;background:transparent;border-color:transparent}
+body.dark .pin-key.ck{background:transparent}
 .pin-key.dk{color:var(--rd)}
 
 /* PROFILE FLOATING MENU */
@@ -1135,6 +1169,18 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
     <!-- 보상 사용 TOP -->
     <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg> 보상 교환 랭킹</div>
     <div class="card" id="insight-reward"></div>
+
+    <!-- 기분 변화 그래프 -->
+    <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M14.828 14.828a4 4 0 01-5.656 0"/><path d="M9 9h.01M15 9h.01"/><circle cx="12" cy="12" r="10"/></svg> 기분 변화 트래커</div>
+    <div class="card" id="insight-mood-timeline"></div>
+
+    <!-- 요일별 기분 패턴 -->
+    <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M3 3v18h18"/><circle cx="9" cy="9" r="2"/><circle cx="15" cy="15" r="2"/><circle cx="18" cy="7" r="2"/></svg> 요일별 기분 패턴</div>
+    <div class="card" id="insight-mood-weekday"></div>
+
+    <!-- 감정 순위 -->
+    <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/><circle cx="12" cy="12" r="10"/></svg> 감정 순위 TOP</div>
+    <div class="card" id="insight-mood-rank"></div>
   </div>
 
   <!-- ===== 패널 1: 캘린더 ===== -->
@@ -2049,6 +2095,7 @@ function defaultState(){
     acts:JSON.parse(JSON.stringify(DACTS)),
     rwds:JSON.parse(JSON.stringify(DRWDS)),
     log:[],
+    moodLog:[],
     settings:{streakBonus:true,streakBonusPts:100,pin:'1234',msgMode:'auto',customMsg:''},
     actDone:{},
     dark:false,
@@ -3039,6 +3086,7 @@ function renderInsights(){
   renderInsightTime();
   renderInsightCategory();
   renderInsightReward();
+  renderMoodInsights();
 }
 
 function renderInsightWeekCmp(){
@@ -3180,6 +3228,169 @@ function renderInsightReward(){
     return `<div class="rwd-rank-item"><div class="rwd-rank-num">${i+1}</div><span class="rwd-rank-emoji">${r.emoji}</span><div style="flex:1;min-width:0"><div class="rwd-rank-name">${r.name}</div><div class="rwd-rank-bar"><div class="rwd-rank-fill" style="width:${pct}%"></div></div></div><div class="rwd-rank-cnt">${r.count}회<br><span style="font-size:10px;color:var(--tx3)">${r.totalPts.toLocaleString()}점</span></div></div>`;
   }).join('');
   el.innerHTML=`<div class="rwd-rank-list">${listHtml}</div>`;
+}
+
+/* ===== MOOD INSIGHT PANELS ===== */
+const MOOD_SCORE={happy:5,love:5,calm:4,excited:5,annoyed:2,angry:1,sad:1,tired:2};
+const MOOD_POSITIVE=new Set(['happy','love','calm','excited']);
+const MOOD_COLORS={happy:'#10B981',love:'#F43F5E',calm:'#06B6D4',excited:'#F59E0B',annoyed:'#F97316',angry:'#EF4444',sad:'#3B82F6',tired:'#8B5CF6'};
+const MOOD_EMOJI={happy:'😆',love:'🥰',calm:'😌',excited:'🤩',annoyed:'😤',angry:'😠',sad:'😢',tired:'😴'};
+
+function getMoodLog(){return (S.moodLog||[]);}
+
+function renderMoodInsights(){
+  renderMoodTimeline();
+  renderMoodWeekday();
+  renderMoodRank();
+}
+
+function renderMoodTimeline(){
+  const el=document.getElementById('insight-mood-timeline');
+  if(!el)return;
+  const logs=getMoodLog();
+  if(logs.length===0){
+    el.innerHTML='<div class="insight-empty">기분을 기록하면 여기에 변화 그래프가 나타나요!</div>';
+    return;
+  }
+  // Last 14 days
+  const days=[];
+  for(let i=13;i>=0;i--){
+    const d=new Date();d.setDate(d.getDate()-i);
+    const ds=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    days.push({date:ds,day:d.getDate(),dow:['일','월','화','수','목','금','토'][d.getDay()]});
+  }
+  // Group logs by date (last per day)
+  const byDate={};
+  logs.forEach(l=>{
+    const d=new Date(l.ts);
+    const ds=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    if(!byDate[ds])byDate[ds]=[];
+    byDate[ds].push(l);
+  });
+
+  // Calculate positive vs negative
+  let posCnt=0,negCnt=0;
+  const last30=logs.filter(l=>l.ts>Date.now()-30*86400000);
+  last30.forEach(l=>{if(MOOD_POSITIVE.has(l.mood))posCnt++;else negCnt++;});
+  const total30=posCnt+negCnt;
+  const posPct=total30>0?Math.round(posCnt/total30*100):0;
+  const negPct=total30>0?Math.round(negCnt/total30*100):0;
+
+  // Score line (1-5 for each day)
+  const maxScore=5;
+  const pointsHtml=days.map(day=>{
+    const dayLogs=byDate[day.date];
+    if(!dayLogs||dayLogs.length===0){
+      return `<div class="mood-score-col"><div class="mood-day-lbl">${day.day}</div></div>`;
+    }
+    const lastMood=dayLogs[0]; // most recent (unshift order)
+    const score=MOOD_SCORE[lastMood.mood]||3;
+    const h=Math.round((score/maxScore)*100);
+    const color=MOOD_COLORS[lastMood.mood]||'#94A3B8';
+    return `<div class="mood-score-col">
+      <div style="position:absolute;bottom:${h}%;transform:translateY(50%);z-index:2;font-size:14px;line-height:1" title="${lastMood.label}">${lastMood.emoji}</div>
+      <div class="mood-score-stem" style="height:${h}%;background:${color};opacity:.3"></div>
+      <div class="mood-day-lbl">${day.day}</div>
+    </div>`;
+  }).join('');
+
+  // Summary message
+  let summaryEmoji='😊',summaryMsg='';
+  if(posPct>=70)summaryMsg='최근 긍정적인 기분이 많아요! 잘하고 있어요!';
+  else if(posPct>=50)summaryMsg='긍정과 부정이 비슷해요. 좋은 일이 더 많아지길!';
+  else if(total30>0)summaryMsg='부정적인 감정이 좀 있어요. 힘내요!';
+  else summaryMsg='기분을 기록해보세요!';
+  if(negPct>posPct)summaryEmoji='💪';
+
+  el.innerHTML=`<div class="mood-pos-neg">
+      <div class="mood-pn-box pos"><div class="mood-pn-val">${posPct}%</div><div class="mood-pn-lbl">긍정 (${posCnt}회)</div></div>
+      <div class="mood-pn-box neg"><div class="mood-pn-val">${negPct}%</div><div class="mood-pn-lbl">부정 (${negCnt}회)</div></div>
+    </div>
+    <div style="font-size:11px;font-weight:700;color:var(--tx3);margin-bottom:4px">최근 14일 기분 변화</div>
+    <div class="mood-score-line"><div class="mood-score-canvas">${pointsHtml}</div></div>
+    <div class="mood-summary-msg"><span class="mood-summary-ico">${summaryEmoji}</span>${summaryMsg}</div>`;
+}
+
+function renderMoodWeekday(){
+  const el=document.getElementById('insight-mood-weekday');
+  if(!el)return;
+  const logs=getMoodLog();
+  if(logs.length===0){
+    el.innerHTML='<div class="insight-empty">기분 기록이 쌓이면 요일별 패턴이 보여요</div>';
+    return;
+  }
+  const dayNames=['일','월','화','수','목','금','토'];
+  const dayScores=Array(7).fill(null).map(()=>({sum:0,count:0,moods:{}}));
+  logs.forEach(l=>{
+    const dow=new Date(l.ts).getDay();
+    const score=MOOD_SCORE[l.mood]||3;
+    dayScores[dow].sum+=score;
+    dayScores[dow].count++;
+    dayScores[dow].moods[l.mood]=(dayScores[dow].moods[l.mood]||0)+1;
+  });
+  // Reorder Mon-Sun
+  const order=[1,2,3,4,5,6,0];
+  const maxAvg=5;
+
+  const barsHtml=order.map(i=>{
+    const d=dayScores[i];
+    if(d.count===0)return `<div class="mood-score-col"><div class="mood-day-lbl">${dayNames[i]}</div></div>`;
+    const avg=d.sum/d.count;
+    const h=Math.round((avg/maxAvg)*100);
+    const isPositive=avg>=3.5;
+    const color=isPositive?'#10B981':'#F59E0B';
+    // Most common mood for this day
+    const topMood=Object.entries(d.moods).sort((a,b)=>b[1]-a[1])[0][0];
+    const topEmoji=MOOD_EMOJI[topMood]||'😶';
+    return `<div class="mood-score-col">
+      <div style="position:absolute;bottom:${h}%;transform:translateY(50%);z-index:2;font-size:16px;line-height:1">${topEmoji}</div>
+      <div class="mood-score-stem" style="height:${h}%;background:${color};opacity:.25"></div>
+      <div class="mood-day-lbl" style="${i===new Date().getDay()?'color:var(--tab-color,var(--or));font-weight:900':''}">${dayNames[i]}</div>
+    </div>`;
+  }).join('');
+
+  // Find best & worst day
+  let bestDay=-1,worstDay=-1,bestAvg=0,worstAvg=6;
+  order.forEach(i=>{
+    if(dayScores[i].count===0)return;
+    const avg=dayScores[i].sum/dayScores[i].count;
+    if(avg>bestAvg){bestAvg=avg;bestDay=i;}
+    if(avg<worstAvg){worstAvg=avg;worstDay=i;}
+  });
+
+  el.innerHTML=`<div class="mood-score-line" style="height:70px"><div class="mood-score-canvas">${barsHtml}</div></div>
+    <div class="mood-summary-msg"><span class="mood-summary-ico">📅</span>${bestDay>=0?`<b>${dayNames[bestDay]}요일</b>에 기분이 가장 좋고${worstDay>=0&&worstDay!==bestDay?`, <b>${dayNames[worstDay]}요일</b>에 힘들어해요`:''}!`:'데이터를 더 모아봐요'}</div>`;
+}
+
+function renderMoodRank(){
+  const el=document.getElementById('insight-mood-rank');
+  if(!el)return;
+  const logs=getMoodLog();
+  if(logs.length===0){
+    el.innerHTML='<div class="insight-empty">감정 순위가 여기에 나타나요</div>';
+    return;
+  }
+  const moodCounts={};
+  logs.forEach(l=>{
+    if(!moodCounts[l.mood])moodCounts[l.mood]={mood:l.mood,emoji:l.emoji,label:l.label,count:0};
+    moodCounts[l.mood].count++;
+  });
+  const sorted=Object.values(moodCounts).sort((a,b)=>b.count-a.count);
+  const maxCnt=sorted[0]?.count||1;
+  const listHtml=sorted.map((m,i)=>{
+    const pct=Math.round(m.count/maxCnt*100);
+    const color=MOOD_COLORS[m.mood]||'#94A3B8';
+    const isPos=MOOD_POSITIVE.has(m.mood);
+    return `<div class="mood-rank-item">
+      <div class="mood-rank-emoji">${m.emoji}</div>
+      <div class="mood-rank-info">
+        <div class="mood-rank-name">${m.label} <span style="font-size:10px;font-weight:600;color:${isPos?'#10B981':'#F59E0B'}">${isPos?'긍정':'부정'}</span></div>
+        <div class="mood-rank-bar"><div class="mood-rank-fill" style="width:${pct}%;background:${color}"></div></div>
+      </div>
+      <div class="mood-rank-cnt">${m.count}회</div>
+    </div>`;
+  }).join('');
+  el.innerHTML=`<div class="mood-rank-list">${listHtml}</div>`;
 }
 
 let HP=7;
@@ -3901,6 +4112,10 @@ function selectMood(mood){
   if(currentUser){
     if(!S.moods)S.moods={};
     S.moods[currentUser]={mood:mood,date:new Date().toISOString().slice(0,10),ts:Date.now()};
+    // moodLog history
+    if(!S.moodLog)S.moodLog=[];
+    S.moodLog.unshift({mood:mood,emoji:m.emoji,label:m.label,ts:Date.now(),user:currentUser});
+    if(S.moodLog.length>500)S.moodLog=S.moodLog.slice(0,500);
     // moodNotify triggers Cloud Function to push to other users
     S.moodNotify={user:currentUser,mood:mood,emoji:m.emoji,label:m.label,ts:Date.now()};
     save();
