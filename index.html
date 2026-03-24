@@ -357,7 +357,10 @@ body.dark .today-summary-card .ts-msg{background:linear-gradient(135deg,#312E81,
 .heatmap-cell .hm-val{font-size:14px;font-weight:900}
 .top3-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--bdr)}
 .top3-item:last-child{border-bottom:none}
-.top3-rank{font-size:20px;font-weight:900;width:30px;text-align:center}
+.top3-rank{font-size:11px;font-weight:900;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0}
+.top3-rank.r1{background:linear-gradient(135deg,#F59E0B,#EF4444)}
+.top3-rank.r2{background:linear-gradient(135deg,#94A3B8,#64748B)}
+.top3-rank.r3{background:linear-gradient(135deg,#D97706,#92400E)}
 .top3-emoji{font-size:28px}
 .top3-info{flex:1}
 .top3-name{font-size:14px;font-weight:800;color:var(--tx)}
@@ -2917,7 +2920,7 @@ function renderDashTop3(){
   });
   const sorted=Object.values(counts).sort((a,b)=>b.count-a.count).slice(0,3);
   const maxCount=sorted[0]?.count||1;
-  const rankEmojis=['🥇','🥈','🥉'];
+  const rankLabels=['1등','2등','3등'];
   const barColors=['#F59E0B','#818CF8','#A78BFA'];
 
   if(sorted.length===0){
@@ -2927,7 +2930,7 @@ function renderDashTop3(){
 
   el.innerHTML='<div style="padding:4px 14px">'+sorted.map((item,i)=>`
     <div class="top3-item">
-      <div class="top3-rank">${rankEmojis[i]||i+1}</div>
+      <div class="top3-rank r${i+1}">${rankLabels[i]||i+1}</div>
       <div class="top3-emoji">${item.emoji}</div>
       <div class="top3-info">
         <div class="top3-name">${item.name}</div>
