@@ -46,10 +46,10 @@ body.dark{
   --pu-lt:rgba(139,92,246,.15);--yw-lt:rgba(245,158,11,.15);
 }
 /* TAB THEME COLORS */
-body[data-tab="home"]{--tab-color:#6366F1;--tab-color2:#818CF8;--tab-shadow:rgba(99,102,241,0.3);--tab-lt:rgba(99,102,241,.1)}
-body[data-tab="log"]{--tab-color:#F43F5E;--tab-color2:#FB7185;--tab-shadow:rgba(244,63,94,0.3);--tab-lt:rgba(244,63,94,.1)}
-body[data-tab="rwd"]{--tab-color:#F59E0B;--tab-color2:#FBBF24;--tab-shadow:rgba(245,158,11,0.3);--tab-lt:rgba(245,158,11,.1)}
-body[data-tab="hist"]{--tab-color:#8B5CF6;--tab-color2:#A78BFA;--tab-shadow:rgba(139,92,246,0.3);--tab-lt:rgba(139,92,246,.1)}
+body[data-tab="home"]{--tab-color:#6366F1;--tab-color2:#818CF8;--tab-shadow:rgba(99,102,241,0.3);--tab-lt:rgba(99,102,241,.1);--tab-lt-dk:rgba(99,102,241,.15)}
+body[data-tab="log"]{--tab-color:#F43F5E;--tab-color2:#FB7185;--tab-shadow:rgba(244,63,94,0.3);--tab-lt:rgba(244,63,94,.1);--tab-lt-dk:rgba(244,63,94,.15)}
+body[data-tab="rwd"]{--tab-color:#F59E0B;--tab-color2:#FBBF24;--tab-shadow:rgba(245,158,11,0.3);--tab-lt:rgba(245,158,11,.1);--tab-lt-dk:rgba(245,158,11,.15)}
+body[data-tab="hist"]{--tab-color:#8B5CF6;--tab-color2:#A78BFA;--tab-shadow:rgba(139,92,246,0.3);--tab-lt:rgba(139,92,246,.1);--tab-lt-dk:rgba(139,92,246,.15)}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{background:#6366F1;touch-action:manipulation}
 body{touch-action:pan-x pan-y}
@@ -90,7 +90,7 @@ body.dark .nav-item svg{stroke:var(--tx2)}
 /* DOCKED NAV STATE */
 .nav-container.docked{bottom:0;left:0;right:0;transform:none;width:100%;display:flex;justify-content:center}
 .nav-container.docked .bottom-nav{border-radius:0;padding:8px 6px calc(8px + env(safe-area-inset-bottom));gap:4px;box-sizing:border-box;justify-content:center;width:100%;background:var(--tab-lt,var(--or-lt));border-color:transparent}
-body.dark .nav-container.docked .bottom-nav{background:rgba(30,41,59,.95);backdrop-filter:none;-webkit-backdrop-filter:none}
+body.dark .nav-container.docked .bottom-nav{background:linear-gradient(var(--tab-lt-dk,rgba(99,102,241,.15)),var(--tab-lt-dk,rgba(99,102,241,.15))),rgba(15,23,42,.92);backdrop-filter:none;-webkit-backdrop-filter:none}
 .nav-container.docked .nav-users{gap:4px}
 .nav-container.docked .nav-divider{margin:0 6px}
 
