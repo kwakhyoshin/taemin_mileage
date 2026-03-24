@@ -4940,21 +4940,20 @@ function updatePushUI(){
 }
 
 async function sendTestPush(){
-  if(!swRegistration){toast('서비스 워커가 준비되지 않았어요');return;}
-  // Use Service Worker's showNotification for immediate local test
+  // 모든 기기에 알림 전송 (Firestore → Cloud Functions → 모든 등록 기기)
   try{
-    const permission=typeof Notification!=='undefined'?Notification.permission:'default';
-    if(permission!=='granted'){
-      toast('알림 권한이 없어요. 먼저 알림 받기를 활성화하세요.');return;
+    const deviceCount=S.pushDevices?Object.values(S.pushDevices).filter(d=>d.enabled).length:0;
+    if(deviceCount===0){
+      toast('알림을 받을 기기가 없어요. 먼저 알림 받기를 활성화하세요.');return;
     }
-    await swRegistration.showNotification('태민이 마일리지 🌟',{
-      body:'테스트 알림이에요! 푸시 알림이 잘 작동하고 있어요 ✅',
-      icon:'icon-180.png',
-      badge:'icon-180.png',
-      tag:'test-notification',
-      vibrate:[200,100,200]
-    });
-    toast('📤 테스트 알림을 보냈어요! 알림창을 확인하세요.');
+    // pushBroadcast 필드를 업데이트하면 Cloud Functions의 onBroadcastPush가 트리거됨
+    S.pushBroadcast={
+      title:'태민이 마일리지 🌟',
+      body:'테스트 알림이에요! 모든 기기에서 확인해보세요 ✅',
+      ts:Date.now()
+    };
+    save();
+    toast('📤 모든 기기('+deviceCount+'대)로 알림을 보냈어요!');
   }catch(e){toast('알림 전송 실패: '+e.message);}
 }
 
