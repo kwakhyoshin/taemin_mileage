@@ -62,14 +62,14 @@ body{font-family:'Pretendard Variable',-apple-system,sans-serif;background:var(-
 
 /* BOTTOM NAV - Floating Glass Pill with SVG Icons */
 .nav-container{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:100}
-.bottom-nav{display:flex;align-items:center;gap:4px;background:var(--tabbar);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border:1px solid rgba(255,255,255,0.4);border-radius:28px;padding:8px 10px;box-shadow:var(--shadow-lg),0 0 0 1px rgba(0,0,0,0.04)}
+.bottom-nav{display:flex;align-items:center;gap:2px;background:var(--tabbar);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border:1px solid rgba(255,255,255,0.4);border-radius:28px;padding:6px 6px;box-shadow:var(--shadow-lg),0 0 0 1px rgba(0,0,0,0.04)}
 body.dark .bottom-nav{border-color:rgba(255,255,255,0.1)}
-.nav-item{display:flex;align-items:center;justify-content:center;gap:6px;padding:12px 14px;border-radius:22px;cursor:pointer;transition:all .25s cubic-bezier(.4,0,.2,1);border:none;background:transparent}
-.nav-item svg{width:22px;height:22px;stroke:var(--tx3);stroke-width:2;fill:none;transition:all .25s}
-.nav-item .nav-label{font-size:12px;font-weight:700;color:var(--or);max-width:0;overflow:hidden;white-space:nowrap;transition:all .3s cubic-bezier(.4,0,.2,1);opacity:0}
-.nav-item.active{background:var(--or-lt);padding:12px 18px}
+.nav-item{display:flex;align-items:center;justify-content:center;gap:4px;padding:10px 10px;border-radius:20px;cursor:pointer;transition:all .25s cubic-bezier(.4,0,.2,1);border:none;background:transparent}
+.nav-item svg{width:20px;height:20px;stroke:var(--tx3);stroke-width:2;fill:none;transition:all .25s}
+.nav-item .nav-label{font-size:11px;font-weight:700;color:var(--or);max-width:0;overflow:hidden;white-space:nowrap;transition:all .3s cubic-bezier(.4,0,.2,1);opacity:0}
+.nav-item.active{background:var(--or-lt);padding:10px 14px}
 .nav-item.active svg{stroke:var(--or)}
-.nav-item.active .nav-label{max-width:50px;opacity:1;margin-left:2px}
+.nav-item.active .nav-label{max-width:44px;opacity:1;margin-left:2px}
 .nav-item:not(.active):hover{background:rgba(99,102,241,0.08)}
 .nav-item:not(.active):active{transform:scale(0.95)}
 
@@ -510,15 +510,15 @@ body.dark .nav-profile{border-color:rgba(255,255,255,.4)}
 .nav-profile svg{width:100%;height:100%}
 .nav-profile img{width:100%;height:100%;object-fit:cover}
 
-.nav-divider{width:1px;height:32px;background:var(--bdr);margin:0 4px;flex-shrink:0}
-.nav-users{display:flex;align-items:center;gap:2px;flex-shrink:0}
-.nav-user-wrap{display:flex;flex-direction:column;align-items:center;gap:1px;cursor:pointer;padding:4px 6px;border-radius:16px;position:relative;-webkit-tap-highlight-color:transparent;transition:background .15s}
+.nav-divider{width:1px;height:28px;background:var(--bdr);margin:0 2px;flex-shrink:0}
+.nav-users{display:flex;align-items:center;gap:0;flex-shrink:0}
+.nav-user-wrap{display:flex;flex-direction:column;align-items:center;gap:1px;cursor:pointer;padding:3px 5px;border-radius:14px;position:relative;-webkit-tap-highlight-color:transparent;transition:background .15s}
 .nav-user-wrap:active{background:rgba(99,102,241,.1)}
-.nav-user-wrap .nav-profile{width:32px;height:32px;border-width:2px}
-.nav-user-wrap.me .nav-profile{width:36px;height:36px;border-color:var(--or)}
-.nav-user-label{font-size:9px;font-weight:800;color:var(--tx3);line-height:1}
+.nav-user-wrap .nav-profile{width:28px;height:28px;border-width:1.5px}
+.nav-user-wrap.me .nav-profile{width:30px;height:30px;border-color:var(--or)}
+.nav-user-label{font-size:8px;font-weight:800;color:var(--tx3);line-height:1}
 .nav-user-wrap.me .nav-user-label{color:var(--or)}
-.nav-mood-badge{position:absolute;top:-2px;right:-2px;font-size:12px;line-height:1;pointer-events:none;animation:moodBounce 2s infinite}
+.nav-mood-badge{position:absolute;top:-4px;right:-2px;font-size:10px;line-height:1;pointer-events:none;animation:moodBounce 2s infinite}
 @keyframes moodBounce{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
 
 /* PROFILE ICON IN ADMIN */
@@ -623,11 +623,13 @@ body.dark .nav-profile{border-color:rgba(255,255,255,.4)}
 
   /* Bottom nav - wider pill */
   .nav-container{bottom:24px}
-  .bottom-nav{padding:10px 16px;gap:6px}
-  .nav-item{padding:14px 18px}
-  .nav-item.active{padding:14px 22px}
-  .nav-item svg{width:24px;height:24px}
-  .nav-item .nav-label{font-size:13px}
+  .bottom-nav{padding:8px 10px;gap:4px}
+  .nav-item{padding:12px 14px}
+  .nav-item.active{padding:12px 16px}
+  .nav-item svg{width:22px;height:22px}
+  .nav-item .nav-label{font-size:12px}
+  .nav-user-wrap .nav-profile{width:32px;height:32px}
+  .nav-user-wrap.me .nav-profile{width:34px;height:34px}
 
   /* Admin section */
   .adm-sec{margin:0 20px 14px}
@@ -3411,7 +3413,7 @@ function renderNavUsers(){
     const moodEmoji=getMoodEmoji(id);
     html+=`<div class="nav-user-wrap" onclick="openMsgPop('${id}')">
       ${moodEmoji?`<span class="nav-mood-badge">${moodEmoji}</span>`:''}
-      <div class="nav-profile">${getAvatarHTML(id,32)}</div>
+      <div class="nav-profile">${getAvatarHTML(id,28)}</div>
       <span class="nav-user-label">${userLabels[id]||MEMBERS[id].name}</span>
     </div>`;
   });
@@ -3420,7 +3422,7 @@ function renderNavUsers(){
     const myMood=getMoodEmoji(currentUser);
     html+=`<div class="nav-user-wrap me" onclick="goTab('adm')">
       ${myMood?`<span class="nav-mood-badge">${myMood}</span>`:''}
-      <div class="nav-profile" id="nav-profile-icon">${getAvatarHTML(currentUser,36)}</div>
+      <div class="nav-profile" id="nav-profile-icon">${getAvatarHTML(currentUser,30)}</div>
       <span class="nav-user-label">나</span>
     </div>`;
   }else{
@@ -3633,6 +3635,16 @@ function urlBase64ToUint8Array(base64String){
   return outputArray;
 }
 
+// Generate a unique device ID for this browser/device
+function getDeviceId(){
+  let id=localStorage.getItem('taemin_device_id');
+  if(!id){
+    id='dev_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);
+    localStorage.setItem('taemin_device_id',id);
+  }
+  return id;
+}
+
 async function subscribePush(){
   // Check if running in standalone PWA mode (required on iOS)
   const isStandalone=window.navigator.standalone||window.matchMedia('(display-mode:standalone)').matches;
@@ -3678,19 +3690,26 @@ async function subscribePush(){
     console.error('[Push] subscribe error:',e);
     toast('푸시 구독 실패: '+e.message);return;
   }
-  // Step 3: Save to Firestore — use existing users doc to avoid permission issues
+  // Step 3: Save to localStorage (device-specific toggle state)
+  localStorage.setItem('taemin_push_enabled','true');
+
+  // Step 4: Save subscription to Firestore keyed by device ID (supports multiple devices)
   try{
-    await setDoc(DATA_DOC,{
-      pushSubscription:JSON.stringify(pushSubscription.toJSON()),
-      pushEnabled:true,
-      pushUpdatedAt:Date.now()
-    },{merge:true});
-    console.log('[Push] saved to Firestore (users/taemin)');
+    const deviceId=getDeviceId();
+    if(!S.pushDevices)S.pushDevices={};
+    S.pushDevices[deviceId]={
+      subscription:JSON.stringify(pushSubscription.toJSON()),
+      user:currentUser||'unknown',
+      enabled:true,
+      updatedAt:Date.now()
+    };
+    save();
+    console.log('[Push] saved device', deviceId, 'to Firestore');
   }catch(e){
     console.warn('[Push] Firestore save failed (subscription still active):',e);
   }
   updatePushUI();
-  toast('🔔 알림이 활성화됐어요!');
+  toast('🔔 이 기기에서 알림이 활성화됐어요!');
 }
 
 async function unsubscribePush(){
@@ -3698,9 +3717,15 @@ async function unsubscribePush(){
   try{
     await pushSubscription.unsubscribe();
     pushSubscription=null;
-    await setDoc(DATA_DOC,{pushEnabled:false,pushUpdatedAt:Date.now()},{merge:true});
+    localStorage.setItem('taemin_push_enabled','false');
+    // Remove this device from Firestore
+    const deviceId=getDeviceId();
+    if(S.pushDevices&&S.pushDevices[deviceId]){
+      S.pushDevices[deviceId].enabled=false;
+      save();
+    }
     updatePushUI();
-    toast('🔕 알림이 해제됐어요');
+    toast('🔕 이 기기에서 알림이 해제됐어요');
   }catch(e){
     toast('알림 해제 실패: '+e.message);
   }
@@ -3710,38 +3735,33 @@ function updatePushUI(){
   const togBtn=document.getElementById('push-tog');
   const statusEl=document.getElementById('push-status');
   if(!togBtn)return;
-  // Also check for iOS Safari limitation
   const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
   const isStandalone=window.navigator.standalone||window.matchMedia('(display-mode:standalone)').matches;
   const pushSupported=typeof Notification!=='undefined'&&(!isIOS||isStandalone);
+  // Use local push subscription state (device-specific)
   const isOn=!!pushSubscription;
   togBtn.classList.toggle('off',!isOn);
   if(statusEl){
     if(!pushSupported) statusEl.textContent='미지원 (홈화면 앱 필요)';
-    else statusEl.textContent=isOn?'활성화':'비활성화';
+    else statusEl.textContent=isOn?'활성화 (이 기기)':'비활성화';
   }
 }
 
 async function sendTestPush(){
   if(!pushSubscription){toast('먼저 알림을 활성화하세요');return;}
   try{
-    await setDoc(doc(db,'push_queue','test_'+Date.now()),{
+    const deviceId=getDeviceId();
+    if(!S.pushQueue)S.pushQueue=[];
+    S.pushQueue.push({
+      deviceId:deviceId,
       subscription:JSON.stringify(pushSubscription.toJSON()),
       title:'태민이 마일리지 🌟',
       body:'테스트 알림이에요! 푸시 알림이 잘 작동하고 있어요 ✅',
       timestamp:Date.now()
     });
+    save();
     toast('📤 테스트 알림을 보냈어요!');
-  }catch(e){
-    // push_queue collection might not have permissions, try saving to users doc instead
-    try{
-      await setDoc(DATA_DOC,{
-        pendingTestPush:true,
-        pendingPushTs:Date.now()
-      },{merge:true});
-      toast('📤 테스트 알림 요청을 저장했어요!');
-    }catch(e2){toast('전송 실패: '+e2.message);}
-  }
+  }catch(e){toast('전송 실패: '+e.message);}
 }
 
 function togglePush(){
