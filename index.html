@@ -110,7 +110,11 @@ body.dark .dtog-in{transform:translateX(24px)}
 .hero.compact .prog-row{margin-top:3px;font-size:10px}
 
 /* SECTION */
-.sec{font-size:17px;font-weight:800;color:var(--tx);margin:14px 16px 10px}
+.sec{font-size:15px;font-weight:800;color:var(--tx);margin:14px 16px 10px;display:flex;align-items:center;gap:6px}
+.sec-ico{width:18px;height:18px;fill:none;stroke:#6366F1;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;margin-top:1px}
+.dtab-ico{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px}
+.cal-detail-sec{margin:0!important;padding:14px 16px 10px!important;border-bottom:1px solid var(--bdr)}
+.hdr-ico{width:22px;height:22px;fill:none;stroke:rgba(255,255,255,.45);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;margin-left:6px;vertical-align:-3px;display:inline}
 .sec-hdr{display:flex;align-items:center;justify-content:space-between;margin:14px 16px 10px}
 .card{background:var(--card);border-radius:var(--r);margin:0 16px 12px;padding:16px;transition:background .25s}
 
@@ -137,7 +141,7 @@ body.dark .dtog-in{transform:translateX(24px)}
 
 /* LOG HEADER STICKY */
 .log-header-sticky{position:sticky;top:0;z-index:10;background:linear-gradient(135deg,#6366F1,#818CF8);padding:16px 20px 16px;padding-top:calc(16px + env(safe-area-inset-top));margin:0 0 14px;border-radius:0 0 var(--rxl) var(--rxl);box-shadow:0 4px 20px rgba(99,102,241,0.3)}
-.log-header-sticky h2{font-size:22px;font-weight:900;color:#fff}
+.log-header-sticky h2{font-size:20px;font-weight:900;color:#fff}
 .log-header-sticky p{font-size:12px;color:rgba(255,255,255,.85);margin-top:2px;font-weight:600}
 
 /* LOG LIST */
@@ -199,7 +203,7 @@ body.dark .rec-day-tag.day-1{background:#312E81;color:#A5B4FC}
 
 /* ADMIN */
 .adm-top{background:linear-gradient(135deg,#6366F1,#818CF8);padding:16px 18px 16px;padding-top:calc(16px + env(safe-area-inset-top));position:sticky;top:0;z-index:10;box-shadow:0 4px 20px rgba(99,102,241,0.3);border-radius:0 0 var(--rxl) var(--rxl);margin-bottom:14px}
-.adm-top h2{font-size:22px;font-weight:900;color:#fff}
+.adm-top h2{font-size:20px;font-weight:900;color:#fff}
 .adm-top p{font-size:12px;color:rgba(255,255,255,.8);margin-top:2px;font-weight:600}
 .adm-lock{position:absolute;top:calc(16px + env(safe-area-inset-top));right:18px;background:rgba(255,255,255,.2);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:700;color:#fff;cursor:pointer;border:none;font-family:inherit}
 .stat-row{display:flex;gap:9px;margin:12px 16px 0}
@@ -239,7 +243,7 @@ body.dark .rec-day-tag.day-1{background:#312E81;color:#A5B4FC}
 
 /* HISTORY */
 .hist-hero{position:sticky;top:0;z-index:10;background:linear-gradient(135deg,#6366F1,#818CF8);border-radius:0 0 var(--rxl) var(--rxl);margin:0 0 14px;padding:18px 20px 16px;padding-top:calc(18px + env(safe-area-inset-top));box-shadow:0 4px 20px rgba(99,102,241,0.3)}
-.hist-hero h2{font-size:22px;font-weight:900;color:#fff}
+.hist-hero h2{font-size:20px;font-weight:900;color:#fff}
 .hist-hero p{font-size:12px;color:rgba(255,255,255,.85);margin-top:2px;font-weight:600}
 .hist-stats-card{background:var(--card);border-radius:var(--r);margin:0 16px 14px;padding:14px;box-shadow:var(--sh)}
 .hist-stat-items{display:flex;gap:8px;margin-bottom:12px}
@@ -253,7 +257,11 @@ body.dark .rec-day-tag.day-1{background:#312E81;color:#A5B4FC}
 .hist-earned-inline{text-align:right}
 .hist-earned-inline span:first-child{font-size:11px;color:var(--tx3);font-weight:700;display:block}
 .hist-earned-inline .hist-earned-val{font-size:22px;font-weight:900;color:var(--or)}
-.today-summary-card{margin:0 16px 6px;padding:16px;background:var(--card);border-radius:var(--r);box-shadow:var(--sh)}
+.hist-custom-row{display:flex;align-items:center;gap:10px;margin-top:10px;padding-top:10px;border-top:1px solid var(--bdr)}
+.hist-date-inp{padding:7px 10px;border-radius:var(--rsm);border:1.5px solid var(--bdr);font-family:inherit;font-size:13px;font-weight:700;color:var(--tx);background:var(--bg);outline:none;transition:border .2s}
+.hist-date-inp:focus{border-color:#6366F1}
+.hist-custom-range{font-size:11px;font-weight:700;color:var(--tx3)}
+.today-summary-card{margin:0 16px 12px;padding:16px;background:var(--card);border-radius:var(--r);box-shadow:var(--sh)}
 .today-summary-card .ts-header{display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:15px;font-weight:800;color:var(--tx)}
 .today-summary-card .ts-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
 .today-summary-card .ts-item{background:var(--bg);border-radius:var(--rsm);padding:10px 12px;text-align:center;border:1px solid var(--bdr)}
@@ -268,6 +276,45 @@ body.dark .today-summary-card .ts-msg{background:linear-gradient(135deg,#312E81,
 .hist-tm{font-size:10px;color:var(--tx3);font-weight:600;margin-top:1px}
 .hist-pts{font-size:14px;font-weight:800;color:var(--gn2)}
 .hist-pts.neg{color:var(--rd)}
+.dash-tabs{display:flex;gap:6px;padding:0 16px;margin-bottom:14px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.dash-tab{padding:8px 16px;border-radius:20px;font-size:13px;font-weight:800;color:var(--tx2);background:var(--card);border:1.5px solid var(--bdr);cursor:pointer;white-space:nowrap;font-family:inherit;transition:.2s}
+.dash-tab.on{background:#6366F1;color:#fff;border-color:#6366F1}
+.dash-panel{animation:fadeUp .25s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.dash-streak-card{padding:16px!important}
+.dash-streak-card .ds-row{display:flex;align-items:center;gap:14px}
+.dash-streak-card .ds-fire{font-size:36px}
+.dash-streak-card .ds-num{font-size:28px;font-weight:900;color:var(--or)}
+.dash-streak-card .ds-lbl{font-size:12px;color:var(--tx3);font-weight:700}
+.dash-streak-card .ds-bar-wrap{margin-top:12px}
+.dash-streak-card .ds-bar-bg{background:var(--bdr);border-radius:6px;height:8px;overflow:hidden}
+.dash-streak-card .ds-bar-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,#F59E0B,#EF4444);transition:width .5s}
+.dash-streak-card .ds-bar-lbl{display:flex;justify-content:space-between;font-size:11px;font-weight:700;color:var(--tx3);margin-top:4px}
+.heatmap-row{display:flex;gap:4px;justify-content:space-between;padding:8px 4px}
+.heatmap-cell{flex:1;aspect-ratio:1;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;font-weight:800;gap:2px;min-width:0}
+.heatmap-cell .hm-day{color:var(--tx3)}
+.heatmap-cell .hm-val{font-size:14px;font-weight:900}
+.top3-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--bdr)}
+.top3-item:last-child{border-bottom:none}
+.top3-rank{font-size:20px;font-weight:900;width:30px;text-align:center}
+.top3-emoji{font-size:28px}
+.top3-info{flex:1}
+.top3-name{font-size:14px;font-weight:800;color:var(--tx)}
+.top3-sub{font-size:11px;color:var(--tx3);font-weight:700;margin-top:1px}
+.top3-bar-bg{height:6px;background:var(--bdr);border-radius:3px;margin-top:6px;overflow:hidden}
+.top3-bar{height:100%;border-radius:3px;transition:width .5s}
+.weekday-chart{display:flex;align-items:flex-end;gap:6px;height:120px;padding:12px 4px 0}
+.weekday-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%}
+.weekday-bar-area{flex:1;width:100%;display:flex;align-items:flex-end;justify-content:center}
+.weekday-bar{width:70%;border-radius:4px 4px 0 0;background:linear-gradient(180deg,#818CF8,#6366F1);transition:height .5s;min-height:2px}
+.weekday-lbl{font-size:11px;font-weight:800;color:var(--tx3)}
+.weekday-val{font-size:10px;font-weight:800;color:var(--or)}
+.monthly-chart{display:flex;align-items:flex-end;gap:8px;height:140px;padding:12px 4px 0}
+.monthly-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%}
+.monthly-bar-area{flex:1;width:100%;display:flex;align-items:flex-end;justify-content:center}
+.monthly-bar{width:60%;border-radius:4px 4px 0 0;transition:height .5s;min-height:2px}
+.monthly-lbl{font-size:10px;font-weight:800;color:var(--tx3)}
+.monthly-val{font-size:10px;font-weight:800;color:var(--tx2)}
 .period-row{display:flex;gap:7px;margin:0 16px 12px}
 .period-btn{flex:1;padding:8px;background:var(--card);border-radius:var(--rsm);border:1.5px solid transparent;font-family:inherit;font-size:12px;font-weight:800;color:var(--tx2);cursor:pointer;transition:background .2s}
 .period-btn.on{background:var(--or-lt);color:var(--or);border-color:var(--or)}
@@ -484,12 +531,12 @@ body.dark .nav-profile{border-color:rgba(255,255,255,.4)}
   .home-top h1{font-size:24px}
   .hero{padding:22px 24px 26px;position:sticky;top:0;z-index:10}
   .log-header-sticky{padding:20px 24px}
-  .log-header-sticky h2{font-size:26px}
+  .log-header-sticky h2{font-size:22px}
   .rwd-header-sticky{padding:20px 24px}
   .hist-hero{padding:22px 24px 18px}
   .hist-stats-card{margin:0 20px 14px}
   .adm-top{padding:20px 24px}
-  .adm-top h2{font-size:26px}
+  .adm-top h2{font-size:22px}
 
   /* Reward cards */
   .rwd-card{padding:18px}
@@ -598,10 +645,10 @@ body.dark .nav-profile{border-color:rgba(255,255,255,.4)}
 
   /* Header stickies - not full width */
   .log-header-sticky{margin:0 0 16px;border-radius:0 0 var(--rxl) var(--rxl);padding:24px 28px}
-  .log-header-sticky h2{font-size:28px}
+  .log-header-sticky h2{font-size:24px}
   .rwd-header-sticky{border-radius:0 0 var(--rxl) var(--rxl);padding:24px 28px}
   .hist-hero{border-radius:0 0 var(--rxl) var(--rxl);padding:26px 28px 20px}
-  .hist-hero h2{font-size:26px}
+  .hist-hero h2{font-size:24px}
   .hist-stats-card{margin:0 24px 14px}
   .adm-top{border-radius:0 0 var(--rxl) var(--rxl);padding:24px 28px}
 
@@ -767,16 +814,16 @@ body.dark .nav-profile{border-color:rgba(255,255,255,.4)}
     <div class="prog-track"><div class="prog-fill" id="hero-bar" style="width:0%"></div></div>
     <div class="prog-row"><span>0</span><span id="hero-bar-lbl"></span></div>
   </div>
-  <div class="sec">오늘 할 일 ✅</div>
+  <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> 오늘 할 일</div>
   <div class="act-grid" id="home-grid"></div>
-  <div class="sec">최근 활동 📋</div>
+  <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> 최근 활동</div>
   <div class="rec-list" id="rec-list"></div>
 </div>
 
 <!-- LOG -->
 <div class="scr" id="s-log">
   <div class="log-header-sticky">
-    <h2>활동 기록하기</h2>
+    <h2>활동 기록하기 <svg class="hdr-ico" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><path d="M9 15l2 2 4-4"/></svg></h2>
     <p>탭해서 마일리지를 받아요 — 실수로 눌렀으면 취소!</p>
   </div>
   <div class="log-wrap" id="log-list"></div>
@@ -787,8 +834,8 @@ body.dark .nav-profile{border-color:rgba(255,255,255,.4)}
   <div class="rwd-header-sticky">
     <div style="display:flex;align-items:center;justify-content:space-between">
       <div>
-        <h1 style="font-size:20px;font-weight:900;color:#fff">보상 상점 🎁</h1>
-        <p style="font-size:11px;color:rgba(255,255,255,.75);margin-top:2px">모은 마일리지로 교환해요</p>
+        <h2 style="font-size:20px;font-weight:900;color:#fff">보상 상점 <svg class="hdr-ico" viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg></h2>
+        <p style="font-size:12px;color:rgba(255,255,255,.8);margin-top:2px;font-weight:600">모은 마일리지로 교환해요</p>
       </div>
       <div style="text-align:right">
         <div style="font-size:10px;color:rgba(255,255,255,.7);font-weight:700">보유</div>
@@ -796,65 +843,110 @@ body.dark .nav-profile{border-color:rgba(255,255,255,.4)}
       </div>
     </div>
   </div>
-  <div class="sec">교환 가능한 보상</div>
+  <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg> 교환 가능한 보상</div>
   <div class="rwd-grid" id="rwd-grid"></div>
 </div>
 
 <!-- HISTORY -->
 <div class="scr" id="s-hist">
   <div class="hist-hero">
-    <h2>활동 기록</h2>
-    <p>지금까지의 마일리지 내역</p>
+    <h2>활동 통계 <svg class="hdr-ico" viewBox="0 0 24 24"><path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9"/><path d="M21 3l-9 9"/><path d="M15 3h6v6"/></svg></h2>
+    <p>태민이의 활동 인사이트</p>
   </div>
 
-  <!-- 마일리지 요약 (일반 카드 스타일) -->
-  <div class="hist-stats-card">
-    <div class="hist-stat-items" id="hist-stats"></div>
-    <div class="hist-period-row">
-      <div class="hist-period-btns">
-        <button class="hist-pbtn on" data-p="7" onclick="setPeriod(7)">7일</button>
-        <button class="hist-pbtn" data-p="30" onclick="setPeriod(30)">30일</button>
-        <button class="hist-pbtn" data-p="0" onclick="setPeriod(0)">전체</button>
+  <!-- 서브 메뉴 탭 -->
+  <div class="dash-tabs">
+    <button class="dash-tab on" onclick="switchDash(0,this)"><svg class="dtab-ico" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 5-6"/></svg> 대시보드</button>
+    <button class="dash-tab" onclick="switchDash(1,this)"><svg class="dtab-ico" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> 캘린더</button>
+    <button class="dash-tab" onclick="switchDash(2,this)"><svg class="dtab-ico" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg> 내역</button>
+  </div>
+
+  <!-- ===== 패널 0: 대시보드 ===== -->
+  <div class="dash-panel" id="dash-p0">
+    <!-- 요약 카드 -->
+    <div class="hist-stats-card">
+      <div class="hist-stat-items" id="hist-stats"></div>
+    </div>
+
+    <!-- 연속 달성 트래커 -->
+    <div class="card dash-streak-card" id="dash-streak"></div>
+
+    <!-- 주간 히트맵 -->
+    <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg> 이번 주 활동 히트맵</div>
+    <div class="card" id="dash-heatmap"></div>
+
+    <!-- TOP 3 활동 -->
+    <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7L12 16.4 5.7 21l2.3-7L2 9.4h7.6z"/></svg> 이번 달 TOP 활동</div>
+    <div class="card" id="dash-top3"></div>
+
+    <!-- 요일별 패턴 -->
+    <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 5-6"/></svg> 요일별 활동 패턴</div>
+    <div class="card" id="dash-weekday"></div>
+
+    <!-- 월간 추이 -->
+    <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg> 월별 마일리지 추이</div>
+    <div class="card" id="dash-monthly"></div>
+  </div>
+
+  <!-- ===== 패널 1: 캘린더 ===== -->
+  <div class="dash-panel" id="dash-p1" style="display:none">
+    <div class="sec" style="display:flex;align-items:center;justify-content:space-between">
+      <span style="display:flex;align-items:center;gap:6px"><svg class="sec-ico" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> 활동 캘린더</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button class="cal-nav" onclick="calPrev()">◀</button>
+        <span id="cal-month" style="font-size:14px;font-weight:800;min-width:90px;text-align:center"></span>
+        <button class="cal-nav" onclick="calNext()">▶</button>
       </div>
-      <div class="hist-earned-inline">
-        <span id="hist-period-lbl">최근 7일</span>
-        <span class="hist-earned-val" id="hist-earned">+0점</span>
+    </div>
+    <div class="card cal-card">
+      <div class="cal-header">
+        <span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+    </div>
+    <div id="today-summary" class="today-summary-card"></div>
+    <div id="cal-detail">
+      <div class="card" style="overflow:hidden;padding:0">
+        <div class="sec cal-detail-sec" id="cal-detail-title"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> 오늘의 활동</div>
+        <div style="padding:0" id="cal-detail-list"></div>
       </div>
     </div>
   </div>
 
-  <!-- 캘린더 -->
-  <div class="sec" style="display:flex;align-items:center;justify-content:space-between">
-    <span>📅 활동 캘린더</span>
-    <div style="display:flex;align-items:center;gap:8px">
-      <button class="cal-nav" onclick="calPrev()">◀</button>
-      <span id="cal-month" style="font-size:14px;font-weight:800;min-width:90px;text-align:center"></span>
-      <button class="cal-nav" onclick="calNext()">▶</button>
+  <!-- ===== 패널 2: 전체 내역 ===== -->
+  <div class="dash-panel" id="dash-p2" style="display:none">
+    <div class="hist-stats-card" style="margin-top:4px">
+      <div class="hist-period-row">
+        <div class="hist-period-btns">
+          <button class="hist-pbtn on" data-p="7" onclick="setPeriod(7)">7일</button>
+          <button class="hist-pbtn" data-p="30" onclick="setPeriod(30)">30일</button>
+          <button class="hist-pbtn" data-p="custom" onclick="setPeriod('custom')">사용자 지정</button>
+        </div>
+        <div class="hist-earned-inline">
+          <span id="hist-period-lbl">최근 7일</span>
+          <span class="hist-earned-val" id="hist-earned">+0점</span>
+        </div>
+      </div>
+      <div class="hist-custom-row" id="hist-custom-row" style="display:none">
+        <label style="font-size:12px;font-weight:700;color:var(--tx2)">시작일</label>
+        <input type="date" id="hist-custom-date" class="hist-date-inp" onchange="applyCustomPeriod()">
+        <span class="hist-custom-range" id="hist-custom-range"></span>
+      </div>
     </div>
-  </div>
-  <div class="card cal-card">
-    <div class="cal-header">
-      <span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span>
-    </div>
-    <div class="cal-grid" id="cal-grid"></div>
-  </div>
-
-  <!-- 오늘 활동 요약 -->
-  <div id="today-summary" class="today-summary-card"></div>
-
-  <!-- 선택된 날짜 활동 목록 (기본 표시) -->
-  <div id="cal-detail">
-    <div class="sec" id="cal-detail-title">📋 오늘의 활동</div>
-    <div class="card" style="padding:0;overflow:hidden" id="cal-detail-list"></div>
+    <div class="card" style="padding:0;overflow:hidden" id="hist-list"></div>
   </div>
 </div>
 
 <!-- ADMIN -->
 <div class="scr" id="s-adm">
   <div class="adm-top">
-    <h2>⚙️ 관리자</h2>
-    <p>부모님 전용 설정 화면</p>
-    <button class="adm-lock" onclick="lockAdmin()">🔒 잠금</button>
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <h2>관리자 <svg class="hdr-ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></h2>
+        <p>부모님 전용 설정 화면</p>
+      </div>
+      <button class="adm-lock" onclick="lockAdmin()">🔒 잠금</button>
+    </div>
   </div>
   <div class="stat-row">
     <div class="stat-c"><div class="stat-n" id="adm-pts">0</div><div class="stat-l">마일리지</div></div>
@@ -902,7 +994,7 @@ body.dark .nav-profile{border-color:rgba(255,255,255,.4)}
   </div>
   <div id="adm-p2" style="display:none">
     <div class="adm-sec">
-      <div class="adm-sec-lbl">💬 스마트 메시지 설정</div>
+      <div class="adm-sec-lbl">스마트 메시지 설정</div>
       <div class="adm-card">
         <div class="adm-row">
           <div class="adm-row-l"><div class="adm-row-nm">메시지 모드</div><div class="adm-row-sub">자동: 날씨/미세먼지 연동</div></div>
@@ -1005,7 +1097,7 @@ body.dark .nav-profile{border-color:rgba(255,255,255,.4)}
       </div>
     </div>
     <div class="adm-sec">
-      <div class="adm-sec-lbl">📷 가족 프로필 사진 관리</div>
+      <div class="adm-sec-lbl">가족 프로필 사진 관리</div>
       <div class="adm-card" id="adm-member-photos">
         <!-- 동적으로 렌더링됨 -->
       </div>
@@ -1046,7 +1138,7 @@ body.dark .nav-profile{border-color:rgba(255,255,255,.4)}
     </div>
     <div class="nav-item" data-tab="hist" id="tab-hist" onclick="goTab('hist')">
       <svg viewBox="0 0 24 24"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
-      <span class="nav-label">기록</span>
+      <span class="nav-label">통계</span>
     </div>
     <div class="nav-item" data-tab="adm" id="tab-adm" onclick="goTab('adm')">
       <div class="nav-profile" id="nav-profile-icon">👤</div>
@@ -1904,7 +1996,7 @@ function countdownStr(act){
 function renderAll(){
   renderHero();renderHomeGrid();renderRecent();
   renderLogList();renderRewardGrid();
-  renderHistStats();renderHistList();renderCalendar();
+  renderDashboard();renderHistStats();renderHistList();renderCalendar();
   renderAdmStats();renderAdmActList();renderAdmRwdList();renderAdmSettings();
   renderMsgSettings();renderAdmMemberPhotos();
 }
@@ -2160,7 +2252,7 @@ function renderCalDetail(dateStr){
   const isToday=dateStr===todayStr;
   
   const dateLabel=isToday?'오늘의 활동':`${parseInt(m)}월 ${parseInt(d)}일`;
-  titleEl.innerHTML=`📋 ${dateLabel} ${complete?'<span style="color:var(--gn)">✓ 목표 달성!</span>':''}`;
+  titleEl.innerHTML=`<svg class="sec-ico" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> ${dateLabel} ${complete?'<span style="color:var(--gn)">✓ 목표 달성!</span>':''}`;
   
   if(logs.length===0){
     listEl.innerHTML=`<div class="empty">${isToday?'아직 완료한 활동이 없어요':'이 날 완료한 활동이 없어요'}</div>`;
@@ -2229,12 +2321,16 @@ function renderTodaySummary(){
   else if(selLogs.length>0) msg=isToday?'🌱 좋은 시작이야! 아직 할 수 있는 게 많아!':'🌱 조금 활동한 날이야';
   else msg=isToday?'🌅 오늘 하루도 파이팅! 첫 활동을 시작해보자!':'📭 이 날은 활동 기록이 없어요';
 
-  const statusIcon=allDone?'🏆':completePct>=50?'🔥':'📋';
+  const statusSvg=allDone
+    ?'<svg class="sec-ico" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/><circle cx="12" cy="12" r="10"/></svg>'
+    :completePct>=50
+    ?'<svg class="sec-ico" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>'
+    :'<svg class="sec-ico" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
 
   const pctBar=totalCount>0?`<div style="margin-top:6px;background:var(--bdr);border-radius:4px;height:6px;overflow:hidden"><div style="width:${completePct}%;height:100%;background:${allDone?'var(--gn)':'var(--or)'};border-radius:4px;transition:width .3s"></div></div>`:'';
 
   el.innerHTML=`
-    <div class="ts-header">${statusIcon} ${dateLabel}의 요약</div>
+    <div class="ts-header">${statusSvg} ${dateLabel}의 요약</div>
     <div class="ts-grid">
       <div class="ts-item">
         <div class="ts-val" style="color:${allDone?'var(--gn)':'var(--or)'}">${allDone?'완료!':totalCount>0?completePct+'%':'–'}</div>
@@ -2251,9 +2347,300 @@ function renderTodaySummary(){
   `;
 }
 
+// ── DASHBOARD SUB-TAB SWITCHING ──────────────────
+let currentDashPanel=0;
+function switchDash(idx,btn){
+  currentDashPanel=idx;
+  document.querySelectorAll('.dash-tab').forEach(b=>b.classList.remove('on'));
+  if(btn)btn.classList.add('on');
+  else document.querySelectorAll('.dash-tab')[idx]?.classList.add('on');
+  for(let i=0;i<3;i++){
+    const p=document.getElementById('dash-p'+i);
+    if(p)p.style.display=i===idx?'':'none';
+  }
+  if(idx===0)renderDashboard();
+  if(idx===1){renderCalendar();renderTodaySummary();}
+  if(idx===2){renderHistStats();renderHistList();}
+}
+window.switchDash=switchDash;
+
+// ── DASHBOARD RENDERERS ──────────────────────────
+function renderDashboard(){
+  renderDashStreak();
+  renderDashHeatmap();
+  renderDashTop3();
+  renderDashWeekday();
+  renderDashMonthly();
+}
+
+function renderDashStreak(){
+  const el=document.getElementById('dash-streak');
+  if(!el)return;
+  const streak=S.streak||0;
+  const longest=S.longest||0;
+  const nextMilestone=streak<7?7:streak<14?14:streak<30?30:streak<60?60:streak<100?100:Math.ceil((streak+1)/50)*50;
+  const pct=Math.min(100,Math.round(streak/nextMilestone*100));
+  let emoji='🔥',msg='';
+  if(streak===0){emoji='😴';msg='오늘 첫 활동을 시작해보자!';}
+  else if(streak<3){emoji='🌱';msg='좋은 시작이야! 계속 이어가자!';}
+  else if(streak<7){emoji='🔥';msg='잘하고 있어! 일주일을 향해!';}
+  else if(streak<14){emoji='⚡';msg='대단해! 벌써 일주일 넘었어!';}
+  else if(streak<30){emoji='💎';msg='놀라워! 2주 이상 연속 달성!';}
+  else if(streak<60){emoji='🏆';msg='한 달 넘게 이어가다니 최고야!';}
+  else{emoji='👑';msg='전설적인 연속 달성! 존경스러워!';}
+
+  el.innerHTML=`
+    <div class="ds-row">
+      <div class="ds-fire">${emoji}</div>
+      <div>
+        <div class="ds-num">${streak}일</div>
+        <div class="ds-lbl">연속 달성 중 ${longest>streak?`(최장 ${longest}일)`:streak>0?'🎉 최장 기록!':''}</div>
+      </div>
+    </div>
+    <div class="ds-bar-wrap">
+      <div class="ds-bar-bg"><div class="ds-bar-fill" style="width:${pct}%"></div></div>
+      <div class="ds-bar-lbl"><span>${streak}일</span><span>목표 ${nextMilestone}일</span></div>
+    </div>
+    <div style="text-align:center;font-size:13px;font-weight:700;color:var(--tx2);margin-top:8px">${msg}</div>
+  `;
+}
+
+function renderDashHeatmap(){
+  const el=document.getElementById('dash-heatmap');
+  if(!el)return;
+  const dayNames=['일','월','화','수','목','금','토'];
+  const today=new Date();
+  const dayOfWeek=today.getDay();
+  let cells=[];
+  // Show Mon-Sun of this week
+  const monday=new Date(today);
+  monday.setDate(today.getDate()-((dayOfWeek===0?6:dayOfWeek-1)));
+  monday.setHours(0,0,0,0);
+
+  for(let i=0;i<7;i++){
+    const d=new Date(monday);
+    d.setDate(monday.getDate()+i);
+    const ds=getDateStr(d.getFullYear(),d.getMonth(),d.getDate());
+    const logs=getLogsForDate(ds);
+    const count=logs.length;
+    const pts=logs.reduce((a,l)=>a+(l.pts>0?l.pts:0),0);
+    const isToday=ds===todayStr();
+    // Intensity: 0=none, 1=low, 2=mid, 3=high
+    let level=0;
+    if(count>=5)level=3;
+    else if(count>=3)level=2;
+    else if(count>=1)level=1;
+    const colors=['var(--bdr)','#C7D2FE','#818CF8','#6366F1'];
+    const textColor=level>=2?'#fff':'var(--tx2)';
+    cells.push(`<div class="heatmap-cell" style="background:${colors[level]};${isToday?'box-shadow:0 0 0 2px var(--or);':''}">
+      <span class="hm-day" style="${level>=2?'color:rgba(255,255,255,.7)':''}">${dayNames[(i+1)%7===0?0:(i+1)%7===0?0:((i+1)%7)]}</span>
+      <span class="hm-val" style="color:${textColor}">${count}</span>
+    </div>`);
+  }
+  // Fix day labels: monday=1, tuesday=2, ..., sunday=0
+  cells=[];
+  for(let i=0;i<7;i++){
+    const d=new Date(monday);
+    d.setDate(monday.getDate()+i);
+    const ds=getDateStr(d.getFullYear(),d.getMonth(),d.getDate());
+    const logs=getLogsForDate(ds);
+    const count=logs.length;
+    const dayIdx=d.getDay();
+    const isToday=ds===todayStr();
+    const isFuture=d>today;
+    let level=0;
+    if(!isFuture){
+      if(count>=5)level=3;
+      else if(count>=3)level=2;
+      else if(count>=1)level=1;
+    }
+    const colors=['var(--bdr)','#C7D2FE','#818CF8','#6366F1'];
+    const textColor=level>=2?'#fff':'var(--tx2)';
+    cells.push(`<div class="heatmap-cell" style="background:${colors[level]};${isToday?'box-shadow:0 0 0 2px var(--or);':''}${isFuture?'opacity:.3;':''}">
+      <span class="hm-day" style="${level>=2?'color:rgba(255,255,255,.7)':''}">${dayNames[dayIdx]}</span>
+      <span class="hm-val" style="color:${textColor}">${isFuture?'–':count}</span>
+    </div>`);
+  }
+  el.innerHTML=`<div class="heatmap-row">${cells.join('')}</div>
+    <div style="display:flex;justify-content:center;gap:10px;padding:6px 0 4px;font-size:10px;font-weight:700;color:var(--tx3)">
+      <span>⬜ 0</span><span style="color:#818CF8">🟦 1-2</span><span style="color:#6366F1">🟪 3-4</span><span style="color:#4F46E5">🟫 5+</span>
+    </div>`;
+}
+
+function renderDashTop3(){
+  const el=document.getElementById('dash-top3');
+  if(!el)return;
+  // Count activities this month
+  const now=new Date();
+  const monthStart=getDateStr(now.getFullYear(),now.getMonth(),1);
+  const thisMonthLogs=S.log.filter(l=>{
+    const d=new Date(l.ts);
+    return getDateStr(d.getFullYear(),d.getMonth(),d.getDate())>=monthStart&&l.pts>0;
+  });
+  // Group by actId
+  const counts={};
+  thisMonthLogs.forEach(l=>{
+    const key=l.actId||l.name;
+    if(!counts[key])counts[key]={name:l.name,emoji:l.emoji,count:0,pts:0};
+    counts[key].count++;
+    counts[key].pts+=l.pts;
+  });
+  const sorted=Object.values(counts).sort((a,b)=>b.count-a.count).slice(0,3);
+  const maxCount=sorted[0]?.count||1;
+  const rankEmojis=['🥇','🥈','🥉'];
+  const barColors=['#F59E0B','#818CF8','#A78BFA'];
+
+  if(sorted.length===0){
+    el.innerHTML='<div class="empty" style="padding:20px">이번 달 활동 기록이 없어요</div>';
+    return;
+  }
+
+  el.innerHTML='<div style="padding:4px 14px">'+sorted.map((item,i)=>`
+    <div class="top3-item">
+      <div class="top3-rank">${rankEmojis[i]||i+1}</div>
+      <div class="top3-emoji">${item.emoji}</div>
+      <div class="top3-info">
+        <div class="top3-name">${item.name}</div>
+        <div class="top3-sub">${item.count}회 · ${item.pts.toLocaleString()}점</div>
+        <div class="top3-bar-bg"><div class="top3-bar" style="width:${Math.round(item.count/maxCount*100)}%;background:${barColors[i]||'#818CF8'}"></div></div>
+      </div>
+    </div>`).join('')+'</div>';
+}
+
+function renderDashWeekday(){
+  const el=document.getElementById('dash-weekday');
+  if(!el)return;
+  const dayNames=['일','월','화','수','목','금','토'];
+  // Compute avg mileage per day-of-week from last 30 days
+  const daySums=[0,0,0,0,0,0,0];
+  const dayCounts=[0,0,0,0,0,0,0];
+  const cutoff=Date.now()-30*86400000;
+  S.log.forEach(l=>{
+    if(l.ts<cutoff||l.pts<=0)return;
+    const d=new Date(l.ts).getDay();
+    daySums[d]+=l.pts;
+    dayCounts[d]++;
+  });
+  // Count unique days in last 30 days for each day-of-week
+  const uniqueDays=[0,0,0,0,0,0,0];
+  for(let i=0;i<30;i++){
+    const d=new Date(Date.now()-i*86400000);
+    uniqueDays[d.getDay()]++;
+  }
+  const avgs=daySums.map((s,i)=>uniqueDays[i]>0?Math.round(s/uniqueDays[i]):0);
+  const maxAvg=Math.max(...avgs,1);
+  const todayDay=new Date().getDay();
+
+  // Reorder: Mon(1) to Sun(0)
+  const order=[1,2,3,4,5,6,0];
+  el.innerHTML='<div class="weekday-chart">'+order.map(i=>{
+    const h=Math.max(2,Math.round(avgs[i]/maxAvg*100));
+    const isToday=i===todayDay;
+    return `<div class="weekday-bar-wrap">
+      <div class="weekday-val">${avgs[i]}</div>
+      <div class="weekday-bar-area"><div class="weekday-bar" style="height:${h}%;${isToday?'background:linear-gradient(180deg,#F59E0B,#EF4444)':''}"></div></div>
+      <div class="weekday-lbl" style="${isToday?'color:var(--or)':''}">${dayNames[i]}</div>
+    </div>`;
+  }).join('')+'</div>'+
+  '<div style="text-align:center;padding:8px 0 4px;font-size:11px;color:var(--tx3);font-weight:700">최근 30일 기준 일평균 마일리지</div>';
+}
+
+function renderDashMonthly(){
+  const el=document.getElementById('dash-monthly');
+  if(!el)return;
+  // Last 6 months
+  const now=new Date();
+  const months=[];
+  for(let i=5;i>=0;i--){
+    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    months.push({
+      key:getDateStr(d.getFullYear(),d.getMonth(),1).slice(0,7),
+      label:(d.getMonth()+1)+'월',
+      year:d.getFullYear()
+    });
+  }
+  // Sum pts per month
+  const monthPts={};
+  S.log.forEach(l=>{
+    if(l.pts<=0)return;
+    const d=new Date(l.ts);
+    const mk=getDateStr(d.getFullYear(),d.getMonth(),1).slice(0,7);
+    monthPts[mk]=(monthPts[mk]||0)+l.pts;
+  });
+  const vals=months.map(m=>monthPts[m.key]||0);
+  const maxVal=Math.max(...vals,1);
+  const thisMonth=getDateStr(now.getFullYear(),now.getMonth(),1).slice(0,7);
+
+  el.innerHTML='<div class="monthly-chart">'+months.map((m,i)=>{
+    const h=Math.max(2,Math.round(vals[i]/maxVal*100));
+    const isCurrent=m.key===thisMonth;
+    const bg=isCurrent?'linear-gradient(180deg,#F59E0B,#EF4444)':'linear-gradient(180deg,#A5B4FC,#6366F1)';
+    return `<div class="monthly-bar-wrap">
+      <div class="monthly-val">${vals[i]>0?vals[i].toLocaleString():''}</div>
+      <div class="monthly-bar-area"><div class="monthly-bar" style="height:${h}%;background:${bg}"></div></div>
+      <div class="monthly-lbl" style="${isCurrent?'color:var(--or);font-weight:900':''}">${m.label}</div>
+    </div>`;
+  }).join('')+'</div>'+
+  '<div style="text-align:center;padding:8px 0 4px;font-size:11px;color:var(--tx3);font-weight:700">최근 6개월 총 마일리지</div>';
+}
+
 let HP=7;
-function setPeriod(p){HP=p;document.querySelectorAll('.hist-pbtn').forEach(b=>b.classList.remove('on'));document.querySelectorAll(`.hist-pbtn[data-p="${p}"]`).forEach(b=>b.classList.add('on'));renderHistStats();renderHistList();}
-function fLog(){return HP===0?S.log:S.log.filter(l=>l.ts>Date.now()-HP*86400000);}
+let customStartTs=null; // custom period start timestamp
+function setPeriod(p){
+  HP=p;
+  document.querySelectorAll('.hist-pbtn').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll(`.hist-pbtn[data-p="${p}"]`).forEach(b=>b.classList.add('on'));
+  const customRow=document.getElementById('hist-custom-row');
+  if(p==='custom'){
+    if(customRow)customRow.style.display='flex';
+    // Set default date to 7 days ago if not set
+    const inp=document.getElementById('hist-custom-date');
+    if(inp&&!inp.value){
+      const d=new Date();d.setDate(d.getDate()-7);
+      inp.value=d.toISOString().slice(0,10);
+      // Set max to today
+      inp.max=new Date().toISOString().slice(0,10);
+      applyCustomPeriod();
+      return;
+    }
+    applyCustomPeriod();
+    return;
+  }else{
+    if(customRow)customRow.style.display='none';
+    customStartTs=null;
+  }
+  renderHistStats();renderHistList();
+}
+window.setPeriod=setPeriod;
+
+function applyCustomPeriod(){
+  const inp=document.getElementById('hist-custom-date');
+  if(!inp||!inp.value)return;
+  const startDate=new Date(inp.value+'T00:00:00');
+  customStartTs=startDate.getTime();
+  // Calculate end: start + 60 days or today, whichever is earlier
+  const endDate=new Date(customStartTs+60*86400000);
+  const today=new Date();today.setHours(23,59,59,999);
+  const actualEnd=endDate>today?today:endDate;
+  const diffDays=Math.round((actualEnd.getTime()-customStartTs)/86400000);
+  const rangeEl=document.getElementById('hist-custom-range');
+  if(rangeEl){
+    const sm=startDate.getMonth()+1, sd=startDate.getDate();
+    const em=actualEnd.getMonth()+1, ed=actualEnd.getDate();
+    rangeEl.textContent=`${sm}/${sd} ~ ${em}/${ed} (${diffDays}일간)`;
+  }
+  renderHistStats();renderHistList();
+}
+window.applyCustomPeriod=applyCustomPeriod;
+
+function fLog(){
+  if(HP==='custom'&&customStartTs){
+    const endTs=Math.min(customStartTs+60*86400000,Date.now());
+    return S.log.filter(l=>l.ts>=customStartTs&&l.ts<=endTs);
+  }
+  return S.log.filter(l=>l.ts>Date.now()-HP*86400000);
+}
+
 function renderHistStats(){
   const statsHtml=[
     {n:S.pts.toLocaleString(),l:'보유 마일리지'},{n:S.totalDone,l:'총 완료 횟수'},
@@ -2261,7 +2648,16 @@ function renderHistStats(){
   ].map(s=>`<div class="stat-c"><div class="stat-n">${s.n}</div><div class="stat-l">${s.l}</div></div>`).join('');
   document.getElementById('hist-stats').innerHTML=statsHtml;
   const earned=fLog().reduce((a,l)=>a+(l.pts>0?l.pts:0),0);
-  document.getElementById('hist-period-lbl').textContent=HP===0?'전체':HP===7?'최근 7일':'최근 30일';
+  let periodLabel='';
+  if(HP==='custom'){
+    const inp=document.getElementById('hist-custom-date');
+    if(inp&&inp.value){
+      const d=new Date(inp.value);
+      periodLabel=`${d.getMonth()+1}월 ${d.getDate()}일부터`;
+    }else{periodLabel='사용자 지정';}
+  }else if(HP===7){periodLabel='최근 7일';}
+  else if(HP===30){periodLabel='최근 30일';}
+  document.getElementById('hist-period-lbl').textContent=periodLabel;
   document.getElementById('hist-earned').textContent='+'+earned.toLocaleString()+'점';
   renderTodaySummary();
 }
