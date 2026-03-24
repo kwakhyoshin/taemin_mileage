@@ -2182,8 +2182,9 @@ function getDisplayStreak(){
   if(S.lastDate===t||S.lastDate===y)return S.streak;
   return 0;
 }
-function weekStart(){const d=new Date();d.setDate(d.getDate()-((d.getDay()||7)-1));return d.toISOString().slice(0,10);}
-function monthStr(){return new Date().toISOString().slice(0,7);}
+function weekStart(){const d=new Date();d.setDate(d.getDate()-((d.getDay()||7)-1));return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+function monthStr(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;}
+
 // midnight of next day timestamp
 function nextMidnight(){const d=new Date();d.setHours(24,0,0,0);return d.getTime();}
 function nextWeekMonday(){const d=new Date();const diff=((8-d.getDay())%7)||7;d.setDate(d.getDate()+diff);d.setHours(0,0,0,0);return d.getTime();}
@@ -4107,6 +4108,25 @@ function scheduleMiddnightCheck(){
   }, delay);
 }
 scheduleMiddnightCheck();
+
+// ── APP RESUME: iOS PWA에서 백그라운드 복귀 시 날짜 변경 감지 ──
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible'){
+    console.log('📱 앱 복귀 감지 - 날짜 체크');
+    checkDayChange();
+  }
+});
+// iOS Safari PWA: pageshow 이벤트 (bfcache 복원 포함)
+window.addEventListener('pageshow',(e)=>{
+  if(e.persisted){
+    console.log('📱 페이지 캐시 복원 - 날짜 체크');
+    checkDayChange();
+  }
+});
+// focus 이벤트: 탭/앱 포커스 복귀
+window.addEventListener('focus',()=>{
+  checkDayChange();
+});
 
 // ── PUSH NOTIFICATIONS ──────────────────────────
 const VAPID_PUBLIC = 'BMqfqNW-_vInMwqdq3H01AKHBepukX3-Lk1RX8ZkZ97jlixIOS7hIZDRJ0gwNy00hARwc2XilfOHnx9WBlcNJfI';
