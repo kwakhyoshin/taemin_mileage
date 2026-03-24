@@ -1188,6 +1188,8 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
       <div class="hdr-stat"><div class="hdr-stat-num" id="rwd-hdr-pts">0</div><div class="hdr-stat-lbl">보유 마일리지</div></div>
       <div class="hdr-stat-divider"></div>
       <div class="hdr-stat"><div class="hdr-stat-num" id="rwd-hdr-avail">0</div><div class="hdr-stat-lbl">교환 가능</div></div>
+      <div class="hdr-stat-divider"></div>
+      <div class="hdr-stat"><div class="hdr-stat-num" id="rwd-hdr-owned">0</div><div class="hdr-stat-lbl">보유 보상</div></div>
     </div>
   </div>
   <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg> 교환 가능한 보상</div>
@@ -2613,6 +2615,8 @@ function renderHdrStats(){
     return S.pts>=actualPts;
   }).length;
   const el4=document.getElementById('rwd-hdr-avail');if(el4)el4.textContent=availCount;
+  const ownedCount=S.rewardInventory?S.rewardInventory.filter(x=>x.status==='owned'||x.status==='pending').length:0;
+  const el5=document.getElementById('rwd-hdr-owned');if(el5)el5.textContent=ownedCount;
 
   // History tab: points, total done, current streak, longest streak
   const el5=document.getElementById('hist-hdr-pts');if(el5)el5.textContent=S.pts.toLocaleString();
