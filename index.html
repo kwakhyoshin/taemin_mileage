@@ -2280,6 +2280,10 @@ function defaultState(){
     rewardRequests:[], // Array of {id, rwdInvId, rwdName, rwdEmoji, fromUser, toUsers, status, requestedAt, approvedBy, approvedAt}
     rewardLog:[], // Array of {id, emoji, name, pts, ts, rwdId, type('exchange'|'refund'|'use')}
     rewardNotify:null, // Trigger for Cloud Functions
+    familyMessages:[], // 가족 메시지
+    photos:{}, // 프로필 사진
+    moods:{}, // 기분 데이터
+    pushDevices:{}, // 푸시 디바이스
   };
 }
 
@@ -2287,10 +2291,12 @@ let S = defaultState();
 let _saveTimer = null;
 let _isSaving = false;      // true while a setDoc write is in-flight
 let _pendingSave = false;   // another save was requested while one was in-flight
+let _hasDirtyLocal = false; // true when local changes haven't been saved to Firestore yet
 let _lastSavedJSON = '';    // tracks what we last wrote → prevents echo loop
 
 // Robust debounced save with in-flight guard
 function save(){
+  _hasDirtyLocal = true; // 로컬 변경이 아직 저장 안 됨
   if(_isSaving){
     // A write is already in-flight — just mark that another is needed
     _pendingSave = true;
@@ -2304,6 +2310,7 @@ function save(){
       const json = JSON.stringify(S);
       await setDoc(DATA_DOC, S);
       _lastSavedJSON = json; // remember what we just wrote
+      _hasDirtyLocal = false; // 저장 완료
       localStorage.setItem('taemin_v6_backup', json);
     }catch(e){
       console.warn('Firebase save failed', e);
@@ -2857,13 +2864,23 @@ function renderRewardHistory(){
     el.innerHTML='<div class="card" style="padding:16px;text-align:center;color:var(--tx3);font-size:13px">아직 교환/사용 이력이 없어요</div>';
     return;
   }
+  const typeInfo={
+    exchange:{label:'교환',color:'var(--rd)',icon:'🛒',sign:'-'},
+    refund:{label:'환불',color:'var(--gn2)',icon:'↩️',sign:'+'},
+    use_request:{label:'사용 요청',color:'#F59E0B',icon:'📲',sign:''},
+    approved:{label:'사용 승인',color:'#22C55E',icon:'✅',sign:''},
+    rejected:{label:'사용 거절',color:'#EF4444',icon:'❌',sign:''},
+    use:{label:'사용',color:'var(--tx3)',icon:'✨',sign:''}
+  };
   el.innerHTML='<div class="card" style="padding:0;overflow:hidden">'+logs.map(l=>{
     const d=new Date(l.ts);
-    const timeStr=(d.getMonth()+1)+'/'+d.getDate()+' '+d.getHours()+':'+String(d.getMinutes()).padStart(2,'0');
-    const typeLabel=l.type==='exchange'?'교환':l.type==='refund'?'환불':l.type==='use'?'사용':'기타';
-    const typeColor=l.type==='exchange'?'var(--rd)':l.type==='refund'?'var(--gn2)':'var(--tx3)';
-    const ptsSign=l.type==='exchange'?'-':'+';
-    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--bdr)"><span style="font-size:20px">'+l.emoji+'</span><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--tx)">'+l.name+'</div><div style="font-size:11px;color:var(--tx3)">'+timeStr+'</div></div><div style="text-align:right"><div style="font-size:13px;font-weight:800;color:'+typeColor+'">'+ptsSign+l.pts.toLocaleString()+' M</div><div style="font-size:10px;color:var(--tx3);font-weight:700">'+typeLabel+'</div></div></div>';
+    const h=d.getHours(),m=String(d.getMinutes()).padStart(2,'0'),ap=h>=12?'오후':'오전',h12=h>12?h-12:h===0?12:h;
+    const timeStr=(d.getMonth()+1)+'/'+d.getDate()+' '+ap+' '+h12+':'+m;
+    const ti=typeInfo[l.type]||typeInfo.use;
+    const nameWithType=ti.icon+' '+l.name+' '+ti.label;
+    const byInfo=l.by?'<div style="font-size:10px;color:var(--tx3)">by '+l.by+'</div>':'';
+    const ptsHtml=l.pts>0?'<div style="font-size:13px;font-weight:800;color:'+ti.color+'">'+ti.sign+l.pts.toLocaleString()+' M</div>':'';
+    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--bdr)"><span style="font-size:20px">'+l.emoji+'</span><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--tx)">'+nameWithType+'</div><div style="font-size:11px;color:var(--tx3)">'+timeStr+'</div></div><div style="text-align:right">'+ptsHtml+'<div style="font-size:10px;color:'+ti.color+';font-weight:700">'+ti.label+'</div>'+byInfo+'</div></div>';
   }).join('')+'</div>';
 }
 
@@ -4058,6 +4075,10 @@ function useReward(invId){
     ts:Date.now()
   };
 
+  // 이력 기록
+  if(!S.rewardLog)S.rewardLog=[];
+  S.rewardLog.unshift({id:'rl_'+Date.now(),emoji:item.rwdEmoji,name:item.rwdName,pts:item.pts,ts:Date.now(),rwdId:item.rwdId,type:'use_request'});
+
   save();renderAll();
   toast(`📲 사용 요청을 보냈어요! 부모님의 승인을 기다려주세요.`);
 }
@@ -4121,6 +4142,10 @@ function approveRewardRequest(reqId,approver){
     ts:Date.now()
   };
 
+  // 이력 기록
+  if(!S.rewardLog)S.rewardLog=[];
+  S.rewardLog.unshift({id:'rl_'+Date.now(),emoji:req.rwdEmoji||'🎁',name:req.rwdName,pts:0,ts:Date.now(),rwdId:req.rwdInvId,type:'approved',by:approverName});
+
   save();renderAll();
   toast(`✅ "${req.rwdName}" 승인 완료!`);
 }
@@ -4166,6 +4191,10 @@ function rejectRewardRequest(reqId,rejector){
     body:`"${req.rwdName}" 사용이 거절됐어요.`,
     ts:Date.now()
   };
+
+  // 이력 기록
+  if(!S.rewardLog)S.rewardLog=[];
+  S.rewardLog.unshift({id:'rl_'+Date.now(),emoji:req.rwdEmoji||'🎁',name:req.rwdName,pts:0,ts:Date.now(),rwdId:req.rwdInvId,type:'rejected',by:rejectorName});
 
   save();renderAll();
   toast(`❌ "${req.rwdName}" 거절됨.`);
@@ -5823,9 +5852,21 @@ Object.assign(window, {
       // 1. We are currently saving (this is our own echo coming back)
       // 2. This is exactly what we just saved (echo after write completes)
       // 3. Incoming data is identical to current state
+      // 4. We have unsaved local changes (prevent overwriting local edits during debounce window)
       if(_isSaving) return;
       if(incomingJSON === _lastSavedJSON) return;
       if(incomingJSON === JSON.stringify(S)) return;
+      if(_hasDirtyLocal){
+        // 로컬 변경이 있는데 외부 변경이 들어옴 — 로컬 변경을 유지하되 외부 데이터의 다른 필드만 머지
+        try{
+          const incoming = snap.data();
+          // pushDevices, pushBroadcast 등 인프라 필드만 머지 (메시지/상태는 로컬 우선)
+          if(incoming.pushDevices) S.pushDevices = incoming.pushDevices;
+          if(incoming.pushUpdatedAt) S.pushUpdatedAt = incoming.pushUpdatedAt;
+        }catch(e){}
+        console.log('🛡️ 로컬 변경 보호: 외부 변경 일부만 머지');
+        return;
+      }
 
       // Another device changed the data — apply it
       S = Object.assign(defaultState(), snap.data());
