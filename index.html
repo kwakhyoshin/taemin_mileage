@@ -1192,7 +1192,7 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
   </div>
   <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg> 교환 가능한 보상</div>
   <div class="rwd-grid" id="rwd-grid"></div>
-  <div class="sec">🎒 보유 보상 목록</div>
+  <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg> 보유 보상 목록</div>
   <div id="rwd-inventory"></div>
 </div>
 
@@ -4686,6 +4686,13 @@ function sendFamilyMsg(){
 window.sendFamilyMsg=sendFamilyMsg;
 
 function closeRecvMsg(){
+  // 현재 보고 있는 메시지를 읽음 처리
+  if(_currentRecvMsg&&!_currentRecvMsg.read){
+    _currentRecvMsg.read=true;
+    save();
+    renderNavUsers();
+  }
+  _currentRecvMsg=null;
   document.getElementById('recv-msg-bg').style.display='none';
   document.getElementById('recv-msg-pop').style.display='none';
 }
@@ -4809,10 +4816,9 @@ window.readMsgFromList=readMsgFromList;
 
 function checkNewMessages(){
   if(!currentUser||!S.familyMessages)return;
+  // 가장 최근 읽지 않은 메시지를 팝업으로 보여줌 (읽음 처리는 팝업 닫을 때)
   const unread=S.familyMessages.find(m=>m.to===currentUser&&!m.read);
   if(unread){
-    unread.read=true;
-    save();
     showReceivedMsg(unread.from,unread.text,unread.emotion,unread);
   }
 }
@@ -4853,13 +4859,17 @@ window.showReceivedMsg=showReceivedMsg;
 
 function handleRewardAction(action){
   if(!_currentRecvMsg||!_currentRecvMsg.requestId)return;
+  // 먼저 읽음 처리
+  if(!_currentRecvMsg.read)_currentRecvMsg.read=true;
   const reqId=_currentRecvMsg.requestId;
+  _currentRecvMsg=null; // closeRecvMsg에서 중복 save 방지
+  document.getElementById('recv-msg-bg').style.display='none';
+  document.getElementById('recv-msg-pop').style.display='none';
   if(action==='approve'){
     approveRewardRequest(reqId,currentUser);
   }else{
     rejectRewardRequest(reqId,currentUser);
   }
-  closeRecvMsg();
 }
 window.handleRewardAction=handleRewardAction;
 

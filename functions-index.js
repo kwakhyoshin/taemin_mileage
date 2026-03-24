@@ -37,7 +37,7 @@ function sendToDevices(devices, targetUsers, payload) {
   return Promise.all(promises);
 }
 
-// 1) 가족 메시지 → 수신자에게 푸시
+// 1) 가족 메시지 → 수신자에게 푸시 (새로 추가된 메시지 전부 처리)
 exports.onFamilyMessage = onDocumentUpdated("users/taemin", async (event) => {
   const before = event.data.before.data();
   const after = event.data.after.data();
@@ -45,22 +45,28 @@ exports.onFamilyMessage = onDocumentUpdated("users/taemin", async (event) => {
   const newMsgs = after.familyMessages || [];
   if (newMsgs.length <= oldMsgs.length) return null;
 
-  const latestMsg = newMsgs[newMsgs.length - 1];
-  if (!latestMsg || latestMsg.read) return null;
-
   const devices = after.pushDevices || {};
-  const senderName = NAMES[latestMsg.from] || "가족";
+  const promises = [];
 
-  return sendToDevices(devices, [latestMsg.to], {
-    title: senderName + "에게서 메시지가 도착했어요 💌",
-    body: latestMsg.text,
-    icon: "icon-180.png",
-    tag: "family-msg-" + latestMsg.from + "-" + latestMsg.to,
-    type: "family_msg",
-    from: latestMsg.from,
-    msgText: latestMsg.text,
-    url: "./"
-  });
+  // 새로 추가된 메시지 모두에 대해 푸시 전송
+  for (let i = oldMsgs.length; i < newMsgs.length; i++) {
+    const msg = newMsgs[i];
+    if (!msg || msg.read) continue;
+    const senderName = NAMES[msg.from] || "가족";
+
+    promises.push(sendToDevices(devices, [msg.to], {
+      title: senderName + "에게서 메시지가 도착했어요 💌",
+      body: msg.text,
+      icon: "icon-180.png",
+      tag: "family-msg-" + msg.from + "-" + msg.to + "-" + (msg.ts || Date.now()),
+      type: "family_msg",
+      from: msg.from,
+      msgText: msg.text,
+      url: "./"
+    }));
+  }
+
+  return Promise.all(promises);
 });
 
 // 2) 기분 업데이트 → 다른 가족에게 푸시
