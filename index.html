@@ -2652,10 +2652,10 @@ function renderHdrStats(){
   const el5=document.getElementById('rwd-hdr-owned');if(el5)el5.textContent=ownedCount;
 
   // History tab: points, total done, current streak, longest streak
-  const el5=document.getElementById('hist-hdr-pts');if(el5)el5.textContent=S.pts.toLocaleString();
-  const el6=document.getElementById('hist-hdr-done');if(el6)el6.textContent=S.totalDone||0;
-  const el7=document.getElementById('hist-hdr-streak');if(el7)el7.textContent=getDisplayStreak();
-  const el8=document.getElementById('hist-hdr-longest');if(el8)el8.textContent=S.longest||0;
+  const el6=document.getElementById('hist-hdr-pts');if(el6)el6.textContent=S.pts.toLocaleString();
+  const el7=document.getElementById('hist-hdr-done');if(el7)el7.textContent=S.totalDone||0;
+  const el8=document.getElementById('hist-hdr-streak');if(el8)el8.textContent=getDisplayStreak();
+  const el9=document.getElementById('hist-hdr-longest');if(el9)el9.textContent=S.longest||0;
 }
 
 function getCardState(act){
