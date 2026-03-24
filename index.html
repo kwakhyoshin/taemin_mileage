@@ -2723,28 +2723,34 @@ function renderAdmActList(){
     const done=countDone(a);
     const isDone=a.maxDay>0&&done>=a.maxDay;
     return `
-    <div class="manage-item" style="flex-wrap:wrap;align-items:center;gap:8px;padding:12px 14px">
-      <div class="m-emoji">${a.emoji}</div>
-      <div class="m-info" style="min-width:100px">
-        <div class="m-nm">${a.name}</div>
-        <div class="m-sub">${a.pts}점 · ${a.maxDay===0?'제한없음':a.maxDay+'회/'+CYCLE_LABEL[a.cycle]}${a.days&&a.days.length>0&&a.days.length<7?' · '+a.days.map(d=>['일','월','화','수','목','금','토'][d]).join(''):''}
+    <div class="manage-item" style="flex-direction:column;align-items:stretch;gap:0;padding:12px 14px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="m-emoji">${a.emoji}</div>
+        <div class="m-info" style="flex:1;min-width:0">
+          <div class="m-nm">${a.name}</div>
+          <div class="m-sub">${a.pts}점 · ${a.maxDay===0?'제한없음':a.maxDay+'회/'+CYCLE_LABEL[a.cycle]}${a.days&&a.days.length>0&&a.days.length<7?' · '+a.days.map(d=>['일','월','화','수','목','금','토'][d]).join(''):''}
+          </div>
         </div>
       </div>
-      <div class="m-btns-row" style="flex-wrap:wrap;gap:6px;margin-left:auto">
-        <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
-          <button class="tog${isDone?'':' off'}" onclick="togActDone('${a.id}')"><div class="tog-dot"></div></button>
-          <span style="font-size:9px;font-weight:800;color:${isDone?'var(--or)':'var(--tx3)'}">오늘완료</span>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--bdr)">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+            <button class="tog${isDone?'':' off'}" onclick="togActDone('${a.id}')"><div class="tog-dot"></div></button>
+            <span style="font-size:9px;font-weight:800;color:${isDone?'var(--or)':'var(--tx3)'}">오늘완료</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+            <button class="tog${a.showHome?' ':' off'}" onclick="togActHome('${a.id}')"><div class="tog-dot"></div></button>
+            <span style="font-size:9px;font-weight:800;color:${a.showHome?'var(--gn2)':'var(--tx3)'}">홈표시</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+            <button class="tog${a.active?'':' off'}" onclick="togAct('${a.id}')"><div class="tog-dot"></div></button>
+            <span style="font-size:9px;font-weight:800;color:${a.active?'var(--gn2)':'var(--tx3)'}">활성화</span>
+          </div>
         </div>
-        <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
-          <button class="tog${a.showHome?' ':' off'}" onclick="togActHome('${a.id}')"><div class="tog-dot"></div></button>
-          <span style="font-size:9px;font-weight:800;color:${a.showHome?'var(--gn2)':'var(--tx3)'}">홈표시</span>
+        <div style="display:flex;align-items:center;gap:6px">
+          <button class="btn-sm gy" style="padding:6px 12px;font-size:11px" onclick="openActForm('${a.id}')">수정</button>
+          <button class="btn-sm rd" style="padding:6px 12px;font-size:11px" onclick="delAct('${a.id}')">삭제</button>
         </div>
-        <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
-          <button class="tog${a.active?'':' off'}" onclick="togAct('${a.id}')"><div class="tog-dot"></div></button>
-          <span style="font-size:9px;font-weight:800;color:${a.active?'var(--gn2)':'var(--tx3)'}">활성화</span>
-        </div>
-        <button class="btn-sm gy" style="padding:6px 9px;font-size:11px" onclick="openActForm('${a.id}')">수정</button>
-        <button class="btn-sm rd" style="padding:6px 9px;font-size:11px" onclick="delAct('${a.id}')">삭제</button>
       </div>
     </div>`;
   }).join('');
