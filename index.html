@@ -83,13 +83,13 @@ body.dark .dtog{background:#334155}
 body.dark .dtog-in{transform:translateX(24px)}
 
 /* HOME TOP - scrolls away */
-.home-top{background:#6366F1;padding:16px 20px 0;padding-top:calc(16px + env(safe-area-inset-top));display:flex;justify-content:space-between;align-items:flex-start}
+.home-top{background:#6366F1;padding:16px 20px 0;padding-top:calc(16px + env(safe-area-inset-top));display:flex;justify-content:space-between;align-items:flex-start;position:relative;overflow:visible;z-index:11}
+.home-top::after{content:'';position:absolute;bottom:-70px;right:-20px;width:160px;height:160px;background:rgba(255,255,255,.1);border-radius:50%;pointer-events:none}
 .home-top h1{font-size:20px;font-weight:900;color:#fff}
 
 /* HERO - Sticky on scroll, full width when stuck */
 .hero{margin:0;background:linear-gradient(180deg,#6366F1,#818CF8);border-radius:0 0 var(--rxl) var(--rxl);padding:14px 20px 22px;color:#fff;position:sticky;top:0;z-index:10;overflow:hidden;box-shadow:0 4px 20px rgba(99,102,241,0.3);transition:padding .25s}
-.hero::before{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;background:rgba(255,255,255,.1);border-radius:50%}
-.hero::after{content:'';position:absolute;bottom:-30px;left:20px;width:110px;height:110px;background:rgba(255,255,255,.08);border-radius:50%}
+.hero::after{content:'';position:absolute;bottom:-30px;left:20px;width:110px;height:110px;background:rgba(255,255,255,.08);border-radius:50%;pointer-events:none}
 .hero-lbl{font-size:12px;font-weight:700;opacity:.85;transition:font-size .25s}
 .hero-pts{font-size:54px;font-weight:900;letter-spacing:-2px;line-height:1;transition:font-size .25s}
 .hero-unit{font-size:18px;font-weight:700;opacity:.85;transition:font-size .25s}
@@ -421,13 +421,40 @@ body.dark .today-summary-card .ts-msg{background:linear-gradient(135deg,#312E81,
 
 /* PROFILE FLOATING MENU */
 .pfm-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:500;animation:fadeIn .15s}
-.pfm-menu{position:fixed;bottom:90px;right:16px;z-index:501;background:var(--card);border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.2);overflow:hidden;width:220px;animation:fadeUp .2s ease}
+.pfm-menu{position:fixed;z-index:501;background:var(--card);border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.2);overflow:hidden;width:220px;animation:fadeUp .2s ease}
 .pfm-item{display:flex;align-items:center;gap:12px;width:100%;padding:14px 16px;border:none;background:none;cursor:pointer;font-family:inherit;text-align:left;transition:background .15s;-webkit-tap-highlight-color:transparent}
 .pfm-item:active{background:var(--bg2)}
 .pfm-item+.pfm-item{border-top:1px solid var(--bdr)}
 .pfm-ico{width:22px;height:22px;fill:none;stroke:#6366F1;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
 .pfm-nm{font-size:14px;font-weight:800;color:var(--tx)}
 .pfm-desc{font-size:11px;color:var(--tx3);font-weight:600;margin-top:1px}
+
+/* MOOD SELECTOR */
+.mood-pop{position:fixed;z-index:502;background:var(--card);border-radius:20px;box-shadow:0 8px 30px rgba(0,0,0,.2);padding:16px;width:280px;animation:fadeUp .25s ease}
+.mood-pop-title{font-size:14px;font-weight:900;color:var(--tx);text-align:center;margin-bottom:12px}
+.mood-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.mood-btn{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 6px;border:2px solid var(--bdr);border-radius:14px;background:none;cursor:pointer;font-family:inherit;transition:all .2s;-webkit-tap-highlight-color:transparent}
+.mood-btn:active{transform:scale(.93)}
+.mood-btn.sel{border-color:var(--or);background:var(--or-lt)}
+.mood-emoji{font-size:28px;line-height:1}
+.mood-label{font-size:10px;font-weight:800;color:var(--tx2)}
+.mood-btn.sel .mood-label{color:var(--or)}
+
+/* MOOD PARTICLES */
+.mood-particle-container{position:fixed;pointer-events:none;z-index:99;width:60px;overflow:visible}
+.mood-particle{position:absolute;animation:moodFloat 2.5s ease-out forwards;font-size:18px;opacity:0}
+@keyframes moodFloat{
+  0%{opacity:1;transform:translateY(0) scale(.5)}
+  20%{opacity:1;transform:translateY(-20px) scale(1)}
+  100%{opacity:0;transform:translateY(-120px) scale(.6)}
+}
+.mood-particle:nth-child(2){animation-delay:.3s;left:10px}
+.mood-particle:nth-child(3){animation-delay:.6s;left:-8px}
+.mood-particle:nth-child(4){animation-delay:.9s;left:18px}
+.mood-particle:nth-child(5){animation-delay:1.2s;left:4px}
+.mood-particle:nth-child(6){animation-delay:1.5s;left:-4px}
+.mood-particle:nth-child(7){animation-delay:1.8s;left:12px}
+.mood-particle:nth-child(8){animation-delay:2.1s;left:-10px}
 
 /* AUTH SCREENS */
 .auth-screen{position:fixed;inset:0;background:linear-gradient(135deg,#6366F1,#818CF8);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
@@ -1301,7 +1328,31 @@ body.dark .nav-profile{border-color:rgba(255,255,255,.4)}
     <svg class="pfm-ico" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
     <div class="pfm-txt"><div class="pfm-nm">프로필 사진 변경</div><div class="pfm-desc">내 프로필 사진 바꾸기</div></div>
   </button>
+  <button class="pfm-item" onclick="pfMenuAction('mood')">
+    <svg class="pfm-ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+    <div class="pfm-txt"><div class="pfm-nm">기분 표현</div><div class="pfm-desc">지금 기분을 표현해봐요</div></div>
+  </button>
 </div>
+
+<!-- MOOD SELECTOR -->
+<div class="pfm-bg" id="mood-bg" onclick="closeMoodPop()" style="display:none"></div>
+<div class="mood-pop" id="mood-pop" style="display:none">
+  <div class="mood-pop-title">지금 기분이 어때요?</div>
+  <div class="mood-grid">
+    <button class="mood-btn" onclick="selectMood('happy')"><span class="mood-emoji">😆</span><span class="mood-label">행복해!</span></button>
+    <button class="mood-btn" onclick="selectMood('love')"><span class="mood-emoji">🥰</span><span class="mood-label">사랑스러워</span></button>
+    <button class="mood-btn" onclick="selectMood('calm')"><span class="mood-emoji">😌</span><span class="mood-label">차분해</span></button>
+    <button class="mood-btn" onclick="selectMood('excited')"><span class="mood-emoji">🤩</span><span class="mood-label">신나!</span></button>
+    <button class="mood-btn" onclick="selectMood('annoyed')"><span class="mood-emoji">😤</span><span class="mood-label">짜증나</span></button>
+    <button class="mood-btn" onclick="selectMood('angry')"><span class="mood-emoji">😠</span><span class="mood-label">화나!</span></button>
+    <button class="mood-btn" onclick="selectMood('sad')"><span class="mood-emoji">😢</span><span class="mood-label">슬퍼</span></button>
+    <button class="mood-btn" onclick="selectMood('tired')"><span class="mood-emoji">😴</span><span class="mood-label">피곤해</span></button>
+    <button class="mood-btn" onclick="selectMood('none')"><span class="mood-emoji">🚫</span><span class="mood-label">기분 끄기</span></button>
+  </div>
+</div>
+
+<!-- MOOD PARTICLES CONTAINER -->
+<div class="mood-particle-container" id="mood-particles"></div>
 
 <!-- EMOJI PICKER -->
 <div id="ep-bg" onclick="closeEP()"></div>
@@ -3148,9 +3199,27 @@ function goTab(tab){
   reallyGoTab(tab);
 }
 
+function positionMenuAboveIcon(menuEl){
+  const icon=document.getElementById('tab-adm');
+  if(!icon){return;}
+  const rect=icon.getBoundingClientRect();
+  const menuW=menuEl.offsetWidth||220;
+  // Position above the icon, centered
+  let left=rect.left+rect.width/2-menuW/2;
+  // Keep within viewport
+  if(left<8)left=8;
+  if(left+menuW>window.innerWidth-8)left=window.innerWidth-8-menuW;
+  const bottom=window.innerHeight-rect.top+10;
+  menuEl.style.left=left+'px';
+  menuEl.style.bottom=bottom+'px';
+  menuEl.style.right='auto';
+  menuEl.style.top='auto';
+}
 function openPfMenu(){
   document.getElementById('pfm-bg').style.display='block';
-  document.getElementById('pfm-menu').style.display='block';
+  const menu=document.getElementById('pfm-menu');
+  menu.style.display='block';
+  positionMenuAboveIcon(menu);
 }
 function closePfMenu(){
   document.getElementById('pfm-bg').style.display='none';
@@ -3167,11 +3236,98 @@ function pfMenuAction(action){
   }else if(action==='profile'){
     if(!currentUser){toast('먼저 로그인해주세요');return;}
     openAvatarEditor(currentUser);
+  }else if(action==='mood'){
+    openMoodPop();
   }
 }
 window.openPfMenu=openPfMenu;
 window.closePfMenu=closePfMenu;
 window.pfMenuAction=pfMenuAction;
+
+// ── MOOD SYSTEM ──────────────────────────────
+const MOOD_DATA={
+  happy:{emoji:'😆',particles:['❤️','✨','🌟','💛','⭐','🎉','💫','🌈'],label:'행복해!'},
+  love:{emoji:'🥰',particles:['💕','💗','💖','💓','💘','❤️','💝','💞'],label:'사랑스러워'},
+  calm:{emoji:'😌',particles:['✨','🍃','🌿','💎','🦋','🌸','☁️','💫'],label:'차분해'},
+  excited:{emoji:'🤩',particles:['🎉','🎊','⚡','🔥','💥','🌟','🎵','🎶'],label:'신나!'},
+  annoyed:{emoji:'😤',particles:['💢','💨','😤','💢','💨','😤','💢','💨'],label:'짜증나'},
+  angry:{emoji:'😠',particles:['🔥','💢','⚡','💥','🔥','💢','⚡','💥'],label:'화나!'},
+  sad:{emoji:'😢',particles:['💧','🌧️','💦','😿','💧','🌧️','💦','💙'],label:'슬퍼'},
+  tired:{emoji:'😴',particles:['💤','☁️','🌙','⭐','💤','☁️','🌙','✨'],label:'피곤해'}
+};
+let currentMood=null;
+let moodInterval=null;
+
+function openMoodPop(){
+  document.getElementById('mood-bg').style.display='block';
+  const pop=document.getElementById('mood-pop');
+  pop.style.display='block';
+  positionMenuAboveIcon(pop);
+  // Highlight current mood
+  pop.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('sel'));
+  if(currentMood){
+    const btns=pop.querySelectorAll('.mood-btn');
+    btns.forEach(b=>{
+      if(b.getAttribute('onclick').includes("'"+currentMood+"'"))b.classList.add('sel');
+    });
+  }
+}
+function closeMoodPop(){
+  document.getElementById('mood-bg').style.display='none';
+  document.getElementById('mood-pop').style.display='none';
+}
+window.openMoodPop=openMoodPop;
+window.closeMoodPop=closeMoodPop;
+
+function selectMood(mood){
+  closeMoodPop();
+  if(mood==='none'){
+    currentMood=null;
+    stopMoodParticles();
+    toast('기분 표현을 껐어요');
+    return;
+  }
+  currentMood=mood;
+  const m=MOOD_DATA[mood];
+  toast(m.emoji+' '+m.label);
+  startMoodParticles();
+}
+window.selectMood=selectMood;
+
+function startMoodParticles(){
+  stopMoodParticles();
+  emitMoodParticles(); // emit immediately
+  moodInterval=setInterval(emitMoodParticles,3500);
+}
+function stopMoodParticles(){
+  if(moodInterval){clearInterval(moodInterval);moodInterval=null;}
+  const c=document.getElementById('mood-particles');
+  if(c)c.innerHTML='';
+}
+
+function emitMoodParticles(){
+  if(!currentMood||!MOOD_DATA[currentMood])return;
+  const icon=document.getElementById('tab-adm');
+  if(!icon)return;
+  const rect=icon.getBoundingClientRect();
+  const container=document.getElementById('mood-particles');
+  container.style.left=(rect.left+rect.width/2-30)+'px';
+  container.style.bottom=(window.innerHeight-rect.top+5)+'px';
+  container.innerHTML='';
+  const particles=MOOD_DATA[currentMood].particles;
+  particles.forEach((p,i)=>{
+    const span=document.createElement('span');
+    span.className='mood-particle';
+    span.textContent=p;
+    // Random horizontal offset
+    span.style.left=(Math.random()*50-10)+'px';
+    span.style.animationDelay=(i*0.3)+'s';
+    span.style.animationDuration=(2+Math.random()*1.5)+'s';
+    container.appendChild(span);
+  });
+  // Clean up after animation
+  setTimeout(()=>{if(container.children.length)container.innerHTML='';},4500);
+}
 function reallyGoTab(tab){
   document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
   document.querySelectorAll('.nav-item').forEach(t=>t.classList.remove('active'));
@@ -3290,6 +3446,22 @@ function urlBase64ToUint8Array(base64String){
 }
 
 async function subscribePush(){
+  // Check if running in standalone PWA mode (required on iOS)
+  const isStandalone=window.navigator.standalone||window.matchMedia('(display-mode:standalone)').matches;
+  const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
+
+  // iOS Safari (not PWA) does not support push notifications at all
+  if(isIOS && !isStandalone){
+    toast('📱 아이폰에서는 홈 화면에 추가한 앱에서만 알림을 받을 수 있어요. 먼저 "홈 화면에 추가"를 해주세요!');
+    return;
+  }
+
+  // Check if Notification API exists
+  if(typeof Notification==='undefined'){
+    toast('이 브라우저에서는 알림을 지원하지 않아요. 홈 화면에 추가한 앱에서 다시 시도해주세요.');
+    return;
+  }
+
   // If swRegistration is not set yet, try to get it now
   if(!swRegistration){
     try{
@@ -3302,7 +3474,7 @@ async function subscribePush(){
   // Step 1: Request notification permission
   try{
     const permission=await Notification.requestPermission();
-    if(permission!=='granted'){toast('알림 권한이 거부됐어요. 브라우저 설정에서 알림을 허용해주세요.');return;}
+    if(permission!=='granted'){toast('알림 권한이 거부됐어요. 설정 > Safari > 알림에서 허용해주세요.');return;}
   }catch(e){
     console.error('[Push] permission error:',e);
     toast('알림 권한 요청 실패: '+e.message);return;
@@ -3318,15 +3490,14 @@ async function subscribePush(){
     console.error('[Push] subscribe error:',e);
     toast('푸시 구독 실패: '+e.message);return;
   }
-  // Step 3: Save to Firestore (non-blocking)
+  // Step 3: Save to Firestore — use existing users doc to avoid permission issues
   try{
-    const subJSON=pushSubscription.toJSON();
-    await setDoc(doc(db,'push_subscriptions','taemin'),{
-      subscription:JSON.stringify(subJSON),
-      updatedAt:Date.now(),
-      enabled:true
-    });
-    console.log('[Push] saved to Firestore');
+    await setDoc(DATA_DOC,{
+      pushSubscription:JSON.stringify(pushSubscription.toJSON()),
+      pushEnabled:true,
+      pushUpdatedAt:Date.now()
+    },{merge:true});
+    console.log('[Push] saved to Firestore (users/taemin)');
   }catch(e){
     console.warn('[Push] Firestore save failed (subscription still active):',e);
   }
@@ -3339,7 +3510,7 @@ async function unsubscribePush(){
   try{
     await pushSubscription.unsubscribe();
     pushSubscription=null;
-    await setDoc(doc(db,'push_subscriptions','taemin'),{enabled:false,updatedAt:Date.now()},{merge:true});
+    await setDoc(DATA_DOC,{pushEnabled:false,pushUpdatedAt:Date.now()},{merge:true});
     updatePushUI();
     toast('🔕 알림이 해제됐어요');
   }catch(e){
@@ -3351,14 +3522,20 @@ function updatePushUI(){
   const togBtn=document.getElementById('push-tog');
   const statusEl=document.getElementById('push-status');
   if(!togBtn)return;
+  // Also check for iOS Safari limitation
+  const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isStandalone=window.navigator.standalone||window.matchMedia('(display-mode:standalone)').matches;
+  const pushSupported=typeof Notification!=='undefined'&&(!isIOS||isStandalone);
   const isOn=!!pushSubscription;
   togBtn.classList.toggle('off',!isOn);
-  if(statusEl)statusEl.textContent=isOn?'활성화':'비활성화';
+  if(statusEl){
+    if(!pushSupported) statusEl.textContent='미지원 (홈화면 앱 필요)';
+    else statusEl.textContent=isOn?'활성화':'비활성화';
+  }
 }
 
 async function sendTestPush(){
   if(!pushSubscription){toast('먼저 알림을 활성화하세요');return;}
-  // Send test via Firestore trigger doc
   try{
     await setDoc(doc(db,'push_queue','test_'+Date.now()),{
       subscription:JSON.stringify(pushSubscription.toJSON()),
@@ -3367,7 +3544,16 @@ async function sendTestPush(){
       timestamp:Date.now()
     });
     toast('📤 테스트 알림을 보냈어요!');
-  }catch(e){toast('전송 실패: '+e.message);}
+  }catch(e){
+    // push_queue collection might not have permissions, try saving to users doc instead
+    try{
+      await setDoc(DATA_DOC,{
+        pendingTestPush:true,
+        pendingPushTs:Date.now()
+      },{merge:true});
+      toast('📤 테스트 알림 요청을 저장했어요!');
+    }catch(e2){toast('전송 실패: '+e2.message);}
+  }
 }
 
 function togglePush(){
