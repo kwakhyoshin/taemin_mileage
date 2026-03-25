@@ -5668,23 +5668,27 @@ function showLongPressChoice(actId,cardEl){
         <div class="lp-lbl">말풍선</div>
       </div>
     </div>`;
-  // Use pointer/touch events for reliable mobile interaction
-  function handleChoiceTap(e){
-    const btn=e.target.closest('.lp-choice-btn');
-    if(btn){
+  document.body.appendChild(ov);
+  _lpOverlay=ov;
+  // Block the initial finger-lift from triggering anything
+  let ready=false;
+  setTimeout(()=>{ready=true;},300);
+  // Attach handlers directly to each button
+  ov.querySelectorAll('.lp-choice-btn').forEach(btn=>{
+    function onBtnTap(e){
+      if(!ready)return;
       e.preventDefault();e.stopPropagation();
       const action=btn.dataset.action;
       closeLPOverlay();
       if(action==='sticker')openStickerPicker(actId);
       else if(action==='bubble')openBubbleInput(actId);
-    }else if(e.target===ov){
-      closeLPOverlay();
     }
-  }
-  ov.addEventListener('pointerup',handleChoiceTap);
-  ov.addEventListener('click',handleChoiceTap);
-  document.body.appendChild(ov);
-  _lpOverlay=ov;
+    btn.addEventListener('touchend',onBtnTap);
+    btn.addEventListener('click',onBtnTap);
+  });
+  // Close on background tap
+  ov.addEventListener('click',(e)=>{if(ready&&e.target===ov)closeLPOverlay();});
+  ov.addEventListener('touchend',(e)=>{if(ready&&e.target===ov){e.preventDefault();closeLPOverlay();}});
 }
 function closeLPOverlay(){if(_lpOverlay){_lpOverlay.remove();_lpOverlay=null;}}
 
@@ -5700,18 +5704,25 @@ function openStickerPicker(actId){
   ov.innerHTML=`<div class="stk-picker">
     <div class="stk-picker-title">스티커 선택</div>
     <div class="stk-emoji-row">${emojiGrid}</div>
-    <button class="stk-cancel" data-role="cancel">취소</button>
+    <button class="stk-cancel">취소</button>
   </div>`;
-  function handleStkTap(e){
-    const emojiBtn=e.target.closest('.stk-emoji-btn');
-    if(emojiBtn){e.preventDefault();e.stopPropagation();const em=emojiBtn.dataset.emoji;closeStickerPicker();addSticker(actId,'emoji',em);return;}
-    const cancelBtn=e.target.closest('[data-role=cancel]');
-    if(cancelBtn||e.target===ov){e.preventDefault();closeStickerPicker();return;}
-  }
-  ov.addEventListener('pointerup',handleStkTap);
-  ov.addEventListener('click',handleStkTap);
   document.body.appendChild(ov);
   _stkPickerOv=ov;
+  // Direct handlers on each emoji button
+  ov.querySelectorAll('.stk-emoji-btn').forEach(btn=>{
+    function onEmoji(e){e.preventDefault();e.stopPropagation();const em=btn.dataset.emoji;closeStickerPicker();addSticker(actId,'emoji',em);}
+    btn.addEventListener('touchend',onEmoji);
+    btn.addEventListener('click',onEmoji);
+  });
+  // Cancel button
+  const cancelBtn=ov.querySelector('.stk-cancel');
+  if(cancelBtn){
+    cancelBtn.addEventListener('touchend',(e)=>{e.preventDefault();closeStickerPicker();});
+    cancelBtn.addEventListener('click',()=>closeStickerPicker());
+  }
+  // Background dismiss
+  ov.addEventListener('click',(e)=>{if(e.target===ov)closeStickerPicker();});
+  ov.addEventListener('touchend',(e)=>{if(e.target===ov){e.preventDefault();closeStickerPicker();}});
 }
 function closeStickerPicker(){if(_stkPickerOv){_stkPickerOv.remove();_stkPickerOv=null;}}
 
@@ -5725,20 +5736,22 @@ function openBubbleInput(actId){
     <input id="bbl-msg-inp" type="text" placeholder="짧은 메시지를 남겨봐요" maxlength="10" autocomplete="off">
     <div class="bbl-char-count"><span id="bbl-char-cnt">0</span>/10</div>
     <div class="bbl-input-btns">
-      <button class="bbl-cancel" data-role="cancel">취소</button>
-      <button class="bbl-send" data-role="send">보내기</button>
+      <button class="bbl-cancel">취소</button>
+      <button class="bbl-send">보내기</button>
     </div>
   </div>`;
-  function handleBblTap(e){
-    const cancel=e.target.closest('[data-role=cancel]');
-    if(cancel||e.target===ov){e.preventDefault();closeBubbleInput();return;}
-    const send=e.target.closest('[data-role=send]');
-    if(send){e.preventDefault();submitBubble(actId);return;}
-  }
-  ov.addEventListener('pointerup',handleBblTap);
-  ov.addEventListener('click',handleBblTap);
   document.body.appendChild(ov);
   _bblInputOv=ov;
+  // Direct handlers
+  const cancelBtn=ov.querySelector('.bbl-cancel');
+  cancelBtn.addEventListener('touchend',(e)=>{e.preventDefault();closeBubbleInput();});
+  cancelBtn.addEventListener('click',()=>closeBubbleInput());
+  const sendBtn=ov.querySelector('.bbl-send');
+  sendBtn.addEventListener('touchend',(e)=>{e.preventDefault();submitBubble(actId);});
+  sendBtn.addEventListener('click',()=>submitBubble(actId));
+  // Background dismiss
+  ov.addEventListener('click',(e)=>{if(e.target===ov)closeBubbleInput();});
+  ov.addEventListener('touchend',(e)=>{if(e.target===ov){e.preventDefault();closeBubbleInput();}});
   const inp=document.getElementById('bbl-msg-inp');
   inp.addEventListener('input',()=>{
     document.getElementById('bbl-char-cnt').textContent=inp.value.length;
@@ -5793,20 +5806,23 @@ function showStickerInfo(stkId){
     <div class="stk-info-who">${uName}</div>
     <div class="stk-info-when">${timeStr}</div>
     <div style="display:flex;gap:8px;justify-content:center">
-      ${canDel?`<button class="stk-info-del" data-role="delete">삭제하기</button>`:''}
-      <button class="stk-info-close" data-role="close">닫기</button>
+      ${canDel?`<button class="stk-info-del">삭제하기</button>`:''}
+      <button class="stk-info-close">닫기</button>
     </div>
   </div>`;
-  function handleInfoTap(e){
-    const del=e.target.closest('[data-role=delete]');
-    if(del){e.preventDefault();e.stopPropagation();deleteSticker(stkId);return;}
-    const cls=e.target.closest('[data-role=close]');
-    if(cls||e.target===ov){e.preventDefault();closeStickerInfo();return;}
-  }
-  ov.addEventListener('pointerup',handleInfoTap);
-  ov.addEventListener('click',handleInfoTap);
   document.body.appendChild(ov);
   _stkInfoOv=ov;
+  // Direct handlers
+  const delBtn=ov.querySelector('.stk-info-del');
+  if(delBtn){
+    delBtn.addEventListener('touchend',(e)=>{e.preventDefault();e.stopPropagation();deleteSticker(stkId);});
+    delBtn.addEventListener('click',(e)=>{e.stopPropagation();deleteSticker(stkId);});
+  }
+  const clsBtn=ov.querySelector('.stk-info-close');
+  clsBtn.addEventListener('touchend',(e)=>{e.preventDefault();closeStickerInfo();});
+  clsBtn.addEventListener('click',()=>closeStickerInfo());
+  ov.addEventListener('click',(e)=>{if(e.target===ov)closeStickerInfo();});
+  ov.addEventListener('touchend',(e)=>{if(e.target===ov){e.preventDefault();closeStickerInfo();}});
 }
 function closeStickerInfo(){if(_stkInfoOv){_stkInfoOv.remove();_stkInfoOv=null;}}
 
