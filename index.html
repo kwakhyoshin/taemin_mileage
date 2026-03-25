@@ -57,6 +57,7 @@ body{touch-action:pan-x pan-y}
 input,select,textarea{font-size:16px!important}
 body{font-family:'Pretendard Variable',-apple-system,sans-serif;background:var(--bg);color:var(--tx);max-width:430px;margin:0 auto;min-height:100vh;min-height:100dvh;overflow-x:hidden;transition:background .25s,color .25s}
 body.popup-open{overflow:hidden!important;position:fixed;width:100%;top:var(--scroll-y,0)}
+body.popup-open .nav-container{opacity:0;pointer-events:none;transition:opacity .15s}
 @media(min-width:768px){body{max-width:100%;margin:0}}
 @media(min-width:1024px){body{margin:0}}
 
