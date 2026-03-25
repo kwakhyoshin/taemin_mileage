@@ -3161,7 +3161,8 @@ function generateBadgeSVG(badge,earned,size){
     '히든':{outer1:'#9370DB',outer2:'#6A0DAD',inner1:'#B19CD9',inner2:'#8A2BE2',ring:'#C8A2C8',accent:'#F3E8FF',glow:'#9370DB'},
     '생활습관':{outer1:'#20B2AA',outer2:'#008080',inner1:'#7FDBDA',inner2:'#40C9C9',ring:'#A0E8E8',accent:'#E0FFFF',glow:'#20B2AA'},
     '감정':{outer1:'#FF6B8A',outer2:'#E8456B',inner1:'#FFB3C1',inner2:'#FF8FAB',ring:'#FFC4D6',accent:'#FFF0F3',glow:'#FF6B8A'},
-    '마일리지':{outer1:'#FFB347',outer2:'#E8952E',inner1:'#FFDD99',inner2:'#FFC266',ring:'#FFE0A0',accent:'#FFF8E7',glow:'#FFB347'}
+    '마일리지':{outer1:'#FFB347',outer2:'#E8952E',inner1:'#FFDD99',inner2:'#FFC266',ring:'#FFE0A0',accent:'#FFF8E7',glow:'#FFB347'},
+    '특별':{outer1:'#E040FB',outer2:'#AB47BC',inner1:'#F3B4F8',inner2:'#CE93D8',ring:'#E1BEE7',accent:'#FFF0FF',glow:'#E040FB'}
   };
   const gray={outer1:'#A0A0A0',outer2:'#707070',inner1:'#C0C0C0',inner2:'#909090',ring:'#B8B8B8',accent:'#E0E0E0',glow:'#999'};
   const c=earned?(schemes[badge.category]||schemes['공부']):gray;
@@ -5802,13 +5803,26 @@ function renderCustomBadgesList(){
   `).join('')+'</div>';
 }
 
+let _badgeFormModal=null;
+function closeBadgeForm(){
+  if(_badgeFormModal){_badgeFormModal.remove();_badgeFormModal=null;}
+}
 function openBadgeForm(){
+  closeBadgeForm();
   const modal=document.createElement('div');
+  _badgeFormModal=modal;
   modal.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:9999;overflow-y:auto;padding:20px 0';
-  modal.onclick=e=>{if(e.target===modal)modal.remove();};
+  modal.onclick=e=>{if(e.target===modal)closeBadgeForm();};
+
+  // Build icon library grid options
+  const iconNames=typeof BADGE_ICON_LIB==='object'?Object.keys(BADGE_ICON_LIB):[];
+  const iconGridHTML=iconNames.map(name=>{
+    const svg=`<svg viewBox="0 0 100 100" width="36" height="36" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="46" fill="#EEF2FF"/><g transform="translate(50,50) scale(0.85) translate(-50,-50)">${BADGE_ICON_LIB[name]('#6366F1')}</g></svg>`;
+    return `<div class="icon-pick-item" data-icon="${name}" onclick="pickBadgeIcon(this,'${name}')" title="${name}" style="cursor:pointer;padding:4px;border-radius:10px;border:2px solid transparent;display:flex;align-items:center;justify-content:center;transition:all .15s">${svg}</div>`;
+  }).join('');
 
   const card=document.createElement('div');
-  card.style.cssText='background:white;border-radius:16px;padding:24px;max-width:380px;width:100%;margin:auto';
+  card.style.cssText='background:white;border-radius:16px;padding:24px;max-width:400px;width:100%;margin:auto;max-height:90vh;overflow-y:auto';
   card.innerHTML=`
     <div style="font-size:16px;font-weight:900;color:#1F2937;margin-bottom:16px">새 뱃지 추가</div>
     <div style="display:flex;flex-direction:column;gap:12px">
@@ -5817,8 +5831,14 @@ function openBadgeForm(){
         <input id="badge-name" class="txt-inp" type="text" placeholder="예: 특별한 날" maxlength="20" style="margin-top:4px">
       </div>
       <div>
-        <label style="font-size:11px;font-weight:700;color:var(--tx3)">이모지</label>
+        <label style="font-size:11px;font-weight:700;color:var(--tx3)">이모지 (텍스트 표시용)</label>
         <input id="badge-emoji" class="txt-inp" type="text" placeholder="예: 🎊" maxlength="2" style="margin-top:4px">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--tx3)">SVG 아이콘 선택 <span id="badge-icon-selected" style="color:#6366F1;font-weight:900"></span></label>
+        <input id="badge-icon-search" class="txt-inp" type="text" placeholder="아이콘 검색 (예: star, heart, book...)" style="margin-top:4px;margin-bottom:6px" oninput="filterBadgeIcons(this.value)">
+        <div id="badge-icon-grid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px;max-height:180px;overflow-y:auto;padding:6px;border:1.5px solid var(--bdr);border-radius:10px;background:var(--bg)">${iconGridHTML}</div>
+        <input type="hidden" id="badge-icon-val" value="">
       </div>
       <div>
         <label style="font-size:11px;font-weight:700;color:var(--tx3)">설명</label>
@@ -5831,6 +5851,10 @@ function openBadgeForm(){
           <option value="꾸준함">꾸준함</option>
           <option value="도전">도전</option>
           <option value="성장">성장</option>
+          <option value="생활습관">생활습관</option>
+          <option value="감정">감정</option>
+          <option value="마일리지">마일리지</option>
+          <option value="히든">히든</option>
           <option value="특별">특별</option>
         </select>
       </div>
@@ -5839,8 +5863,8 @@ function openBadgeForm(){
         <input id="badge-bonus" class="num-inp" type="number" value="50" min="1" style="margin-top:4px">
       </div>
       <div style="display:flex;gap:8px;margin-top:12px">
-        <button class="btn-sm rd" style="flex:1" onclick="this.closest('div').closest('div').parentElement.remove()">취소</button>
-        <button class="btn-sm" style="flex:1" onclick="saveBadgeForm();this.closest('div').closest('div').parentElement.remove()">저장</button>
+        <button class="btn-sm rd" style="flex:1" onclick="closeBadgeForm()">취소</button>
+        <button class="btn-sm" style="flex:1" onclick="saveBadgeForm()">저장</button>
       </div>
     </div>
   `;
@@ -5848,6 +5872,31 @@ function openBadgeForm(){
   document.body.appendChild(modal);
 }
 window.openBadgeForm=openBadgeForm;
+window.closeBadgeForm=closeBadgeForm;
+
+function pickBadgeIcon(el,name){
+  // Deselect previous
+  const grid=document.getElementById('badge-icon-grid');
+  if(grid)grid.querySelectorAll('.icon-pick-item').forEach(it=>{it.style.border='2px solid transparent';it.style.background='';});
+  // Select this one
+  el.style.border='2px solid #6366F1';
+  el.style.background='#EEF2FF';
+  document.getElementById('badge-icon-val').value=name;
+  const lbl=document.getElementById('badge-icon-selected');
+  if(lbl)lbl.textContent='✓ '+name;
+}
+window.pickBadgeIcon=pickBadgeIcon;
+
+function filterBadgeIcons(query){
+  const grid=document.getElementById('badge-icon-grid');
+  if(!grid)return;
+  const q=query.toLowerCase();
+  grid.querySelectorAll('.icon-pick-item').forEach(el=>{
+    const iconName=el.getAttribute('data-icon')||'';
+    el.style.display=(!q||iconName.includes(q))?'flex':'none';
+  });
+}
+window.filterBadgeIcons=filterBadgeIcons;
 
 function saveBadgeForm(){
   const name=document.getElementById('badge-name')?.value.trim();
@@ -5855,6 +5904,7 @@ function saveBadgeForm(){
   const desc=document.getElementById('badge-desc')?.value.trim();
   const category=document.getElementById('badge-category')?.value;
   const bonus=parseInt(document.getElementById('badge-bonus')?.value)||50;
+  const icon=document.getElementById('badge-icon-val')?.value.trim()||'';
 
   if(!name||!emoji){toast('이름과 이모지를 입력해주세요');return;}
 
@@ -5867,12 +5917,15 @@ function saveBadgeForm(){
     category:category||'특별',
     hidden:false,
     bonus:bonus,
+    icon:icon||'',
+    label:name.substring(0,4),
     condType:'manual',
     condValue:0,
     check:S=>false // Custom badges are manually awarded
   });
 
   save();renderAdmSettings();
+  closeBadgeForm();
   toast('✅ 뱃지가 추가됐어요!');
 }
 window.saveBadgeForm=saveBadgeForm;
