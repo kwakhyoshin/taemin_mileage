@@ -5939,6 +5939,9 @@ function delCustomBadge(idx){
 window.delCustomBadge=delCustomBadge;
 
 function resetToday(){
+  showPin('reset_today','🔐 관리자 인증','오늘 활동 초기화를 위해<br>PIN 4자리를 입력하세요');
+}
+function doResetToday(){
   if(!confirm('오늘 활동 완료 기록을 초기화할까요?'))return;
   const t=todayStr();
   Object.keys(S.actDone||{}).forEach(k=>{if(S.actDone[k].date===t)delete S.actDone[k];});
@@ -5988,6 +5991,9 @@ function restoreData(input){
 }
 
 function resetAll(){
+  showPin('reset_all','🔐 관리자 인증','⚠️ 전체 데이터 삭제를 위해<br>PIN 4자리를 입력하세요');
+}
+function doResetAll(){
   if(!confirm('정말 모든 데이터를 삭제할까요? 되돌릴 수 없어요!'))return;
   setDoc(DATA_DOC, defaultState()).then(()=>{ S=defaultState(); renderAll(); toast('✅ 초기화됐어요'); }).catch(e=>{ toast('오류: '+e.message); });
 }
@@ -6158,6 +6164,12 @@ function handlePin(){
   }else if(pMode==='new2'){
     if(pBuf===pFirst){S.settings.pin=pBuf;save();document.getElementById('pin-wrap').style.display='none';pBuf='';pFirst='';pMode='auth';toast('🔐 PIN이 변경됐어요!');}
     else{updDots('err');setTimeout(()=>{pBuf='';pFirst='';showPin('new1','🔑 새 PIN 설정','PIN이 일치하지 않아요. 다시 입력하세요');toast('❌ PIN이 일치하지 않아요');},600);}
+  }else if(pMode==='reset_today'){
+    if(pBuf===S.settings.pin){document.getElementById('pin-wrap').style.display='none';pBuf='';pMode='auth';doResetToday();}
+    else{updDots('err');setTimeout(()=>{pBuf='';updDots('normal');toast('❌ PIN이 틀렸어요');},600);}
+  }else if(pMode==='reset_all'){
+    if(pBuf===S.settings.pin){document.getElementById('pin-wrap').style.display='none';pBuf='';pMode='auth';doResetAll();}
+    else{updDots('err');setTimeout(()=>{pBuf='';updDots('normal');toast('❌ PIN이 틀렸어요');},600);}
   }
 }
 function updDots(state){document.querySelectorAll('.pin-dot').forEach((d,i)=>{d.classList.toggle('on',state==='normal'&&i<pBuf.length);d.classList.toggle('err',state==='err');});}
