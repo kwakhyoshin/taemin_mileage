@@ -485,12 +485,12 @@ body.dark .today-summary-card .ts-msg{background:linear-gradient(135deg,#312E81,
 /* CALENDAR */
 .cal-nav{background:var(--card);border:1.5px solid var(--bdr);border-radius:8px;width:32px;height:32px;font-size:12px;cursor:pointer;color:var(--tx2);font-family:inherit;transition:all .2s}
 .cal-nav:active{background:var(--tab-lt,var(--or-lt));border-color:var(--tab-color,var(--or));color:var(--tab-color,var(--or))}
-.cal-card{padding:12px !important}
+.cal-card{padding:12px !important;position:relative;overflow:visible}
 .cal-header{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:11px;font-weight:800;color:var(--tx3);margin-bottom:8px}
 .cal-header span:first-child{color:var(--rd)}
 .cal-header span:last-child{color:var(--bl)}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px 2px}
-.cal-day{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:4px 2px;min-height:48px;border-radius:10px;font-size:13px;font-weight:700;color:var(--tx);cursor:pointer;position:relative;transition:all .15s;background:transparent}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px 0;position:relative}
+.cal-day{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:6px 2px 4px;min-height:68px;border-radius:10px;font-size:13px;font-weight:700;color:var(--tx);cursor:pointer;position:relative;transition:all .15s;background:transparent;z-index:1}
 .cal-day:hover{background:var(--bg2)}
 .cal-day.empty{cursor:default}
 .cal-day.empty:hover{background:transparent}
@@ -508,20 +508,20 @@ body.dark .today-summary-card .ts-msg{background:linear-gradient(135deg,#312E81,
 .cal-day.sat{color:var(--bl)}
 .cal-day.other-month{opacity:.3}
 .cal-day.weekend{background:rgba(59,130,246,0.03)}
-.cal-mood{display:flex;gap:2px;margin-top:2px;font-size:11px;flex-wrap:wrap;justify-content:center}
-.cal-mood-icon{display:inline-block}
-.cal-mood-label{font-size:7px;color:var(--tx3);white-space:nowrap}
+.cal-mood-section{margin-top:3px;text-align:center}
+.cal-mood-ratio{font-size:7px;font-weight:700;line-height:1.2;white-space:nowrap}
+.cal-mood-ratio .pos{color:#10B981}
+.cal-mood-ratio .neg{color:#EF4444}
+.cal-mood-emojis{font-size:10px;letter-spacing:-1px}
 .cal-activity-dots{display:flex;gap:1px;margin-top:2px;justify-content:center}
 .cal-activity-dot{width:4px;height:4px;border-radius:50%;background:var(--or)}
 .cal-activity-dot.gn{background:var(--gn)}
 .cal-activity-dot.bl{background:var(--bl)}
-.cal-streak-bar{height:3px;background:linear-gradient(90deg,#10B981,#34D399);margin-top:3px;position:relative;border-radius:0}
-.cal-streak-bar.single{width:60%;margin-left:auto;margin-right:auto;border-radius:2px}
-.cal-streak-bar.start{width:calc(50% + 4px);margin-left:auto;margin-right:0;border-radius:2px 0 0 2px}
-.cal-streak-bar.mid{width:calc(100% + 8px);margin-left:-4px;border-radius:0}
-.cal-streak-bar.end{width:calc(50% + 4px);margin-right:auto;margin-left:0;border-radius:0 2px 2px 0}
-.streak-len{position:absolute;right:0;top:-10px;font-size:7px;font-weight:800;color:var(--gn2);white-space:nowrap}
-.cal-fail-msg{font-size:7px;color:#F97316;margin-top:2px;font-weight:700;text-align:center;white-space:nowrap;padding:1px 2px;background:rgba(249,115,22,.08);border-radius:3px;line-height:1.2}
+.cal-arrow-layer{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:2}
+.cal-streak-label{position:absolute;font-size:8px;font-weight:800;color:#10B981;white-space:nowrap;background:rgba(255,255,255,.85);padding:1px 4px;border-radius:4px;border:1px solid rgba(16,185,129,.3);z-index:3}
+.cal-fail-badge{position:absolute;text-align:center;z-index:3}
+.cal-fail-x{font-size:14px;color:#EF4444;font-weight:900;line-height:1}
+.cal-fail-text{font-size:7px;color:#F97316;font-weight:700;white-space:nowrap;background:rgba(249,115,22,.08);padding:1px 3px;border-radius:3px}
 .cal-best{position:absolute;top:0px;left:1px;font-size:9px;line-height:1}
 @keyframes todayPulse{0%{box-shadow:0 0 0 0 rgba(249,115,22,0.4)};50%{box-shadow:0 0 0 4px rgba(249,115,22,0)};100%{box-shadow:0 0 0 0 rgba(249,115,22,0)}}
 
@@ -4092,6 +4092,104 @@ function isDayComplete(dateStr){
   return true;
 }
 
+function drawCalendarArrows(streakInfo,firstDay,lastDate){
+  const grid=document.getElementById('cal-grid');
+  const existingSvg=grid.querySelector('.cal-arrow-layer');
+  if(existingSvg)existingSvg.remove();
+  grid.querySelectorAll('.cal-streak-label,.cal-fail-badge').forEach(e=>e.remove());
+
+  const cells=grid.querySelectorAll('.cal-day:not(.empty)');
+  if(!cells.length)return;
+
+  const gridRect=grid.getBoundingClientRect();
+  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.classList.add('cal-arrow-layer');
+  svg.setAttribute('width',gridRect.width);
+  svg.setAttribute('height',gridRect.height);
+  svg.style.cssText='position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:2';
+
+  // Draw arrows between consecutive complete days
+  for(let d=1;d<=lastDate;d++){
+    const info=streakInfo[d];
+    if(!info)continue;
+
+    const cellIdx=d-1;
+    if(cellIdx>=cells.length)continue;
+
+    if(info.type==='start'||info.type==='mid'||info.type==='single'){
+      const nextInfo=streakInfo[d+1];
+      if(nextInfo&&(nextInfo.type==='mid'||nextInfo.type==='end')){
+        const fromCell=cells[cellIdx];
+        const toCell=cells[cellIdx+1];
+        if(!fromCell||!toCell)continue;
+
+        const fromRect=fromCell.getBoundingClientRect();
+        const toRect=toCell.getBoundingClientRect();
+
+        const x1=fromRect.left+fromRect.width/2-gridRect.left;
+        const y1=fromRect.bottom-4-gridRect.top;
+        const x2=toRect.left+toRect.width/2-gridRect.left;
+        const y2=toRect.top+4-gridRect.top;
+
+        const sameRow=Math.abs(fromRect.top-toRect.top)<10;
+
+        const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+        let pathD;
+        if(sameRow){
+          const midY=fromRect.bottom+2-gridRect.top;
+          pathD=`M${x1},${midY} L${x2},${midY}`;
+          const arrow=document.createElementNS('http://www.w3.org/2000/svg','polygon');
+          arrow.setAttribute('points',`${x2-4},${midY-3} ${x2},${midY} ${x2-4},${midY+3}`);
+          arrow.setAttribute('fill','#10B981');
+          svg.appendChild(arrow);
+        }else{
+          const midX=(x1+x2)/2;
+          const midY=(y1+y2)/2;
+          pathD=`M${x1},${y1} C${x1},${midY} ${x2},${midY} ${x2},${y2}`;
+          const arrow=document.createElementNS('http://www.w3.org/2000/svg','polygon');
+          arrow.setAttribute('points',`${x2-3},${y2-5} ${x2},${y2} ${x2+3},${y2-5}`);
+          arrow.setAttribute('fill','#10B981');
+          svg.appendChild(arrow);
+        }
+
+        path.setAttribute('d',pathD);
+        path.setAttribute('stroke','#10B981');
+        path.setAttribute('stroke-width','2');
+        path.setAttribute('fill','none');
+        path.setAttribute('stroke-linecap','round');
+        svg.appendChild(path);
+      }
+    }
+
+    // Add streak label at start
+    if(info.type==='start'&&info.length>=1){
+      const cell=cells[cellIdx];
+      const cellRect=cell.getBoundingClientRect();
+      const label=document.createElement('div');
+      label.className='cal-streak-label';
+      label.textContent=`${info.length}일 연속성공`;
+      label.style.left=(cellRect.left-gridRect.left)+'px';
+      label.style.top=(cellRect.bottom-gridRect.top+2)+'px';
+      grid.appendChild(label);
+    }
+
+    // Add fail badge
+    if(info.type==='fail'){
+      const cell=cells[cellIdx];
+      const cellRect=cell.getBoundingClientRect();
+      const badge=document.createElement('div');
+      badge.className='cal-fail-badge';
+      badge.innerHTML=`<div class="cal-fail-x">✕</div><div class="cal-fail-text">${getFailMessage(d)}</div>`;
+      badge.style.left=(cellRect.left-gridRect.left+cellRect.width/2-20)+'px';
+      badge.style.top=(cellRect.bottom-gridRect.top-2)+'px';
+      badge.style.width='40px';
+      grid.appendChild(badge);
+    }
+  }
+
+  grid.appendChild(svg);
+}
+
 function renderCalendar(){
   const calMonthEl=document.getElementById('cal-month');
   const calGridEl=document.getElementById('cal-grid');
@@ -4134,16 +4232,20 @@ function renderCalendar(){
     if(isSelected)cls+=' selected';
     if(complete)cls+=' complete';
 
-    // 감정 아이콘 HTML (최대 3개)
+    // 감정 아이콘 + 비율 HTML
     let moodHTML='';
     if(moods.length>0){
+      const positive=moods.filter(m=>['happy','love','calm','excited'].includes(m.mood)).length;
+      const negative=moods.filter(m=>['annoyed','angry','sad','tired'].includes(m.mood)).length;
+      const total=moods.length;
+      const posPct=Math.round(positive/total*100);
+      const negPct=Math.round(negative/total*100);
       const displayMoods=moods.slice(0,3);
       const moodIcons=displayMoods.map(m=>m.emoji).join('');
-      moodHTML=`<div class="cal-mood"><span class="cal-mood-icon">${moodIcons}</span>`;
-      if(moods.length>3){
-        moodHTML+=`<span class="cal-mood-label">감정 ${moods.length}회</span>`;
-      }
-      moodHTML+='</div>';
+      moodHTML=`<div class="cal-mood-section">
+        <div class="cal-mood-ratio"><span class="pos">긍정${posPct}%</span> <span class="neg">부정${negPct}%</span></div>
+        <div class="cal-mood-emojis">${moodIcons}${moods.length>3?`<span style="font-size:7px;color:var(--tx3)">+${moods.length-3}</span>`:''}</div>
+      </div>`;
     }
 
     // 활동 개수 도트 (1-3개)
@@ -4158,21 +4260,8 @@ function renderCalendar(){
       activityDotHTML+='</div>';
     }
 
-    // 스트릭 바 HTML
+    // Streak arrows now drawn via SVG overlay after render
     let streakHTML='';
-    if(streak){
-      if(streak.type==='fail'){
-        streakHTML=`<div class="cal-fail-msg">${getFailMessage(d)}</div>`;
-      }else if(streak.type==='single'){
-        streakHTML=`<div class="cal-streak-bar single"></div>`;
-      }else if(streak.type==='start'){
-        streakHTML=`<div class="cal-streak-bar start"></div>`;
-      }else if(streak.type==='mid'){
-        streakHTML=`<div class="cal-streak-bar mid"></div>`;
-      }else if(streak.type==='end'){
-        streakHTML=`<div class="cal-streak-bar end">${streak.length>=3?`<span class="streak-len">${streak.length}일 연속!</span>`:''}</div>`;
-      }
-    }
 
     // 베스트 데이 배지
     let bestDayHTML='';
@@ -4190,6 +4279,13 @@ function renderCalendar(){
   }
 
   calGridEl.innerHTML=html;
+
+  // Draw arrows between consecutive success days
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      drawCalendarArrows(streakInfo,firstDay,lastDate);
+    });
+  });
 
   // 선택된 날짜의 디테일도 렌더링
   if(calSelected){
