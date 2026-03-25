@@ -1073,6 +1073,13 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
 .sale-timer{font-size:10px;font-weight:700;color:#EF4444;margin-bottom:6px}
 @keyframes badgeSpin{0%{transform:perspective(800px) rotateY(0deg) scale(0.3);opacity:0}30%{opacity:1}100%{transform:perspective(800px) rotateY(720deg) scale(1)}}
 @keyframes badgeFadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.badge-grid-section{padding:8px 4px}
+.badge-cat-header{font-size:13px;font-weight:800;color:var(--tx2);padding:12px 12px 8px;display:flex;align-items:center;gap:6px}
+.badge-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:0 8px 16px}
+.badge-item{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;transition:transform .15s}
+.badge-item:active{transform:scale(0.95)}
+.badge-item .badge-name{font-size:10px;font-weight:700;color:var(--tx2);text-align:center;line-height:1.3;max-width:72px}
+.badge-item.locked .badge-name{color:var(--tx3)}
 </style>
 </head>
 <body data-tab="home">
@@ -1170,13 +1177,6 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
   <div class="act-grid" id="home-grid"></div>
   <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> 최근 활동</div>
   <div class="rec-list" id="rec-list"></div>
-  <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> 나의 뱃지</div>
-  <div id="badges-section" style="padding:0 16px"></div>
-
-  <div style="padding:0 16px;margin-top:20px">
-    <div style="font-size:14px;font-weight:700;color:var(--tx);margin-bottom:10px">🏅 뱃지 마일리지 수령 내역</div>
-    <div id="badge-history"></div>
-  </div>
 </div>
 
 <!-- LOG -->
@@ -1214,10 +1214,10 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
   <div id="rwd-history" style="margin:0 16px 14px"></div>
 </div>
 
-<!-- HISTORY -->
+<!-- STATS / ACHIEVEMENTS -->
 <div class="scr" id="s-hist">
   <div class="hist-hero">
-    <h2>통계 &amp; Insight <svg class="hdr-ico" viewBox="0 0 24 24"><path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9"/><path d="M21 3l-9 9"/><path d="M15 3h6v6"/></svg></h2>
+    <h2>성과 &amp; 통계 <svg class="hdr-ico" viewBox="0 0 24 24"><path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9"/><path d="M21 3l-9 9"/><path d="M15 3h6v6"/></svg></h2>
     <p>태민이의 활동 분석</p>
     <div class="hdr-stats hdr-stats-4" id="hist-hdr-stats">
       <div class="hdr-stat"><div class="hdr-stat-num" id="hist-hdr-pts">0</div><div class="hdr-stat-lbl">보유 마일리지</div></div>
@@ -1230,6 +1230,25 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
     </div>
   </div>
 
+  <!-- Badge Summary Panel -->
+  <div class="card badge-summary-card" onclick="openBadgeView()" style="margin:12px 16px;padding:16px;cursor:pointer">
+    <div style="display:flex;align-items:center;gap:14px">
+      <div id="badge-summary-svg" style="width:64px;height:64px;flex-shrink:0">
+        <!-- Most recently earned badge SVG will be rendered here -->
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:15px;font-weight:900;color:var(--tx)">🏅 뱃지</div>
+        <div style="font-size:12px;color:var(--tx3);margin-top:2px" id="badge-summary-text">0/26 획득</div>
+        <div style="margin-top:8px;height:6px;background:var(--bdr);border-radius:3px;overflow:hidden">
+          <div id="badge-summary-bar" style="height:100%;background:linear-gradient(90deg,#FFB800,#FF8C00);border-radius:3px;transition:width .3s;width:0%"></div>
+        </div>
+      </div>
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--tx3)" stroke-width="2"><polyline points="9,18 15,12 9,6"/></svg>
+    </div>
+  </div>
+
+  <!-- Stats Content -->
+  <div id="stat-achieve-view">
   <!-- 서브 메뉴 탭 -->
   <div class="dash-tabs">
     <button class="dash-tab on" onclick="switchDash(0,this)"><svg class="dtab-ico" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 5-6"/></svg> 대시보드</button>
@@ -1373,6 +1392,22 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
       </div>
     </div>
     <div class="card" style="padding:0;overflow:hidden" id="hist-list"></div>
+  </div>
+</div>
+
+<!-- Badge View Screen -->
+<div class="scr" id="s-badge" style="display:none;position:fixed;inset:0;z-index:100;background:var(--bg);overflow-y:auto">
+  <div style="padding:16px;display:flex;align-items:center;gap:12px">
+    <button onclick="closeBadgeView()" style="background:none;border:none;font-size:24px;cursor:pointer;color:var(--tx)">←</button>
+    <div>
+      <div style="font-size:20px;font-weight:900;color:var(--tx)">나의 뱃지</div>
+      <div style="font-size:12px;color:var(--tx3)" id="badge-view-count">0/26 획득</div>
+    </div>
+  </div>
+  <div id="badge-view-grid" style="padding:0 12px"></div>
+  <div style="padding:16px">
+    <div style="font-size:14px;font-weight:700;color:var(--tx);margin-bottom:10px">마일리지 수령 내역</div>
+    <div id="badge-view-history"></div>
   </div>
 </div>
 
@@ -1597,8 +1632,8 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
       <span class="nav-label">보상</span>
     </div>
     <div class="nav-item" data-tab="hist" id="tab-hist" onclick="goTab('hist')">
-      <svg viewBox="0 0 24 24"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
-      <span class="nav-label">통계</span>
+      <svg viewBox="0 0 24 24"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
+      <span class="nav-label">성과</span>
     </div>
     <div class="nav-divider"></div>
     <div class="nav-users" id="tab-adm">
@@ -2773,34 +2808,81 @@ function hasEarlyStudy(){
   });
 }
 
-// Generate SVG badge medal
-function generateBadgeSVG(badge,earned){
-  const categoryColors={
-    '공부':{main:'#FFD700',light:'#FFA500'},
-    '꾸준함':{main:'#4F94FF',light:'#2563EB'},
-    '도전':{main:'#FF6B35',light:'#EF4444'},
-    '성장':{main:'#22C55E',light:'#059669'},
-    '히든':{main:'#8B5CF6',light:'#6D28D9'}
-  };
-  const colors=categoryColors[badge.category]||{main:'#999',light:'#666'};
-  const opacity=earned?1:0.4;
-  const filter=earned?'drop-shadow(0 4px 8px rgba(0,0,0,.2))':'grayscale(100%)';
+// Generate SVG badge - Apple Fitness style metallic circular design
+function generateBadgeSVG(badge,earned,size){
+  size=size||80;
+  const id=badge.id;
 
-  return`<svg viewBox="0 0 120 140" xmlns="http://www.w3.org/2000/svg" style="opacity:${opacity};filter:${filter}">
+  // Category color schemes (metallic gradients)
+  const schemes={
+    '공부':{outer1:'#D4AF37',outer2:'#B8860B',inner1:'#FFD700',inner2:'#DAA520',ring:'#F5D76E',accent:'#FFF8DC'},
+    '꾸준함':{outer1:'#7B8FA1',outer2:'#4A6FA5',inner1:'#A8C8E8',inner2:'#6B9BD2',ring:'#B0C4DE',accent:'#E8F0FE'},
+    '도전':{outer1:'#CD7F32',outer2:'#A0522D',inner1:'#DEB887',inner2:'#CD853F',ring:'#E8B87A',accent:'#FFF0DB'},
+    '성장':{outer1:'#50C878',outer2:'#2E8B57',inner1:'#90EE90',inner2:'#3CB371',ring:'#98D8A8',accent:'#E8FFF0'},
+    '히든':{outer1:'#9370DB',outer2:'#6A0DAD',inner1:'#B19CD9',inner2:'#8A2BE2',ring:'#C8A2C8',accent:'#F3E8FF'}
+  };
+
+  // Unearned: silver/gray metallic
+  const gray={outer1:'#A0A0A0',outer2:'#707070',inner1:'#C0C0C0',inner2:'#909090',ring:'#B8B8B8',accent:'#E0E0E0'};
+  const c=earned?(schemes[badge.category]||schemes['공부']):gray;
+
+  // Category icon SVG paths (detailed, professional)
+  const icons={
+    '공부':`<path d="M50 25c-2 0-4 0.5-5.5 1.5L34 33v20l10.5-6c1.5-1 3.5-1.5 5.5-1.5s4 0.5 5.5 1.5L66 53V33l-10.5-6.5C54 25.5 52 25 50 25z" fill="${c.accent}" opacity="0.9"/>
+             <path d="M50 30v22M34 33v20M66 33v20" stroke="${c.outer2}" stroke-width="1.5" fill="none" opacity="0.6"/>`,
+    '꾸준함':`<path d="M50 24l5.5 11.2 12.3 1.8-8.9 8.7 2.1 12.3L50 52l-11 5.8 2.1-12.3-8.9-8.7 12.3-1.8z" fill="${c.accent}" opacity="0.9"/>
+              <path d="M50 24l5.5 11.2 12.3 1.8-8.9 8.7 2.1 12.3L50 52l-11 5.8 2.1-12.3-8.9-8.7 12.3-1.8z" stroke="${c.outer2}" stroke-width="1" fill="none" opacity="0.4"/>`,
+    '도전':`<path d="M38 60h24l-3-10h-18l-3 10zM42 50h16l4-16H38l4 16zM36 34h28v-4H36v4z" fill="${c.accent}" opacity="0.9"/>
+            <path d="M36 34h28v-4H36v4z" stroke="${c.outer2}" stroke-width="1" fill="none" opacity="0.3"/>`,
+    '성장':`<path d="M50 65V40" stroke="${c.accent}" stroke-width="3" stroke-linecap="round" fill="none"/>
+            <path d="M50 40c-6-6-14-4-16 2 6 0 10-2 16-2" fill="${c.accent}" opacity="0.9"/>
+            <path d="M50 40c6-6 14-4 16 2-6 0-10-2-16-2" fill="${c.accent}" opacity="0.9"/>
+            <path d="M45 65h10" stroke="${c.accent}" stroke-width="2" stroke-linecap="round" fill="none"/>`,
+    '히든':`<path d="M50 25L30 50l20 20 20-20L50 25z" fill="${c.accent}" opacity="0.85"/>
+            <path d="M50 25L30 50l20 20 20-20L50 25z" stroke="${c.outer2}" stroke-width="1.2" fill="none" opacity="0.4"/>
+            <path d="M50 35L38 50l12 12 12-12L50 35z" fill="none" stroke="${c.accent}" stroke-width="0.8" opacity="0.5"/>`
+  };
+
+  // Lock icon for unearned
+  const lockIcon=`<path d="M42 48h16v12H42zM45 48v-5a5 5 0 0110 0v5" fill="none" stroke="${c.accent}" stroke-width="2.5" stroke-linecap="round"/>`;
+
+  const iconPath=earned?(icons[badge.category]||icons['공부']):lockIcon;
+
+  return `<svg viewBox="0 0 100 100" width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
     <defs>
-      <linearGradient id="badgeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" style="stop-color:${colors.main};stop-opacity:1" />
-        <stop offset="100%" style="stop-color:${colors.light};stop-opacity:1" />
+      <radialGradient id="bg-${id}" cx="35%" cy="35%">
+        <stop offset="0%" stop-color="${c.inner1}"/>
+        <stop offset="100%" stop-color="${c.inner2}"/>
+      </radialGradient>
+      <linearGradient id="ring-${id}" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="${c.outer1}"/>
+        <stop offset="50%" stop-color="${c.ring}"/>
+        <stop offset="100%" stop-color="${c.outer2}"/>
       </linearGradient>
+      ${earned?`<filter id="glow-${id}"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>`:''}
     </defs>
-    <!-- Medal shape -->
-    <path d="M 60 10 C 75 10 85 20 85 35 C 85 50 75 60 60 65 C 45 60 35 50 35 35 C 35 20 45 10 60 10 Z" fill="url(#badgeGrad)"/>
-    <!-- Ribbon -->
-    <rect x="50" y="62" width="20" height="28" fill="${colors.main}" opacity="0.8"/>
-    <rect x="48" y="90" width="10" height="12" fill="${colors.light}"/>
-    <rect x="62" y="90" width="10" height="12" fill="${colors.light}"/>
-    <!-- Emoji center -->
-    <text x="60" y="48" text-anchor="middle" font-size="32" dominant-baseline="middle">${badge.emoji}</text>
+    <!-- Outer metallic ring -->
+    <circle cx="50" cy="50" r="48" fill="url(#ring-${id})" ${earned?`filter="url(#glow-${id})"`:'opacity="0.5"'}/>
+    <!-- Inner circle -->
+    <circle cx="50" cy="50" r="42" fill="url(#bg-${id})" ${earned?'':'opacity="0.5"'}/>
+    <!-- Metallic rim highlight -->
+    <circle cx="50" cy="50" r="44" fill="none" stroke="${c.accent}" stroke-width="0.8" opacity="${earned?'0.6':'0.2'}"/>
+    <circle cx="50" cy="50" r="40" fill="none" stroke="${c.outer2}" stroke-width="0.5" opacity="${earned?'0.3':'0.15'}"/>
+    <!-- Shine highlight (top-left) -->
+    <ellipse cx="38" cy="35" rx="18" ry="14" fill="white" opacity="${earned?'0.15':'0.05'}"/>
+    <!-- Icon -->
+    <g>
+      ${iconPath}
+    </g>
+    ${earned?`
+    <!-- Decorative notches around rim -->
+    ${Array.from({length:12},(_,i)=>{
+      const angle=i*30*Math.PI/180;
+      const x=50+46*Math.cos(angle);
+      const y=50+46*Math.sin(angle);
+      return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="1.2" fill="${c.accent}" opacity="0.5"/>`;
+    }).join('')}
+    `:''}
   </svg>`;
 }
 window.generateBadgeSVG=generateBadgeSVG;
@@ -2828,9 +2910,9 @@ function showBadgeCelebration(badge){
 
   const card=document.createElement('div');
   card.style.cssText='background:white;border-radius:20px;padding:40px 30px;text-align:center;max-width:320px;box-shadow:0 10px 40px rgba(0,0,0,.3)';
-  const svgHtml=generateBadgeSVG(badge,true);
+  const svgHtml=generateBadgeSVG(badge,true,160);
   card.innerHTML=`
-    <div style="width:120px;height:140px;margin:0 auto 20px;display:flex;align-items:center;justify-content:center;animation:badgeSpin 1.5s cubic-bezier(.34,.17,.67,.83) forwards">
+    <div style="width:160px;height:160px;margin:0 auto 20px;display:flex;align-items:center;justify-content:center;animation:badgeSpin 1.5s cubic-bezier(.34,.17,.67,.83) forwards">
       ${svgHtml}
     </div>
     <div style="animation:badgeFadeIn .6s ease-out forwards;animation-delay:.6s;opacity:0">
@@ -2870,9 +2952,10 @@ window.getCurrentGreeting=getCurrentGreeting;
 
 // ── RENDER ────────────────────────────────────
 function renderAll(){
-  renderHero();renderHomeGrid();renderRecent();renderBadges();renderBadgeHistory();
+  renderHero();renderHomeGrid();renderRecent();
   renderLogList();renderRewardGrid();renderRewardInventory();renderRewardHistory();
   renderDashboard();renderHistStats();renderHistList();renderCalendar();
+  renderBadgeSummary();
   renderAdmStats();renderAdmActList();renderAdmRwdList();renderAdmSettings();
   renderMsgSettings();renderAdmMemberPhotos();
   renderNavUsers();
@@ -3115,8 +3198,8 @@ function showBadgeDetail(badge){
     `<button onclick="claimBadgeMileage('${badge.id}');this.closest('div').parentElement.remove()" style="padding:8px 16px;background:#6366F1;color:white;border:none;border-radius:8px;font-weight:600;cursor:pointer;width:100%">🎁 마일리지 받기 +${badge.bonus||0}</button>`;
 
   card.innerHTML=`
-    <div style="width:120px;height:140px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center">
-      ${generateBadgeSVG(badge,true)}
+    <div style="width:120px;height:120px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center">
+      ${generateBadgeSVG(badge,true,120)}
     </div>
     <div style="font-size:18px;font-weight:900;color:#1F2937;margin:0 0 8px">${badge.name}</div>
     <div style="font-size:13px;color:#6B7280;margin:0 0 12px;line-height:1.5">${badge.desc}</div>
@@ -3167,6 +3250,108 @@ function renderBadgeHistory(){
     return '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--bdr)"><span style="font-size:20px">'+l.badgeEmoji+'</span><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--tx)">'+l.badgeName+'</div><div style="font-size:11px;color:var(--tx3)">'+timeStr+'</div></div><div style="text-align:right"><div style="font-size:13px;font-weight:800;color:var(--gn2)">+'+l.pts.toLocaleString()+' M</div><div style="font-size:10px;color:var(--gn2);font-weight:700">획득</div></div></div>';
   }).join('')+'</div>';
 }
+
+function openBadgeView(){
+  document.getElementById('s-badge').style.display='block';
+  renderBadgeViewGrid();
+  renderBadgeViewHistory();
+}
+window.openBadgeView=openBadgeView;
+
+function closeBadgeView(){
+  document.getElementById('s-badge').style.display='none';
+}
+window.closeBadgeView=closeBadgeView;
+
+function renderBadgeSummary(){
+  const el=document.getElementById('badge-summary-svg');
+  if(!el)return;
+
+  const earned=Object.keys(S.badges||{});
+  const total=BADGES.length;
+  const pct=Math.round(earned.length/total*100);
+
+  // Find most recently earned badge
+  let latestBadge=null;
+  let latestTime=0;
+  earned.forEach(badgeId=>{
+    const badgeInfo=S.badges[badgeId];
+    if(badgeInfo.earnedAt>latestTime){
+      latestTime=badgeInfo.earnedAt;
+      latestBadge=BADGES.find(b=>b.id===badgeId);
+    }
+  });
+
+  // Render badge SVG (use first badge if no earned badges)
+  const badge=latestBadge||BADGES[0];
+  el.innerHTML=generateBadgeSVG(badge,earned.includes(badge.id),64);
+
+  // Update text and bar
+  document.getElementById('badge-summary-text').textContent=`${earned.length}/${total} 획득`;
+  document.getElementById('badge-summary-bar').style.width=pct+'%';
+}
+window.renderBadgeSummary=renderBadgeSummary;
+
+function renderBadgeViewGrid(){
+  const el=document.getElementById('badge-view-grid');
+  if(!el)return;
+
+  const earned=Object.keys(S.badges||{});
+  const total=BADGES.length;
+
+  // Group badges by category
+  const byCategory={};
+  BADGES.forEach(b=>{
+    if(!byCategory[b.category])byCategory[b.category]=[];
+    byCategory[b.category].push(b);
+  });
+
+  // Add custom badges if any
+  const customBadges=S.customBadges||[];
+  customBadges.forEach(cb=>{
+    const cat=cb.category||'기타';
+    if(!byCategory[cat])byCategory[cat]=[];
+    byCategory[cat].push(cb);
+  });
+
+  let html='';
+  Object.entries(byCategory).forEach(([cat,badges])=>{
+    html+=`<div class="badge-grid-section">
+      <div class="badge-cat-header">${cat}</div>
+      <div class="badge-grid">`;
+    badges.forEach(b=>{
+      const isEarned=S.badges&&S.badges[b.id];
+      const title=b.hidden&&!isEarned?'???':b.name;
+      html+=`<div class="badge-item${isEarned?'':' locked'}" onclick="showBadgeDetail('${b.id}')">
+        ${generateBadgeSVG(b,!!isEarned,64)}
+        <div class="badge-name">${title}</div>
+      </div>`;
+    });
+    html+=`</div></div>`;
+  });
+
+  el.innerHTML=html;
+}
+window.renderBadgeViewGrid=renderBadgeViewGrid;
+
+function renderBadgeViewHistory(){
+  const el=document.getElementById('badge-view-history');
+  if(!el)return;
+
+  const logs=(S.badgeLog||[]).slice(0,20);
+  if(logs.length===0){
+    el.innerHTML='<div class="card" style="padding:16px;text-align:center;color:var(--tx3);font-size:13px">아직 뱃지 마일리지 수령이 없어요</div>';
+    return;
+  }
+
+  el.innerHTML='<div class="card" style="padding:0;overflow:hidden">'+logs.map(l=>{
+    const d=new Date(l.ts);
+    const h=d.getHours(),m=String(d.getMinutes()).padStart(2,'0'),ap=h>=12?'오후':'오전',h12=h>12?h-12:h===0?12:h;
+    const timeStr=(d.getMonth()+1)+'/'+d.getDate()+' '+ap+' '+h12+':'+m;
+    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--bdr)"><span style="font-size:20px">'+l.badgeEmoji+'</span><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--tx)">'+l.badgeName+'</div><div style="font-size:11px;color:var(--tx3)">'+timeStr+'</div></div><div style="text-align:right"><div style="font-size:13px;font-weight:800;color:var(--gn2)">+'+l.pts.toLocaleString()+' M</div><div style="font-size:10px;color:var(--gn2);font-weight:700">획득</div></div></div>';
+  }).join('')+'</div>';
+}
+window.renderBadgeViewHistory=renderBadgeViewHistory;
 
 function renderRewardGrid(){
   document.getElementById('rwd-grid').innerHTML=S.rwds.map(r=>{
@@ -6321,13 +6506,14 @@ Object.assign(window, {
   setPeriod, pk, startChangePIN, lockAdmin,
   saveMsgMode, saveCustomMsg,
   calPrev, calNext, selectCalDay,
-  admTab,
+  admTab, switchDash,
   // Auth functions
   showAuthScreen, selectMember, doRegister, doLogin, logout, togglePwd,
   // Avatar functions
   openAvatarEditor, saveAvatarCrop, renderAdmMemberPhotos,
   // Badge functions
-  checkBadges, showBadgeCelebration, showBadgeDetail, renderBadges,
+  checkBadges, showBadgeCelebration, showBadgeDetail, claimBadgeMileage,
+  openBadgeView, closeBadgeView, renderBadgeViewGrid, renderBadgeViewHistory, renderBadgeSummary,
 });
 
 // ── INIT (Firebase async) ─────────────────────
