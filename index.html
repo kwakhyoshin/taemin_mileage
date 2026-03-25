@@ -116,7 +116,7 @@ body.dark .dtog-in{transform:translateX(24px)}
 .home-top h1{font-size:24px;font-weight:900;color:rgba(255,255,255,.68)}
 
 /* HERO - Sticky on scroll, full width when stuck */
-.hero{margin:0;background:linear-gradient(180deg,var(--tab-color,#6366F1),var(--tab-color2,#818CF8));border-radius:0 0 40px 40px;padding:14px 20px 22px;color:#fff;position:sticky;top:0;z-index:10;overflow:hidden;box-shadow:0 4px 20px var(--tab-shadow,rgba(99,102,241,0.3));transition:padding .25s}
+.hero{margin:0;background:linear-gradient(180deg,var(--tab-color,#6366F1),var(--tab-color2,#818CF8));border-radius:0 0 var(--rxl) var(--rxl);padding:14px 20px 22px;color:#fff;position:sticky;top:0;z-index:10;overflow:hidden;box-shadow:0 4px 20px var(--tab-shadow,rgba(99,102,241,0.3));transition:padding .25s}
 .hero::after{content:'';position:absolute;bottom:-30px;left:20px;width:110px;height:110px;background:rgba(255,255,255,.08);border-radius:50%;pointer-events:none}
 .hero-lbl{font-size:14px;font-weight:700;opacity:.85;transition:font-size .25s}
 .hero-pts{font-size:58px;font-weight:900;letter-spacing:-2px;line-height:1;transition:font-size .25s}
@@ -124,7 +124,7 @@ body.dark .dtog-in{transform:translateX(24px)}
 .hero-goal{font-size:15px;opacity:.82;margin-top:6px;font-weight:600;line-height:1.4;transition:all .25s;max-height:50px;overflow:hidden}
 .streak-pill{position:absolute;top:18px;right:18px;background:rgba(255,255,255,.2);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:800;transition:all .25s}
 .prog-track{background:rgba(255,255,255,.25);border-radius:7px;height:14px;margin-top:14px;transition:margin .25s}
-.prog-fill{background:#fff;border-radius:7px;height:100%;transition:width .7s}
+.prog-fill{background:linear-gradient(90deg,#7C3AED,#A855F7,#D946EF,#EC4899);border-radius:7px;height:100%;transition:width .7s}
 .prog-row{display:flex;justify-content:space-between;margin-top:5px;font-size:11px;opacity:.75;font-weight:700;transition:all .25s}
 
 /* HERO compact state */
@@ -171,7 +171,7 @@ body.dark .dtog-in{transform:translateX(24px)}
 .act-card .timer{font-size:10px;font-weight:700;color:var(--tx3);margin-top:2px}
 
 /* LOG HEADER STICKY */
-.log-header-sticky{position:sticky;top:0;z-index:10;background:linear-gradient(135deg,var(--tab-color,#6366F1),var(--tab-color2,#818CF8));padding:16px 20px 16px;padding-top:calc(16px + env(safe-area-inset-top));margin:0 0 14px;border-radius:0 0 40px 40px;box-shadow:0 4px 20px var(--tab-shadow,rgba(99,102,241,0.3))}
+.log-header-sticky{position:sticky;top:0;z-index:10;background:linear-gradient(135deg,var(--tab-color,#6366F1),var(--tab-color2,#818CF8));padding:16px 20px 16px;padding-top:calc(16px + env(safe-area-inset-top));margin:0 0 14px;border-radius:0 0 var(--rxl) var(--rxl);box-shadow:0 4px 20px var(--tab-shadow,rgba(99,102,241,0.3))}
 .log-header-sticky h2{font-size:24px;font-weight:900;color:#fff;transition:font-size .25s}
 .log-header-sticky p{font-size:14px;color:rgba(255,255,255,.85);margin-top:2px;font-weight:600;transition:all .25s}
 
@@ -248,7 +248,7 @@ body.dark .dtog-in{transform:translateX(24px)}
 
 /* REWARD */
 .rwd-bal{display:flex;align-items:center;justify-content:space-between;background:var(--card);border-radius:var(--r);margin:8px 16px 12px;padding:16px;transition:background .25s}
-.rwd-header-sticky{background:linear-gradient(135deg,var(--tab-color,#6366F1),var(--tab-color2,#818CF8));border-radius:0 0 40px 40px;margin:0 0 14px;padding:16px 20px;padding-top:calc(16px + env(safe-area-inset-top));position:sticky;top:0;z-index:10;box-shadow:0 4px 20px var(--tab-shadow,rgba(99,102,241,0.3))}
+.rwd-header-sticky{background:linear-gradient(135deg,var(--tab-color,#6366F1),var(--tab-color2,#818CF8));border-radius:0 0 var(--rxl) var(--rxl);margin:0 0 14px;padding:16px 20px;padding-top:calc(16px + env(safe-area-inset-top));position:sticky;top:0;z-index:10;box-shadow:0 4px 20px var(--tab-shadow,rgba(99,102,241,0.3))}
 .rwd-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 16px 14px}
 .rwd-card{background:var(--card);border-radius:var(--rsm);padding:14px;text-align:center;position:relative;transition:background .25s;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:manipulation}
 .rwd-card.goal{border:2px solid var(--tab-color,var(--or))}
@@ -336,7 +336,7 @@ body.dark .rec-day-tag.day-1{background:#312E81;color:#A5B4FC}
 .tog.off .tog-dot{right:auto;left:2px}
 
 /* HISTORY */
-.hist-hero{position:sticky;top:0;z-index:10;background:linear-gradient(135deg,var(--tab-color,#6366F1),var(--tab-color2,#818CF8));border-radius:0 0 40px 40px;margin:0 0 14px;padding:18px 20px 16px;padding-top:calc(18px + env(safe-area-inset-top));box-shadow:0 4px 20px var(--tab-shadow,rgba(99,102,241,0.3))}
+.hist-hero{position:sticky;top:0;z-index:10;background:linear-gradient(135deg,var(--tab-color,#6366F1),var(--tab-color2,#818CF8));border-radius:0 0 var(--rxl) var(--rxl);margin:0 0 14px;padding:18px 20px 16px;padding-top:calc(18px + env(safe-area-inset-top));box-shadow:0 4px 20px var(--tab-shadow,rgba(99,102,241,0.3))}
 .hist-hero h2{font-size:24px;font-weight:900;color:#fff}
 .hist-hero p{font-size:12px;color:rgba(255,255,255,.85);margin-top:2px;font-weight:600}
 .hist-stats-card{background:var(--card);border-radius:var(--r);margin:0 16px 14px;padding:14px;box-shadow:var(--sh)}
@@ -606,7 +606,6 @@ body.dark .today-summary-card .ts-msg{background:linear-gradient(135deg,#312E81,
 @keyframes rotate-phone{0%,100%{transform:rotate(0deg)}50%{transform:rotate(-90deg)}}
 @media screen and (orientation:landscape) and (max-height:500px) and (max-width:767px){
   .landscape-block{display:flex}
-  .hero,.log-header-sticky,.rwd-header-sticky,.hist-hero{border-radius:0!important}
 }
 
 /* PIN */
@@ -1177,8 +1176,8 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
 .bubble-group{position:relative;cursor:pointer;animation:bubbleDangle 3s ease-in-out infinite;transform-origin:top center;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;padding-left:18px}
 .bubble-group:active{transform:scale(1.05)!important}
 .bubble-avatar{position:absolute;left:0;top:50%;transform:translateY(-50%);z-index:2;filter:drop-shadow(1px 0 2px rgba(0,0,0,.1))}
-.bubble-speech{background:color-mix(in srgb,var(--bclr,#6366F1) 9%,#ffffff);color:#1a1a2e;font-size:11px;font-weight:800;padding:5px 9px 5px 17px;border-radius:14px;white-space:nowrap;max-width:100px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.10),inset 0 1px 0 rgba(255,255,255,.6);border:1.5px solid color-mix(in srgb,var(--bclr,#6366F1) 32%,transparent);line-height:1.3;position:relative;z-index:1}
-body.dark .bubble-speech{background:color-mix(in srgb,var(--bclr,#6366F1) 20%,#1c1c2e);color:#f0f0ff;border-color:color-mix(in srgb,var(--bclr,#6366F1) 55%,transparent);box-shadow:0 2px 10px rgba(0,0,0,.35),0 0 10px color-mix(in srgb,var(--bclr,#6366F1) 18%,transparent)}
+.bubble-speech{background:#fff;color:#222;font-size:11px;font-weight:800;padding:5px 8px 5px 16px;border-radius:14px;white-space:nowrap;max-width:100px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.15);border:1.5px solid color-mix(in srgb,var(--tab-color,#6366F1) 30%,transparent);line-height:1.3;position:relative;z-index:1}
+body.dark .bubble-speech{background:rgba(255,255,255,.72);color:#222}
 .bubble-speech .bbl-text{display:inline-block;white-space:nowrap}
 /* Log list bubble: avatar + dot + speech inline */
 .log-sticker-area{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;align-items:center}
@@ -1186,8 +1185,8 @@ body.dark .bubble-speech{background:color-mix(in srgb,var(--bclr,#6366F1) 20%,#1
 .bubble-group-log:active{transform:scale(1.05)!important}
 .bubble-avatar-log{flex-shrink:0}
 .bubble-dot-log{width:4px;height:4px;border-radius:50%;background:var(--tab-color,#6366F1);opacity:.45;flex-shrink:0;margin:0 2px}
-.bubble-speech-log{background:color-mix(in srgb,var(--bclr,#6366F1) 9%,#ffffff);color:#1a1a2e;font-size:10px;font-weight:700;padding:3px 8px;border-radius:10px;white-space:nowrap;max-width:140px;overflow:hidden;text-overflow:ellipsis;box-shadow:0 1px 5px rgba(0,0,0,.10);border:1px solid color-mix(in srgb,var(--bclr,#6366F1) 32%,transparent);line-height:1.2}
-body.dark .bubble-speech-log{background:color-mix(in srgb,var(--bclr,#6366F1) 20%,#1c1c2e);color:#f0f0ff;border-color:color-mix(in srgb,var(--bclr,#6366F1) 55%,transparent);box-shadow:0 1px 6px rgba(0,0,0,.3),0 0 8px color-mix(in srgb,var(--bclr,#6366F1) 15%,transparent)}
+.bubble-speech-log{background:#fff;color:#222;font-size:10px;font-weight:700;padding:3px 8px;border-radius:10px;white-space:nowrap;max-width:140px;overflow:hidden;text-overflow:ellipsis;box-shadow:0 1px 4px rgba(0,0,0,.12);border:1px solid color-mix(in srgb,var(--tab-color,#6366F1) 30%,transparent);line-height:1.2}
+body.dark .bubble-speech-log{background:rgba(255,255,255,.72);color:#222}
 
 /* Long-press choice popup */
 .lp-overlay{position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.45);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;animation:fadeIn .2s;overscroll-behavior:contain}
@@ -1576,6 +1575,7 @@ body.dark .bubble-speech-log{background:color-mix(in srgb,var(--bclr,#6366F1) 20
       </div>
       <button class="adm-lock" onclick="lockAdmin()">🔒 잠금</button>
     </div>
+    <div id="env-switch-area" style="display:flex;gap:6px;padding:0 18px 10px"></div>
   </div>
   <div class="stat-row">
     <div class="stat-c"><div class="stat-n" id="adm-pts">0</div><div class="stat-l">마일리지</div></div>
@@ -2337,7 +2337,7 @@ async function doRegister() {
     
     // Auto login
     currentUser = selectedMember;
-    localStorage.setItem('taemin_current_user', selectedMember);
+    localStorage.setItem(_LS_PREFIX+'current_user', selectedMember);
     
     toast(`${MEMBERS[selectedMember].name} 가입 완료! 🎉`);
     hideAllAuth();
@@ -2381,7 +2381,7 @@ async function doLogin() {
   for (const memberId in users) {
     if (users[memberId].id === id && users[memberId].pwdHash === pwdHash) {
       currentUser = memberId;
-      localStorage.setItem('taemin_current_user', memberId);
+      localStorage.setItem(_LS_PREFIX+'current_user', memberId);
       toast(`${MEMBERS[memberId].name}, 환영해요! 🎉`);
       hideAllAuth();
       applyUserProfile();
@@ -2433,7 +2433,7 @@ function applyUserProfile() {
 function logout() {
   if (!confirm('로그아웃 하시겠어요?')) return;
   currentUser = null;
-  localStorage.removeItem('taemin_current_user');
+  localStorage.removeItem(_LS_PREFIX+'current_user');
   showAuthScreen('login');
   document.getElementById('login-id').value = '';
   document.getElementById('login-pwd').value = '';
@@ -2443,7 +2443,7 @@ function checkAuth() {
   // S.users에서 사용자 데이터 로드
   cachedUsers = S.users || {};
   
-  const savedUser = localStorage.getItem('taemin_current_user');
+  const savedUser = localStorage.getItem(_LS_PREFIX+'current_user');
   
   // 3명 모두 가입했으면 회원가입 링크 숨김
   const allRegistered = Object.keys(MEMBERS).every(id => cachedUsers[id]);
@@ -2608,9 +2608,11 @@ const firebaseConfig = {
   appId: "1:1002709736057:web:5e4df58febe004c765d2a8"
 };
 
+const _ENV = 'prod'; // 'prod' = 운영, 'dev' = 개발
+const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_'; // localStorage 키 접두사
 const fbApp = initializeApp(firebaseConfig);
 const db = getFirestore(fbApp);
-const DATA_DOC = doc(db, 'users', 'taemin');
+const DATA_DOC = doc(db, 'users', _ENV==='dev'?'taemin_dev':'taemin');
 
 // 캐시된 사용자 데이터 (S.users에서 로드)
 let cachedUsers = null;
@@ -2673,10 +2675,10 @@ function save(){
       _lastSavedJSON = json; // remember what we just wrote
       _hasDirtyLocal = false; // 저장 완료
       _lastSaveTime = Date.now(); // cooldown start
-      localStorage.setItem('taemin_v6_backup', json);
+      localStorage.setItem(_LS_PREFIX+'v6_backup', json);
     }catch(e){
       console.warn('Firebase save failed', e);
-      localStorage.setItem('taemin_v6_backup', JSON.stringify(S));
+      localStorage.setItem(_LS_PREFIX+'v6_backup', JSON.stringify(S));
     } finally {
       _isSaving = false;
       // If another save was requested while we were writing, do it now
@@ -2718,11 +2720,11 @@ function applyDark(v){
 }
 function toggleDark(){
   const isDark=!document.body.classList.contains('dark');
-  localStorage.setItem('taemin_dark',isDark?'1':'0');
+  localStorage.setItem(_LS_PREFIX+'dark',isDark?'1':'0');
   applyDark(isDark);
 }
 function loadDarkPref(){
-  const saved=localStorage.getItem('taemin_dark');
+  const saved=localStorage.getItem(_LS_PREFIX+'dark');
   if(saved!==null){
     applyDark(saved==='1');
   }
@@ -5846,7 +5848,7 @@ function renderStickersFor(actId){
       const bclr=getBubbleColor(s.user);
       html+=`<div class="bubble-group" data-stkid="${s.id}" style="animation-delay:${i*0.4}s">
         <div class="bubble-avatar">${getStickerAvatar(s.user,28)}</div>
-        <div class="bubble-speech" style="--bclr:${bclr}"><span class="bbl-text">${safe}</span></div>
+        <div class="bubble-speech" style="border-color:color-mix(in srgb,${bclr} 30%,transparent)"><span class="bbl-text">${safe}</span></div>
       </div>`;
     });
     html+=`</div>`;
@@ -5874,7 +5876,7 @@ function renderStickersForLog(actId){
       html+=`<div class="bubble-group-log" data-stkid="${s.id}" style="animation-delay:${i*0.4}s">
         <div class="bubble-avatar-log">${getStickerAvatar(s.user,22)}</div>
         <div class="bubble-dot-log" style="background:${bclr}"></div>
-        <div class="bubble-speech-log" style="--bclr:${bclr}">${safe}</div>
+        <div class="bubble-speech-log" style="border-color:color-mix(in srgb,${bclr} 30%,transparent)">${safe}</div>
       </div>`;
     }
   });
@@ -7117,7 +7119,7 @@ function renderNavUsers(){
     html+=`<div class="nav-user-wrap" onclick="onUserIconClick('${id}')">
       ${moodEmoji?`<span class="nav-mood-badge">${moodEmoji}</span>`:''}
       ${unreadCount>0?`<span class="nav-unread-badge">${unreadCount}</span>`:''}
-      <div class="nav-profile" style="border-color:var(--tab-color,var(--or))">${getAvatarHTML(id,28)}</div>
+      <div class="nav-profile" style="border-color:${getBubbleColor(id)}">${getAvatarHTML(id,28)}</div>
       <span class="nav-user-label">${userLabels[id]||MEMBERS[id].name}</span>
     </div>`;
   });
@@ -7645,18 +7647,17 @@ function reallyGoTab(tab){
   const hero=document.querySelector('.hero');
   if(hero){
     hero.classList.remove('compact');
-    hero.style.borderRadius='';
     const progTrack=hero.querySelector('.prog-track');
     if(progTrack){progTrack.style.height='14px';progTrack.style.borderRadius='7px';}
   }
   const ht=document.querySelector('.home-top');
   if(ht) Array.from(ht.children).forEach(c=>c.style.opacity='1');
   const logH=document.querySelector('.log-header-sticky');
-  if(logH){logH.classList.remove('compact');logH.style.borderRadius='';}
+  if(logH) logH.classList.remove('compact');
   const rwdH=document.querySelector('.rwd-header-sticky');
-  if(rwdH){rwdH.classList.remove('compact');rwdH.style.borderRadius='';}
+  if(rwdH) rwdH.classList.remove('compact');
   const histH=document.querySelector('.hist-hero');
-  if(histH){histH.classList.remove('compact');histH.style.borderRadius='';}
+  if(histH) histH.classList.remove('compact');
 
   // Set tab theme
   document.body.setAttribute('data-tab', tab);
@@ -7722,13 +7723,13 @@ function swipeToTab(tab,animClass){
   });
   // 모든 탭 compact 상태 초기화
   const hero=document.querySelector('.hero');
-  if(hero){hero.classList.remove('compact');hero.style.borderRadius='';}
+  if(hero)hero.classList.remove('compact');
   const logH2=document.querySelector('.log-header-sticky');
-  if(logH2){logH2.classList.remove('compact');logH2.style.borderRadius='';}
+  if(logH2)logH2.classList.remove('compact');
   const rwdH2=document.querySelector('.rwd-header-sticky');
-  if(rwdH2){rwdH2.classList.remove('compact');rwdH2.style.borderRadius='';}
+  if(rwdH2)rwdH2.classList.remove('compact');
   const histH2=document.querySelector('.hist-hero');
-  if(histH2){histH2.classList.remove('compact');histH2.style.borderRadius='';};
+  if(histH2)histH2.classList.remove('compact');
 
   // Set tab theme
   document.body.setAttribute('data-tab', tab);
@@ -7945,10 +7946,10 @@ function urlBase64ToUint8Array(base64String){
 
 // Generate a unique device ID for this browser/device
 function getDeviceId(){
-  let id=localStorage.getItem('taemin_device_id');
+  let id=localStorage.getItem(_LS_PREFIX+'device_id');
   if(!id){
     id='dev_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);
-    localStorage.setItem('taemin_device_id',id);
+    localStorage.setItem(_LS_PREFIX+'device_id',id);
   }
   return id;
 }
@@ -7999,7 +8000,7 @@ async function subscribePush(){
     toast('푸시 구독 실패: '+e.message);return;
   }
   // Step 3: Save to localStorage (device-specific toggle state)
-  localStorage.setItem('taemin_push_enabled','true');
+  localStorage.setItem(_LS_PREFIX+'push_enabled','true');
 
   // Step 4: Save subscription to Firestore keyed by device ID (supports multiple devices)
   try{
@@ -8025,7 +8026,7 @@ async function unsubscribePush(){
   try{
     await pushSubscription.unsubscribe();
     pushSubscription=null;
-    localStorage.setItem('taemin_push_enabled','false');
+    localStorage.setItem(_LS_PREFIX+'push_enabled','false');
     // Remove this device from Firestore
     const deviceId=getDeviceId();
     if(S.pushDevices&&S.pushDevices[deviceId]){
@@ -8079,6 +8080,31 @@ function togglePush(){
 }
 window.togglePush=togglePush;
 window.sendTestPush=sendTestPush;
+
+// ── 환경 스위치 ──────
+function switchEnv(){
+  const baseUrl=location.pathname.replace(/\/dev\/index\.html$/,'/').replace(/\/index\.html$/,'/');
+  if(_ENV==='prod'){
+    location.href=baseUrl+'dev/index.html';
+  }else{
+    location.href=baseUrl.replace(/\/dev\/$/,'/')+'index.html';
+  }
+}
+window.switchEnv=switchEnv;
+
+// 환경 스위치 버튼 렌더링
+(function(){
+  const area=document.getElementById('env-switch-area');
+  if(!area)return;
+  const isProd=_ENV==='prod';
+  area.innerHTML=`<button onclick="switchEnv()" style="flex:1;padding:8px;background:${isProd?'rgba(255,255,255,.2)':'#EF4444'};color:#fff;border:1.5px solid rgba(255,255,255,.3);border-radius:10px;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit">${isProd?'🔧 개발기로 이동':'🚀 운영기로 이동'}</button>`;
+})();
+
+// ── DEV: 유저 빠른전환 (운영에서는 동작 안 함) ──────
+function openDevUserSwitch(){
+  if(_ENV!=='dev') { goTab('adm'); return; }
+}
+window.openDevUserSwitch=openDevUserSwitch;
 
 // Initialize SW
 initServiceWorker();
@@ -8362,7 +8388,7 @@ Object.assign(window, {
   }catch(e){
     console.warn('Firebase load failed, trying localStorage backup', e);
     try{
-      const backup = localStorage.getItem('taemin_v6_backup');
+      const backup = localStorage.getItem(_LS_PREFIX+'v6_backup');
       if(backup) S = Object.assign(defaultState(), JSON.parse(backup));
     }catch(e2){}
     toast('⚠️ 오프라인 모드 — 인터넷 연결을 확인해주세요');
@@ -8465,15 +8491,9 @@ Object.assign(window, {
   window.addEventListener('scroll', ()=>{
     const scrollY = window.scrollY || document.documentElement.scrollTop;
     const threshold = 60;
-    // Border-radius 점진적 변화 (태블릿/가로모드 제외)
-    const skipRadius = window.innerWidth >= 1024 || window.matchMedia('(orientation:landscape)').matches;
-    const rMax=40, rMin=28;
-    const rRatio=Math.max(0,Math.min(1,scrollY/threshold));
-    const r=rMax-(rMax-rMin)*rRatio;
     // Home
     if(homeScr && homeScr.classList.contains('on') && hero){
       hero.classList.toggle('compact', scrollY > threshold);
-      if(!skipRadius) hero.style.borderRadius=`0 0 ${r}px ${r}px`;
       // Smooth gauge height: 10px (expanded) → 5px (compact)
       const progTrack=hero.querySelector('.prog-track');
       if(progTrack){
@@ -8496,19 +8516,16 @@ Object.assign(window, {
     const logHdr = document.querySelector('.log-header-sticky');
     if(logHdr && document.getElementById('s-log')?.classList.contains('on')){
       logHdr.classList.toggle('compact', scrollY > threshold);
-      if(!skipRadius) logHdr.style.borderRadius=`0 0 ${r}px ${r}px`;
     }
     // Reward
     const rwdHdr = document.querySelector('.rwd-header-sticky');
     if(rwdHdr && document.getElementById('s-rwd')?.classList.contains('on')){
       rwdHdr.classList.toggle('compact', scrollY > threshold);
-      if(!skipRadius) rwdHdr.style.borderRadius=`0 0 ${r}px ${r}px`;
     }
     // History/Stats
     const histHdr = document.querySelector('.hist-hero');
     if(histHdr && document.getElementById('s-hist')?.classList.contains('on')){
       histHdr.classList.toggle('compact', scrollY > threshold);
-      if(!skipRadius) histHdr.style.borderRadius=`0 0 ${r}px ${r}px`;
     }
   }, {passive:true});
 
