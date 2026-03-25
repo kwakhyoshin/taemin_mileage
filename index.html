@@ -1922,8 +1922,8 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
   <div class="recv-msg-emotion" id="recv-msg-emotion" style="font-size:48px;margin-bottom:8px;display:none"></div>
   <div class="recv-msg-text" id="recv-msg-text"></div>
   <div id="recv-msg-actions" style="display:none;gap:8px;margin-bottom:10px">
-    <button class="msg-send-btn" id="recv-msg-approve" style="flex:1;background:#22C55E;margin:0" onclick="handleRewardAction('approve')">✅ 승인</button>
-    <button class="msg-send-btn" id="recv-msg-reject" style="flex:1;background:#EF4444;margin:0" onclick="handleRewardAction('reject')">❌ 거절</button>
+    <button id="recv-msg-approve" style="flex:1;padding:12px;background:#22C55E;color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;min-height:48px;-webkit-tap-highlight-color:transparent;touch-action:manipulation;position:relative;z-index:10" onclick="handleRewardAction('approve')">✅ 승인</button>
+    <button id="recv-msg-reject" style="flex:1;padding:12px;background:#EF4444;color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;min-height:48px;-webkit-tap-highlight-color:transparent;touch-action:manipulation;position:relative;z-index:10" onclick="handleRewardAction('reject')">❌ 거절</button>
   </div>
   <button class="msg-send-btn" onclick="closeRecvMsg()">닫기</button>
 </div>
@@ -6660,8 +6660,8 @@ function readMsgFromList(fromId,msgIdx){
     const req=S.rewardRequests?S.rewardRequests.find(r=>r.id===m.requestId):null;
     if(req&&req.status==='pending'){
       actionsHTML=`<div class="msglist-detail-actions">
-        <button class="msg-send-btn" style="background:#22C55E" onclick="_currentRecvMsg=S.familyMessages.find(fm=>fm.ts===${m.ts});handleRewardAction('approve')">✅ 승인</button>
-        <button class="msg-send-btn" style="background:#EF4444" onclick="_currentRecvMsg=S.familyMessages.find(fm=>fm.ts===${m.ts});handleRewardAction('reject')">❌ 거절</button>
+        <button style="flex:1;padding:12px;background:#22C55E;color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;min-height:48px;-webkit-tap-highlight-color:transparent;touch-action:manipulation" onclick="handleRewardFromList(${m.ts},'approve')">✅ 승인</button>
+        <button style="flex:1;padding:12px;background:#EF4444;color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;min-height:48px;-webkit-tap-highlight-color:transparent;touch-action:manipulation" onclick="handleRewardFromList(${m.ts},'reject')">❌ 거절</button>
       </div>`;
     }
   }
@@ -6756,6 +6756,21 @@ function handleRewardAction(action){
   }
 }
 window.handleRewardAction=handleRewardAction;
+
+function handleRewardFromList(msgTs,action){
+  const msg=S.familyMessages?S.familyMessages.find(fm=>fm.ts===msgTs):null;
+  if(!msg||!msg.requestId){toast('요청 정보를 찾을 수 없어요');return;}
+  if(!msg.read)msg.read=true;
+  const reqId=msg.requestId;
+  // Close message list popup
+  closeMsgList();
+  if(action==='approve'){
+    approveRewardRequest(reqId,currentUser);
+  }else{
+    rejectRewardRequest(reqId,currentUser);
+  }
+}
+window.handleRewardFromList=handleRewardFromList;
 
 let selectedEmotion=null;
 
