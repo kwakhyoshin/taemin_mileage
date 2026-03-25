@@ -29,7 +29,7 @@ self.addEventListener('push', (e) => {
   const options = {
     body: data.body,
     icon: data.icon || 'icon-180.png',
-    badge: 'icon-180.png',
+    badge: 'icon-96.png',
     vibrate: [100, 50, 100],
     tag: data.tag || 'default',
     renotify: true,
