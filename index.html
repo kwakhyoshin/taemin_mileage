@@ -722,6 +722,11 @@ body.dark .nav-user-label{color:var(--tx2)}
 .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 .conf-p{position:fixed;pointer-events:none;z-index:998;border-radius:2px;animation:fall 1.3s ease-in forwards}
 @keyframes fall{0%{transform:translateY(-10px) rotate(0);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes fadeOut{from{opacity:1}to{opacity:0}}
+@keyframes popIn{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}
+.badge-card{transition:all .2s ease}
+.badge-card:hover{transform:scale(1.05)}
 .divider{height:.5px;background:var(--bdr);margin:0 14px}
 .empty{text-align:center;padding:28px 20px;color:var(--tx3);font-weight:600;font-size:14px}
 
@@ -1066,6 +1071,8 @@ body.dark .rwd-card.on-sale{background:linear-gradient(135deg,rgba(239,68,68,.15
 .sale-cost{background:linear-gradient(135deg,#FEE2E2,#FECACA)!important;color:#DC2626!important;font-size:12px!important;font-weight:900!important}
 body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(239,68,68,.15))!important}
 .sale-timer{font-size:10px;font-weight:700;color:#EF4444;margin-bottom:6px}
+@keyframes badgeSpin{0%{transform:perspective(800px) rotateY(0deg) scale(0.3);opacity:0}30%{opacity:1}100%{transform:perspective(800px) rotateY(720deg) scale(1)}}
+@keyframes badgeFadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
 <body data-tab="home">
@@ -1163,6 +1170,13 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
   <div class="act-grid" id="home-grid"></div>
   <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> 최근 활동</div>
   <div class="rec-list" id="rec-list"></div>
+  <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> 나의 뱃지</div>
+  <div id="badges-section" style="padding:0 16px"></div>
+
+  <div style="padding:0 16px;margin-top:20px">
+    <div style="font-size:14px;font-weight:700;color:var(--tx);margin-bottom:10px">🏅 뱃지 마일리지 수령 내역</div>
+    <div id="badge-history"></div>
+  </div>
 </div>
 
 <!-- LOG -->
@@ -1440,12 +1454,7 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
     </div>
     <div class="adm-sec">
       <div class="adm-sec-lbl">홈 화면 인사말 변경</div>
-      <div class="adm-card">
-        <div class="adm-row">
-          <input class="txt-inp" id="greeting-inp" type="text" placeholder="안녕, 태민아! 👋" maxlength="30">
-          <button class="btn-sm" onclick="saveGreeting()">저장</button>
-        </div>
-      </div>
+      <div id="greetings-settings-container"></div>
     </div>
     <div class="adm-sec">
       <div class="adm-sec-lbl">화면 설정</div>
@@ -1484,6 +1493,16 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
           <div class="adm-row-l"><div class="adm-row-nm">보너스 마일리지</div></div>
           <input class="num-inp" id="bonus-pts-inp" type="number" value="100" min="1" onchange="saveSettings()">
         </div>
+      </div>
+    </div>
+    <div class="adm-sec">
+      <div class="adm-sec-lbl">뱃지 관리</div>
+      <div class="adm-card">
+        <div class="adm-row">
+          <div class="adm-row-l"><div class="adm-row-nm">새 뱃지 추가</div><div class="adm-row-sub">커스텀 뱃지 생성</div></div>
+          <button class="btn-sm" onclick="openBadgeForm()">추가</button>
+        </div>
+        <div id="custom-badges-list" style="margin-top:12px"></div>
       </div>
     </div>
     <div class="adm-sec">
@@ -2132,28 +2151,23 @@ function hideAllAuth() {
 
 function applyUserProfile() {
   const greetingEl = document.getElementById('greeting-txt');
-  
+
   if (!currentUser) {
     // 로그인 안 된 경우 기본 인사말
     if (greetingEl) greetingEl.textContent = S.greeting || '안녕, 태민아! 👋';
     return;
   }
-  
+
   const member = MEMBERS[currentUser];
-  
+
   // Update nav profile icon - custom photo first, fallback to SVG avatar
   const navIcon = document.getElementById('nav-profile-icon');
   if (navIcon) navIcon.innerHTML = getAvatarHTML(currentUser, 44);
-  
-  // Update greeting - 태민이만 커스텀 인사말 사용, 나머지는 고정
+
+  // Update greeting - use new per-user greeting system
   if (greetingEl) {
-    if (currentUser === 'taemin') {
-      // 태민이는 관리자가 설정한 커스텀 인사말 또는 기본 인사말 사용
-      greetingEl.textContent = S.greeting || member.greeting;
-    } else {
-      // 아빠/엄마는 항상 고정된 인사말 사용
-      greetingEl.textContent = member.greeting;
-    }
+    const greetingTxt = getCurrentGreeting(currentUser);
+    greetingEl.textContent = greetingTxt;
   }
   
   // Update admin tab profile section - custom photo first
@@ -2244,6 +2258,45 @@ const DRWDS = [
   {id:'r9',emoji:'🎳',name:'볼링',                pts:500, goal:false},
 ];
 
+// ── BADGES (뱃지/업적) ──────────────────────────────────
+const BADGES = [
+  // 📚 공부 (Study) - 8 badges
+  {id:'study_first',emoji:'📖',name:'첫 공부 시작',desc:'시작이 반이야! 첫 공부를 해냈어',category:'공부',hidden:false,bonus:30,check:S=>countStudyTotal()>=1},
+  {id:'study_5',emoji:'🌱',name:'공부 습관 씨앗',desc:'작은 노력이 모여 큰 힘이 돼',category:'공부',hidden:false,bonus:50,check:S=>countStudyTotal()>=5},
+  {id:'study_15',emoji:'📝',name:'꾸준한 학습자',desc:'꾸준함이 천재를 이겨!',category:'공부',hidden:false,bonus:80,check:S=>countStudyTotal()>=15},
+  {id:'study_30',emoji:'🎓',name:'공부의 달인',desc:'30번의 노력, 정말 대단해!',category:'공부',hidden:false,bonus:120,check:S=>countStudyTotal()>=30},
+  {id:'study_50',emoji:'👑',name:'공부왕',desc:'50번! 노력은 절대 배신하지 않아',category:'공부',hidden:false,bonus:200,check:S=>countStudyTotal()>=50},
+  {id:'study_streak3',emoji:'🔥',name:'공부 연속 3일',desc:'3일 연속 공부! 습관이 되고 있어',category:'공부',hidden:false,bonus:40,check:S=>getStudyStreak()>=3},
+  {id:'study_streak7',emoji:'💎',name:'공부 연속 7일',desc:'일주일 내내! 대단한 끈기야',category:'공부',hidden:false,bonus:100,check:S=>getStudyStreak()>=7},
+  {id:'study_weekend',emoji:'🌟',name:'주말에도 공부',desc:'쉬는 날에도 노력하는 모습, 멋져!',category:'공부',hidden:false,bonus:60,check:S=>hasWeekendStudy()},
+
+  // ⭐ 꾸준함 (Consistency) - 6 badges
+  {id:'streak_3',emoji:'⭐',name:'3일 연속 출석',desc:'꾸준함의 시작!',category:'꾸준함',hidden:false,bonus:20,check:S=>(S.streak||0)>=3||(S.longest||0)>=3},
+  {id:'streak_7',emoji:'🌈',name:'7일 연속 출석',desc:'일주일 연속! 대단해!',category:'꾸준함',hidden:false,bonus:50,check:S=>(S.streak||0)>=7||(S.longest||0)>=7},
+  {id:'streak_14',emoji:'🏅',name:'14일 연속 출석',desc:'2주 연속이라니!',category:'꾸준함',hidden:false,bonus:80,check:S=>(S.streak||0)>=14||(S.longest||0)>=14},
+  {id:'streak_30',emoji:'🏆',name:'30일 연속 출석',desc:'한 달 내내! 진정한 챔피언',category:'꾸준함',hidden:false,bonus:150,check:S=>(S.streak||0)>=30||(S.longest||0)>=30},
+  {id:'morning_7',emoji:'🌅',name:'아침형 인간',desc:'아침 활동을 7번이나!',category:'꾸준함',hidden:false,bonus:30,check:S=>countMorningActivities()>=7},
+  {id:'total_100',emoji:'💯',name:'100번째 활동',desc:'100번의 작은 노력이 모였어!',category:'꾸준함',hidden:false,bonus:100,check:S=>(S.totalDone||0)>=100},
+
+  // 💪 도전 (Challenge) - 5 badges
+  {id:'daily_5',emoji:'✋',name:'하루 5개 클리어',desc:'오늘 정말 열심히 했어!',category:'도전',hidden:false,bonus:30,check:S=>getMaxDailyActivities()>=5},
+  {id:'daily_10',emoji:'🔟',name:'하루 10개 클리어',desc:'놀라운 하루!',category:'도전',hidden:false,bonus:60,check:S=>getMaxDailyActivities()>=10},
+  {id:'health_combo',emoji:'💚',name:'건강 지킴이',desc:'운동+영양제+양치 한 번에!',category:'도전',hidden:false,bonus:40,check:S=>hasHealthCombo()},
+  {id:'patience_5',emoji:'😌',name:'짜증 참기 달인',desc:'감정을 다스리는 힘이 자랐어',category:'도전',hidden:false,bonus:50,check:S=>countActivityByName('짜증 안내기')>=5},
+  {id:'happy_school_7',emoji:'😄',name:'즐거운 등교 달인',desc:'기분좋게 학교가기, 벌써 7번!',category:'도전',hidden:false,bonus:40,check:S=>countActivityByName('기분좋게 학교')>=7},
+
+  // 🌱 성장 (Growth) - 5 badges
+  {id:'first_activity',emoji:'👣',name:'첫 걸음',desc:'모든 여행은 첫 걸음부터!',category:'성장',hidden:false,bonus:10,check:S=>(S.totalDone||0)>=1},
+  {id:'first_reward',emoji:'🎁',name:'첫 보상 교환',desc:'노력의 결실을 맛봤어!',category:'성장',hidden:false,bonus:20,check:S=>(S.rewardLog||[]).some(r=>r.type==='exchange')},
+  {id:'pts_1000',emoji:'🚀',name:'1000 마일리지 돌파',desc:'차곡차곡 모은 보람!',category:'성장',hidden:false,bonus:50,check:S=>getTotalEarned()>=1000},
+  {id:'pts_3000',emoji:'💰',name:'3000 마일리지 돌파',desc:'꾸준한 노력의 증거!',category:'성장',hidden:false,bonus:100,check:S=>getTotalEarned()>=3000},
+  {id:'mood_7',emoji:'🎭',name:'기분 나누기 달인',desc:'감정을 표현하는 건 용기야',category:'성장',hidden:false,bonus:30,check:S=>(S.moodLog||[]).length>=7},
+
+  // 🏆 히든 (Hidden) - 2 badges
+  {id:'perfect_day',emoji:'✨',name:'올 클리어',desc:'하루 모든 활동 완료! 완벽한 하루',category:'히든',hidden:true,bonus:80,check:S=>hasPerfectDay()},
+  {id:'early_study',emoji:'🦉',name:'새벽 학습자',desc:'아침 8시 전에 공부하다니!',category:'히든',hidden:true,bonus:50,check:S=>hasEarlyStudy()},
+];
+
 // ── FIREBASE ──────────────────────────────────
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -2271,10 +2324,18 @@ function defaultState(){
     rwds:JSON.parse(JSON.stringify(DRWDS)),
     log:[],
     moodLog:[],
+    badges:{}, // {badgeId: {earnedAt: timestamp, seen: boolean, claimed: boolean}}
+    badgeLog:[], // {id, badgeId, badgeName, badgeEmoji, pts, ts}
     settings:{streakBonus:true,streakBonusPts:100,pin:'1234',msgMode:'auto',customMsg:''},
     actDone:{},
     dark:false,
-    greeting:'안녕, 태민아! 👋',
+    greeting:'안녕, 태민아! 👋', // deprecated, kept for backwards compat
+    greetings:{
+      taemin:{mode:'auto',messages:['안녕, 태민아! 오늘도 화이팅! 👋','태민아, 오늘은 뭘 해볼까? 🌟','좋은 아침! 오늘도 파이팅 💪','태민이, 열심히 해볼까? 🎯'],custom:'',currentIdx:0},
+      dad:{mode:'auto',messages:['좋은 아침, 효신님! 💪','하루를 시작해볼까요? 👋','오늘도 화이팅! 💼','힘내세요! 🌟'],custom:'',currentIdx:0},
+      mom:{mode:'auto',messages:['좋은 아침입니다! 🌸','오늘도 행복한 하루 되세요 💝','힘내세요! 💪','화이팅! 🌟'],custom:'',currentIdx:0}
+    },
+    customBadges:[], // Array of custom badges
     users:{}, // 가입 정보 저장
     rewardInventory:[], // Array of {id, rwdId, rwdName, rwdEmoji, purchasedAt, pts, status, requestId, approvedBy, approvedAt}
     rewardRequests:[], // Array of {id, rwdInvId, rwdName, rwdEmoji, fromUser, toUsers, status, requestedAt, approvedBy, approvedAt}
@@ -2611,9 +2672,205 @@ function countdownStr(act){
   return m+'분 후';
 }
 
+// ── BADGE HELPERS ────────────────────────────────────
+function countStudyTotal(){
+  return (S.log||[]).filter(l=>!l.isRedeem&&l.name&&(l.name.includes('숙제')||l.name.includes('공부'))).length;
+}
+
+function getStudyStreak(){
+  let streak=0;
+  const d=new Date();
+  while(true){
+    const ds=getDateStr(d.getFullYear(),d.getMonth(),d.getDate());
+    const dayLogs=(S.log||[]).filter(l=>{
+      const ld=new Date(l.ts);
+      return !l.isRedeem&&getDateStr(ld.getFullYear(),ld.getMonth(),ld.getDate())===ds;
+    });
+    const hasStudy=dayLogs.some(l=>l.name&&(l.name.includes('숙제')||l.name.includes('공부')));
+    if(!hasStudy)break;
+    streak++;
+    d.setDate(d.getDate()-1);
+  }
+  return streak;
+}
+
+function hasWeekendStudy(){
+  const studyLogs=(S.log||[]).filter(l=>!l.isRedeem&&l.name&&(l.name.includes('숙제')||l.name.includes('공부')));
+  const studyDates=studyLogs.map(l=>new Date(l.ts));
+  for(const d of studyDates){
+    if(d.getDay()===6){
+      const sundayTs=d.getTime()+86400000;
+      const sunday=new Date(sundayTs);
+      const sunStr=getDateStr(sunday.getFullYear(),sunday.getMonth(),sunday.getDate());
+      const hasSunStudy=studyDates.some(sd=>!sd.isRedeem&&getDateStr(sd.getFullYear(),sd.getMonth(),sd.getDate())===sunStr);
+      if(hasSunStudy)return true;
+    }
+  }
+  return false;
+}
+
+function countMorningActivities(){
+  return (S.log||[]).filter(l=>{
+    if(l.isRedeem||!l.ts)return false;
+    const d=new Date(l.ts);
+    return d.getHours()<10;
+  }).length;
+}
+
+function getMaxDailyActivities(){
+  const byDate={};
+  (S.log||[]).filter(l=>!l.isRedeem&&l.pts>0).forEach(l=>{
+    const d=new Date(l.ts);
+    const ds=getDateStr(d.getFullYear(),d.getMonth(),d.getDate());
+    byDate[ds]=(byDate[ds]||0)+1;
+  });
+  return Math.max(0,...Object.values(byDate));
+}
+
+function hasHealthCombo(){
+  const today=todayStr();
+  const todayLogs=(S.log||[]).filter(l=>{
+    if(l.isRedeem||!l.ts)return false;
+    const d=new Date(l.ts);
+    return !l.isRedeem&&getDateStr(d.getFullYear(),d.getMonth(),d.getDate())===today;
+  });
+  const hasExercise=todayLogs.some(l=>l.name&&l.name.includes('운동'));
+  const hasVitamins=todayLogs.some(l=>l.name&&l.name.includes('영양제'));
+  const hasBrushing=todayLogs.some(l=>l.name&&l.name.includes('양치'));
+  return hasExercise&&hasVitamins&&hasBrushing;
+}
+
+function countActivityByName(actName){
+  return (S.log||[]).filter(l=>!l.isRedeem&&l.name&&l.name.includes(actName)).length;
+}
+
+function getTotalEarned(){
+  return (S.log||[]).filter(l=>!l.isRedeem&&l.pts>0).reduce((a,l)=>a+(l.pts||0),0);
+}
+
+function hasPerfectDay(){
+  const today=todayStr();
+  const activeActsToday=S.acts.filter(a=>a.active&&isAvailableToday(a)&&a.maxDay>0);
+  if(activeActsToday.length===0)return false;
+  const todayLogs=(S.log||[]).filter(l=>{
+    if(l.isRedeem||!l.ts)return false;
+    const d=new Date(l.ts);
+    return !l.isRedeem&&getDateStr(d.getFullYear(),d.getMonth(),d.getDate())===today;
+  });
+  const completedActIds=new Set();
+  activeActsToday.forEach(a=>{
+    const doneCount=todayLogs.filter(l=>l.actId===a.id).length;
+    if(doneCount>=a.maxDay)completedActIds.add(a.id);
+  });
+  return completedActIds.size===activeActsToday.length;
+}
+
+function hasEarlyStudy(){
+  return (S.log||[]).some(l=>{
+    if(l.isRedeem||!l.ts)return false;
+    const d=new Date(l.ts);
+    return l.name&&(l.name.includes('숙제')||l.name.includes('공부'))&&d.getHours()<8;
+  });
+}
+
+// Generate SVG badge medal
+function generateBadgeSVG(badge,earned){
+  const categoryColors={
+    '공부':{main:'#FFD700',light:'#FFA500'},
+    '꾸준함':{main:'#4F94FF',light:'#2563EB'},
+    '도전':{main:'#FF6B35',light:'#EF4444'},
+    '성장':{main:'#22C55E',light:'#059669'},
+    '히든':{main:'#8B5CF6',light:'#6D28D9'}
+  };
+  const colors=categoryColors[badge.category]||{main:'#999',light:'#666'};
+  const opacity=earned?1:0.4;
+  const filter=earned?'drop-shadow(0 4px 8px rgba(0,0,0,.2))':'grayscale(100%)';
+
+  return`<svg viewBox="0 0 120 140" xmlns="http://www.w3.org/2000/svg" style="opacity:${opacity};filter:${filter}">
+    <defs>
+      <linearGradient id="badgeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style="stop-color:${colors.main};stop-opacity:1" />
+        <stop offset="100%" style="stop-color:${colors.light};stop-opacity:1" />
+      </linearGradient>
+    </defs>
+    <!-- Medal shape -->
+    <path d="M 60 10 C 75 10 85 20 85 35 C 85 50 75 60 60 65 C 45 60 35 50 35 35 C 35 20 45 10 60 10 Z" fill="url(#badgeGrad)"/>
+    <!-- Ribbon -->
+    <rect x="50" y="62" width="20" height="28" fill="${colors.main}" opacity="0.8"/>
+    <rect x="48" y="90" width="10" height="12" fill="${colors.light}"/>
+    <rect x="62" y="90" width="10" height="12" fill="${colors.light}"/>
+    <!-- Emoji center -->
+    <text x="60" y="48" text-anchor="middle" font-size="32" dominant-baseline="middle">${badge.emoji}</text>
+  </svg>`;
+}
+window.generateBadgeSVG=generateBadgeSVG;
+
+function checkBadges(){
+  const newBadges=[];
+  BADGES.forEach(badge=>{
+    if(!S.badges[badge.id]&&badge.check(S)){
+      S.badges[badge.id]={earnedAt:Date.now(),seen:false,claimed:false};
+      newBadges.push(badge);
+    }
+  });
+  if(newBadges.length>0){
+    save();
+    newBadges.forEach(b=>showBadgeCelebration(b));
+  }
+  return newBadges;
+}
+
+function showBadgeCelebration(badge){
+  confetti();
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:9999;animation:fadeIn .3s ease-out;cursor:pointer';
+  overlay.onclick=()=>overlay.remove();
+
+  const card=document.createElement('div');
+  card.style.cssText='background:white;border-radius:20px;padding:40px 30px;text-align:center;max-width:320px;box-shadow:0 10px 40px rgba(0,0,0,.3)';
+  const svgHtml=generateBadgeSVG(badge,true);
+  card.innerHTML=`
+    <div style="width:120px;height:140px;margin:0 auto 20px;display:flex;align-items:center;justify-content:center;animation:badgeSpin 1.5s cubic-bezier(.34,.17,.67,.83) forwards">
+      ${svgHtml}
+    </div>
+    <div style="animation:badgeFadeIn .6s ease-out forwards;animation-delay:.6s;opacity:0">
+      <div style="font-size:20px;font-weight:900;color:#1F2937;margin:0 0 8px">${badge.name}</div>
+      <div style="font-size:14px;color:#6B7280;margin:0 0 16px;line-height:1.5">${badge.desc}</div>
+      <div style="background:rgba(99,102,241,.1);padding:10px 12px;border-radius:8px;margin:0 0 8px">
+        <div style="font-size:12px;color:var(--tx3);font-weight:600">🎁 보너스 +${badge.bonus||0} 마일리지</div>
+        <div style="font-size:11px;color:var(--tx3);margin-top:4px">뱃지 화면에서 마일리지를 받을 수 있어요!</div>
+      </div>
+      <div style="font-size:11px;color:#9CA3AF;font-weight:600">뱃지 획득!</div>
+    </div>
+  `;
+  overlay.appendChild(card);
+  document.body.appendChild(overlay);
+  setTimeout(()=>{
+    overlay.style.animation='fadeOut .3s ease-out forwards';
+    setTimeout(()=>overlay.remove(),300);
+  },4000);
+}
+
+// Get current greeting for a user
+function getCurrentGreeting(userId){
+  const gr=S.greetings?.[userId];
+  if(!gr){
+    // Fallback to old greeting field for backwards compat
+    return S.greeting||'안녕하세요!';
+  }
+  if(gr.mode==='manual'){
+    return gr.custom||'안녕하세요!';
+  }
+  // Auto mode: rotate by day of year
+  const doy=Math.floor((new Date()-new Date(new Date().getFullYear(),0,0))/86400000);
+  const idx=doy%gr.messages.length;
+  return gr.messages[idx]||'안녕하세요!';
+}
+window.getCurrentGreeting=getCurrentGreeting;
+
 // ── RENDER ────────────────────────────────────
 function renderAll(){
-  renderHero();renderHomeGrid();renderRecent();
+  renderHero();renderHomeGrid();renderRecent();renderBadges();renderBadgeHistory();
   renderLogList();renderRewardGrid();renderRewardInventory();renderRewardHistory();
   renderDashboard();renderHistStats();renderHistList();renderCalendar();
   renderAdmStats();renderAdmActList();renderAdmRwdList();renderAdmSettings();
@@ -2626,6 +2883,10 @@ function renderHero(){
   // 인사말은 applyUserProfile에서 관리하므로 여기서는 로그인 안 된 경우만 처리
   if (!currentUser) {
     document.getElementById('greeting-txt').textContent=S.greeting||'안녕, 태민아! 👋';
+  }else{
+    const greetingTxt=getCurrentGreeting(currentUser);
+    const el=document.getElementById('greeting-txt');
+    if(el)el.textContent=greetingTxt;
   }
   document.getElementById('hero-pts').textContent=S.pts.toLocaleString();
   document.getElementById('streak-pill').textContent=`🔥 ${getDisplayStreak()}일 연속`;
@@ -2774,6 +3035,137 @@ function renderRecent(){
     </div>`;
   });
   el.innerHTML=html;
+}
+
+function renderBadges(){
+  const el=document.getElementById('badges-section');
+  if(!el)return; // section may not exist on all screens
+
+  const earned=Object.keys(S.badges||{});
+  const total=BADGES.length;
+  const pct=Math.round(earned.length/total*100);
+
+  // Group badges by category
+  const byCategory={};
+  BADGES.forEach(b=>{
+    if(!byCategory[b.category])byCategory[b.category]=[];
+    byCategory[b.category].push(b);
+  });
+
+  let html=`<div style="padding:16px;background:rgba(99,102,241,.05);border-radius:12px;margin-bottom:12px">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+      <div style="flex:1">
+        <div style="font-size:12px;color:var(--tx3);font-weight:600;margin-bottom:4px">뱃지 진행도</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="flex:1;height:6px;background:rgba(0,0,0,.1);border-radius:3px;overflow:hidden">
+            <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#6366F1,#8B5CF6);transition:width .3s ease"></div>
+          </div>
+          <div style="font-size:14px;font-weight:800;color:#6366F1;min-width:45px">${earned.length}/${total}</div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+
+  Object.entries(byCategory).forEach(([cat,badges])=>{
+    html+=`<div style="margin-bottom:16px">
+      <div style="font-size:12px;color:var(--tx3);font-weight:700;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">${cat}</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">`;
+    badges.forEach(b=>{
+      const isEarned=S.badges&&S.badges[b.id];
+      const isClaimed=isEarned?.claimed||false;
+      const cursor=isEarned?'pointer':'default';
+      html+=`<div class="badge-card" data-badge-id="${b.id}" style="cursor:${cursor};transition:all .2s ease;padding:12px;border-radius:14px;text-align:center;background:${isEarned?'rgba(99,102,241,.1)':'rgba(0,0,0,.05)'};border:1px solid ${isEarned?'rgba(99,102,241,.2)':'rgba(0,0,0,.1)'};display:flex;flex-direction:column;align-items:center;gap:8px" title="${b.name}">
+        <div style="width:80px;height:100px;display:flex;align-items:center;justify-content:center">
+          ${generateBadgeSVG(b,isEarned)}
+        </div>
+        <div style="font-size:10px;font-weight:600;color:var(--tx);line-height:1.2;word-break:break-word">${b.hidden&&!isEarned?'???':b.name}</div>
+      </div>`;
+    });
+    html+=`</div></div>`;
+  });
+
+  el.innerHTML=html;
+
+  // Add click handlers for badge details
+  document.querySelectorAll('.badge-card').forEach(card=>{
+    card.addEventListener('click',()=>{
+      const badgeId=card.dataset.badgeId;
+      const badge=BADGES.find(b=>b.id===badgeId);
+      if(badge&&(S.badges&&S.badges[badgeId])){
+        showBadgeDetail(badge);
+      }
+    });
+  });
+}
+
+function showBadgeDetail(badge){
+  const modal=document.createElement('div');
+  modal.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:9999';
+  modal.onclick=e=>{if(e.target===modal)modal.remove();};
+
+  const card=document.createElement('div');
+  card.style.cssText='background:white;border-radius:16px;padding:30px;max-width:320px;text-align:center;animation:popIn .3s ease-out';
+
+  const earnedAt=S.badges[badge.id]?.earnedAt;
+  const isClaimed=S.badges[badge.id]?.claimed||false;
+  const earnedDate=earnedAt?new Date(earnedAt).toLocaleDateString('ko-KR'):'-';
+
+  const btnHtml=isClaimed?
+    `<button style="padding:8px 16px;background:#D1D5DB;color:#6B7280;border:none;border-radius:8px;font-weight:600;cursor:default;width:100%">✅ 마일리지 수령 완료</button>`:
+    `<button onclick="claimBadgeMileage('${badge.id}');this.closest('div').parentElement.remove()" style="padding:8px 16px;background:#6366F1;color:white;border:none;border-radius:8px;font-weight:600;cursor:pointer;width:100%">🎁 마일리지 받기 +${badge.bonus||0}</button>`;
+
+  card.innerHTML=`
+    <div style="width:120px;height:140px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center">
+      ${generateBadgeSVG(badge,true)}
+    </div>
+    <div style="font-size:18px;font-weight:900;color:#1F2937;margin:0 0 8px">${badge.name}</div>
+    <div style="font-size:13px;color:#6B7280;margin:0 0 12px;line-height:1.5">${badge.desc}</div>
+    <div style="background:rgba(99,102,241,.1);padding:10px 12px;border-radius:8px;margin:0 0 16px">
+      <div style="font-size:11px;color:var(--tx3);margin:0 0 4px">획득일</div>
+      <div style="font-size:12px;font-weight:700;color:#6366F1;margin:0 0 8px">${earnedDate}</div>
+      <div style="font-size:11px;color:var(--tx3)">🎁 보너스 +${badge.bonus||0} 마일리지</div>
+    </div>
+    ${btnHtml}
+  `;
+  modal.appendChild(card);
+  document.body.appendChild(modal);
+}
+window.showBadgeDetail=showBadgeDetail;
+
+function claimBadgeMileage(badgeId){
+  const badge=BADGES.find(b=>b.id===badgeId);
+  if(!badge||!S.badges[badgeId])return;
+  const badgeInfo=S.badges[badgeId];
+  if(badgeInfo.claimed)return;
+
+  const bonus=badge.bonus||0;
+  S.pts+=bonus;
+  badgeInfo.claimed=true;
+
+  // Add to badge log
+  if(!S.badgeLog)S.badgeLog=[];
+  S.badgeLog.unshift({id:'bl_'+Date.now(),badgeId:badge.id,badgeName:badge.name,badgeEmoji:badge.emoji,pts:bonus,ts:Date.now()});
+
+  save();renderAll();
+  toast(`🏅 ${badge.name}! ${bonus} 마일리지 획득!`);
+  confetti();
+}
+window.claimBadgeMileage=claimBadgeMileage;
+
+function renderBadgeHistory(){
+  const el=document.getElementById('badge-history');
+  if(!el)return;
+  const logs=(S.badgeLog||[]).slice(0,15);
+  if(logs.length===0){
+    el.innerHTML='<div class="card" style="padding:16px;text-align:center;color:var(--tx3);font-size:13px">아직 뱃지 마일리지 수령이 없어요</div>';
+    return;
+  }
+  el.innerHTML='<div class="card" style="padding:0;overflow:hidden">'+logs.map(l=>{
+    const d=new Date(l.ts);
+    const h=d.getHours(),m=String(d.getMinutes()).padStart(2,'0'),ap=h>=12?'오후':'오전',h12=h>12?h-12:h===0?12:h;
+    const timeStr=(d.getMonth()+1)+'/'+d.getDate()+' '+ap+' '+h12+':'+m;
+    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--bdr)"><span style="font-size:20px">'+l.badgeEmoji+'</span><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--tx)">'+l.badgeName+'</div><div style="font-size:11px;color:var(--tx3)">'+timeStr+'</div></div><div style="text-align:right"><div style="font-size:13px;font-weight:800;color:var(--gn2)">+'+l.pts.toLocaleString()+' M</div><div style="font-size:10px;color:var(--gn2);font-weight:700">획득</div></div></div>';
+  }).join('')+'</div>';
 }
 
 function renderRewardGrid(){
@@ -3902,7 +4294,34 @@ function renderAdmSettings(){
   const ts=document.getElementById('tog-streak');if(ts)ts.classList.toggle('off',!S.settings.streakBonus);
   const td=document.getElementById('tog-dark');if(td)td.classList.toggle('off',!document.body.classList.contains('dark'));
   const bi=document.getElementById('bonus-pts-inp');if(bi)bi.value=S.settings.streakBonusPts||100;
-  const gi=document.getElementById('greeting-inp');if(gi)gi.value=S.greeting||'';
+
+  // Render per-user greeting settings
+  const container=document.getElementById('greetings-settings-container');
+  if(container){
+    let html='';
+    Object.entries(MEMBERS).forEach(([userId,member])=>{
+      const gr=S.greetings?.[userId]||{mode:'auto',messages:[],custom:'',currentIdx:0};
+      html+=`<div class="adm-card" style="margin-bottom:12px">
+        <div style="font-weight:700;color:var(--tx);margin-bottom:10px">${member.name}</div>
+        <div class="adm-row">
+          <div class="adm-row-l"><div class="adm-row-nm">모드</div></div>
+          <select id="greeting-mode-${userId}" onchange="saveGreetingMode('${userId}')" style="padding:6px 10px;border:1.5px solid var(--bdr);border-radius:9px;font-size:13px;font-weight:700;background:var(--bg);color:var(--tx);font-family:inherit">
+            <option value="auto" ${gr.mode==='auto'?'selected':''}>자동</option>
+            <option value="manual" ${gr.mode==='manual'?'selected':''}>수동</option>
+          </select>
+        </div>
+        <div class="adm-row" id="greeting-manual-${userId}" style="display:${gr.mode==='manual'?'flex':'none'};flex-direction:column;align-items:stretch;gap:8px;margin-top:10px">
+          <input class="txt-inp" id="greeting-custom-${userId}" type="text" placeholder="인사말을 입력하세요" maxlength="50" value="${gr.custom||''}">
+          <button class="btn-sm" onclick="saveGreetingCustom('${userId}')">저장</button>
+        </div>
+        ${gr.mode==='auto'?`<div style="font-size:12px;color:var(--tx3);margin-top:8px">현재 인사말: "${getCurrentGreeting(userId)}"</div>`:''}
+      </div>`;
+    });
+    container.innerHTML=html;
+  }
+
+  // Render custom badges list
+  renderCustomBadgesList();
 }
 
 // ── ACTIVITY ACTIONS ──────────────────────────
@@ -3926,6 +4345,7 @@ function doAct(id){
   S.log.unshift({id:'l_'+Date.now(),emoji:a.emoji,name:a.name,pts:a.pts+bonus,ts:Date.now(),actId:a.id});
   if(S.log.length>300)S.log=S.log.slice(0,300);
   save();renderAll();
+  checkBadges();
   toast(`${a.emoji} ${a.name} +${a.pts} 마일리지${sm}`);confetti();
 }
 
@@ -3985,6 +4405,7 @@ function confirmRedeem(){
   if(!S.rewardLog)S.rewardLog=[];
   S.rewardLog.unshift({id:'rl_'+Date.now(),emoji:r.emoji,name:r.name,pts:actualPts,ts:Date.now(),rwdId:r.id,type:'exchange'});
   save();closeModal('m-redeem');renderAll();
+  checkBadges();
   toast(`🎉 ${r.emoji} ${r.name} 교환 완료!`);confetti();
 }
 function undoRedeem(logId){
@@ -4242,13 +4663,132 @@ function delAct(id){if(!confirm('이 활동을 삭제할까요?'))return;S.acts=
 function delRwd(id){if(!confirm('이 보상을 삭제할까요?'))return;S.rwds=S.rwds.filter(r=>r.id!==id);save();renderAll();toast('🗑️ 삭제됐어요');}
 function togSetting(k){if(k==='streak')S.settings.streakBonus=!S.settings.streakBonus;save();renderAdmSettings();toast(S.settings.streakBonus?'✅ 연속 보너스 켜짐':'🔕 꺼짐');}
 function saveSettings(){S.settings.streakBonusPts=parseInt(document.getElementById('bonus-pts-inp').value)||100;save();}
-function saveGreeting(){
-  const v=document.getElementById('greeting-inp').value.trim();
-  if(!v)return;
-  S.greeting=v;save();
-  document.getElementById('greeting-txt').textContent=v;
-  toast('✅ 인사말이 변경됐어요!');
+function saveGreetingMode(userId){
+  const mode=document.getElementById(`greeting-mode-${userId}`).value;
+  if(!S.greetings)S.greetings={};
+  if(!S.greetings[userId])S.greetings[userId]={mode:'auto',messages:[],custom:'',currentIdx:0};
+  S.greetings[userId].mode=mode;
+  save();
+  renderAdmSettings();
+  applyUserProfile();
+  toast('✅ 인사말 모드가 변경됐어요!');
 }
+window.saveGreetingMode=saveGreetingMode;
+
+function saveGreetingCustom(userId){
+  const customText=document.getElementById(`greeting-custom-${userId}`).value.trim();
+  if(!customText)return;
+  if(!S.greetings)S.greetings={};
+  if(!S.greetings[userId])S.greetings[userId]={mode:'manual',messages:[],custom:'',currentIdx:0};
+  S.greetings[userId].custom=customText;
+  save();
+  renderAdmSettings();
+  applyUserProfile();
+  toast('✅ 인사말이 저장됐어요!');
+}
+window.saveGreetingCustom=saveGreetingCustom;
+
+// ── BADGE MANAGEMENT ──────────────────────────
+function renderCustomBadgesList(){
+  const el=document.getElementById('custom-badges-list');
+  if(!el)return;
+  const custom=S.customBadges||[];
+  if(custom.length===0){
+    el.innerHTML='<div style="font-size:12px;color:var(--tx3);text-align:center;padding:8px">추가한 뱃지가 없어요</div>';
+    return;
+  }
+  el.innerHTML='<div style="margin-top:8px">'+custom.map((b,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:8px;background:rgba(0,0,0,.03);border-radius:8px;margin-bottom:6px">
+      <span style="font-size:18px">${b.emoji}</span>
+      <div style="flex:1"><div style="font-size:11px;font-weight:700;color:var(--tx)">${b.name}</div><div style="font-size:10px;color:var(--tx3)">${b.category} | 보너스 +${b.bonus}</div></div>
+      <button class="btn-sm rd" style="padding:4px 8px;font-size:10px" onclick="delCustomBadge(${i})">삭제</button>
+    </div>
+  `).join('')+'</div>';
+}
+
+function openBadgeForm(){
+  const modal=document.createElement('div');
+  modal.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:9999;overflow-y:auto;padding:20px 0';
+  modal.onclick=e=>{if(e.target===modal)modal.remove();};
+
+  const card=document.createElement('div');
+  card.style.cssText='background:white;border-radius:16px;padding:24px;max-width:380px;width:100%;margin:auto';
+  card.innerHTML=`
+    <div style="font-size:16px;font-weight:900;color:#1F2937;margin-bottom:16px">새 뱃지 추가</div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--tx3)">뱃지 이름</label>
+        <input id="badge-name" class="txt-inp" type="text" placeholder="예: 특별한 날" maxlength="20" style="margin-top:4px">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--tx3)">이모지</label>
+        <input id="badge-emoji" class="txt-inp" type="text" placeholder="예: 🎊" maxlength="2" style="margin-top:4px">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--tx3)">설명</label>
+        <input id="badge-desc" class="txt-inp" type="text" placeholder="뱃지 설명" maxlength="40" style="margin-top:4px">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--tx3)">카테고리</label>
+        <select id="badge-category" style="padding:8px 10px;border:1.5px solid var(--bdr);border-radius:9px;font-size:13px;font-weight:700;background:var(--bg);color:var(--tx);font-family:inherit;margin-top:4px;width:100%">
+          <option value="공부">공부</option>
+          <option value="꾸준함">꾸준함</option>
+          <option value="도전">도전</option>
+          <option value="성장">성장</option>
+          <option value="특별">특별</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--tx3)">보너스 마일리지</label>
+        <input id="badge-bonus" class="num-inp" type="number" value="50" min="1" style="margin-top:4px">
+      </div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button class="btn-sm rd" style="flex:1" onclick="this.closest('div').closest('div').parentElement.remove()">취소</button>
+        <button class="btn-sm" style="flex:1" onclick="saveBadgeForm();this.closest('div').closest('div').parentElement.remove()">저장</button>
+      </div>
+    </div>
+  `;
+  modal.appendChild(card);
+  document.body.appendChild(modal);
+}
+window.openBadgeForm=openBadgeForm;
+
+function saveBadgeForm(){
+  const name=document.getElementById('badge-name')?.value.trim();
+  const emoji=document.getElementById('badge-emoji')?.value.trim();
+  const desc=document.getElementById('badge-desc')?.value.trim();
+  const category=document.getElementById('badge-category')?.value;
+  const bonus=parseInt(document.getElementById('badge-bonus')?.value)||50;
+
+  if(!name||!emoji){toast('이름과 이모지를 입력해주세요');return;}
+
+  if(!S.customBadges)S.customBadges=[];
+  S.customBadges.push({
+    id:'custom_'+Date.now(),
+    emoji:emoji,
+    name:name,
+    desc:desc||name,
+    category:category||'특별',
+    hidden:false,
+    bonus:bonus,
+    condType:'manual',
+    condValue:0,
+    check:S=>false // Custom badges are manually awarded
+  });
+
+  save();renderAdmSettings();
+  toast('✅ 뱃지가 추가됐어요!');
+}
+window.saveBadgeForm=saveBadgeForm;
+
+function delCustomBadge(idx){
+  if(!confirm('이 뱃지를 삭제할까요?'))return;
+  S.customBadges.splice(idx,1);
+  save();renderAdmSettings();
+  toast('🗑️ 삭제됐어요');
+}
+window.delCustomBadge=delCustomBadge;
+
 function resetToday(){
   if(!confirm('오늘 활동 완료 기록을 초기화할까요?'))return;
   const t=todayStr();
@@ -4646,6 +5186,7 @@ function selectMood(mood){
     // moodNotify triggers Cloud Function to push to other users
     S.moodNotify={user:currentUser,mood:mood,emoji:m.emoji,label:m.label,ts:Date.now()};
     save();
+    checkBadges();
   }
   toast(m.emoji+' '+m.label);
   startMoodParticles();
@@ -4808,10 +5349,21 @@ function sendFamilyMsg(){
   });
   // Keep only last 50 messages
   if(S.familyMessages.length>50)S.familyMessages=S.familyMessages.slice(-50);
+
+  // For self-messages, play emotion animation immediately
+  const isSelfMessage=msgTargetUser===currentUser;
+  if(isSelfMessage&&selectedEmotion){
+    playEmotionAnimation(selectedEmotion);
+  }
+
   save();
   closeMsgPop();
   const toName=MEMBERS[msgTargetUser].name;
-  toast(`💌 ${toName}에게 메시지를 보냈어요!`);
+  if(isSelfMessage){
+    toast(`💌 나에게 메시지를 보냈어요!`);
+  }else{
+    toast(`💌 ${toName}에게 메시지를 보냈어요!`);
+  }
 }
 window.sendFamilyMsg=sendFamilyMsg;
 
@@ -5761,7 +6313,7 @@ Object.assign(window, {
   toggleDark, goTab, admTab, doAct, undoAct, undoRedeem,
   openRedeem, confirmRedeem, closeModal, openModal,
   giveBonus, deductPts, togAct, togActHome, delAct, delRwd,
-  togSetting, saveSettings, saveGreeting,
+  togSetting, saveSettings, saveGreetingMode, saveGreetingCustom,
   resetToday, simulateDayPass, resetAll, backupData, restoreData,
   openActForm, saveActivity, pickCycle, toggleDaysMode, toggleDay,
   openRwdForm, saveReward, setGoalT, setRwdSale, initActDrag,
@@ -5774,6 +6326,8 @@ Object.assign(window, {
   showAuthScreen, selectMember, doRegister, doLogin, logout, togglePwd,
   // Avatar functions
   openAvatarEditor, saveAvatarCrop, renderAdmMemberPhotos,
+  // Badge functions
+  checkBadges, showBadgeCelebration, showBadgeDetail, renderBadges,
 });
 
 // ── INIT (Firebase async) ─────────────────────
@@ -5863,6 +6417,15 @@ Object.assign(window, {
           // pushDevices, pushBroadcast 등 인프라 필드만 머지 (메시지/상태는 로컬 우선)
           if(incoming.pushDevices) S.pushDevices = incoming.pushDevices;
           if(incoming.pushUpdatedAt) S.pushUpdatedAt = incoming.pushUpdatedAt;
+          // Merge read status from other devices for family messages
+          if(incoming.familyMessages && S.familyMessages) {
+            incoming.familyMessages.forEach((imsg, i) => {
+              if(imsg.read && S.familyMessages[i] && !S.familyMessages[i].read) {
+                S.familyMessages[i].read = true;
+              }
+            });
+            renderNavUsers();
+          }
         }catch(e){}
         console.log('🛡️ 로컬 변경 보호: 외부 변경 일부만 머지');
         return;
