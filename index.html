@@ -1158,11 +1158,20 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
 .sticker-item:hover{transform:scale(1.2)!important}
 .sticker-item.pop-in{animation:stickerPop .4s ease-out forwards}
 
-.bubble-wrap{position:absolute;top:4px;left:50%;transform:translateX(-50%);z-index:6;display:flex;gap:6px;flex-wrap:wrap;justify-content:center;pointer-events:auto}
-.bubble-item{background:#fff;color:#222;font-size:11px;font-weight:800;padding:5px 10px;border-radius:14px;cursor:pointer;animation:bubbleDangle 3s ease-in-out infinite;transform-origin:bottom center;white-space:nowrap;max-width:100px;overflow:hidden;text-overflow:ellipsis;box-shadow:0 2px 8px rgba(0,0,0,.18);position:relative;border:2px solid var(--tab-color,#6366F1);line-height:1.3;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
-.bubble-item::after{content:'';position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:7px solid var(--tab-color,#6366F1)}
-.bubble-item::before{content:'';position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid #fff;z-index:1}
-.bubble-item:active{transform:scale(1.08)!important}
+.bubble-wrap{position:absolute;top:2px;left:50%;transform:translateX(-50%);z-index:6;display:flex;gap:6px;flex-wrap:wrap;justify-content:center;pointer-events:auto}
+/* Home card bubble: speech + avatar underneath */
+.bubble-group{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;animation:bubbleDangle 3s ease-in-out infinite;transform-origin:top center;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.bubble-group:active{transform:scale(1.05)!important}
+.bubble-speech{background:#fff;color:#222;font-size:10px;font-weight:800;padding:4px 9px;border-radius:12px;white-space:nowrap;max-width:90px;overflow:hidden;text-overflow:ellipsis;box-shadow:0 2px 6px rgba(0,0,0,.15);position:relative;border:2px solid var(--tab-color,#6366F1);line-height:1.3}
+.bubble-speech::after{content:'';position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid var(--tab-color,#6366F1)}
+.bubble-speech::before{content:'';position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid #fff;z-index:1}
+.bubble-avatar{margin-top:2px}
+/* Log list bubble: avatar + speech inline */
+.log-sticker-area{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;align-items:center}
+.bubble-group-log{display:inline-flex;align-items:center;gap:4px;cursor:pointer;animation:bubbleDangle 3s ease-in-out infinite;transform-origin:top center;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.bubble-group-log:active{transform:scale(1.05)!important}
+.bubble-speech-log{background:#fff;color:#222;font-size:10px;font-weight:700;padding:3px 7px;border-radius:10px;white-space:nowrap;max-width:80px;overflow:hidden;text-overflow:ellipsis;box-shadow:0 1px 4px rgba(0,0,0,.12);border:1.5px solid var(--tab-color,#6366F1);line-height:1.2;position:relative}
+.bubble-speech-log::before{content:'';position:absolute;left:-5px;top:50%;transform:translateY(-50%);width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-right:5px solid var(--tab-color,#6366F1)}
 
 /* Long-press choice popup */
 .lp-overlay{position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.45);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;animation:fadeIn .2s}
@@ -5619,6 +5628,17 @@ function getTodayStickers(actId){
   return S.stickers.filter(s=>s.actId===actId&&s.ts>=todayStart.getTime());
 }
 
+function getStickerAvatar(userId,size){
+  const photos=S.photos||{};
+  if(photos[userId]){
+    return `<img src="${photos[userId]}" style="width:${size}px;height:${size}px;object-fit:cover;border-radius:50%;flex-shrink:0">`;
+  }
+  const m=MEMBERS[userId];
+  const icon=m?m.icon:'👤';
+  const bg=m?m.color:'#eee';
+  return `<span style="display:inline-flex;align-items:center;justify-content:center;width:${size}px;height:${size}px;border-radius:50%;background:${bg};font-size:${Math.round(size*0.6)}px;flex-shrink:0;box-shadow:0 1px 3px rgba(0,0,0,.12)">${icon}</span>`;
+}
+
 function renderStickersFor(actId){
   const items=getTodayStickers(actId);
   if(!items.length)return '';
@@ -5629,7 +5649,10 @@ function renderStickersFor(actId){
     html+=`<div class="bubble-wrap">`;
     bubbles.forEach((s,i)=>{
       const safe=s.content.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-      html+=`<span class="bubble-item" data-stkid="${s.id}" style="animation-delay:${i*0.4}s">${safe}</span>`;
+      html+=`<div class="bubble-group" data-stkid="${s.id}" style="animation-delay:${i*0.4}s">
+        <div class="bubble-speech">${safe}</div>
+        <div class="bubble-avatar">${getStickerAvatar(s.user,22)}</div>
+      </div>`;
     });
     html+=`</div>`;
   }
@@ -5646,13 +5669,16 @@ function renderStickersFor(actId){
 function renderStickersForLog(actId){
   const items=getTodayStickers(actId);
   if(!items.length)return '';
-  let html='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;align-items:center">';
+  let html='<div class="log-sticker-area">';
   items.forEach((s,i)=>{
     if(s.type==='emoji'){
       html+=`<span class="sticker-item" data-stkid="${s.id}" style="font-size:16px;animation-delay:${i*0.3}s;display:inline-block">${s.content}</span>`;
     }else{
       const safe=s.content.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-      html+=`<span class="bubble-item" data-stkid="${s.id}" style="font-size:9px;padding:2px 6px;animation-delay:${i*0.4}s;display:inline-block">${safe}</span>`;
+      html+=`<div class="bubble-group-log" data-stkid="${s.id}" style="animation-delay:${i*0.4}s">
+        ${getStickerAvatar(s.user,18)}
+        <div class="bubble-speech-log">${safe}</div>
+      </div>`;
     }
   });
   html+='</div>';
