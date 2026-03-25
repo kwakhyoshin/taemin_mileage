@@ -698,6 +698,15 @@ body.dark .pin-key.ck{background:transparent}
 .msglist-item-dot{width:8px;height:8px;border-radius:50%;background:#EF4444;flex-shrink:0;margin-top:4px}
 .msglist-item-dot.read{background:transparent}
 .msglist-empty{padding:24px;text-align:center;color:var(--tx3);font-size:13px}
+.msglist-back{background:none;border:none;color:var(--tx2);cursor:pointer;padding:4px;display:flex;align-items:center;border-radius:8px;transition:background .15s}
+.msglist-back:active{background:var(--bg2)}
+.msglist-detail{padding:16px;overflow-y:auto;flex:1;display:flex;flex-direction:column;align-items:center;gap:12px}
+.msglist-detail-emoji{font-size:48px;animation:msgEmojiBounce .5s ease}
+.msglist-detail-text{font-size:15px;font-weight:700;color:var(--tx);line-height:1.6;padding:16px;background:var(--bg2);border-radius:14px;width:100%;word-break:break-word;text-align:center}
+.msglist-detail-time{font-size:11px;color:var(--tx3)}
+.msglist-detail-actions{display:flex;gap:8px;width:100%;margin-top:4px}
+.msglist-detail-actions button{flex:1}
+@keyframes msgEmojiBounce{0%{transform:scale(0)}50%{transform:scale(1.2)}100%{transform:scale(1)}}
 
 /* AUTH SCREENS */
 .auth-screen{position:fixed;inset:0;background:linear-gradient(135deg,#6366F1,#818CF8);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
@@ -1923,10 +1932,12 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
 <div class="pfm-bg" id="msglist-bg" onclick="closeMsgList()" style="display:none"></div>
 <div class="msglist-pop" id="msglist-pop" style="display:none">
   <div class="msglist-header">
+    <button class="msglist-back" id="msglist-back" onclick="msgListGoBack()" style="display:none"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></button>
     <div class="msglist-title" id="msglist-title">메시지</div>
     <button class="msg-pop-close" onclick="closeMsgList()">✕</button>
   </div>
   <div class="msglist-body" id="msglist-body"></div>
+  <div class="msglist-detail" id="msglist-detail" style="display:none"></div>
 </div>
 
 <!-- EMOJI PICKER -->
@@ -6421,20 +6432,66 @@ window.openMsgList=openMsgList;
 function closeMsgList(){
   document.getElementById('msglist-bg').style.display='none';
   document.getElementById('msglist-pop').style.display='none';
+  document.getElementById('msglist-detail').style.display='none';
+  document.getElementById('msglist-body').style.display='block';
+  document.getElementById('msglist-back').style.display='none';
+  _msgListFromId=null;
 }
 window.closeMsgList=closeMsgList;
 
+let _msgListFromId=null;
 function readMsgFromList(fromId,msgIdx){
   const msgs=S.familyMessages?S.familyMessages.filter(m=>m.from===fromId&&m.to===currentUser):[];
-  if(msgs[msgIdx]){
-    msgs[msgIdx].read=true;
-    save();
-    closeMsgList();
-    showReceivedMsg(fromId,msgs[msgIdx].text,msgs[msgIdx].emotion,msgs[msgIdx]);
-    renderNavUsers();
+  if(!msgs[msgIdx])return;
+  const m=msgs[msgIdx];
+  m.read=true;
+  save();
+  renderNavUsers();
+
+  // Show detail view inside the same popup
+  _msgListFromId=fromId;
+  document.getElementById('msglist-body').style.display='none';
+  document.getElementById('msglist-back').style.display='flex';
+  document.getElementById('msglist-title').textContent='메시지 상세';
+
+  const detail=document.getElementById('msglist-detail');
+  const emotionEmoji=m.emotion&&EMOTION_MAP[m.emotion]?EMOTION_MAP[m.emotion].emoji:'';
+  const date=new Date(m.ts);
+  const timeStr=date.getFullYear()+'.'+(date.getMonth()+1)+'.'+date.getDate()+' '+(date.getHours()>=12?'오후':'오전')+' '+(date.getHours()>12?date.getHours()-12:date.getHours()||12)+':'+String(date.getMinutes()).padStart(2,'0');
+
+  let actionsHTML='';
+  if(m.type==='reward_request'&&m.requestId){
+    const req=S.rewardRequests?S.rewardRequests.find(r=>r.id===m.requestId):null;
+    if(req&&req.status==='pending'){
+      actionsHTML=`<div class="msglist-detail-actions">
+        <button class="msg-send-btn" style="background:#22C55E" onclick="_currentRecvMsg=S.familyMessages.find(fm=>fm.ts===${m.ts});handleRewardAction('approve')">✅ 승인</button>
+        <button class="msg-send-btn" style="background:#EF4444" onclick="_currentRecvMsg=S.familyMessages.find(fm=>fm.ts===${m.ts});handleRewardAction('reject')">❌ 거절</button>
+      </div>`;
+    }
   }
+
+  detail.innerHTML=`
+    ${emotionEmoji?`<div class="msglist-detail-emoji">${emotionEmoji}</div>`:''}
+    <div class="msglist-detail-text">${m.text}</div>
+    <div class="msglist-detail-time">${(MEMBERS[fromId]?.name||'가족')} · ${timeStr}</div>
+    ${actionsHTML}
+  `;
+  detail.style.display='flex';
 }
 window.readMsgFromList=readMsgFromList;
+
+function msgListGoBack(){
+  document.getElementById('msglist-detail').style.display='none';
+  document.getElementById('msglist-body').style.display='block';
+  document.getElementById('msglist-back').style.display='none';
+  if(_msgListFromId){
+    const name=MEMBERS[_msgListFromId]?.name||'가족';
+    document.getElementById('msglist-title').textContent=name+'의 메시지';
+    // Refresh the list to show updated read status
+    openMsgList(_msgListFromId);
+  }
+}
+window.msgListGoBack=msgListGoBack;
 
 function checkNewMessages(){
   if(!currentUser||!S.familyMessages)return;
