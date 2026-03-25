@@ -3665,18 +3665,21 @@ function renderHomeGrid(){
     const actId=card.dataset.actid;
     const a=S.acts.find(x=>x.id===actId);
     const exhausted=a&&getCardState(a).exhausted;
-    let lpTimer=null, didLongPress=false, didScroll=false;
-    const startLP=(e)=>{didLongPress=false;didScroll=false;lpTimer=setTimeout(()=>{didLongPress=true;showLongPressChoice(actId,card);},500);};
-    const onMove=()=>{didScroll=true;clearTimeout(lpTimer);};
-    const endLP=()=>{clearTimeout(lpTimer);};
-    const doTap=(e)=>{if(didLongPress||didScroll){e.preventDefault();return;}if(!exhausted&&a)doAct(actId);};
+    let lpTimer=null, didLongPress=false;
+    const startLP=()=>{didLongPress=false;lpTimer=setTimeout(()=>{didLongPress=true;showLongPressChoice(actId,card);},500);};
+    const cancelLP=()=>{clearTimeout(lpTimer);};
     card.addEventListener('touchstart',startLP,{passive:true});
-    card.addEventListener('touchend',(e)=>{endLP();doTap(e);});
-    card.addEventListener('touchmove',onMove,{passive:true});
-    card.addEventListener('touchcancel',endLP);
+    card.addEventListener('touchmove',cancelLP,{passive:true});
+    card.addEventListener('touchend',cancelLP);
+    card.addEventListener('touchcancel',cancelLP);
     card.addEventListener('mousedown',startLP);
-    card.addEventListener('mouseup',(e)=>{endLP();doTap(e);});
-    card.addEventListener('mouseleave',endLP);
+    card.addEventListener('mouseleave',cancelLP);
+    card.addEventListener('mouseup',cancelLP);
+    // click only fires on genuine taps (NOT after scroll)
+    card.addEventListener('click',(e)=>{
+      if(didLongPress){didLongPress=false;e.preventDefault();return;}
+      if(!exhausted&&a)doAct(actId);
+    });
   });
 }
 
@@ -3721,19 +3724,23 @@ function renderLogList(){
     const actId=item.dataset.actid;
     const a=S.acts.find(x=>x.id===actId);
     const exhausted=a&&getCardState(a).exhausted;
-    let lpTimer=null, didLongPress=false, didScroll=false;
+    let lpTimer=null, didLongPress=false;
     const isUndoBtn=(e)=>{const t=e.target;return t&&(t.classList.contains('undo-btn')||t.closest('.undo-btn'));};
-    const startLP=(e)=>{if(isUndoBtn(e))return;didLongPress=false;didScroll=false;lpTimer=setTimeout(()=>{didLongPress=true;showLongPressChoice(actId,item);},500);};
-    const onMove=()=>{didScroll=true;clearTimeout(lpTimer);};
-    const endLP=()=>{clearTimeout(lpTimer);};
-    const doTap=(e)=>{if(isUndoBtn(e)||didLongPress||didScroll){e.preventDefault();return;}if(!exhausted&&a)doAct(actId);};
+    const startLP=(e)=>{if(isUndoBtn(e))return;didLongPress=false;lpTimer=setTimeout(()=>{didLongPress=true;showLongPressChoice(actId,item);},500);};
+    const cancelLP=()=>{clearTimeout(lpTimer);};
     item.addEventListener('touchstart',startLP,{passive:true});
-    item.addEventListener('touchend',(e)=>{endLP();doTap(e);});
-    item.addEventListener('touchmove',onMove,{passive:true});
-    item.addEventListener('touchcancel',endLP);
+    item.addEventListener('touchmove',cancelLP,{passive:true});
+    item.addEventListener('touchend',cancelLP);
+    item.addEventListener('touchcancel',cancelLP);
     item.addEventListener('mousedown',startLP);
-    item.addEventListener('mouseup',(e)=>{endLP();doTap(e);});
-    item.addEventListener('mouseleave',endLP);
+    item.addEventListener('mouseleave',cancelLP);
+    item.addEventListener('mouseup',cancelLP);
+    // click only fires on genuine taps (NOT after scroll)
+    item.addEventListener('click',(e)=>{
+      if(isUndoBtn(e))return; // let undo button's own onclick handle it
+      if(didLongPress){didLongPress=false;e.preventDefault();return;}
+      if(!exhausted&&a)doAct(actId);
+    });
   });
 }
 
