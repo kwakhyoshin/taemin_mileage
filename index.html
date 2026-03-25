@@ -1457,7 +1457,7 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
 
       <!-- 실제 사용 보상 TOP -->
       <div class="dash-brick">
-        <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> 실제 사용 보상 랭킹</div>
+        <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> 보상 사용 랭킹</div>
         <div class="card" id="insight-reward-used"></div>
       </div>
 
@@ -3562,20 +3562,51 @@ function showBadgeCelebration(badge){
   },4000);
 }
 
+// Time-aware greeting pools per user
+const TIME_GREETINGS={
+  taemin:{
+    morning:['좋은 아침, 태민아! ☀️','태민아, 오늘도 화이팅! 👋','일어났어? 오늘도 멋진 하루! 🌅','태민아, 좋은 아침이야! 💪'],
+    afternoon:['태민아, 오늘 잘하고 있어! 🌟','태민아, 오후도 파이팅! 💪','태민이, 열심히 해볼까? 🎯','태민아, 힘내자! ⭐'],
+    evening:['태민아, 오늘 수고했어! 🌙','태민아, 오늘 하루 어땠어? ✨','태민이, 잘 마무리하자! 🌟','오늘도 멋진 하루였어! 💫'],
+    night:['태민아, 곧 잘 시간이야! 🌜','태민아, 오늘 잘했어! 😴','푹 자고 내일 또 만나! 💤','태민아, 좋은 꿈 꿔! 🌙']
+  },
+  dad:{
+    morning:['좋은 아침, 효신님! ☀️','오늘 하루도 시작해볼까요! 👋','활기찬 아침이에요! 💪','좋은 아침입니다! 🌅'],
+    afternoon:['오후도 화이팅! 💼','오늘 잘 보내고 계시죠? 🌟','힘내세요! 오후도 파이팅! 💪','좋은 오후예요! ⭐'],
+    evening:['수고하셨습니다! 🌙','오늘 하루 고생하셨어요! ✨','편안한 저녁 보내세요! 🌟','좋은 저녁이에요! 💫'],
+    night:['오늘도 수고하셨어요! 🌜','편안한 밤 되세요! 😴','좋은 꿈 꾸세요! 💤','푹 쉬세요! 🌙']
+  },
+  mom:{
+    morning:['좋은 아침이에요! ☀️','오늘도 행복한 하루! 🌸','활기찬 아침이에요! 💝','좋은 아침! 힘내세요! 🌅'],
+    afternoon:['오후도 화이팅! 💝','즐거운 오후 보내세요! 🌸','오늘 잘 보내고 계시죠? 💪','좋은 오후예요! 🌟'],
+    evening:['수고하셨어요! 🌙','편안한 저녁 되세요! 💝','오늘 하루 고생하셨어요! ✨','좋은 저녁이에요! 🌸'],
+    night:['편안한 밤 되세요! 🌜','오늘도 수고하셨어요! 😴','좋은 꿈 꾸세요! 💤','푹 쉬세요! 🌙']
+  }
+};
+function getTimePeriod(){
+  const h=new Date().getHours();
+  if(h>=5&&h<12)return 'morning';
+  if(h>=12&&h<17)return 'afternoon';
+  if(h>=17&&h<21)return 'evening';
+  return 'night';
+}
 // Get current greeting for a user
 function getCurrentGreeting(userId){
   const gr=S.greetings?.[userId];
   if(!gr){
-    // Fallback to old greeting field for backwards compat
     return S.greeting||'안녕하세요!';
   }
   if(gr.mode==='manual'){
     return gr.custom||'안녕하세요!';
   }
-  // Auto mode: rotate by day of year
-  const doy=Math.floor((new Date()-new Date(new Date().getFullYear(),0,0))/86400000);
-  const idx=doy%gr.messages.length;
-  return gr.messages[idx]||'안녕하세요!';
+  // Auto mode: pick time-appropriate message, rotate every 3 hours
+  const period=getTimePeriod();
+  const pool=(TIME_GREETINGS[userId]&&TIME_GREETINGS[userId][period])||(gr.messages||['안녕하세요!']);
+  const now=new Date();
+  const slot=Math.floor(now.getHours()/3);
+  const doy=Math.floor((now-new Date(now.getFullYear(),0,0))/86400000);
+  const idx=(doy*8+slot)%pool.length;
+  return pool[idx];
 }
 window.getCurrentGreeting=getCurrentGreeting;
 
