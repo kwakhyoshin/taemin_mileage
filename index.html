@@ -3598,27 +3598,49 @@ function showBadgeDetail(badgeOrId){
     modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:9999';
     modal.onclick=e=>{if(e.target===modal)modal.remove();};
 
+    // Hidden badges: mysterious messages instead of real conditions
+    const isHidden=badge.hidden;
+    const hiddenHints=[
+      '평범한 하루 속에 숨어있는 특별한 순간...',
+      '예상치 못한 타이밍에 찾아올 거예요',
+      '어쩌면 이미 가까이 와 있을지도?',
+      '힌트는... 비밀이에요! 🤫'
+    ];
+    const hiddenMeanings=[
+      '이 뱃지는 스스로 발견했을 때 더 특별해요',
+      '뜻밖의 선물처럼 찾아오는 뱃지랍니다',
+      '모험하는 자만이 발견할 수 있는 보물이에요',
+      '언젠가 반짝! 하고 나타날 거예요 ✨'
+    ];
+    const hIdx=Math.abs(badge.id.split('').reduce((a,c)=>a+c.charCodeAt(0),0))%hiddenHints.length;
+
+    const conditionText=isHidden?hiddenHints[hIdx]:badge.desc;
+    const meaningText=isHidden?hiddenMeanings[hIdx]:getBadgeMeaning(badge);
+    const conditionLabel=isHidden?'🔮 힌트':'획득 조건';
+    const meaningLabel=isHidden?'🌟 비밀의 의미':'이 뱃지의 의미';
+    const bonusText=isHidden?`🎁 보너스 ??? 마일리지`:`🎁 보너스 +${badge.bonus||0} 마일리지`;
+
     const card=document.createElement('div');
     card.style.cssText='perspective:800px;width:min(340px,90vw);height:380px';
     card.innerHTML=`
       <div style="position:relative;width:100%;height:100%;transition:transform .6s;transform-style:preserve-3d;animation:cardFlip .6s ease-out forwards">
-        <div style="position:absolute;inset:0;backface-visibility:hidden;background:linear-gradient(135deg,#C0C0C0,#909090);border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px">
+        <div style="position:absolute;inset:0;backface-visibility:hidden;background:linear-gradient(135deg,${isHidden?'#1a1a2e,#16213e':'#C0C0C0,#909090'});border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px">
           ${generateBadgeSVG(badge,false,120)}
-          <div style="font-size:16px;font-weight:900;color:#fff;margin-top:12px">${badge.hidden?'???':badge.name}</div>
-          <div style="font-size:12px;color:rgba(255,255,255,.7);margin-top:4px">미획득 뱃지</div>
+          <div style="font-size:16px;font-weight:900;color:#fff;margin-top:12px">${isHidden?'???':badge.name}</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.7);margin-top:4px">${isHidden?'히든 뱃지':'미획득 뱃지'}</div>
         </div>
-        <div style="position:absolute;inset:0;backface-visibility:hidden;transform:rotateY(180deg);background:white;border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;overflow-y:auto">
-          <div style="font-size:36px;margin-bottom:8px">${badge.emoji||'🏅'}</div>
-          <div style="font-size:18px;font-weight:900;color:#1F2937;margin-bottom:12px">${badge.name}</div>
-          <div style="background:rgba(139,92,246,.1);padding:12px 16px;border-radius:12px;margin-bottom:12px;width:100%;box-sizing:border-box">
-            <div style="font-size:11px;font-weight:700;color:#8B5CF6;margin-bottom:6px">획득 조건</div>
-            <div style="font-size:13px;font-weight:600;color:#4B5563;line-height:1.5">${badge.desc}</div>
+        <div style="position:absolute;inset:0;backface-visibility:hidden;transform:rotateY(180deg);background:${isHidden?'linear-gradient(135deg,#0f0c29,#302b63,#24243e)':'white'};border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;overflow-y:auto">
+          <div style="font-size:36px;margin-bottom:8px">${isHidden?'🔮':badge.emoji||'🏅'}</div>
+          <div style="font-size:18px;font-weight:900;color:${isHidden?'#e0d4ff':'#1F2937'};margin-bottom:12px">${isHidden?'??? 히든 뱃지':badge.name}</div>
+          <div style="background:${isHidden?'rgba(139,92,246,.2)':'rgba(139,92,246,.1)'};padding:12px 16px;border-radius:12px;margin-bottom:12px;width:100%;box-sizing:border-box">
+            <div style="font-size:11px;font-weight:700;color:${isHidden?'#c4b5fd':'#8B5CF6'};margin-bottom:6px">${conditionLabel}</div>
+            <div style="font-size:13px;font-weight:600;color:${isHidden?'#d1d5db':'#4B5563'};line-height:1.5">${conditionText}</div>
           </div>
-          <div style="background:rgba(245,158,11,.1);padding:12px 16px;border-radius:12px;width:100%;box-sizing:border-box">
-            <div style="font-size:11px;font-weight:700;color:#F59E0B;margin-bottom:6px">이 뱃지의 의미</div>
-            <div style="font-size:13px;font-weight:600;color:#4B5563;line-height:1.5">${getBadgeMeaning(badge)}</div>
+          <div style="background:${isHidden?'rgba(245,158,11,.15)':'rgba(245,158,11,.1)'};padding:12px 16px;border-radius:12px;width:100%;box-sizing:border-box">
+            <div style="font-size:11px;font-weight:700;color:${isHidden?'#fbbf24':'#F59E0B'};margin-bottom:6px">${meaningLabel}</div>
+            <div style="font-size:13px;font-weight:600;color:${isHidden?'#d1d5db':'#4B5563'};line-height:1.5">${meaningText}</div>
           </div>
-          <div style="margin-top:12px;font-size:12px;font-weight:700;color:#8B5CF6">🎁 보너스 +${badge.bonus||0} 마일리지</div>
+          <div style="margin-top:12px;font-size:12px;font-weight:700;color:${isHidden?'#a78bfa':'#8B5CF6'}">${bonusText}</div>
         </div>
       </div>
     `;
@@ -3742,7 +3764,11 @@ function renderBadgeViewGrid(){
   if(!el)return;
 
   const earned=Object.keys(S.badges||{});
-  const total=BADGES.length;
+  const total=BADGES.length+(S.customBadges||[]).length;
+
+  // Update badge-view-count header
+  const countEl=document.getElementById('badge-view-count');
+  if(countEl) countEl.textContent=`${earned.length}개 획득`;
 
   // Group badges by category
   const byCategory={};
@@ -3764,14 +3790,22 @@ function renderBadgeViewGrid(){
     '꾸준함': {icon:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg>', desc:'매일 꾸준히 노력한 보상이에요'},
     '도전': {icon:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>', desc:'도전하는 용기가 멋진 뱃지들'},
     '성장': {icon:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>', desc:'한 걸음씩 성장하고 있어요'},
-    '히idden': {icon:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>', desc:'특별한 순간에 나타나는 비밀 뱃지'},
     '생활습관': {icon:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>', desc:'건강한 생활습관을 만들어가요'},
     '감정': {icon:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>', desc:'감정을 나누고 표현하는 힘'},
-    '마일리지': {icon:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>', desc:'차곡차곡 모아온 마일리지의 기록'}
+    '마일리지': {icon:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>', desc:'차곡차곡 모아온 마일리지의 기록'},
+    '히든': {icon:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>', desc:'어떻게 얻는지는 비밀! 특별한 순간에 나타나요'}
   };
 
+  // Sort categories: 히든 always last
+  const catOrder=Object.keys(byCategory).sort((a,b)=>{
+    if(a==='히든') return 1;
+    if(b==='히든') return -1;
+    return 0;
+  });
+
   let html='';
-  Object.entries(byCategory).forEach(([cat,badges])=>{
+  catOrder.forEach(cat=>{
+    const badges=byCategory[cat];
     const ci = catInfo[cat] || {icon:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>', desc:cat};
     html+=`<div class="badge-grid-section">
       <div class="badge-cat-header">${ci.icon} <span>${cat}</span> <span style="font-size:11px;font-weight:600;color:var(--tx3);margin-left:4px">${ci.desc}</span></div>
