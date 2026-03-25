@@ -1073,12 +1073,14 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
 .sale-timer{font-size:10px;font-weight:700;color:#EF4444;margin-bottom:6px}
 @keyframes badgeSpin{0%{transform:perspective(800px) rotateY(0deg) scale(0.3);opacity:0}30%{opacity:1}100%{transform:perspective(800px) rotateY(720deg) scale(1)}}
 @keyframes badgeFadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-.badge-grid-section{padding:8px 4px}
-.badge-cat-header{font-size:13px;font-weight:800;color:var(--tx2);padding:12px 12px 8px;display:flex;align-items:center;gap:6px}
-.badge-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:0 8px 16px}
-.badge-item{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;transition:transform .15s}
-.badge-item:active{transform:scale(0.95)}
-.badge-item .badge-name{font-size:10px;font-weight:700;color:var(--tx2);text-align:center;line-height:1.3;max-width:72px}
+@keyframes cardFlip{from{transform:rotateY(0)}to{transform:rotateY(180deg)}}
+.badge-grid-section{padding:4px 0}
+.badge-cat-header{font-size:14px;font-weight:800;color:var(--tx2);padding:14px 16px 8px;display:flex;align-items:center;gap:6px}
+.badge-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:0 12px 16px}
+.badge-item{display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;transition:transform .2s;background:var(--card);border-radius:16px;padding:20px 12px 16px;box-shadow:0 2px 8px rgba(0,0,0,.06);border:1px solid var(--bdr)}
+.badge-item:active{transform:scale(0.97)}
+.badge-item .badge-name{font-size:13px;font-weight:700;color:var(--tx);text-align:center;line-height:1.4}
+.badge-item.locked{opacity:0.7}
 .badge-item.locked .badge-name{color:var(--tx3)}
 </style>
 </head>
@@ -2816,42 +2818,64 @@ function hasEarlyStudy(){
 // Generate SVG badge - Apple Fitness style metallic circular design
 function generateBadgeSVG(badge,earned,size){
   size=size||80;
-  const id=badge.id;
+  const id=badge.id+'_'+(earned?'e':'l');
 
-  // Category color schemes (metallic gradients)
   const schemes={
-    '공부':{outer1:'#D4AF37',outer2:'#B8860B',inner1:'#FFD700',inner2:'#DAA520',ring:'#F5D76E',accent:'#FFF8DC'},
-    '꾸준함':{outer1:'#7B8FA1',outer2:'#4A6FA5',inner1:'#A8C8E8',inner2:'#6B9BD2',ring:'#B0C4DE',accent:'#E8F0FE'},
-    '도전':{outer1:'#CD7F32',outer2:'#A0522D',inner1:'#DEB887',inner2:'#CD853F',ring:'#E8B87A',accent:'#FFF0DB'},
-    '성장':{outer1:'#50C878',outer2:'#2E8B57',inner1:'#90EE90',inner2:'#3CB371',ring:'#98D8A8',accent:'#E8FFF0'},
-    '히든':{outer1:'#9370DB',outer2:'#6A0DAD',inner1:'#B19CD9',inner2:'#8A2BE2',ring:'#C8A2C8',accent:'#F3E8FF'}
+    '공부':{outer1:'#D4AF37',outer2:'#B8860B',inner1:'#FFD700',inner2:'#DAA520',ring:'#F5D76E',accent:'#FFF8DC',glow:'#FFD700'},
+    '꾸준함':{outer1:'#7B8FA1',outer2:'#4A6FA5',inner1:'#A8C8E8',inner2:'#6B9BD2',ring:'#B0C4DE',accent:'#E8F0FE',glow:'#6B9BD2'},
+    '도전':{outer1:'#CD7F32',outer2:'#A0522D',inner1:'#DEB887',inner2:'#CD853F',ring:'#E8B87A',accent:'#FFF0DB',glow:'#CD7F32'},
+    '성장':{outer1:'#50C878',outer2:'#2E8B57',inner1:'#90EE90',inner2:'#3CB371',ring:'#98D8A8',accent:'#E8FFF0',glow:'#50C878'},
+    '히든':{outer1:'#9370DB',outer2:'#6A0DAD',inner1:'#B19CD9',inner2:'#8A2BE2',ring:'#C8A2C8',accent:'#F3E8FF',glow:'#9370DB'}
   };
-
-  // Unearned: silver/gray metallic
-  const gray={outer1:'#A0A0A0',outer2:'#707070',inner1:'#C0C0C0',inner2:'#909090',ring:'#B8B8B8',accent:'#E0E0E0'};
+  const gray={outer1:'#A0A0A0',outer2:'#707070',inner1:'#C0C0C0',inner2:'#909090',ring:'#B8B8B8',accent:'#E0E0E0',glow:'#999'};
   const c=earned?(schemes[badge.category]||schemes['공부']):gray;
 
-  // Category icon SVG paths (detailed, professional)
   const icons={
-    '공부':`<path d="M50 25c-2 0-4 0.5-5.5 1.5L34 33v20l10.5-6c1.5-1 3.5-1.5 5.5-1.5s4 0.5 5.5 1.5L66 53V33l-10.5-6.5C54 25.5 52 25 50 25z" fill="${c.accent}" opacity="0.9"/>
-             <path d="M50 30v22M34 33v20M66 33v20" stroke="${c.outer2}" stroke-width="1.5" fill="none" opacity="0.6"/>`,
-    '꾸준함':`<path d="M50 24l5.5 11.2 12.3 1.8-8.9 8.7 2.1 12.3L50 52l-11 5.8 2.1-12.3-8.9-8.7 12.3-1.8z" fill="${c.accent}" opacity="0.9"/>
-              <path d="M50 24l5.5 11.2 12.3 1.8-8.9 8.7 2.1 12.3L50 52l-11 5.8 2.1-12.3-8.9-8.7 12.3-1.8z" stroke="${c.outer2}" stroke-width="1" fill="none" opacity="0.4"/>`,
-    '도전':`<path d="M38 60h24l-3-10h-18l-3 10zM42 50h16l4-16H38l4 16zM36 34h28v-4H36v4z" fill="${c.accent}" opacity="0.9"/>
-            <path d="M36 34h28v-4H36v4z" stroke="${c.outer2}" stroke-width="1" fill="none" opacity="0.3"/>`,
-    '성장':`<path d="M50 65V40" stroke="${c.accent}" stroke-width="3" stroke-linecap="round" fill="none"/>
-            <path d="M50 40c-6-6-14-4-16 2 6 0 10-2 16-2" fill="${c.accent}" opacity="0.9"/>
-            <path d="M50 40c6-6 14-4 16 2-6 0-10-2-16-2" fill="${c.accent}" opacity="0.9"/>
-            <path d="M45 65h10" stroke="${c.accent}" stroke-width="2" stroke-linecap="round" fill="none"/>`,
-    '히든':`<path d="M50 25L30 50l20 20 20-20L50 25z" fill="${c.accent}" opacity="0.85"/>
-            <path d="M50 25L30 50l20 20 20-20L50 25z" stroke="${c.outer2}" stroke-width="1.2" fill="none" opacity="0.4"/>
-            <path d="M50 35L38 50l12 12 12-12L50 35z" fill="none" stroke="${c.accent}" stroke-width="0.8" opacity="0.5"/>`
+    '공부':`<path d="M50 25c-2 0-4 .5-5.5 1.5L34 33v20l10.5-6c1.5-1 3.5-1.5 5.5-1.5s4 .5 5.5 1.5L66 53V33l-10.5-6.5C54 25.5 52 25 50 25z" fill="${c.accent}" opacity=".9"/>
+             <path d="M50 30v22M34 33v20M66 33v20" stroke="${c.outer2}" stroke-width="1.5" fill="none" opacity=".6"/>
+             <circle cx="50" cy="26" r="2" fill="${c.accent}" opacity=".7"/>`,
+    '꾸준함':`<path d="M50 24l5.5 11.2 12.3 1.8-8.9 8.7 2.1 12.3L50 52l-11 5.8 2.1-12.3-8.9-8.7 12.3-1.8z" fill="${c.accent}" opacity=".9"/>
+              <path d="M50 24l5.5 11.2 12.3 1.8-8.9 8.7 2.1 12.3L50 52l-11 5.8 2.1-12.3-8.9-8.7 12.3-1.8z" stroke="${c.outer2}" stroke-width="1" fill="none" opacity=".4"/>
+              <path d="M50 32l3 6.2 6.8 1-4.9 4.8 1.2 6.8L50 47l-6.1 3.2 1.2-6.8-4.9-4.8 6.8-1z" fill="${c.outer1}" opacity=".3"/>`,
+    '도전':`<path d="M38 60h24l-3-10h-18l-3 10z" fill="${c.accent}" opacity=".9"/>
+            <path d="M42 50h16l4-16H38l4 16z" fill="${c.accent}" opacity=".85"/>
+            <path d="M36 34h28v-4H36v4z" fill="${c.accent}" opacity=".9"/>
+            <path d="M44 34v-8h12v8" fill="none" stroke="${c.outer2}" stroke-width="1.5" opacity=".4"/>
+            <circle cx="50" cy="42" r="3" fill="${c.outer1}" opacity=".5"/>`,
+    '성장':`<path d="M50 65V38" stroke="${c.accent}" stroke-width="3.5" stroke-linecap="round"/>
+            <path d="M50 38c-8-8-16-5-18 2 7 0 12-2 18-2" fill="${c.accent}" opacity=".9"/>
+            <path d="M50 38c8-8 16-5 18 2-7 0-12-2-18-2" fill="${c.accent}" opacity=".9"/>
+            <path d="M50 48c-5-5-10-3-12 1 4 0 8-1 12-1" fill="${c.accent}" opacity=".6"/>
+            <path d="M50 48c5-5 10-3 12 1-4 0-8-1-12-1" fill="${c.accent}" opacity=".6"/>
+            <path d="M44 65h12" stroke="${c.accent}" stroke-width="2.5" stroke-linecap="round"/>`,
+    '히든':`<path d="M50 25L30 50l20 20 20-20z" fill="${c.accent}" opacity=".85"/>
+            <path d="M50 25L30 50l20 20 20-20z" stroke="${c.outer2}" stroke-width="1.2" fill="none" opacity=".4"/>
+            <path d="M50 32L36 50l14 14 14-14z" fill="none" stroke="${c.accent}" stroke-width=".8" opacity=".5"/>
+            <path d="M50 39L42 50l8 8 8-8z" fill="${c.outer1}" opacity=".2"/>`
   };
 
-  // Lock icon for unearned
-  const lockIcon=`<path d="M42 48h16v12H42zM45 48v-5a5 5 0 0110 0v5" fill="none" stroke="${c.accent}" stroke-width="2.5" stroke-linecap="round"/>`;
+  const lockIcon=`<path d="M42 48h16v12H42z" fill="${c.accent}" opacity=".3" stroke="${c.accent}" stroke-width="1.5"/>
+                   <path d="M45 48v-5a5 5 0 0110 0v5" fill="none" stroke="${c.accent}" stroke-width="2.5" stroke-linecap="round"/>
+                   <circle cx="50" cy="54" r="1.5" fill="${c.accent}" opacity=".6"/>`;
 
   const iconPath=earned?(icons[badge.category]||icons['공부']):lockIcon;
+
+  // More notches for elaborate look
+  const notches = earned ? Array.from({length:24},(_,i)=>{
+    const angle=i*15*Math.PI/180;
+    const r1 = i%2===0 ? 47 : 46;
+    const sz = i%2===0 ? 1.5 : 0.8;
+    const x=50+r1*Math.cos(angle);
+    const y=50+r1*Math.sin(angle);
+    return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${sz}" fill="${c.accent}" opacity="${i%2===0?'0.6':'0.3'}"/>`;
+  }).join('') : '';
+
+  // Star sparkles for earned
+  const sparkles = earned ? `
+    <circle cx="22" cy="22" r="1.5" fill="${c.accent}" opacity=".8"><animate attributeName="opacity" values=".3;.8;.3" dur="2s" repeatCount="indefinite"/></circle>
+    <circle cx="78" cy="28" r="1" fill="${c.accent}" opacity=".6"><animate attributeName="opacity" values=".2;.7;.2" dur="1.8s" repeatCount="indefinite"/></circle>
+    <circle cx="75" cy="72" r="1.2" fill="${c.accent}" opacity=".7"><animate attributeName="opacity" values=".4;.9;.4" dur="2.2s" repeatCount="indefinite"/></circle>
+  `:'';
 
   return `<svg viewBox="0 0 100 100" width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
     <defs>
@@ -2861,33 +2885,36 @@ function generateBadgeSVG(badge,earned,size){
       </radialGradient>
       <linearGradient id="ring-${id}" x1="0" y1="0" x2="1" y2="1">
         <stop offset="0%" stop-color="${c.outer1}"/>
-        <stop offset="50%" stop-color="${c.ring}"/>
+        <stop offset="30%" stop-color="${c.ring}"/>
+        <stop offset="60%" stop-color="${c.outer1}"/>
         <stop offset="100%" stop-color="${c.outer2}"/>
       </linearGradient>
-      ${earned?`<filter id="glow-${id}"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>`:''}
+      <linearGradient id="shine-${id}" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="white" stop-opacity="${earned?'0.4':'0.1'}"/>
+        <stop offset="50%" stop-color="white" stop-opacity="0"/>
+      </linearGradient>
+      ${earned?`<filter id="glow-${id}"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      <filter id="shadow-${id}"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="${c.glow}" flood-opacity="0.4"/></filter>`:''}
     </defs>
+    <!-- Drop shadow for earned -->
+    ${earned?`<circle cx="50" cy="52" r="46" fill="${c.glow}" opacity="0.15" filter="url(#shadow-${id})"/>`:''}
     <!-- Outer metallic ring -->
-    <circle cx="50" cy="50" r="48" fill="url(#ring-${id})" ${earned?`filter="url(#glow-${id})"`:'opacity="0.5"'}/>
+    <circle cx="50" cy="50" r="48" fill="url(#ring-${id})" ${earned?`filter="url(#glow-${id})"`:'opacity="0.45"'}/>
+    <!-- Inner ring detail -->
+    <circle cx="50" cy="50" r="45" fill="none" stroke="${c.outer2}" stroke-width="0.5" opacity="${earned?'0.4':'0.15'}"/>
     <!-- Inner circle -->
-    <circle cx="50" cy="50" r="42" fill="url(#bg-${id})" ${earned?'':'opacity="0.5"'}/>
-    <!-- Metallic rim highlight -->
-    <circle cx="50" cy="50" r="44" fill="none" stroke="${c.accent}" stroke-width="0.8" opacity="${earned?'0.6':'0.2'}"/>
-    <circle cx="50" cy="50" r="40" fill="none" stroke="${c.outer2}" stroke-width="0.5" opacity="${earned?'0.3':'0.15'}"/>
-    <!-- Shine highlight (top-left) -->
-    <ellipse cx="38" cy="35" rx="18" ry="14" fill="white" opacity="${earned?'0.15':'0.05'}"/>
+    <circle cx="50" cy="50" r="42" fill="url(#bg-${id})" ${earned?'':'opacity="0.45"'}/>
+    <!-- Metallic rim highlights -->
+    <circle cx="50" cy="50" r="44" fill="none" stroke="${c.accent}" stroke-width="1" opacity="${earned?'0.7':'0.2'}"/>
+    <circle cx="50" cy="50" r="40" fill="none" stroke="${c.outer2}" stroke-width="0.5" opacity="${earned?'0.35':'0.15'}"/>
+    <!-- Top shine overlay -->
+    <ellipse cx="42" cy="32" rx="22" ry="18" fill="url(#shine-${id})"/>
+    <!-- Notches -->
+    ${notches}
+    <!-- Sparkles -->
+    ${sparkles}
     <!-- Icon -->
-    <g>
-      ${iconPath}
-    </g>
-    ${earned?`
-    <!-- Decorative notches around rim -->
-    ${Array.from({length:12},(_,i)=>{
-      const angle=i*30*Math.PI/180;
-      const x=50+46*Math.cos(angle);
-      const y=50+46*Math.sin(angle);
-      return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="1.2" fill="${c.accent}" opacity="0.5"/>`;
-    }).join('')}
-    `:''}
+    <g>${iconPath}</g>
   </svg>`;
 }
 window.generateBadgeSVG=generateBadgeSVG;
@@ -3186,7 +3213,79 @@ function renderBadges(){
   });
 }
 
-function showBadgeDetail(badge){
+function getBadgeMeaning(badge){
+  const meanings = {
+    'study_first':'첫 걸음이 가장 중요해요. 시작하는 용기가 곧 성장의 씨앗이에요!',
+    'study_5':'작은 노력이 쌓이면 큰 변화가 와요. 5번의 공부가 습관이 되는 중이에요!',
+    'study_15':'꾸준한 학습이 진짜 실력을 만들어요. 이미 충분히 대단해요!',
+    'study_30':'30번의 공부는 정말 대단한 노력이에요. 공부가 일상이 된 거예요!',
+    'study_50':'50번이라니! 공부의 즐거움을 알게 된 거예요!',
+    'study_100':'100번의 공부! 어떤 어려운 것도 해낼 수 있는 힘이 생겼어요!',
+    'homework_10':'숙제를 스스로 챙기는 습관은 평생의 보물이에요!',
+    'extra_5':'스스로 더 공부하려는 마음이 진짜 실력을 만들어요!',
+    'streak_3':'3일 연속! 꾸준함의 첫 걸음이에요!',
+    'streak_7':'일주일 내내! 이 습관은 정말 값져요!',
+    'streak_14':'2주 연속이라니! 대단한 의지력이에요!',
+    'streak_30':'한 달 연속! 이건 정말 놀라운 성취예요!',
+    'streak_60':'60일 연속! 이제 이건 그냥 일상이 된 거예요!',
+    'streak_100':'100일 연속! 세상에서 가장 꾸준한 어린이예요!',
+    'total_50':'50개의 활동! 매일 조금씩 해낸 결과예요!',
+    'total_100':'100개! 노력의 결실이 보이기 시작해요!',
+    'total_200':'200개의 활동을 해냈다니! 정말 자랑스러워요!',
+    'total_500':'500개! 누구도 따라올 수 없는 노력이에요!',
+    'total_1000':'1000개! 진정한 마일리지 마스터예요!',
+    'pts_500':'500 마일리지! 열심히 노력한 보상이에요!',
+    'pts_1000':'1000 마일리지! 큰 목표를 이루어가고 있어요!',
+    'pts_3000':'3000 마일리지! 노력이 눈에 보이는 성과가 됐어요!',
+    'pts_5000':'5000 마일리지! 최고의 노력가예요!',
+    'pts_10000':'10000 마일리지! 전설적인 기록이에요!',
+    'mood_7':'일주일 동안 매일 기분을 기록했어요. 자기 감정을 아는 건 매우 중요해요!',
+    'perfect_day':'하루를 완벽하게 보냈어요. 이런 날이 쌓이면 큰 힘이 돼요!'
+  };
+  return meanings[badge.id] || '꾸준한 노력과 도전으로 성장하는 모습이 정말 멋져요!';
+}
+
+function showBadgeDetail(badgeOrId){
+  const badge = typeof badgeOrId === 'string' ? BADGES.find(b=>b.id===badgeOrId) || (S.customBadges||[]).find(b=>b.id===badgeOrId) : badgeOrId;
+  if(!badge) return;
+
+  const isEarned = S.badges && S.badges[badge.id];
+
+  if(!isEarned) {
+    // Flip card for unearned badges
+    const modal=document.createElement('div');
+    modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:9999';
+    modal.onclick=e=>{if(e.target===modal)modal.remove();};
+
+    const card=document.createElement('div');
+    card.style.cssText='perspective:800px;width:280px;height:360px';
+    card.innerHTML=`
+      <div style="position:relative;width:100%;height:100%;transition:transform .6s;transform-style:preserve-3d;animation:cardFlip .6s ease-out forwards">
+        <div style="position:absolute;inset:0;backface-visibility:hidden;background:linear-gradient(135deg,#C0C0C0,#909090);border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px">
+          ${generateBadgeSVG(badge,false,120)}
+          <div style="font-size:16px;font-weight:900;color:#fff;margin-top:12px">${badge.hidden?'???':badge.name}</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.7);margin-top:4px">미획득 뱃지</div>
+        </div>
+        <div style="position:absolute;inset:0;backface-visibility:hidden;transform:rotateY(180deg);background:white;border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;overflow-y:auto">
+          <div style="font-size:36px;margin-bottom:8px">${badge.emoji||'🏅'}</div>
+          <div style="font-size:18px;font-weight:900;color:#1F2937;margin-bottom:12px">${badge.name}</div>
+          <div style="background:rgba(139,92,246,.1);padding:12px 16px;border-radius:12px;margin-bottom:12px;width:100%;box-sizing:border-box">
+            <div style="font-size:11px;font-weight:700;color:#8B5CF6;margin-bottom:6px">획득 조건</div>
+            <div style="font-size:13px;font-weight:600;color:#4B5563;line-height:1.5">${badge.desc}</div>
+          </div>
+          <div style="background:rgba(245,158,11,.1);padding:12px 16px;border-radius:12px;width:100%;box-sizing:border-box">
+            <div style="font-size:11px;font-weight:700;color:#F59E0B;margin-bottom:6px">이 뱃지의 의미</div>
+            <div style="font-size:13px;font-weight:600;color:#4B5563;line-height:1.5">${getBadgeMeaning(badge)}</div>
+          </div>
+          <div style="margin-top:12px;font-size:12px;font-weight:700;color:#8B5CF6">🎁 보너스 +${badge.bonus||0} 마일리지</div>
+        </div>
+      </div>
+    `;
+    modal.appendChild(card);
+    document.body.appendChild(modal);
+    return;
+  }
+
   const modal=document.createElement('div');
   modal.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:9999';
   modal.onclick=e=>{if(e.target===modal)modal.remove();};
@@ -3258,6 +3357,8 @@ function renderBadgeHistory(){
 
 function openBadgeView(){
   document.getElementById('s-badge').style.display='block';
+  const navC=document.querySelector('.nav-container');
+  if(navC) navC.style.display='none';
   renderBadgeViewGrid();
   renderBadgeViewHistory();
 }
@@ -3265,6 +3366,8 @@ window.openBadgeView=openBadgeView;
 
 function closeBadgeView(){
   document.getElementById('s-badge').style.display='none';
+  const navC=document.querySelector('.nav-container');
+  if(navC) navC.style.display='';
 }
 window.closeBadgeView=closeBadgeView;
 
@@ -3328,7 +3431,7 @@ function renderBadgeViewGrid(){
       const isEarned=S.badges&&S.badges[b.id];
       const title=b.hidden&&!isEarned?'???':b.name;
       html+=`<div class="badge-item${isEarned?'':' locked'}" onclick="showBadgeDetail('${b.id}')">
-        ${generateBadgeSVG(b,!!isEarned,64)}
+        ${generateBadgeSVG(b,!!isEarned,80)}
         <div class="badge-name">${title}</div>
       </div>`;
     });
@@ -4492,19 +4595,19 @@ function renderAdmSettings(){
     Object.entries(MEMBERS).forEach(([userId,member])=>{
       const gr=S.greetings?.[userId]||{mode:'auto',messages:[],custom:'',currentIdx:0};
       html+=`<div class="adm-card" style="margin-bottom:12px">
-        <div style="font-weight:700;color:var(--tx);margin-bottom:10px">${member.name}</div>
-        <div class="adm-row">
-          <div class="adm-row-l"><div class="adm-row-nm">모드</div></div>
-          <select id="greeting-mode-${userId}" onchange="saveGreetingMode('${userId}')" style="padding:6px 10px;border:1.5px solid var(--bdr);border-radius:9px;font-size:13px;font-weight:700;background:var(--bg);color:var(--tx);font-family:inherit">
+        <div style="font-weight:700;color:var(--tx);padding:12px 14px 0">${member.name}</div>
+        <div class="adm-row" style="flex-wrap:nowrap">
+          <div class="adm-row-l" style="flex-shrink:0"><div class="adm-row-nm">모드</div></div>
+          <select id="greeting-mode-${userId}" onchange="saveGreetingMode('${userId}')" style="padding:6px 10px;border:1.5px solid var(--bdr);border-radius:9px;font-size:13px;font-weight:700;background:var(--bg);color:var(--tx);font-family:inherit;flex-shrink:0">
             <option value="auto" ${gr.mode==='auto'?'selected':''}>자동</option>
             <option value="manual" ${gr.mode==='manual'?'selected':''}>수동</option>
           </select>
         </div>
-        <div class="adm-row" id="greeting-manual-${userId}" style="display:${gr.mode==='manual'?'flex':'none'};flex-direction:column;align-items:stretch;gap:8px;margin-top:10px">
-          <input class="txt-inp" id="greeting-custom-${userId}" type="text" placeholder="인사말을 입력하세요" maxlength="50" value="${gr.custom||''}">
+        <div id="greeting-manual-${userId}" style="display:${gr.mode==='manual'?'block':'none'};padding:0 14px 12px">
+          <input class="txt-inp" id="greeting-custom-${userId}" type="text" placeholder="인사말을 입력하세요" maxlength="50" value="${gr.custom||''}" style="width:100%;box-sizing:border-box;margin-bottom:8px">
           <button class="btn-sm" onclick="saveGreetingCustom('${userId}')">저장</button>
         </div>
-        ${gr.mode==='auto'?`<div style="font-size:12px;color:var(--tx3);margin-top:8px">현재 인사말: "${getCurrentGreeting(userId)}"</div>`:''}
+        ${gr.mode==='auto'?`<div style="font-size:12px;color:var(--tx3);padding:0 14px 12px;word-break:keep-all;overflow-wrap:break-word;line-height:1.5">현재: "${getCurrentGreeting(userId)}"</div>`:''}
       </div>`;
     });
     container.innerHTML=html;
