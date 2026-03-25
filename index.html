@@ -614,7 +614,7 @@ body.dark .today-summary-card .ts-msg{background:linear-gradient(135deg,#312E81,
 .pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .pin-key{background:var(--bg2);border:1.5px solid var(--bdr);border-radius:14px;padding:18px 0;font-size:26px;font-weight:800;cursor:pointer;font-family:inherit;color:var(--tx);transition:background .1s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;min-height:56px;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 body.dark .pin-key{background:var(--card2);border-color:var(--bdr2)}
-.pin-key:active{background:var(--bdr2);transform:scale(.95)}
+.pin-key:active,.pin-key.pressed{background:var(--bdr2);transform:scale(.95)}
 .pin-key.ck{font-size:13px;color:var(--tx2);font-weight:700;background:transparent;border-color:transparent}
 body.dark .pin-key.ck{background:transparent}
 .pin-key.dk{color:var(--rd)}
@@ -6767,26 +6767,19 @@ function showPin(mode,title,sub){
 }
 
 // Direct touch handlers for PIN buttons (avoids iOS onclick issues)
+// PIN pad: register on touchstart for instant response to fast taps
+let _pinTouchHandled=false;
 document.querySelectorAll('.pin-key[data-pk]').forEach(btn=>{
-  let touched=false;
   btn.addEventListener('touchstart',(e)=>{
-    touched=true;
-    btn.style.background='var(--bdr2)';
-    btn.style.transform='scale(.95)';
-  },{passive:true});
-  btn.addEventListener('touchend',(e)=>{
     e.preventDefault();
-    btn.style.background='';
-    btn.style.transform='';
-    if(touched){pk(btn.dataset.pk);touched=false;}
-  });
-  btn.addEventListener('touchcancel',()=>{
-    btn.style.background='';
-    btn.style.transform='';
-    touched=false;
-  });
+    _pinTouchHandled=true;
+    btn.classList.add('pressed');
+    pk(btn.dataset.pk);
+    setTimeout(()=>btn.classList.remove('pressed'),120);
+  },{passive:false});
   btn.addEventListener('click',(e)=>{
-    if(!touched)pk(btn.dataset.pk);
+    if(_pinTouchHandled){_pinTouchHandled=false;return;}
+    pk(btn.dataset.pk);
   });
 });
 
