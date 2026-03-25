@@ -243,7 +243,7 @@ body.dark .dtog-in{transform:translateX(24px)}
 .rwd-bal{display:flex;align-items:center;justify-content:space-between;background:var(--card);border-radius:var(--r);margin:8px 16px 12px;padding:16px;transition:background .25s}
 .rwd-header-sticky{background:linear-gradient(135deg,var(--tab-color,#6366F1),var(--tab-color2,#818CF8));border-radius:0 0 var(--rxl) var(--rxl);margin:0 0 14px;padding:16px 20px;padding-top:calc(16px + env(safe-area-inset-top));position:sticky;top:0;z-index:10;box-shadow:0 4px 20px var(--tab-shadow,rgba(99,102,241,0.3))}
 .rwd-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 16px 14px}
-.rwd-card{background:var(--card);border-radius:var(--rsm);padding:14px;text-align:center;position:relative;transition:background .25s}
+.rwd-card{background:var(--card);border-radius:var(--rsm);padding:14px;text-align:center;position:relative;transition:background .25s;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:manipulation}
 .rwd-card.goal{border:2px solid var(--tab-color,var(--or))}
 .rwd-card.closed{opacity:.45;pointer-events:none;filter:grayscale(.6)}
 .rwd-card.closed .rwd-btn{background:var(--bdr)!important;color:var(--tx3)!important;cursor:default}
@@ -4250,7 +4250,7 @@ function renderRewardGrid(){
       </div>`;
     }
 
-    return `<div class="rwd-card${r.goal?' goal':''}${sale?' on-sale':''}">
+    return `<div class="rwd-card${r.goal?' goal':''}${sale?' on-sale':''}" data-rwdid="${r.id}">
       ${r.goal?'<div class="goal-tag">🎯 목표</div>':''}
       ${sale?`<div class="sale-ribbon">${sale.label||'할인 이벤트'}</div>`:''}
       <div class="rwd-e">${r.emoji}</div><div class="rwd-nm">${r.name}</div>
@@ -4267,6 +4267,81 @@ function renderRewardGrid(){
       ${!can?`<div class="rwd-lack">${lack.toLocaleString()} 마일리지 더 필요해요</div>`:''}
     </div>`;
   }).join('');
+  // Attach long-press for goal setting
+  attachRwdLongPress();
+}
+
+function attachRwdLongPress(){
+  const grid=document.getElementById('rwd-grid');
+  if(!grid)return;
+  grid.querySelectorAll('.rwd-card[data-rwdid]').forEach(card=>{
+    const rwdId=card.dataset.rwdid;
+    let lpTimer=null,didLongPress=false,startY=0,didMove=false;
+    card.addEventListener('touchstart',(e)=>{
+      didLongPress=false;didMove=false;
+      startY=e.touches[0].clientY;
+      lpTimer=setTimeout(()=>{didLongPress=true;showRwdGoalChoice(rwdId,card);},500);
+    },{passive:true});
+    card.addEventListener('touchmove',(e)=>{
+      if(Math.abs(e.touches[0].clientY-startY)>8){didMove=true;clearTimeout(lpTimer);}
+    },{passive:true});
+    card.addEventListener('touchend',()=>{clearTimeout(lpTimer);});
+    card.addEventListener('touchcancel',()=>{clearTimeout(lpTimer);});
+    card.addEventListener('mousedown',(e)=>{didLongPress=false;lpTimer=setTimeout(()=>{didLongPress=true;showRwdGoalChoice(rwdId,card);},500);});
+    card.addEventListener('mouseleave',()=>{clearTimeout(lpTimer);});
+    card.addEventListener('mouseup',()=>{clearTimeout(lpTimer);});
+    // Block click after long press
+    card.addEventListener('click',(e)=>{if(didLongPress){didLongPress=false;e.preventDefault();e.stopPropagation();}},true);
+  });
+}
+
+let _rwdGoalOv=null;
+function showRwdGoalChoice(rwdId,cardEl){
+  if(navigator.vibrate)navigator.vibrate(30);
+  closeRwdGoalOv();
+  const r=S.rwds.find(x=>x.id===rwdId);
+  if(!r)return;
+  const isGoal=!!r.goal;
+  const ov=document.createElement('div');
+  ov.className='lp-overlay';
+  ov.innerHTML=`
+    <div class="lp-choice">
+      <div class="lp-choice-btn" data-action="goal">
+        <div class="lp-ico">${isGoal?'❌':'🎯'}</div>
+        <div class="lp-lbl">${isGoal?'목표 해제':'목표 설정'}</div>
+      </div>
+    </div>`;
+  document.body.appendChild(ov);
+  _rwdGoalOv=ov;
+  let ready=false;
+  setTimeout(()=>{ready=true;},300);
+  ov.querySelectorAll('.lp-choice-btn').forEach(btn=>{
+    function onBtnTap(e){
+      if(!ready)return;
+      e.preventDefault();e.stopPropagation();
+      closeRwdGoalOv();
+      setRwdGoalFromShop(rwdId);
+    }
+    btn.addEventListener('touchend',onBtnTap);
+    btn.addEventListener('click',onBtnTap);
+  });
+  ov.addEventListener('click',(e)=>{if(ready&&e.target===ov)closeRwdGoalOv();});
+  ov.addEventListener('touchend',(e)=>{if(ready&&e.target===ov){e.preventDefault();closeRwdGoalOv();}});
+}
+function closeRwdGoalOv(){if(_rwdGoalOv){_rwdGoalOv.remove();_rwdGoalOv=null;}}
+function setRwdGoalFromShop(rwdId){
+  const r=S.rwds.find(x=>x.id===rwdId);
+  if(!r)return;
+  if(r.goal){
+    r.goal=false;
+    save();renderAll();
+    toast('🎯 목표가 해제됐어요');
+  }else{
+    S.rwds.forEach(x=>x.goal=false);
+    r.goal=true;
+    save();renderAll();
+    toast(`🎯 ${r.emoji} ${r.name}이(가) 목표로 설정됐어요!`);
+  }
 }
 
 function renderRewardInventory(){
@@ -8097,7 +8172,7 @@ Object.assign(window, {
   countPerfectDays, hasWeekendWarrior, hasNightActivity, getMaxDailyVariety,
   countMorningCombo, countMoodType, countUniqueMoods, countSentMessages,
   hasMidnightStudy, hasComeback, getBadgeMeaning,
-  toggleRwdClosed,
+  toggleRwdClosed, setRwdGoalFromShop,
 });
 
 // ── INIT (Firebase async) ─────────────────────
