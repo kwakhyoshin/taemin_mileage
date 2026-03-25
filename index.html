@@ -1230,6 +1230,15 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
     </div>
   </div>
 
+  <!-- Stats Content -->
+  <div id="stat-achieve-view">
+  <!-- 서브 메뉴 탭 -->
+  <div class="dash-tabs">
+    <button class="dash-tab on" onclick="switchDash(0,this)"><svg class="dtab-ico" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 5-6"/></svg> 대시보드</button>
+    <button class="dash-tab" onclick="switchDash(1,this)"><svg class="dtab-ico" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> 캘린더</button>
+    <button class="dash-tab" onclick="switchDash(2,this)"><svg class="dtab-ico" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg> 내역</button>
+  </div>
+
   <!-- Badge Summary Panel -->
   <div class="card badge-summary-card" onclick="openBadgeView()" style="margin:12px 16px;padding:16px;cursor:pointer">
     <div style="display:flex;align-items:center;gap:14px">
@@ -1245,15 +1254,6 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
       </div>
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--tx3)" stroke-width="2"><polyline points="9,18 15,12 9,6"/></svg>
     </div>
-  </div>
-
-  <!-- Stats Content -->
-  <div id="stat-achieve-view">
-  <!-- 서브 메뉴 탭 -->
-  <div class="dash-tabs">
-    <button class="dash-tab on" onclick="switchDash(0,this)"><svg class="dtab-ico" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 5-6"/></svg> 대시보드</button>
-    <button class="dash-tab" onclick="switchDash(1,this)"><svg class="dtab-ico" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> 캘린더</button>
-    <button class="dash-tab" onclick="switchDash(2,this)"><svg class="dtab-ico" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg> 내역</button>
   </div>
 
   <!-- ===== 패널 0: 대시보드 ===== -->
@@ -1398,14 +1398,18 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
 
 <!-- Badge View Screen -->
 <div class="scr" id="s-badge" style="display:none;position:fixed;inset:0;z-index:100;background:var(--bg);overflow-y:auto">
-  <div style="padding:16px;display:flex;align-items:center;gap:12px">
-    <button onclick="closeBadgeView()" style="background:none;border:none;font-size:24px;cursor:pointer;color:var(--tx)">←</button>
-    <div>
-      <div style="font-size:20px;font-weight:900;color:var(--tx)">나의 뱃지</div>
-      <div style="font-size:12px;color:var(--tx3)" id="badge-view-count">0/26 획득</div>
+  <div style="position:sticky;top:0;z-index:10;background:linear-gradient(135deg,#8B5CF6,#A78BFA);padding:18px 20px 16px;padding-top:calc(18px + env(safe-area-inset-top));border-radius:0 0 var(--rxl) var(--rxl);box-shadow:0 4px 20px rgba(139,92,246,0.3)">
+    <div style="display:flex;align-items:center;gap:12px">
+      <button onclick="closeBadgeView()" style="background:rgba(255,255,255,0.2);border:none;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;font-size:18px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15,18 9,12 15,6"/></svg>
+      </button>
+      <div>
+        <div style="font-size:22px;font-weight:900;color:#fff">나의 뱃지</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.85);font-weight:600;margin-top:2px" id="badge-view-count">0/26 획득</div>
+      </div>
     </div>
   </div>
-  <div id="badge-view-grid" style="padding:0 12px"></div>
+  <div id="badge-view-grid" style="padding:12px 12px 0"></div>
   <div style="padding:16px">
     <div style="font-size:14px;font-weight:700;color:var(--tx);margin-bottom:10px">마일리지 수령 내역</div>
     <div id="badge-view-history"></div>
