@@ -2695,7 +2695,16 @@ function getDisplayStreak(){
   const t=todayStr();
   const d=new Date();d.setDate(d.getDate()-1);
   const y=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-  if(S.lastDate===t||S.lastDate===y)return S.streak;
+  // lastDate가 오늘이면: 현재도 모든 할일이 완료 상태인지 재검증
+  // (활동 취소, 활동 추가 등으로 상태가 바뀔 수 있음)
+  if(S.lastDate===t){
+    if(isTodayAllDone()) return S.streak;
+    // 오늘 한때 다 했지만 지금은 아님 → 오늘은 미달성, streak에서 오늘분 빼기
+    return Math.max(0, S.streak - 1);
+  }
+  // lastDate가 어제면 → 어제까지의 streak 유지 (오늘 아직 미완료)
+  if(S.lastDate===y) return S.streak;
+  // 그보다 오래됨 → 연속 끊김
   return 0;
 }
 function weekStart(){const d=new Date();d.setDate(d.getDate()-((d.getDay()||7)-1));return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
@@ -5032,13 +5041,16 @@ function doAct(id){
   // streak — 오늘 할 일을 모두 완료한 경우에만 연속일수 증가
   const t=todayStr();
   let bonus=0,sm='';
-  if(S.lastDate!==t&&isTodayAllDone()){
-    // 오늘 처음으로 모든 활동 완료!
+  if(isTodayAllDone()){
     const yd=new Date();yd.setDate(yd.getDate()-1);const y=`${yd.getFullYear()}-${String(yd.getMonth()+1).padStart(2,'0')}-${String(yd.getDate()).padStart(2,'0')}`;
-    if(S.lastDate===y){S.streak++;}
-    else{S.streak=1;}
-    S.longest=Math.max(S.longest||0,S.streak);S.lastDate=t;
-    if(S.settings.streakBonus&&S.streak>0&&S.streak%7===0){bonus=S.settings.streakBonusPts||100;sm=` 🔥 ${S.streak}일 연속 +${bonus} 마일리지!`;}
+    if(S.lastDate!==t){
+      // 오늘 처음으로 모든 활동 완료!
+      if(S.lastDate===y){S.streak++;}
+      else{S.streak=1;}
+      S.longest=Math.max(S.longest||0,S.streak);S.lastDate=t;
+      if(S.settings.streakBonus&&S.streak>0&&S.streak%7===0){bonus=S.settings.streakBonusPts||100;sm=` 🔥 ${S.streak}일 연속 +${bonus} 마일리지!`;}
+    }
+    // 이미 오늘 lastDate가 설정된 경우: 취소 후 다시 완료했을 수 있으므로 lastDate 유지
   }
 
   S.pts+=a.pts+bonus;S.totalDone++;
@@ -5065,6 +5077,19 @@ function undoAct(actId){
   S.totalDone=Math.max(0,S.totalDone-1);
   S.log.splice(idx,1); // remove from log
   unmarkDone(a);
+
+  // 활동 취소 후 오늘 할일이 미완료 상태가 되면 streak에서 오늘분 제거
+  // (getDisplayStreak가 실시간 재검증하므로 표시는 자동 반영됨)
+  // DB값도 보정: 오늘 lastDate인데 더이상 모든 할일이 안끝났으면 streak 롤백
+  const _t=todayStr();
+  if(S.lastDate===_t && !isTodayAllDone()){
+    // 오늘이 streak에 포함됐었는데 이제 미완료 → streak에서 오늘 제거
+    S.streak=Math.max(0,S.streak-1);
+    // lastDate를 어제로 되돌림 (어제까지가 마지막 연속 달성일)
+    const _yd=new Date();_yd.setDate(_yd.getDate()-1);
+    S.lastDate=S.streak>0?`${_yd.getFullYear()}-${String(_yd.getMonth()+1).padStart(2,'0')}-${String(_yd.getDate()).padStart(2,'0')}`:null;
+  }
+
   save();renderAll();
   toast(`↩ ${a.name} 취소됨 (-${entry.pts} 마일리지)`);
 }
@@ -6567,8 +6592,24 @@ function checkDayChange(){
   const now = todayStr();
   if(now !== _lastDateStr){
     console.log('🌅 날짜가 바뀌었어요! 활동을 초기화합니다:', now);
+    const prevDay = _lastDateStr;
     _lastDateStr = now;
-    // 날짜 변경 시 전체 UI 갱신 (countDone이 자동으로 0 반환)
+
+    // 날짜가 바뀌는 시점: 어제(prevDay)가 lastDate인데 모든 할일을 못했으면 streak 리셋
+    // (이미 자정이 지났으므로 어제의 활동 상태를 기준으로 판단)
+    if(S.lastDate && S.lastDate !== prevDay){
+      // lastDate가 어제가 아님 → 어제 미완료 → streak 유지 안됨 (이미 on-load에서 처리)
+    } else if(S.lastDate === prevDay){
+      // lastDate가 어제 → 어제는 달성했음 → streak 유지
+    }
+    // 핵심: lastDate가 어제보다 오래됐으면 streak=0 (on-load 로직과 동일)
+    const yd=new Date();yd.setDate(yd.getDate()-1);
+    const ystr=`${yd.getFullYear()}-${String(yd.getMonth()+1).padStart(2,'0')}-${String(yd.getDate()).padStart(2,'0')}`;
+    if(S.lastDate && S.lastDate!==now && S.lastDate!==ystr){
+      S.streak=0;
+      save();
+    }
+
     renderAll();
     toast('🌅 새로운 하루가 시작됐어요! 오늘도 화이팅!');
     return true;
