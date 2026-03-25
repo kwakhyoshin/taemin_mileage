@@ -105,7 +105,7 @@ body.dark .dtog{background:#334155}
 body.dark .dtog-in{transform:translateX(24px)}
 
 /* HOME TOP - scrolls away */
-.home-top{background:var(--tab-color,#6366F1);padding:16px 20px 0;padding-top:calc(16px + env(safe-area-inset-top));display:flex;justify-content:space-between;align-items:flex-start;position:relative;overflow:visible;z-index:11}
+.home-top{background:var(--tab-color,#6366F1);padding:16px 20px 0;padding-top:calc(16px + env(safe-area-inset-top));display:flex;justify-content:space-between;align-items:flex-start;position:relative;overflow:visible;z-index:11;transition:opacity .1s ease-out}
 .home-top::after{content:'';position:absolute;bottom:-70px;right:10px;width:160px;height:160px;background:rgba(255,255,255,.1);border-radius:50%;pointer-events:none}
 .home-top h1{font-size:24px;font-weight:900;color:#fff}
 
@@ -8359,6 +8359,13 @@ Object.assign(window, {
     // Home
     if(homeScr && homeScr.classList.contains('on') && hero){
       hero.classList.toggle('compact', scrollY > threshold);
+      // Fade out home-top greeting as it scrolls behind status bar
+      const ht=document.querySelector('.home-top');
+      if(ht){
+        const fadeStart=10, fadeEnd=60;
+        const opacity=scrollY<=fadeStart?1:scrollY>=fadeEnd?0:1-(scrollY-fadeStart)/(fadeEnd-fadeStart);
+        ht.style.opacity=Math.max(0,Math.min(1,opacity));
+      }
     }
     // Log
     const logHdr = document.querySelector('.log-header-sticky');
