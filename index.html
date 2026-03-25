@@ -825,6 +825,8 @@ body.dark .nav-user-label{color:var(--tx2)}
   .log-header-sticky h2{font-size:26px}
   .rwd-header-sticky{padding:20px 24px;border-radius:0;margin:0 0 14px}
   .hist-hero{padding:22px 24px 18px;border-radius:0;margin:0 0 14px}
+  .badge-hero{border-radius:0!important}
+  #s-badge{margin-left:200px;width:calc(100vw - 200px)}
   .hist-stats-card{margin:0 20px 14px}
   .adm-top{padding:20px 24px;border-radius:0}
   .adm-top h2{font-size:22px}
@@ -960,6 +962,8 @@ body.dark .nav-user-label{color:var(--tx2)}
   .rwd-header-sticky{border-radius:0;padding:24px 28px}
   .hist-hero{border-radius:0;padding:26px 28px 20px}
   .hist-hero h2{font-size:28px}
+  .badge-hero{border-radius:0!important}
+  #s-badge{margin-left:240px;width:calc(100vw - 240px)}
   .hist-stats-card{margin:0 24px 14px}
   .adm-top{border-radius:0;padding:24px 28px}
 
@@ -1400,7 +1404,7 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
 
 <!-- Badge View Screen -->
 <div class="scr" id="s-badge" style="display:none;position:fixed;inset:0;z-index:99;background:var(--bg);overflow-y:auto">
-  <div style="position:sticky;top:0;z-index:10;background:linear-gradient(135deg,#8B5CF6,#A78BFA);padding:18px 20px 16px;padding-top:calc(18px + env(safe-area-inset-top));border-radius:0 0 var(--rxl) var(--rxl);box-shadow:0 4px 20px rgba(139,92,246,0.3)">
+  <div class="badge-hero" style="position:sticky;top:0;z-index:10;background:linear-gradient(135deg,#8B5CF6,#A78BFA);padding:18px 20px 16px;padding-top:calc(18px + env(safe-area-inset-top));border-radius:0 0 var(--rxl) var(--rxl);box-shadow:0 4px 20px rgba(139,92,246,0.3)">
     <div style="display:flex;align-items:center;gap:12px">
       <button onclick="closeBadgeView()" style="background:rgba(255,255,255,0.2);border:none;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;font-size:18px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15,18 9,12 15,6"/></svg>
@@ -2631,6 +2635,12 @@ function renderMsgSettings(){const mode=S.settings?.msgMode||'auto';const sel=do
 
 // ── TIME HELPERS ──────────────────────────────
 function todayStr(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+function isTodayAllDone(){
+  // 오늘 활성화된 모든 활동이 완료됐는지 체크
+  const todayActs=S.acts.filter(a=>a.active&&isAvailableToday(a)&&a.maxDay>0);
+  if(todayActs.length===0)return false;
+  return todayActs.every(a=>countDone(a)>=a.maxDay);
+}
 function getDisplayStreak(){
   const t=todayStr();
   const d=new Date();d.setDate(d.getDate()-1);
@@ -4702,15 +4712,17 @@ function doAct(id){
   if(!a||!canDo(a))return;
   markDone(a);
 
-  // streak
-  const t=todayStr();const yd=new Date();yd.setDate(yd.getDate()-1);const y=`${yd.getFullYear()}-${String(yd.getMonth()+1).padStart(2,'0')}-${String(yd.getDate()).padStart(2,'0')}`;
-  if(S.lastDate===t){}
-  else if(S.lastDate===y){S.streak++;}
-  else{S.streak=1;}
-  S.longest=Math.max(S.longest||0,S.streak);S.lastDate=t;
-
+  // streak — 오늘 할 일을 모두 완료한 경우에만 연속일수 증가
+  const t=todayStr();
   let bonus=0,sm='';
-  if(S.settings.streakBonus&&S.streak>0&&S.streak%7===0){bonus=S.settings.streakBonusPts||100;sm=` 🔥 ${S.streak}일 연속 +${bonus} 마일리지!`;}
+  if(S.lastDate!==t&&isTodayAllDone()){
+    // 오늘 처음으로 모든 활동 완료!
+    const yd=new Date();yd.setDate(yd.getDate()-1);const y=`${yd.getFullYear()}-${String(yd.getMonth()+1).padStart(2,'0')}-${String(yd.getDate()).padStart(2,'0')}`;
+    if(S.lastDate===y){S.streak++;}
+    else{S.streak=1;}
+    S.longest=Math.max(S.longest||0,S.streak);S.lastDate=t;
+    if(S.settings.streakBonus&&S.streak>0&&S.streak%7===0){bonus=S.settings.streakBonusPts||100;sm=` 🔥 ${S.streak}일 연속 +${bonus} 마일리지!`;}
+  }
 
   S.pts+=a.pts+bonus;S.totalDone++;
   // log entry with unique id for undo
@@ -5728,11 +5740,16 @@ function sendFamilyMsg(){
     playEmotionAnimation(selectedEmotion);
   }
 
+  const sentEmotion=selectedEmotion||null;
+  const sentText=text;
+  const sentMsg=S.familyMessages[S.familyMessages.length-1];
   save();
   closeMsgPop();
   const toName=MEMBERS[msgTargetUser].name;
   if(isSelfMessage){
     toast(`💌 나에게 메시지를 보냈어요!`);
+    // 자기 자신에게 보낸 메시지 → 바로 수신 팝업 표시
+    setTimeout(()=>showReceivedMsg(currentUser,sentText,sentEmotion,sentMsg),300);
   }else{
     toast(`💌 ${toName}에게 메시지를 보냈어요!`);
   }
