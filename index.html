@@ -4265,7 +4265,7 @@ function renderCalDetail(dateStr){
 
   // 감정 기록 표시
   if(moods.length>0){
-    content+=`<div style="padding:12px 16px;background:var(--bg2);border-bottom:.5px solid var(--bdr);border-radius:8px;margin:0 8px 8px">
+    content+=`<div style="padding:12px 16px;background:var(--bg2);border-radius:8px;margin:0 8px 8px">
       <div style="font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:6px">감정 기록 (${moods.length}회)</div>
       <div style="display:flex;gap:4px;flex-wrap:wrap">`;
     moods.forEach(mo=>{
@@ -4356,7 +4356,6 @@ function renderTodaySummary(){
   const pctBar=totalCount>0?`<div style="margin-top:6px;background:var(--bdr);border-radius:4px;height:6px;overflow:hidden"><div style="width:${completePct}%;height:100%;background:${allDone?'var(--gn)':'var(--or)'};border-radius:4px;transition:width .3s"></div></div>`:'';
 
   const summaryHTML=`
-    <div class="sec" style="margin:0 0 12px;padding:0"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> 오늘의 요약</div>
     <div class="ts-header">${statusSvg} ${dateLabel}의 요약</div>
     <div class="ts-grid">
       <div class="ts-item">
