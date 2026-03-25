@@ -1171,8 +1171,8 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
 .bubble-group{position:relative;cursor:pointer;animation:bubbleDangle 3s ease-in-out infinite;transform-origin:top center;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;padding-left:18px}
 .bubble-group:active{transform:scale(1.05)!important}
 .bubble-avatar{position:absolute;left:0;top:50%;transform:translateY(-50%);z-index:2;filter:drop-shadow(1px 0 2px rgba(0,0,0,.1))}
-.bubble-speech{background:#fff;color:#222;font-size:11px;font-weight:800;padding:5px 10px 5px 16px;border-radius:14px;white-space:nowrap;max-width:90px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.15);border:2px solid var(--tab-color,#6366F1);line-height:1.3;position:relative;z-index:1}
-.bubble-speech .bbl-text{display:inline-block;white-space:nowrap;transition:transform .3s ease-out}
+.bubble-speech{background:#fff;color:#222;font-size:11px;font-weight:800;padding:5px 8px 5px 16px;border-radius:14px;white-space:nowrap;max-width:100px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.15);border:2px solid var(--tab-color,#6366F1);line-height:1.3;position:relative;z-index:1}
+.bubble-speech .bbl-text{display:inline-block;white-space:nowrap}
 /* Log list bubble: avatar + dot + speech inline */
 .log-sticker-area{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;align-items:center}
 .bubble-group-log{display:inline-flex;align-items:center;gap:0;cursor:pointer;animation:bubbleDangle 3s ease-in-out infinite;transform-origin:top center;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
@@ -5871,39 +5871,36 @@ function attachStickerTapHandlers(container){
 // Bubble marquee: slide left to show overflow, pause, snap back, repeat
 let _bubbleMarqueeTimers=[];
 function startBubbleMarquees(container){
-  _bubbleMarqueeTimers.forEach(t=>clearInterval(t));
+  _bubbleMarqueeTimers.forEach(t=>{clearTimeout(t);clearInterval(t);});
   _bubbleMarqueeTimers=[];
   (container||document).querySelectorAll('.bubble-speech').forEach(speech=>{
     const txt=speech.querySelector('.bbl-text');
     if(!txt)return;
-    const overflow=txt.scrollWidth-speech.clientWidth;
-    if(overflow<=2)return; // fits, no scroll needed
-    // Animation cycle: wait 1.5s → slide left over 2-4s → wait 2s → snap back → repeat
-    const slideDuration=Math.max(2,Math.min(4,overflow/25)); // speed: ~25px/s
-    txt.style.transition=`transform ${slideDuration}s ease-in-out`;
+    // Measure real text width vs visible area
+    const textW=txt.offsetWidth;
+    const boxW=speech.clientWidth; // includes padding
+    const overflow=textW-boxW;
+    if(overflow<=4)return; // fits fine, no animation
+    const px=overflow+8; // extra 8px so last char isn't right at edge
+    const slideSec=Math.max(2,Math.min(5,px/20)); // ~20px/s
     function cycle(){
-      // Slide to show hidden text
-      txt.style.transform=`translateX(-${overflow}px)`;
-      // After slide done + pause, snap back
-      const snapTimer=setTimeout(()=>{
+      // Slide left
+      txt.style.transition=`transform ${slideSec}s ease-in-out`;
+      txt.style.transform=`translateX(-${px}px)`;
+      // After slide + 2s pause → snap back
+      const t1=setTimeout(()=>{
         txt.style.transition='none';
         txt.style.transform='translateX(0)';
-        // Re-enable transition after snap
-        requestAnimationFrame(()=>{
-          requestAnimationFrame(()=>{
-            txt.style.transition=`transform ${slideDuration}s ease-in-out`;
-          });
-        });
-      },(slideDuration*1000)+2000); // slide time + 2s pause
-      _bubbleMarqueeTimers.push(snapTimer);
+      },(slideSec*1000)+2000);
+      _bubbleMarqueeTimers.push(t1);
     }
-    // Start first cycle after 1.5s
-    const startTimer=setTimeout(cycle,1500);
-    _bubbleMarqueeTimers.push(startTimer);
-    // Repeat the whole thing
-    const totalCycle=(1500+slideDuration*1000+2000+300); // wait+slide+pause+snap
-    const interval=setInterval(cycle,totalCycle);
-    _bubbleMarqueeTimers.push(interval);
+    // First cycle after 2s
+    const t0=setTimeout(cycle,2000);
+    _bubbleMarqueeTimers.push(t0);
+    // Repeat: total = 2s wait + slide + 2s pause + 0.5s snap gap
+    const total=2000+slideSec*1000+2000+500;
+    const iv=setInterval(cycle,total);
+    _bubbleMarqueeTimers.push(iv);
   });
 }
 
