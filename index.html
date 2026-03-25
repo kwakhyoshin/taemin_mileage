@@ -5551,6 +5551,7 @@ function renderAdmRwdList(){
       <div class="m-emoji">${r.emoji}</div>
       <div class="m-info"><div class="m-nm">${r.name}${r.goal?' 🎯':''}${r.closed?' <span style="font-size:9px;color:#EF4444;font-weight:800">종료</span>':''}</div><div class="m-sub">${r.pts.toLocaleString()} 마일리지</div>${r.sale&&r.sale.endDate&&new Date(r.sale.endDate+'T23:59:59')>=new Date()?`<div style="font-size:9px;font-weight:800;color:#EF4444;margin-top:2px">🏷️ ${r.sale.percent}% 할인 중 (~${r.sale.endDate.slice(5).replace('-','/')})</div>`:''}</div>
       <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+        <span style="font-size:9px;font-weight:700;color:${r.closed?'#EF4444':'var(--tx3)'};white-space:nowrap">${r.closed?'종료':'운영'}</span>
         <button class="tog tog-sm ${r.closed?'off':''}" onclick="toggleRwdClosed('${r.id}')" title="${r.closed?'종료됨':'운영중'}"><div class="tog-dot"></div></button>
         <button class="icon-btn" onclick="openRwdForm('${r.id}')" title="수정"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg></button>
         <button class="icon-btn del" onclick="delRwd('${r.id}')" title="삭제"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></button>
@@ -8096,6 +8097,7 @@ Object.assign(window, {
   countPerfectDays, hasWeekendWarrior, hasNightActivity, getMaxDailyVariety,
   countMorningCombo, countMoodType, countUniqueMoods, countSentMessages,
   hasMidnightStudy, hasComeback, getBadgeMeaning,
+  toggleRwdClosed,
 });
 
 // ── INIT (Firebase async) ─────────────────────
