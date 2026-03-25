@@ -60,8 +60,7 @@ body{touch-action:pan-x pan-y}
 /* Prevent iOS zoom on input focus */
 input,select,textarea{font-size:16px!important}
 body{font-family:'Pretendard Variable',-apple-system,sans-serif;background:var(--bg);color:var(--tx);max-width:430px;margin:0 auto;min-height:100vh;min-height:100dvh;overflow-x:hidden;transition:background .25s,color .25s}
-html.popup-open{overflow:hidden}
-body.popup-open{position:fixed;width:100%;top:var(--scroll-y,0)}
+html.popup-open,body.popup-open{overflow:hidden!important;height:100%!important}
 body.popup-open .nav-container{opacity:0;pointer-events:none;transition:opacity .15s}
 @media(min-width:768px){body{max-width:100%;margin:0}}
 @media(min-width:1024px){body{margin:0}}
@@ -2090,11 +2089,36 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
 <script type="module">
 // ── BODY SCROLL LOCK (iOS safe) ──────────────
 let _scrollLockCount=0;
+let _scrollLockTouchHandler=null;
+let _savedScrollY=0;
+function _isScrollableEl(el){
+  while(el&&el!==document.body&&el!==document){
+    const s=getComputedStyle(el);
+    if((s.overflowY==='auto'||s.overflowY==='scroll')&&el.scrollHeight>el.clientHeight) return el;
+    el=el.parentElement;
+  }
+  return null;
+}
 function lockBodyScroll(){
   if(_scrollLockCount===0){
-    document.documentElement.style.setProperty('--scroll-y',`-${window.scrollY}px`);
+    _savedScrollY=window.scrollY;
     document.body.classList.add('popup-open');
     document.documentElement.classList.add('popup-open');
+    let _lastTouchY=0;
+    document.addEventListener('touchstart',function _tsH(e){
+      _lastTouchY=e.touches[0].clientY;
+      if(!_scrollLockTouchHandler) document.removeEventListener('touchstart',_tsH);
+    },{passive:true});
+    _scrollLockTouchHandler=function(e){
+      const scr=_isScrollableEl(e.target);
+      if(!scr){ e.preventDefault(); return; }
+      const dy=e.touches[0].clientY-_lastTouchY;
+      _lastTouchY=e.touches[0].clientY;
+      const atTop=scr.scrollTop<=0;
+      const atBot=scr.scrollTop+scr.clientHeight>=scr.scrollHeight-1;
+      if((atTop&&dy>0)||(atBot&&dy<0)||(atTop&&atBot)) e.preventDefault();
+    };
+    document.addEventListener('touchmove',_scrollLockTouchHandler,{passive:false});
   }
   _scrollLockCount++;
 }
@@ -2103,9 +2127,11 @@ function unlockBodyScroll(){
   if(_scrollLockCount===0){
     document.body.classList.remove('popup-open');
     document.documentElement.classList.remove('popup-open');
-    const y=parseInt(document.documentElement.style.getPropertyValue('--scroll-y')||'0')*-1;
-    document.body.style.position='';document.body.style.top='';document.body.style.width='';
-    window.scrollTo(0,y);
+    if(_scrollLockTouchHandler){
+      document.removeEventListener('touchmove',_scrollLockTouchHandler);
+      _scrollLockTouchHandler=null;
+    }
+    window.scrollTo(0,_savedScrollY);
   }
 }
 // ═══════════════════════════════════════════════
