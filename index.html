@@ -56,7 +56,8 @@ body{touch-action:pan-x pan-y}
 /* Prevent iOS zoom on input focus */
 input,select,textarea{font-size:16px!important}
 body{font-family:'Pretendard Variable',-apple-system,sans-serif;background:var(--bg);color:var(--tx);max-width:430px;margin:0 auto;min-height:100vh;min-height:100dvh;overflow-x:hidden;transition:background .25s,color .25s}
-body.popup-open{overflow:hidden!important;position:fixed;width:100%;top:var(--scroll-y,0)}
+html.popup-open{overflow:hidden}
+body.popup-open{position:fixed;width:100%;top:var(--scroll-y,0)}
 body.popup-open .nav-container{opacity:0;pointer-events:none;transition:opacity .15s}
 @media(min-width:768px){body{max-width:100%;margin:0}}
 @media(min-width:1024px){body{margin:0}}
@@ -2089,6 +2090,7 @@ function lockBodyScroll(){
   if(_scrollLockCount===0){
     document.documentElement.style.setProperty('--scroll-y',`-${window.scrollY}px`);
     document.body.classList.add('popup-open');
+    document.documentElement.classList.add('popup-open');
   }
   _scrollLockCount++;
 }
@@ -2096,6 +2098,7 @@ function unlockBodyScroll(){
   _scrollLockCount=Math.max(0,_scrollLockCount-1);
   if(_scrollLockCount===0){
     document.body.classList.remove('popup-open');
+    document.documentElement.classList.remove('popup-open');
     const y=parseInt(document.documentElement.style.getPropertyValue('--scroll-y')||'0')*-1;
     document.body.style.position='';document.body.style.top='';document.body.style.width='';
     window.scrollTo(0,y);
