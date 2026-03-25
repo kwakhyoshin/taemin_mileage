@@ -2593,6 +2593,7 @@ let _isSaving = false;      // true while a setDoc write is in-flight
 let _pendingSave = false;   // another save was requested while one was in-flight
 let _hasDirtyLocal = false; // true when local changes haven't been saved to Firestore yet
 let _lastSavedJSON = '';    // tracks what we last wrote → prevents echo loop
+let _lastSaveTime = 0;      // timestamp of last save completion — cooldown for echo
 
 // Robust debounced save with in-flight guard
 function save(){
@@ -2611,6 +2612,7 @@ function save(){
       await setDoc(DATA_DOC, S);
       _lastSavedJSON = json; // remember what we just wrote
       _hasDirtyLocal = false; // 저장 완료
+      _lastSaveTime = Date.now(); // cooldown start
       localStorage.setItem('taemin_v6_backup', json);
     }catch(e){
       console.warn('Firebase save failed', e);
@@ -8254,6 +8256,7 @@ Object.assign(window, {
       // 3. Incoming data is identical to current state
       // 4. We have unsaved local changes (prevent overwriting local edits during debounce window)
       if(_isSaving) return;
+      if(Date.now() - _lastSaveTime < 2000) return; // cooldown: ignore echoes within 2s of save
       if(incomingJSON === _lastSavedJSON) return;
       if(incomingJSON === JSON.stringify(S)) return;
       if(_hasDirtyLocal){
