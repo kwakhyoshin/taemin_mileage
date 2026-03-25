@@ -5744,8 +5744,18 @@ function renderStickersForLog(actId){
 // Attach tap handlers to all sticker/bubble items in a container
 function attachStickerTapHandlers(container){
   container.querySelectorAll('[data-stkid]').forEach(el=>{
+    let didMove=false, startY=0;
+    el.addEventListener('touchstart',(e)=>{
+      didMove=false;
+      startY=e.touches[0].clientY;
+    },{passive:true});
+    el.addEventListener('touchmove',(e)=>{
+      if(Math.abs(e.touches[0].clientY-startY)>6)didMove=true;
+    },{passive:true});
     el.addEventListener('touchend',(e)=>{
-      e.stopPropagation();e.preventDefault();
+      e.stopPropagation();
+      if(didMove){didMove=false;return;}
+      e.preventDefault();
       showStickerInfo(el.dataset.stkid);
     });
     el.addEventListener('click',(e)=>{
