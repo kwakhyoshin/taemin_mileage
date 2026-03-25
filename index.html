@@ -144,7 +144,7 @@ body.dark .dtog-in{transform:translateX(24px)}
 
 /* ACT GRID */
 .act-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 16px 14px}
-.act-card{background:var(--card);border-radius:var(--rsm);padding:12px;cursor:pointer;transition:transform .12s,background .25s,border .25s,box-shadow .25s;border:2px solid transparent;position:relative;overflow:hidden;user-select:none}
+.act-card{background:var(--card);border-radius:var(--rsm);padding:12px;cursor:pointer;transition:transform .12s,background .25s,border .25s,box-shadow .25s;border:2px solid transparent;position:relative;overflow:visible;user-select:none}
 .act-card:active{transform:scale(.95)}
 
 /* Progress fill inside card */
@@ -1133,6 +1133,75 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
 .badge-item .badge-name{font-size:13px;font-weight:700;color:var(--tx);text-align:center;line-height:1.4}
 .badge-item.locked{opacity:0.7}
 .badge-item.locked .badge-name{color:var(--tx3)}
+
+/* ── STICKER / BUBBLE SYSTEM ── */
+@keyframes stickerDangle{
+  0%{transform:rotate(-6deg) translateY(0)}
+  25%{transform:rotate(4deg) translateY(-1px)}
+  50%{transform:rotate(-3deg) translateY(0)}
+  75%{transform:rotate(5deg) translateY(-1px)}
+  100%{transform:rotate(-6deg) translateY(0)}
+}
+@keyframes bubbleDangle{
+  0%{transform:rotate(-3deg) translateY(0)}
+  30%{transform:rotate(2deg) translateY(-1px)}
+  60%{transform:rotate(-2deg) translateY(0.5px)}
+  100%{transform:rotate(-3deg) translateY(0)}
+}
+@keyframes stickerPop{
+  0%{transform:scale(0) rotate(-20deg);opacity:0}
+  60%{transform:scale(1.2) rotate(5deg);opacity:1}
+  100%{transform:scale(1) rotate(0deg);opacity:1}
+}
+.sticker-wrap{position:absolute;top:-8px;right:-4px;z-index:5;display:flex;gap:2px;flex-wrap:wrap;max-width:80px;justify-content:flex-end;pointer-events:auto}
+.sticker-item{font-size:22px;cursor:pointer;animation:stickerDangle 2.5s ease-in-out infinite;transform-origin:top center;filter:drop-shadow(0 1px 2px rgba(0,0,0,.15));transition:transform .15s}
+.sticker-item:hover{transform:scale(1.2)!important}
+.sticker-item.pop-in{animation:stickerPop .4s ease-out forwards}
+
+.bubble-wrap{position:absolute;bottom:-10px;left:50%;transform:translateX(-50%);z-index:5;display:flex;gap:4px;flex-wrap:wrap;justify-content:center;pointer-events:auto}
+.bubble-item{background:var(--tab-color,#6366F1);color:#fff;font-size:10px;font-weight:800;padding:3px 8px;border-radius:10px;cursor:pointer;animation:bubbleDangle 3s ease-in-out infinite;transform-origin:top center;white-space:nowrap;max-width:90px;overflow:hidden;text-overflow:ellipsis;box-shadow:0 2px 6px rgba(0,0,0,.15);position:relative}
+.bubble-item::after{content:'';position:absolute;top:-4px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-bottom:4px solid var(--tab-color,#6366F1)}
+.bubble-item:hover{transform:scale(1.1)!important}
+
+/* Long-press choice popup */
+.lp-overlay{position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.45);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;animation:fadeIn .2s}
+.lp-choice{background:var(--card);border-radius:20px;padding:20px 16px;display:flex;gap:16px;box-shadow:0 12px 40px rgba(0,0,0,.25);animation:popUp .25s ease-out}
+.lp-choice-btn{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 24px;border-radius:16px;background:var(--bg2);border:2px solid var(--bdr);cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent}
+.lp-choice-btn:active{transform:scale(.93);border-color:var(--tab-color)}
+.lp-choice-btn .lp-ico{font-size:36px}
+.lp-choice-btn .lp-lbl{font-size:13px;font-weight:800;color:var(--tx)}
+
+/* Sticker emoji picker bar (iMessage style) */
+.stk-picker-overlay{position:fixed;inset:0;z-index:910;background:rgba(0,0,0,.35);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:flex-end;justify-content:center;animation:fadeIn .15s}
+.stk-picker{background:var(--card);border-radius:20px 20px 0 0;padding:16px 12px calc(16px + env(safe-area-inset-bottom));width:100%;max-width:420px;box-shadow:0 -8px 30px rgba(0,0,0,.2);animation:slideUp .25s ease-out}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.stk-picker-title{font-size:14px;font-weight:900;color:var(--tx);text-align:center;margin-bottom:12px}
+.stk-emoji-row{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;padding:4px 0}
+.stk-emoji-btn{font-size:28px;width:48px;height:48px;display:flex;align-items:center;justify-content:center;border-radius:14px;cursor:pointer;transition:all .12s;background:transparent;border:none;-webkit-tap-highlight-color:transparent}
+.stk-emoji-btn:active{transform:scale(1.3);background:var(--bg2)}
+.stk-cancel{margin-top:12px;width:100%;padding:12px;border-radius:12px;background:var(--bg2);border:none;font-size:14px;font-weight:800;color:var(--tx3);cursor:pointer}
+
+/* Bubble message input */
+.bbl-input-overlay{position:fixed;inset:0;z-index:910;background:rgba(0,0,0,.35);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;animation:fadeIn .15s}
+.bbl-input-box{background:var(--card);border-radius:20px;padding:24px 20px;width:calc(100% - 48px);max-width:340px;box-shadow:0 12px 40px rgba(0,0,0,.25);animation:popUp .25s ease-out}
+.bbl-input-box h4{font-size:15px;font-weight:900;color:var(--tx);margin-bottom:14px;text-align:center}
+.bbl-input-box input{width:100%;padding:12px 14px;border-radius:12px;border:2px solid var(--bdr);background:var(--bg2);font-size:15px;font-weight:700;color:var(--tx);font-family:inherit;outline:none;box-sizing:border-box}
+.bbl-input-box input:focus{border-color:var(--tab-color)}
+.bbl-input-box .bbl-char-count{font-size:11px;color:var(--tx3);text-align:right;margin-top:4px;font-weight:700}
+.bbl-input-btns{display:flex;gap:8px;margin-top:14px}
+.bbl-input-btns button{flex:1;padding:12px;border-radius:12px;font-size:14px;font-weight:800;border:none;cursor:pointer}
+.bbl-input-btns .bbl-cancel{background:var(--bg2);color:var(--tx3)}
+.bbl-input-btns .bbl-send{background:var(--tab-color,#6366F1);color:#fff}
+
+/* Sticker info popup */
+.stk-info-overlay{position:fixed;inset:0;z-index:920;background:rgba(0,0,0,.35);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;animation:fadeIn .1s}
+.stk-info-box{background:var(--card);border-radius:18px;padding:20px;min-width:220px;box-shadow:0 12px 40px rgba(0,0,0,.25);animation:popUp .2s ease-out;text-align:center}
+.stk-info-preview{font-size:48px;margin-bottom:8px}
+.stk-info-preview.is-bubble{font-size:16px;font-weight:800;background:var(--tab-color,#6366F1);color:#fff;display:inline-block;padding:6px 14px;border-radius:14px}
+.stk-info-who{font-size:13px;font-weight:700;color:var(--tx);margin-bottom:4px}
+.stk-info-when{font-size:11px;color:var(--tx3);font-weight:600;margin-bottom:14px}
+.stk-info-del{padding:10px 24px;border-radius:12px;background:#EF4444;color:#fff;font-size:13px;font-weight:800;border:none;cursor:pointer}
+.stk-info-close{padding:10px 24px;border-radius:12px;background:var(--bg2);color:var(--tx3);font-size:13px;font-weight:800;border:none;cursor:pointer;margin-left:8px}
 </style>
 </head>
 <body data-tab="home">
@@ -2499,6 +2568,7 @@ function defaultState(){
     familyMessages:[], // 가족 메시지
     photos:{}, // 프로필 사진
     moods:{}, // 기분 데이터
+    stickers:[], // [{id,actId,type:'emoji'|'bubble',content,user,ts}]
     pushDevices:{}, // 푸시 디바이스
   };
 }
@@ -3573,17 +3643,15 @@ function getCardState(act){
 
 function renderHomeGrid(){
   const g=document.getElementById('home-grid');
-  // showHome이 true이고 오늘 요일에 활성화된 활동만 표시
   let acts=S.acts.filter(a=>a.active&&a.showHome&&isAvailableToday(a));
   if(acts.length===0) acts=S.acts.filter(a=>a.active&&isAvailableToday(a)).slice(0,6);
   g.innerHTML=acts.map(a=>{
     const st=getCardState(a);
     const timer=countdownStr(a);
-    // done 클래스 우선 (완료된 건 진하게 표시), exhausted는 클릭만 막음
     const cls=st.cls?' '+st.cls:'';
-    const onclick=st.exhausted?'':'doAct(\''+a.id+'\')';
-    const cursorStyle=st.exhausted?'cursor:default;':'';
-    return `<div class="act-card${cls}" style="${cursorStyle}" onclick="${onclick}">
+    const stickerHTML=renderStickersFor(a.id);
+    return `<div class="act-card${cls}" data-actid="${a.id}" style="${st.exhausted?'cursor:default;':''}">
+      ${stickerHTML}
       <div class="e">${a.emoji}</div>
       <div class="n">${a.name}</div>
       <div class="p">+${a.pts} 마일리지</div>
@@ -3592,6 +3660,23 @@ function renderHomeGrid(){
       <div class="act-card-prog" style="width:${st.pct}%"></div>
     </div>`;
   }).join('');
+  // Attach long-press + tap handlers
+  g.querySelectorAll('.act-card[data-actid]').forEach(card=>{
+    const actId=card.dataset.actid;
+    const a=S.acts.find(x=>x.id===actId);
+    const exhausted=a&&getCardState(a).exhausted;
+    let lpTimer=null, didLongPress=false;
+    const startLP=()=>{didLongPress=false;lpTimer=setTimeout(()=>{didLongPress=true;showLongPressChoice(actId,card);},500);};
+    const endLP=()=>{clearTimeout(lpTimer);};
+    const doTap=(e)=>{if(didLongPress){e.preventDefault();return;}if(!exhausted&&a)doAct(actId);};
+    card.addEventListener('touchstart',startLP,{passive:true});
+    card.addEventListener('touchend',(e)=>{endLP();doTap(e);});
+    card.addEventListener('touchmove',endLP,{passive:true});
+    card.addEventListener('touchcancel',endLP);
+    card.addEventListener('mousedown',startLP);
+    card.addEventListener('mouseup',(e)=>{endLP();doTap(e);});
+    card.addEventListener('mouseleave',endLP);
+  });
 }
 
 function renderLogList(){
@@ -3600,20 +3685,19 @@ function renderLogList(){
   el.innerHTML=acts.map(a=>{
     const done=countDone(a);
     const max=a.maxDay;
-    const exhausted=max>0&&done>=max; // 횟수 다 채움
-    const partial=max>0&&done>0&&done<max; // 일부만 완료
-    // 완료(exhausted)면 done 클래스, 일부면 partial, 무제한인데 1회이상이면 done
+    const exhausted=max>0&&done>=max;
+    const partial=max>0&&done>0&&done<max;
     let cls='';
-    if(exhausted) cls=' done'; // 완료 = 초록색
-    else if(partial) cls=' partial'; // 일부 = 노란색
-    else if(max===0&&done>0) cls=' done'; // 무제한인데 오늘 했으면 초록색
+    if(exhausted) cls=' done';
+    else if(partial) cls=' partial';
+    else if(max===0&&done>0) cls=' done';
     const timer=countdownStr(a);
     const pct=max>0?Math.round(done/max*100):0;
     const cc=CYCLE_CHIP[a.cycle]||'c-or';
     const cycleLabel=CYCLE_LABEL[a.cycle]||a.cycle;
     const countLabel=max>0?`${done}/${max}회`:'';
-    const canClick=!exhausted;
-    return `<div class="log-item${cls}" onclick="${canClick?'doAct(\''+a.id+'\')':''}" style="${exhausted?'cursor:default':''}">
+    const stickerHTML=renderStickersForLog(a.id);
+    return `<div class="log-item${cls}" data-actid="${a.id}" style="${exhausted?'cursor:default':''}position:relative;overflow:visible;">
       <div class="log-ico" style="${pct>0?'--prog:'+pct+'%;':''}">${a.emoji}${pct>0&&pct<100?'<div class="log-prog-ring"></div>':''}</div>
       <div class="log-inf">
         <div class="log-nm">${a.name}</div>
@@ -3623,6 +3707,7 @@ function renderLogList(){
           ${countLabel?`<span class="chip c-yw">${countLabel}</span>`:''}
           ${timer?`<span class="log-timer">⏰ ${timer}</span>`:''}
         </div>
+        ${stickerHTML}
       </div>
       <div class="log-right">
         <span class="log-badge">+${a.pts} 마일리지</span>
@@ -3630,6 +3715,23 @@ function renderLogList(){
       </div>
     </div>`;
   }).join('');
+  // Attach long-press + tap handlers for log items
+  el.querySelectorAll('.log-item[data-actid]').forEach(item=>{
+    const actId=item.dataset.actid;
+    const a=S.acts.find(x=>x.id===actId);
+    const exhausted=a&&getCardState(a).exhausted;
+    let lpTimer=null, didLongPress=false;
+    const startLP=()=>{didLongPress=false;lpTimer=setTimeout(()=>{didLongPress=true;showLongPressChoice(actId,item);},500);};
+    const endLP=()=>{clearTimeout(lpTimer);};
+    const doTap=(e)=>{if(didLongPress){e.preventDefault();return;}if(!exhausted&&a)doAct(actId);};
+    item.addEventListener('touchstart',startLP,{passive:true});
+    item.addEventListener('touchend',(e)=>{endLP();doTap(e);});
+    item.addEventListener('touchmove',endLP,{passive:true});
+    item.addEventListener('touchcancel',endLP);
+    item.addEventListener('mousedown',startLP);
+    item.addEventListener('mouseup',(e)=>{endLP();doTap(e);});
+    item.addEventListener('mouseleave',endLP);
+  });
 }
 
 function getDayLabel(ts){
@@ -5478,6 +5580,218 @@ function undoAct(actId){
   save();renderAll();
   toast(`↩ ${a.name} 취소됨 (-${entry.pts} 마일리지)`);
 }
+
+// ── STICKER & BUBBLE MESSAGE SYSTEM ──────────────────────
+const STICKER_EMOJIS=['❤️','👍','👎','😂','‼️','❓','😆','💔','🔥','⭐','💪','🎉','👏','😍','😢','😡','💩','👀','🙏','💯','🌈','🍀','✨','🫶','💕','😎','🤔','😴','🤗','😱'];
+
+function cleanExpiredStickers(){
+  if(!S.stickers)S.stickers=[];
+  const now=Date.now();
+  const todayStart=new Date();todayStart.setHours(0,0,0,0);
+  const cutoff=todayStart.getTime();
+  const before=S.stickers.length;
+  S.stickers=S.stickers.filter(s=>s.ts>=cutoff);
+  if(S.stickers.length<before)save();
+}
+
+function getTodayStickers(actId){
+  if(!S.stickers)S.stickers=[];
+  const todayStart=new Date();todayStart.setHours(0,0,0,0);
+  return S.stickers.filter(s=>s.actId===actId&&s.ts>=todayStart.getTime());
+}
+
+function renderStickersFor(actId){
+  const items=getTodayStickers(actId);
+  if(!items.length)return '';
+  const emojis=items.filter(s=>s.type==='emoji');
+  const bubbles=items.filter(s=>s.type==='bubble');
+  let html='';
+  if(emojis.length){
+    html+=`<div class="sticker-wrap">`;
+    emojis.forEach((s,i)=>{
+      html+=`<span class="sticker-item" style="animation-delay:${i*0.3}s" onclick="event.stopPropagation();showStickerInfo('${s.id}')">${s.content}</span>`;
+    });
+    html+=`</div>`;
+  }
+  if(bubbles.length){
+    html+=`<div class="bubble-wrap">`;
+    bubbles.forEach((s,i)=>{
+      const safe=s.content.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+      html+=`<span class="bubble-item" style="animation-delay:${i*0.4}s" onclick="event.stopPropagation();showStickerInfo('${s.id}')">${safe}</span>`;
+    });
+    html+=`</div>`;
+  }
+  return html;
+}
+
+function renderStickersForLog(actId){
+  const items=getTodayStickers(actId);
+  if(!items.length)return '';
+  let html='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;align-items:center">';
+  items.forEach((s,i)=>{
+    if(s.type==='emoji'){
+      html+=`<span class="sticker-item" style="font-size:16px;animation-delay:${i*0.3}s;display:inline-block" onclick="event.stopPropagation();showStickerInfo('${s.id}')">${s.content}</span>`;
+    }else{
+      const safe=s.content.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+      html+=`<span class="bubble-item" style="font-size:9px;padding:2px 6px;animation-delay:${i*0.4}s;display:inline-block" onclick="event.stopPropagation();showStickerInfo('${s.id}')">${safe}</span>`;
+    }
+  });
+  html+='</div>';
+  return html;
+}
+
+let _lpOverlay=null;
+function showLongPressChoice(actId,cardEl){
+  // Haptic feedback if available
+  if(navigator.vibrate)navigator.vibrate(30);
+  closeLPOverlay();
+  const ov=document.createElement('div');
+  ov.className='lp-overlay';
+  ov.innerHTML=`
+    <div class="lp-choice">
+      <div class="lp-choice-btn" onclick="closeLPOverlay();openStickerPicker('${actId}')">
+        <div class="lp-ico">😊</div>
+        <div class="lp-lbl">스티커</div>
+      </div>
+      <div class="lp-choice-btn" onclick="closeLPOverlay();openBubbleInput('${actId}')">
+        <div class="lp-ico">💬</div>
+        <div class="lp-lbl">말풍선</div>
+      </div>
+    </div>`;
+  ov.addEventListener('click',(e)=>{if(e.target===ov)closeLPOverlay();});
+  document.body.appendChild(ov);
+  _lpOverlay=ov;
+}
+function closeLPOverlay(){if(_lpOverlay){_lpOverlay.remove();_lpOverlay=null;}}
+
+let _stkPickerOv=null;
+function openStickerPicker(actId){
+  closeStickerPicker();
+  const ov=document.createElement('div');
+  ov.className='stk-picker-overlay';
+  let emojiGrid='';
+  STICKER_EMOJIS.forEach(em=>{
+    emojiGrid+=`<button class="stk-emoji-btn" onclick="addSticker('${actId}','emoji','${em}')">${em}</button>`;
+  });
+  ov.innerHTML=`<div class="stk-picker">
+    <div class="stk-picker-title">스티커 선택</div>
+    <div class="stk-emoji-row">${emojiGrid}</div>
+    <button class="stk-cancel" onclick="closeStickerPicker()">취소</button>
+  </div>`;
+  ov.addEventListener('click',(e)=>{if(e.target===ov)closeStickerPicker();});
+  document.body.appendChild(ov);
+  _stkPickerOv=ov;
+}
+function closeStickerPicker(){if(_stkPickerOv){_stkPickerOv.remove();_stkPickerOv=null;}}
+
+let _bblInputOv=null;
+function openBubbleInput(actId){
+  closeBubbleInput();
+  const ov=document.createElement('div');
+  ov.className='bbl-input-overlay';
+  ov.innerHTML=`<div class="bbl-input-box">
+    <h4>💬 말풍선 메시지</h4>
+    <input id="bbl-msg-inp" type="text" placeholder="짧은 메시지를 남겨봐요" maxlength="10" autocomplete="off">
+    <div class="bbl-char-count"><span id="bbl-char-cnt">0</span>/10</div>
+    <div class="bbl-input-btns">
+      <button class="bbl-cancel" onclick="closeBubbleInput()">취소</button>
+      <button class="bbl-send" onclick="submitBubble('${actId}')">보내기</button>
+    </div>
+  </div>`;
+  ov.addEventListener('click',(e)=>{if(e.target===ov)closeBubbleInput();});
+  document.body.appendChild(ov);
+  _bblInputOv=ov;
+  const inp=document.getElementById('bbl-msg-inp');
+  inp.addEventListener('input',()=>{
+    document.getElementById('bbl-char-cnt').textContent=inp.value.length;
+  });
+  setTimeout(()=>inp.focus(),100);
+}
+function closeBubbleInput(){if(_bblInputOv){_bblInputOv.remove();_bblInputOv=null;}}
+
+function submitBubble(actId){
+  const inp=document.getElementById('bbl-msg-inp');
+  const msg=inp?inp.value.trim():'';
+  if(!msg){toast('메시지를 입력해주세요');return;}
+  addSticker(actId,'bubble',msg);
+}
+
+function addSticker(actId,type,content){
+  if(!S.stickers)S.stickers=[];
+  const stk={
+    id:'stk_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+    actId:actId,
+    type:type,
+    content:content,
+    user:currentUser||'unknown',
+    ts:Date.now()
+  };
+  S.stickers.push(stk);
+  save();
+  closeStickerPicker();
+  closeBubbleInput();
+  renderAll();
+  if(navigator.vibrate)navigator.vibrate(15);
+  toast(type==='emoji'?`${content} 스티커를 붙였어요!`:'💬 말풍선을 남겼어요!');
+}
+
+let _stkInfoOv=null;
+function showStickerInfo(stkId){
+  closeStickerInfo();
+  if(!S.stickers)return;
+  const stk=S.stickers.find(s=>s.id===stkId);
+  if(!stk)return;
+  const uName=getUserDisplayName(stk.user);
+  const time=new Date(stk.ts);
+  const timeStr=`${time.getFullYear()}.${String(time.getMonth()+1).padStart(2,'0')}.${String(time.getDate()).padStart(2,'0')} ${String(time.getHours()).padStart(2,'0')}:${String(time.getMinutes()).padStart(2,'0')}`;
+  const preview=stk.type==='emoji'
+    ?`<div class="stk-info-preview">${stk.content}</div>`
+    :`<div class="stk-info-preview is-bubble">${stk.content.replace(/</g,'&lt;')}</div>`;
+  const canDel=(stk.user===currentUser)||isParentUser();
+  const ov=document.createElement('div');
+  ov.className='stk-info-overlay';
+  ov.innerHTML=`<div class="stk-info-box">
+    ${preview}
+    <div class="stk-info-who">${uName}</div>
+    <div class="stk-info-when">${timeStr}</div>
+    <div style="display:flex;gap:8px;justify-content:center">
+      ${canDel?`<button class="stk-info-del" onclick="deleteSticker('${stkId}')">삭제하기</button>`:''}
+      <button class="stk-info-close" onclick="closeStickerInfo()">닫기</button>
+    </div>
+  </div>`;
+  ov.addEventListener('click',(e)=>{if(e.target===ov)closeStickerInfo();});
+  document.body.appendChild(ov);
+  _stkInfoOv=ov;
+}
+function closeStickerInfo(){if(_stkInfoOv){_stkInfoOv.remove();_stkInfoOv=null;}}
+
+function deleteSticker(stkId){
+  if(!S.stickers)return;
+  S.stickers=S.stickers.filter(s=>s.id!==stkId);
+  save();
+  closeStickerInfo();
+  renderAll();
+  toast('🗑️ 스티커가 삭제됐어요');
+}
+
+function getUserDisplayName(userId){
+  if(!userId)return '알 수 없음';
+  if(S.users&&S.users[userId]){
+    return S.users[userId].emoji?S.users[userId].emoji+' '+S.users[userId].name:S.users[userId].name;
+  }
+  if(userId==='taemin')return '🧒 태민';
+  if(userId==='dad')return '👨 아빠';
+  if(userId==='mom')return '👩 엄마';
+  return userId;
+}
+
+function isParentUser(){
+  if(!currentUser)return false;
+  if(S.users&&S.users[currentUser])return S.users[currentUser].role==='parent';
+  return currentUser==='dad'||currentUser==='mom';
+}
+
+// ── END STICKER SYSTEM ──────────────────────
 
 // REDEEM
 let pRwdId=null;
@@ -7641,8 +7955,9 @@ Object.assign(window, {
   
   loadDarkPref(); // localStorage에서 개인 다크모드 설정 로드
   applyUserProfile(); // 로그인된 사용자 프로필 적용 (인사말 포함)
+  cleanExpiredStickers(); // 하루 지난 스티커 자동 삭제
   renderAll();
-  
+
   // 날씨/미세먼지 데이터 가져오기
   fetchWeather();
   setInterval(fetchWeather, 600000); // 10분마다 갱신
@@ -7677,6 +7992,12 @@ Object.assign(window, {
               }
             });
             renderNavUsers();
+          }
+          // Merge stickers from other devices
+          if(incoming.stickers && Array.isArray(incoming.stickers)){
+            const localIds=new Set((S.stickers||[]).map(s=>s.id));
+            incoming.stickers.forEach(s=>{if(!localIds.has(s.id)){if(!S.stickers)S.stickers=[];S.stickers.push(s);}});
+            renderAll();
           }
         }catch(e){}
         console.log('🛡️ 로컬 변경 보호: 외부 변경 일부만 머지');
