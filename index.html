@@ -701,6 +701,7 @@ body.dark .pin-key.ck{background:transparent}
 .msglist-item-dot{width:8px;height:8px;border-radius:50%;background:#EF4444;flex-shrink:0;margin-top:4px}
 .msglist-item-dot.read{background:transparent}
 .msglist-empty{padding:24px;text-align:center;color:var(--tx3);font-size:13px}
+.msglist-footer{padding:10px 12px;border-top:1px solid var(--bdr);flex-shrink:0}
 .msglist-back{background:none;border:none;color:var(--tx2);cursor:pointer;padding:4px;display:flex;align-items:center;border-radius:8px;transition:background .15s}
 .msglist-back:active{background:var(--bg2)}
 .msglist-detail{padding:16px;overflow-y:auto;flex:1;display:flex;flex-direction:column;align-items:center;gap:12px}
@@ -2034,6 +2035,7 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
     <button class="msg-pop-close" onclick="closeMsgList()">✕</button>
   </div>
   <div class="msglist-body" id="msglist-body"></div>
+  <div class="msglist-footer" id="msglist-footer" style="display:none"></div>
   <div class="msglist-detail" id="msglist-detail" style="display:none"></div>
 </div>
 
@@ -7098,7 +7100,7 @@ function sendFamilyMsg(){
     read:false
   });
   // Keep only last 50 messages
-  if(S.familyMessages.length>50)S.familyMessages=S.familyMessages.slice(-50);
+  if(S.familyMessages.length>200)S.familyMessages=S.familyMessages.slice(-200);
 
   // For self-messages, play emotion animation immediately
   const isSelfMessage=msgTargetUser===currentUser;
@@ -7224,10 +7226,10 @@ function openMsgList(fromId){
       </div>`;
     }).join('');
   }
-  // Add "새 메시지 보내기" button at bottom
-  body.innerHTML+=`<div style="padding:12px 8px;border-top:1px solid var(--bdr);margin-top:8px">
-    <button class="msg-send-btn" onclick="closeMsgList();openMsgPop('${fromId}')">💌 새 메시지 보내기</button>
-  </div>`;
+  // Fixed footer with send button
+  const footer=document.getElementById('msglist-footer');
+  footer.innerHTML=`<button class="msg-send-btn" onclick="closeMsgList();openMsgPop('${fromId}')">💌 새 메시지 보내기</button>`;
+  footer.style.display='block';
   document.getElementById('msglist-bg').style.display='block';
   document.getElementById('msglist-pop').style.display='flex';
 }
@@ -7238,6 +7240,7 @@ function closeMsgList(){
   document.getElementById('msglist-pop').style.display='none';
   document.getElementById('msglist-detail').style.display='none';
   document.getElementById('msglist-body').style.display='block';
+  document.getElementById('msglist-footer').style.display='none';
   document.getElementById('msglist-back').style.display='none';
   _msgListFromId=null;
 }
@@ -7255,6 +7258,7 @@ function readMsgFromList(fromId,msgIdx){
   // Show detail view inside the same popup
   _msgListFromId=fromId;
   document.getElementById('msglist-body').style.display='none';
+  document.getElementById('msglist-footer').style.display='none';
   document.getElementById('msglist-back').style.display='flex';
   document.getElementById('msglist-title').textContent='메시지 상세';
 
