@@ -611,8 +611,8 @@ body.dark .today-summary-card .ts-msg{background:linear-gradient(135deg,#312E81,
 .pin-dot{width:15px;height:15px;border-radius:50%;border:2px solid var(--bdr2);background:transparent;transition:.15s}
 .pin-dot.on{background:var(--tab-color,var(--or));border-color:var(--tab-color,var(--or))}
 .pin-dot.err{background:var(--rd);border-color:var(--rd)}
-.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
-.pin-key{background:var(--bg2);border:1.5px solid var(--bdr);border-radius:14px;padding:16px 0;font-size:24px;font-weight:800;cursor:pointer;font-family:inherit;color:var(--tx);transition:background .1s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;min-height:52px;user-select:none}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.pin-key{background:var(--bg2);border:1.5px solid var(--bdr);border-radius:14px;padding:18px 0;font-size:26px;font-weight:800;cursor:pointer;font-family:inherit;color:var(--tx);transition:background .1s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;min-height:56px;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 body.dark .pin-key{background:var(--card2);border-color:var(--bdr2)}
 .pin-key:active{background:var(--bdr2);transform:scale(.95)}
 .pin-key.ck{font-size:13px;color:var(--tx2);font-weight:700;background:transparent;border-color:transparent}
@@ -1923,13 +1923,13 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
       <div class="pin-dot"></div><div class="pin-dot"></div>
       <div class="pin-dot"></div><div class="pin-dot"></div>
     </div>
-    <div class="pin-pad">
-      <button class="pin-key" onclick="pk('1')">1</button><button class="pin-key" onclick="pk('2')">2</button><button class="pin-key" onclick="pk('3')">3</button>
-      <button class="pin-key" onclick="pk('4')">4</button><button class="pin-key" onclick="pk('5')">5</button><button class="pin-key" onclick="pk('6')">6</button>
-      <button class="pin-key" onclick="pk('7')">7</button><button class="pin-key" onclick="pk('8')">8</button><button class="pin-key" onclick="pk('9')">9</button>
-      <button class="pin-key ck" onclick="pk('cancel')">취소</button>
-      <button class="pin-key" onclick="pk('0')">0</button>
-      <button class="pin-key dk" onclick="pk('del')">⌫</button>
+    <div class="pin-pad" id="pin-pad">
+      <button class="pin-key" data-pk="1">1</button><button class="pin-key" data-pk="2">2</button><button class="pin-key" data-pk="3">3</button>
+      <button class="pin-key" data-pk="4">4</button><button class="pin-key" data-pk="5">5</button><button class="pin-key" data-pk="6">6</button>
+      <button class="pin-key" data-pk="7">7</button><button class="pin-key" data-pk="8">8</button><button class="pin-key" data-pk="9">9</button>
+      <button class="pin-key ck" data-pk="cancel">취소</button>
+      <button class="pin-key" data-pk="0">0</button>
+      <button class="pin-key dk" data-pk="del">⌫</button>
     </div>
   </div>
 </div>
@@ -6763,41 +6763,67 @@ function showPin(mode,title,sub){
   document.getElementById('pin-sub').innerHTML=sub;
   updDots('normal');
   document.getElementById('pin-wrap').style.display='flex';
-  // Focus PIN area for keyboard input
-  setTimeout(()=>document.getElementById('pin-wrap').focus(),100);
+  lockBodyScroll();
 }
 
-// Keyboard support for PIN input
+// Direct touch handlers for PIN buttons (avoids iOS onclick issues)
+document.querySelectorAll('.pin-key[data-pk]').forEach(btn=>{
+  let touched=false;
+  btn.addEventListener('touchstart',(e)=>{
+    touched=true;
+    btn.style.background='var(--bdr2)';
+    btn.style.transform='scale(.95)';
+  },{passive:true});
+  btn.addEventListener('touchend',(e)=>{
+    e.preventDefault();
+    btn.style.background='';
+    btn.style.transform='';
+    if(touched){pk(btn.dataset.pk);touched=false;}
+  });
+  btn.addEventListener('touchcancel',()=>{
+    btn.style.background='';
+    btn.style.transform='';
+    touched=false;
+  });
+  btn.addEventListener('click',(e)=>{
+    if(!touched)pk(btn.dataset.pk);
+  });
+});
+
+// Keyboard support for PIN input (desktop)
 document.getElementById('pin-wrap').setAttribute('tabindex','-1');
-document.getElementById('pin-wrap').addEventListener('keydown',function(e){
-  if(this.style.display==='none')return;
+document.addEventListener('keydown',function(e){
+  const pw=document.getElementById('pin-wrap');
+  if(!pw||pw.style.display==='none')return;
   if(e.key>='0'&&e.key<='9'){pk(e.key);e.preventDefault();}
   else if(e.key==='Backspace'){pk('del');e.preventDefault();}
   else if(e.key==='Escape'){pk('cancel');e.preventDefault();}
 });
 function startChangePIN(){showPin('new1','🔑 새 PIN 설정','새로 사용할 PIN 4자리를 입력하세요');}
 function pk(k){
-  if(k==='cancel'){document.getElementById('pin-wrap').style.display='none';pBuf='';pFirst='';pMode='auth';return;}
+  if(k==='cancel'){document.getElementById('pin-wrap').style.display='none';unlockBodyScroll();pBuf='';pFirst='';pMode='auth';return;}
   if(k==='del'){pBuf=pBuf.slice(0,-1);updDots('normal');return;}
   if(pBuf.length>=4)return;
   pBuf+=k;updDots('normal');
+  if(navigator.vibrate)navigator.vibrate(10);
   if(pBuf.length===4)setTimeout(handlePin,150);
 }
+function closePin(){document.getElementById('pin-wrap').style.display='none';unlockBodyScroll();}
 function handlePin(){
   if(pMode==='auth'){
-    if(pBuf===S.settings.pin){document.getElementById('pin-wrap').style.display='none';adminOK=true;pBuf='';reallyGoTab('adm');}
+    if(pBuf===S.settings.pin){closePin();adminOK=true;pBuf='';reallyGoTab('adm');}
     else{updDots('err');setTimeout(()=>{pBuf='';updDots('normal');toast('❌ PIN이 틀렸어요');},600);}
   }else if(pMode==='new1'){
     pFirst=pBuf;pBuf='';
     showPin('new2','🔑 PIN 확인','방금 입력한 PIN을 한 번 더 입력하세요');
   }else if(pMode==='new2'){
-    if(pBuf===pFirst){S.settings.pin=pBuf;save();document.getElementById('pin-wrap').style.display='none';pBuf='';pFirst='';pMode='auth';toast('🔐 PIN이 변경됐어요!');}
+    if(pBuf===pFirst){S.settings.pin=pBuf;save();closePin();pBuf='';pFirst='';pMode='auth';toast('🔐 PIN이 변경됐어요!');}
     else{updDots('err');setTimeout(()=>{pBuf='';pFirst='';showPin('new1','🔑 새 PIN 설정','PIN이 일치하지 않아요. 다시 입력하세요');toast('❌ PIN이 일치하지 않아요');},600);}
   }else if(pMode==='reset_today'){
-    if(pBuf===S.settings.pin){document.getElementById('pin-wrap').style.display='none';pBuf='';pMode='auth';doResetToday();}
+    if(pBuf===S.settings.pin){closePin();pBuf='';pMode='auth';doResetToday();}
     else{updDots('err');setTimeout(()=>{pBuf='';updDots('normal');toast('❌ PIN이 틀렸어요');},600);}
   }else if(pMode==='reset_all'){
-    if(pBuf===S.settings.pin){document.getElementById('pin-wrap').style.display='none';pBuf='';pMode='auth';doResetAll();}
+    if(pBuf===S.settings.pin){closePin();pBuf='';pMode='auth';doResetAll();}
     else{updDots('err');setTimeout(()=>{pBuf='';updDots('normal');toast('❌ PIN이 틀렸어요');},600);}
   }
 }
