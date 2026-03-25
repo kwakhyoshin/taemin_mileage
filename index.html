@@ -2303,40 +2303,40 @@ const DRWDS = [
 // ── BADGES (뱃지/업적) ──────────────────────────────────
 const BADGES = [
   // 📚 공부 (Study) - 8 badges
-  {id:'study_first',emoji:'📖',name:'첫 공부 시작',desc:'시작이 반이야! 첫 공부를 해냈어',category:'공부',hidden:false,bonus:30,check:S=>countStudyTotal()>=1},
-  {id:'study_5',emoji:'🌱',name:'공부 습관 씨앗',desc:'작은 노력이 모여 큰 힘이 돼',category:'공부',hidden:false,bonus:50,check:S=>countStudyTotal()>=5},
-  {id:'study_15',emoji:'📝',name:'꾸준한 학습자',desc:'꾸준함이 천재를 이겨!',category:'공부',hidden:false,bonus:80,check:S=>countStudyTotal()>=15},
-  {id:'study_30',emoji:'🎓',name:'공부의 달인',desc:'30번의 노력, 정말 대단해!',category:'공부',hidden:false,bonus:120,check:S=>countStudyTotal()>=30},
-  {id:'study_50',emoji:'👑',name:'공부왕',desc:'50번! 노력은 절대 배신하지 않아',category:'공부',hidden:false,bonus:200,check:S=>countStudyTotal()>=50},
-  {id:'study_streak3',emoji:'🔥',name:'공부 연속 3일',desc:'3일 연속 공부! 습관이 되고 있어',category:'공부',hidden:false,bonus:40,check:S=>getStudyStreak()>=3},
-  {id:'study_streak7',emoji:'💎',name:'공부 연속 7일',desc:'일주일 내내! 대단한 끈기야',category:'공부',hidden:false,bonus:100,check:S=>getStudyStreak()>=7},
-  {id:'study_weekend',emoji:'🌟',name:'주말에도 공부',desc:'쉬는 날에도 노력하는 모습, 멋져!',category:'공부',hidden:false,bonus:60,check:S=>hasWeekendStudy()},
+  {id:'study_first',emoji:'📖',name:'첫 공부 시작',desc:'시작이 반이야! 첫 공부를 해냈어',category:'공부',hidden:false,bonus:5,label:'1st',check:S=>countStudyTotal()>=1},
+  {id:'study_5',emoji:'🌱',name:'공부 습관 씨앗',desc:'작은 노력이 모여 큰 힘이 돼',category:'공부',hidden:false,bonus:10,label:'×5',check:S=>countStudyTotal()>=5},
+  {id:'study_15',emoji:'📝',name:'꾸준한 학습자',desc:'꾸준함이 천재를 이겨!',category:'공부',hidden:false,bonus:15,label:'×15',check:S=>countStudyTotal()>=15},
+  {id:'study_30',emoji:'🎓',name:'공부의 달인',desc:'30번의 노력, 정말 대단해!',category:'공부',hidden:false,bonus:20,label:'×30',check:S=>countStudyTotal()>=30},
+  {id:'study_50',emoji:'👑',name:'공부왕',desc:'50번! 노력은 절대 배신하지 않아',category:'공부',hidden:false,bonus:30,label:'×50',check:S=>countStudyTotal()>=50},
+  {id:'study_streak3',emoji:'🔥',name:'공부 연속 3일',desc:'3일 연속 공부! 습관이 되고 있어',category:'공부',hidden:false,bonus:10,label:'3Days',check:S=>getStudyStreak()>=3},
+  {id:'study_streak7',emoji:'💎',name:'공부 연속 7일',desc:'일주일 내내! 대단한 끈기야',category:'공부',hidden:false,bonus:20,label:'7Days',check:S=>getStudyStreak()>=7},
+  {id:'study_weekend',emoji:'🌟',name:'주말에도 공부',desc:'쉬는 날에도 노력하는 모습, 멋져!',category:'공부',hidden:false,bonus:10,label:'Weekend',check:S=>hasWeekendStudy()},
 
   // ⭐ 꾸준함 (Consistency) - 6 badges
-  {id:'streak_3',emoji:'⭐',name:'3일 연속 출석',desc:'꾸준함의 시작!',category:'꾸준함',hidden:false,bonus:20,check:S=>(S.streak||0)>=3||(S.longest||0)>=3},
-  {id:'streak_7',emoji:'🌈',name:'7일 연속 출석',desc:'일주일 연속! 대단해!',category:'꾸준함',hidden:false,bonus:50,check:S=>(S.streak||0)>=7||(S.longest||0)>=7},
-  {id:'streak_14',emoji:'🏅',name:'14일 연속 출석',desc:'2주 연속이라니!',category:'꾸준함',hidden:false,bonus:80,check:S=>(S.streak||0)>=14||(S.longest||0)>=14},
-  {id:'streak_30',emoji:'🏆',name:'30일 연속 출석',desc:'한 달 내내! 진정한 챔피언',category:'꾸준함',hidden:false,bonus:150,check:S=>(S.streak||0)>=30||(S.longest||0)>=30},
-  {id:'morning_7',emoji:'🌅',name:'아침형 인간',desc:'아침 활동을 7번이나!',category:'꾸준함',hidden:false,bonus:30,check:S=>countMorningActivities()>=7},
-  {id:'total_100',emoji:'💯',name:'100번째 활동',desc:'100번의 작은 노력이 모였어!',category:'꾸준함',hidden:false,bonus:100,check:S=>(S.totalDone||0)>=100},
+  {id:'streak_3',emoji:'⭐',name:'3일 연속 출석',desc:'꾸준함의 시작!',category:'꾸준함',hidden:false,bonus:5,label:'3Days',check:S=>(S.streak||0)>=3||(S.longest||0)>=3},
+  {id:'streak_7',emoji:'🌈',name:'7일 연속 출석',desc:'일주일 연속! 대단해!',category:'꾸준함',hidden:false,bonus:10,label:'7Days',check:S=>(S.streak||0)>=7||(S.longest||0)>=7},
+  {id:'streak_14',emoji:'🏅',name:'14일 연속 출석',desc:'2주 연속이라니!',category:'꾸준함',hidden:false,bonus:15,label:'14Days',check:S=>(S.streak||0)>=14||(S.longest||0)>=14},
+  {id:'streak_30',emoji:'🏆',name:'30일 연속 출석',desc:'한 달 내내! 진정한 챔피언',category:'꾸준함',hidden:false,bonus:25,label:'30Days',check:S=>(S.streak||0)>=30||(S.longest||0)>=30},
+  {id:'morning_7',emoji:'🌅',name:'아침형 인간',desc:'아침 활동을 7번이나!',category:'꾸준함',hidden:false,bonus:10,label:'AM',check:S=>countMorningActivities()>=7},
+  {id:'total_100',emoji:'💯',name:'100번째 활동',desc:'100번의 작은 노력이 모였어!',category:'꾸준함',hidden:false,bonus:20,label:'100',check:S=>(S.totalDone||0)>=100},
 
   // 💪 도전 (Challenge) - 5 badges
-  {id:'daily_5',emoji:'✋',name:'하루 5개 클리어',desc:'오늘 정말 열심히 했어!',category:'도전',hidden:false,bonus:30,check:S=>getMaxDailyActivities()>=5},
-  {id:'daily_10',emoji:'🔟',name:'하루 10개 클리어',desc:'놀라운 하루!',category:'도전',hidden:false,bonus:60,check:S=>getMaxDailyActivities()>=10},
-  {id:'health_combo',emoji:'💚',name:'건강 지킴이',desc:'운동+영양제+양치 한 번에!',category:'도전',hidden:false,bonus:40,check:S=>hasHealthCombo()},
-  {id:'patience_5',emoji:'😌',name:'짜증 참기 달인',desc:'감정을 다스리는 힘이 자랐어',category:'도전',hidden:false,bonus:50,check:S=>countActivityByName('짜증 안내기')>=5},
-  {id:'happy_school_7',emoji:'😄',name:'즐거운 등교 달인',desc:'기분좋게 학교가기, 벌써 7번!',category:'도전',hidden:false,bonus:40,check:S=>countActivityByName('기분좋게 학교')>=7},
+  {id:'daily_5',emoji:'✋',name:'하루 5개 클리어',desc:'오늘 정말 열심히 했어!',category:'도전',hidden:false,bonus:5,label:'×5',check:S=>getMaxDailyActivities()>=5},
+  {id:'daily_10',emoji:'🔟',name:'하루 10개 클리어',desc:'놀라운 하루!',category:'도전',hidden:false,bonus:15,label:'×10',check:S=>getMaxDailyActivities()>=10},
+  {id:'health_combo',emoji:'💚',name:'건강 지킴이',desc:'운동+영양제+양치 한 번에!',category:'도전',hidden:false,bonus:10,label:'Health',check:S=>hasHealthCombo()},
+  {id:'patience_5',emoji:'😌',name:'짜증 참기 달인',desc:'감정을 다스리는 힘이 자랐어',category:'도전',hidden:false,bonus:10,label:'Zen',check:S=>countActivityByName('짜증 안내기')>=5},
+  {id:'happy_school_7',emoji:'😄',name:'즐거운 등교 달인',desc:'기분좋게 학교가기, 벌써 7번!',category:'도전',hidden:false,bonus:10,label:'Happy',check:S=>countActivityByName('기분좋게 학교')>=7},
 
   // 🌱 성장 (Growth) - 5 badges
-  {id:'first_activity',emoji:'👣',name:'첫 걸음',desc:'모든 여행은 첫 걸음부터!',category:'성장',hidden:false,bonus:10,check:S=>(S.totalDone||0)>=1},
-  {id:'first_reward',emoji:'🎁',name:'첫 보상 교환',desc:'노력의 결실을 맛봤어!',category:'성장',hidden:false,bonus:20,check:S=>(S.rewardLog||[]).some(r=>r.type==='exchange')},
-  {id:'pts_1000',emoji:'🚀',name:'1000 마일리지 돌파',desc:'차곡차곡 모은 보람!',category:'성장',hidden:false,bonus:50,check:S=>getTotalEarned()>=1000},
-  {id:'pts_3000',emoji:'💰',name:'3000 마일리지 돌파',desc:'꾸준한 노력의 증거!',category:'성장',hidden:false,bonus:100,check:S=>getTotalEarned()>=3000},
-  {id:'mood_7',emoji:'🎭',name:'기분 나누기 달인',desc:'감정을 표현하는 건 용기야',category:'성장',hidden:false,bonus:30,check:S=>(S.moodLog||[]).length>=7},
+  {id:'first_activity',emoji:'👣',name:'첫 걸음',desc:'모든 여행은 첫 걸음부터!',category:'성장',hidden:false,bonus:5,label:'1st',check:S=>(S.totalDone||0)>=1},
+  {id:'first_reward',emoji:'🎁',name:'첫 보상 교환',desc:'노력의 결실을 맛봤어!',category:'성장',hidden:false,bonus:5,label:'Gift',check:S=>(S.rewardLog||[]).some(r=>r.type==='exchange')},
+  {id:'pts_1000',emoji:'🚀',name:'1000 마일리지 돌파',desc:'차곡차곡 모은 보람!',category:'성장',hidden:false,bonus:15,label:'1K',check:S=>getTotalEarned()>=1000},
+  {id:'pts_3000',emoji:'💰',name:'3000 마일리지 돌파',desc:'꾸준한 노력의 증거!',category:'성장',hidden:false,bonus:25,label:'3K',check:S=>getTotalEarned()>=3000},
+  {id:'mood_7',emoji:'🎭',name:'기분 나누기 달인',desc:'감정을 표현하는 건 용기야',category:'성장',hidden:false,bonus:10,label:'Mood',check:S=>(S.moodLog||[]).length>=7},
 
   // 🏆 히든 (Hidden) - 2 badges
-  {id:'perfect_day',emoji:'✨',name:'올 클리어',desc:'하루 모든 활동 완료! 완벽한 하루',category:'히든',hidden:true,bonus:80,check:S=>hasPerfectDay()},
-  {id:'early_study',emoji:'🦉',name:'새벽 학습자',desc:'아침 8시 전에 공부하다니!',category:'히든',hidden:true,bonus:50,check:S=>hasEarlyStudy()},
+  {id:'perfect_day',emoji:'✨',name:'올 클리어',desc:'하루 모든 활동 완료! 완벽한 하루',category:'히든',hidden:true,bonus:20,label:'Perfect',check:S=>hasPerfectDay()},
+  {id:'early_study',emoji:'🦉',name:'새벽 학습자',desc:'아침 8시 전에 공부하다니!',category:'히든',hidden:true,bonus:15,label:'Early',check:S=>hasEarlyStudy()},
 ];
 
 // ── FIREBASE ──────────────────────────────────
@@ -2818,7 +2818,7 @@ function hasEarlyStudy(){
 // Generate SVG badge - Apple Fitness style metallic circular design
 function generateBadgeSVG(badge,earned,size){
   size=size||80;
-  const id=badge.id+'_'+(earned?'e':'l');
+  const id=badge.id+'_'+(earned?'e':'l')+'_'+Math.random().toString(36).substr(2,4);
 
   const schemes={
     '공부':{outer1:'#D4AF37',outer2:'#B8860B',inner1:'#FFD700',inner2:'#DAA520',ring:'#F5D76E',accent:'#FFF8DC',glow:'#FFD700'},
@@ -2830,37 +2830,106 @@ function generateBadgeSVG(badge,earned,size){
   const gray={outer1:'#A0A0A0',outer2:'#707070',inner1:'#C0C0C0',inner2:'#909090',ring:'#B8B8B8',accent:'#E0E0E0',glow:'#999'};
   const c=earned?(schemes[badge.category]||schemes['공부']):gray;
 
-  const icons={
-    '공부':`<path d="M50 25c-2 0-4 .5-5.5 1.5L34 33v20l10.5-6c1.5-1 3.5-1.5 5.5-1.5s4 .5 5.5 1.5L66 53V33l-10.5-6.5C54 25.5 52 25 50 25z" fill="${c.accent}" opacity=".9"/>
-             <path d="M50 30v22M34 33v20M66 33v20" stroke="${c.outer2}" stroke-width="1.5" fill="none" opacity=".6"/>
-             <circle cx="50" cy="26" r="2" fill="${c.accent}" opacity=".7"/>`,
-    '꾸준함':`<path d="M50 24l5.5 11.2 12.3 1.8-8.9 8.7 2.1 12.3L50 52l-11 5.8 2.1-12.3-8.9-8.7 12.3-1.8z" fill="${c.accent}" opacity=".9"/>
-              <path d="M50 24l5.5 11.2 12.3 1.8-8.9 8.7 2.1 12.3L50 52l-11 5.8 2.1-12.3-8.9-8.7 12.3-1.8z" stroke="${c.outer2}" stroke-width="1" fill="none" opacity=".4"/>
-              <path d="M50 32l3 6.2 6.8 1-4.9 4.8 1.2 6.8L50 47l-6.1 3.2 1.2-6.8-4.9-4.8 6.8-1z" fill="${c.outer1}" opacity=".3"/>`,
-    '도전':`<path d="M38 60h24l-3-10h-18l-3 10z" fill="${c.accent}" opacity=".9"/>
-            <path d="M42 50h16l4-16H38l4 16z" fill="${c.accent}" opacity=".85"/>
-            <path d="M36 34h28v-4H36v4z" fill="${c.accent}" opacity=".9"/>
-            <path d="M44 34v-8h12v8" fill="none" stroke="${c.outer2}" stroke-width="1.5" opacity=".4"/>
-            <circle cx="50" cy="42" r="3" fill="${c.outer1}" opacity=".5"/>`,
-    '성장':`<path d="M50 65V38" stroke="${c.accent}" stroke-width="3.5" stroke-linecap="round"/>
-            <path d="M50 38c-8-8-16-5-18 2 7 0 12-2 18-2" fill="${c.accent}" opacity=".9"/>
-            <path d="M50 38c8-8 16-5 18 2-7 0-12-2-18-2" fill="${c.accent}" opacity=".9"/>
-            <path d="M50 48c-5-5-10-3-12 1 4 0 8-1 12-1" fill="${c.accent}" opacity=".6"/>
-            <path d="M50 48c5-5 10-3 12 1-4 0-8-1-12-1" fill="${c.accent}" opacity=".6"/>
-            <path d="M44 65h12" stroke="${c.accent}" stroke-width="2.5" stroke-linecap="round"/>`,
-    '히든':`<path d="M50 25L30 50l20 20 20-20z" fill="${c.accent}" opacity=".85"/>
-            <path d="M50 25L30 50l20 20 20-20z" stroke="${c.outer2}" stroke-width="1.2" fill="none" opacity=".4"/>
-            <path d="M50 32L36 50l14 14 14-14z" fill="none" stroke="${c.accent}" stroke-width=".8" opacity=".5"/>
-            <path d="M50 39L42 50l8 8 8-8z" fill="${c.outer1}" opacity=".2"/>`
+  // Per-badge unique icon SVG paths
+  const badgeIcons={
+    // 공부
+    'study_first':`<path d="M38 32h24v28H38z" fill="${c.accent}" opacity=".15" rx="2"/>
+      <path d="M42 38h16M42 44h12M42 50h14" stroke="${c.accent}" stroke-width="2" stroke-linecap="round" opacity=".8"/>
+      <text x="50" y="68" text-anchor="middle" font-size="10" font-weight="900" fill="${c.accent}" opacity=".9">1st</text>`,
+    'study_5':`<path d="M40 30c0-3 3-5 6-5h8c3 0 6 2 6 5v20l-10 8-10-8V30z" fill="${c.accent}" opacity=".2"/>
+      <path d="M44 38h12M44 44h8" stroke="${c.accent}" stroke-width="2" stroke-linecap="round" opacity=".7"/>
+      <text x="50" y="68" text-anchor="middle" font-size="11" font-weight="900" fill="${c.accent}" opacity=".9">×5</text>`,
+    'study_15':`<path d="M36 28h28v4H36zM38 32h24v22H38z" fill="${c.accent}" opacity=".2"/>
+      <path d="M43 40h14M43 46h10M43 52h12" stroke="${c.accent}" stroke-width="1.8" stroke-linecap="round" opacity=".7"/>
+      <text x="50" y="68" text-anchor="middle" font-size="10" font-weight="900" fill="${c.accent}" opacity=".9">×15</text>`,
+    'study_30':`<path d="M50 26l-2 4h-8l6 5-2 7 6-4 6 4-2-7 6-5h-8z" fill="${c.accent}" opacity=".4"/>
+      <path d="M40 48h20" stroke="${c.accent}" stroke-width="1.5" opacity=".5"/>
+      <text x="50" y="62" text-anchor="middle" font-size="13" font-weight="900" fill="${c.accent}" opacity=".95">×30</text>`,
+    'study_50':`<path d="M50 24l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z" fill="${c.accent}" opacity=".5"/>
+      <path d="M38 48h24" stroke="${c.accent}" stroke-width="1" opacity=".4"/>
+      <text x="50" y="63" text-anchor="middle" font-size="14" font-weight="900" fill="${c.accent}">×50</text>`,
+    'study_streak3':`<path d="M50 26c-3 8-12 12-12 22 0 7 5 12 12 12s12-5 12-12c0-10-9-14-12-22z" fill="${c.accent}" opacity=".3"/>
+      <path d="M50 34c-2 5-7 8-7 14 0 4 3 7 7 7s7-3 7-7c0-6-5-9-7-14z" fill="${c.accent}" opacity=".5"/>
+      <text x="50" y="70" text-anchor="middle" font-size="9" font-weight="900" fill="${c.accent}">3Days</text>`,
+    'study_streak7':`<path d="M42 28l8 8 8-8M42 36l8 8 8-8M42 44l8 8 8-8" fill="none" stroke="${c.accent}" stroke-width="2.5" stroke-linecap="round" opacity=".7"/>
+      <text x="50" y="68" text-anchor="middle" font-size="9" font-weight="900" fill="${c.accent}">7Days</text>`,
+    'study_weekend':`<circle cx="42" cy="38" r="8" fill="${c.accent}" opacity=".3"/>
+      <circle cx="58" cy="38" r="8" fill="${c.accent}" opacity=".3"/>
+      <text x="42" y="41" text-anchor="middle" font-size="8" font-weight="900" fill="${c.accent}" opacity=".9">S</text>
+      <text x="58" y="41" text-anchor="middle" font-size="8" font-weight="900" fill="${c.accent}" opacity=".9">S</text>
+      <path d="M38 50h24" stroke="${c.accent}" stroke-width="1" opacity=".3"/>
+      <text x="50" y="63" text-anchor="middle" font-size="8" font-weight="800" fill="${c.accent}" opacity=".9">Weekend</text>`,
+    // 꾸준함
+    'streak_3':`<path d="M50 28v24" stroke="${c.accent}" stroke-width="3" stroke-linecap="round" opacity=".6"/>
+      <circle cx="50" cy="28" r="4" fill="${c.accent}" opacity=".5"/>
+      <text x="50" y="66" text-anchor="middle" font-size="10" font-weight="900" fill="${c.accent}">3Days</text>`,
+    'streak_7':`<path d="M36 40h28" stroke="${c.accent}" stroke-width="2" opacity=".4"/>
+      ${[0,1,2,3,4,5,6].map(i=>`<circle cx="${36+i*4.7}" cy="40" r="2.5" fill="${c.accent}" opacity="${i<7?'.7':'.3'}"/>`).join('')}
+      <text x="50" y="62" text-anchor="middle" font-size="10" font-weight="900" fill="${c.accent}">7Days</text>`,
+    'streak_14':`<path d="M34 34h32v18H34z" fill="${c.accent}" opacity=".15" rx="3"/>
+      <text x="50" y="47" text-anchor="middle" font-size="16" font-weight="900" fill="${c.accent}" opacity=".85">14</text>
+      <text x="50" y="62" text-anchor="middle" font-size="8" font-weight="800" fill="${c.accent}" opacity=".7">DAYS</text>`,
+    'streak_30':`<path d="M34 32h32v20H34z" fill="${c.accent}" opacity=".15" rx="3"/>
+      <text x="50" y="47" text-anchor="middle" font-size="18" font-weight="900" fill="${c.accent}" opacity=".9">30</text>
+      <text x="50" y="62" text-anchor="middle" font-size="8" font-weight="800" fill="${c.accent}" opacity=".7">DAYS</text>`,
+    'morning_7':`<path d="M50 30v-5M60 33l3-3M65 43h5M35 43h-5M40 33l-3-3" stroke="${c.accent}" stroke-width="2" stroke-linecap="round" opacity=".6"/>
+      <path d="M50 55a12 12 0 010-24 12 12 0 010 24z" fill="${c.accent}" opacity=".25"/>
+      <path d="M38 55h24" stroke="${c.accent}" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+      <text x="50" y="68" text-anchor="middle" font-size="9" font-weight="900" fill="${c.accent}">AM</text>`,
+    'total_100':`<text x="50" y="50" text-anchor="middle" dominant-baseline="central" font-size="22" font-weight="900" fill="${c.accent}" opacity=".9">100</text>
+      <path d="M30 60h40" stroke="${c.accent}" stroke-width="1.5" opacity=".4"/>
+      <text x="50" y="70" text-anchor="middle" font-size="7" font-weight="800" fill="${c.accent}" opacity=".7">COMPLETE</text>`,
+    // 도전
+    'daily_5':`<text x="50" y="46" text-anchor="middle" font-size="20" font-weight="900" fill="${c.accent}" opacity=".9">5</text>
+      <text x="50" y="62" text-anchor="middle" font-size="8" font-weight="800" fill="${c.accent}" opacity=".7">IN A DAY</text>`,
+    'daily_10':`<text x="50" y="46" text-anchor="middle" font-size="20" font-weight="900" fill="${c.accent}" opacity=".9">10</text>
+      <text x="50" y="62" text-anchor="middle" font-size="8" font-weight="800" fill="${c.accent}" opacity=".7">IN A DAY</text>`,
+    'health_combo':`<path d="M50 30l10 18H40z" fill="${c.accent}" opacity=".3"/>
+      <circle cx="42" cy="52" r="6" fill="${c.accent}" opacity=".25"/>
+      <circle cx="58" cy="52" r="6" fill="${c.accent}" opacity=".25"/>
+      <text x="50" y="70" text-anchor="middle" font-size="8" font-weight="900" fill="${c.accent}">Health</text>`,
+    'patience_5':`<circle cx="50" cy="40" r="14" fill="${c.accent}" opacity=".2"/>
+      <path d="M44 44q6-8 12 0" fill="none" stroke="${c.accent}" stroke-width="2" stroke-linecap="round" opacity=".7"/>
+      <circle cx="45" cy="37" r="1.5" fill="${c.accent}" opacity=".7"/>
+      <circle cx="55" cy="37" r="1.5" fill="${c.accent}" opacity=".7"/>
+      <text x="50" y="66" text-anchor="middle" font-size="9" font-weight="900" fill="${c.accent}">Zen</text>`,
+    'happy_school_7':`<path d="M38 44q12-14 24 0" fill="none" stroke="${c.accent}" stroke-width="2.5" stroke-linecap="round" opacity=".6"/>
+      <circle cx="44" cy="36" r="2" fill="${c.accent}" opacity=".7"/>
+      <circle cx="56" cy="36" r="2" fill="${c.accent}" opacity=".7"/>
+      <text x="50" y="64" text-anchor="middle" font-size="8" font-weight="900" fill="${c.accent}">Happy</text>`,
+    // 성장
+    'first_activity':`<path d="M45 55l5-25 5 25" fill="none" stroke="${c.accent}" stroke-width="2.5" stroke-linecap="round" opacity=".7"/>
+      <path d="M42 55h16" stroke="${c.accent}" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+      <text x="50" y="68" text-anchor="middle" font-size="10" font-weight="900" fill="${c.accent}">1st</text>`,
+    'first_reward':`<path d="M40 34h20v16H40z" fill="${c.accent}" opacity=".2" rx="2"/>
+      <path d="M50 34v16M40 42h20" stroke="${c.accent}" stroke-width="2" opacity=".5"/>
+      <path d="M44 30l6 4 6-4" fill="none" stroke="${c.accent}" stroke-width="2" stroke-linecap="round" opacity=".6"/>
+      <text x="50" y="66" text-anchor="middle" font-size="9" font-weight="900" fill="${c.accent}">Gift</text>`,
+    'pts_1000':`<path d="M40 50l10-20 10 20" fill="none" stroke="${c.accent}" stroke-width="2.5" opacity=".6"/>
+      <path d="M36 50h28" stroke="${c.accent}" stroke-width="1.5" opacity=".4"/>
+      <text x="50" y="66" text-anchor="middle" font-size="12" font-weight="900" fill="${c.accent}">1K</text>`,
+    'pts_3000':`<path d="M38 48l12-20 12 20" fill="${c.accent}" opacity=".2"/>
+      <path d="M38 48l12-20 12 20z" fill="none" stroke="${c.accent}" stroke-width="1.5" opacity=".5"/>
+      <text x="50" y="66" text-anchor="middle" font-size="12" font-weight="900" fill="${c.accent}">3K</text>`,
+    'mood_7':`<circle cx="43" cy="38" r="7" fill="${c.accent}" opacity=".2"/>
+      <circle cx="57" cy="38" r="7" fill="${c.accent}" opacity=".2"/>
+      <path d="M40 50q10 8 20 0" fill="none" stroke="${c.accent}" stroke-width="2" stroke-linecap="round" opacity=".6"/>
+      <text x="50" y="68" text-anchor="middle" font-size="8" font-weight="900" fill="${c.accent}">Mood</text>`,
+    // 히든
+    'perfect_day':`<path d="M50 26l3 8 8 1-6 6 2 8-7-4-7 4 2-8-6-6 8-1z" fill="${c.accent}" opacity=".5"/>
+      <text x="50" y="62" text-anchor="middle" font-size="7" font-weight="900" fill="${c.accent}">Perfect</text>`,
+    'early_study':`<circle cx="50" cy="38" r="12" fill="${c.accent}" opacity=".15"/>
+      <path d="M50 30v8l5 3" fill="none" stroke="${c.accent}" stroke-width="2" stroke-linecap="round" opacity=".7"/>
+      <text x="50" y="64" text-anchor="middle" font-size="8" font-weight="900" fill="${c.accent}">Early</text>`
   };
 
-  const lockIcon=`<path d="M42 48h16v12H42z" fill="${c.accent}" opacity=".3" stroke="${c.accent}" stroke-width="1.5"/>
-                   <path d="M45 48v-5a5 5 0 0110 0v5" fill="none" stroke="${c.accent}" stroke-width="2.5" stroke-linecap="round"/>
-                   <circle cx="50" cy="54" r="1.5" fill="${c.accent}" opacity=".6"/>`;
+  const lockIcon=`<path d="M42 46h16v14H42z" fill="${c.accent}" opacity=".2" rx="2"/>
+    <path d="M45 46v-5a5 5 0 0110 0v5" fill="none" stroke="${c.accent}" stroke-width="2.5" stroke-linecap="round" opacity=".5"/>
+    <circle cx="50" cy="53" r="2" fill="${c.accent}" opacity=".5"/>`;
 
-  const iconPath=earned?(icons[badge.category]||icons['공부']):lockIcon;
+  const iconPath=earned?(badgeIcons[badge.id]||`<text x="50" y="50" text-anchor="middle" dominant-baseline="central" font-size="10" font-weight="900" fill="${c.accent}">${badge.label||'?'}</text>`):lockIcon;
 
-  // More notches for elaborate look
+  // Notches
   const notches = earned ? Array.from({length:24},(_,i)=>{
     const angle=i*15*Math.PI/180;
     const r1 = i%2===0 ? 47 : 46;
@@ -2870,7 +2939,7 @@ function generateBadgeSVG(badge,earned,size){
     return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${sz}" fill="${c.accent}" opacity="${i%2===0?'0.6':'0.3'}"/>`;
   }).join('') : '';
 
-  // Star sparkles for earned
+  // Sparkles
   const sparkles = earned ? `
     <circle cx="22" cy="22" r="1.5" fill="${c.accent}" opacity=".8"><animate attributeName="opacity" values=".3;.8;.3" dur="2s" repeatCount="indefinite"/></circle>
     <circle cx="78" cy="28" r="1" fill="${c.accent}" opacity=".6"><animate attributeName="opacity" values=".2;.7;.2" dur="1.8s" repeatCount="indefinite"/></circle>
@@ -2896,24 +2965,15 @@ function generateBadgeSVG(badge,earned,size){
       ${earned?`<filter id="glow-${id}"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
       <filter id="shadow-${id}"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="${c.glow}" flood-opacity="0.4"/></filter>`:''}
     </defs>
-    <!-- Drop shadow for earned -->
     ${earned?`<circle cx="50" cy="52" r="46" fill="${c.glow}" opacity="0.15" filter="url(#shadow-${id})"/>`:''}
-    <!-- Outer metallic ring -->
     <circle cx="50" cy="50" r="48" fill="url(#ring-${id})" ${earned?`filter="url(#glow-${id})"`:'opacity="0.45"'}/>
-    <!-- Inner ring detail -->
     <circle cx="50" cy="50" r="45" fill="none" stroke="${c.outer2}" stroke-width="0.5" opacity="${earned?'0.4':'0.15'}"/>
-    <!-- Inner circle -->
     <circle cx="50" cy="50" r="42" fill="url(#bg-${id})" ${earned?'':'opacity="0.45"'}/>
-    <!-- Metallic rim highlights -->
     <circle cx="50" cy="50" r="44" fill="none" stroke="${c.accent}" stroke-width="1" opacity="${earned?'0.7':'0.2'}"/>
     <circle cx="50" cy="50" r="40" fill="none" stroke="${c.outer2}" stroke-width="0.5" opacity="${earned?'0.35':'0.15'}"/>
-    <!-- Top shine overlay -->
     <ellipse cx="42" cy="32" rx="22" ry="18" fill="url(#shine-${id})"/>
-    <!-- Notches -->
     ${notches}
-    <!-- Sparkles -->
     ${sparkles}
-    <!-- Icon -->
     <g>${iconPath}</g>
   </svg>`;
 }
