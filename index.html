@@ -1158,10 +1158,11 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
 .sticker-item:hover{transform:scale(1.2)!important}
 .sticker-item.pop-in{animation:stickerPop .4s ease-out forwards}
 
-.bubble-wrap{position:absolute;bottom:-10px;left:50%;transform:translateX(-50%);z-index:5;display:flex;gap:4px;flex-wrap:wrap;justify-content:center;pointer-events:auto}
-.bubble-item{background:var(--tab-color,#6366F1);color:#fff;font-size:10px;font-weight:800;padding:3px 8px;border-radius:10px;cursor:pointer;animation:bubbleDangle 3s ease-in-out infinite;transform-origin:top center;white-space:nowrap;max-width:90px;overflow:hidden;text-overflow:ellipsis;box-shadow:0 2px 6px rgba(0,0,0,.15);position:relative}
-.bubble-item::after{content:'';position:absolute;top:-4px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-bottom:4px solid var(--tab-color,#6366F1)}
-.bubble-item:hover{transform:scale(1.1)!important}
+.bubble-wrap{position:absolute;top:-18px;left:50%;transform:translateX(-50%);z-index:6;display:flex;gap:6px;flex-wrap:wrap;justify-content:center;pointer-events:auto}
+.bubble-item{background:#fff;color:#222;font-size:11px;font-weight:800;padding:5px 10px;border-radius:14px;cursor:pointer;animation:bubbleDangle 3s ease-in-out infinite;transform-origin:bottom center;white-space:nowrap;max-width:100px;overflow:hidden;text-overflow:ellipsis;box-shadow:0 2px 8px rgba(0,0,0,.18);position:relative;border:2px solid var(--tab-color,#6366F1);line-height:1.3}
+.bubble-item::after{content:'';position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:7px solid var(--tab-color,#6366F1)}
+.bubble-item::before{content:'';position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid #fff;z-index:1}
+.bubble-item:active{transform:scale(1.08)!important}
 
 /* Long-press choice popup */
 .lp-overlay{position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.45);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;animation:fadeIn .2s}
@@ -3677,10 +3678,14 @@ function renderHomeGrid(){
     card.addEventListener('mouseup',cancelLP);
     // click only fires on genuine taps (NOT after scroll)
     card.addEventListener('click',(e)=>{
+      // If tapped a sticker/bubble, let its own handler deal with it
+      if(e.target.closest('[data-stkid]'))return;
       if(didLongPress){didLongPress=false;e.preventDefault();return;}
       if(!exhausted&&a)doAct(actId);
     });
   });
+  // Attach sticker/bubble tap handlers
+  attachStickerTapHandlers(g);
 }
 
 function renderLogList(){
@@ -3737,11 +3742,14 @@ function renderLogList(){
     item.addEventListener('mouseup',cancelLP);
     // click only fires on genuine taps (NOT after scroll)
     item.addEventListener('click',(e)=>{
+      if(e.target.closest('[data-stkid]'))return;
       if(isUndoBtn(e))return; // let undo button's own onclick handle it
       if(didLongPress){didLongPress=false;e.preventDefault();return;}
       if(!exhausted&&a)doAct(actId);
     });
   });
+  // Attach sticker/bubble tap handlers
+  attachStickerTapHandlers(el);
 }
 
 function getDayLabel(ts){
@@ -5616,18 +5624,18 @@ function renderStickersFor(actId){
   const emojis=items.filter(s=>s.type==='emoji');
   const bubbles=items.filter(s=>s.type==='bubble');
   let html='';
-  if(emojis.length){
-    html+=`<div class="sticker-wrap">`;
-    emojis.forEach((s,i)=>{
-      html+=`<span class="sticker-item" style="animation-delay:${i*0.3}s" ontouchend="event.stopPropagation();event.preventDefault();showStickerInfo('${s.id}')" onclick="event.stopPropagation();showStickerInfo('${s.id}')">${s.content}</span>`;
-    });
-    html+=`</div>`;
-  }
   if(bubbles.length){
     html+=`<div class="bubble-wrap">`;
     bubbles.forEach((s,i)=>{
       const safe=s.content.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-      html+=`<span class="bubble-item" style="animation-delay:${i*0.4}s" ontouchend="event.stopPropagation();event.preventDefault();showStickerInfo('${s.id}')" onclick="event.stopPropagation();showStickerInfo('${s.id}')">${safe}</span>`;
+      html+=`<span class="bubble-item" data-stkid="${s.id}" style="animation-delay:${i*0.4}s">${safe}</span>`;
+    });
+    html+=`</div>`;
+  }
+  if(emojis.length){
+    html+=`<div class="sticker-wrap">`;
+    emojis.forEach((s,i)=>{
+      html+=`<span class="sticker-item" data-stkid="${s.id}" style="animation-delay:${i*0.3}s">${s.content}</span>`;
     });
     html+=`</div>`;
   }
@@ -5640,14 +5648,28 @@ function renderStickersForLog(actId){
   let html='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;align-items:center">';
   items.forEach((s,i)=>{
     if(s.type==='emoji'){
-      html+=`<span class="sticker-item" style="font-size:16px;animation-delay:${i*0.3}s;display:inline-block" ontouchend="event.stopPropagation();event.preventDefault();showStickerInfo('${s.id}')" onclick="event.stopPropagation();showStickerInfo('${s.id}')">${s.content}</span>`;
+      html+=`<span class="sticker-item" data-stkid="${s.id}" style="font-size:16px;animation-delay:${i*0.3}s;display:inline-block">${s.content}</span>`;
     }else{
       const safe=s.content.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-      html+=`<span class="bubble-item" style="font-size:9px;padding:2px 6px;animation-delay:${i*0.4}s;display:inline-block" ontouchend="event.stopPropagation();event.preventDefault();showStickerInfo('${s.id}')" onclick="event.stopPropagation();showStickerInfo('${s.id}')">${safe}</span>`;
+      html+=`<span class="bubble-item" data-stkid="${s.id}" style="font-size:9px;padding:2px 6px;animation-delay:${i*0.4}s;display:inline-block">${safe}</span>`;
     }
   });
   html+='</div>';
   return html;
+}
+
+// Attach tap handlers to all sticker/bubble items in a container
+function attachStickerTapHandlers(container){
+  container.querySelectorAll('[data-stkid]').forEach(el=>{
+    el.addEventListener('touchend',(e)=>{
+      e.stopPropagation();e.preventDefault();
+      showStickerInfo(el.dataset.stkid);
+    });
+    el.addEventListener('click',(e)=>{
+      e.stopPropagation();e.preventDefault();
+      showStickerInfo(el.dataset.stkid);
+    });
+  });
 }
 
 let _lpOverlay=null;
