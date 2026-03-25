@@ -6272,9 +6272,9 @@ function sendFamilyMsg(){
   const sentEmotion=selectedEmotion||null;
   const sentText=text;
   const sentMsg=S.familyMessages[S.familyMessages.length-1];
+  const toName=(MEMBERS[msgTargetUser]?.name)||'가족';  // closeMsgPop 전에 캡처!
   save();
-  closeMsgPop();
-  const toName=MEMBERS[msgTargetUser].name;
+  closeMsgPop();  // 여기서 msgTargetUser=null이 됨
   if(isSelfMessage){
     toast(`💌 나에게 메시지를 보냈어요!`);
     // 자기 자신에게 보낸 메시지 → 바로 수신 팝업 표시
