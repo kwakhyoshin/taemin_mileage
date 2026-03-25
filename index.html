@@ -6766,32 +6766,7 @@ function showPin(mode,title,sub){
   lockBodyScroll();
 }
 
-// Direct touch handlers for PIN buttons (avoids iOS onclick issues)
-// PIN pad: register on touchstart for instant response to fast taps
-let _pinTouchHandled=false;
-document.querySelectorAll('.pin-key[data-pk]').forEach(btn=>{
-  btn.addEventListener('touchstart',(e)=>{
-    e.preventDefault();
-    _pinTouchHandled=true;
-    btn.classList.add('pressed');
-    pk(btn.dataset.pk);
-    setTimeout(()=>btn.classList.remove('pressed'),120);
-  },{passive:false});
-  btn.addEventListener('click',(e)=>{
-    if(_pinTouchHandled){_pinTouchHandled=false;return;}
-    pk(btn.dataset.pk);
-  });
-});
-
-// Keyboard support for PIN input (desktop)
-document.getElementById('pin-wrap').setAttribute('tabindex','-1');
-document.addEventListener('keydown',function(e){
-  const pw=document.getElementById('pin-wrap');
-  if(!pw||pw.style.display==='none')return;
-  if(e.key>='0'&&e.key<='9'){pk(e.key);e.preventDefault();}
-  else if(e.key==='Backspace'){pk('del');e.preventDefault();}
-  else if(e.key==='Escape'){pk('cancel');e.preventDefault();}
-});
+// PIN handlers are attached after pk() is defined below
 function startChangePIN(){showPin('new1','🔑 새 PIN 설정','새로 사용할 PIN 4자리를 입력하세요');}
 function pk(k){
   if(k==='cancel'){document.getElementById('pin-wrap').style.display='none';unlockBodyScroll();pBuf='';pFirst='';pMode='auth';return;}
@@ -6822,6 +6797,36 @@ function handlePin(){
 }
 function updDots(state){document.querySelectorAll('.pin-dot').forEach((d,i)=>{d.classList.toggle('on',state==='normal'&&i<pBuf.length);d.classList.toggle('err',state==='err');});}
 function lockAdmin(){adminOK=false;toast('🔒 관리자 잠금');goTab('home');}
+
+// PIN pad: event delegation on container — touchstart for instant response
+(function(){
+  const pad=document.getElementById('pin-pad');
+  if(!pad)return;
+  let _pinTouched=false;
+  pad.addEventListener('touchstart',function(e){
+    const btn=e.target.closest('.pin-key[data-pk]');
+    if(!btn)return;
+    e.preventDefault();
+    _pinTouched=true;
+    btn.classList.add('pressed');
+    setTimeout(()=>btn.classList.remove('pressed'),120);
+    pk(btn.dataset.pk);
+  },{passive:false});
+  pad.addEventListener('click',function(e){
+    if(_pinTouched){_pinTouched=false;return;}
+    const btn=e.target.closest('.pin-key[data-pk]');
+    if(!btn)return;
+    pk(btn.dataset.pk);
+  });
+  // Keyboard support (desktop)
+  document.addEventListener('keydown',function(e){
+    const pw=document.getElementById('pin-wrap');
+    if(!pw||pw.style.display==='none')return;
+    if(e.key>='0'&&e.key<='9'){pk(e.key);e.preventDefault();}
+    else if(e.key==='Backspace'){pk('del');e.preventDefault();}
+    else if(e.key==='Escape'){pk('cancel');e.preventDefault();}
+  });
+})();
 
 // ── EMOJI PICKER ──────────────────────────────
 let epTarget='act',epCatCurrent=Object.keys(EMOJIS)[0];
