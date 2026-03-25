@@ -3006,8 +3006,8 @@ function countUniqueMoods(){
 }
 
 function countSentMessages(){
-  if(!currentUser||!S.familyMessages)return 0;
-  return S.familyMessages.filter(m=>m.from===currentUser).length;
+  if(!S.familyMessages)return 0;
+  return S.familyMessages.filter(m=>m.from==='taemin').length;
 }
 
 function hasMidnightStudy(){
