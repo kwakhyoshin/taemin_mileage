@@ -1193,7 +1193,7 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
 .stk-cancel{margin-top:12px;width:100%;padding:12px;border-radius:12px;background:var(--bg2);border:none;font-size:14px;font-weight:800;color:var(--tx3);cursor:pointer}
 
 /* Bubble message input */
-.bbl-input-overlay{position:fixed;inset:0;z-index:910;background:rgba(0,0,0,.35);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;animation:fadeIn .15s}
+.bbl-input-overlay{position:fixed;inset:0;z-index:910;background:rgba(0,0,0,.35);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:flex-start;justify-content:center;padding-top:30vh;animation:fadeIn .15s}
 .bbl-input-box{background:var(--card);border-radius:20px;padding:24px 20px;width:calc(100% - 48px);max-width:340px;box-shadow:0 12px 40px rgba(0,0,0,.25);animation:popUp .25s ease-out}
 .bbl-input-box h4{font-size:15px;font-weight:900;color:var(--tx);margin-bottom:14px;text-align:center}
 .bbl-input-box input{width:100%;padding:12px 14px;border-radius:12px;border:2px solid var(--bdr);background:var(--bg2);font-size:15px;font-weight:700;color:var(--tx);font-family:inherit;outline:none;box-sizing:border-box}
@@ -5641,6 +5641,13 @@ function getStickerAvatar(userId,size){
   return `<span style="display:inline-flex;align-items:center;justify-content:center;width:${size}px;height:${size}px;border-radius:50%;background:${bg};font-size:${Math.round(size*0.6)}px;flex-shrink:0;${border}">${icon}</span>`;
 }
 
+function getBubbleColor(userId){
+  if(userId==='dad')return '#6366F1';
+  if(userId==='taemin')return '#D97706';
+  if(userId==='mom')return '#E11D48';
+  return '#6366F1';
+}
+
 function renderStickersFor(actId){
   const items=getTodayStickers(actId);
   if(!items.length)return '';
@@ -5651,9 +5658,10 @@ function renderStickersFor(actId){
     html+=`<div class="bubble-wrap">`;
     bubbles.forEach((s,i)=>{
       const safe=s.content.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+      const bclr=getBubbleColor(s.user);
       html+=`<div class="bubble-group" data-stkid="${s.id}" style="animation-delay:${i*0.4}s">
         <div class="bubble-avatar">${getStickerAvatar(s.user,28)}</div>
-        <div class="bubble-speech">${safe}</div>
+        <div class="bubble-speech" style="border-color:${bclr}">${safe}</div>
       </div>`;
     });
     html+=`</div>`;
@@ -5677,10 +5685,11 @@ function renderStickersForLog(actId){
       html+=`<span class="sticker-item" data-stkid="${s.id}" style="font-size:16px;animation-delay:${i*0.3}s;display:inline-block">${s.content}</span>`;
     }else{
       const safe=s.content.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+      const bclr=getBubbleColor(s.user);
       html+=`<div class="bubble-group-log" data-stkid="${s.id}" style="animation-delay:${i*0.4}s">
         <div class="bubble-avatar-log">${getStickerAvatar(s.user,22)}</div>
-        <div class="bubble-dot-log"></div>
-        <div class="bubble-speech-log">${safe}</div>
+        <div class="bubble-dot-log" style="background:${bclr}"></div>
+        <div class="bubble-speech-log" style="border-color:${bclr}">${safe}</div>
       </div>`;
     }
   });
@@ -5785,8 +5794,8 @@ function openBubbleInput(actId){
   ov.className='bbl-input-overlay';
   ov.innerHTML=`<div class="bbl-input-box">
     <h4>💬 말풍선 메시지</h4>
-    <input id="bbl-msg-inp" type="text" placeholder="짧은 메시지를 남겨봐요" maxlength="10" autocomplete="off">
-    <div class="bbl-char-count"><span id="bbl-char-cnt">0</span>/10</div>
+    <input id="bbl-msg-inp" type="text" placeholder="짧은 메시지를 남겨봐요" maxlength="15" autocomplete="off">
+    <div class="bbl-char-count"><span id="bbl-char-cnt">0</span>/15</div>
     <div class="bbl-input-btns">
       <button class="bbl-cancel">취소</button>
       <button class="bbl-send">보내기</button>
@@ -5809,6 +5818,26 @@ function openBubbleInput(actId){
     document.getElementById('bbl-char-cnt').textContent=inp.value.length;
   });
   setTimeout(()=>inp.focus(),100);
+}
+function adjustBblForKeyboard(){
+  if(!_bblInputOv)return;
+  const box=_bblInputOv.querySelector('.bbl-input-box');
+  if(!box)return;
+  if(window.visualViewport){
+    const vh=window.visualViewport.height;
+    const fullH=window.innerHeight;
+    if(fullH-vh>100){
+      _bblInputOv.style.paddingTop=Math.max(window.visualViewport.offsetTop+20,20)+'px';
+      _bblInputOv.style.alignItems='flex-start';
+    }else{
+      _bblInputOv.style.paddingTop='30vh';
+      _bblInputOv.style.alignItems='flex-start';
+    }
+  }
+}
+if(window.visualViewport){
+  window.visualViewport.addEventListener('resize',adjustBblForKeyboard);
+  window.visualViewport.addEventListener('scroll',adjustBblForKeyboard);
 }
 function closeBubbleInput(){if(_bblInputOv){_bblInputOv.remove();_bblInputOv=null;}}
 
