@@ -6024,6 +6024,9 @@ function checkUrlParams(){
 window.checkUrlParams=checkUrlParams;
 
 function reallyGoTab(tab){
+  // 뱃지 상세 화면이 열려있으면 닫기
+  const badgeView=document.getElementById('s-badge');
+  if(badgeView) badgeView.style.display='none';
   document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
   document.querySelectorAll('.nav-item').forEach(t=>t.classList.remove('active'));
   document.getElementById('s-'+tab).classList.add('on');
