@@ -5876,28 +5876,27 @@ function startBubbleMarquees(container){
   (container||document).querySelectorAll('.bubble-speech').forEach(speech=>{
     const txt=speech.querySelector('.bbl-text');
     if(!txt)return;
-    // Measure real text width vs visible area
-    const textW=txt.offsetWidth;
-    const boxW=speech.clientWidth; // includes padding
-    const overflow=textW-boxW;
-    if(overflow<=4)return; // fits fine, no animation
-    const px=overflow+8; // extra 8px so last char isn't right at edge
-    const slideSec=Math.max(2,Math.min(5,px/20)); // ~20px/s
+    // Measure: text full width vs inner visible area (clientWidth minus padding)
+    const cs=getComputedStyle(speech);
+    const padL=parseFloat(cs.paddingLeft)||0;
+    const padR=parseFloat(cs.paddingRight)||0;
+    const innerW=speech.clientWidth-padL-padR;
+    const textW=txt.scrollWidth;
+    const overflow=textW-innerW;
+    if(overflow<=2)return; // fits fine
+    const px=overflow+6; // small extra margin
+    const slideSec=Math.max(1.5,Math.min(5,px/18)); // ~18px/s
     function cycle(){
-      // Slide left
       txt.style.transition=`transform ${slideSec}s ease-in-out`;
       txt.style.transform=`translateX(-${px}px)`;
-      // After slide + 2s pause → snap back
       const t1=setTimeout(()=>{
         txt.style.transition='none';
         txt.style.transform='translateX(0)';
       },(slideSec*1000)+2000);
       _bubbleMarqueeTimers.push(t1);
     }
-    // First cycle after 2s
     const t0=setTimeout(cycle,2000);
     _bubbleMarqueeTimers.push(t0);
-    // Repeat: total = 2s wait + slide + 2s pause + 0.5s snap gap
     const total=2000+slideSec*1000+2000+500;
     const iv=setInterval(cycle,total);
     _bubbleMarqueeTimers.push(iv);
