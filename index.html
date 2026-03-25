@@ -7417,10 +7417,35 @@ function msgListGoBack(){
   document.getElementById('msglist-body').style.display='block';
   document.getElementById('msglist-back').style.display='none';
   if(_msgListFromId){
-    const name=MEMBERS[_msgListFromId]?.name||'가족';
+    const fromId=_msgListFromId;
+    const name=MEMBERS[fromId]?.name||'가족';
     document.getElementById('msglist-title').textContent=name+'의 메시지';
-    // Refresh the list to show updated read status
-    openMsgList(_msgListFromId);
+    // Refresh list content without re-calling openMsgList (avoids double lockBodyScroll)
+    const msgs=S.familyMessages?S.familyMessages.filter(m=>m.from===fromId&&m.to===currentUser):[];
+    const body=document.getElementById('msglist-body');
+    if(msgs.length===0){
+      body.innerHTML='<div class="msglist-empty">메시지가 없어요</div>';
+    }else{
+      body.innerHTML=msgs.slice().reverse().map((m,i)=>{
+        const date=new Date(m.ts);
+        const timeStr=(date.getMonth()+1)+'/'+date.getDate()+' '+date.getHours()+':'+String(date.getMinutes()).padStart(2,'0');
+        let statusTag='';
+        if(m.type==='reward_request'&&m.requestId){
+          const req=S.rewardRequests?S.rewardRequests.find(r=>r.id===m.requestId):null;
+          if(req){
+            if(req.status==='pending')statusTag='<span style="font-size:10px;background:#FCA5A5;color:#7F1D1D;padding:2px 6px;border-radius:6px;font-weight:800;margin-left:4px">승인 대기</span>';
+            else if(req.status==='approved')statusTag='<span style="font-size:10px;background:#86EFAC;color:#14532D;padding:2px 6px;border-radius:6px;font-weight:800;margin-left:4px">승인됨</span>';
+            else if(req.status==='rejected')statusTag='<span style="font-size:10px;background:#D4D4D8;color:#3F3F46;padding:2px 6px;border-radius:6px;font-weight:800;margin-left:4px">거절됨</span>';
+          }
+        }
+        return `<div class="msglist-item" onclick="readMsgFromList('${fromId}',${msgs.length-1-i})">
+          <div class="msglist-item-dot${m.read?' read':''}"></div>
+          <div class="msglist-item-text">${m.text}${statusTag}</div>
+          <div class="msglist-item-time">${timeStr}</div>
+        </div>`;
+      }).join('');
+    }
+    document.getElementById('msglist-footer').style.display='block';
   }
 }
 window.msgListGoBack=msgListGoBack;
