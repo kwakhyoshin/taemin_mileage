@@ -1413,7 +1413,7 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
   </div>
   <div id="badge-view-grid" style="padding:12px 12px 0"></div>
   <div style="padding:16px">
-    <div style="font-size:14px;font-weight:700;color:var(--tx);margin-bottom:10px">마일리지 수령 내역</div>
+    <div style="font-size:14px;font-weight:700;color:var(--tx);margin-bottom:10px">뱃지 수령 및 보상 내역</div>
     <div id="badge-view-history"></div>
   </div>
 </div>
@@ -3446,17 +3446,40 @@ function renderBadgeViewHistory(){
   const el=document.getElementById('badge-view-history');
   if(!el)return;
 
-  const logs=(S.badgeLog||[]).slice(0,20);
-  if(logs.length===0){
-    el.innerHTML='<div class="card" style="padding:16px;text-align:center;color:var(--tx3);font-size:13px">아직 뱃지 마일리지 수령이 없어요</div>';
+  // Combine badge earn events + mileage claim events into one timeline
+  const events=[];
+
+  // Badge earned events from S.badges
+  Object.entries(S.badges||{}).forEach(([badgeId,info])=>{
+    const badge=BADGES.find(b=>b.id===badgeId)||(S.customBadges||[]).find(b=>b.id===badgeId);
+    if(!badge)return;
+    events.push({type:'earned',name:badge.name,emoji:badge.emoji||'🏅',ts:info.earnedAt,bonus:badge.bonus||0,claimed:!!info.claimed});
+  });
+
+  // Mileage claim events from S.badgeLog
+  (S.badgeLog||[]).forEach(l=>{
+    events.push({type:'claimed',name:l.badgeName,emoji:l.badgeEmoji||'🎁',ts:l.ts,pts:l.pts});
+  });
+
+  // Sort by time descending
+  events.sort((a,b)=>b.ts-a.ts);
+
+  if(events.length===0){
+    el.innerHTML='<div class="card" style="padding:16px;text-align:center;color:var(--tx3);font-size:13px">아직 획득한 뱃지가 없어요</div>';
     return;
   }
 
-  el.innerHTML='<div class="card" style="padding:0;overflow:hidden">'+logs.map(l=>{
-    const d=new Date(l.ts);
+  el.innerHTML='<div class="card" style="padding:0;overflow:hidden">'+events.slice(0,30).map(ev=>{
+    const d=new Date(ev.ts);
     const h=d.getHours(),m=String(d.getMinutes()).padStart(2,'0'),ap=h>=12?'오후':'오전',h12=h>12?h-12:h===0?12:h;
     const timeStr=(d.getMonth()+1)+'/'+d.getDate()+' '+ap+' '+h12+':'+m;
-    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--bdr)"><span style="font-size:20px">'+l.badgeEmoji+'</span><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--tx)">'+l.badgeName+'</div><div style="font-size:11px;color:var(--tx3)">'+timeStr+'</div></div><div style="text-align:right"><div style="font-size:13px;font-weight:800;color:var(--gn2)">+'+l.pts.toLocaleString()+' M</div><div style="font-size:10px;color:var(--gn2);font-weight:700">획득</div></div></div>';
+    if(ev.type==='earned'){
+      const statusTxt=ev.claimed?'보너스 수령완료':'보너스 미수령';
+      const statusColor=ev.claimed?'var(--tx3)':'#F59E0B';
+      return '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--bdr)"><span style="font-size:20px">'+ev.emoji+'</span><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--tx)">'+ev.name+' <span style="font-size:11px;color:#8B5CF6;font-weight:800">획득!</span></div><div style="font-size:11px;color:var(--tx3)">'+timeStr+'</div></div><div style="text-align:right"><div style="font-size:11px;font-weight:700;color:'+statusColor+'">'+statusTxt+'</div><div style="font-size:10px;color:var(--tx3)">+'+ev.bonus+' M</div></div></div>';
+    } else {
+      return '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--bdr)"><span style="font-size:20px">🎁</span><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--tx)">'+ev.name+' <span style="font-size:11px;color:var(--gn2);font-weight:800">보상수령</span></div><div style="font-size:11px;color:var(--tx3)">'+timeStr+'</div></div><div style="text-align:right"><div style="font-size:13px;font-weight:800;color:var(--gn2)">+'+ev.pts.toLocaleString()+' M</div></div></div>';
+    }
   }).join('')+'</div>';
 }
 window.renderBadgeViewHistory=renderBadgeViewHistory;
