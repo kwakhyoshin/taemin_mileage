@@ -1172,9 +1172,7 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
 .bubble-group:active{transform:scale(1.05)!important}
 .bubble-avatar{position:absolute;left:0;top:50%;transform:translateY(-50%);z-index:2;filter:drop-shadow(1px 0 2px rgba(0,0,0,.1))}
 .bubble-speech{background:#fff;color:#222;font-size:11px;font-weight:800;padding:5px 10px 5px 16px;border-radius:14px;white-space:nowrap;max-width:90px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.15);border:2px solid var(--tab-color,#6366F1);line-height:1.3;position:relative;z-index:1}
-.bubble-speech .bbl-text{display:inline-block;white-space:nowrap}
-.bubble-speech.needs-marquee .bbl-text{animation:bubbleMarquee 5s linear infinite;padding-right:30px}
-@keyframes bubbleMarquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.bubble-speech .bbl-text{display:inline-block;white-space:nowrap;transition:transform .3s ease-out}
 /* Log list bubble: avatar + dot + speech inline */
 .log-sticker-area{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;align-items:center}
 .bubble-group-log{display:inline-flex;align-items:center;gap:0;cursor:pointer;animation:bubbleDangle 3s ease-in-out infinite;transform-origin:top center;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
@@ -3757,6 +3755,8 @@ function renderHomeGrid(){
   });
   // Attach sticker/bubble tap handlers
   attachStickerTapHandlers(g);
+  // Start bubble text marquee for overflowing text
+  setTimeout(()=>startBubbleMarquees(g),300);
 }
 
 function renderLogList(){
@@ -5806,12 +5806,9 @@ function renderStickersFor(actId){
     bubbles.forEach((s,i)=>{
       const safe=s.content.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
       const bclr=getBubbleColor(s.user);
-      const needsMarquee=s.content.length>7;
-      const marqueeClass=needsMarquee?' needs-marquee':'';
-      const textHTML=needsMarquee?`<span class="bbl-text">${safe}\u00A0\u00A0\u00A0\u00A0${safe}\u00A0\u00A0\u00A0\u00A0</span>`:`<span class="bbl-text">${safe}</span>`;
       html+=`<div class="bubble-group" data-stkid="${s.id}" style="animation-delay:${i*0.4}s">
         <div class="bubble-avatar">${getStickerAvatar(s.user,28)}</div>
-        <div class="bubble-speech${marqueeClass}" style="border-color:${bclr}">${textHTML}</div>
+        <div class="bubble-speech" style="border-color:${bclr}"><span class="bbl-text">${safe}</span></div>
       </div>`;
     });
     html+=`</div>`;
@@ -5868,6 +5865,45 @@ function attachStickerTapHandlers(container){
       e.stopPropagation();e.preventDefault();
       showStickerInfo(el.dataset.stkid);
     });
+  });
+}
+
+// Bubble marquee: slide left to show overflow, pause, snap back, repeat
+let _bubbleMarqueeTimers=[];
+function startBubbleMarquees(container){
+  _bubbleMarqueeTimers.forEach(t=>clearInterval(t));
+  _bubbleMarqueeTimers=[];
+  (container||document).querySelectorAll('.bubble-speech').forEach(speech=>{
+    const txt=speech.querySelector('.bbl-text');
+    if(!txt)return;
+    const overflow=txt.scrollWidth-speech.clientWidth;
+    if(overflow<=2)return; // fits, no scroll needed
+    // Animation cycle: wait 1.5s → slide left over 2-4s → wait 2s → snap back → repeat
+    const slideDuration=Math.max(2,Math.min(4,overflow/25)); // speed: ~25px/s
+    txt.style.transition=`transform ${slideDuration}s ease-in-out`;
+    function cycle(){
+      // Slide to show hidden text
+      txt.style.transform=`translateX(-${overflow}px)`;
+      // After slide done + pause, snap back
+      const snapTimer=setTimeout(()=>{
+        txt.style.transition='none';
+        txt.style.transform='translateX(0)';
+        // Re-enable transition after snap
+        requestAnimationFrame(()=>{
+          requestAnimationFrame(()=>{
+            txt.style.transition=`transform ${slideDuration}s ease-in-out`;
+          });
+        });
+      },(slideDuration*1000)+2000); // slide time + 2s pause
+      _bubbleMarqueeTimers.push(snapTimer);
+    }
+    // Start first cycle after 1.5s
+    const startTimer=setTimeout(cycle,1500);
+    _bubbleMarqueeTimers.push(startTimer);
+    // Repeat the whole thing
+    const totalCycle=(1500+slideDuration*1000+2000+300); // wait+slide+pause+snap
+    const interval=setInterval(cycle,totalCycle);
+    _bubbleMarqueeTimers.push(interval);
   });
 }
 
