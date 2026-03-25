@@ -138,6 +138,9 @@ body.dark .dtog-in{transform:translateX(24px)}
 .hdr-ico{width:22px;height:22px;fill:none;stroke:rgba(255,255,255,.45);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;margin-left:6px;vertical-align:-3px;display:inline}
 .sec-hdr{display:flex;align-items:center;justify-content:space-between;margin:14px 16px 10px}
 .card{background:var(--card);border-radius:var(--r);margin:0 16px 12px;padding:16px;transition:background .25s}
+/* Merge section title with card - makes them look like one panel */
+#dash-p0 .dash-brick .sec,#dash-p1>.sec.merge-header,#dash-p2 .sec.merge-header{background:var(--card);margin-bottom:0!important;padding:12px 16px 8px;border-radius:var(--r) var(--r) 0 0;border:.5px solid var(--bdr);border-bottom:none}
+#dash-p0 .dash-brick .sec+.card,#dash-p1>.sec.merge-header+.card,#dash-p2 .sec.merge-header+.card{border-radius:0 0 var(--r) var(--r)!important;margin-top:0!important}
 
 /* ACT GRID */
 .act-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 16px 14px}
@@ -199,6 +202,9 @@ body.dark .dtog-in{transform:translateX(24px)}
 .hdr-stats-4{gap:0}
 .hdr-stats-4 .hdr-stat-num{font-size:18px}
 .hdr-stats-4 .hdr-stat-lbl{font-size:9px}
+.hdr-stats-5{gap:0}
+.hdr-stats-5 .hdr-stat-num{font-size:16px}
+.hdr-stats-5 .hdr-stat-lbl{font-size:8px}
 .hdr-stat{flex:1;text-align:center}
 .hdr-stat-num{font-size:22px;font-weight:900;color:#fff;line-height:1.2}
 .hdr-stat-lbl{font-size:10px;font-weight:700;color:rgba(255,255,255,.7);margin-top:2px}
@@ -498,9 +504,7 @@ body.dark .today-summary-card .ts-msg{background:linear-gradient(135deg,#312E81,
 .cal-day.selected{background:var(--tab-color,var(--or));color:#fff}
 .cal-day.selected:hover{background:var(--tab-color,var(--or))}
 .cal-day.complete{background:linear-gradient(135deg,var(--gn-lt),rgba(16,185,129,0.25))}
-.cal-day.complete::after{content:'✓';position:absolute;top:2px;right:2px;font-size:8px;color:var(--gn2)}
 .cal-day.selected.complete{background:var(--gn);color:#fff}
-.cal-day.selected.complete::after{color:#fff}
 .cal-day .cal-count{font-size:8px;font-weight:800;color:var(--tab-color,var(--or));margin-top:1px}
 .cal-day.complete .cal-count{color:var(--gn2)}
 .cal-day.selected .cal-count{color:rgba(255,255,255,.8)}
@@ -509,20 +513,30 @@ body.dark .today-summary-card .ts-msg{background:linear-gradient(135deg,#312E81,
 .cal-day.other-month{opacity:.3}
 .cal-day.weekend{background:rgba(59,130,246,0.03)}
 .cal-mood-section{margin-top:3px;text-align:center}
-.cal-mood-ratio{font-size:7px;font-weight:700;line-height:1.2;white-space:nowrap}
-.cal-mood-ratio .pos{color:#10B981}
-.cal-mood-ratio .neg{color:#EF4444}
 .cal-mood-emojis{font-size:10px;letter-spacing:-1px}
 .cal-activity-dots{display:flex;gap:1px;margin-top:2px;justify-content:center}
 .cal-activity-dot{width:4px;height:4px;border-radius:50%;background:var(--or)}
 .cal-activity-dot.gn{background:var(--gn)}
 .cal-activity-dot.bl{background:var(--bl)}
+
+/* Hand-drawn grade circle */
+.cal-date-wrap{position:relative;display:flex;align-items:center;justify-content:center;width:28px;height:28px}
+.cal-grade-circle{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none}
+.cal-date-num{position:relative;z-index:1}
+
+/* Streak bars - CSS-based */
+.cal-streak-bar{position:absolute;bottom:0;left:0;right:0;height:3px;background:#10B981;z-index:2}
+.cal-streak-bar.start{left:30%;border-radius:2px 0 0 2px}
+.cal-streak-bar.end{right:30%;border-radius:0 2px 2px 0}
+.cal-streak-bar.single{left:30%;right:30%;border-radius:2px}
+.cal-streak-bar.mid{left:0;right:0;border-radius:0}
+.cal-streak-num{position:absolute;top:-12px;left:50%;transform:translateX(-50%);font-size:7px;font-weight:800;color:#10B981;white-space:nowrap;background:rgba(255,255,255,.9);padding:0 3px;border-radius:3px}
+.cal-fail-mark{font-size:7px;color:#F97316;font-weight:700;text-align:center;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .cal-arrow-layer{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:2}
 .cal-streak-label{position:absolute;font-size:8px;font-weight:800;color:#10B981;white-space:nowrap;background:rgba(255,255,255,.85);padding:1px 4px;border-radius:4px;border:1px solid rgba(16,185,129,.3);z-index:3}
 .cal-fail-badge{position:absolute;text-align:center;z-index:3}
 .cal-fail-x{font-size:14px;color:#EF4444;font-weight:900;line-height:1}
 .cal-fail-text{font-size:7px;color:#F97316;font-weight:700;white-space:nowrap;background:rgba(249,115,22,.08);padding:1px 3px;border-radius:3px}
-.cal-best{position:absolute;top:0px;left:1px;font-size:9px;line-height:1}
 @keyframes todayPulse{0%{box-shadow:0 0 0 0 rgba(249,115,22,0.4)};50%{box-shadow:0 0 0 4px rgba(249,115,22,0)};100%{box-shadow:0 0 0 0 rgba(249,115,22,0)}}
 
 /* SHEET MODAL */
@@ -1249,10 +1263,12 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
   <div class="hist-hero">
     <h2>성과 &amp; 통계 <svg class="hdr-ico" viewBox="0 0 24 24"><path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9"/><path d="M21 3l-9 9"/><path d="M15 3h6v6"/></svg></h2>
     <p>태민이의 활동 분석</p>
-    <div class="hdr-stats hdr-stats-4" id="hist-hdr-stats">
+    <div class="hdr-stats hdr-stats-5" id="hist-hdr-stats">
       <div class="hdr-stat"><div class="hdr-stat-num" id="hist-hdr-pts">0</div><div class="hdr-stat-lbl">보유 마일리지</div></div>
       <div class="hdr-stat-divider"></div>
-      <div class="hdr-stat"><div class="hdr-stat-num" id="hist-hdr-done">0</div><div class="hdr-stat-lbl">총 완료</div></div>
+      <div class="hdr-stat"><div class="hdr-stat-num" id="hist-hdr-done">0</div><div class="hdr-stat-lbl">총 활동완료</div></div>
+      <div class="hdr-stat-divider"></div>
+      <div class="hdr-stat"><div class="hdr-stat-num" id="hist-hdr-badges">0</div><div class="hdr-stat-lbl">획득 뱃지</div></div>
       <div class="hdr-stat-divider"></div>
       <div class="hdr-stat"><div class="hdr-stat-num" id="hist-hdr-streak">0</div><div class="hdr-stat-lbl">현재 연속</div></div>
       <div class="hdr-stat-divider"></div>
@@ -3383,6 +3399,7 @@ function renderHdrStats(){
   // History tab: points, total done, current streak, longest streak
   const el6=document.getElementById('hist-hdr-pts');if(el6)el6.textContent=S.pts.toLocaleString();
   const el7=document.getElementById('hist-hdr-done');if(el7)el7.textContent=S.totalDone||0;
+  const el7b=document.getElementById('hist-hdr-badges');if(el7b)el7b.textContent=Object.keys(S.badges||{}).length;
   const el8=document.getElementById('hist-hdr-streak');if(el8)el8.textContent=getDisplayStreak();
   const el9=document.getElementById('hist-hdr-longest');if(el9)el9.textContent=S.longest||0;
 }
@@ -4093,101 +4110,11 @@ function isDayComplete(dateStr){
 }
 
 function drawCalendarArrows(streakInfo,firstDay,lastDate){
+  // Streak visualization is now CSS-based inside each cell
   const grid=document.getElementById('cal-grid');
+  grid.querySelectorAll('.cal-streak-label,.cal-fail-badge').forEach(e=>e.remove());
   const existingSvg=grid.querySelector('.cal-arrow-layer');
   if(existingSvg)existingSvg.remove();
-  grid.querySelectorAll('.cal-streak-label,.cal-fail-badge').forEach(e=>e.remove());
-
-  const cells=grid.querySelectorAll('.cal-day:not(.empty)');
-  if(!cells.length)return;
-
-  const gridRect=grid.getBoundingClientRect();
-  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
-  svg.classList.add('cal-arrow-layer');
-  svg.setAttribute('width',gridRect.width);
-  svg.setAttribute('height',gridRect.height);
-  svg.style.cssText='position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:2';
-
-  // Draw arrows between consecutive complete days
-  for(let d=1;d<=lastDate;d++){
-    const info=streakInfo[d];
-    if(!info)continue;
-
-    const cellIdx=d-1;
-    if(cellIdx>=cells.length)continue;
-
-    if(info.type==='start'||info.type==='mid'||info.type==='single'){
-      const nextInfo=streakInfo[d+1];
-      if(nextInfo&&(nextInfo.type==='mid'||nextInfo.type==='end')){
-        const fromCell=cells[cellIdx];
-        const toCell=cells[cellIdx+1];
-        if(!fromCell||!toCell)continue;
-
-        const fromRect=fromCell.getBoundingClientRect();
-        const toRect=toCell.getBoundingClientRect();
-
-        const x1=fromRect.left+fromRect.width/2-gridRect.left;
-        const y1=fromRect.bottom-4-gridRect.top;
-        const x2=toRect.left+toRect.width/2-gridRect.left;
-        const y2=toRect.top+4-gridRect.top;
-
-        const sameRow=Math.abs(fromRect.top-toRect.top)<10;
-
-        const path=document.createElementNS('http://www.w3.org/2000/svg','path');
-        let pathD;
-        if(sameRow){
-          const midY=fromRect.bottom+2-gridRect.top;
-          pathD=`M${x1},${midY} L${x2},${midY}`;
-          const arrow=document.createElementNS('http://www.w3.org/2000/svg','polygon');
-          arrow.setAttribute('points',`${x2-4},${midY-3} ${x2},${midY} ${x2-4},${midY+3}`);
-          arrow.setAttribute('fill','#10B981');
-          svg.appendChild(arrow);
-        }else{
-          const midX=(x1+x2)/2;
-          const midY=(y1+y2)/2;
-          pathD=`M${x1},${y1} C${x1},${midY} ${x2},${midY} ${x2},${y2}`;
-          const arrow=document.createElementNS('http://www.w3.org/2000/svg','polygon');
-          arrow.setAttribute('points',`${x2-3},${y2-5} ${x2},${y2} ${x2+3},${y2-5}`);
-          arrow.setAttribute('fill','#10B981');
-          svg.appendChild(arrow);
-        }
-
-        path.setAttribute('d',pathD);
-        path.setAttribute('stroke','#10B981');
-        path.setAttribute('stroke-width','2');
-        path.setAttribute('fill','none');
-        path.setAttribute('stroke-linecap','round');
-        svg.appendChild(path);
-      }
-    }
-
-    // Add streak label at start
-    if(info.type==='start'&&info.length>=1){
-      const cell=cells[cellIdx];
-      const cellRect=cell.getBoundingClientRect();
-      const label=document.createElement('div');
-      label.className='cal-streak-label';
-      label.textContent=`${info.length}일 연속성공`;
-      label.style.left=(cellRect.left-gridRect.left)+'px';
-      label.style.top=(cellRect.bottom-gridRect.top+2)+'px';
-      grid.appendChild(label);
-    }
-
-    // Add fail badge
-    if(info.type==='fail'){
-      const cell=cells[cellIdx];
-      const cellRect=cell.getBoundingClientRect();
-      const badge=document.createElement('div');
-      badge.className='cal-fail-badge';
-      badge.innerHTML=`<div class="cal-fail-x">✕</div><div class="cal-fail-text">${getFailMessage(d)}</div>`;
-      badge.style.left=(cellRect.left-gridRect.left+cellRect.width/2-20)+'px';
-      badge.style.top=(cellRect.bottom-gridRect.top-2)+'px';
-      badge.style.width='40px';
-      grid.appendChild(badge);
-    }
-  }
-
-  grid.appendChild(svg);
 }
 
 function renderCalendar(){
@@ -4232,18 +4159,12 @@ function renderCalendar(){
     if(isSelected)cls+=' selected';
     if(complete)cls+=' complete';
 
-    // 감정 아이콘 + 비율 HTML
+    // 감정 아이콘 HTML
     let moodHTML='';
     if(moods.length>0){
-      const positive=moods.filter(m=>['happy','love','calm','excited'].includes(m.mood)).length;
-      const negative=moods.filter(m=>['annoyed','angry','sad','tired'].includes(m.mood)).length;
-      const total=moods.length;
-      const posPct=Math.round(positive/total*100);
-      const negPct=Math.round(negative/total*100);
       const displayMoods=moods.slice(0,3);
       const moodIcons=displayMoods.map(m=>m.emoji).join('');
       moodHTML=`<div class="cal-mood-section">
-        <div class="cal-mood-ratio"><span class="pos">긍정${posPct}%</span> <span class="neg">부정${negPct}%</span></div>
         <div class="cal-mood-emojis">${moodIcons}${moods.length>3?`<span style="font-size:7px;color:var(--tx3)">+${moods.length-3}</span>`:''}</div>
       </div>`;
     }
@@ -4260,20 +4181,24 @@ function renderCalendar(){
       activityDotHTML+='</div>';
     }
 
-    // Streak arrows now drawn via SVG overlay after render
-    let streakHTML='';
+    // Hand-drawn red circle SVG for completed days (like a teacher's grading mark)
+    const circleHTML=complete?`<svg class="cal-grade-circle" viewBox="0 0 40 40" width="32" height="32"><path d="M20 4 C28 3, 37 10, 36 20 C37 30, 28 37, 20 36 C10 37, 3 30, 4 20 C3 10, 12 3, 20 4Z" fill="none" stroke="#E53E3E" stroke-width="2" stroke-linecap="round" opacity="0.7"/></svg>`:'';
 
-    // 베스트 데이 배지
-    let bestDayHTML='';
-    if(isBestDay&&count>0){
-      bestDayHTML='<span class="cal-best">👑</span>';
+    // Streak bar (CSS-based, replaces SVG arrows)
+    let streakBarHTML='';
+    if(streak){
+      if(streak.type==='single') streakBarHTML=`<div class="cal-streak-bar single"></div>`;
+      else if(streak.type==='start') streakBarHTML=`<div class="cal-streak-bar start"><span class="cal-streak-num">${streak.length}일</span></div>`;
+      else if(streak.type==='mid') streakBarHTML=`<div class="cal-streak-bar mid"></div>`;
+      else if(streak.type==='end') streakBarHTML=`<div class="cal-streak-bar end"></div>`;
+      else if(streak.type==='fail') streakBarHTML=`<div class="cal-fail-mark">${getFailMessage(d)}</div>`;
     }
 
     html+=`<div class="${cls}" onclick="selectCalDay('${dateStr}')" title="${d}일: ${complete?'✓ 목표달성':''}${count>0?' '+count+'개 활동':''}">
-      ${bestDayHTML}${d}
+      <div class="cal-date-wrap">${circleHTML}<span class="cal-date-num">${d}</span></div>
       ${moodHTML}
       ${activityDotHTML}
-      ${streakHTML}
+      ${streakBarHTML}
       ${count>0?`<div class="cal-count">${count}</div>`:''}
     </div>`;
   }
@@ -4340,7 +4265,7 @@ function renderCalDetail(dateStr){
 
   // 감정 기록 표시
   if(moods.length>0){
-    content+=`<div style="padding:12px 16px;background:var(--bg2);border-bottom:.5px solid var(--bdr);border-radius:8px;margin-bottom:8px">
+    content+=`<div style="padding:12px 16px;background:var(--bg2);border-bottom:.5px solid var(--bdr);border-radius:8px;margin:0 8px 8px">
       <div style="font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:6px">감정 기록 (${moods.length}회)</div>
       <div style="display:flex;gap:4px;flex-wrap:wrap">`;
     moods.forEach(mo=>{
@@ -4431,6 +4356,7 @@ function renderTodaySummary(){
   const pctBar=totalCount>0?`<div style="margin-top:6px;background:var(--bdr);border-radius:4px;height:6px;overflow:hidden"><div style="width:${completePct}%;height:100%;background:${allDone?'var(--gn)':'var(--or)'};border-radius:4px;transition:width .3s"></div></div>`:'';
 
   const summaryHTML=`
+    <div class="sec" style="margin:0 0 12px;padding:0"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> 오늘의 요약</div>
     <div class="ts-header">${statusSvg} ${dateLabel}의 요약</div>
     <div class="ts-grid">
       <div class="ts-item">
@@ -4497,6 +4423,7 @@ function renderDashStreak(){
   else{emoji='👑';msg='전설적인 연속 달성! 존경스러워!';}
 
   el.innerHTML=`
+    <div class="sec" style="margin:0 0 12px;padding:0"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> 연속 달성</div>
     <div class="ds-row">
       <div class="ds-fire">${emoji}</div>
       <div>
@@ -6514,13 +6441,16 @@ function checkNewMessages(){
   if(!currentUser||!S.familyMessages)return;
   const unreadMsgs=S.familyMessages.filter(m=>m.to===currentUser&&!m.read);
   if(unreadMsgs.length>0){
-    // 뱃지 업데이트만 하고 팝업은 띄우지 않음 — 사용자가 아이콘을 클릭해서 직접 확인
     renderNavUsers();
-    // 토스트로 새 메시지 알림만 표시 (한 번만)
-    if(!window._lastUnreadNotifyTs||Date.now()-window._lastUnreadNotifyTs>3000){
-      const fromNames=[...new Set(unreadMsgs.map(m=>MEMBERS[m.from]?.name||'가족'))];
-      toast(`💌 ${fromNames.join(', ')}에게서 새 메시지 ${unreadMsgs.length}개`);
-      window._lastUnreadNotifyTs=Date.now();
+    // 가장 최근 미읽은 메시지의 레이어 팝업 표시 (동일 메시지 중복 방지)
+    const latestMsg=unreadMsgs[unreadMsgs.length-1];
+    const msgKey=latestMsg.from+'_'+(latestMsg.ts||0);
+    if(msgKey!==window._lastShownMsgKey){
+      window._lastShownMsgKey=msgKey;
+      // 약간의 딜레이 후 팝업 표시 (onSnapshot 렌더링 완료 후)
+      setTimeout(()=>{
+        showReceivedMsg(latestMsg.from, latestMsg.text, latestMsg.emotion||null, latestMsg);
+      }, 500);
     }
   }
 }
