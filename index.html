@@ -118,8 +118,8 @@ body.dark .dtog-in{transform:translateX(24px)}
 .hero-unit{font-size:18px;font-weight:700;opacity:.85;transition:font-size .25s}
 .hero-goal{font-size:15px;opacity:.82;margin-top:6px;font-weight:600;line-height:1.4;transition:all .25s;max-height:50px;overflow:hidden}
 .streak-pill{position:absolute;top:18px;right:18px;background:rgba(255,255,255,.2);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:800;transition:all .25s}
-.prog-track{background:rgba(255,255,255,.25);border-radius:6px;height:6px;margin-top:14px;transition:all .25s}
-.prog-fill{background:#fff;border-radius:6px;height:6px;transition:width .7s}
+.prog-track{background:rgba(255,255,255,.25);border-radius:6px;height:10px;margin-top:14px;transition:margin .25s}
+.prog-fill{background:#fff;border-radius:6px;height:100%;transition:width .7s}
 .prog-row{display:flex;justify-content:space-between;margin-top:5px;font-size:11px;opacity:.75;font-weight:700;transition:all .25s}
 
 /* HERO compact state */
@@ -129,7 +129,7 @@ body.dark .dtog-in{transform:translateX(24px)}
 .hero.compact .hero-unit{font-size:14px}
 .hero.compact .hero-goal{max-height:0;margin-top:0;opacity:0}
 .hero.compact .streak-pill{top:calc(12px + env(safe-area-inset-top));padding:4px 10px;font-size:11px}
-.hero.compact .prog-track{margin-top:10px;height:5px}
+.hero.compact .prog-track{margin-top:10px}
 .hero.compact .prog-row{margin-top:3px;font-size:10px}
 
 /* SECTION */
@@ -8398,6 +8398,15 @@ Object.assign(window, {
     // Home
     if(homeScr && homeScr.classList.contains('on') && hero){
       hero.classList.toggle('compact', scrollY > threshold);
+      // Smooth gauge height: 10px (expanded) → 5px (compact)
+      const progTrack=hero.querySelector('.prog-track');
+      if(progTrack){
+        const gaugeMax=10,gaugeMin=5;
+        const gRatio=Math.max(0,Math.min(1,scrollY/threshold));
+        const gh=gaugeMax-(gaugeMax-gaugeMin)*gRatio;
+        progTrack.style.height=gh+'px';
+        progTrack.style.borderRadius=(gh/2)+'px';
+      }
       // Fade out home-top children only (not background)
       const ht=document.querySelector('.home-top');
       if(ht){
