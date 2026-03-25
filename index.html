@@ -7117,7 +7117,7 @@ function renderNavUsers(){
     html+=`<div class="nav-user-wrap" onclick="onUserIconClick('${id}')">
       ${moodEmoji?`<span class="nav-mood-badge">${moodEmoji}</span>`:''}
       ${unreadCount>0?`<span class="nav-unread-badge">${unreadCount}</span>`:''}
-      <div class="nav-profile" style="border-color:${getBubbleColor(id)}">${getAvatarHTML(id,28)}</div>
+      <div class="nav-profile" style="border-color:var(--tab-color,var(--or))">${getAvatarHTML(id,28)}</div>
       <span class="nav-user-label">${userLabels[id]||MEMBERS[id].name}</span>
     </div>`;
   });
