@@ -7640,9 +7640,15 @@ function reallyGoTab(tab){
     if(navC)navC.classList.remove('docked');
     _navDocked=false;
   }
-  // 모든 탭 compact 상태 초기화
+  // 모든 탭 compact 상태 초기화 + 홈탭 인사말 opacity 복원
   const hero=document.querySelector('.hero');
-  if(hero) hero.classList.remove('compact');
+  if(hero){
+    hero.classList.remove('compact');
+    const progTrack=hero.querySelector('.prog-track');
+    if(progTrack){progTrack.style.height='14px';progTrack.style.borderRadius='7px';}
+  }
+  const ht=document.querySelector('.home-top');
+  if(ht) Array.from(ht.children).forEach(c=>c.style.opacity='1');
   const logH=document.querySelector('.log-header-sticky');
   if(logH) logH.classList.remove('compact');
   const rwdH=document.querySelector('.rwd-header-sticky');
