@@ -5612,7 +5612,7 @@ function renderStickersFor(actId){
   if(emojis.length){
     html+=`<div class="sticker-wrap">`;
     emojis.forEach((s,i)=>{
-      html+=`<span class="sticker-item" style="animation-delay:${i*0.3}s" onclick="event.stopPropagation();showStickerInfo('${s.id}')">${s.content}</span>`;
+      html+=`<span class="sticker-item" style="animation-delay:${i*0.3}s" ontouchend="event.stopPropagation();event.preventDefault();showStickerInfo('${s.id}')" onclick="event.stopPropagation();showStickerInfo('${s.id}')">${s.content}</span>`;
     });
     html+=`</div>`;
   }
@@ -5620,7 +5620,7 @@ function renderStickersFor(actId){
     html+=`<div class="bubble-wrap">`;
     bubbles.forEach((s,i)=>{
       const safe=s.content.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-      html+=`<span class="bubble-item" style="animation-delay:${i*0.4}s" onclick="event.stopPropagation();showStickerInfo('${s.id}')">${safe}</span>`;
+      html+=`<span class="bubble-item" style="animation-delay:${i*0.4}s" ontouchend="event.stopPropagation();event.preventDefault();showStickerInfo('${s.id}')" onclick="event.stopPropagation();showStickerInfo('${s.id}')">${safe}</span>`;
     });
     html+=`</div>`;
   }
@@ -5633,10 +5633,10 @@ function renderStickersForLog(actId){
   let html='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;align-items:center">';
   items.forEach((s,i)=>{
     if(s.type==='emoji'){
-      html+=`<span class="sticker-item" style="font-size:16px;animation-delay:${i*0.3}s;display:inline-block" onclick="event.stopPropagation();showStickerInfo('${s.id}')">${s.content}</span>`;
+      html+=`<span class="sticker-item" style="font-size:16px;animation-delay:${i*0.3}s;display:inline-block" ontouchend="event.stopPropagation();event.preventDefault();showStickerInfo('${s.id}')" onclick="event.stopPropagation();showStickerInfo('${s.id}')">${s.content}</span>`;
     }else{
       const safe=s.content.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-      html+=`<span class="bubble-item" style="font-size:9px;padding:2px 6px;animation-delay:${i*0.4}s;display:inline-block" onclick="event.stopPropagation();showStickerInfo('${s.id}')">${safe}</span>`;
+      html+=`<span class="bubble-item" style="font-size:9px;padding:2px 6px;animation-delay:${i*0.4}s;display:inline-block" ontouchend="event.stopPropagation();event.preventDefault();showStickerInfo('${s.id}')" onclick="event.stopPropagation();showStickerInfo('${s.id}')">${safe}</span>`;
     }
   });
   html+='</div>';
@@ -5652,16 +5652,30 @@ function showLongPressChoice(actId,cardEl){
   ov.className='lp-overlay';
   ov.innerHTML=`
     <div class="lp-choice">
-      <div class="lp-choice-btn" onclick="closeLPOverlay();openStickerPicker('${actId}')">
+      <div class="lp-choice-btn" data-action="sticker">
         <div class="lp-ico">😊</div>
         <div class="lp-lbl">스티커</div>
       </div>
-      <div class="lp-choice-btn" onclick="closeLPOverlay();openBubbleInput('${actId}')">
+      <div class="lp-choice-btn" data-action="bubble">
         <div class="lp-ico">💬</div>
         <div class="lp-lbl">말풍선</div>
       </div>
     </div>`;
-  ov.addEventListener('click',(e)=>{if(e.target===ov)closeLPOverlay();});
+  // Use pointer/touch events for reliable mobile interaction
+  function handleChoiceTap(e){
+    const btn=e.target.closest('.lp-choice-btn');
+    if(btn){
+      e.preventDefault();e.stopPropagation();
+      const action=btn.dataset.action;
+      closeLPOverlay();
+      if(action==='sticker')openStickerPicker(actId);
+      else if(action==='bubble')openBubbleInput(actId);
+    }else if(e.target===ov){
+      closeLPOverlay();
+    }
+  }
+  ov.addEventListener('pointerup',handleChoiceTap);
+  ov.addEventListener('click',handleChoiceTap);
   document.body.appendChild(ov);
   _lpOverlay=ov;
 }
@@ -5674,14 +5688,21 @@ function openStickerPicker(actId){
   ov.className='stk-picker-overlay';
   let emojiGrid='';
   STICKER_EMOJIS.forEach(em=>{
-    emojiGrid+=`<button class="stk-emoji-btn" onclick="addSticker('${actId}','emoji','${em}')">${em}</button>`;
+    emojiGrid+=`<button class="stk-emoji-btn" data-emoji="${em}">${em}</button>`;
   });
   ov.innerHTML=`<div class="stk-picker">
     <div class="stk-picker-title">스티커 선택</div>
     <div class="stk-emoji-row">${emojiGrid}</div>
-    <button class="stk-cancel" onclick="closeStickerPicker()">취소</button>
+    <button class="stk-cancel" data-role="cancel">취소</button>
   </div>`;
-  ov.addEventListener('click',(e)=>{if(e.target===ov)closeStickerPicker();});
+  function handleStkTap(e){
+    const emojiBtn=e.target.closest('.stk-emoji-btn');
+    if(emojiBtn){e.preventDefault();e.stopPropagation();const em=emojiBtn.dataset.emoji;closeStickerPicker();addSticker(actId,'emoji',em);return;}
+    const cancelBtn=e.target.closest('[data-role=cancel]');
+    if(cancelBtn||e.target===ov){e.preventDefault();closeStickerPicker();return;}
+  }
+  ov.addEventListener('pointerup',handleStkTap);
+  ov.addEventListener('click',handleStkTap);
   document.body.appendChild(ov);
   _stkPickerOv=ov;
 }
@@ -5697,11 +5718,18 @@ function openBubbleInput(actId){
     <input id="bbl-msg-inp" type="text" placeholder="짧은 메시지를 남겨봐요" maxlength="10" autocomplete="off">
     <div class="bbl-char-count"><span id="bbl-char-cnt">0</span>/10</div>
     <div class="bbl-input-btns">
-      <button class="bbl-cancel" onclick="closeBubbleInput()">취소</button>
-      <button class="bbl-send" onclick="submitBubble('${actId}')">보내기</button>
+      <button class="bbl-cancel" data-role="cancel">취소</button>
+      <button class="bbl-send" data-role="send">보내기</button>
     </div>
   </div>`;
-  ov.addEventListener('click',(e)=>{if(e.target===ov)closeBubbleInput();});
+  function handleBblTap(e){
+    const cancel=e.target.closest('[data-role=cancel]');
+    if(cancel||e.target===ov){e.preventDefault();closeBubbleInput();return;}
+    const send=e.target.closest('[data-role=send]');
+    if(send){e.preventDefault();submitBubble(actId);return;}
+  }
+  ov.addEventListener('pointerup',handleBblTap);
+  ov.addEventListener('click',handleBblTap);
   document.body.appendChild(ov);
   _bblInputOv=ov;
   const inp=document.getElementById('bbl-msg-inp');
@@ -5758,11 +5786,18 @@ function showStickerInfo(stkId){
     <div class="stk-info-who">${uName}</div>
     <div class="stk-info-when">${timeStr}</div>
     <div style="display:flex;gap:8px;justify-content:center">
-      ${canDel?`<button class="stk-info-del" onclick="deleteSticker('${stkId}')">삭제하기</button>`:''}
-      <button class="stk-info-close" onclick="closeStickerInfo()">닫기</button>
+      ${canDel?`<button class="stk-info-del" data-role="delete">삭제하기</button>`:''}
+      <button class="stk-info-close" data-role="close">닫기</button>
     </div>
   </div>`;
-  ov.addEventListener('click',(e)=>{if(e.target===ov)closeStickerInfo();});
+  function handleInfoTap(e){
+    const del=e.target.closest('[data-role=delete]');
+    if(del){e.preventDefault();e.stopPropagation();deleteSticker(stkId);return;}
+    const cls=e.target.closest('[data-role=close]');
+    if(cls||e.target===ov){e.preventDefault();closeStickerInfo();return;}
+  }
+  ov.addEventListener('pointerup',handleInfoTap);
+  ov.addEventListener('click',handleInfoTap);
   document.body.appendChild(ov);
   _stkInfoOv=ov;
 }
