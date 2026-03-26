@@ -186,8 +186,9 @@ body.dark .dtog-in{transform:translateX(24px)}
 .hero.compact .prog-track{margin-top:10px}
 .hero.compact .prog-row{margin-top:3px;font-size:10px}
 
-/* SECTION */
-.sec{font-size:18px;font-weight:800;color:var(--tx);margin:16px 16px 12px;display:flex;align-items:center;gap:7px}
+/* SECTION — sticky scroll with fade */
+.sec{font-size:18px;font-weight:800;color:var(--tx);margin:16px 16px 12px;display:flex;align-items:center;gap:7px;position:sticky;top:0;z-index:8;background:var(--bg);padding:10px 16px 8px;margin-left:0;margin-right:0;transition:opacity .25s,transform .2s;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.sec.sec-fading{opacity:0;transform:translateY(-8px);pointer-events:none}
 .sec-ico{width:22px;height:22px;fill:none;stroke:var(--tab-color,#6366F1);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;margin-top:1px}
 .dtab-ico{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px}
 .cal-detail-sec{margin:0!important;padding:14px 16px 10px!important;border-bottom:1px solid var(--bdr)}
@@ -195,7 +196,7 @@ body.dark .dtog-in{transform:translateX(24px)}
 .sec-hdr{display:flex;align-items:center;justify-content:space-between;margin:14px 16px 10px}
 .card{background:var(--card);border-radius:var(--r);margin:0 16px 14px;padding:18px;transition:background .25s;box-shadow:0 2px 8px rgba(0,0,0,.04);border:.5px solid var(--bdr)}
 /* Merge section title with card - makes them look like one panel */
-#dash-p0 .dash-brick .sec,#dash-p1>.sec.merge-header,#dash-p2 .sec.merge-header{background:var(--card);margin-bottom:0!important;padding:12px 16px 8px;border-radius:var(--r) var(--r) 0 0;border:.5px solid var(--bdr);border-bottom:none}
+#dash-p0 .dash-brick .sec,#dash-p1>.sec.merge-header,#dash-p2 .sec.merge-header{background:var(--card);margin-bottom:0!important;padding:12px 16px 8px;border-radius:var(--r) var(--r) 0 0;border:.5px solid var(--bdr);border-bottom:none;position:relative;z-index:auto;backdrop-filter:none;-webkit-backdrop-filter:none}
 #dash-p0 .dash-brick .sec+.card,#dash-p1>.sec.merge-header+.card,#dash-p2 .sec.merge-header+.card{border-radius:0 0 var(--r) var(--r)!important;margin-top:0!important}
 
 /* ACT GRID */
@@ -1376,6 +1377,7 @@ body.dark .bubble-speech-log{background:rgba(255,255,255,.12);color:rgba(255,255
 .node-form-modal h3{font-size:15px;font-weight:900;color:var(--tx);margin-bottom:16px;text-align:center}
 .node-form-modal input,.node-form-modal select{width:100%;padding:12px 14px;border-radius:10px;border:2px solid var(--bdr);background:var(--bg2);font-size:14px;font-weight:600;color:var(--tx);font-family:inherit;outline:none;box-sizing:border-box;margin-bottom:12px}
 .node-form-modal input:focus,.node-form-modal select:focus{border-color:var(--tab-color,#6366F1)}
+.node-form-modal input[type="date"]{height:42px;line-height:20px;-webkit-appearance:none;appearance:none}
 .node-form-modal .node-form-btns{display:flex;gap:8px}
 .node-form-modal .node-form-btns button{flex:1;padding:10px;border-radius:10px;font-size:13px;font-weight:800;border:none;cursor:pointer}
 .node-form-modal .node-form-save{background:var(--tab-color,#6366F1);color:#fff}
@@ -1745,161 +1747,8 @@ body.dark {
   max-width: 280px;
 }
 
-/* Enhanced Card Styles */
-.card {
-  background: var(--color-card);
-  border-radius: var(--radius-lg);
-  padding: 18px;
-  border: 0.5px solid var(--color-border);
-  box-shadow: var(--shadow-sm);
-  transition: background var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base), transform var(--transition-fast);
-}
-
-.card:hover {
-  box-shadow: var(--shadow-md);
-  border-color: var(--color-border-dark);
-}
-
-.card:active {
-  transform: translateY(1px);
-}
-
-/* Activity Card Enhancements */
-.act-card {
-  background: var(--color-card);
-  border-radius: var(--radius-md);
-  padding: 16px 14px 20px;
-  cursor: pointer;
-  border: none;
-  position: relative;
-  overflow: visible;
-  -webkit-user-select: none;
-  user-select: none;
-  -webkit-touch-callout: none;
-  touch-action: manipulation;
-  box-shadow: var(--shadow-sm);
-  transition: transform var(--transition-fast), background var(--transition-base), box-shadow var(--transition-base);
-}
-
-.act-card:active {
-  transform: scale(0.95);
-}
-
-.act-card:hover {
-  box-shadow: var(--shadow-md);
-}
-
-.act-card.done {
-  background: linear-gradient(145deg, rgba(16, 185, 129, 0.12), rgba(16, 185, 129, 0.05));
-  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.12);
-}
-
-.act-card.done .n,
-.act-card.done .p {
-  color: var(--color-success-dark);
-}
-
-.act-card.partial {
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(245, 158, 11, 0.06));
-  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.1);
-}
-
-.act-card.exhausted {
-  background: var(--color-bg-alt);
-  opacity: 0.6;
-  cursor: default;
-  box-shadow: none;
-}
-
-/* Enhanced Button Styles */
-button {
-  font-family: var(--font-family);
-  transition: all var(--transition-fast);
-}
-
-.auth-btn {
-  padding: 14px 20px;
-  border-radius: var(--radius-lg);
-  background: var(--color-primary);
-  color: #fff;
-  font-size: var(--font-base);
-  font-weight: var(--font-weight-bold);
-  border: none;
-  cursor: pointer;
-  width: 100%;
-  transition: all var(--transition-fast);
-  box-shadow: var(--shadow-sm);
-}
-
-.auth-btn:hover {
-  background: var(--color-primary-dark);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-1px);
-}
-
-.auth-btn:active {
-  transform: translateY(0);
-  box-shadow: var(--shadow-xs);
-}
-
-.auth-btn.secondary {
-  background: var(--color-bg-alt);
-  color: var(--color-text);
-}
-
-.auth-btn.secondary:hover {
-  background: var(--color-border);
-}
-
-/* Enhanced Input Styles */
-.auth-input {
-  width: 100%;
-  padding: 12px 16px;
-  border: 2px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-card);
-  font-size: var(--font-base);
-  font-family: var(--font-family);
-  color: var(--color-text);
-  transition: all var(--transition-fast);
-}
-
-.auth-input::placeholder {
-  color: var(--color-text-tertiary);
-}
-
-.auth-input:focus {
-  outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1), inset 0 1px 2px rgba(0, 0, 0, 0.04);
-  background: var(--color-card);
-}
-
-.auth-input:hover {
-  border-color: var(--color-border-dark);
-}
-
-/* Enhanced Bottom Navigation with Glassmorphism */
-.tab-bar, .bottom-nav {
-  display: flex;
-  align-items: center;
-  gap: 3px;
-  background: color-mix(in srgb, var(--color-primary, #6366F1) 6%, rgba(255, 255, 255, 0.95));
-  backdrop-filter: var(--backdrop-blur-lg) saturate(180%);
-  -webkit-backdrop-filter: var(--backdrop-blur-lg) saturate(180%);
-  border: 1px solid color-mix(in srgb, var(--color-primary, #6366F1) 12%, rgba(0, 0, 0, 0.04));
-  border-radius: var(--radius-3xl);
-  padding: 10px;
-  box-shadow: 0 4px 20px color-mix(in srgb, var(--color-primary, #6366F1) 12%, rgba(0, 0, 0, 0.1)), 0 12px 40px rgba(0, 0, 0, 0.08);
-  transition: all var(--transition-base);
-}
-
-body.dark .tab-bar,
-body.dark .bottom-nav {
-  background: color-mix(in srgb, var(--color-primary, #6366F1) 10%, rgba(20, 30, 50, 0.95));
-  border-color: color-mix(in srgb, var(--color-primary, #6366F1) 15%, rgba(255, 255, 255, 0.06));
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), 0 12px 40px rgba(0, 0, 0, 0.2);
-}
+/* ── 기존 컴포넌트 스타일 보존 (중복 선언 제거됨) ── */
+/* .card, .act-card, .auth-btn, .auth-input, .tab-bar 원본 유지 */
 
 /* Responsive and Accessibility Enhancements */
 button, a, input[type="checkbox"], input[type="radio"] {
@@ -2585,6 +2434,7 @@ button:disabled {
     <button class="adm-tab" id="at-1" onclick="admTab(1)">보상</button>
     <button class="adm-tab" id="at-2" onclick="admTab(2)">뱃지</button>
     <button class="adm-tab" id="at-3" onclick="admTab(3)">설정</button>
+    <button class="adm-tab" id="at-4" onclick="admTab(4)" style="display:flex;align-items:center;gap:4px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>가족</button>
   </div>
   <div id="adm-p0">
     <div class="adm-sec">
@@ -2789,6 +2639,38 @@ button:disabled {
       </div>
     </div>
     <div style="height:16px"></div>
+  </div>
+  <div id="adm-p4" style="display:none">
+    <div class="adm-sec">
+      <div class="adm-sec-lbl">가족 구성원 관리</div>
+      <div class="adm-card" id="family-mgr-list">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+    <div class="adm-sec">
+      <div class="adm-sec-lbl">초대 링크 보내기</div>
+      <div class="adm-card" id="family-invite-list">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+    <div class="adm-sec">
+      <div class="adm-sec-lbl">새 구성원 추가</div>
+      <div class="adm-card">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <input type="text" class="txt-inp" id="new-member-name" placeholder="이름" style="flex:1;min-width:80px" maxlength="10">
+          <select id="new-member-role" style="padding:8px 12px;border:1.5px solid var(--bdr);border-radius:9px;font-size:13px;font-weight:700;background:var(--bg);color:var(--tx);font-family:inherit">
+            <option value="dad">아빠</option>
+            <option value="mom">엄마</option>
+            <option value="grandpa">할아버지</option>
+            <option value="grandma">할머니</option>
+            <option value="grandpa_m">외할아버지</option>
+            <option value="grandma_m">외할머니</option>
+            <option value="child">자녀</option>
+          </select>
+          <button class="btn-sm" onclick="addNewFamilyMember()">추가</button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -3647,7 +3529,7 @@ function openNodeForm(idx){
     <input type="text" id="node-name" placeholder="이름" value="${m.name}" maxlength="10" style="width:100%;padding:10px;border-radius:8px;border:2px solid var(--bdr);background:var(--bg2);font-size:14px;font-weight:600;color:var(--tx);margin-bottom:12px;font-family:inherit;box-sizing:border-box">
     <div id="node-child-fields" style="display:${isChildRole?'block':'none'}">
       <label style="display:block;font-size:12px;font-weight:700;color:var(--tx3);margin-bottom:4px;text-align:left">생년월일</label>
-      <input type="date" id="node-birthdate" value="${m.birthDate||''}" placeholder="생년월일" style="width:100%;padding:10px;border-radius:8px;border:2px solid var(--bdr);background:var(--bg2);font-size:14px;font-weight:600;color:var(--tx);margin-bottom:12px;font-family:inherit;box-sizing:border-box">
+      <input type="date" id="node-birthdate" value="${m.birthDate||''}" placeholder="생년월일" style="width:100%;padding:10px;border-radius:8px;border:2px solid var(--bdr);background:var(--bg2);font-size:13px;font-weight:600;color:var(--tx);margin-bottom:12px;font-family:inherit;box-sizing:border-box;height:42px;line-height:20px;-webkit-appearance:none;appearance:none">
       <label style="display:block;font-size:12px;font-weight:700;color:var(--tx3);margin-bottom:4px;text-align:left">성별</label>
       <select id="node-gender" style="width:100%;padding:10px;border-radius:8px;border:2px solid var(--bdr);background:var(--bg2);font-size:14px;font-weight:600;color:var(--tx);margin-bottom:12px;font-family:inherit;box-sizing:border-box">
         <option value="" ${!m.gender?'selected':''}>성별 (선택)</option>
@@ -4258,6 +4140,7 @@ async function doJoinRegister(){
 
     currentUser=mid;
     localStorage.setItem(_LS_PREFIX+'current_user',mid);
+    syncMemberToGlobal(); // Load member data for this user
 
     rebuildMembersFromFamily();
     hideAllAuth();
@@ -4303,6 +4186,7 @@ async function doLogin(){
         if(!u.v){u.pwdHash=pwdHashSalted;u.v=2;S.users[memberId]=u;save();}
         currentUser=memberId;
         localStorage.setItem(_LS_PREFIX+'current_user',memberId);
+        syncMemberToGlobal(); // Load member data for this user
         rebuildMembersFromFamily();
         hideAllAuth();
         applyUserProfile();
@@ -4327,6 +4211,7 @@ async function doLogin(){
         save();
         currentUser=mid;
         localStorage.setItem(_LS_PREFIX+'current_user',mid);
+        syncMemberToGlobal(); // Load member data for this user
         rebuildMembersFromFamily();
         hideAllAuth();
         applyUserProfile();
@@ -4369,6 +4254,7 @@ async function doLogin(){
                 await save();
                 currentUser = otherMid;
                 localStorage.setItem(_LS_PREFIX+'current_user', otherMid);
+                syncMemberToGlobal(); // Load member data for this user
                 rebuildMembersFromFamily();
                 hideAllAuth();
                 applyUserProfile();
@@ -4451,6 +4337,7 @@ function checkAuth() {
 
   if (savedUser && cachedUsers[savedUser]) {
     currentUser = savedUser;
+    syncMemberToGlobal(); // Load member data for this user
     // 관리자 권한이면 자동으로 adminOK
     if(isCurrentUserAdmin()) adminOK = true;
     hideAllAuth();
@@ -4668,6 +4555,7 @@ function defaultState(){
     stickers:[], // [{id,actId,type:'emoji'|'bubble',content,user,ts}]
     pushDevices:{}, // 푸시 디바이스
     familyMeta:null, // 다가족 메타 정보 {familyId, familyName, members, mode, inviteTokens, ...}
+    memberData:{}, // Per-member data isolation: {[memberId]: {pts, streak, longest, lastDate, totalDone, acts, rwds, log, actDone, moodLog, badges, badgeLog}}
   };
 }
 
@@ -4679,8 +4567,70 @@ let _hasDirtyLocal = false; // true when local changes haven't been saved to Fir
 let _lastSavedJSON = '';    // tracks what we last wrote → prevents echo loop
 let _lastSaveTime = 0;      // timestamp of last save completion — cooldown for echo
 
+// ── PER-MEMBER DATA ISOLATION HELPERS ──────────────────────────────
+// Retrieves or creates the per-member state for the current user
+function getMemberState() {
+  if (!S.memberData) S.memberData = {};
+  if (!S.memberData[currentUser]) {
+    // First time: migrate global data to this member
+    S.memberData[currentUser] = {
+      pts: S.pts || 0,
+      streak: S.streak || 0,
+      longest: S.longest || 0,
+      lastDate: S.lastDate || null,
+      totalDone: S.totalDone || 0,
+      acts: S.acts ? JSON.parse(JSON.stringify(S.acts)) : JSON.parse(JSON.stringify(DACTS)),
+      rwds: S.rwds ? JSON.parse(JSON.stringify(S.rwds)) : JSON.parse(JSON.stringify(DRWDS)),
+      log: S.log ? [...S.log] : [],
+      actDone: S.actDone ? {...S.actDone} : {},
+      moodLog: S.moodLog ? [...S.moodLog] : [],
+      badges: S.badges ? {...S.badges} : {},
+      badgeLog: S.badgeLog ? [...S.badgeLog] : []
+    };
+  }
+  return S.memberData[currentUser];
+}
+
+// Syncs member data to global S for backward compatibility
+function syncMemberToGlobal() {
+  if (!currentUser) return;
+  const ms = getMemberState();
+  S.pts = ms.pts;
+  S.streak = ms.streak;
+  S.longest = ms.longest;
+  S.lastDate = ms.lastDate;
+  S.totalDone = ms.totalDone;
+  S.acts = ms.acts;
+  S.rwds = ms.rwds;
+  S.log = ms.log;
+  S.actDone = ms.actDone;
+  S.moodLog = ms.moodLog;
+  S.badges = ms.badges;
+  S.badgeLog = ms.badgeLog;
+}
+
+// Syncs global S back to member data before saving
+function syncGlobalToMember() {
+  if (!S.memberData || !currentUser) return;
+  if (!S.memberData[currentUser]) return;
+  const ms = S.memberData[currentUser];
+  ms.pts = S.pts;
+  ms.streak = S.streak;
+  ms.longest = S.longest;
+  ms.lastDate = S.lastDate;
+  ms.totalDone = S.totalDone;
+  ms.acts = S.acts;
+  ms.rwds = S.rwds;
+  ms.log = S.log;
+  ms.actDone = S.actDone;
+  ms.moodLog = S.moodLog;
+  ms.badges = S.badges;
+  ms.badgeLog = S.badgeLog;
+}
+
 // Robust debounced save with in-flight guard
 function save(){
+  syncGlobalToMember(); // Sync changes back to member data before saving
   _hasDirtyLocal = true; // 로컬 변경이 아직 저장 안 됨
   if(_isSaving){
     // A write is already in-flight — just mark that another is needed
@@ -5724,6 +5674,7 @@ function renderAll(){
   renderNavUsers();
   renderHdrStats();
 }
+  checkOnboarding();
 
 function renderHero(){
   // 인사말은 applyUserProfile에서 관리하므로 여기서는 로그인 안 된 경우만 처리
@@ -5790,6 +5741,8 @@ function renderHomeGrid(){
   const g=document.getElementById('home-grid');
   let acts=S.acts.filter(a=>a.active&&a.showHome&&isAvailableToday(a));
   if(acts.length===0) acts=S.acts.filter(a=>a.active&&isAvailableToday(a)).slice(0,6);
+  // Empty state
+  if(acts.length===0){g.innerHTML=renderEmptyState('acts');return;}
   g.innerHTML=acts.map(a=>{
     const st=getCardState(a);
     const timer=countdownStr(a);
@@ -5837,6 +5790,8 @@ function renderHomeGrid(){
 function renderLogList(){
   const el=document.getElementById('log-list');
   const acts=S.acts.filter(a=>a.active&&isAvailableToday(a));
+  // Empty state
+  if(acts.length===0){el.innerHTML=renderEmptyState('log');return;}
   el.innerHTML=acts.map(a=>{
     const done=countDone(a);
     const max=a.maxDay;
@@ -6342,7 +6297,10 @@ function renderBadgeViewHistory(){
 window.renderBadgeViewHistory=renderBadgeViewHistory;
 
 function renderRewardGrid(){
-  document.getElementById('rwd-grid').innerHTML=S.rwds.map(r=>{
+  const rg=document.getElementById('rwd-grid');
+  // Empty state
+  if(S.rwds.length===0){rg.innerHTML=renderEmptyState('rwds');return;}
+  rg.innerHTML=S.rwds.map(r=>{
     // Check if sale is active
     const sale=r.sale&&r.sale.percent&&(!r.sale.endDate||new Date(r.sale.endDate+'T23:59:59')>=new Date())?r.sale:null;
     const actualPts=sale?Math.round(r.pts*(1-sale.percent/100)):r.pts;
@@ -8526,6 +8484,160 @@ function deductPts(){
   S.log.unshift({id:'l_'+Date.now(),emoji:'📉',name:`차감 -${v} 마일리지`,pts:-v,ts:Date.now(),actId:null});
   save();renderAll();toast(`📉 ${v} 마일리지 차감됨`);
 }
+
+// FAMILY MANAGEMENT FUNCTIONS
+function renderFamilyManager() {
+  const container = document.getElementById('family-mgr-list');
+  const inviteContainer = document.getElementById('family-invite-list');
+  if(!container) return;
+
+  const fm = S.familyMeta?.members || {};
+  const ROLE_LABELS = {dad:'아빠',mom:'엄마',grandpa:'할아버지',grandma:'할머니',grandpa_m:'외할아버지',grandma_m:'외할머니',child:'자녀'};
+
+  // Member list
+  container.innerHTML = Object.entries(fm).map(([mid, m]) => {
+    const rd = ROLE_DEFS[m.role] || ROLE_DEFS.child;
+    const hasAccount = !!m.account;
+    const isMe = mid === currentUser;
+    const isAdmin = m.isAdmin;
+
+    return `<div class="adm-row" style="padding:12px 8px">
+      <div class="adm-row-l" style="display:flex;align-items:center;gap:10px">
+        <div style="width:36px;height:36px;border-radius:50%;background:${rd.color||'#F1F5F9'};border:2px solid ${rd.textColor||'#64748B'};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${rd.textColor||'#64748B'}" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg>
+        </div>
+        <div>
+          <div style="font-size:14px;font-weight:800;color:var(--tx)">${m.name||'-'} ${isMe?'<span style="font-size:10px;color:var(--or);font-weight:700">(나)</span>':''}</div>
+          <div style="font-size:11px;color:var(--tx3);font-weight:600">${ROLE_LABELS[m.role]||m.role} · ${hasAccount?'가입완료':'미가입'} ${isAdmin?'· 관리자':''}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center">
+        ${!isMe ? `<button class="btn-sm" onclick="toggleFamilyAdmin('${mid}')" style="font-size:10px;padding:4px 8px">${isAdmin?'관리자 해제':'관리자 부여'}</button>` : ''}
+        ${!isMe ? `<button class="btn-sm rd" onclick="removeFamilyMemberAdmin('${mid}')" style="font-size:10px;padding:4px 8px">삭제</button>` : ''}
+      </div>
+    </div>${Object.keys(fm).indexOf(mid) < Object.keys(fm).length - 1 ? '<div class="divider"></div>' : ''}`;
+  }).join('');
+
+  // Invite links for unregistered members
+  const unregistered = Object.entries(fm).filter(([mid, m]) => !m.account);
+  if(unregistered.length === 0) {
+    inviteContainer.innerHTML = '<div style="text-align:center;padding:16px;color:var(--tx3);font-size:13px;font-weight:600">모든 구성원이 가입을 완료했어요 🎉</div>';
+  } else {
+    inviteContainer.innerHTML = unregistered.map(([mid, m]) => {
+      const rd = ROLE_DEFS[m.role] || ROLE_DEFS.child;
+      return `<div class="adm-row" style="padding:12px 8px">
+        <div class="adm-row-l">
+          <div style="font-size:13px;font-weight:800;color:var(--tx)">${m.name} <span style="font-size:11px;color:${rd.textColor||'var(--tx3)'};font-weight:600">(${rd.label||m.role})</span></div>
+          <div style="font-size:11px;color:var(--tx3);font-weight:600">아직 가입하지 않음</div>
+        </div>
+        <button class="btn-sm" onclick="sendFamilyInvite('${mid}')" style="display:flex;align-items:center;gap:4px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          초대
+        </button>
+      </div>`;
+    }).join('<div class="divider"></div>');
+  }
+}
+
+async function toggleFamilyAdmin(memberId) {
+  const m = S.familyMeta?.members?.[memberId];
+  if(!m) return;
+  m.isAdmin = !m.isAdmin;
+  await save();
+  renderFamilyManager();
+  toast(m.isAdmin ? `${m.name}님에게 관리자 권한을 부여했어요` : `${m.name}님의 관리자 권한을 해제했어요`);
+}
+
+async function removeFamilyMemberAdmin(memberId) {
+  const m = S.familyMeta?.members?.[memberId];
+  if(!m) return;
+  if(!confirm(`${m.name}님을 가족에서 삭제할까요? 이 작업은 되돌릴 수 없어요.`)) return;
+  delete S.familyMeta.members[memberId];
+  if(S.users && S.users[memberId]) delete S.users[memberId];
+  if(S.memberData && S.memberData[memberId]) delete S.memberData[memberId];
+  await save();
+  rebuildMembersFromFamily();
+  renderFamilyManager();
+  renderAll();
+  toast(`${m.name}님이 가족에서 삭제되었어요`);
+}
+
+async function addNewFamilyMember() {
+  const name = document.getElementById('new-member-name').value.trim();
+  const role = document.getElementById('new-member-role').value;
+  if(!name) { toast('이름을 입력해주세요'); return; }
+  if(!S.familyMeta?.members) { toast('가족 정보가 없어요'); return; }
+
+  const memberCount = Object.keys(S.familyMeta.members).length;
+  if(memberCount >= 7) { toast('최대 7명까지 추가할 수 있어요'); return; }
+
+  const rd = ROLE_DEFS[role] || ROLE_DEFS.child;
+  const newId = 'mid_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+  S.familyMeta.members[newId] = {
+    name, role,
+    type: role === 'child' ? 'child' : 'parent',
+    color: rd.color || '#F1F5F9',
+    textColor: rd.textColor || '#64748B',
+    isAdmin: false,
+    joinedAt: null
+  };
+  await save();
+  rebuildMembersFromFamily();
+  renderFamilyManager();
+  document.getElementById('new-member-name').value = '';
+  toast(`${name}님이 가족에 추가되었어요`);
+}
+
+async function sendFamilyInvite(memberId) {
+  const m = S.familyMeta?.members?.[memberId];
+  if(!m) return;
+
+  // Generate invite token
+  const inviteToken = Math.random().toString(36).slice(2) + Date.now().toString(36);
+  if(!S.familyMeta.inviteTokens) S.familyMeta.inviteTokens = [];
+
+  const tokenEntry = {
+    token: inviteToken,
+    memberId: memberId,
+    createdAt: Date.now(),
+    type: 'invite'
+  };
+  S.familyMeta.inviteTokens.push(tokenEntry);
+  await save();
+
+  const rawFamilyId = _familyId.startsWith('dev_') ? _familyId.slice(4) : _familyId;
+  const familyName = S.familyMeta?.familyName || '가족';
+  const rd = ROLE_DEFS[m.role] || ROLE_DEFS.child;
+  const url = `https://kwakhyoshin.github.io/taemin_mileage/dev/?invite=${rawFamilyId}&token=${inviteToken}&mid=${memberId}`;
+  const text = `${m.name}님, ${familyName} 가족에 초대합니다! 아래 링크로 ${rd.label} 역할로 가입하세요.`;
+
+  if(navigator.share) {
+    try {
+      await navigator.share({ title: `${familyName} 가족 초대`, text, url });
+    } catch(e) {
+      // User cancelled share
+      copyToClipboard(url);
+    }
+  } else {
+    copyToClipboard(url);
+  }
+}
+
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    toast('초대 링크가 복사되었어요! 📋');
+  }).catch(() => {
+    // Fallback
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    toast('초대 링크가 복사되었어요! 📋');
+  });
+}
+
 function togActDone(id){
   const a=S.acts.find(x=>x.id===id);if(!a)return;
   if(!S.actDone)S.actDone={};
@@ -8586,6 +8698,12 @@ function filterBadgeMgr(cat,btn){
   renderBadgeMgrList();
 }
 window.filterBadgeMgr=filterBadgeMgr;
+window.renderFamilyManager=renderFamilyManager;
+window.toggleFamilyAdmin=toggleFamilyAdmin;
+window.removeFamilyMemberAdmin=removeFamilyMemberAdmin;
+window.addNewFamilyMember=addNewFamilyMember;
+window.sendFamilyInvite=sendFamilyInvite;
+window.copyToClipboard=copyToClipboard;
 
 function getAllBadgesForMgr(){
   // Combine built-in BADGES (with overrides) + customBadges, marking source
@@ -10499,6 +10617,7 @@ async function checkUrlParams(){
         await registerGlobalId(acc.id, docPath, mid);
         currentUser=mid;
         localStorage.setItem(_LS_PREFIX+'current_user',mid);
+        syncMemberToGlobal(); // Load member data for this user
         rebuildMembersFromFamily();
 
         if(acc.needReset){
@@ -10633,7 +10752,7 @@ function reallyGoTab(tab){
     themeMeta.content=isDark?'#1E293B':(TAB_COLORS[tab]||'#6366F1');
   }
 }
-function admTab(i){[0,1,2,3].forEach(j=>{document.getElementById('at-'+j).classList.toggle('on',j===i);document.getElementById('adm-p'+j).style.display=j===i?'block':'none';});if(i===2)renderBadgeMgrList();if(i===3){showCacheInfo();showPushDebug();}}
+function admTab(i){[0,1,2,3,4].forEach(j=>{document.getElementById('at-'+j).classList.toggle('on',j===i);document.getElementById('adm-p'+j).style.display=j===i?'block':'none';});if(i===2)renderBadgeMgrList();if(i===3){showCacheInfo();showPushDebug();}if(i===4)renderFamilyManager();}
 function openModal(id){document.getElementById(id).classList.add('open');}
 function closeModal(id){document.getElementById(id).classList.remove('open');}
 document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
@@ -11236,6 +11355,12 @@ function devSwitchUser(userId){
 }
 window.devSwitchUser=devSwitchUser;
 window.renderDevUserSwitch=renderDevUserSwitch;
+
+// Per-member data isolation exports
+window.getMemberState=getMemberState;
+window.syncMemberToGlobal=syncMemberToGlobal;
+window.syncGlobalToMember=syncGlobalToMember;
+
 // Initial render
 renderDevUserSwitch();
 
@@ -11764,6 +11889,79 @@ window._createState = _createState;
   window.addEventListener('resize', updateHeaderCompact, {passive:true});
   window.addEventListener('orientationchange', ()=>{setTimeout(updateHeaderCompact,100);});
 
+  // ── 섹션 제목 스티키 + 페이드 아웃 효과 ──
+  // 각 .sec 제목이 sticky로 고정된 상태에서, 해당 섹션의 마지막 카드가
+  // 뷰포트를 벗어나면 제목도 함께 희미해지며 사라짐
+  function initStickySecHeaders(){
+    const secs=document.querySelectorAll('.sec:not(.merge-header):not(.cal-detail-sec)');
+    if(!secs.length)return;
+    const observer=new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{
+        // sentinel이 보이면 해당 sec은 visible, 안 보이면 fading
+        const sec=e.target._linkedSec;
+        if(!sec)return;
+        if(e.isIntersecting){
+          sec.classList.remove('sec-fading');
+        }else if(e.boundingClientRect.top<0){
+          // 섹션이 위로 벗어났을 때만 fade
+          sec.classList.add('sec-fading');
+        }
+      });
+    },{threshold:0,rootMargin:'0px 0px 0px 0px'});
+
+    secs.forEach(sec=>{
+      // 각 sec 다음에 오는 형제 요소들 중 마지막 카드/콘텐츠를 찾음
+      let sibling=sec.nextElementSibling;
+      let lastContent=null;
+      while(sibling&&!sibling.classList.contains('sec')){
+        lastContent=sibling;
+        sibling=sibling.nextElementSibling;
+      }
+      if(lastContent){
+        // sentinel: 마지막 콘텐츠 요소를 관찰
+        lastContent._linkedSec=sec;
+        observer.observe(lastContent);
+      }
+    });
+  }
+  // 탭 전환 시 재초기화
+  setTimeout(initStickySecHeaders,500);
+
+  // ============ ONBOARDING OVERLAY ============
+  function dismissOnboarding() {
+    document.getElementById("onboarding-overlay").style.display="none";
+    localStorage.setItem(_LS_PREFIX+"onboarded","1");
+  }
+
+  function checkOnboarding() {
+    if(localStorage.getItem(_LS_PREFIX+"onboarded")) return;
+    if(!currentUser) return;
+    const totalDone = S.totalDone || 0;
+    if(totalDone > 0) { localStorage.setItem(_LS_PREFIX+"onboarded","1"); return; }
+    const el = document.getElementById("onboarding-overlay");
+    if(el) el.style.display="flex";
+    const name = MEMBERS[currentUser]?.name || "";
+    const title = document.getElementById("onboard-title");
+    if(title && name) title.textContent = `${name}님, 환영해요!`;
+  }
+
+  // ============ EMPTY STATE HANDLER ============
+  function renderEmptyState(type) {
+    const configs = {
+      acts: { icon: "📋", title: "활동이 없어요", desc: "새로운 활동을 추가하고\n매일 마일리지를 모아보세요!", btn: "활동 추가하기", action: "openAddAct()" },
+      log: { icon: "📝", title: "아직 기록이 없어요", desc: "활동을 완료하면\n여기에 기록이 쌓여요!", btn: null },
+      rwds: { icon: "🎁", title: "보상이 없어요", desc: "목표 보상을 추가하면\n동기부여가 돼요!", btn: "보상 추가하기", action: "openAddRwd()" },
+      badges: { icon: "🏅", title: "아직 뱃지가 없어요", desc: "활동을 계속하면\n멋진 뱃지를 받을 수 있어요!" },
+      mood: { icon: "😊", title: "기분 기록이 없어요", desc: "매일 기분을 기록하면\n감정 패턴을 알 수 있어요!" }
+    };
+    const c = configs[type] || configs.acts;
+    return `<div style="text-align:center;padding:40px 20px"><div style="font-size:48px;margin-bottom:12px;opacity:0.8">${c.icon}</div><div style="font-size:16px;font-weight:800;color:#1E293B;margin-bottom:8px">${c.title}</div><div style="font-size:13px;color:#94A3B8;font-weight:600;line-height:1.6;white-space:pre-line">${c.desc}</div>${c.btn ? `<button onclick="${c.action}" style="margin-top:16px;padding:10px 24px;background:#6366F1;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">${c.btn}</button>` : ""}</div>`;
+  }
+
+  window.dismissOnboarding = dismissOnboarding;
+  window.checkOnboarding = checkOnboarding;
+  window.renderEmptyState = renderEmptyState;
+
   // iOS Safari 줌 방지 (JS 레벨)
   document.addEventListener('gesturestart', function(e){ e.preventDefault(); }, {passive:false});
   document.addEventListener('gesturechange', function(e){ e.preventDefault(); }, {passive:false});
@@ -11784,5 +11982,18 @@ window._createState = _createState;
 
 })();
 </script>
+<!-- Onboarding Overlay -->
+<div id="onboarding-overlay" style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#fff;border-radius:24px;padding:32px;max-width:340px;width:100%;text-align:center;animation:scaleIn 0.3s ease">
+    <div style="font-size:48px;margin-bottom:16px">🎉</div>
+    <div style="font-size:20px;font-weight:900;color:#1E293B;margin-bottom:8px" id="onboard-title">환영해요!</div>
+    <div style="font-size:14px;color:#64748B;font-weight:600;line-height:1.6;margin-bottom:24px" id="onboard-desc">
+      우리 가족의 마일리지 여정이 시작되었어요!<br>
+      매일 활동을 완료하고 마일리지를 모아보세요.
+    </div>
+    <button onclick="dismissOnboarding()" style="width:100%;padding:14px;background:#6366F1;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit">시작하기</button>
+  </div>
+</div>
+
 </body>
 </html>
