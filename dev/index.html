@@ -6579,14 +6579,17 @@ function getLogsForDate(dateStr){
 }
 
 function isDayComplete(dateStr){
-  // 홈에 표시된 활성 활동들(showHome=true, active=true) 중 
+  // 홈에 표시된 활성 활동들(showHome=true, active=true) 중
   // maxDay>0인 것들이 모두 완료되었는지 체크
   const logs=getLogsForDate(dateStr);
   const homeActs=S.acts.filter(a=>a.active&&a.showHome!==false&&a.maxDay>0);
   if(homeActs.length===0)return false;
-  
+
   // 각 홈 활동별로 해당 날짜에 maxDay만큼 완료했는지 확인
   for(const act of homeActs){
+    // 활동이 S.acts에 현재 존재하는지, maxDay>0인지 검증
+    const currentAct=S.acts.find(a=>a.id===act.id);
+    if(!currentAct||currentAct.maxDay<=0)return false;
     const actLogs=logs.filter(l=>l.actId===act.id);
     if(actLogs.length<act.maxDay)return false;
   }
@@ -8308,13 +8311,19 @@ function useReward(invId){
 
   // Create reward request
   if(!S.rewardRequests)S.rewardRequests=[];
+  const adminMembers = [];
+  if(S.familyMeta?.members){
+    for(const [mid,m] of Object.entries(S.familyMeta.members)){
+      if(mid !== currentUser && (m.isAdmin || m.role !== 'child')) adminMembers.push(mid);
+    }
+  }
   S.rewardRequests.push({
     id:item.requestId,
     rwdInvId:invId,
     rwdName:item.rwdName,
     rwdEmoji:item.rwdEmoji,
-    fromUser:'taemin',
-    toUsers:['dad','mom'],
+    fromUser:currentUser,
+    toUsers:adminMembers,
     status:'pending',
     requestedAt:Date.now(),
     approvedBy:null,
@@ -8323,39 +8332,32 @@ function useReward(invId){
 
   // Add family messages for parents
   if(!S.familyMessages)S.familyMessages=[];
-  S.familyMessages.push({
-    from:'taemin',
-    to:'dad',
-    text:`🎁 태민이가 "${item.rwdName}" 보상 사용을 요청했어요!`,
-    ts:Date.now(),
-    read:false,
-    type:'reward_request',
-    requestId:item.requestId,
-    rwdInvId:invId
-  });
-  S.familyMessages.push({
-    from:'taemin',
-    to:'mom',
-    text:`🎁 태민이가 "${item.rwdName}" 보상 사용을 요청했어요!`,
-    ts:Date.now(),
-    read:false,
-    type:'reward_request',
-    requestId:item.requestId,
-    rwdInvId:invId
-  });
+  const requesterName = MEMBERS[currentUser]?.name || currentUser;
+  for(const adminId of adminMembers){
+    S.familyMessages.push({
+      from:currentUser,
+      to:adminId,
+      text:`🎁 ${requesterName}가 "${item.rwdName}" 보상 사용을 요청했어요!`,
+      ts:Date.now(),
+      read:false,
+      type:'reward_request',
+      requestId:item.requestId,
+      rwdInvId:invId
+    });
+  }
 
   // Trigger push notification to parents (pushBroadcast as reliable fallback)
   S.rewardNotify={
     type:'request',
     rwdName:item.rwdName,
     rwdEmoji:item.rwdEmoji,
-    user:'taemin',
-    targetUsers:['dad','mom'],
+    user:currentUser,
+    targetUsers:adminMembers,
     ts:Date.now()
   };
   S.pushBroadcast={
     title:'🎁 보상 사용 요청',
-    body:`태민이가 "${item.rwdName}" 사용을 요청했어요!`,
+    body:`${requesterName}가 "${item.rwdName}" 사용을 요청했어요!`,
     ts:Date.now()
   };
 
@@ -8399,12 +8401,12 @@ function approveRewardRequest(reqId,approver){
     inv.approvedAt=Date.now();
   }
 
-  // Add message to taemin
+  // Add message to requester
   if(!S.familyMessages)S.familyMessages=[];
-  const approverName={dad:'아빠',mom:'엄마',taemin:'태민이'}[approver]||approver;
+  const approverName=MEMBERS[approver]?.name||approver;
   S.familyMessages.push({
     from:approver,
-    to:'taemin',
+    to:req.fromUser,
     text:`✅ ${approverName}가 "${req.rwdName}" 사용을 승인했어요!`,
     ts:Date.now(),
     read:false,
@@ -8416,8 +8418,8 @@ function approveRewardRequest(reqId,approver){
   S.rewardNotify={
     type:'approved',
     rwdName:req.rwdName,
-    user:'taemin',
-    targetUsers:['taemin'],
+    user:req.fromUser,
+    targetUsers:[req.fromUser],
     ts:Date.now()
   };
   S.pushBroadcast={
@@ -8428,7 +8430,8 @@ function approveRewardRequest(reqId,approver){
 
   // 이력 기록
   if(!S.rewardLog)S.rewardLog=[];
-  S.rewardLog.unshift({id:'rl_'+Date.now(),emoji:req.rwdEmoji||'🎁',name:req.rwdName,pts:0,ts:Date.now(),rwdId:req.rwdInvId,type:'approved',by:approverName});
+  const approverNameForLog=MEMBERS[approver]?.name||approver;
+  S.rewardLog.unshift({id:'rl_'+Date.now(),emoji:req.rwdEmoji||'🎁',name:req.rwdName,pts:0,ts:Date.now(),rwdId:req.rwdInvId,type:'approved',by:approverNameForLog});
 
   save();renderAll();
   toast(`✅ "${req.rwdName}" 승인 완료!`);
@@ -8449,12 +8452,12 @@ function rejectRewardRequest(reqId,rejector){
     inv.status='owned';
   }
 
-  // Add message to taemin
+  // Add message to requester
   if(!S.familyMessages)S.familyMessages=[];
-  const rejectorName={dad:'아빠',mom:'엄마',taemin:'태민이'}[rejector]||rejector;
+  const rejectorName=MEMBERS[rejector]?.name||rejector;
   S.familyMessages.push({
     from:rejector,
-    to:'taemin',
+    to:req.fromUser,
     text:`❌ ${rejectorName}가 "${req.rwdName}" 사용을 거절했어요.`,
     ts:Date.now(),
     read:false,
@@ -8466,8 +8469,8 @@ function rejectRewardRequest(reqId,rejector){
   S.rewardNotify={
     type:'rejected',
     rwdName:req.rwdName,
-    user:'taemin',
-    targetUsers:['taemin'],
+    user:req.fromUser,
+    targetUsers:[req.fromUser],
     ts:Date.now()
   };
   S.pushBroadcast={
@@ -8478,7 +8481,8 @@ function rejectRewardRequest(reqId,rejector){
 
   // 이력 기록
   if(!S.rewardLog)S.rewardLog=[];
-  S.rewardLog.unshift({id:'rl_'+Date.now(),emoji:req.rwdEmoji||'🎁',name:req.rwdName,pts:0,ts:Date.now(),rwdId:req.rwdInvId,type:'rejected',by:rejectorName});
+  const rejectorNameForLog=MEMBERS[rejector]?.name||rejector;
+  S.rewardLog.unshift({id:'rl_'+Date.now(),emoji:req.rwdEmoji||'🎁',name:req.rwdName,pts:0,ts:Date.now(),rwdId:req.rwdInvId,type:'rejected',by:rejectorNameForLog});
 
   save();renderAll();
   toast(`❌ "${req.rwdName}" 거절됨.`);
@@ -8676,7 +8680,7 @@ function togActDone(id){
 }
 function togAct(id){const a=S.acts.find(x=>x.id===id);if(a){a.active=!a.active;save();renderAdmActList();renderLogList();renderHomeGrid();}}
 function togActHome(id){const a=S.acts.find(x=>x.id===id);if(a){a.showHome=!a.showHome;save();renderAdmActList();renderHomeGrid();toast(a.showHome?`🏠 "${a.name}" 홈에 표시됩니다`:`➖ "${a.name}" 홈에서 제거됩니다`);}}
-function delAct(id){if(!confirm('이 활동을 삭제할까요?'))return;S.acts=S.acts.filter(a=>a.id!==id);save();renderAll();toast('🗑️ 삭제됐어요');}
+function delAct(id){if(!confirm('이 활동을 삭제할까요?'))return;S.acts=S.acts.filter(a=>a.id!==id);if(S.actDone&&S.actDone[id])delete S.actDone[id];save();renderAll();toast('🗑️ 삭제됐어요');}
 function delRwd(id){if(!confirm('이 보상을 삭제할까요?'))return;S.rwds=S.rwds.filter(r=>r.id!==id);save();renderAll();toast('🗑️ 삭제됐어요');}
 function toggleRwdClosed(id){const r=S.rwds.find(x=>x.id===id);if(!r)return;r.closed=!r.closed;save();renderAll();toast(r.closed?'⛔ 보상이 종료됐어요':'✅ 보상이 다시 운영돼요');}
 function togSetting(k){if(k==='streak')S.settings.streakBonus=!S.settings.streakBonus;save();renderAdmSettings();toast(S.settings.streakBonus?'✅ 연속 보너스 켜짐':'🔕 꺼짐');}
