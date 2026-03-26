@@ -7647,7 +7647,8 @@ function reallyGoTab(tab){
   const hero=document.querySelector('.hero');
   if(hero){
     hero.classList.remove('compact');
-    hero.style.borderRadius='0 0 38px 38px';
+    const defaultBr=window.innerWidth>=768?'0':'0 0 38px 38px';
+    hero.style.borderRadius=defaultBr;
     const progTrack=hero.querySelector('.prog-track');
     if(progTrack){progTrack.style.height='14px';progTrack.style.borderRadius='7px';}
     const ptEl=hero.querySelector('.hero-pts');if(ptEl)ptEl.style.fontSize='';
@@ -7656,12 +7657,13 @@ function reallyGoTab(tab){
   }
   const ht=document.querySelector('.home-top');
   if(ht) Array.from(ht.children).forEach(c=>c.style.opacity='1');
+  const defaultBr2=window.innerWidth>=768?'0':'0 0 38px 38px';
   const logH=document.querySelector('.log-header-sticky');
-  if(logH){logH.classList.remove('compact');logH.style.borderRadius='0 0 38px 38px';}
+  if(logH){logH.classList.remove('compact');logH.style.borderRadius=defaultBr2;}
   const rwdH=document.querySelector('.rwd-header-sticky');
-  if(rwdH){rwdH.classList.remove('compact');rwdH.style.borderRadius='0 0 38px 38px';}
+  if(rwdH){rwdH.classList.remove('compact');rwdH.style.borderRadius=defaultBr2;}
   const histH=document.querySelector('.hist-hero');
-  if(histH){histH.classList.remove('compact');histH.style.borderRadius='0 0 38px 38px';}
+  if(histH){histH.classList.remove('compact');histH.style.borderRadius=defaultBr2;}
 
   // Set tab theme
   document.body.setAttribute('data-tab', tab);
@@ -8495,11 +8497,12 @@ Object.assign(window, {
   window.addEventListener('scroll', ()=>{
     const scrollY = window.scrollY || document.documentElement.scrollTop;
     const threshold = 60;
-    // Smooth border-radius interpolation for all tab headers: 38px → 28px
+    // Smooth border-radius interpolation for all tab headers: 38px → 28px (mobile only)
+    const isWide=window.innerWidth>=768;
     const brMax=38,brMin=28;
     const brRatio=Math.max(0,Math.min(1,scrollY/threshold));
-    const br=brMax-(brMax-brMin)*brRatio;
-    const brStr='0 0 '+br+'px '+br+'px';
+    const br=isWide?0:(brMax-(brMax-brMin)*brRatio);
+    const brStr=isWide?'0':'0 0 '+br+'px '+br+'px';
     // Home
     if(homeScr && homeScr.classList.contains('on') && hero){
       hero.classList.toggle('compact', scrollY > threshold);
