@@ -302,7 +302,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:#F1F5F9;color:#1E293B;min-
             환경: <span style="color:#EF4444;font-weight:800">DEV</span><br>
             Firebase 프로젝트: taemin-mileage<br>
             Firestore 컬렉션: families (dev_*)<br>
-            레지스트리 경로: userIds/dev_registry<br>
+            레지스트리 경로: families/_dev_id_registry<br>
             로그 경로: adminLogs/dev_log<br>
             로드 시간: <span id="load-time">—</span>
           </div>
@@ -456,7 +456,7 @@ async function loadAllData() {
   } catch (e) {}
 
   try {
-    const regSnap = await getDoc(doc(db, 'userIds', 'dev_registry'));
+    const regSnap = await getDoc(doc(db, 'families', '_dev_id_registry'));
     if (regSnap.exists()) {
       _registry = regSnap.data() || {};
     }
