@@ -58,8 +58,8 @@ body.dark[data-tab="log"]{--tab-color:#DC3550;--tab-color2:#E5606F;--tab-shadow:
 body.dark[data-tab="rwd"]{--tab-color:#D98E09;--tab-color2:#E0A820;--tab-shadow:rgba(217,142,9,0.3)}
 body.dark[data-tab="hist"]{--tab-color:#7A4FDD;--tab-color2:#9578E8;--tab-shadow:rgba(122,79,221,0.3)}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html{background:#6366F1;touch-action:manipulation}
-body{touch-action:pan-x pan-y}
+html{background:#6366F1;touch-action:manipulation;overscroll-behavior-x:none}
+body{touch-action:pan-y;overscroll-behavior-x:none}
 /* Prevent iOS zoom on input focus */
 input,select,textarea{font-size:16px!important}
 body{font-family:'Pretendard Variable',-apple-system,sans-serif;background:var(--bg);color:var(--tx);max-width:430px;margin:0 auto;min-height:100vh;min-height:100dvh;overflow-x:hidden;transition:background .25s,color .25s}
@@ -8492,7 +8492,10 @@ document.addEventListener('touchstart',function(e){
   if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'||tag==='CANVAS')return;
   if(e.target.closest('.overlay.open,.pfm-menu,.user-fm,.mood-pop,.msg-pop,.recv-msg-pop,.msglist-pop,.pin-pad,.ep-pop'))return;
   if(e.touches.length!==1)return;
-  _swipeStartX=e.touches[0].clientX;
+  // 화면 가장자리(25px 이내) 터치는 무시 - 브라우저 제스처와 충돌 방지
+  const touchX=e.touches[0].clientX;
+  if(touchX<25||touchX>window.innerWidth-25)return;
+  _swipeStartX=touchX;
   _swipeStartY=e.touches[0].clientY;
   _swiping=true;
   _swipeCurrentTab=getCurrentTab();
@@ -8648,6 +8651,21 @@ window.addEventListener('pageshow',(e)=>{
     return;
   }
 });
+
+// ── 브라우저 뒤로가기 방지 (히스토리 트랩) ──────────────────────────
+// 히스토리에 더미 상태를 넣어서 브라우저 뒤로가기(스와이프 포함)를 트랩
+(function(){
+  // 초기 히스토리 상태 설정
+  if(!history.state||!history.state._taemin){
+    history.replaceState({_taemin:true,depth:0},'');
+    history.pushState({_taemin:true,depth:1},'');
+  }
+  window.addEventListener('popstate',function(e){
+    // 뒤로가기가 감지되면 다시 앞으로 push해서 앱을 벗어나지 못하게 함
+    console.log('📱 popstate 감지 - 뒤로가기 트랩');
+    history.pushState({_taemin:true,depth:1},'');
+  });
+})();
 // focus 이벤트: 탭/앱 포커스 복귀
 window.addEventListener('focus',()=>{
   checkDayChange();
