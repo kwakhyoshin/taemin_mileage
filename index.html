@@ -3724,7 +3724,7 @@ function renderHdrStats(){
   // Reward tab: current points and available rewards count
   const el3=document.getElementById('rwd-hdr-pts');if(el3)el3.textContent=S.pts.toLocaleString();
   const availCount=S.rwds.filter(r=>{
-    const sale=r.sale&&r.sale.endDate&&new Date(r.sale.endDate+'T23:59:59')>=new Date()?r.sale:null;
+    const sale=r.sale&&r.sale.percent&&(!r.sale.endDate||new Date(r.sale.endDate+'T23:59:59')>=new Date())?r.sale:null;
     const actualPts=sale?Math.round(r.pts*(1-sale.percent/100)):r.pts;
     return S.pts>=actualPts;
   }).length;
@@ -4302,7 +4302,7 @@ window.renderBadgeViewHistory=renderBadgeViewHistory;
 function renderRewardGrid(){
   document.getElementById('rwd-grid').innerHTML=S.rwds.map(r=>{
     // Check if sale is active
-    const sale=r.sale&&r.sale.endDate&&new Date(r.sale.endDate+'T23:59:59')>=new Date()?r.sale:null;
+    const sale=r.sale&&r.sale.percent&&(!r.sale.endDate||new Date(r.sale.endDate+'T23:59:59')>=new Date())?r.sale:null;
     const actualPts=sale?Math.round(r.pts*(1-sale.percent/100)):r.pts;
     const can=S.pts>=actualPts;
     const lack=actualPts-S.pts;
@@ -4326,7 +4326,7 @@ function renderRewardGrid(){
           <span class="sale-badge">-${sale.percent}%</span>
         </div>
         <div class="cost-tag sale-cost">${actualPts.toLocaleString()} 마일리지</div>
-        <div class="sale-timer">⏰ ~${sale.endDate.slice(5).replace('-','/')}</div>
+        ${sale.endDate?`<div class="sale-timer">⏰ ~${sale.endDate.slice(5).replace('-','/')}</div>`:''}
       `:`<div class="cost-tag">${r.pts.toLocaleString()} 마일리지</div><br>`}
       <button class="rwd-btn${can?'':' locked'}" ${can?`onclick="openRedeem('${r.id}')"`:'disabled'}>
         ${can?'교환하기':'마일리지 부족'}</button>
@@ -5690,7 +5690,7 @@ function renderAdmRwdList(){
     <div class="manage-item" style="padding:10px 12px">
       <div class="drag-handle">☰</div>
       <div class="m-emoji">${r.emoji}</div>
-      <div class="m-info"><div class="m-nm">${r.name}${r.goal?' 🎯':''}${r.closed?' <span style="font-size:9px;color:#EF4444;font-weight:800">종료</span>':''}</div><div class="m-sub">${r.pts.toLocaleString()} 마일리지</div>${r.sale&&r.sale.endDate&&new Date(r.sale.endDate+'T23:59:59')>=new Date()?`<div style="font-size:9px;font-weight:800;color:#EF4444;margin-top:2px">🏷️ ${r.sale.percent}% 할인 중 (~${r.sale.endDate.slice(5).replace('-','/')})</div>`:''}</div>
+      <div class="m-info"><div class="m-nm">${r.name}${r.goal?' 🎯':''}${r.closed?' <span style="font-size:9px;color:#EF4444;font-weight:800">종료</span>':''}</div><div class="m-sub">${r.pts.toLocaleString()} 마일리지</div>${r.sale&&r.sale.percent&&(!r.sale.endDate||new Date(r.sale.endDate+'T23:59:59')>=new Date())?`<div style="font-size:9px;font-weight:800;color:#EF4444;margin-top:2px">🏷️ ${r.sale.percent}% 할인 중${r.sale.endDate?' (~'+r.sale.endDate.slice(5).replace('-','/')+')':''}</div>`:''}</div>
       <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
         <span style="font-size:9px;font-weight:700;color:${r.closed?'#EF4444':'var(--tx3)'};white-space:nowrap">${r.closed?'종료':'운영'}</span>
         <button class="tog tog-sm ${r.closed?'off':''}" onclick="toggleRwdClosed('${r.id}')" title="${r.closed?'종료됨':'운영중'}"><div class="tog-dot"></div></button>
@@ -6176,7 +6176,7 @@ function isParentUser(){
 let pRwdId=null;
 function openRedeem(id){
   const r=S.rwds.find(x=>x.id===id);
-  const sale=r.sale&&r.sale.endDate&&new Date(r.sale.endDate+'T23:59:59')>=new Date()?r.sale:null;
+  const sale=r.sale&&r.sale.percent&&(!r.sale.endDate||new Date(r.sale.endDate+'T23:59:59')>=new Date())?r.sale:null;
   const actualPts=sale?Math.round(r.pts*(1-sale.percent/100)):r.pts;
   if(!r||S.pts<actualPts)return;
   if(!confirm(`🎁 "${r.name}" 보상을 교환하시겠어요?\n(${actualPts.toLocaleString()} 마일리지가 차감됩니다)`))return;
@@ -6188,7 +6188,7 @@ function openRedeem(id){
 }
 function confirmRedeem(){
   const r=S.rwds.find(x=>x.id===pRwdId);
-  const sale=r.sale&&r.sale.endDate&&new Date(r.sale.endDate+'T23:59:59')>=new Date()?r.sale:null;
+  const sale=r.sale&&r.sale.percent&&(!r.sale.endDate||new Date(r.sale.endDate+'T23:59:59')>=new Date())?r.sale:null;
   const actualPts=sale?Math.round(r.pts*(1-sale.percent/100)):r.pts;
   if(!r||S.pts<actualPts)return;
   S.pts-=actualPts;
@@ -6797,7 +6797,7 @@ function openRwdForm(id){
   setGoalT(r?.goal||false);
 
   // Load sale data
-  const hasSale=r?.sale&&r.sale.endDate&&new Date(r.sale.endDate+'T23:59:59')>=new Date();
+  const hasSale=r?.sale&&r.sale.percent&&(!r.sale.endDate||new Date(r.sale.endDate+'T23:59:59')>=new Date());
   setRwdSale(!!hasSale);
   if(hasSale){
     document.getElementById('rwd-sale-pct').value=r.sale.percent||20;
