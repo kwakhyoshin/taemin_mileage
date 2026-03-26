@@ -1466,15 +1466,9 @@ body.dark .bubble-speech-log{background:rgba(255,255,255,.12);color:rgba(255,255
     <div class="auth-steps" id="create-steps-2"></div>
     <div class="auth-logo"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg></div>
     <div class="auth-title">가족 정보</div>
-    <div class="auth-sub">우리 가족의 이름과 구성원을 정해주세요</div>
+    <div class="auth-sub">우리 가족의 이름을 정해주세요</div>
     <label class="auth-label">가족 이름</label>
     <input type="text" class="auth-input" id="create-family-name" placeholder="예: 태민이네, 곽씨 패밀리" maxlength="20">
-    <label class="auth-label" style="margin-top:12px">가족 구성원 수</label>
-    <div class="member-count-stepper" id="member-count-stepper">
-      <button class="stepper-btn" onclick="decrementMemberCount()">−</button>
-      <span class="stepper-val" id="member-count-display">3</span>
-      <button class="stepper-btn" onclick="incrementMemberCount()">+</button>
-    </div>
     <div class="auth-error" id="create2-error"></div>
     <button class="auth-btn" onclick="createStep2Next()">다음</button>
   </div>
@@ -1485,8 +1479,11 @@ body.dark .bubble-speech-log{background:rgba(255,255,255,.12);color:rgba(255,255
   <div class="auth-card">
     <div class="auth-steps" id="create-steps-3"></div>
     <div class="auth-title">가족 구성원</div>
-    <div class="auth-sub">가족 구성원을 등록해주세요</div>
+    <div class="auth-sub">구성원을 추가하거나 수정해주세요</div>
     <div class="family-graph" id="family-graph"></div>
+    <button type="button" onclick="addFamilyMember()" id="add-member-btn" style="width:100%;padding:12px;margin-top:8px;background:#F1F5F9;border:2px dashed #CBD5E1;border-radius:12px;font-size:14px;font-weight:700;color:#64748B;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 구성원 추가
+    </button>
     <div class="auth-error" id="create3-error"></div>
     <button class="auth-btn" onclick="createStep3Next()" id="create-step3-next">다음</button>
     <button class="auth-btn secondary" onclick="showAuthScreen('create-2')" style="margin-top:8px">돌아가기</button>
@@ -2655,7 +2652,9 @@ let _joinState = {
   familyId: '',
   token: '',
   selectedMemberId: '',
-  autoLogin: false
+  autoLogin: false,
+  fromSelect: false,
+  isReset: false // true면 기존 임시계정 → 새 ID/비번 설정 모드
 };
 
 // ── AUTH 화면 관리 ──
@@ -2757,14 +2756,14 @@ function createStep2Next(){
   _createState.familyName=familyName;
   err.textContent='';
 
-  // Initialize members array: creator first, then empty slots
-  _createState.members=[{role:_createState.myRole, name:_createState.myName, birthDate:'', gender:'', isSelf:true}];
-  for(let i=1;i<_createState.memberCount;i++){
-    _createState.members.push({role:'child', name:'', birthDate:'', gender:'', isSelf:false});
+  // members 초기화: "나"만 포함, 나머지는 Step 3에서 추가
+  if(!_createState.members||_createState.members.length===0){
+    _createState.members=[{role:_createState.myRole, name:_createState.myName, birthDate:'', gender:'', isSelf:true}];
   }
 
   showAuthScreen('create-3');
   renderFamilyGraph();
+  updateAddMemberBtn();
 }
 
 function renderFamilyGraph(){
@@ -2779,8 +2778,10 @@ function renderFamilyGraph(){
     const rd=ROLE_DEFS[m.role]||ROLE_DEFS.child;
     const filled=m.name.trim();
 
+    // 삭제 버튼 (나 제외)
+    const deleteBtn=!isSelf?`<button type="button" onclick="event.stopPropagation();removeFamilyMember(${idx})" style="width:32px;height:32px;border-radius:50%;background:#FEE2E2;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;-webkit-tap-highlight-color:transparent" title="삭제"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`:'';
+
     if(isSelf){
-      // 나 (첫번째) — 강조 카드
       html+=`<button type="button" onclick="openNodeForm(${idx})" style="display:flex;align-items:center;gap:14px;padding:14px 16px;background:${rd.color||'#EEF2FF'};border:2px solid ${rd.textColor||'#6366F1'};border-radius:14px;cursor:pointer;-webkit-tap-highlight-color:transparent;outline:none;font-family:inherit;text-align:left;width:100%">
         <div style="width:48px;height:48px;border-radius:50%;background:#fff;border:3px solid ${rd.textColor||'#6366F1'};display:flex;align-items:center;justify-content:center;flex-shrink:0;box-sizing:border-box">
           <span style="font-size:18px;font-weight:900;color:${rd.textColor||'#6366F1'}">나</span>
@@ -2792,29 +2793,32 @@ function renderFamilyGraph(){
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
       </button>`;
     } else if(filled){
-      // 등록된 구성원
-      html+=`<button type="button" onclick="openNodeForm(${idx})" style="display:flex;align-items:center;gap:14px;padding:14px 16px;background:#fff;border:2px solid ${rd.textColor||'#E2E8F0'};border-radius:14px;cursor:pointer;-webkit-tap-highlight-color:transparent;outline:none;font-family:inherit;text-align:left;width:100%">
-        <div style="width:44px;height:44px;border-radius:50%;background:${rd.color||'#F1F5F9'};border:2px solid ${rd.textColor||'#64748B'};display:flex;align-items:center;justify-content:center;flex-shrink:0;box-sizing:border-box">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="${rd.textColor||'#64748B'}" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg>
-        </div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:14px;font-weight:800;color:#1E293B">${m.name}</div>
-          <div style="font-size:12px;font-weight:600;color:${rd.textColor||'#64748B'};margin-top:2px">${rd.label||''}</div>
-        </div>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
-      </button>`;
+      html+=`<div style="display:flex;align-items:center;gap:8px;width:100%">
+        <button type="button" onclick="openNodeForm(${idx})" style="flex:1;display:flex;align-items:center;gap:14px;padding:14px 16px;background:#fff;border:2px solid ${rd.textColor||'#E2E8F0'};border-radius:14px;cursor:pointer;-webkit-tap-highlight-color:transparent;outline:none;font-family:inherit;text-align:left">
+          <div style="width:44px;height:44px;border-radius:50%;background:${rd.color||'#F1F5F9'};border:2px solid ${rd.textColor||'#64748B'};display:flex;align-items:center;justify-content:center;flex-shrink:0;box-sizing:border-box">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="${rd.textColor||'#64748B'}" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg>
+          </div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:14px;font-weight:800;color:#1E293B">${m.name}</div>
+            <div style="font-size:12px;font-weight:600;color:${rd.textColor||'#64748B'};margin-top:2px">${rd.label||''}</div>
+          </div>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+        ${deleteBtn}
+      </div>`;
     } else {
-      // 미등록 구성원 — + 추가
-      html+=`<button type="button" onclick="openNodeForm(${idx})" style="display:flex;align-items:center;gap:14px;padding:14px 16px;background:#FAFBFC;border:2px dashed #CBD5E1;border-radius:14px;cursor:pointer;-webkit-tap-highlight-color:transparent;outline:none;font-family:inherit;text-align:left;width:100%">
-        <div style="width:44px;height:44px;border-radius:50%;background:#F1F5F9;border:2px dashed #CBD5E1;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-sizing:border-box">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        </div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:14px;font-weight:700;color:#94A3B8">구성원 ${idx} 추가</div>
-          <div style="font-size:12px;font-weight:600;color:#CBD5E1;margin-top:2px">눌러서 등록하세요</div>
-        </div>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      </button>`;
+      html+=`<div style="display:flex;align-items:center;gap:8px;width:100%">
+        <button type="button" onclick="openNodeForm(${idx})" style="flex:1;display:flex;align-items:center;gap:14px;padding:14px 16px;background:#FAFBFC;border:2px dashed #CBD5E1;border-radius:14px;cursor:pointer;-webkit-tap-highlight-color:transparent;outline:none;font-family:inherit;text-align:left">
+          <div style="width:44px;height:44px;border-radius:50%;background:#F1F5F9;border:2px dashed #CBD5E1;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-sizing:border-box">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:14px;font-weight:700;color:#94A3B8">구성원 ${idx} 등록</div>
+            <div style="font-size:12px;font-weight:600;color:#CBD5E1;margin-top:2px">눌러서 역할과 이름을 입력하세요</div>
+          </div>
+        </button>
+        ${deleteBtn}
+      </div>`;
     }
   });
 
@@ -2822,13 +2826,44 @@ function renderFamilyGraph(){
 
   // 안내 텍스트
   const filled=members.filter(m=>m.name.trim()).length;
-  html+=`<div style="text-align:center;margin-top:12px;font-size:13px;font-weight:600">${
-    filled>=total?'<span style="color:#10B981">모든 구성원이 등록되었어요!</span>'
-    :`<span style="color:#94A3B8">각 항목을 눌러 구성원을 추가하세요 (${filled}/${total})</span>`
-  }</div>`;
+  const unfilled=total-filled;
+  if(unfilled>0){
+    html+=`<div style="text-align:center;margin-top:10px;font-size:13px;font-weight:600;color:#94A3B8">등록 완료: ${filled}명 / 전체: ${total}명</div>`;
+  }else{
+    html+=`<div style="text-align:center;margin-top:10px;font-size:13px;font-weight:600;color:#10B981">모든 구성원이 등록되었어요! (${total}명)</div>`;
+  }
 
   container.innerHTML=html;
   checkGraphComplete();
+}
+
+function addFamilyMember(){
+  if(_createState.members.length>=7){toast('최대 7명까지 등록할 수 있어요');return;}
+  _createState.members.push({role:'child', name:'', birthDate:'', gender:'', isSelf:false});
+  _createState.memberCount=_createState.members.length;
+  renderFamilyGraph();
+  updateAddMemberBtn();
+  // 새로 추가된 멤버의 등록 폼 바로 열기
+  openNodeForm(_createState.members.length-1);
+}
+
+function removeFamilyMember(idx){
+  if(idx===0)return; // 나는 삭제 불가
+  if(_createState.members.length<=2){toast('최소 2명 이상이어야 해요');return;}
+  _createState.members.splice(idx,1);
+  _createState.memberCount=_createState.members.length;
+  renderFamilyGraph();
+  updateAddMemberBtn();
+}
+
+function updateAddMemberBtn(){
+  const btn=document.getElementById('add-member-btn');
+  if(!btn)return;
+  if(_createState.members.length>=7){
+    btn.style.display='none';
+  }else{
+    btn.style.display='flex';
+  }
 }
 
 let _nodeFormIndex=-1;
@@ -2906,16 +2941,21 @@ function closeNodeForm(){
 
 function checkGraphComplete(){
   const allFilled=_createState.members.every(m=>m.name.trim());
+  const hasMinimum=_createState.members.length>=2 && allFilled;
   const btn=document.getElementById('create-step3-next');
-  if(btn)btn.disabled=!allFilled;
+  if(btn)btn.disabled=!hasMinimum;
 }
 
 async function createStep3Next(){
   const err=document.getElementById('create3-error');
   const childCount=_createState.members.filter(m=>m.role==='child'&&m.name.trim()).length;
 
+  if(_createState.members.length<2){
+    err.textContent='나 외에 최소 1명의 구성원이 필요해요';
+    return;
+  }
   if(!_createState.members.every(m=>m.name.trim())){
-    err.textContent='모든 구성원을 입력해주세요';
+    err.textContent='모든 구성원의 이름을 입력해주세요';
     return;
   }
 
@@ -3013,53 +3053,65 @@ function generateChildAccount(idx){
 }
 
 async function shareInviteLink(memberName, memberIdx){
-  // memberIdx는 _createState.members 배열의 인덱스 (1부터 시작, 0은 나)
-  // 가족이 아직 생성되지 않은 상태(가입 중)면 familyId와 memberId를 저장 후 공유해야 함
-  // 가족 생성 완료 후에만 유효한 초대 링크를 만들 수 있음
   if(!_familyId){
-    toast('가족 등록을 먼저 완료해주세요. 완료 후 초대 링크를 공유할 수 있어요.');
+    toast('가족 등록을 먼저 완료해주세요.');
     return;
   }
-  // 해당 구성원의 memberId 찾기
-  const fm=S.familyMeta?.members||{};
-  let targetMid='';
-  const entries=Object.entries(fm);
-  // _createState.members[memberIdx].name과 매칭되는 memberId 찾기
-  for(const [mid,m] of entries){
-    if(m.name===memberName && !m.account){
-      targetMid=mid;
-      break;
-    }
-  }
+
+  // _createState._memberIds 에서 직접 memberId 가져오기 (정확한 매칭)
+  const targetMid=_createState._memberIds?.[memberIdx-1]||'';
   if(!targetMid){
-    // 이름으로 못 찾으면 account 없는 멤버 중 순서대로 매칭
-    const unregistered=entries.filter(([mid,m])=>!m.account);
-    if(memberIdx-1 < unregistered.length){
-      targetMid=unregistered[memberIdx-1][0];
+    // fallback: 이름으로 찾기
+    const fm=S.familyMeta?.members||{};
+    for(const [mid,m] of Object.entries(fm)){
+      if(m.name===memberName && mid!==_createState._myMemberId){
+        targetMid=mid; break;
+      }
     }
   }
+  if(!targetMid){toast('구성원 정보를 찾을 수 없어요');return;}
+
+  const fm=S.familyMeta?.members||{};
+  const memberData=fm[targetMid];
+  const hasPreAccount=!!_createState.childAccounts[memberIdx]; // 부모가 미리 계정 생성했는지
 
   // 초대 토큰 생성
   const inviteToken=Math.random().toString(36).slice(2)+Date.now().toString(36);
   if(!S.familyMeta.inviteTokens)S.familyMeta.inviteTokens=[];
-  S.familyMeta.inviteTokens.push({
+
+  const tokenEntry={
     token:inviteToken,
     memberId:targetMid,
-    type:'invite',
     createdAt:Date.now(),
-    expiresAt:Date.now()+7*24*60*60*1000 // 7일 유효
-  });
-  await save();
+    expiresAt:Date.now()+7*24*60*60*1000
+  };
 
   const rawFamilyId=_familyId.startsWith('dev_')?_familyId.slice(4):_familyId;
-  const url=`https://kwakhyoshin.github.io/taemin_mileage/dev/?invite=${rawFamilyId}&token=${inviteToken}&mid=${targetMid}`;
-  const title=`${S.familyMeta?.familyName||_createState.familyName} 가족에 초대합니다!`;
-  const text=`${memberName}님, ${title} 아래 링크를 눌러 가입하세요.`;
+  let url;
+  let text;
+  const familyName=S.familyMeta?.familyName||_createState.familyName;
+  const rd=ROLE_DEFS[memberData?.role]||ROLE_DEFS.child;
 
+  if(hasPreAccount){
+    // 시나리오 C: 부모가 미리 계정을 만들어줌 → 자동로그인 토큰 링크
+    const acc=_createState.childAccounts[memberIdx];
+    tokenEntry.type='auto';
+    tokenEntry.autoAccount={id:acc.id, pwdHash:await hashPassword(acc.pwd), v:2, needReset:true};
+    url=`https://kwakhyoshin.github.io/taemin_mileage/dev/?invite=${rawFamilyId}&token=${inviteToken}&auto=1`;
+    text=`${memberName}님, ${familyName} 가족에 초대합니다! 링크를 눌러 바로 시작하세요.`;
+  }else{
+    // 시나리오 A/B: 계정 직접 생성 → mid 포함 링크
+    tokenEntry.type='invite';
+    url=`https://kwakhyoshin.github.io/taemin_mileage/dev/?invite=${rawFamilyId}&token=${inviteToken}&mid=${targetMid}`;
+    text=`${memberName}님(${rd.label}), ${familyName} 가족에 초대합니다! 링크를 눌러 가입하세요.`;
+  }
+
+  S.familyMeta.inviteTokens.push(tokenEntry);
+  await save();
+
+  const title=`${familyName} 가족 초대`;
   if(navigator.share){
-    try{
-      await navigator.share({title,text,url});
-    }catch(e){}
+    try{await navigator.share({title,text,url});}catch(e){}
   }else{
     try{await navigator.clipboard.writeText(url);}catch(e){}
     toast('초대 링크가 복사되었어요!');
@@ -3347,17 +3399,20 @@ async function doJoinRegister(){
   if(pwd.length<4){err.textContent='비밀번호는 4자 이상이어야 해요';return;}
   if(pwd!==pwd2){err.textContent='비밀번호가 일치하지 않아요';return;}
 
-  // 아이디 중복 체크
+  // 아이디 중복 체크 (자기 자신의 기존 임시 계정은 제외)
   const users=S.users||{};
-  for(const k in users){if(users[k].id===userId){err.textContent='이미 사용중인 아이디예요';return;}}
+  const mid=_joinState.selectedMemberId;
+  for(const k in users){
+    if(k===mid) continue; // 자기 자신의 기존 임시 ID는 무시
+    if(users[k].id===userId){err.textContent='이미 사용중인 아이디예요';return;}
+  }
 
   try{
     const pwdHash=await hashPassword(pwd);
-    const mid=_joinState.selectedMemberId;
 
-    // 멤버 계정 정보 업데이트
+    // 멤버 계정 정보 업데이트 (신규 또는 재설정)
     if(!S.familyMeta.members[mid]){err.textContent='구성원 정보를 찾을 수 없어요';return;}
-    S.familyMeta.members[mid].account={id:userId,pwdHash,v:2};
+    S.familyMeta.members[mid].account={id:userId,pwdHash,v:2}; // needReset 제거
     if(!S.users)S.users={};
     S.users[mid]={id:userId,pwdHash,v:2};
 
@@ -3375,7 +3430,13 @@ async function doJoinRegister(){
     hideAllAuth();
     applyUserProfile();
     renderAll();
-    toast(`🎉 가입 완료! 환영해요!`);
+
+    const memberName=S.familyMeta.members[mid]?.name||'';
+    if(_joinState.isReset){
+      toast(`✅ ${memberName}, ID와 비밀번호가 설정되었어요!`);
+    }else{
+      toast(`🎉 ${memberName}, 가입 완료! 환영해요!`);
+    }
   }catch(e){
     console.error('Join register failed:',e);
     err.textContent='가입에 실패했어요. 다시 시도해주세요.';
@@ -9487,10 +9548,10 @@ async function checkUrlParams(){
   if(params.get('invite')){
     const familyId=params.get('invite');
     const token=params.get('token')||'';
-    const autoUser=params.get('u')||'';
-    const autoToken=params.get('t')||'';
+    const targetMid=params.get('mid')||'';
+    const isAuto=params.get('auto')==='1';
 
-    // Clean URL first
+    // URL 정리 (params는 이미 읽음)
     window.history.replaceState({_tm:3},'',window.location.pathname);
 
     try{
@@ -9506,58 +9567,76 @@ async function checkUrlParams(){
       localStorage.setItem(_LS_PREFIX+'family_id',docPath);
       rebuildMembersFromFamily();
 
-      // 자동 로그인 토큰 확인
-      if(autoUser&&autoToken){
-        const tokens=S.familyMeta?.inviteTokens||[];
-        const validToken=tokens.find(t=>t.token===autoToken&&t.type==='auto'&&t.expiresAt>Date.now());
-        if(validToken&&validToken.autoAccount){
-          // 자동 로그인 처리
-          const mid=validToken.memberId;
-          if(mid&&S.familyMeta.members[mid]){
-            S.familyMeta.members[mid].account=validToken.autoAccount;
-            if(!S.users)S.users={};
-            S.users[mid]={id:validToken.autoAccount.id,pwdHash:validToken.autoAccount.pwdHash,v:2};
-            // 토큰 소비
-            S.familyMeta.inviteTokens=tokens.filter(t=>t.token!==autoToken);
-            await save();
-            currentUser=mid;
-            localStorage.setItem(_LS_PREFIX+'current_user',mid);
-            rebuildMembersFromFamily();
-            hideAllAuth();
-            applyUserProfile();
-            renderAll();
-            toast(`🎉 환영해요, ${MEMBERS[mid]?.name||''}!`);
-            return;
-          }
-        }
-        toast('❌ 만료되거나 유효하지 않은 토큰이에요');
+      const fm=S.familyMeta?.members||{};
+      const tokens=S.familyMeta?.inviteTokens||[];
+      const validToken=tokens.find(t=>t.token===token&&t.expiresAt>Date.now());
+
+      if(!validToken){
+        toast('❌ 만료되거나 유효하지 않은 초대 링크예요');
+        showAuthScreen('login');
+        return;
       }
 
-      // 일반 초대 — 구성원 등록 화면
+      const mid=validToken.memberId;
+      const member=fm[mid];
+      if(!member){toast('❌ 구성원 정보를 찾을 수 없어요');showAuthScreen('login');return;}
+
+      const rd=ROLE_DEFS[member.role]||ROLE_DEFS.child;
+      const familyName=S.familyMeta?.familyName||'가족';
+
+      // ── 시나리오 C: 자동 로그인 (부모가 미리 계정 생성) ──
+      if(isAuto && validToken.type==='auto' && validToken.autoAccount){
+        const acc=validToken.autoAccount;
+        // 멤버에 계정 연결
+        S.familyMeta.members[mid].account=acc;
+        if(!S.users)S.users={};
+        S.users[mid]={id:acc.id,pwdHash:acc.pwdHash,v:2};
+        // 토큰 소비
+        S.familyMeta.inviteTokens=tokens.filter(t=>t.token!==token);
+        await save();
+        currentUser=mid;
+        localStorage.setItem(_LS_PREFIX+'current_user',mid);
+        rebuildMembersFromFamily();
+
+        if(acc.needReset){
+          // 최초 로그인 → ID/비밀번호 재설정 화면 표시
+          _joinState.familyId=docPath;
+          _joinState.selectedMemberId=mid;
+          _joinState.fromSelect=false;
+          _joinState.isReset=true; // 기존 계정 재설정 모드
+          showAuthScreen('join-register');
+          const badge=document.getElementById('join-reg-family-badge');
+          if(badge){badge.textContent=`🏠 ${familyName} 가족`;badge.style.display='block';}
+          document.getElementById('join-reg-avatar').innerHTML=`<div style="width:56px;height:56px;border-radius:50%;background:${rd.color||'#F1F5F9'};border:3px solid ${rd.textColor||'#6366F1'};display:flex;align-items:center;justify-content:center;margin:0 auto"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="${rd.textColor||'#6366F1'}" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg></div>`;
+          document.getElementById('join-reg-title').textContent=`${member.name}(${rd.label}) — ID·비밀번호 설정`;
+          // 미리 생성된 ID를 placeholder로 표시
+          document.getElementById('join-reg-id').value='';
+          document.getElementById('join-reg-id').placeholder=`새 아이디 (현재: ${acc.id})`;
+          toast(`🎉 환영해요, ${member.name}! 먼저 ID와 비밀번호를 설정해주세요.`);
+        }else{
+          // 이미 설정 완료된 계정 → 바로 로그인
+          hideAllAuth();
+          applyUserProfile();
+          renderAll();
+          toast(`🎉 환영해요, ${member.name}!`);
+        }
+        return;
+      }
+
+      // ── 시나리오 A/B: 직접 계정 생성 (링크에 mid 포함) ──
       _joinState.familyId=docPath;
       _joinState.token=token;
+      _joinState.selectedMemberId=mid;
+      _joinState.fromSelect=false;
+      _joinState.isReset=false;
 
-      const targetMid=params.get('mid')||'';
-      const fm=S.familyMeta?.members||{};
-
-      if(targetMid && fm[targetMid] && !fm[targetMid].account){
-        // mid가 URL에 있고 유효한 미등록 구성원 → 바로 계정 등록 화면
-        _joinState.selectedMemberId=targetMid;
-        _joinState.fromSelect=false; // 초대 링크에서 바로 진입
-        const m=fm[targetMid];
-        const rd=ROLE_DEFS[m.role]||ROLE_DEFS.child;
-        showAuthScreen('join-register');
-        document.getElementById('join-reg-avatar').innerHTML=`<div style="width:56px;height:56px;border-radius:50%;background:${rd.color||'#F1F5F9'};border:3px solid ${rd.textColor||'#6366F1'};display:flex;align-items:center;justify-content:center;margin:0 auto"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="${rd.textColor||'#6366F1'}" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg></div>`;
-        document.getElementById('join-reg-title').textContent=`${m.name}(${rd.label||m.role}) 계정 만들기`;
-        // 가족 이름 배지
-        const badge=document.getElementById('join-reg-family-badge');
-        if(badge && S.familyMeta?.familyName){badge.textContent=`🏠 ${S.familyMeta.familyName} 가족`;badge.style.display='block';}
-      } else {
-        // mid가 없거나 이미 등록된 구성원 → 구성원 선택 화면
-        renderJoinMemberGrid();
-        showAuthScreen('join-select');
-        document.getElementById('join-family-title').textContent=`${S.familyMeta?.familyName||'가족'} 합류`;
-      }
+      showAuthScreen('join-register');
+      const badge=document.getElementById('join-reg-family-badge');
+      if(badge){badge.textContent=`🏠 ${familyName} 가족`;badge.style.display='block';}
+      document.getElementById('join-reg-avatar').innerHTML=`<div style="width:56px;height:56px;border-radius:50%;background:${rd.color||'#F1F5F9'};border:3px solid ${rd.textColor||'#6366F1'};display:flex;align-items:center;justify-content:center;margin:0 auto"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="${rd.textColor||'#6366F1'}" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg></div>`;
+      document.getElementById('join-reg-title').textContent=`${member.name}(${rd.label}) 계정 만들기`;
+      document.getElementById('join-reg-id').value='';
+      document.getElementById('join-reg-id').placeholder='아이디 (4자 이상)';
     }catch(e){
       console.error('Invite link error:',e);
       toast('❌ 초대 링크 처리에 실패했어요');
@@ -10537,7 +10616,7 @@ Object.assign(window, {
   showAuthScreen, doLogin, logout, togglePwd,
   startCreateFamily, createStep1Next, createStep2Next, createStep3Next, createStep4Next, createStep5Next, createFamilyFinish, skipInvites, saveFamilyToFirestore,
   renderRoleGrid, selectCreateRole, incrementMemberCount, decrementMemberCount,
-  renderFamilyGraph, openNodeForm, saveNodeForm, closeNodeForm, checkGraphComplete,
+  renderFamilyGraph, openNodeForm, saveNodeForm, closeNodeForm, checkGraphComplete, addFamilyMember, removeFamilyMember, updateAddMemberBtn,
   renderInviteOptions, toggleChildAccount, generateChildAccount, shareInviteLink, renderDoneScreen,
   selectJoinMember, doJoinRegister, joinRegGoBack,
   isCurrentUserAdmin, rebuildMembersFromFamily,
