@@ -5,6 +5,26 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <meta name="googlebot" content="noindex, nofollow">
+<script>
+// ── 브라우저 뒤로/앞으로 완전 차단 (최상단에서 즉시 실행) ──
+(function(){
+  // 히스토리 트랩: 페이지 로드 즉시 설정
+  history.replaceState({_tm:1},'');
+  history.pushState({_tm:2},'');
+  history.pushState({_tm:3},'');
+  window.addEventListener('popstate',function(){
+    history.pushState({_tm:3},'');
+  });
+  // 화면 가장자리 터치 차단 (iOS Safari 스와이프 네비게이션 방지)
+  document.addEventListener('touchstart',function(e){
+    var x=e.touches[0].clientX;
+    var w=window.innerWidth;
+    if(x<20||x>w-20){
+      e.preventDefault();
+    }
+  },{passive:false,capture:true});
+})();
+</script>
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -58,8 +78,8 @@ body.dark[data-tab="log"]{--tab-color:#DC3550;--tab-color2:#E5606F;--tab-shadow:
 body.dark[data-tab="rwd"]{--tab-color:#D98E09;--tab-color2:#E0A820;--tab-shadow:rgba(217,142,9,0.3)}
 body.dark[data-tab="hist"]{--tab-color:#7A4FDD;--tab-color2:#9578E8;--tab-shadow:rgba(122,79,221,0.3)}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html{background:#6366F1;touch-action:manipulation;overscroll-behavior-x:none}
-body{touch-action:pan-y;overscroll-behavior-x:none}
+html{background:#6366F1;touch-action:pan-y;overscroll-behavior:none}
+body{touch-action:pan-y;overscroll-behavior:none}
 /* Prevent iOS zoom on input focus */
 input,select,textarea{font-size:16px!important}
 body{font-family:'Pretendard Variable',-apple-system,sans-serif;background:var(--bg);color:var(--tx);max-width:430px;margin:0 auto;min-height:100vh;min-height:100dvh;overflow-x:hidden;transition:background .25s,color .25s}
@@ -8652,20 +8672,7 @@ window.addEventListener('pageshow',(e)=>{
   }
 });
 
-// ── 브라우저 뒤로가기 방지 (히스토리 트랩) ──────────────────────────
-// 히스토리에 더미 상태를 넣어서 브라우저 뒤로가기(스와이프 포함)를 트랩
-(function(){
-  // 초기 히스토리 상태 설정
-  if(!history.state||!history.state._taemin){
-    history.replaceState({_taemin:true,depth:0},'');
-    history.pushState({_taemin:true,depth:1},'');
-  }
-  window.addEventListener('popstate',function(e){
-    // 뒤로가기가 감지되면 다시 앞으로 push해서 앱을 벗어나지 못하게 함
-    console.log('📱 popstate 감지 - 뒤로가기 트랩');
-    history.pushState({_taemin:true,depth:1},'');
-  });
-})();
+
 // focus 이벤트: 탭/앱 포커스 복귀
 window.addEventListener('focus',()=>{
   checkDayChange();
