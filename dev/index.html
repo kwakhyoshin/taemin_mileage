@@ -773,15 +773,17 @@ body.dark .pin-key.ck{background:transparent}
 @keyframes msgEmojiBounce{0%{transform:scale(0)}50%{transform:scale(1.2)}100%{transform:scale(1)}}
 
 /* AUTH SCREENS */
-.auth-screen{position:fixed;inset:0;background:linear-gradient(135deg,#6366F1,#818CF8);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+.auth-screen{position:fixed;inset:0;background:linear-gradient(135deg,#6366F1,#818CF8);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;overflow-y:auto}
 .auth-screen.hidden{display:none}
-.auth-card{background:#fff;border-radius:24px;padding:32px 28px;width:100%;max-width:340px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2)}
-@media(min-width:768px){.auth-card{max-width:400px;padding:40px 36px}.auth-title{font-size:28px}.auth-sub{font-size:14px}.auth-input{padding:16px 18px;font-size:16px}}
+.auth-card{background:#fff;border-radius:24px;padding:32px 28px;width:100%;max-width:380px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2);margin:auto}
+@media(min-width:768px){.auth-card{max-width:440px;padding:40px 36px}.auth-title{font-size:28px}.auth-sub{font-size:14px}.auth-input{padding:16px 18px;font-size:16px}}
 .auth-logo{font-size:48px;margin-bottom:12px}
 .auth-title{font-size:24px;font-weight:900;color:#1E293B;margin-bottom:6px}
 .auth-sub{font-size:13px;color:#64748B;margin-bottom:24px;line-height:1.5}
 .auth-input{width:100%;padding:14px 16px;border:2px solid #E2E8F0;border-radius:12px;font-size:15px;font-weight:600;margin-bottom:12px;outline:none;transition:border .2s;font-family:inherit;background:#fff;color:#1E293B;box-sizing:border-box}
 .auth-input:focus{border-color:#6366F1}
+.auth-select{width:100%;padding:14px 16px;border:2px solid #E2E8F0;border-radius:12px;font-size:15px;font-weight:600;margin-bottom:12px;outline:none;transition:border .2s;font-family:inherit;background:#fff;color:#1E293B;box-sizing:border-box;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+.auth-select:focus{border-color:#6366F1}
 .pwd-wrap{position:relative;width:100%}
 .pwd-wrap .auth-input{padding-right:48px;margin-bottom:12px}
 .pwd-toggle{position:absolute;right:14px;top:50%;transform:translateY(calc(-50% - 6px));background:none;border:none;font-size:18px;cursor:pointer;opacity:.5;transition:opacity .2s}
@@ -789,8 +791,42 @@ body.dark .pin-key.ck{background:transparent}
 .auth-btn{width:100%;padding:14px;background:#6366F1;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:8px;transition:opacity .2s}
 .auth-btn:active{opacity:.8}
 .auth-btn.secondary{background:#E2E8F0;color:#64748B}
+.auth-btn.danger{background:#FEE2E2;color:#EF4444}
 .auth-link{font-size:13px;color:#6366F1;font-weight:700;margin-top:16px;cursor:pointer}
 .auth-error{font-size:12px;color:#EF4444;font-weight:600;margin-top:8px;min-height:18px}
+.auth-steps{display:flex;justify-content:center;gap:6px;margin-bottom:20px}
+.auth-step{width:8px;height:8px;border-radius:50%;background:#E2E8F0;transition:all .3s}
+.auth-step.active{background:#6366F1;width:24px;border-radius:4px}
+.auth-step.done{background:#10B981}
+.auth-label{font-size:12px;font-weight:700;color:#64748B;text-align:left;margin-bottom:6px;display:block}
+
+/* ROLE OPTION CARDS */
+.role-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0}
+.role-card{padding:12px 4px;background:#F8FAFC;border:2px solid #E2E8F0;border-radius:14px;cursor:pointer;transition:all .2s;text-align:center}
+.role-card:hover{background:#EEF2FF;border-color:#C7D2FE}
+.role-card.selected{border-color:#6366F1;background:#EEF2FF}
+.role-card.disabled{opacity:.35;pointer-events:none}
+.role-emoji{font-size:28px;margin-bottom:4px}
+.role-name{font-size:12px;font-weight:700;color:#1E293B}
+
+/* CHILD ADD CARD */
+.child-list{display:flex;flex-direction:column;gap:10px;margin:12px 0;max-height:220px;overflow-y:auto}
+.child-card{background:#F8FAFC;border:2px solid #E2E8F0;border-radius:14px;padding:14px;text-align:left;position:relative}
+.child-card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.child-card-name{font-size:15px;font-weight:800;color:#1E293B}
+.child-card-del{background:none;border:none;color:#EF4444;font-size:18px;cursor:pointer;padding:0 4px}
+.child-card-row{display:flex;gap:8px;margin-bottom:8px}
+.child-card-row .auth-input,.child-card-row .auth-select{margin-bottom:0;flex:1;padding:10px 12px;font-size:13px}
+.child-card-row .auth-select{font-size:13px}
+
+/* MODE SELECT */
+.mode-grid{display:flex;flex-direction:column;gap:12px;margin:16px 0}
+.mode-card{background:#F8FAFC;border:2px solid #E2E8F0;border-radius:16px;padding:18px 16px;cursor:pointer;transition:all .2s;text-align:left}
+.mode-card:hover{border-color:#C7D2FE}
+.mode-card.selected{border-color:#6366F1;background:#EEF2FF}
+.mode-card-title{font-size:15px;font-weight:800;color:#1E293B;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.mode-card-desc{font-size:12px;color:#64748B;line-height:1.5}
+.mode-card-illust{display:flex;justify-content:center;gap:6px;margin-top:10px;padding:10px;background:rgba(99,102,241,.05);border-radius:10px}
 
 /* MEMBER SELECT */
 .member-grid{display:flex;flex-direction:column;gap:10px;margin:20px 0}
@@ -1330,10 +1366,11 @@ body.dark .bubble-speech-log{background:rgba(255,255,255,.12);color:rgba(255,255
 <div class="dev-indicator" id="dev-indicator" style="display:none">DEV</div>
 
 <!-- AUTH: 로그인 화면 -->
+<!-- AUTH: 로그인 화면 -->
 <div class="auth-screen" id="auth-login">
   <div class="auth-card">
     <div class="auth-logo">🏆</div>
-    <div class="auth-title">태민이 마일리지</div>
+    <div class="auth-title">우리가족 마일리지</div>
     <div class="auth-sub">가족 계정으로 로그인하세요</div>
     <input type="text" class="auth-input" id="login-id" placeholder="아이디" autocomplete="username">
     <div class="pwd-wrap">
@@ -1342,41 +1379,156 @@ body.dark .bubble-speech-log{background:rgba(255,255,255,.12);color:rgba(255,255
     </div>
     <div class="auth-error" id="login-error"></div>
     <button class="auth-btn" onclick="doLogin()">로그인</button>
-    <div class="auth-link" id="register-link" onclick="showAuthScreen('member')">처음이신가요? 가입하기</div>
+    <div class="auth-link" onclick="showAuthScreen('welcome')">처음이신가요? 시작하기</div>
   </div>
 </div>
 
-<!-- AUTH: 가족 선택 화면 -->
-<div class="auth-screen hidden" id="auth-member">
+<!-- AUTH: 웰컴 — 새 가족 만들기 or 초대받은 가족 합류 -->
+<div class="auth-screen hidden" id="auth-welcome">
   <div class="auth-card">
-    <div class="auth-logo">👨‍👩‍👦</div>
-    <div class="auth-title">누구세요?</div>
-    <div class="auth-sub">가족 구성원을 선택해주세요</div>
-    <div class="member-grid" id="member-grid">
-      <!-- 동적으로 렌더링 -->
+    <div class="auth-logo">👨‍👩‍👧‍👦</div>
+    <div class="auth-title">환영합니다!</div>
+    <div class="auth-sub">우리가족 마일리지로 자녀의 좋은 습관을<br>함께 만들어가요</div>
+    <button class="auth-btn" onclick="startCreateFamily()" style="margin-bottom:10px">
+      🏠 새 가족 만들기
+    </button>
+    <button class="auth-btn secondary" onclick="showAuthScreen('join-select')">
+      💌 초대받은 가족 합류
+    </button>
+    <div class="auth-link" onclick="showAuthScreen('login')">이미 계정이 있어요</div>
+  </div>
+</div>
+
+<!-- AUTH: 가족 만들기 — 스텝 1: 가족 이름 -->
+<div class="auth-screen hidden" id="auth-create-1">
+  <div class="auth-card">
+    <div class="auth-steps" id="create-steps-1"></div>
+    <div class="auth-logo">🏠</div>
+    <div class="auth-title">가족 이름</div>
+    <div class="auth-sub">우리 가족을 부를 이름을 정해주세요</div>
+    <input type="text" class="auth-input" id="create-family-name" placeholder="예: 태민이네, 곽씨 패밀리" maxlength="20">
+    <div class="auth-error" id="create1-error"></div>
+    <button class="auth-btn" onclick="createStep1Next()">다음 →</button>
+    <button class="auth-btn secondary" onclick="showAuthScreen('welcome')" style="margin-top:8px">← 돌아가기</button>
+  </div>
+</div>
+
+<!-- AUTH: 가족 만들기 — 스텝 2: 내 정보 (역할 선택) -->
+<div class="auth-screen hidden" id="auth-create-2">
+  <div class="auth-card">
+    <div class="auth-steps" id="create-steps-2"></div>
+    <div class="auth-title">나는 누구?</div>
+    <div class="auth-sub">가족에서의 역할을 선택해주세요</div>
+    <div class="role-grid" id="create-role-grid">
+      <!-- 동적 렌더링 -->
     </div>
-    <button class="auth-btn secondary" onclick="showAuthScreen('login')">← 로그인으로 돌아가기</button>
+    <label class="auth-label" style="margin-top:12px">이름</label>
+    <input type="text" class="auth-input" id="create-my-name" placeholder="예: 효신, 은혜" maxlength="10">
+    <div class="auth-error" id="create2-error"></div>
+    <button class="auth-btn" onclick="createStep2Next()">다음 →</button>
+    <button class="auth-btn secondary" onclick="showAuthScreen('auth-create-1')" style="margin-top:8px">← 돌아가기</button>
   </div>
 </div>
 
-<!-- AUTH: 회원가입 화면 -->
-<div class="auth-screen hidden" id="auth-register">
+<!-- AUTH: 가족 만들기 — 스텝 3: 자녀 등록 -->
+<div class="auth-screen hidden" id="auth-create-3">
   <div class="auth-card">
-    <div class="auth-logo" id="reg-avatar" style="width:80px;height:80px;margin:0 auto 12px;border-radius:50%;overflow:hidden">👦</div>
-    <div class="auth-title" id="reg-title">태민이 계정 만들기</div>
+    <div class="auth-steps" id="create-steps-3"></div>
+    <div class="auth-title">자녀 등록</div>
+    <div class="auth-sub">함께 습관을 만들어갈 자녀를 등록해주세요</div>
+    <div class="child-list" id="create-child-list">
+      <!-- 동적 렌더링 -->
+    </div>
+    <button class="auth-btn secondary" onclick="addChildSlot()" style="margin-top:4px" id="add-child-btn">+ 자녀 추가</button>
+    <div class="auth-error" id="create3-error"></div>
+    <button class="auth-btn" onclick="createStep3Next()" style="margin-top:12px">다음 →</button>
+    <button class="auth-btn secondary" onclick="showAuthScreen('auth-create-2')" style="margin-top:8px">← 돌아가기</button>
+  </div>
+</div>
+
+<!-- AUTH: 가족 만들기 — 스텝 4: 관리 모드 선택 (자녀 2명 이상만) -->
+<div class="auth-screen hidden" id="auth-create-4">
+  <div class="auth-card">
+    <div class="auth-steps" id="create-steps-4"></div>
+    <div class="auth-title">관리 모드</div>
+    <div class="auth-sub">자녀가 여러 명일 때 어떻게 관리할까요?</div>
+    <div class="mode-grid" id="create-mode-grid">
+      <div class="mode-card selected" onclick="selectMode('independent')" id="mode-independent">
+        <div class="mode-card-title">📋 독립 관리</div>
+        <div class="mode-card-desc">자녀별로 활동과 보상을 따로 관리해요. 각 자녀에게 맞는 목표를 설정할 수 있어요.</div>
+        <div class="mode-card-illust">
+          <div style="background:#DBEAFE;border-radius:10px;padding:8px 12px;font-size:11px;font-weight:700;color:#3B82F6">👦 태민<br><span style="font-size:10px;font-weight:400">양치 ✅ 숙제 ✅</span></div>
+          <div style="background:#FCE7F3;border-radius:10px;padding:8px 12px;font-size:11px;font-weight:700;color:#EC4899">👧 수아<br><span style="font-size:10px;font-weight:400">피아노 ✅ 독서 ✅</span></div>
+        </div>
+      </div>
+      <div class="mode-card" onclick="selectMode('unified')" id="mode-unified">
+        <div class="mode-card-title">👨‍👩‍👧‍👦 통합 관리</div>
+        <div class="mode-card-desc">같은 활동 목록을 함께 사용해요. 누가 완료했는지 얼굴 스티커로 표시돼요.</div>
+        <div class="mode-card-illust">
+          <div style="background:#F0FDF4;border-radius:10px;padding:8px 12px;font-size:11px;font-weight:700;color:#16A34A;text-align:center">🪥 양치하기<br><span style="font-size:16px">👦👧</span><br><span style="font-size:10px;font-weight:400">둘 다 완료!</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="auth-error" id="create4-error"></div>
+    <button class="auth-btn" onclick="createStep4Next()">다음 →</button>
+    <button class="auth-btn secondary" onclick="showAuthScreen('auth-create-3')" style="margin-top:8px">← 돌아가기</button>
+  </div>
+</div>
+
+<!-- AUTH: 가족 만들기 — 스텝 5: 계정 만들기 -->
+<div class="auth-screen hidden" id="auth-create-5">
+  <div class="auth-card">
+    <div class="auth-steps" id="create-steps-5"></div>
+    <div class="auth-logo">🔑</div>
+    <div class="auth-title">계정 만들기</div>
+    <div class="auth-sub">로그인에 사용할 아이디와 비밀번호를 설정해주세요</div>
+    <input type="text" class="auth-input" id="create-user-id" placeholder="아이디 (4자 이상)" autocomplete="username">
+    <div class="pwd-wrap">
+      <input type="password" class="auth-input" id="create-user-pwd" placeholder="비밀번호 (4자 이상)" autocomplete="new-password">
+      <button type="button" class="pwd-toggle" onclick="togglePwd('create-user-pwd', this)">👁️</button>
+    </div>
+    <div class="pwd-wrap">
+      <input type="password" class="auth-input" id="create-user-pwd2" placeholder="비밀번호 확인" autocomplete="new-password">
+      <button type="button" class="pwd-toggle" onclick="togglePwd('create-user-pwd2', this)">👁️</button>
+    </div>
+    <div class="auth-error" id="create5-error"></div>
+    <button class="auth-btn" onclick="createStep5Finish()">🎉 가족 만들기 완료!</button>
+    <button class="auth-btn secondary" onclick="createStepBack5()" style="margin-top:8px">← 돌아가기</button>
+  </div>
+</div>
+
+<!-- AUTH: 초대 링크로 합류 — 구성원 선택 -->
+<div class="auth-screen hidden" id="auth-join-select">
+  <div class="auth-card">
+    <div class="auth-logo">💌</div>
+    <div class="auth-title" id="join-family-title">가족 합류</div>
+    <div class="auth-sub">초대받은 가족의 구성원을 선택해주세요</div>
+    <div class="member-grid" id="join-member-grid">
+      <!-- 미가입 구성원 동적 렌더링 -->
+    </div>
+    <div class="auth-error" id="join-select-error"></div>
+    <button class="auth-btn secondary" onclick="showAuthScreen('welcome')">← 돌아가기</button>
+  </div>
+</div>
+
+<!-- AUTH: 초대 합류 — 계정 만들기 -->
+<div class="auth-screen hidden" id="auth-join-register">
+  <div class="auth-card">
+    <div class="auth-logo" id="join-reg-avatar">👤</div>
+    <div class="auth-title" id="join-reg-title">계정 만들기</div>
     <div class="auth-sub">아이디와 비밀번호를 설정해주세요</div>
-    <input type="text" class="auth-input" id="reg-id" placeholder="아이디 (4자 이상)" autocomplete="username">
+    <input type="text" class="auth-input" id="join-reg-id" placeholder="아이디 (4자 이상)" autocomplete="username">
     <div class="pwd-wrap">
-      <input type="password" class="auth-input" id="reg-pwd" placeholder="비밀번호 (4자 이상)" autocomplete="new-password">
-      <button type="button" class="pwd-toggle" onclick="togglePwd('reg-pwd', this)">👁️</button>
+      <input type="password" class="auth-input" id="join-reg-pwd" placeholder="비밀번호 (4자 이상)" autocomplete="new-password">
+      <button type="button" class="pwd-toggle" onclick="togglePwd('join-reg-pwd', this)">👁️</button>
     </div>
     <div class="pwd-wrap">
-      <input type="password" class="auth-input" id="reg-pwd2" placeholder="비밀번호 확인" autocomplete="new-password">
-      <button type="button" class="pwd-toggle" onclick="togglePwd('reg-pwd2', this)">👁️</button>
+      <input type="password" class="auth-input" id="join-reg-pwd2" placeholder="비밀번호 확인" autocomplete="new-password">
+      <button type="button" class="pwd-toggle" onclick="togglePwd('join-reg-pwd2', this)">👁️</button>
     </div>
-    <div class="auth-error" id="reg-error"></div>
-    <button class="auth-btn" onclick="doRegister()">가입 완료</button>
-    <button class="auth-btn secondary" onclick="showAuthScreen('member')" style="margin-top:8px">← 다시 선택하기</button>
+    <div class="auth-error" id="join-reg-error"></div>
+    <button class="auth-btn" onclick="doJoinRegister()">가입 완료</button>
+    <button class="auth-btn secondary" onclick="showAuthScreen('join-select')" style="margin-top:8px">← 다시 선택하기</button>
   </div>
 </div>
 
@@ -2341,266 +2493,494 @@ Object.entries(EMOJIS).forEach(([cat,arr])=>arr.forEach(e=>FLAT.push({e,cat,kw:E
 // AUTH SYSTEM
 // ═══════════════════════════════════════════════
 // SVG 아바타 아이콘
-const AVATARS = {
-  taemin: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="20" cy="20" r="20" fill="#FEF3C7"/>
-    <circle cx="20" cy="16" r="8" fill="#FBBF24"/>
-    <ellipse cx="20" cy="35" rx="12" ry="10" fill="#60A5FA"/>
-    <circle cx="20" cy="15" r="6" fill="#FDE68A"/>
-    <circle cx="17" cy="14" r="1.2" fill="#1E293B"/>
-    <circle cx="23" cy="14" r="1.2" fill="#1E293B"/>
-    <path d="M18 17.5c0 0 1 1.5 2 1.5s2-1.5 2-1.5" stroke="#1E293B" stroke-width="0.8" stroke-linecap="round"/>
-    <path d="M14 10c0-4 3-6 6-6s6 2 6 6" stroke="#FBBF24" stroke-width="3" stroke-linecap="round"/>
-  </svg>`,
-  dad: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="20" cy="20" r="20" fill="#DBEAFE"/>
-    <circle cx="20" cy="16" r="8" fill="#3B82F6"/>
-    <ellipse cx="20" cy="35" rx="12" ry="10" fill="#1E40AF"/>
-    <circle cx="20" cy="15" r="6" fill="#FDE68A"/>
-    <circle cx="17" cy="14" r="1.2" fill="#1E293B"/>
-    <circle cx="23" cy="14" r="1.2" fill="#1E293B"/>
-    <path d="M17 18c0 0 1.5 1 3 1s3-1 3-1" stroke="#1E293B" stroke-width="0.8" stroke-linecap="round"/>
-    <rect x="14" y="8" width="12" height="4" rx="1" fill="#1E293B"/>
-    <rect x="16" y="6" width="8" height="3" rx="1" fill="#1E293B"/>
-  </svg>`,
-  mom: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="20" cy="20" r="20" fill="#FCE7F3"/>
-    <circle cx="20" cy="16" r="8" fill="#EC4899"/>
-    <ellipse cx="20" cy="35" rx="12" ry="10" fill="#DB2777"/>
-    <circle cx="20" cy="15" r="6" fill="#FDE68A"/>
-    <circle cx="17" cy="14" r="1.2" fill="#1E293B"/>
-    <circle cx="23" cy="14" r="1.2" fill="#1E293B"/>
-    <path d="M17 17c0 0 1.5 1.5 3 1.5s3-1.5 3-1.5" stroke="#1E293B" stroke-width="0.8" stroke-linecap="round"/>
-    <path d="M12 12c0-5 4-8 8-8s8 3 8 8c0 1-0.5 2-1 2.5" stroke="#1E293B" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-    <circle cx="26" cy="13" r="1.5" fill="#F472B6"/>
-  </svg>`
+// ── 역할 정의 (다가족) ──────────────────────────
+const ROLE_DEFS = {
+  dad:       {label:'아빠',      emoji:'👨', type:'parent', color:'#DBEAFE'},
+  mom:       {label:'엄마',      emoji:'👩', type:'parent', color:'#FCE7F3'},
+  grandpa:   {label:'할아버지',  emoji:'👴', type:'parent', color:'#FEF3C7'},
+  grandma:   {label:'할머니',    emoji:'👵', type:'parent', color:'#FEF9C3'},
+  grandpa_m: {label:'외할아버지',emoji:'👴', type:'parent', color:'#E0E7FF'},
+  grandma_m: {label:'외할머니',  emoji:'👵', type:'parent', color:'#FCE7F3'},
+  child:     {label:'자녀',      emoji:'👦', type:'child',  color:'#D1FAE5'}
 };
 
-const MEMBERS = {
-  taemin: { name: '태민이', icon: '👦', greeting: '안녕, 태민아! 👋', role: '우리집 마일리지 스타 ⭐', color: '#FEF3C7' },
-  dad: { name: '아빠', icon: '👨', greeting: '안녕하세요, 효신님! 👋', role: '곽효신', color: '#DBEAFE' },
-  mom: { name: '엄마', icon: '👩', greeting: '안녕하세요, 은혜님! 👋', role: '배은혜', color: '#FCE7F3' }
-};
+// 기존 하드코딩 MEMBERS/AVATARS → 동적 (familyState.members에서 생성)
+// 호환성: 기존 코드에서 MEMBERS[id].name 등을 참조하는 곳을 위한 동적 프록시
+let MEMBERS = {};
+let AVATARS = {};
+
+function rebuildMembersFromFamily(){
+  const fm = (S.familyMeta && S.familyMeta.members) || {};
+  MEMBERS = {};
+  AVATARS = {};
+  Object.entries(fm).forEach(([mid, m])=>{
+    MEMBERS[mid] = {
+      name: m.name || ROLE_DEFS[m.role]?.label || '구성원',
+      icon: m.emoji || ROLE_DEFS[m.role]?.emoji || '👤',
+      greeting: `안녕, ${m.name}! 👋`,
+      role: ROLE_DEFS[m.role]?.label || m.role,
+      color: m.color || ROLE_DEFS[m.role]?.color || '#F1F5F9',
+      memberType: ROLE_DEFS[m.role]?.type || 'parent',
+      isAdmin: !!m.isAdmin
+    };
+    // 기본 SVG 아바타 생성
+    const c = m.color || ROLE_DEFS[m.role]?.color || '#F1F5F9';
+    const e = m.emoji || ROLE_DEFS[m.role]?.emoji || '👤';
+    AVATARS[mid] = `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="20" fill="${c}"/><text x="20" y="26" text-anchor="middle" font-size="18">${e}</text></svg>`;
+  });
+}
 
 let currentUser = null;
 let selectedMember = null;
+let _familyId = null; // 현재 가족 ID
+
+// ── 가입 흐름 상태 ──
+let _createState = {
+  familyName: '',
+  myRole: '',
+  myName: '',
+  children: [], // [{name, birthDate, gender}]
+  mode: 'independent', // 'independent' | 'unified'
+  userId: '',
+  pwdHash: ''
+};
+let _joinState = {
+  familyId: '',
+  token: '',
+  selectedMemberId: '',
+  autoLogin: false
+};
+
+// ── AUTH 화면 관리 ──
+const _AUTH_SCREENS = ['auth-login','auth-welcome','auth-create-1','auth-create-2','auth-create-3','auth-create-4','auth-create-5','auth-join-select','auth-join-register'];
 
 function showAuthScreen(screen) {
-  document.getElementById('auth-login').classList.toggle('hidden', screen !== 'login');
-  document.getElementById('auth-member').classList.toggle('hidden', screen !== 'member');
-  document.getElementById('auth-register').classList.toggle('hidden', screen !== 'register');
-  // Clear errors
-  document.getElementById('login-error').textContent = '';
-  document.getElementById('reg-error').textContent = '';
-  
-  // Render member grid with SVG avatars
-  if (screen === 'member') {
-    renderMemberGrid();
+  _AUTH_SCREENS.forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.classList.toggle('hidden',id!=='auth-'+screen && id!==screen);
+  });
+  // 스텝 인디케이터 업데이트
+  const stepNum = screen.match(/create-(\d)/);
+  if(stepNum){
+    const n=parseInt(stepNum[1]);
+    const totalSteps = _createState.children.length>=2 ? 5 : 4; // 모드 선택은 2명 이상일때만
+    for(let i=1;i<=5;i++){
+      const stepsEl=document.getElementById('create-steps-'+i);
+      if(stepsEl){
+        let html='';
+        for(let s=1;s<=totalSteps;s++){
+          html+=`<div class="auth-step${s===n?' active':''}${s<n?' done':''}"></div>`;
+        }
+        stepsEl.innerHTML=html;
+      }
+    }
   }
 }
 
-function renderMemberGrid() {
-  const grid = document.getElementById('member-grid');
-  const users = S.users || {};
-  
-  grid.innerHTML = Object.entries(MEMBERS).map(([id, m]) => {
-    const registered = users[id];
-    return `<div class="member-card${registered ? ' registered' : ''}" onclick="selectMember('${id}')">
-      <div class="member-avatar">${getAvatarHTML(id, 50)}</div>
-      <div class="member-info">
-        <div class="member-name">${m.name} ${registered ? '<span style="color:#10B981;font-size:12px">✓ 가입완료</span>' : ''}</div>
-        <div class="member-role">${m.role}</div>
-      </div>
+// ── 가족 만들기 흐름 ──
+function startCreateFamily(){
+  _createState={familyName:'',myRole:'',myName:'',children:[{name:'',birthDate:'',gender:''}],mode:'independent',userId:'',pwdHash:''};
+  showAuthScreen('create-1');
+  document.getElementById('create-family-name').value='';
+}
+
+function createStep1Next(){
+  const name=document.getElementById('create-family-name').value.trim();
+  if(!name){document.getElementById('create1-error').textContent='가족 이름을 입력해주세요';return;}
+  _createState.familyName=name;
+  document.getElementById('create1-error').textContent='';
+  showAuthScreen('create-2');
+  renderRoleGrid();
+}
+
+function renderRoleGrid(){
+  const grid=document.getElementById('create-role-grid');
+  const parentRoles=['dad','mom','grandpa','grandma','grandpa_m','grandma_m'];
+  grid.innerHTML=parentRoles.map(r=>{
+    const d=ROLE_DEFS[r];
+    const sel=_createState.myRole===r?'selected':'';
+    return `<div class="role-card ${sel}" onclick="selectCreateRole('${r}')">
+      <div class="role-emoji">${d.emoji}</div>
+      <div class="role-name">${d.label}</div>
     </div>`;
   }).join('');
 }
 
-function selectMember(memberId) {
-  selectedMember = memberId;
-  const member = MEMBERS[memberId];
-  
-  // Update register screen with custom photo or SVG avatar
-  document.getElementById('reg-avatar').innerHTML = getAvatarHTML(memberId, 80);
-  document.getElementById('reg-title').textContent = `${member.name} 계정 만들기`;
-  
-  // Check if already registered
-  const users = S.users || {};
-  if (users[memberId]) {
-    toast(`${member.name}은(는) 이미 가입했어요! 로그인하세요.`);
-    showAuthScreen('login');
-    return;
-  }
-  
-  showAuthScreen('register');
+function selectCreateRole(role){
+  _createState.myRole=role;
+  renderRoleGrid();
 }
 
-async function doRegister() {
-  const id = document.getElementById('reg-id').value.trim();
-  const pwd = document.getElementById('reg-pwd').value;
-  const pwd2 = document.getElementById('reg-pwd2').value;
-  const errorEl = document.getElementById('reg-error');
-  
-  if (id.length < 4) {
-    errorEl.textContent = '아이디는 4자 이상이어야 해요';
-    return;
-  }
-  if (pwd.length < 4) {
-    errorEl.textContent = '비밀번호는 4자 이상이어야 해요';
-    return;
-  }
-  if (pwd !== pwd2) {
-    errorEl.textContent = '비밀번호가 일치하지 않아요';
-    return;
-  }
-  
-  // S.users에서 확인
-  const users = S.users || {};
-  
-  // Check if ID already taken
-  for (const m in users) {
-    if (users[m].id === id) {
-      errorEl.textContent = '이미 사용중인 아이디예요';
-      return;
-    }
-  }
-  
-  // Hash password with SHA-512 + salt
-  const _PWD_SALT='taemin_mileage_pwd_v1_';
-  let pwdHash;
-  try {
-    const salted=_PWD_SALT+pwd;
-    if(typeof sha512 === 'function') pwdHash = sha512(salted);
-    else if(typeof window.sha512 === 'function') pwdHash = window.sha512(salted);
-    else {
-      const enc = new TextEncoder().encode(salted);
-      const buf = await crypto.subtle.digest('SHA-512', enc);
-      pwdHash = Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
-    }
-  } catch(e) {
-    errorEl.textContent = '오류가 발생했어요. 새로고침 해주세요.';
-    return;
-  }
+function createStep2Next(){
+  if(!_createState.myRole){document.getElementById('create2-error').textContent='역할을 선택해주세요';return;}
+  const name=document.getElementById('create-my-name').value.trim();
+  if(!name){document.getElementById('create2-error').textContent='이름을 입력해주세요';return;}
+  _createState.myName=name;
+  document.getElementById('create2-error').textContent='';
+  showAuthScreen('create-3');
+  renderChildList();
+}
 
-  // S.users에 저장 (salted hash)
-  if (!S.users) S.users = {};
-  S.users[selectedMember] = { id, pwdHash, v:2 };
-  cachedUsers = S.users;
-  
-  // Firebase에 저장
-  try {
-    await save();
-    
-    // Auto login
-    currentUser = selectedMember;
-    localStorage.setItem(_LS_PREFIX+'current_user', selectedMember);
-    
-    toast(`${MEMBERS[selectedMember].name} 가입 완료! 🎉`);
+function renderChildList(){
+  const list=document.getElementById('create-child-list');
+  const maxChildren=5; // 최대 가족 7명 중 부모 제외
+  list.innerHTML=_createState.children.map((c,i)=>`
+    <div class="child-card">
+      <div class="child-card-head">
+        <div class="child-card-name">👶 자녀 ${i+1}</div>
+        ${_createState.children.length>1?`<button class="child-card-del" onclick="removeChild(${i})">✕</button>`:''}
+      </div>
+      <div class="child-card-row">
+        <input type="text" class="auth-input" placeholder="이름" value="${c.name}" oninput="_createState.children[${i}].name=this.value" maxlength="10">
+      </div>
+      <div class="child-card-row">
+        <input type="date" class="auth-input" value="${c.birthDate}" onchange="_createState.children[${i}].birthDate=this.value" style="color:${c.birthDate?'#1E293B':'#94A3B8'}">
+        <select class="auth-select" onchange="_createState.children[${i}].gender=this.value">
+          <option value="" ${!c.gender?'selected':''} disabled>성별</option>
+          <option value="M" ${c.gender==='M'?'selected':''}>남자</option>
+          <option value="F" ${c.gender==='F'?'selected':''}>여자</option>
+        </select>
+      </div>
+    </div>
+  `).join('');
+  const addBtn=document.getElementById('add-child-btn');
+  if(addBtn)addBtn.style.display=_createState.children.length>=maxChildren?'none':'block';
+}
+
+function addChildSlot(){
+  if(_createState.children.length>=5)return;
+  _createState.children.push({name:'',birthDate:'',gender:''});
+  renderChildList();
+}
+
+function removeChild(idx){
+  _createState.children.splice(idx,1);
+  renderChildList();
+}
+
+function createStep3Next(){
+  const err=document.getElementById('create3-error');
+  // 최소 1명 자녀 필요, 이름은 필수
+  const valid=_createState.children.filter(c=>c.name.trim());
+  if(valid.length===0){err.textContent='자녀를 최소 1명 등록해주세요';return;}
+  // 이름 없는 빈 슬롯 제거
+  _createState.children=valid;
+  err.textContent='';
+
+  // 자녀 2명 이상이면 모드 선택, 아니면 스킵
+  if(_createState.children.length>=2){
+    showAuthScreen('create-4');
+  }else{
+    _createState.mode='independent';
+    showAuthScreen('create-5');
+  }
+}
+
+function selectMode(mode){
+  _createState.mode=mode;
+  document.getElementById('mode-independent').classList.toggle('selected',mode==='independent');
+  document.getElementById('mode-unified').classList.toggle('selected',mode==='unified');
+}
+
+function createStep4Next(){
+  showAuthScreen('create-5');
+}
+
+function createStepBack5(){
+  if(_createState.children.length>=2){
+    showAuthScreen('create-4');
+  }else{
+    showAuthScreen('create-3');
+    renderChildList();
+  }
+}
+
+// ── 비밀번호 해싱 유틸 ──
+const _PWD_SALT='taemin_mileage_pwd_v1_';
+async function hashPassword(pwd){
+  const salted=_PWD_SALT+pwd;
+  if(typeof sha512==='function')return sha512(salted);
+  if(typeof window.sha512==='function')return window.sha512(salted);
+  const enc=new TextEncoder().encode(salted);
+  const buf=await crypto.subtle.digest('SHA-512',enc);
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+// ── 가족 ID 생성 ──
+function generateFamilyId(){
+  const chars='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+  let id='';for(let i=0;i<8;i++)id+=chars[Math.floor(Math.random()*chars.length)];
+  return id;
+}
+
+function generateMemberId(){
+  return 'm_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,6);
+}
+
+// ── 가족 만들기 완료 (스텝5) ──
+async function createStep5Finish(){
+  const userId=document.getElementById('create-user-id').value.trim();
+  const pwd=document.getElementById('create-user-pwd').value;
+  const pwd2=document.getElementById('create-user-pwd2').value;
+  const err=document.getElementById('create5-error');
+
+  if(userId.length<4){err.textContent='아이디는 4자 이상이어야 해요';return;}
+  if(pwd.length<4){err.textContent='비밀번호는 4자 이상이어야 해요';return;}
+  if(pwd!==pwd2){err.textContent='비밀번호가 일치하지 않아요';return;}
+  err.textContent='';
+
+  try{
+    const pwdHash=await hashPassword(pwd);
+    const familyId=generateFamilyId();
+    const myMemberId=generateMemberId();
+
+    // 가족 구성원 목록 구축
+    const members={};
+    // 나 (관리자)
+    members[myMemberId]={
+      name:_createState.myName,
+      role:_createState.myRole,
+      emoji:ROLE_DEFS[_createState.myRole]?.emoji||'👤',
+      color:ROLE_DEFS[_createState.myRole]?.color||'#F1F5F9',
+      isAdmin:true,
+      type:'parent',
+      account:{id:userId,pwdHash,v:2},
+      joinedAt:Date.now()
+    };
+    // 자녀들
+    _createState.children.forEach((c,i)=>{
+      const childId=generateMemberId();
+      members[childId]={
+        name:c.name,
+        role:'child',
+        emoji:c.gender==='F'?'👧':'👦',
+        color:c.gender==='F'?'#FCE7F3':'#DBEAFE',
+        isAdmin:false,
+        type:'child',
+        birthDate:c.birthDate||'',
+        gender:c.gender||'',
+        account:null, // 아직 계정 없음
+        joinedAt:Date.now()
+      };
+    });
+
+    // 새 familyMeta 구조
+    const familyMeta={
+      familyId,
+      familyName:_createState.familyName,
+      createdAt:Date.now(),
+      createdBy:myMemberId,
+      mode:_createState.mode,
+      members,
+      inviteTokens:[] // [{token, memberId (optional), createdAt, expiresAt, type:'auto'|'manual', autoAccount:{id,pwdHash}}]
+    };
+
+    // Firestore 문서 경로: families/{familyId}
+    // dev 환경에서는 families/dev_{familyId}
+    const docPath = _ENV==='dev' ? `dev_${familyId}` : familyId;
+    const familyDoc = doc(db, 'families', docPath);
+
+    // 기본 상태에 familyMeta 추가
+    const newState = defaultState();
+    newState.familyMeta = familyMeta;
+    // 사용자 정보도 호환 형태로
+    newState.users = {};
+    newState.users[myMemberId] = {id:userId,pwdHash,v:2};
+
+    await setDoc(familyDoc, newState);
+
+    // 로컬 상태 업데이트
+    S = newState;
+    _familyId = docPath;
+    currentUser = myMemberId;
+
+    // localStorage에 가족 ID + 사용자 저장
+    localStorage.setItem(_LS_PREFIX+'family_id', docPath);
+    localStorage.setItem(_LS_PREFIX+'current_user', myMemberId);
+
+    // MEMBERS/AVATARS 재구축
+    rebuildMembersFromFamily();
+
     hideAllAuth();
     applyUserProfile();
-  } catch(e) {
-    console.error('Registration failed:', e);
-    errorEl.textContent = '가입 중 오류가 발생했어요. 다시 시도해주세요.';
+    renderAll();
+    toast(`🎉 ${_createState.familyName} 가족이 만들어졌어요!`);
+
+  }catch(e){
+    console.error('Family creation failed:', e);
+    err.textContent='가족 만들기에 실패했어요. 다시 시도해주세요.';
   }
 }
 
-async function doLogin() {
-  const id = document.getElementById('login-id').value.trim();
-  const pwd = document.getElementById('login-pwd').value;
-  const errorEl = document.getElementById('login-error');
+// ── 초대 합류 흐름 ──
+function selectJoinMember(memberId){
+  _joinState.selectedMemberId=memberId;
+  const fm=S.familyMeta?.members||{};
+  const m=fm[memberId];
+  if(!m)return;
+  document.getElementById('join-reg-avatar').textContent=m.emoji||'👤';
+  document.getElementById('join-reg-title').textContent=`${m.name} 계정 만들기`;
+  showAuthScreen('join-register');
+}
 
-  if (!id || !pwd) {
-    errorEl.textContent = '아이디와 비밀번호를 입력해주세요';
-    return;
-  }
+async function doJoinRegister(){
+  const userId=document.getElementById('join-reg-id').value.trim();
+  const pwd=document.getElementById('join-reg-pwd').value;
+  const pwd2=document.getElementById('join-reg-pwd2').value;
+  const err=document.getElementById('join-reg-error');
 
-  // S.users에서 확인
-  const users = S.users || {};
-  cachedUsers = users;
+  if(userId.length<4){err.textContent='아이디는 4자 이상이어야 해요';return;}
+  if(pwd.length<4){err.textContent='비밀번호는 4자 이상이어야 해요';return;}
+  if(pwd!==pwd2){err.textContent='비밀번호가 일치하지 않아요';return;}
 
-  // Hash password — try salted first, fallback to unsalted for migration
-  const _PWD_SALT='taemin_mileage_pwd_v1_';
-  let pwdHashSalted, pwdHashLegacy;
-  try {
-    const saltedStr=_PWD_SALT+pwd;
-    if(typeof sha512 === 'function'){pwdHashSalted=sha512(saltedStr);pwdHashLegacy=sha512(pwd);}
-    else if(typeof window.sha512 === 'function'){pwdHashSalted=window.sha512(saltedStr);pwdHashLegacy=window.sha512(pwd);}
-    else {
-      const enc1 = new TextEncoder().encode(saltedStr);
-      const buf1 = await crypto.subtle.digest('SHA-512', enc1);
-      pwdHashSalted = Array.from(new Uint8Array(buf1)).map(b=>b.toString(16).padStart(2,'0')).join('');
-      const enc2 = new TextEncoder().encode(pwd);
-      const buf2 = await crypto.subtle.digest('SHA-512', enc2);
-      pwdHashLegacy = Array.from(new Uint8Array(buf2)).map(b=>b.toString(16).padStart(2,'0')).join('');
+  // 아이디 중복 체크
+  const users=S.users||{};
+  for(const k in users){if(users[k].id===userId){err.textContent='이미 사용중인 아이디예요';return;}}
+
+  try{
+    const pwdHash=await hashPassword(pwd);
+    const mid=_joinState.selectedMemberId;
+
+    // 멤버 계정 정보 업데이트
+    if(!S.familyMeta.members[mid]){err.textContent='구성원 정보를 찾을 수 없어요';return;}
+    S.familyMeta.members[mid].account={id:userId,pwdHash,v:2};
+    if(!S.users)S.users={};
+    S.users[mid]={id:userId,pwdHash,v:2};
+
+    // 토큰 소비 처리
+    if(_joinState.token){
+      S.familyMeta.inviteTokens=(S.familyMeta.inviteTokens||[]).filter(t=>t.token!==_joinState.token);
     }
-  } catch(e) {
-    console.error('SHA-512 hash failed:', e);
-    errorEl.textContent = '로그인 처리 중 오류가 발생했어요. 새로고침 해주세요.';
-    return;
-  }
 
-  for (const memberId in users) {
-    const u=users[memberId];
-    // v2: salted hash, legacy: unsalted hash (auto-migrate)
-    const matched = (u.v===2 && u.id===id && u.pwdHash===pwdHashSalted) ||
-                    (!u.v && u.id===id && u.pwdHash===pwdHashLegacy);
-    if(matched){
-      // 레거시 해시 → 솔트 해시로 자동 마이그레이션
-      if(!u.v){u.pwdHash=pwdHashSalted;u.v=2;S.users[memberId]=u;save();}
-    }
-    if (matched) {
-      currentUser = memberId;
-      localStorage.setItem(_LS_PREFIX+'current_user', memberId);
-      toast(`${MEMBERS[memberId].name}, 환영해요! 🎉`);
-      hideAllAuth();
-      applyUserProfile();
-      return;
-    }
-  }
+    await save();
 
-  errorEl.textContent = '아이디 또는 비밀번호가 틀렸어요';
+    currentUser=mid;
+    localStorage.setItem(_LS_PREFIX+'current_user',mid);
+
+    rebuildMembersFromFamily();
+    hideAllAuth();
+    applyUserProfile();
+    renderAll();
+    toast(`🎉 가입 완료! 환영해요!`);
+  }catch(e){
+    console.error('Join register failed:',e);
+    err.textContent='가입에 실패했어요. 다시 시도해주세요.';
+  }
+}
+
+// ── 로그인 (다가족 대응) ──
+async function doLogin(){
+  const id=document.getElementById('login-id').value.trim();
+  const pwd=document.getElementById('login-pwd').value;
+  const errEl=document.getElementById('login-error');
+  if(!id||!pwd){errEl.textContent='아이디와 비밀번호를 입력해주세요';return;}
+
+  try{
+    const pwdHashSalted=await hashPassword(pwd);
+    // 레거시 해시도 시도 (마이그레이션 지원)
+    let pwdHashLegacy='';
+    try{
+      if(typeof sha512==='function')pwdHashLegacy=sha512(pwd);
+      else if(typeof window.sha512==='function')pwdHashLegacy=window.sha512(pwd);
+      else{const e=new TextEncoder().encode(pwd);const b=await crypto.subtle.digest('SHA-512',e);pwdHashLegacy=Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('');}
+    }catch(e){}
+
+    // 현재 로드된 가족 데이터에서 사용자 검색
+    const users=S.users||{};
+    for(const memberId in users){
+      const u=users[memberId];
+      const matched=(u.v===2&&u.id===id&&u.pwdHash===pwdHashSalted)||
+                    (!u.v&&u.id===id&&u.pwdHash===pwdHashLegacy);
+      if(matched){
+        if(!u.v){u.pwdHash=pwdHashSalted;u.v=2;S.users[memberId]=u;save();}
+        currentUser=memberId;
+        localStorage.setItem(_LS_PREFIX+'current_user',memberId);
+        rebuildMembersFromFamily();
+        hideAllAuth();
+        applyUserProfile();
+        renderAll();
+        toast(`${MEMBERS[memberId]?.name||'회원'}님, 환영해요! 🎉`);
+        return;
+      }
+    }
+
+    // familyMeta.members에서도 검색 (account 필드)
+    const fm=S.familyMeta?.members||{};
+    for(const mid in fm){
+      const acc=fm[mid].account;
+      if(!acc)continue;
+      const matched=(acc.v===2&&acc.id===id&&acc.pwdHash===pwdHashSalted)||
+                    (!acc.v&&acc.id===id&&acc.pwdHash===pwdHashLegacy);
+      if(matched){
+        // users 동기화
+        if(!S.users)S.users={};
+        S.users[mid]={id:acc.id,pwdHash:pwdHashSalted,v:2};
+        if(!acc.v){acc.pwdHash=pwdHashSalted;acc.v=2;}
+        save();
+        currentUser=mid;
+        localStorage.setItem(_LS_PREFIX+'current_user',mid);
+        rebuildMembersFromFamily();
+        hideAllAuth();
+        applyUserProfile();
+        renderAll();
+        toast(`${fm[mid].name||'회원'}님, 환영해요! 🎉`);
+        return;
+      }
+    }
+
+    errEl.textContent='아이디 또는 비밀번호가 틀렸어요';
+  }catch(e){
+    console.error('Login failed:',e);
+    errEl.textContent='로그인 중 오류가 발생했어요';
+  }
 }
 
 function hideAllAuth() {
-  document.getElementById('auth-login').classList.add('hidden');
-  document.getElementById('auth-member').classList.add('hidden');
-  document.getElementById('auth-register').classList.add('hidden');
+  _AUTH_SCREENS.forEach(id=>{const el=document.getElementById(id);if(el)el.classList.add('hidden');});
 }
 
 function applyUserProfile() {
+  rebuildMembersFromFamily();
   const greetingEl = document.getElementById('greeting-txt');
 
   if (!currentUser) {
-    // 로그인 안 된 경우 기본 인사말
-    if (greetingEl) greetingEl.textContent = S.greeting || '안녕, 태민아! 👋';
+    if (greetingEl) greetingEl.textContent = '안녕하세요! 👋';
     return;
   }
 
   const member = MEMBERS[currentUser];
+  if(!member)return;
 
-  // Update nav profile icon - custom photo first, fallback to SVG avatar
+  // Update nav profile icon
   const navIcon = document.getElementById('nav-profile-icon');
   if (navIcon) navIcon.innerHTML = getAvatarHTML(currentUser, 44);
 
-  // Update greeting - use new per-user greeting system
+  // Update greeting
   if (greetingEl) {
     const greetingTxt = getCurrentGreeting(currentUser);
-    greetingEl.textContent = greetingTxt;
+    greetingEl.textContent = greetingTxt || `안녕, ${member.name}! 👋`;
   }
-  
-  // Update admin tab profile section - custom photo first
+
+  // Update admin tab profile section
   const admIcon = document.getElementById('profile-icon-adm');
   const admName = document.getElementById('profile-name-adm');
   const admRole = document.getElementById('profile-role-adm');
   if (admIcon) admIcon.innerHTML = getAvatarHTML(currentUser, 40);
   if (admName) admName.textContent = member.name;
-  if (admRole) admRole.textContent = member.role;
+  if (admRole) admRole.textContent = member.role + (member.isAdmin?' 👑':'');
 
   renderNavUsers();
+}
+
+function isCurrentUserAdmin(){
+  if(!currentUser||!S.familyMeta?.members)return false;
+  return !!S.familyMeta.members[currentUser]?.isAdmin;
 }
 
 function logout() {
   if (!confirm('로그아웃 하시겠어요?')) return;
   currentUser = null;
+  adminOK = false;
   localStorage.removeItem(_LS_PREFIX+'current_user');
   showAuthScreen('login');
   document.getElementById('login-id').value = '';
@@ -2608,30 +2988,28 @@ function logout() {
 }
 
 function checkAuth() {
-  // S.users에서 사용자 데이터 로드
   cachedUsers = S.users || {};
-  
+  rebuildMembersFromFamily();
+
   const savedUser = localStorage.getItem(_LS_PREFIX+'current_user');
-  
-  // 3명 모두 가입했으면 회원가입 링크 숨김
-  const allRegistered = Object.keys(MEMBERS).every(id => cachedUsers[id]);
-  const registerLink = document.getElementById('register-link');
-  if (registerLink) {
-    registerLink.style.display = allRegistered ? 'none' : 'block';
-  }
-  
+
   if (savedUser && cachedUsers[savedUser]) {
     currentUser = savedUser;
+    // 관리자 권한이면 자동으로 adminOK
+    if(isCurrentUserAdmin()) adminOK = true;
     hideAllAuth();
     applyUserProfile();
     return true;
   }
-  
-  // Check if any users exist
-  if (Object.keys(cachedUsers).length === 0) {
-    showAuthScreen('member');
-  } else {
+
+  // 가족 데이터가 있으면 로그인 화면, 없으면 웰컴 화면
+  if (S.familyMeta && S.familyMeta.familyId) {
     showAuthScreen('login');
+  } else if (Object.keys(cachedUsers).length > 0) {
+    // 레거시: 기존 데이터가 있을때
+    showAuthScreen('login');
+  } else {
+    showAuthScreen('welcome');
   }
   return false;
 }
@@ -2781,7 +3159,24 @@ const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di)_di.style.display='';} // localStorage 키 접두사
 const fbApp = initializeApp(firebaseConfig);
 const db = getFirestore(fbApp);
-const DATA_DOC = doc(db, 'users', _ENV==='dev'?'taemin_dev':'taemin');
+// 레거시: 기존 사용자용 문서 경로
+const LEGACY_DOC = doc(db, 'users', _ENV==='dev'?'taemin_dev':'taemin');
+// 다가족: localStorage에서 가족 ID 로드
+let DATA_DOC = LEGACY_DOC; // 초기값은 레거시, init에서 갱신됨
+
+function getFamilyDoc(familyId){
+  return doc(db, 'families', familyId);
+}
+
+function updateDataDoc(){
+  const savedFamilyId = localStorage.getItem(_LS_PREFIX+'family_id');
+  if(savedFamilyId){
+    _familyId = savedFamilyId;
+    DATA_DOC = getFamilyDoc(savedFamilyId);
+  }else{
+    DATA_DOC = LEGACY_DOC;
+  }
+}
 
 // 캐시된 사용자 데이터 (S.users에서 로드)
 let cachedUsers = null;
@@ -2816,6 +3211,7 @@ function defaultState(){
     moods:{}, // 기분 데이터
     stickers:[], // [{id,actId,type:'emoji'|'bubble',content,user,ts}]
     pushDevices:{}, // 푸시 디바이스
+    familyMeta:null, // 다가족 메타 정보 {familyId, familyName, members, mode, inviteTokens, ...}
   };
 }
 
@@ -6396,7 +6792,9 @@ function getUserDisplayName(userId){
 
 function isParentUser(){
   if(!currentUser)return false;
-  if(S.users&&S.users[currentUser])return S.users[currentUser].role==='parent';
+  const fm=S.familyMeta?.members?.[currentUser];
+  if(fm)return fm.type==='parent';
+  // 레거시 호환
   return currentUser==='dad'||currentUser==='mom';
 }
 
@@ -7654,7 +8052,10 @@ function closePfMenu(){
 function pfMenuAction(action){
   closePfMenu();
   if(action==='admin'){
-    if(!adminOK){
+    if(isCurrentUserAdmin()){
+      adminOK=true;
+      reallyGoTab('adm');
+    }else if(!adminOK){
       showPin('auth','🔐 관리자 인증','PIN 4자리를 입력하세요');
     }else{
       reallyGoTab('adm');
@@ -8208,7 +8609,10 @@ function meFmAction(action){
   closeMeFm();
   if(action==='admin'){
     closeFamilyPopup();
-    if(!adminOK){
+    if(isCurrentUserAdmin()){
+      adminOK=true;
+      reallyGoTab('adm');
+    }else if(!adminOK){
       showPin('auth','🔐 관리자 인증','PIN 4자리를 입력하세요');
     }else{
       reallyGoTab('adm');
@@ -8560,11 +8964,75 @@ if('serviceWorker' in navigator){
 }
 
 // Check URL params on load (from notification click opening new window)
-function checkUrlParams(){
+async function checkUrlParams(){
   const params=new URLSearchParams(window.location.search);
+
+  // ── 초대 링크 처리 ──
+  if(params.get('invite')){
+    const familyId=params.get('invite');
+    const token=params.get('token')||'';
+    const autoUser=params.get('u')||'';
+    const autoToken=params.get('t')||'';
+
+    // Clean URL first
+    window.history.replaceState({_tm:3},'',window.location.pathname);
+
+    try{
+      const docPath=_ENV==='dev'?`dev_${familyId}`:familyId;
+      const fDoc=getFamilyDoc(docPath);
+      const snap=await getDoc(fDoc);
+      if(!snap.exists()){toast('❌ 유효하지 않은 초대 링크예요');return;}
+
+      const data=snap.data();
+      S=Object.assign(defaultState(),data);
+      _familyId=docPath;
+      DATA_DOC=fDoc;
+      localStorage.setItem(_LS_PREFIX+'family_id',docPath);
+      rebuildMembersFromFamily();
+
+      // 자동 로그인 토큰 확인
+      if(autoUser&&autoToken){
+        const tokens=S.familyMeta?.inviteTokens||[];
+        const validToken=tokens.find(t=>t.token===autoToken&&t.type==='auto'&&t.expiresAt>Date.now());
+        if(validToken&&validToken.autoAccount){
+          // 자동 로그인 처리
+          const mid=validToken.memberId;
+          if(mid&&S.familyMeta.members[mid]){
+            S.familyMeta.members[mid].account=validToken.autoAccount;
+            if(!S.users)S.users={};
+            S.users[mid]={id:validToken.autoAccount.id,pwdHash:validToken.autoAccount.pwdHash,v:2};
+            // 토큰 소비
+            S.familyMeta.inviteTokens=tokens.filter(t=>t.token!==autoToken);
+            await save();
+            currentUser=mid;
+            localStorage.setItem(_LS_PREFIX+'current_user',mid);
+            rebuildMembersFromFamily();
+            hideAllAuth();
+            applyUserProfile();
+            renderAll();
+            toast(`🎉 환영해요, ${MEMBERS[mid]?.name||''}!`);
+            return;
+          }
+        }
+        toast('❌ 만료되거나 유효하지 않은 토큰이에요');
+      }
+
+      // 일반 초대 — 미가입 구성원 선택 화면
+      _joinState.familyId=docPath;
+      _joinState.token=token;
+      renderJoinMemberGrid();
+      showAuthScreen('join-select');
+      document.getElementById('join-family-title').textContent=`${S.familyMeta?.familyName||'가족'} 합류`;
+    }catch(e){
+      console.error('Invite link error:',e);
+      toast('❌ 초대 링크 처리에 실패했어요');
+    }
+    return;
+  }
+
+  // ── 메시지 알림 처리 ──
   if(params.get('showMsg')==='1'){
     const from=params.get('from');
-    // Find the latest message from this user
     if(from&&S.familyMessages){
       const msg=S.familyMessages.filter(m=>m.from===from&&m.to===currentUser).pop();
       if(msg){
@@ -8573,8 +9041,28 @@ function checkUrlParams(){
         setTimeout(()=>showReceivedMsg(from,msg.text,msg.emotion),500);
       }
     }
-    // Clean URL
     window.history.replaceState({_tm:3},'',window.location.pathname);
+  }
+}
+
+function renderJoinMemberGrid(){
+  const grid=document.getElementById('join-member-grid');
+  if(!grid)return;
+  const fm=S.familyMeta?.members||{};
+  const users=S.users||{};
+  grid.innerHTML=Object.entries(fm).map(([mid,m])=>{
+    const hasAccount=!!m.account||!!users[mid];
+    if(hasAccount)return ''; // 이미 가입된 멤버는 표시 안함
+    return `<div class="member-card" onclick="selectJoinMember('${mid}')">
+      <div class="member-avatar" style="background:${m.color||'#F1F5F9'};display:flex;align-items:center;justify-content:center;font-size:24px">${m.emoji||'👤'}</div>
+      <div class="member-info">
+        <div class="member-name">${m.name}</div>
+        <div class="member-role">${ROLE_DEFS[m.role]?.label||m.role}</div>
+      </div>
+    </div>`;
+  }).filter(Boolean).join('');
+  if(!grid.innerHTML.trim()){
+    grid.innerHTML='<div style="text-align:center;padding:20px;color:#64748B;font-size:13px">모든 구성원이 이미 가입했어요</div>';
   }
 }
 window.checkUrlParams=checkUrlParams;
@@ -9510,8 +9998,12 @@ Object.assign(window, {
   saveMsgMode, saveCustomMsg,
   calPrev, calNext, selectCalDay,
   admTab, switchDash,
-  // Auth functions
-  showAuthScreen, selectMember, doRegister, doLogin, logout, togglePwd,
+  // Auth functions (multi-family)
+  showAuthScreen, doLogin, logout, togglePwd,
+  startCreateFamily, createStep1Next, createStep2Next, createStep3Next, createStep4Next, createStep5Finish, createStepBack5,
+  selectCreateRole, addChildSlot, removeChild, selectMode,
+  selectJoinMember, doJoinRegister,
+  isCurrentUserAdmin, rebuildMembersFromFamily,
   // Avatar functions
   openAvatarEditor, saveAvatarCrop, renderAdmMemberPhotos,
   // Badge functions
@@ -9527,6 +10019,8 @@ Object.assign(window, {
   toggleRwdClosed, setRwdGoalFromShop,
   lockBodyScroll, unlockBodyScroll,
 });
+// _createState를 window에 노출 (child card oninput 참조용)
+window._createState = _createState;
 
 // ── INIT (Firebase async) ─────────────────────
 (async function(){
@@ -9535,17 +10029,21 @@ Object.assign(window, {
 
   showLoading('데이터 불러오는 중...');
 
+  // 다가족: 저장된 familyId가 있으면 해당 문서 로드
+  updateDataDoc();
+
   try{
     // Load initial data from Firestore
     const snap = await getDoc(DATA_DOC);
     if(snap.exists()){
       const data = snap.data();
-      // Merge defaults for any missing fields (backwards compat)
       S = Object.assign(defaultState(), data);
-    } else {
-      // First launch — save defaults to Firestore
+    } else if(_familyId) {
+      // 가족 문서가 없어짐 — 초기 화면으로
       S = defaultState();
-      await setDoc(DATA_DOC, S);
+    } else {
+      // 레거시 첫 실행 또는 신규 — 웰컴 화면 표시
+      S = defaultState();
     }
   }catch(e){
     console.warn('Firebase load failed, trying localStorage backup', e);
@@ -9555,6 +10053,9 @@ Object.assign(window, {
     }catch(e2){}
     toast('⚠️ 오프라인 모드 — 인터넷 연결을 확인해주세요');
   }
+
+  // familyMeta가 있으면 MEMBERS 재구축
+  rebuildMembersFromFamily();
 
   // Validate streak on load
   const _t=todayStr();const _yd=new Date();_yd.setDate(_yd.getDate()-1);
