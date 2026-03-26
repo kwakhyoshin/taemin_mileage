@@ -6873,11 +6873,13 @@ function openBadgeForm(editId){
           </div>
         </div>
       </div>
-      <div style="border:1.5px solid var(--bdr);border-radius:12px;padding:12px;background:rgba(16,185,129,.03);display:${_isBuiltin?'none':'block'}">
+      <div style="border:1.5px solid var(--bdr);border-radius:12px;padding:12px;background:rgba(16,185,129,.03)">
         <label style="font-size:11px;font-weight:700;color:#10B981;display:flex;align-items:center;gap:4px;margin-bottom:8px">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#10B981" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-          획득 조건 설정
+          획득 조건 ${_isBuiltin?'(기본 내장)':'설정'}
         </label>
+        ${_isBuiltin?`<div style="font-size:12px;color:var(--tx2);font-weight:600;padding:8px 10px;background:rgba(16,185,129,.08);border-radius:8px;line-height:1.5">${getBadgeCondDesc({...existing,_src:'builtin'})}</div>
+        <div style="font-size:10px;color:var(--tx3);margin-top:6px">기본 뱃지의 조건은 시스템에 내장되어 자동으로 감지됩니다</div>`:`
         <select id="bf-cond-type" onchange="onBadgeCondTypeChange()" style="padding:8px 10px;border:1.5px solid var(--bdr);border-radius:9px;font-size:12px;font-weight:700;background:var(--bg);color:var(--tx);font-family:inherit;width:100%;box-sizing:border-box">${condOptHtml}</select>
         <div id="bf-cond-value-wrap" style="margin-top:8px;display:${curCond==='manual'?'none':'block'}">
           <label style="font-size:11px;font-weight:700;color:var(--tx3)">목표 수치</label>
@@ -6896,7 +6898,7 @@ function openBadgeForm(editId){
             ${moodOptHtml}
           </select>
         </div>
-        <div id="bf-cond-desc" style="margin-top:8px;font-size:11px;color:#10B981;font-weight:600;padding:6px 8px;background:rgba(16,185,129,.08);border-radius:6px"></div>
+        <div id="bf-cond-desc" style="margin-top:8px;font-size:11px;color:#10B981;font-weight:600;padding:6px 8px;background:rgba(16,185,129,.08);border-radius:6px"></div>`}
       </div>
       ${_isBuiltin&&(S.badgeOverrides||{})[editId]?`<div style="text-align:center;margin-top:4px"><button style="font-size:11px;color:#EF4444;background:none;border:none;font-weight:700;cursor:pointer;text-decoration:underline" onclick="resetBuiltinBadge('${editId}')">기본값으로 초기화</button></div>`:''}
       <div style="display:flex;gap:8px;margin-top:8px">
