@@ -767,25 +767,29 @@ body.dark .nav-profile{border-color:rgba(255,255,255,.4)}
 body.dark .nav-divider{background:var(--bdr2)}
 .nav-users{display:flex;align-items:center;gap:0;flex-shrink:0}
 
-/* ── Overlapping Avatar Stack ── */
-.nav-avatar-stack{display:flex;align-items:center;cursor:pointer;-webkit-tap-highlight-color:transparent;position:relative;padding:4px 4px 4px 8px;border-radius:20px;transition:background .15s;margin-left:2px}
-.nav-avatar-stack:active{background:rgba(99,102,241,.08)}
-.nav-stacked-avatar{width:32px;height:32px;border-radius:50%;overflow:hidden;border:2.5px solid color-mix(in srgb,var(--tab-color,#6366F1) 20%,#fff);box-shadow:0 1px 4px rgba(0,0,0,.12);margin-left:-10px;position:relative;transition:transform .2s;display:flex;align-items:center;justify-content:center;background:var(--card);flex-shrink:0}
-body.dark .nav-stacked-avatar{border-color:color-mix(in srgb,var(--tab-color,#6366F1) 25%,#1E293B)}
-.nav-stacked-avatar:first-child{margin-left:0}
-.nav-stacked-avatar svg,.nav-stacked-avatar img{width:100%;height:100%;object-fit:cover}
-.nav-stacked-avatar.me{border-color:var(--tab-color,#6366F1);z-index:2;width:34px;height:34px}
-.nav-stack-badge{position:absolute;top:-6px;right:-4px;min-width:18px;height:18px;background:#EF4444;color:#fff;font-size:9px;font-weight:900;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 5px;pointer-events:none;box-shadow:0 2px 6px rgba(239,68,68,.4);line-height:1;z-index:5}
-.nav-stack-mood{position:absolute;bottom:-2px;right:-2px;font-size:11px;line-height:1;pointer-events:none;z-index:5}
+/* ── Family Button in Nav ── */
+.nav-family-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:20px;cursor:pointer;-webkit-tap-highlight-color:transparent;position:relative;background:var(--tab-lt,rgba(99,102,241,.1));border:1.5px solid color-mix(in srgb,var(--tab-color,#6366F1) 20%,transparent);transition:all .2s;flex-shrink:0;min-height:40px}
+.nav-family-btn:active{transform:scale(.95);background:var(--tab-lt,rgba(99,102,241,.15))}
+body.dark .nav-family-btn{background:rgba(99,102,241,.12);border-color:rgba(99,102,241,.2)}
+.nav-family-btn .nfb-label{font-size:11px;font-weight:800;color:var(--tab-color,#6366F1);white-space:nowrap;line-height:1}
+.nav-family-btn .nfb-icon{font-size:15px;line-height:1}
+.nav-family-btn .nfb-badge{position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;background:#EF4444;color:#fff;font-size:9px;font-weight:900;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 5px;pointer-events:none;box-shadow:0 2px 6px rgba(239,68,68,.4);line-height:1}
 
-/* Legacy single user wraps (kept for compatibility) */
-.nav-user-wrap{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:4px 6px;border-radius:16px;position:relative;-webkit-tap-highlight-color:transparent;transition:background .15s;min-width:44px;min-height:44px;justify-content:center}
-.nav-user-wrap:active{background:rgba(99,102,241,.1)}
-.nav-user-wrap .nav-profile{width:34px;height:34px;border-width:2px;border-color:var(--tab-color,var(--or))}
-.nav-user-wrap.me .nav-profile{width:36px;height:36px;border-color:var(--tab-color,var(--or))}
-.nav-user-label{font-size:10px;font-weight:800;color:var(--tx3);line-height:1}
-body.dark .nav-user-label{color:var(--tx2)}
-.nav-user-wrap.me .nav-user-label{color:var(--tab-color,var(--or))}
+/* ── Family Popup (avatars fly up from button) ── */
+.family-popup-bg{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.35);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);animation:fadeIn .15s}
+.family-popup{position:fixed;z-index:501;display:flex;gap:12px;animation:familyPopUp .25s cubic-bezier(.34,1.2,.64,1)}
+@keyframes familyPopUp{from{opacity:0;transform:translateY(20px) scale(.9)}to{opacity:1;transform:translateY(0) scale(1)}}
+.family-popup-item{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .15s}
+.family-popup-item:active{transform:scale(.9)}
+.family-popup-avatar{width:52px;height:52px;border-radius:50%;overflow:hidden;border:3px solid #fff;box-shadow:0 4px 16px rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;background:var(--card);position:relative}
+body.dark .family-popup-avatar{border-color:var(--card)}
+.family-popup-avatar svg,.family-popup-avatar img{width:100%;height:100%;object-fit:cover}
+.family-popup-name{font-size:12px;font-weight:800;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.4);white-space:nowrap}
+.family-popup-mood{position:absolute;bottom:-2px;right:-2px;font-size:12px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.3))}
+.family-popup-unread{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;background:#EF4444;color:#fff;font-size:9px;font-weight:900;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 5px;box-shadow:0 2px 6px rgba(239,68,68,.4);line-height:1}
+
+/* Legacy nav-user-wrap (hidden, kept for compat) */
+.nav-user-wrap{display:none}
 .nav-mood-badge{position:absolute;top:-4px;right:-2px;font-size:10px;line-height:1;pointer-events:none;animation:moodBounce 2s infinite}
 @keyframes moodBounce{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
 .nav-unread-badge{position:absolute;top:-4px;left:-2px;min-width:16px;height:16px;background:#EF4444;color:#fff;font-size:9px;font-weight:900;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 4px;pointer-events:none;box-shadow:0 1px 3px rgba(0,0,0,.3);line-height:1}
@@ -6973,7 +6977,7 @@ function goTab(tab){
 }
 
 function positionMenuAboveIcon(menuEl){
-  const icon=document.querySelector('.nav-stacked-avatar.me')||document.querySelector('.nav-user-wrap.me')||document.getElementById('tab-adm');
+  const icon=document.getElementById('nav-family-btn')||document.querySelector('.nav-stacked-avatar.me')||document.querySelector('.nav-user-wrap.me')||document.getElementById('tab-adm');
   if(!icon){return;}
   const rect=icon.getBoundingClientRect();
   const menuW=menuEl.offsetWidth||220;
@@ -7103,7 +7107,7 @@ function stopMoodParticles(){
 
 function emitMoodParticles(){
   if(!currentMood||!MOOD_DATA[currentMood])return;
-  const icon=document.querySelector('.nav-stacked-avatar.me')||document.querySelector('.nav-user-wrap.me')||document.getElementById('tab-adm');
+  const icon=document.getElementById('nav-family-btn')||document.querySelector('.nav-stacked-avatar.me')||document.querySelector('.nav-user-wrap.me')||document.getElementById('tab-adm');
   if(!icon)return;
   const rect=icon.getBoundingClientRect();
   const container=document.getElementById('mood-particles');
@@ -7125,41 +7129,97 @@ function emitMoodParticles(){
   setTimeout(()=>{if(container.children.length)container.innerHTML='';},4500);
 }
 
-// ── NAV USERS RENDERING (Overlapping Avatar Stack) ──
+// ── NAV USERS RENDERING (Family Button) ──
 function renderNavUsers(){
   const container=document.getElementById('tab-adm');
   if(!container)return;
-  // Build overlapping avatar stack: others first, me last (on top)
-  const otherIds=Object.keys(MEMBERS).filter(id=>id!==currentUser);
-  const allIds=[...otherIds];
-  if(currentUser) allIds.push(currentUser);
 
-  // Calculate total unread
+  // Calculate total unread across all other users
+  const otherIds=Object.keys(MEMBERS).filter(id=>id!==currentUser);
   let totalUnread=0;
   otherIds.forEach(id=>{totalUnread+=getUnreadCount(id);});
 
-  // Build avatar stack HTML — each avatar gets its own onclick
-  let avatarsHTML='';
-  allIds.forEach((id,i)=>{
-    const isMe=id===currentUser;
-    const z=i+1;
-    const clickHandler=isMe?"goTab('adm')":"onUserIconClick('"+id+"')";
-    avatarsHTML+=`<div class="nav-stacked-avatar${isMe?' me':''}" style="z-index:${z}" data-user="${id}"${isMe?' id="nav-profile-icon"':''} onclick="${clickHandler};event.stopPropagation()">${getAvatarHTML(id,isMe?32:30)}</div>`;
-  });
-
-  // Mood emoji for current user
-  const myMood=currentUser?getMoodEmoji(currentUser):null;
-
-  let html=`<div class="nav-avatar-stack" id="nav-avatar-stack">
-    ${avatarsHTML}
-    ${totalUnread>0?`<span class="nav-stack-badge">${totalUnread}</span>`:''}
-    ${myMood?`<span class="nav-stack-mood">${myMood}</span>`:''}
+  // Family button — compact, single element
+  let html=`<div class="nav-family-btn" onclick="openFamilyPopup()" id="nav-family-btn">
+    <span class="nfb-icon">👨‍👩‍👦</span>
+    <span class="nfb-label">우리가족</span>
+    ${totalUnread>0?`<span class="nfb-badge">${totalUnread}</span>`:''}
   </div>`;
   container.innerHTML=html;
 }
 window.renderNavUsers=renderNavUsers;
 
-// Avatar stack: each avatar has its own onclick (set in renderNavUsers)
+// ── Family Popup — avatars fly up from button ──
+function openFamilyPopup(){
+  // Close if already open
+  closeFamilyPopup();
+
+  const allIds=Object.keys(MEMBERS);
+  const userLabels={taemin:'태민',dad:'아빠',mom:'엄마'};
+
+  // Create background
+  const bg=document.createElement('div');
+  bg.className='family-popup-bg';
+  bg.id='family-popup-bg';
+  bg.onclick=closeFamilyPopup;
+  document.body.appendChild(bg);
+
+  // Create popup container
+  const popup=document.createElement('div');
+  popup.className='family-popup';
+  popup.id='family-popup';
+
+  allIds.forEach(id=>{
+    const isMe=id===currentUser;
+    const name=userLabels[id]||MEMBERS[id].name;
+    const moodEmoji=getMoodEmoji(id);
+    const unread=isMe?0:getUnreadCount(id);
+
+    const item=document.createElement('div');
+    item.className='family-popup-item';
+    item.onclick=function(e){
+      e.stopPropagation();
+      closeFamilyPopup();
+      if(isMe){
+        goTab('adm');
+      }else{
+        onUserIconClick(id);
+      }
+    };
+    item.innerHTML=`
+      <div class="family-popup-avatar" ${isMe?'id="nav-profile-icon"':''}>
+        ${getAvatarHTML(id,48)}
+        ${moodEmoji?`<span class="family-popup-mood">${moodEmoji}</span>`:''}
+        ${unread>0?`<span class="family-popup-unread">${unread}</span>`:''}
+      </div>
+      <span class="family-popup-name">${name}${isMe?' (나)':''}</span>
+    `;
+    popup.appendChild(item);
+  });
+
+  document.body.appendChild(popup);
+
+  // Position above the family button
+  const btn=document.getElementById('nav-family-btn');
+  if(btn){
+    const rect=btn.getBoundingClientRect();
+    const popupW=popup.offsetWidth;
+    let left=rect.left+rect.width/2-popupW/2;
+    if(left<12)left=12;
+    if(left+popupW>window.innerWidth-12)left=window.innerWidth-12-popupW;
+    popup.style.left=left+'px';
+    popup.style.bottom=(window.innerHeight-rect.top+12)+'px';
+  }
+}
+window.openFamilyPopup=openFamilyPopup;
+
+function closeFamilyPopup(){
+  const bg=document.getElementById('family-popup-bg');
+  const popup=document.getElementById('family-popup');
+  if(bg)bg.remove();
+  if(popup)popup.remove();
+}
+window.closeFamilyPopup=closeFamilyPopup;
 
 function getMoodEmoji(userId){
   if(!S.moods)return null;
@@ -7310,7 +7370,7 @@ function onUserIconClick(userId){
   document.getElementById('user-fm-bg').style.display='block';
   const menu=document.getElementById('user-fm-menu');
   menu.style.display='block';
-  const icon=document.querySelector(`.nav-stacked-avatar[data-user="${userId}"]`)||document.querySelector(`.nav-user-wrap[onclick*="'${userId}'"]`);
+  const icon=document.getElementById('nav-family-btn')||document.querySelector(`.nav-stacked-avatar[data-user="${userId}"]`)||document.querySelector(`.nav-user-wrap[onclick*="'${userId}'"]`);
   if(icon){
     const rect=icon.getBoundingClientRect();
     const menuW=menu.offsetWidth||220;
