@@ -1792,6 +1792,7 @@ body.dark .bubble-speech-log{background:rgba(255,255,255,.12);color:rgba(255,255
           <div class="adm-row-l"><div class="adm-row-nm">테스트 알림</div><div class="adm-row-sub">알림이 잘 도착하는지 확인</div></div>
           <button class="btn-sm" onclick="sendTestPush()">보내기</button>
         </div>
+        <div id="push-debug" style="padding:8px 4px 4px;font-size:10px;color:var(--tx3);line-height:1.6"></div>
       </div>
     </div>
     <div class="adm-sec">
@@ -8573,7 +8574,7 @@ function reallyGoTab(tab){
     themeMeta.content=isDark?'#1E293B':(TAB_COLORS[tab]||'#6366F1');
   }
 }
-function admTab(i){[0,1,2,3].forEach(j=>{document.getElementById('at-'+j).classList.toggle('on',j===i);document.getElementById('adm-p'+j).style.display=j===i?'block':'none';});if(i===2)renderBadgeMgrList();if(i===3)showCacheInfo();}
+function admTab(i){[0,1,2,3].forEach(j=>{document.getElementById('at-'+j).classList.toggle('on',j===i);document.getElementById('adm-p'+j).style.display=j===i?'block':'none';});if(i===2)renderBadgeMgrList();if(i===3){showCacheInfo();showPushDebug();}}
 function openModal(id){document.getElementById(id).classList.add('open');}
 function closeModal(id){document.getElementById(id).classList.remove('open');}
 document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
@@ -9030,13 +9031,47 @@ function updatePushUI(){
   const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
   const isStandalone=window.navigator.standalone||window.matchMedia('(display-mode:standalone)').matches;
   const pushSupported=typeof Notification!=='undefined'&&(!isIOS||isStandalone);
-  // Use local push subscription state (device-specific)
   const isOn=!!pushSubscription;
   togBtn.classList.toggle('off',!isOn);
   if(statusEl){
     if(!pushSupported) statusEl.textContent='미지원 (홈화면 앱 필요)';
     else statusEl.textContent=isOn?'활성화 (이 기기)':'비활성화';
   }
+  showPushDebug();
+}
+async function showPushDebug(){
+  const el=document.getElementById('push-debug');
+  if(!el)return;
+  const lines=[];
+  lines.push('환경: '+_ENV);
+  lines.push('Firestore: '+(_ENV==='dev'?'users/taemin_dev':'users/taemin'));
+  // SW status
+  if('serviceWorker' in navigator){
+    const regs=await navigator.serviceWorker.getRegistrations();
+    lines.push('서비스워커: '+(regs.length>0?'등록됨 ('+regs.length+'개)':'미등록'));
+    if(regs.length>0) lines.push('SW scope: '+regs[0].scope);
+  } else { lines.push('서비스워커: 미지원'); }
+  // Notification permission
+  if(typeof Notification!=='undefined'){
+    lines.push('알림 권한: '+Notification.permission);
+  } else { lines.push('알림 API: 미지원'); }
+  // Push subscription
+  lines.push('Push 구독: '+(pushSubscription?'활성':'없음'));
+  // Device ID
+  const did=localStorage.getItem(_LS_PREFIX+'device_id');
+  lines.push('기기 ID: '+(did||'없음'));
+  // Firestore registered devices
+  const devCount=S.pushDevices?Object.entries(S.pushDevices).filter(([k,v])=>v.enabled).length:0;
+  const totalDev=S.pushDevices?Object.keys(S.pushDevices).length:0;
+  lines.push('등록 기기: '+devCount+'/'+totalDev+'개 활성');
+  // Check if this device is registered
+  if(did&&S.pushDevices&&S.pushDevices[did]){
+    const d=S.pushDevices[did];
+    lines.push('이 기기: '+(d.enabled?'✅ 활성':'❌ 비활성')+' (user: '+d.user+')');
+  } else {
+    lines.push('이 기기: ⚠️ 미등록');
+  }
+  el.innerHTML=lines.map(l=>'<div>'+l+'</div>').join('');
 }
 
 async function sendTestPush(){
