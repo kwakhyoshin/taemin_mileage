@@ -6,26 +6,46 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="googlebot" content="noindex, nofollow">
 <script>
-// ── 브라우저 뒤로/앞으로 완전 차단 (최상단에서 즉시 실행) ──
+// ── 브라우저 뒤로/앞으로 완전 차단 (최상단 즉시 실행) ──
 (function(){
-  // 히스토리 트랩: 페이지 로드 즉시 설정 (다중 레이어)
-  history.replaceState({_tm:1},'');
-  history.pushState({_tm:2},'');
-  history.pushState({_tm:3},'');
-  history.pushState({_tm:4},'');
-  history.pushState({_tm:5},'');
+  // 1. 히스토리 트랩 (10단계 깊이)
+  history.replaceState({_tm:0},'');
+  for(var i=1;i<=10;i++) history.pushState({_tm:i},'');
   window.addEventListener('popstate',function(){
-    // 항상 즉시 다시 push하여 스택 유지
-    try{history.pushState({_tm:5},'');}catch(e){}
+    try{history.pushState({_tm:10},'');}catch(e){}
   });
-  // 화면 가장자리 터치 차단 (iOS Safari 스와이프 네비게이션 방지)
+
+  // 2. 가장자리 터치 차단 (좌우 50px — iOS 스와이프 제스처 영역)
+  var edgeZone=50;
+  var startX=0,startY=0,isEdge=false;
+
   document.addEventListener('touchstart',function(e){
     var x=e.touches[0].clientX;
     var w=window.innerWidth;
-    if(x<20||x>w-20){
-      e.preventDefault();
-    }
+    startX=x; startY=e.touches[0].clientY;
+    isEdge=(x<edgeZone||x>w-edgeZone);
+    if(isEdge) e.preventDefault();
   },{passive:false,capture:true});
+
+  // touchmove에서도 가장자리 수평 스와이프 차단
+  document.addEventListener('touchmove',function(e){
+    if(!isEdge) return;
+    var dx=Math.abs(e.touches[0].clientX-startX);
+    var dy=Math.abs(e.touches[0].clientY-startY);
+    // 수평 이동이 수직보다 크면 차단
+    if(dx>dy) e.preventDefault();
+  },{passive:false,capture:true});
+
+  document.addEventListener('touchend',function(){isEdge=false;},{passive:true,capture:true});
+
+  // 3. beforeunload 이벤트로 페이지 이탈 방지 시도
+  window.addEventListener('beforeunload',function(e){
+    // PWA에서 뒤로가기로 빈 페이지로 나가는 것 방지
+    if(document.visibilityState==='visible'){
+      e.preventDefault();
+      e.returnValue='';
+    }
+  });
 })();
 </script>
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -8585,7 +8605,7 @@ document.addEventListener('touchstart',function(e){
   if(e.touches.length!==1)return;
   // 화면 가장자리(25px 이내) 터치는 무시 - 브라우저 제스처와 충돌 방지
   const touchX=e.touches[0].clientX;
-  if(touchX<25||touchX>window.innerWidth-25)return;
+  if(touchX<50||touchX>window.innerWidth-50)return;
   _swipeStartX=touchX;
   _swipeStartY=e.touches[0].clientY;
   _swiping=true;
