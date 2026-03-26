@@ -9273,7 +9273,24 @@ function backupData(){
     const now=new Date();
     const stamp=`${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}`;
     const filename=`taemin_backup_${stamp}.json`;
-    const json=JSON.stringify(S,null,2);
+    // 회원 정보(users, familyMeta)는 백업에서 분리 표시
+    const backupObj = JSON.parse(JSON.stringify(S));
+    backupObj._backupVersion = 2;
+    backupObj._backupDate = new Date().toISOString();
+    backupObj._backupFamilyId = _familyId || '';
+    // 회원 계정 비밀번호는 백업에 포함하지 않음 (보안)
+    if(backupObj.users){
+      for(const uid in backupObj.users){
+        if(backupObj.users[uid].pw) backupObj.users[uid].pw = '***REDACTED***';
+      }
+    }
+    if(backupObj.familyMeta?.members){
+      for(const mid in backupObj.familyMeta.members){
+        const acc = backupObj.familyMeta.members[mid].account;
+        if(acc?.pw) acc.pw = '***REDACTED***';
+      }
+    }
+    const json=JSON.stringify(backupObj,null,2);
     const blob=new Blob([json],{type:'application/json'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
@@ -9297,12 +9314,40 @@ function restoreData(input){
       if(typeof data.pts==='undefined'||!Array.isArray(data.acts)||!Array.isArray(data.rwds)){
         toast('❌ 올바른 백업 파일이 아니에요'); input.value=''; return;
       }
-      if(!confirm(`📂 백업 데이터를 불러올까요?\n마일리지: ${(data.pts||0).toLocaleString()} 마일리지\n활동: ${(data.acts||[]).length}개\n\n현재 데이터는 사라져요!`)){input.value='';return;}
-      S=data;
+      const isV2 = data._backupVersion >= 2;
+      const actCount = (data.acts||[]).length;
+      const logCount = (data.log||[]).length;
+      let msg = `📂 백업 데이터를 불러올까요?\n\n마일리지: ${(data.pts||0).toLocaleString()}\n활동: ${actCount}개\n기록: ${logCount}건`;
+      if(isV2) msg += `\n백업일: ${data._backupDate?.slice(0,10)||'알 수 없음'}`;
+      msg += '\n\n⚠️ 활동·보상·기록 데이터가 교체됩니다.\n✅ 회원 계정 정보는 유지됩니다.';
+      if(!confirm(msg)){input.value='';return;}
+
+      // ── 회원 데이터 보존: users, familyMeta는 현재 값 유지 ──
+      const preservedUsers = JSON.parse(JSON.stringify(S.users || {}));
+      const preservedFamilyMeta = JSON.parse(JSON.stringify(S.familyMeta || null));
+      const preservedPhotos = JSON.parse(JSON.stringify(S.photos || {}));
+      const preservedPushDevices = JSON.parse(JSON.stringify(S.pushDevices || {}));
+
+      // 게임 데이터만 복원
+      const gameKeys = ['pts','streak','longest','lastDate','totalDone','acts','rwds','log',
+        'moodLog','badges','badgeLog','settings','actDone','dark','greeting','greetings',
+        'customBadges','badgeOverrides','rewardInventory','rewardRequests','rewardLog',
+        'rewardNotify','familyMessages','moods','stickers','memberData'];
+
+      for(const key of gameKeys){
+        if(data[key] !== undefined) S[key] = data[key];
+      }
+
+      // 회원 정보 복원 (보존된 값으로 되돌림)
+      S.users = preservedUsers;
+      S.familyMeta = preservedFamilyMeta;
+      S.photos = preservedPhotos;
+      S.pushDevices = preservedPushDevices;
+
       save();
       renderAll();
       input.value='';
-      toast('✅ 데이터 복원 완료! 마일리지 '+(S.pts||0).toLocaleString()+' 마일리지');
+      toast('✅ 데이터 복원 완료! 회원정보는 유지됐어요.\n마일리지 '+(S.pts||0).toLocaleString());
     }catch(err){
       toast('❌ 파일을 읽을 수 없어요: '+err.message);
       input.value='';
