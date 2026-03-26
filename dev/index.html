@@ -8785,7 +8785,7 @@ Object.assign(window, {
   // 모든 탭 스크롤 시 헤더 축소 (compact)
   const homeScr = document.getElementById('s-home');
   const hero = document.querySelector('.hero');
-  window.addEventListener('scroll', ()=>{
+  function updateHeaderCompact(){
     const scrollY = window.scrollY || document.documentElement.scrollTop;
     const threshold = 60;
     // Smooth border-radius interpolation for all tab headers: 38px → 28px (mobile only)
@@ -8851,7 +8851,10 @@ Object.assign(window, {
       histHdr.classList.toggle('compact', scrollY > threshold);
       histHdr.style.borderRadius=brStr;
     }
-  }, {passive:true});
+  }
+  window.addEventListener('scroll', updateHeaderCompact, {passive:true});
+  window.addEventListener('resize', updateHeaderCompact, {passive:true});
+  window.addEventListener('orientationchange', ()=>{setTimeout(updateHeaderCompact,100);});
 
   // iOS Safari 줌 방지 (JS 레벨)
   document.addEventListener('gesturestart', function(e){ e.preventDefault(); }, {passive:false});
