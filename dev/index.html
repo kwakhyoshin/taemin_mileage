@@ -83,13 +83,13 @@ body.popup-open .nav-container{opacity:0;pointer-events:none;transition:opacity 
 .nav-container{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:100;max-width:calc(100vw - 24px);width:auto}
 .bottom-nav{display:flex;align-items:center;gap:3px;background:color-mix(in srgb,var(--tab-color,#6366F1) 6%,rgba(255,255,255,.95));backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid color-mix(in srgb,var(--tab-color,#6366F1) 12%,rgba(0,0,0,.04));border-radius:30px;padding:10px 10px;box-shadow:0 4px 20px color-mix(in srgb,var(--tab-color,#6366F1) 12%,rgba(0,0,0,.1)),0 12px 40px rgba(0,0,0,.08)}
 body.dark .bottom-nav{background:color-mix(in srgb,var(--tab-color,#6366F1) 10%,rgba(20,30,50,.95));border-color:color-mix(in srgb,var(--tab-color,#6366F1) 15%,rgba(255,255,255,.06));box-shadow:0 4px 20px rgba(0,0,0,.3),0 12px 40px rgba(0,0,0,.2)}
-.nav-item{display:flex;align-items:center;justify-content:center;gap:5px;padding:14px 16px;border-radius:22px;cursor:pointer;transition:all .25s cubic-bezier(.4,0,.2,1);border:none;background:transparent;min-height:50px}
+.nav-item{display:flex;align-items:center;justify-content:center;gap:5px;padding:14px 14px;border-radius:22px;cursor:pointer;transition:all .25s cubic-bezier(.4,0,.2,1);border:none;background:transparent;min-height:50px;flex-shrink:1;min-width:0}
 .nav-item svg{width:22px;height:22px;stroke:var(--tx3);stroke-width:2;fill:none;transition:all .25s}
 body.dark .nav-item svg{stroke:var(--tx2)}
 .nav-item .nav-label{font-size:12px;font-weight:700;color:var(--or);max-width:0;overflow:hidden;white-space:nowrap;transition:all .3s cubic-bezier(.4,0,.2,1);opacity:0}
-.nav-item.active{background:var(--tab-lt,var(--or-lt));padding:14px 18px}
+.nav-item.active{background:var(--tab-lt,var(--or-lt));padding:14px 14px}
 .nav-item.active svg{stroke:var(--tab-color,var(--or))}
-.nav-item.active .nav-label{max-width:48px;opacity:1;margin-left:2px;color:var(--tab-color,var(--or))}
+.nav-item.active .nav-label{max-width:40px;opacity:1;margin-left:2px;color:var(--tab-color,var(--or))}
 .nav-item:not(.active):hover{background:rgba(99,102,241,0.08)}
 .nav-item:not(.active):active{transform:scale(0.93)}
 
