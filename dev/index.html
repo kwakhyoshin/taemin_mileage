@@ -645,7 +645,7 @@ body.dark .pin-key.ck{background:transparent}
 .ufm-badge{position:absolute;top:8px;right:12px;min-width:18px;height:18px;background:#EF4444;color:#fff;font-size:10px;font-weight:900;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 5px;line-height:1}
 
 /* MOOD SELECTOR */
-.mood-pop{position:fixed;z-index:502;background:var(--card);border-radius:20px;box-shadow:0 8px 30px rgba(0,0,0,.2);padding:16px;width:280px;animation:fadeUp .25s ease}
+.mood-pop{position:fixed;z-index:510;background:var(--card);border-radius:20px;box-shadow:0 8px 30px rgba(0,0,0,.2);padding:16px;width:280px;animation:fadeUp .25s ease}
 .mood-pop-title{font-size:14px;font-weight:900;color:var(--tx);text-align:center;margin-bottom:12px}
 .mood-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .mood-btn{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 6px;border:2px solid var(--bdr);border-radius:14px;background:none;cursor:pointer;font-family:inherit;transition:all .2s;-webkit-tap-highlight-color:transparent}
@@ -2140,7 +2140,7 @@ body.dark .bubble-speech-log{background:rgba(255,255,255,.12);color:rgba(255,255
       <button class="s-btn conf" onclick="document.getElementById('avatar-file-input').click()" style="margin-top:12px;background:var(--bl)">📷 사진 선택하기</button>
     </div>
     <div class="sheet-foot">
-      <button class="s-btn canc" onclick="closeModal('m-avatar')">취소</button>
+      <button class="s-btn canc" onclick="cancelAvatarEditor()">취소</button>
       <button class="s-btn conf" onclick="saveAvatarCrop()">저장하기 ✅</button>
     </div>
   </div>
@@ -7072,11 +7072,24 @@ const MOOD_DATA={
 let currentMood=null;
 let moodInterval=null;
 
-function openMoodPop(){
-  document.getElementById('mood-bg').style.display='block';
+let _moodFromFamily=false;
+function openMoodPop(fromFamily){
+  _moodFromFamily=!!fromFamily;
+  if(!_moodFromFamily) document.getElementById('mood-bg').style.display='block';
   const pop=document.getElementById('mood-pop');
-  pop.style.display='block';
-  positionMenuAboveIcon(pop);
+  if(_moodFromFamily){
+    // Center on screen like other family flow popups
+    pop.style.left='50%';
+    pop.style.top='50%';
+    pop.style.bottom='auto';
+    pop.style.right='auto';
+    pop.style.transform='translate(-50%,-50%)';
+    pop.style.animation='fadeUpCenter .2s ease';
+    pop.style.display='block';
+  }else{
+    pop.style.display='block';
+    positionMenuAboveIcon(pop);
+  }
   // Highlight current mood
   pop.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('sel'));
   if(currentMood){
@@ -7088,13 +7101,20 @@ function openMoodPop(){
 }
 function closeMoodPop(){
   document.getElementById('mood-bg').style.display='none';
-  document.getElementById('mood-pop').style.display='none';
+  const pop=document.getElementById('mood-pop');
+  pop.style.display='none';
+  pop.style.transform='';
+  pop.style.animation='';
+  pop.style.left='';pop.style.top='';pop.style.bottom='';pop.style.right='';
+  _moodFromFamily=false;
 }
 window.openMoodPop=openMoodPop;
 window.closeMoodPop=closeMoodPop;
 
 function selectMood(mood){
+  const wasFamily=_moodFromFamily;
   closeMoodPop();
+  if(wasFamily)closeFamilyPopup();
   if(mood==='none'){
     currentMood=null;
     stopMoodParticles();
@@ -7201,13 +7221,18 @@ function openFamilyPopup(){
     const mfm=document.getElementById('me-fm-menu');
     const msgPop=document.getElementById('msg-pop');
     const msgList=document.getElementById('msglist-pop');
+    const moodPop=document.getElementById('mood-pop');
+    const avatarOverlay=document.getElementById('m-avatar');
     const hasSubPopup=(ufm&&ufm.style.display==='block')||(mfm&&mfm.style.display==='block')
-      ||(msgPop&&msgPop.style.display==='block')||(msgList&&msgList.style.display!=='none'&&msgList.style.display!=='');
+      ||(msgPop&&msgPop.style.display==='block')||(msgList&&msgList.style.display!=='none'&&msgList.style.display!=='')
+      ||(moodPop&&moodPop.style.display==='block')||(avatarOverlay&&avatarOverlay.classList.contains('open'));
     if(hasSubPopup){
       if(ufm&&ufm.style.display==='block')closeUserFm();
       if(mfm&&mfm.style.display==='block')closeMeFm();
       if(msgPop&&msgPop.style.display==='block')closeMsgPop();
       if(msgList&&msgList.style.display==='flex')closeMsgList();
+      if(moodPop&&moodPop.style.display==='block')closeMoodPop();
+      if(avatarOverlay&&avatarOverlay.classList.contains('open'))cancelAvatarEditor();
       // Deselect all icons
       const fp=document.getElementById('family-popup');
       if(fp)fp.querySelectorAll('.family-popup-item.selected').forEach(el=>el.classList.remove('selected'));
@@ -7571,12 +7596,10 @@ function meFmAction(action){
       reallyGoTab('adm');
     }
   }else if(action==='profile'){
-    closeFamilyPopup();
     if(!currentUser){toast('먼저 로그인해주세요');return;}
-    openAvatarEditor(currentUser);
+    openAvatarEditor(currentUser,true);
   }else if(action==='mood'){
-    closeFamilyPopup();
-    openMoodPop();
+    openMoodPop(true);
   }else if(action==='selfmsg'){
     if(!currentUser){toast('먼저 로그인해주세요');return;}
     openMsgPop(currentUser,true);
@@ -8479,7 +8502,9 @@ function getAvatarScale() {
   return avatarBaseScale * (avatarZoom / 100);
 }
 
-function openAvatarEditor(userId) {
+let _avatarFromFamily=false;
+function openAvatarEditor(userId,fromFamily) {
+  _avatarFromFamily=!!fromFamily;
   avatarTargetUser = userId || currentUser;
   if (!avatarTargetUser) { toast('로그인이 필요해요'); return; }
 
@@ -8508,6 +8533,12 @@ function openAvatarEditor(userId) {
     ctx.fillText(MEMBERS[avatarTargetUser]?.icon || '📷', CROP_SIZE/2, CROP_SIZE/2);
   }
 
+  const overlay=document.getElementById('m-avatar');
+  if(_avatarFromFamily){
+    overlay.style.zIndex='510';
+  }else{
+    overlay.style.zIndex='';
+  }
   openModal('m-avatar');
 }
 
@@ -8641,12 +8672,25 @@ function saveAvatarCrop() {
   S.photos[avatarTargetUser] = dataUrl;
   save();
 
+  const wasFamily=_avatarFromFamily;
+  _avatarFromFamily=false;
+  document.getElementById('m-avatar').style.zIndex='';
   closeModal('m-avatar');
+  if(wasFamily)closeFamilyPopup();
   applyUserProfile();
   renderMemberGrid();
   renderAdmMemberPhotos();
   toast('📸 프로필 사진이 저장됐어요!');
 }
+
+function cancelAvatarEditor(){
+  const wasFamily=_avatarFromFamily;
+  _avatarFromFamily=false;
+  document.getElementById('m-avatar').style.zIndex='';
+  closeModal('m-avatar');
+  // Don't close family popup on cancel — just return to family flow
+}
+window.cancelAvatarEditor=cancelAvatarEditor;
 
 function getAvatarHTML(userId, size) {
   const photos = S.photos || {};
