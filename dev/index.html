@@ -775,16 +775,23 @@ body.dark .nav-family-btn{background:rgba(99,102,241,.12);border-color:rgba(99,1
 .nav-family-btn .nfb-icon svg{width:100%;height:100%}
 .nav-family-btn .nfb-badge{position:absolute;top:-2px;right:-2px;min-width:18px;height:18px;background:#EF4444;color:#fff;font-size:9px;font-weight:900;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 5px;pointer-events:none;box-shadow:0 2px 6px rgba(239,68,68,.4);line-height:1}
 
-/* ── Family Popup (avatars fly up from button) ── */
-.family-popup-bg{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.35);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);animation:fadeIn .15s}
-.family-popup{position:fixed;z-index:501;display:flex;gap:12px;animation:familyPopUp .25s cubic-bezier(.34,1.2,.64,1)}
-@keyframes familyPopUp{from{opacity:0;transform:translateY(20px) scale(.9)}to{opacity:1;transform:translateY(0) scale(1)}}
+/* ── Family Popup (inverted triangle layout) ── */
+.family-popup-bg{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.4);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);animation:fadeIn .15s}
+.family-popup{position:fixed;z-index:501;display:flex;flex-direction:column;align-items:center;animation:familyPopUp .3s cubic-bezier(.34,1.2,.64,1)}
+@keyframes familyPopUp{from{opacity:0;transform:translateY(24px) scale(.85)}to{opacity:1;transform:translateY(0) scale(1)}}
+.family-popup-lines{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.family-popup-lines line{stroke:rgba(255,255,255,.25);stroke-width:2;stroke-dasharray:4 3}
+.family-popup-top{display:flex;gap:40px;position:relative;z-index:1}
+.family-popup-bottom{margin-top:12px;position:relative;z-index:1}
 .family-popup-item{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .15s}
 .family-popup-item:active{transform:scale(.9)}
-.family-popup-avatar{width:52px;height:52px;border-radius:50%;overflow:visible;border:3px solid #fff;box-shadow:0 4px 16px rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;background:var(--card);position:relative}
-body.dark .family-popup-avatar{border-color:var(--card)}
+.family-popup-avatar{width:50px;height:50px;border-radius:50%;overflow:visible;border:2.5px solid rgba(255,255,255,.7);box-shadow:0 4px 16px rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;background:var(--card);position:relative}
+.family-popup-avatar.me{width:68px;height:68px;border:3px solid #fff;box-shadow:0 6px 24px rgba(0,0,0,.3),0 0 0 4px rgba(255,255,255,.15)}
+body.dark .family-popup-avatar{border-color:rgba(255,255,255,.3)}
+body.dark .family-popup-avatar.me{border-color:rgba(255,255,255,.6);box-shadow:0 6px 24px rgba(0,0,0,.4),0 0 0 4px rgba(255,255,255,.08)}
 .family-popup-avatar svg,.family-popup-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
-.family-popup-name{font-size:12px;font-weight:800;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.4);white-space:nowrap}
+.family-popup-name{font-size:11px;font-weight:800;color:rgba(255,255,255,.85);text-shadow:0 1px 4px rgba(0,0,0,.4);white-space:nowrap}
+.family-popup-avatar.me+.family-popup-name{font-size:13px;color:#fff}
 .family-popup-mood{position:absolute;bottom:-2px;right:-2px;font-size:12px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.3))}
 .family-popup-unread{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;background:#EF4444;color:#fff;font-size:9px;font-weight:900;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 5px;box-shadow:0 2px 6px rgba(239,68,68,.4);line-height:1}
 
@@ -7149,13 +7156,13 @@ function renderNavUsers(){
 }
 window.renderNavUsers=renderNavUsers;
 
-// ── Family Popup — avatars fly up from button ──
+// ── Family Popup — inverted triangle layout ──
 function openFamilyPopup(){
-  // Close if already open
   closeFamilyPopup();
 
   const allIds=Object.keys(MEMBERS);
   const userLabels={taemin:'태민',dad:'아빠',mom:'엄마'};
+  const others=allIds.filter(id=>id!==currentUser);
 
   // Create background
   const bg=document.createElement('div');
@@ -7168,38 +7175,53 @@ function openFamilyPopup(){
   const popup=document.createElement('div');
   popup.className='family-popup';
   popup.id='family-popup';
+  popup.style.position='relative';
 
-  // Reorder: me in center
-  const others=allIds.filter(id=>id!==currentUser);
-  const ordered=others.length>=2?[others[0],currentUser,...others.slice(1)]:[currentUser,...others];
+  // SVG lines (drawn after layout)
+  const svgNS='http://www.w3.org/2000/svg';
+  const linesSvg=document.createElementNS(svgNS,'svg');
+  linesSvg.setAttribute('class','family-popup-lines');
+  popup.appendChild(linesSvg);
 
-  ordered.forEach(id=>{
-    const isMe=id===currentUser;
+  // Top row — other family members
+  const topRow=document.createElement('div');
+  topRow.className='family-popup-top';
+  others.forEach(id=>{
     const name=userLabels[id]||MEMBERS[id].name;
     const moodEmoji=getMoodEmoji(id);
-    const unread=isMe?0:getUnreadCount(id);
-
+    const unread=getUnreadCount(id);
     const item=document.createElement('div');
     item.className='family-popup-item';
-    item.onclick=function(e){
-      e.stopPropagation();
-      closeFamilyPopup();
-      if(isMe){
-        goTab('adm');
-      }else{
-        onUserIconClick(id);
-      }
-    };
+    item.setAttribute('data-fp-id',id);
+    item.onclick=function(e){ e.stopPropagation(); closeFamilyPopup(); onUserIconClick(id); };
     item.innerHTML=`
-      <div class="family-popup-avatar" ${isMe?'id="nav-profile-icon"':''}>
-        ${getAvatarHTML(id,48)}
+      <div class="family-popup-avatar">
+        ${getAvatarHTML(id,46)}
         ${moodEmoji?`<span class="family-popup-mood">${moodEmoji}</span>`:''}
         ${unread>0?`<span class="family-popup-unread">${unread}</span>`:''}
       </div>
-      <span class="family-popup-name">${name}${isMe?' (나)':''}</span>
-    `;
-    popup.appendChild(item);
+      <span class="family-popup-name">${name}</span>`;
+    topRow.appendChild(item);
   });
+  popup.appendChild(topRow);
+
+  // Bottom row — me (bigger)
+  const botRow=document.createElement('div');
+  botRow.className='family-popup-bottom';
+  const meName=userLabels[currentUser]||MEMBERS[currentUser].name;
+  const meMood=getMoodEmoji(currentUser);
+  const meItem=document.createElement('div');
+  meItem.className='family-popup-item';
+  meItem.setAttribute('data-fp-id',currentUser);
+  meItem.onclick=function(e){ e.stopPropagation(); closeFamilyPopup(); goTab('adm'); };
+  meItem.innerHTML=`
+    <div class="family-popup-avatar me" id="nav-profile-icon">
+      ${getAvatarHTML(currentUser,64)}
+      ${meMood?`<span class="family-popup-mood">${meMood}</span>`:''}
+    </div>
+    <span class="family-popup-name">${meName} (나)</span>`;
+  botRow.appendChild(meItem);
+  popup.appendChild(botRow);
 
   document.body.appendChild(popup);
 
@@ -7208,12 +7230,46 @@ function openFamilyPopup(){
   if(btn){
     const rect=btn.getBoundingClientRect();
     const popupW=popup.offsetWidth;
+    const popupH=popup.offsetHeight;
     let left=rect.left+rect.width/2-popupW/2;
     if(left<12)left=12;
     if(left+popupW>window.innerWidth-12)left=window.innerWidth-12-popupW;
     popup.style.left=left+'px';
     popup.style.bottom=(window.innerHeight-rect.top+12)+'px';
   }
+
+  // Draw connecting lines between avatars
+  requestAnimationFrame(()=>{
+    const popupRect=popup.getBoundingClientRect();
+    const meAvatar=botRow.querySelector('.family-popup-avatar');
+    const meR=meAvatar.getBoundingClientRect();
+    const meCX=meR.left+meR.width/2-popupRect.left;
+    const meCY=meR.top+meR.height/2-popupRect.top;
+
+    const topAvatars=topRow.querySelectorAll('.family-popup-avatar');
+    const centers=[];
+    topAvatars.forEach(av=>{
+      const r=av.getBoundingClientRect();
+      centers.push({x:r.left+r.width/2-popupRect.left, y:r.top+r.height/2-popupRect.top});
+    });
+
+    // Lines from me to each top member
+    centers.forEach(c=>{
+      const line=document.createElementNS(svgNS,'line');
+      line.setAttribute('x1',meCX); line.setAttribute('y1',meCY);
+      line.setAttribute('x2',c.x); line.setAttribute('y2',c.y);
+      linesSvg.appendChild(line);
+    });
+    // Line between top members
+    if(centers.length>=2){
+      const line=document.createElementNS(svgNS,'line');
+      line.setAttribute('x1',centers[0].x); line.setAttribute('y1',centers[0].y);
+      line.setAttribute('x2',centers[1].x); line.setAttribute('y2',centers[1].y);
+      linesSvg.appendChild(line);
+    }
+    linesSvg.setAttribute('width',popup.offsetWidth);
+    linesSvg.setAttribute('height',popup.offsetHeight);
+  });
 }
 window.openFamilyPopup=openFamilyPopup;
 
