@@ -2772,110 +2772,59 @@ function renderFamilyGraph(){
   const members=_createState.members;
   const total=members.length;
 
-  // 모바일 최적화: 화면 너비에 맞게 크기 조정 (최소 320, 최대 420)
-  const screenW=Math.min(window.innerWidth-32, 420);
-  const SZ=Math.max(320, screenW); // 컨테이너 크기
-  const scale=SZ/400; // 400px 기준으로 스케일
-  const ME_SZ=Math.round(88*scale); // 나 원 크기 (크게)
-  const OT_SZ=Math.round(72*scale); // 기타 원 크기 (크게)
+  let html='<div style="display:flex;flex-direction:column;gap:10px">';
 
-  // 와이어프레임 기준 좌표 (중심점 기준, SZ=400 기준 → scale 적용)
-  const raw={
-    1:{ me:[200,200], pos:[] },
-    2:{ me:[200,250], pos:[[200,90]] },
-    3:{ me:[200,275], pos:[[120,80],[280,80]], extra:[[0,1]] },
-    4:{ me:[200,170], pos:[[200,30],[55,310],[345,310]] },
-    5:{ me:[200,200], pos:[[200,30],[360,200],[280,365],[120,365],[40,200]] },
-    6:{ me:[200,200], pos:[[200,22],[338,108],[338,295],[200,378],[62,295],[62,108]] },
-    7:{ me:[200,200], pos:[] }
-  };
-  // 7명: 6명 육각형
-  {
-    const cx=200,cy=200,rad=170;
-    const p=[];
-    for(let i=0;i<6;i++){
-      const a=(Math.PI*2*i)/6 - Math.PI/2;
-      p.push([Math.round(cx+rad*Math.cos(a)), Math.round(cy+rad*Math.sin(a))]);
-    }
-    raw[7]={me:[cx,cy],pos:p};
-  }
-
-  const R=raw[total]||raw[2];
-  // 좌표를 scale에 맞게 변환
-  const mx=Math.round(R.me[0]*scale), my=Math.round(R.me[1]*scale);
-  const scaledPos=R.pos.map(([x,y])=>[Math.round(x*scale), Math.round(y*scale)]);
-
-  // ── 컨테이너 ──
-  const boxH=total<=2? Math.round(340*scale) : Math.round(400*scale);
-  let html=`<div id="fg-box" style="position:relative;width:${SZ}px;height:${boxH}px;margin:0 auto">`;
-
-  // ── SVG 연결선 (가는 점선) ──
-  html+=`<svg width="${SZ}" height="${boxH}" style="position:absolute;left:0;top:0;pointer-events:none">`;
-  scaledPos.forEach(([px,py],i)=>{
-    if(i+1>=total)return;
-    html+=`<line x1="${mx}" y1="${my}" x2="${px}" y2="${py}" stroke="#CBD5E1" stroke-width="1.5" stroke-dasharray="6,4" stroke-linecap="round"/>`;
-  });
-  if(R.extra){
-    R.extra.forEach(([a,b])=>{
-      if(a+1>=total||b+1>=total)return;
-      html+=`<line x1="${scaledPos[a][0]}" y1="${scaledPos[a][1]}" x2="${scaledPos[b][0]}" y2="${scaledPos[b][1]}" stroke="#CBD5E1" stroke-width="1.5" stroke-dasharray="6,4" stroke-linecap="round"/>`;
-    });
-  }
-  html+=`</svg>`;
-
-  // ── 노드 공통 스타일 ──
-  function circleBtn(x,y,sz,idx,inner){
-    return `<button type="button" onclick="openNodeForm(${idx})" style="position:absolute;left:${x - sz/2}px;top:${y - sz/2}px;width:${sz}px;height:${sz}px;padding:0;border:none;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent;outline:none;font-family:inherit;z-index:2">${inner}</button>`;
-  }
-
-  // ── 나 (중앙) ──
-  const me=members[0];
-  const meRd=ROLE_DEFS[me.role]||ROLE_DEFS.dad;
-  html+=circleBtn(mx, my, ME_SZ+30, 0,
-    `<div style="display:flex;flex-direction:column;align-items:center">
-      <div style="width:${ME_SZ}px;height:${ME_SZ}px;border-radius:50%;background:${meRd.color||'#EEF2FF'};border:4px solid ${meRd.textColor||'#6366F1'};display:flex;align-items:center;justify-content:center;box-sizing:border-box;box-shadow:0 2px 8px rgba(99,102,241,0.18)">
-        <span style="font-size:${Math.round(20*scale)}px;font-weight:900;color:${meRd.textColor||'#6366F1'}">나</span>
-      </div>
-      <span style="font-size:${Math.round(12*scale)}px;font-weight:700;color:#1E293B;margin-top:4px">${me.name}</span>
-      <span style="font-size:${Math.round(10*scale)}px;font-weight:600;color:${meRd.textColor||'#6366F1'};margin-top:1px">${meRd.label||''}</span>
-    </div>`
-  );
-
-  // ── 나머지 구성원 ──
-  scaledPos.forEach(([px,py],i)=>{
-    const mIdx=i+1;
-    if(mIdx>=total)return;
-    const m=members[mIdx];
+  members.forEach((m,idx)=>{
+    const isSelf=m.isSelf;
     const rd=ROLE_DEFS[m.role]||ROLE_DEFS.child;
+    const filled=m.name.trim();
 
-    if(m.name.trim()){
-      // 등록된 구성원: 진하고 굵은 실선
-      html+=circleBtn(px, py, OT_SZ+24, mIdx,
-        `<div style="display:flex;flex-direction:column;align-items:center">
-          <div style="width:${OT_SZ}px;height:${OT_SZ}px;border-radius:50%;background:${rd.color||'#F1F5F9'};border:4px solid ${rd.textColor||'#64748B'};display:flex;align-items:center;justify-content:center;box-sizing:border-box;box-shadow:0 2px 8px rgba(0,0,0,0.15)">
-            <svg width="${Math.round(28*scale)}" height="${Math.round(28*scale)}" viewBox="0 0 24 24" fill="none" stroke="${rd.textColor||'#64748B'}" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg>
-          </div>
-          <span style="font-size:${Math.round(11*scale)}px;font-weight:700;color:#1E293B;margin-top:3px">${m.name}</span>
-          <span style="font-size:${Math.round(9*scale)}px;font-weight:600;color:${rd.textColor||'#64748B'};margin-top:1px">${rd.label||''}</span>
-        </div>`
-      );
-    }else{
-      // 미등록 구성원: 점선 테두리
-      html+=circleBtn(px, py, OT_SZ+10, mIdx,
-        `<div style="width:${OT_SZ}px;height:${OT_SZ}px;border-radius:50%;background:#F8FAFC;border:2.5px dashed #B0BEC5;display:flex;align-items:center;justify-content:center;box-sizing:border-box">
-          <svg width="${Math.round(26*scale)}" height="${Math.round(26*scale)}" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        </div>`
-      );
+    if(isSelf){
+      // 나 (첫번째) — 강조 카드
+      html+=`<button type="button" onclick="openNodeForm(${idx})" style="display:flex;align-items:center;gap:14px;padding:14px 16px;background:${rd.color||'#EEF2FF'};border:2px solid ${rd.textColor||'#6366F1'};border-radius:14px;cursor:pointer;-webkit-tap-highlight-color:transparent;outline:none;font-family:inherit;text-align:left;width:100%">
+        <div style="width:48px;height:48px;border-radius:50%;background:#fff;border:3px solid ${rd.textColor||'#6366F1'};display:flex;align-items:center;justify-content:center;flex-shrink:0;box-sizing:border-box">
+          <span style="font-size:18px;font-weight:900;color:${rd.textColor||'#6366F1'}">나</span>
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:15px;font-weight:800;color:#1E293B">${m.name||'내 이름'}</div>
+          <div style="font-size:12px;font-weight:600;color:${rd.textColor||'#6366F1'};margin-top:2px">${rd.label||'역할'}</div>
+        </div>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+      </button>`;
+    } else if(filled){
+      // 등록된 구성원
+      html+=`<button type="button" onclick="openNodeForm(${idx})" style="display:flex;align-items:center;gap:14px;padding:14px 16px;background:#fff;border:2px solid ${rd.textColor||'#E2E8F0'};border-radius:14px;cursor:pointer;-webkit-tap-highlight-color:transparent;outline:none;font-family:inherit;text-align:left;width:100%">
+        <div style="width:44px;height:44px;border-radius:50%;background:${rd.color||'#F1F5F9'};border:2px solid ${rd.textColor||'#64748B'};display:flex;align-items:center;justify-content:center;flex-shrink:0;box-sizing:border-box">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="${rd.textColor||'#64748B'}" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg>
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:14px;font-weight:800;color:#1E293B">${m.name}</div>
+          <div style="font-size:12px;font-weight:600;color:${rd.textColor||'#64748B'};margin-top:2px">${rd.label||''}</div>
+        </div>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+      </button>`;
+    } else {
+      // 미등록 구성원 — + 추가
+      html+=`<button type="button" onclick="openNodeForm(${idx})" style="display:flex;align-items:center;gap:14px;padding:14px 16px;background:#FAFBFC;border:2px dashed #CBD5E1;border-radius:14px;cursor:pointer;-webkit-tap-highlight-color:transparent;outline:none;font-family:inherit;text-align:left;width:100%">
+        <div style="width:44px;height:44px;border-radius:50%;background:#F1F5F9;border:2px dashed #CBD5E1;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-sizing:border-box">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:14px;font-weight:700;color:#94A3B8">구성원 ${idx} 추가</div>
+          <div style="font-size:12px;font-weight:600;color:#CBD5E1;margin-top:2px">눌러서 등록하세요</div>
+        </div>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>`;
     }
   });
 
-  html+=`</div>`; // close fg-box
+  html+='</div>';
 
   // 안내 텍스트
   const filled=members.filter(m=>m.name.trim()).length;
-  html+=`<div style="text-align:center;margin-top:10px;font-size:${Math.round(13*scale)}px;font-weight:600">${
+  html+=`<div style="text-align:center;margin-top:12px;font-size:13px;font-weight:600">${
     filled>=total?'<span style="color:#10B981">모든 구성원이 등록되었어요!</span>'
-    :`<span style="color:#94A3B8">원을 눌러 구성원을 추가하세요 (${filled}/${total})</span>`
+    :`<span style="color:#94A3B8">각 항목을 눌러 구성원을 추가하세요 (${filled}/${total})</span>`
   }</div>`;
 
   container.innerHTML=html;
