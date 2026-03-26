@@ -8,12 +8,15 @@
 <script>
 // ── 브라우저 뒤로/앞으로 완전 차단 (최상단에서 즉시 실행) ──
 (function(){
-  // 히스토리 트랩: 페이지 로드 즉시 설정
+  // 히스토리 트랩: 페이지 로드 즉시 설정 (다중 레이어)
   history.replaceState({_tm:1},'');
   history.pushState({_tm:2},'');
   history.pushState({_tm:3},'');
+  history.pushState({_tm:4},'');
+  history.pushState({_tm:5},'');
   window.addEventListener('popstate',function(){
-    history.pushState({_tm:3},'');
+    // 항상 즉시 다시 push하여 스택 유지
+    try{history.pushState({_tm:5},'');}catch(e){}
   });
   // 화면 가장자리 터치 차단 (iOS Safari 스와이프 네비게이션 방지)
   document.addEventListener('touchstart',function(e){
@@ -8448,7 +8451,7 @@ function checkUrlParams(){
       }
     }
     // Clean URL
-    window.history.replaceState({},'',window.location.pathname);
+    window.history.replaceState({_tm:3},'',window.location.pathname);
   }
 }
 window.checkUrlParams=checkUrlParams;
