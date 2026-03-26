@@ -1854,7 +1854,7 @@ body.dark .bubble-speech-log{background:rgba(255,255,255,.12);color:rgba(255,255
           <div class="adm-row-l"><div class="adm-row-nm">🔄 캐시 초기화</div><div class="adm-row-sub">PWA 캐시를 삭제하고 최신 버전으로 새로고침</div></div>
           <button class="btn-sm" onclick="clearAppCache()">초기화</button>
         </div>
-        <div id="cache-info" style="padding:8px 0 0;font-size:11px;color:var(--tx3)"></div>
+        <div id="cache-info" style="padding:8px 4px 0;font-size:11px;color:var(--tx3);line-height:1.5"></div>
       </div>
     </div>
     <div class="adm-sec">
@@ -8752,8 +8752,10 @@ window.addEventListener('focus',()=>{
 
 // ── 앱 캐시 초기화 ──────────────────────────
 async function clearAppCache(){
+  if(!confirm('캐시를 초기화하고 최신 버전으로 새로고침할까요?'))return;
+  const btn=document.querySelector('[onclick="clearAppCache()"]');
+  if(btn){btn.textContent='처리중...';btn.disabled=true;}
   try{
-    toast('🔄 캐시 초기화 중...');
     let cleared=0;
     // 1. Service Worker 캐시 전부 삭제
     if('caches' in window){
@@ -8763,17 +8765,19 @@ async function clearAppCache(){
         cleared++;
       }
     }
-    // 2. Service Worker 등록 해제 후 재등록
+    // 2. Service Worker 등록 해제
     if('serviceWorker' in navigator){
       const regs=await navigator.serviceWorker.getRegistrations();
       for(const reg of regs){
         await reg.unregister();
       }
     }
-    toast('✅ 캐시 초기화 완료! 새로고침합니다...');
-    setTimeout(()=>location.reload(true),1000);
+    // 3. 강제 새로고침 (캐시 무시)
+    alert('✅ 캐시 '+cleared+'개 삭제 완료!\n확인을 누르면 새로고침합니다.');
+    window.location.href=window.location.pathname+'?_cb='+Date.now();
   }catch(e){
-    toast('❌ 캐시 초기화 실패: '+e.message);
+    alert('❌ 캐시 초기화 실패: '+e.message);
+    if(btn){btn.textContent='초기화';btn.disabled=false;}
   }
 }
 // 캐시 정보 표시
