@@ -227,7 +227,7 @@ const db = getFirestore(app);
 // ── Admin credentials (SHA-512 salted) ──
 const ADMIN_SALT = 'taemin_sysadmin_v1_';
 const ADMIN_ACCOUNTS = {
-  'kwakhyoshin': { pwdHash: null, name: '곽효신' } // will be set on first load
+  'nonmarking': { pwdHash: null, name: '곽효신' } // will be set on first load
 };
 
 // Pre-compute admin hash
@@ -241,7 +241,7 @@ async function hashPwd(pwd) {
 
 // Init admin hash
 (async () => {
-  ADMIN_ACCOUNTS['kwakhyoshin'].pwdHash = await hashPwd('promise3807');
+  ADMIN_ACCOUNTS['nonmarking'].pwdHash = await hashPwd('promise3807');
 })();
 
 let _loggedIn = false;
