@@ -432,7 +432,9 @@ window.openFamilyDetail = function(familyId) {
     const hasAccount = !!m.account || !!users[mid];
     const roleBadge = m.type === 'child' ? 'badge-child' : 'badge-parent';
     const adminBadge = m.isAdmin ? ' <span class="badge-pill badge-admin">관리자</span>' : '';
+    const loginId = m.account?.id || (users[mid]?.id) || null;
     const accountStatus = hasAccount ? '<span style="color:#10B981">가입완료</span>' : '<span style="color:#94A3B8">미가입</span>';
+    const loginIdDisplay = loginId ? `<span style="color:#6366F1;font-weight:700">${loginId}</span>` : '<span style="color:#CBD5E1">-</span>';
     const birthInfo = m.birthDate ? ` · ${m.birthDate}` : '';
     const genderInfo = m.gender === 'M' ? ' · 남' : m.gender === 'F' ? ' · 여' : '';
 
@@ -442,7 +444,7 @@ window.openFamilyDetail = function(familyId) {
       </div>
       <div class="member-row-info">
         <div class="member-row-name">${m.name || '-'} <span class="badge-pill ${roleBadge}">${ROLE_LABELS[m.role] || m.role}</span>${adminBadge}</div>
-        <div class="member-row-role">${accountStatus}${birthInfo}${genderInfo} · ID: ${mid.slice(0, 12)}...</div>
+        <div class="member-row-role">${accountStatus} · 로그인ID: ${loginIdDisplay}${birthInfo}${genderInfo}</div>
       </div>
       <div class="member-row-actions">
         ${m.isAdmin ? '' : `<button class="btn-sm btn-primary" onclick="toggleAdmin('${familyId}','${mid}',true)">관리자 부여</button>`}
@@ -500,6 +502,7 @@ function renderMembersTable() {
     const users = f.users || {};
     Object.entries(members).forEach(([mid, m]) => {
       const hasAccount = !!m.account || !!users[mid];
+      const loginId = m.account?.id || users[mid]?.id || null;
       rows.push({
         familyName: fm.familyName || f.id,
         familyId: f.id,
@@ -508,6 +511,7 @@ function renderMembersTable() {
         type: m.type,
         isAdmin: m.isAdmin,
         hasAccount,
+        loginId,
         joinedAt: m.joinedAt
       });
     });
@@ -519,11 +523,12 @@ function renderMembersTable() {
   }
 
   wrap.innerHTML = `<table class="data-table">
-    <thead><tr><th>이름</th><th>역할</th><th>가족</th><th>권한</th><th>계정</th><th>가입일</th></tr></thead>
+    <thead><tr><th>이름</th><th>역할</th><th>가족</th><th>로그인 ID</th><th>권한</th><th>계정</th><th>가입일</th></tr></thead>
     <tbody>${rows.map(r => `<tr>
       <td style="font-weight:800">${r.name}</td>
       <td><span class="badge-pill ${r.type === 'child' ? 'badge-child' : 'badge-parent'}">${r.role}</span></td>
       <td style="color:#64748B">${r.familyName}</td>
+      <td style="color:#6366F1;font-weight:700">${r.loginId || '<span style="color:#CBD5E1">-</span>'}</td>
       <td>${r.isAdmin ? '<span class="badge-pill badge-admin">관리자</span>' : '-'}</td>
       <td>${r.hasAccount ? '<span style="color:#10B981;font-weight:700">가입완료</span>' : '<span style="color:#CBD5E1">미가입</span>'}</td>
       <td style="color:#94A3B8;font-size:12px">${r.joinedAt ? new Date(r.joinedAt).toLocaleDateString('ko-KR') : '-'}</td>
