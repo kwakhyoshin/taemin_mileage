@@ -1,6 +1,35 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+<script>
+// 브라우저 뒤로/앞으로 완전 차단 (최상단 즉시 실행)
+(function(){
+  history.replaceState({_p:1},'');
+  history.pushState({_p:2},'');
+  history.pushState({_p:3},'');
+  window._allowBack=false;
+  window.addEventListener('popstate',function(){
+    if(window._allowBack)return;
+    history.pushState({_p:3},'');
+  });
+  // 화면 가장자리 터치 차단 (iOS Safari 스와이프 방지)
+  document.addEventListener('touchstart',function(e){
+    var x=e.touches[0].clientX;
+    if(x<20||x>window.innerWidth-20){e.preventDefault();}
+  },{passive:false,capture:true});
+})();
+function goBackToApp(){
+  window._allowBack=true;
+  if(document.referrer&&document.referrer.includes(location.hostname)){
+    history.go(-(history.length-1));
+    setTimeout(function(){location.href='./';},100);
+  } else {
+    location.href='./';
+  }
+}
+// bfcache
+window.addEventListener('pageshow',function(e){if(e.persisted)location.reload();});
+</script>
 <meta charset="UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -11,7 +40,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
 html{overflow-x:hidden;width:100%}
-body{font-family:'Noto Sans KR',sans-serif;background:#0B0B1A;color:#E0E0F0;overflow-x:hidden;overscroll-behavior:none;-webkit-font-smoothing:antialiased;width:100%}
+body{font-family:'Noto Sans KR',sans-serif;background:#0B0B1A;color:#E0E0F0;overflow-x:hidden;overscroll-behavior:none;touch-action:pan-y;-webkit-font-smoothing:antialiased;width:100%}
 ::selection{background:rgba(99,102,241,.4)}
 .page{max-width:600px;margin:0 auto;padding:0 20px;overflow:hidden}
 .section{padding:56px 0;overflow:hidden}
@@ -124,36 +153,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:#0B0B1A;color:#E0E0F0;over
 <div id="close-bar" style="position:fixed;top:0;left:0;right:0;z-index:9999;display:flex;justify-content:center;padding:12px 0 8px;background:linear-gradient(to bottom,rgba(0,0,0,.6) 0%,rgba(0,0,0,.3) 70%,transparent 100%);pointer-events:none">
   <button onclick="goBackToApp()" style="pointer-events:auto;width:44px;height:44px;border-radius:50%;border:2px solid rgba(255,255,255,.3);background:rgba(0,0,0,.5);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;box-shadow:0 2px 12px rgba(0,0,0,.3)" onmouseover="this.style.background='rgba(255,255,255,.2)'" onmouseout="this.style.background='rgba(0,0,0,.5)'">✕</button>
 </div>
-<script>
-// 앱으로 돌아가기
-function goBackToApp(){
-  // referrer가 있으면 (앱에서 왔으면) 뒤로가기, 아니면 직접 이동
-  if(document.referrer && document.referrer.includes(location.hostname)){
-    // history trap 해제 후 뒤로가기
-    window._allowBack = true;
-    history.back();
-  } else {
-    location.href = './';
-  }
-}
 
-// 브라우저 뒤로가기 방지 (히스토리 트랩)
-(function(){
-  if(!history.state||!history.state._page){
-    history.replaceState({_page:true,depth:0},'');
-    history.pushState({_page:true,depth:1},'');
-  }
-  window.addEventListener('popstate',function(e){
-    if(window._allowBack) return; // X 버튼으로 닫을 때는 허용
-    history.pushState({_page:true,depth:1},'');
-  });
-})();
-
-// bfcache 복원 시 새로고침
-window.addEventListener('pageshow',function(e){
-  if(e.persisted){location.reload();}
-});
-</script>
 
 
 <div class="hero">
