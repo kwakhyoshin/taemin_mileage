@@ -241,7 +241,7 @@ body.dark .dtog-in{transform:translateX(24px)}
 .log-header-sticky.compact p{font-size:0;margin:0;opacity:0;max-height:0;overflow:hidden}
 .log-header-sticky.compact .hdr-stats{margin-top:6px;padding:6px 8px;border-radius:10px}
 .log-header-sticky.compact .hdr-stat-num{font-size:16px}
-.log-header-sticky.compact .hdr-stat-lbl{font-size:8px}
+.log-header-sticky.compact .hdr-stat-lbl{font-size:10px}
 .log-header-sticky.compact .hdr-stat-divider{height:20px}
 
 .rwd-header-sticky{transition:padding .25s}
@@ -250,7 +250,7 @@ body.dark .dtog-in{transform:translateX(24px)}
 .rwd-header-sticky.compact p{font-size:0!important;margin:0!important;opacity:0;max-height:0;overflow:hidden}
 .rwd-header-sticky.compact .hdr-stats{margin-top:6px;padding:6px 8px;border-radius:10px}
 .rwd-header-sticky.compact .hdr-stat-num{font-size:16px}
-.rwd-header-sticky.compact .hdr-stat-lbl{font-size:8px}
+.rwd-header-sticky.compact .hdr-stat-lbl{font-size:10px}
 .rwd-header-sticky.compact .hdr-stat-divider{height:20px}
 
 .hist-hero{transition:padding .25s}
@@ -259,7 +259,7 @@ body.dark .dtog-in{transform:translateX(24px)}
 .hist-hero.compact p{font-size:0;margin:0;opacity:0;max-height:0;overflow:hidden}
 .hist-hero.compact .hdr-stats{margin-top:6px;padding:5px 6px;border-radius:10px}
 .hist-hero.compact .hdr-stat-num{font-size:14px}
-.hist-hero.compact .hdr-stat-lbl{font-size:7px}
+.hist-hero.compact .hdr-stat-lbl{font-size:10px}
 .hist-hero.compact .hdr-stat-divider{height:18px}
 
 .log-header-sticky h2,.rwd-header-sticky h2,.hist-hero h2{transition:font-size .25s}
@@ -270,7 +270,7 @@ body.dark .dtog-in{transform:translateX(24px)}
 .hdr-stats-4 .hdr-stat-lbl{font-size:9px}
 .hdr-stats-5{gap:0}
 .hdr-stats-5 .hdr-stat-num{font-size:16px}
-.hdr-stats-5 .hdr-stat-lbl{font-size:8px}
+.hdr-stats-5 .hdr-stat-lbl{font-size:10px}
 .hdr-stat{flex:1;text-align:center}
 .hdr-stat-num{font-size:22px;font-weight:900;color:#fff;line-height:1.2}
 .hdr-stat-lbl{font-size:11px;font-weight:700;color:rgba(255,255,255,.7);margin-top:2px}
@@ -385,7 +385,7 @@ body.dark .rec-day-tag.day-1{background:#312E81;color:#A5B4FC}
 .m-nm{font-size:14px;font-weight:800;color:var(--tx)}
 .m-sub{font-size:11px;color:var(--tx2);font-weight:600;margin-top:2px}
 .m-btns-row{display:flex;gap:5px;flex-shrink:0;align-items:center}
-.icon-btn{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;border:none;background:var(--bg2);color:var(--tx2);cursor:pointer;flex-shrink:0;transition:all .15s}
+.icon-btn{display:flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;width:44px;height:44px;border-radius:10px;border:none;background:var(--bg2);color:var(--tx2);cursor:pointer;flex-shrink:0;transition:all .15s}
 .icon-btn:active{transform:scale(.9)}
 .icon-btn.del{color:#EF4444}
 .icon-btn.del:active{background:#FEE2E2}
@@ -803,7 +803,7 @@ body.dark .pin-key.ck{background:transparent}
 .auth-btn:disabled{background:#CBD5E1;color:#94A3B8;cursor:not-allowed;opacity:.6}
 .auth-btn.danger{background:#FEE2E2;color:#EF4444}
 .auth-link{font-size:13px;color:#6366F1;font-weight:700;margin-top:16px;cursor:pointer}
-.auth-error{font-size:12px;color:#EF4444;font-weight:600;margin-top:8px;min-height:18px}
+.auth-error{font-size:13px;color:#EF4444;font-weight:600;margin-top:8px;min-height:18px}
 .auth-steps{display:flex;justify-content:center;gap:6px;margin-bottom:20px}
 .auth-step{width:8px;height:8px;border-radius:50%;background:#E2E8F0;transition:all .3s}
 .auth-step.active{background:#6366F1;width:24px;border-radius:4px}
@@ -4253,6 +4253,7 @@ async function doLogin(){
                               (!u.v&&u.id===id&&u.pwdHash===pwdHashLegacy);
               if (matched) {
                 // 해당 가족으로 전환하고 로그인
+                await save();
                 S = Object.assign(defaultState(), familyData);
                 _familyId = otherFamilyPath;
                 DATA_DOC = familyDoc;
@@ -9436,6 +9437,7 @@ function toggleDay(btn){btn.classList.toggle('on');}
 function saveActivity(){
   const name=document.getElementById('act-name').value.trim();
   if(!name){toast('❗ 활동 이름을 입력해주세요');return;}
+  if(name.length>20){toast('활동 이름은 20자 이내로 입력해주세요');return;}
   const id=document.getElementById('act-eid').value;
   const emoji=document.getElementById('act-e').textContent;
   const desc=document.getElementById('act-desc').value.trim();
@@ -9495,6 +9497,7 @@ function setGoalT(v){rwdGoal=v;document.getElementById('rwd-goal-y').classList.t
 function saveReward(){
   const name=document.getElementById('rwd-name').value.trim();
   if(!name){toast('❗ 보상 이름을 입력해주세요');return;}
+  if(name.length>30){toast('보상 이름은 30자 이내로 입력해주세요');return;}
   const id=document.getElementById('rwd-eid').value;
   const emoji=document.getElementById('rwd-e').textContent;
   const pts=Math.max(1,parseInt(document.getElementById('rwd-pts').value)||100);
