@@ -1845,6 +1845,16 @@ body.dark .bubble-speech-log{background:rgba(255,255,255,.12);color:rgba(255,255
       </div>
     </div>
     <div class="adm-sec">
+      <div class="adm-sec-lbl">앱 캐시</div>
+      <div class="adm-card">
+        <div class="adm-row">
+          <div class="adm-row-l"><div class="adm-row-nm">🔄 캐시 초기화</div><div class="adm-row-sub">PWA 캐시를 삭제하고 최신 버전으로 새로고침</div></div>
+          <button class="btn-sm" onclick="clearAppCache()">초기화</button>
+        </div>
+        <div id="cache-info" style="padding:8px 0 0;font-size:11px;color:var(--tx3)"></div>
+      </div>
+    </div>
+    <div class="adm-sec">
       <div class="adm-sec-lbl">가족 프로필 사진 관리</div>
       <div class="adm-card" id="adm-member-photos">
         <!-- 동적으로 렌더링됨 -->
@@ -8492,7 +8502,7 @@ function reallyGoTab(tab){
     themeMeta.content=isDark?'#1E293B':(TAB_COLORS[tab]||'#6366F1');
   }
 }
-function admTab(i){[0,1,2,3].forEach(j=>{document.getElementById('at-'+j).classList.toggle('on',j===i);document.getElementById('adm-p'+j).style.display=j===i?'block':'none';});if(i===2)renderBadgeMgrList();}
+function admTab(i){[0,1,2,3].forEach(j=>{document.getElementById('at-'+j).classList.toggle('on',j===i);document.getElementById('adm-p'+j).style.display=j===i?'block':'none';});if(i===2)renderBadgeMgrList();if(i===3)showCacheInfo();}
 function openModal(id){document.getElementById(id).classList.add('open');}
 function closeModal(id){document.getElementById(id).classList.remove('open');}
 document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
@@ -8736,6 +8746,50 @@ window.addEventListener('focus',()=>{
   checkDayChange();
 });
 
+
+// ── 앱 캐시 초기화 ──────────────────────────
+async function clearAppCache(){
+  try{
+    toast('🔄 캐시 초기화 중...');
+    let cleared=0;
+    // 1. Service Worker 캐시 전부 삭제
+    if('caches' in window){
+      const names=await caches.keys();
+      for(const name of names){
+        await caches.delete(name);
+        cleared++;
+      }
+    }
+    // 2. Service Worker 등록 해제 후 재등록
+    if('serviceWorker' in navigator){
+      const regs=await navigator.serviceWorker.getRegistrations();
+      for(const reg of regs){
+        await reg.unregister();
+      }
+    }
+    toast('✅ 캐시 초기화 완료! 새로고침합니다...');
+    setTimeout(()=>location.reload(true),1000);
+  }catch(e){
+    toast('❌ 캐시 초기화 실패: '+e.message);
+  }
+}
+// 캐시 정보 표시
+async function showCacheInfo(){
+  const el=document.getElementById('cache-info');
+  if(!el)return;
+  try{
+    let info=[];
+    if('caches' in window){
+      const names=await caches.keys();
+      info.push('캐시 저장소: '+names.length+'개');
+    }
+    if('serviceWorker' in navigator){
+      const regs=await navigator.serviceWorker.getRegistrations();
+      info.push('서비스 워커: '+(regs.length>0?'활성':'없음'));
+    }
+    el.textContent=info.join(' · ');
+  }catch(e){el.textContent='';}
+}
 // ── PUSH NOTIFICATIONS ──────────────────────────
 const VAPID_PUBLIC = 'BMqfqNW-_vInMwqdq3H01AKHBepukX3-Lk1RX8ZkZ97jlixIOS7hIZDRJ0gwNy00hARwc2XilfOHnx9WBlcNJfI';
 let swRegistration = null;
