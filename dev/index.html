@@ -3595,14 +3595,19 @@ function generateBadgeSVG(badge,earned,size){
     <path d="M45 46v-5a5 5 0 0110 0v5" fill="none" stroke="${c.accent}" stroke-width="2.5" stroke-linecap="round" opacity=".5"/>
     <circle cx="50" cy="53" r="2" fill="${c.accent}" opacity=".5"/>`;
 
-  // Resolve icon: 1) custom per-badge SVG, 2) icon library via badge.icon, 3) text label fallback
+  // Resolve icon priority:
+  // 1) If user explicitly set icon via override/custom → use library icon
+  // 2) Built-in per-badge SVG (badgeIcons)
+  // 3) Badge.icon from library
+  // 4) Text label fallback
+  const hasOverriddenIcon=badge.icon&&(S.badgeOverrides||{})[badge.id]?.icon;
   let iconPath;
   if(!earned){
     iconPath=lockIcon;
+  } else if(badge.icon && typeof BADGE_ICON_LIB[badge.icon]==='function' && (hasOverriddenIcon || !badgeIcons[badge.id])){
+    iconPath=BADGE_ICON_LIB[badge.icon](c.accent);
   } else if(badgeIcons[badge.id]){
     iconPath=badgeIcons[badge.id];
-  } else if(badge.icon && typeof BADGE_ICON_LIB[badge.icon]==='function'){
-    iconPath=BADGE_ICON_LIB[badge.icon](c.accent);
   } else {
     iconPath=`<text x="50" y="50" text-anchor="middle" dominant-baseline="central" font-size="10" font-weight="900" fill="${c.accent}">${badge.label||'?'}</text>`;
   }
@@ -6971,7 +6976,9 @@ function updateBadgePreview(){
   const category=document.getElementById('bf-category')?.value||'특별';
   const label=document.getElementById('bf-label')?.value||'';
 
-  const tempBadge={id:'_preview',emoji,name,desc:'',category,hidden:false,bonus:0,label,icon,iconScale:scale};
+  // Use real badge ID when editing so badgeIcons lookup works for builtin badges
+  const previewId=(_badgeEditId&&_badgeEditBuiltin)?_badgeEditId:'_preview';
+  const tempBadge={id:previewId,emoji,name,desc:'',category,hidden:false,bonus:0,label,icon,iconScale:scale};
   prevEl.innerHTML=generateBadgeSVG(tempBadge,true,80);
   if(lockEl)lockEl.innerHTML=generateBadgeSVG(tempBadge,false,60);
 }
