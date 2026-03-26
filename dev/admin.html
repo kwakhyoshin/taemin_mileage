@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>시스템 관리자 — 우리가족 마일리지</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Noto Sans KR',sans-serif;background:#F1F5F9;color:#1E293B;min-height:100vh}
+
+/* ── Login ── */
+.login-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#1E293B,#334155)}
+.login-card{background:#fff;border-radius:16px;padding:40px 36px;width:380px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.login-card h1{font-size:20px;font-weight:900;margin-bottom:4px;color:#1E293B;display:flex;align-items:center;gap:8px}
+.login-card p{font-size:13px;color:#64748B;margin-bottom:24px}
+.login-card input{width:100%;padding:12px 16px;border:2px solid #E2E8F0;border-radius:10px;font-size:14px;font-weight:600;font-family:inherit;outline:none;margin-bottom:12px;transition:border .2s}
+.login-card input:focus{border-color:#6366F1}
+.login-card button{width:100%;padding:12px;background:#6366F1;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;transition:opacity .2s}
+.login-card button:active{opacity:.8}
+.login-error{font-size:12px;color:#EF4444;font-weight:600;margin-bottom:8px;min-height:18px}
+
+/* ── Layout ── */
+.app{display:none;min-height:100vh}
+.topbar{background:#1E293B;color:#fff;padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.topbar-left svg{opacity:.6}
+.topbar-title{font-size:15px;font-weight:800}
+.topbar-env{font-size:10px;font-weight:800;background:#EF4444;padding:2px 8px;border-radius:4px;letter-spacing:1px}
+.topbar-right{display:flex;align-items:center;gap:16px}
+.topbar-user{font-size:13px;font-weight:600;opacity:.7}
+.topbar-logout{background:rgba(255,255,255,.1);border:none;color:#fff;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
+.topbar-logout:hover{background:rgba(255,255,255,.2)}
+
+.layout{display:flex;min-height:calc(100vh - 56px)}
+.sidebar{width:220px;background:#fff;border-right:1px solid #E2E8F0;padding:16px 0;flex-shrink:0}
+.sidebar-item{display:flex;align-items:center;gap:10px;padding:10px 20px;font-size:13px;font-weight:700;color:#64748B;cursor:pointer;transition:all .15s;border-left:3px solid transparent}
+.sidebar-item:hover{background:#F8FAFC;color:#1E293B}
+.sidebar-item.active{background:#EEF2FF;color:#6366F1;border-left-color:#6366F1}
+.sidebar-item svg{width:18px;height:18px;flex-shrink:0}
+
+.main{flex:1;padding:24px 32px;overflow-y:auto;max-height:calc(100vh - 56px)}
+.main h2{font-size:18px;font-weight:900;margin-bottom:4px}
+.main .subtitle{font-size:13px;color:#64748B;font-weight:600;margin-bottom:20px}
+
+/* ── Cards & Tables ── */
+.stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px}
+.stat-card{background:#fff;border-radius:12px;padding:20px;border:1px solid #E2E8F0}
+.stat-card .stat-label{font-size:12px;color:#64748B;font-weight:700;margin-bottom:4px}
+.stat-card .stat-value{font-size:28px;font-weight:900;color:#1E293B}
+.stat-card .stat-sub{font-size:11px;color:#94A3B8;font-weight:600;margin-top:2px}
+
+.data-table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #E2E8F0}
+.data-table th{background:#F8FAFC;padding:12px 16px;text-align:left;font-size:12px;font-weight:800;color:#64748B;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #E2E8F0}
+.data-table td{padding:12px 16px;font-size:13px;font-weight:600;border-bottom:1px solid #F1F5F9;vertical-align:middle}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tr:hover td{background:#FAFBFC}
+
+.badge-pill{display:inline-block;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.badge-admin{background:#EEF2FF;color:#6366F1}
+.badge-parent{background:#DBEAFE;color:#3B82F6}
+.badge-child{background:#D1FAE5;color:#059669}
+.badge-inactive{background:#F1F5F9;color:#94A3B8}
+
+.section{margin-bottom:32px}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.section-title{font-size:15px;font-weight:800;color:#1E293B}
+
+.btn-sm{padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700;border:none;cursor:pointer;font-family:inherit;transition:opacity .15s}
+.btn-sm:active{opacity:.7}
+.btn-primary{background:#6366F1;color:#fff}
+.btn-danger{background:#FEE2E2;color:#EF4444}
+.btn-ghost{background:#F1F5F9;color:#64748B}
+
+.empty-state{text-align:center;padding:40px;color:#94A3B8;font-size:13px;font-weight:600}
+
+/* ── Panel sections ── */
+.panel{display:none}
+.panel.active{display:block}
+
+.family-card{background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:20px;margin-bottom:12px;cursor:pointer;transition:all .15s}
+.family-card:hover{border-color:#C7D2FE;box-shadow:0 2px 8px rgba(99,102,241,.1)}
+.family-card-head{display:flex;align-items:center;justify-content:space-between}
+.family-card-name{font-size:15px;font-weight:800}
+.family-card-meta{font-size:12px;color:#64748B;font-weight:600;margin-top:4px}
+.family-card-members{display:flex;gap:4px;margin-top:8px}
+.family-card-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.1)}
+
+/* Detail view */
+.detail-back{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:#6366F1;cursor:pointer;margin-bottom:16px;background:none;border:none;font-family:inherit}
+.detail-back:hover{text-decoration:underline}
+
+.member-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #F1F5F9}
+.member-row:last-child{border-bottom:none}
+.member-row-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.member-row-avatar svg{width:100%;height:100%}
+.member-row-info{flex:1}
+.member-row-name{font-size:14px;font-weight:800}
+.member-row-role{font-size:11px;color:#64748B;font-weight:600}
+.member-row-actions{display:flex;gap:6px}
+
+@media(max-width:768px){
+  .sidebar{display:none}
+  .main{padding:16px}
+  .stat-row{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+<!-- LOGIN -->
+<div class="login-wrap" id="login-wrap">
+  <div class="login-card">
+    <h1><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> 시스템 관리자</h1>
+    <p>관리자 계정으로 로그인하세요</p>
+    <input type="text" id="admin-id" placeholder="아이디" autofocus>
+    <input type="password" id="admin-pwd" placeholder="비밀번호">
+    <div class="login-error" id="login-error"></div>
+    <button onclick="doAdminLogin()">로그인</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app" id="app">
+  <div class="topbar">
+    <div class="topbar-left">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      <div class="topbar-title">우리가족 마일리지 — 시스템 관리자</div>
+      <div class="topbar-env">DEV</div>
+    </div>
+    <div class="topbar-right">
+      <span class="topbar-user" id="topbar-user"></span>
+      <button class="topbar-logout" onclick="doAdminLogout()">로그아웃</button>
+    </div>
+  </div>
+  <div class="layout">
+    <div class="sidebar">
+      <div class="sidebar-item active" onclick="showPanel('dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        대시보드
+      </div>
+      <div class="sidebar-item" onclick="showPanel('families')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg>
+        가족 관리
+      </div>
+      <div class="sidebar-item" onclick="showPanel('members')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        전체 회원
+      </div>
+      <div class="sidebar-item" onclick="showPanel('settings')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        시스템 설정
+      </div>
+    </div>
+    <div class="main">
+      <!-- Dashboard -->
+      <div class="panel active" id="panel-dashboard">
+        <h2>대시보드</h2>
+        <div class="subtitle">시스템 전체 현황</div>
+        <div class="stat-row" id="dash-stats"></div>
+        <div class="section">
+          <div class="section-header"><div class="section-title">최근 가입 가족</div></div>
+          <div id="dash-recent-families"></div>
+        </div>
+      </div>
+
+      <!-- Families -->
+      <div class="panel" id="panel-families">
+        <div id="families-list-view">
+          <h2>가족 관리</h2>
+          <div class="subtitle">등록된 모든 가족 목록</div>
+          <div id="families-list"></div>
+        </div>
+        <div id="family-detail-view" style="display:none">
+          <button class="detail-back" onclick="closeFamilyDetail()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            가족 목록으로
+          </button>
+          <div id="family-detail-content"></div>
+        </div>
+      </div>
+
+      <!-- Members -->
+      <div class="panel" id="panel-members">
+        <h2>전체 회원</h2>
+        <div class="subtitle">모든 가족의 가입된 회원 목록</div>
+        <div id="members-table-wrap"></div>
+      </div>
+
+      <!-- Settings -->
+      <div class="panel" id="panel-settings">
+        <h2>시스템 설정</h2>
+        <div class="subtitle">관리자 도구</div>
+        <div class="section">
+          <div class="section-header"><div class="section-title">Firestore 문서 현황</div></div>
+          <div id="firestore-info"></div>
+        </div>
+        <div class="section">
+          <div class="section-header"><div class="section-title">환경 정보</div></div>
+          <div style="background:#fff;border-radius:12px;padding:16px;border:1px solid #E2E8F0;font-size:13px;font-weight:600;line-height:2">
+            환경: <span style="color:#EF4444;font-weight:800">DEV</span><br>
+            Firebase 프로젝트: taemin-mileage<br>
+            Firestore 컬렉션: families (dev_*), users (taemin_dev)
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha512/0.8.0/sha512.min.js"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, doc, getDoc, getDocs, setDoc, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDTS81EBGgiuo564ThxvTTOpR_iAHLb8tg",
+  authDomain: "taemin-mileage.firebaseapp.com",
+  projectId: "taemin-mileage",
+  storageBucket: "taemin-mileage.firebasestorage.app",
+  messagingSenderId: "1002709736057",
+  appId: "1:1002709736057:web:5e4df58febe004c765d2a8"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// ── Admin credentials (SHA-512 salted) ──
+const ADMIN_SALT = 'taemin_sysadmin_v1_';
+const ADMIN_ACCOUNTS = {
+  'kwakhyoshin': { pwdHash: null, name: '곽효신' } // will be set on first load
+};
+
+// Pre-compute admin hash
+async function hashPwd(pwd) {
+  const salted = ADMIN_SALT + pwd;
+  if (typeof sha512 === 'function') return sha512(salted);
+  const enc = new TextEncoder().encode(salted);
+  const buf = await crypto.subtle.digest('SHA-512', enc);
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// Init admin hash
+(async () => {
+  ADMIN_ACCOUNTS['kwakhyoshin'].pwdHash = await hashPwd('taemin2024!');
+})();
+
+let _loggedIn = false;
+let _adminName = '';
+let _allFamilies = []; // cached
+
+// ── Login ──
+window.doAdminLogin = async function() {
+  const id = document.getElementById('admin-id').value.trim();
+  const pwd = document.getElementById('admin-pwd').value;
+  const err = document.getElementById('login-error');
+
+  if (!id || !pwd) { err.textContent = '아이디와 비밀번호를 입력해주세요'; return; }
+
+  const account = ADMIN_ACCOUNTS[id];
+  if (!account) { err.textContent = '등록되지 않은 관리자입니다'; return; }
+
+  const hash = await hashPwd(pwd);
+  if (hash !== account.pwdHash) { err.textContent = '비밀번호가 틀렸어요'; return; }
+
+  _loggedIn = true;
+  _adminName = account.name;
+  document.getElementById('login-wrap').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('topbar-user').textContent = _adminName;
+  sessionStorage.setItem('sysadmin', id);
+  await loadAllData();
+};
+
+window.doAdminLogout = function() {
+  sessionStorage.removeItem('sysadmin');
+  location.reload();
+};
+
+// Auto-login from session
+(async function checkSession() {
+  const saved = sessionStorage.getItem('sysadmin');
+  if (saved && ADMIN_ACCOUNTS[saved]) {
+    // Wait for hash to be computed
+    await new Promise(r => setTimeout(r, 200));
+    _loggedIn = true;
+    _adminName = ADMIN_ACCOUNTS[saved].name;
+    document.getElementById('login-wrap').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    document.getElementById('topbar-user').textContent = _adminName;
+    await loadAllData();
+  }
+  // Enter key support
+  document.getElementById('admin-pwd').addEventListener('keydown', e => { if (e.key === 'Enter') window.doAdminLogin(); });
+  document.getElementById('admin-id').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('admin-pwd').focus(); });
+})();
+
+// ── Data Loading ──
+async function loadAllData() {
+  _allFamilies = [];
+
+  // Load families collection (dev_* prefix)
+  try {
+    const familiesSnap = await getDocs(collection(db, 'families'));
+    familiesSnap.forEach(docSnap => {
+      const id = docSnap.id;
+      if (id.startsWith('dev_')) {
+        _allFamilies.push({ id, ...docSnap.data() });
+      }
+    });
+  } catch (e) {
+    console.error('Failed to load families:', e);
+  }
+
+  // Also load legacy doc
+  try {
+    const legacySnap = await getDoc(doc(db, 'users', 'taemin_dev'));
+    if (legacySnap.exists()) {
+      const data = legacySnap.data();
+      _allFamilies.push({
+        id: '_legacy_taemin_dev',
+        _isLegacy: true,
+        familyMeta: {
+          familyId: '_legacy',
+          familyName: '태민이네 (레거시)',
+          createdAt: 0,
+          members: {},
+          mode: 'independent'
+        },
+        ...data
+      });
+    }
+  } catch (e) {}
+
+  renderDashboard();
+  renderFamiliesList();
+  renderMembersTable();
+}
+
+// ── Panel Navigation ──
+window.showPanel = function(panel) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + panel).classList.add('active');
+  document.querySelectorAll('.sidebar-item').forEach((s, i) => {
+    s.classList.toggle('active', s.textContent.trim() === {
+      dashboard: '대시보드', families: '가족 관리', members: '전체 회원', settings: '시스템 설정'
+    }[panel]);
+  });
+  if (panel === 'families') {
+    document.getElementById('families-list-view').style.display = '';
+    document.getElementById('family-detail-view').style.display = 'none';
+  }
+};
+
+// ── Dashboard ──
+function renderDashboard() {
+  const totalFamilies = _allFamilies.filter(f => !f._isLegacy).length;
+  const totalMembers = _allFamilies.reduce((sum, f) => {
+    const fm = f.familyMeta?.members || {};
+    return sum + Object.keys(fm).length;
+  }, 0);
+  const totalRegistered = _allFamilies.reduce((sum, f) => {
+    const users = f.users || {};
+    return sum + Object.keys(users).length;
+  }, 0);
+  const totalChildren = _allFamilies.reduce((sum, f) => {
+    const fm = f.familyMeta?.members || {};
+    return sum + Object.values(fm).filter(m => m.type === 'child').length;
+  }, 0);
+
+  document.getElementById('dash-stats').innerHTML = `
+    <div class="stat-card"><div class="stat-label">총 가족 수</div><div class="stat-value">${totalFamilies}</div><div class="stat-sub">레거시 제외</div></div>
+    <div class="stat-card"><div class="stat-label">총 구성원</div><div class="stat-value">${totalMembers}</div><div class="stat-sub">모든 가족 합계</div></div>
+    <div class="stat-card"><div class="stat-label">가입 완료</div><div class="stat-value">${totalRegistered}</div><div class="stat-sub">계정 생성 완료</div></div>
+    <div class="stat-card"><div class="stat-label">자녀 수</div><div class="stat-value">${totalChildren}</div><div class="stat-sub">전체 자녀</div></div>
+  `;
+
+  // Recent families
+  const recent = [..._allFamilies].sort((a, b) => (b.familyMeta?.createdAt || 0) - (a.familyMeta?.createdAt || 0)).slice(0, 5);
+  document.getElementById('dash-recent-families').innerHTML = recent.length === 0
+    ? '<div class="empty-state">아직 등록된 가족이 없습니다</div>'
+    : recent.map(f => renderFamilyCard(f)).join('');
+}
+
+// ── Families ──
+function renderFamilyCard(f) {
+  const fm = f.familyMeta || {};
+  const members = fm.members || {};
+  const memberCount = Object.keys(members).length;
+  const registeredCount = Object.keys(f.users || {}).length;
+  const created = fm.createdAt ? new Date(fm.createdAt).toLocaleDateString('ko-KR') : '-';
+  const colors = ['#6366F1', '#EC4899', '#F59E0B', '#10B981', '#8B5CF6', '#EF4444', '#06B6D4'];
+
+  return `<div class="family-card" onclick="openFamilyDetail('${f.id}')">
+    <div class="family-card-head">
+      <div>
+        <div class="family-card-name">${fm.familyName || f.id} ${f._isLegacy ? '<span class="badge-pill badge-inactive">레거시</span>' : ''}</div>
+        <div class="family-card-meta">구성원 ${memberCount}명 · 가입 ${registeredCount}명 · 모드: ${fm.mode === 'unified' ? '통합' : '독립'} · 생성: ${created}</div>
+      </div>
+      <div style="font-size:12px;color:#94A3B8;font-weight:600">${f.id}</div>
+    </div>
+    <div class="family-card-members">
+      ${Object.values(members).slice(0, 7).map((m, i) =>
+        `<div class="family-card-avatar" style="background:${colors[i % colors.length]}" title="${m.name}">${(m.name || '?')[0]}</div>`
+      ).join('')}
+    </div>
+  </div>`;
+}
+
+function renderFamiliesList() {
+  const wrap = document.getElementById('families-list');
+  if (_allFamilies.length === 0) {
+    wrap.innerHTML = '<div class="empty-state">등록된 가족이 없습니다</div>';
+    return;
+  }
+  wrap.innerHTML = _allFamilies.map(f => renderFamilyCard(f)).join('');
+}
+
+window.openFamilyDetail = function(familyId) {
+  const f = _allFamilies.find(x => x.id === familyId);
+  if (!f) return;
+
+  document.getElementById('families-list-view').style.display = 'none';
+  document.getElementById('family-detail-view').style.display = '';
+
+  const fm = f.familyMeta || {};
+  const members = fm.members || {};
+  const users = f.users || {};
+
+  const ROLE_LABELS = { dad: '아빠', mom: '엄마', grandpa: '할아버지', grandma: '할머니', grandpa_m: '외할아버지', grandma_m: '외할머니', child: '자녀' };
+
+  let membersHtml = Object.entries(members).map(([mid, m]) => {
+    const hasAccount = !!m.account || !!users[mid];
+    const roleBadge = m.type === 'child' ? 'badge-child' : 'badge-parent';
+    const adminBadge = m.isAdmin ? ' <span class="badge-pill badge-admin">관리자</span>' : '';
+    const accountStatus = hasAccount ? '<span style="color:#10B981">가입완료</span>' : '<span style="color:#94A3B8">미가입</span>';
+    const birthInfo = m.birthDate ? ` · ${m.birthDate}` : '';
+    const genderInfo = m.gender === 'M' ? ' · 남' : m.gender === 'F' ? ' · 여' : '';
+
+    return `<div class="member-row">
+      <div class="member-row-avatar" style="background:${m.color || '#F1F5F9'};border-radius:50%">
+        <svg viewBox="0 0 24 24" fill="none" stroke="${m.type === 'child' ? '#059669' : '#3B82F6'}" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg>
+      </div>
+      <div class="member-row-info">
+        <div class="member-row-name">${m.name || '-'} <span class="badge-pill ${roleBadge}">${ROLE_LABELS[m.role] || m.role}</span>${adminBadge}</div>
+        <div class="member-row-role">${accountStatus}${birthInfo}${genderInfo} · ID: ${mid.slice(0, 12)}...</div>
+      </div>
+      <div class="member-row-actions">
+        ${m.isAdmin ? '' : `<button class="btn-sm btn-primary" onclick="toggleAdmin('${familyId}','${mid}',true)">관리자 부여</button>`}
+        ${m.isAdmin ? `<button class="btn-sm btn-ghost" onclick="toggleAdmin('${familyId}','${mid}',false)">관리자 해제</button>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('family-detail-content').innerHTML = `
+    <h2>${fm.familyName || f.id}</h2>
+    <div class="subtitle">ID: ${f.id} · 모드: ${fm.mode === 'unified' ? '통합 관리' : '독립 관리'} · 생성: ${fm.createdAt ? new Date(fm.createdAt).toLocaleString('ko-KR') : '-'}</div>
+    <div class="stat-row">
+      <div class="stat-card"><div class="stat-label">마일리지</div><div class="stat-value">${f.pts || 0}</div></div>
+      <div class="stat-card"><div class="stat-label">연속 출석</div><div class="stat-value">${f.streak || 0}일</div></div>
+      <div class="stat-card"><div class="stat-label">총 활동</div><div class="stat-value">${f.totalDone || 0}회</div></div>
+      <div class="stat-card"><div class="stat-label">뱃지</div><div class="stat-value">${Object.keys(f.badges || {}).length}개</div></div>
+    </div>
+    <div class="section">
+      <div class="section-header"><div class="section-title">구성원 (${Object.keys(members).length}명)</div></div>
+      ${membersHtml || '<div class="empty-state">구성원이 없습니다</div>'}
+    </div>
+  `;
+};
+
+window.closeFamilyDetail = function() {
+  document.getElementById('families-list-view').style.display = '';
+  document.getElementById('family-detail-view').style.display = 'none';
+};
+
+window.toggleAdmin = async function(familyId, memberId, grant) {
+  const f = _allFamilies.find(x => x.id === familyId);
+  if (!f || !f.familyMeta?.members?.[memberId]) return;
+  f.familyMeta.members[memberId].isAdmin = grant;
+  try {
+    if (f._isLegacy) {
+      await setDoc(doc(db, 'users', 'taemin_dev'), f);
+    } else {
+      await setDoc(doc(db, 'families', familyId), f);
+    }
+    window.openFamilyDetail(familyId);
+  } catch (e) {
+    alert('저장 실패: ' + e.message);
+  }
+};
+
+// ── Members Table ──
+function renderMembersTable() {
+  const wrap = document.getElementById('members-table-wrap');
+  const ROLE_LABELS = { dad: '아빠', mom: '엄마', grandpa: '할아버지', grandma: '할머니', grandpa_m: '외할아버지', grandma_m: '외할머니', child: '자녀' };
+
+  let rows = [];
+  _allFamilies.forEach(f => {
+    const fm = f.familyMeta || {};
+    const members = fm.members || {};
+    const users = f.users || {};
+    Object.entries(members).forEach(([mid, m]) => {
+      const hasAccount = !!m.account || !!users[mid];
+      rows.push({
+        familyName: fm.familyName || f.id,
+        familyId: f.id,
+        name: m.name || '-',
+        role: ROLE_LABELS[m.role] || m.role,
+        type: m.type,
+        isAdmin: m.isAdmin,
+        hasAccount,
+        joinedAt: m.joinedAt
+      });
+    });
+  });
+
+  if (rows.length === 0) {
+    wrap.innerHTML = '<div class="empty-state">등록된 회원이 없습니다</div>';
+    return;
+  }
+
+  wrap.innerHTML = `<table class="data-table">
+    <thead><tr><th>이름</th><th>역할</th><th>가족</th><th>권한</th><th>계정</th><th>가입일</th></tr></thead>
+    <tbody>${rows.map(r => `<tr>
+      <td style="font-weight:800">${r.name}</td>
+      <td><span class="badge-pill ${r.type === 'child' ? 'badge-child' : 'badge-parent'}">${r.role}</span></td>
+      <td style="color:#64748B">${r.familyName}</td>
+      <td>${r.isAdmin ? '<span class="badge-pill badge-admin">관리자</span>' : '-'}</td>
+      <td>${r.hasAccount ? '<span style="color:#10B981;font-weight:700">가입완료</span>' : '<span style="color:#CBD5E1">미가입</span>'}</td>
+      <td style="color:#94A3B8;font-size:12px">${r.joinedAt ? new Date(r.joinedAt).toLocaleDateString('ko-KR') : '-'}</td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+</script>
+</body>
+</html>
