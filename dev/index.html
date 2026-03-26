@@ -2057,7 +2057,7 @@ body.dark .bubble-speech-log{background:rgba(255,255,255,.12);color:rgba(255,255
 <div class="pin-wrap" id="pin-wrap" style="display:none">
   <div class="pin-card">
     <h3 id="pin-title">🔐 관리자 인증</h3>
-    <p class="pin-sub" id="pin-sub">PIN 4자리를 입력하세요<br><span style="font-size:11px;color:var(--tx3)">(기본 PIN: 1234)</span></p>
+    <p class="pin-sub" id="pin-sub">PIN 4자리를 입력하세요</p>
     <div class="pin-dots" id="pin-dots">
       <div class="pin-dot"></div><div class="pin-dot"></div>
       <div class="pin-dot"></div><div class="pin-dot"></div>
@@ -2464,13 +2464,15 @@ async function doRegister() {
     }
   }
   
-  // Hash password with SHA-512
+  // Hash password with SHA-512 + salt
+  const _PWD_SALT='taemin_mileage_pwd_v1_';
   let pwdHash;
   try {
-    if(typeof sha512 === 'function') pwdHash = sha512(pwd);
-    else if(typeof window.sha512 === 'function') pwdHash = window.sha512(pwd);
+    const salted=_PWD_SALT+pwd;
+    if(typeof sha512 === 'function') pwdHash = sha512(salted);
+    else if(typeof window.sha512 === 'function') pwdHash = window.sha512(salted);
     else {
-      const enc = new TextEncoder().encode(pwd);
+      const enc = new TextEncoder().encode(salted);
       const buf = await crypto.subtle.digest('SHA-512', enc);
       pwdHash = Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
     }
@@ -2479,9 +2481,9 @@ async function doRegister() {
     return;
   }
 
-  // S.users에 저장
+  // S.users에 저장 (salted hash)
   if (!S.users) S.users = {};
-  S.users[selectedMember] = { id, pwdHash };
+  S.users[selectedMember] = { id, pwdHash, v:2 };
   cachedUsers = S.users;
   
   // Firebase에 저장
@@ -2515,15 +2517,20 @@ async function doLogin() {
   const users = S.users || {};
   cachedUsers = users;
 
-  let pwdHash;
+  // Hash password — try salted first, fallback to unsalted for migration
+  const _PWD_SALT='taemin_mileage_pwd_v1_';
+  let pwdHashSalted, pwdHashLegacy;
   try {
-    if(typeof sha512 === 'function') pwdHash = sha512(pwd);
-    else if(typeof window.sha512 === 'function') pwdHash = window.sha512(pwd);
+    const saltedStr=_PWD_SALT+pwd;
+    if(typeof sha512 === 'function'){pwdHashSalted=sha512(saltedStr);pwdHashLegacy=sha512(pwd);}
+    else if(typeof window.sha512 === 'function'){pwdHashSalted=window.sha512(saltedStr);pwdHashLegacy=window.sha512(pwd);}
     else {
-      // Web Crypto API fallback
-      const enc = new TextEncoder().encode(pwd);
-      const buf = await crypto.subtle.digest('SHA-512', enc);
-      pwdHash = Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+      const enc1 = new TextEncoder().encode(saltedStr);
+      const buf1 = await crypto.subtle.digest('SHA-512', enc1);
+      pwdHashSalted = Array.from(new Uint8Array(buf1)).map(b=>b.toString(16).padStart(2,'0')).join('');
+      const enc2 = new TextEncoder().encode(pwd);
+      const buf2 = await crypto.subtle.digest('SHA-512', enc2);
+      pwdHashLegacy = Array.from(new Uint8Array(buf2)).map(b=>b.toString(16).padStart(2,'0')).join('');
     }
   } catch(e) {
     console.error('SHA-512 hash failed:', e);
@@ -2532,7 +2539,15 @@ async function doLogin() {
   }
 
   for (const memberId in users) {
-    if (users[memberId].id === id && users[memberId].pwdHash === pwdHash) {
+    const u=users[memberId];
+    // v2: salted hash, legacy: unsalted hash (auto-migrate)
+    const matched = (u.v===2 && u.id===id && u.pwdHash===pwdHashSalted) ||
+                    (!u.v && u.id===id && u.pwdHash===pwdHashLegacy);
+    if(matched){
+      // 레거시 해시 → 솔트 해시로 자동 마이그레이션
+      if(!u.v){u.pwdHash=pwdHashSalted;u.v=2;S.users[memberId]=u;save();}
+    }
+    if (matched) {
       currentUser = memberId;
       localStorage.setItem(_LS_PREFIX+'current_user', memberId);
       toast(`${MEMBERS[memberId].name}, 환영해요! 🎉`);
@@ -2780,7 +2795,7 @@ function defaultState(){
     moodLog:[],
     badges:{}, // {badgeId: {earnedAt: timestamp, seen: boolean, claimed: boolean}}
     badgeLog:[], // {id, badgeId, badgeName, badgeEmoji, pts, ts}
-    settings:{streakBonus:true,streakBonusPts:100,pin:'1234',msgMode:'auto',customMsg:''},
+    settings:{streakBonus:true,streakBonusPts:100,pinHash:'',msgMode:'auto',customMsg:''},
     actDone:{},
     dark:false,
     greeting:'안녕, 태민아! 👋', // deprecated, kept for backwards compat
@@ -7460,8 +7475,33 @@ function saveReward(){
   toast(id?'✏️ 보상이 수정됐어요':'🎁 새 보상이 추가됐어요!');
 }
 
-// ── PIN ────────────────────────────────────────
+// ── PIN (해시 기반 보안) ────────────────────────────────────────
 let pMode='auth',pBuf='',pFirst='',adminOK=false;
+let _adminSessionTimer=null;
+const _ADMIN_TIMEOUT=10*60*1000; // 10분 자동 잠금
+const _PIN_SALT='taemin_mileage_pin_v1_';
+
+// PIN 해시 함수 (SHA-256)
+async function hashPin(pin){
+  const enc=new TextEncoder().encode(_PIN_SALT+pin);
+  const buf=await crypto.subtle.digest('SHA-256',enc);
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+// 기존 평문 PIN → 해시로 마이그레이션
+async function migratePinIfNeeded(){
+  if(S.settings.pin && !S.settings.pinHash){
+    S.settings.pinHash=await hashPin(S.settings.pin);
+    delete S.settings.pin;
+    await save();
+  }
+  // 최초 설치: 기본 PIN '1234' 해시 설정
+  if(!S.settings.pinHash){
+    S.settings.pinHash=await hashPin('1234');
+    await save();
+  }
+}
+
 function showPin(mode,title,sub){
   pMode=mode;pBuf='';
   document.getElementById('pin-title').textContent=title;
@@ -7471,7 +7511,6 @@ function showPin(mode,title,sub){
   lockBodyScroll();
 }
 
-// PIN handlers are attached after pk() is defined below
 function startChangePIN(){showPin('new1','🔑 새 PIN 설정','새로 사용할 PIN 4자리를 입력하세요');}
 function pk(k){
   if(k==='cancel'){document.getElementById('pin-wrap').style.display='none';unlockBodyScroll();pBuf='';pFirst='';pMode='auth';return;}
@@ -7482,26 +7521,36 @@ function pk(k){
   if(pBuf.length===4)setTimeout(handlePin,150);
 }
 function closePin(){document.getElementById('pin-wrap').style.display='none';unlockBodyScroll();}
-function handlePin(){
+
+async function handlePin(){
+  const inputHash=await hashPin(pBuf);
   if(pMode==='auth'){
-    if(pBuf===S.settings.pin){closePin();adminOK=true;pBuf='';reallyGoTab('adm');}
+    if(inputHash===S.settings.pinHash){closePin();adminOK=true;pBuf='';startAdminSession();reallyGoTab('adm');}
     else{updDots('err');setTimeout(()=>{pBuf='';updDots('normal');toast('❌ PIN이 틀렸어요');},600);}
   }else if(pMode==='new1'){
     pFirst=pBuf;pBuf='';
     showPin('new2','🔑 PIN 확인','방금 입력한 PIN을 한 번 더 입력하세요');
   }else if(pMode==='new2'){
-    if(pBuf===pFirst){S.settings.pin=pBuf;save();closePin();pBuf='';pFirst='';pMode='auth';toast('🔐 PIN이 변경됐어요!');}
+    if(pBuf===pFirst){S.settings.pinHash=await hashPin(pBuf);delete S.settings.pin;save();closePin();pBuf='';pFirst='';pMode='auth';toast('🔐 PIN이 변경됐어요!');}
     else{updDots('err');setTimeout(()=>{pBuf='';pFirst='';showPin('new1','🔑 새 PIN 설정','PIN이 일치하지 않아요. 다시 입력하세요');toast('❌ PIN이 일치하지 않아요');},600);}
   }else if(pMode==='reset_today'){
-    if(pBuf===S.settings.pin){closePin();pBuf='';pMode='auth';doResetToday();}
+    if(inputHash===S.settings.pinHash){closePin();pBuf='';pMode='auth';doResetToday();}
     else{updDots('err');setTimeout(()=>{pBuf='';updDots('normal');toast('❌ PIN이 틀렸어요');},600);}
   }else if(pMode==='reset_all'){
-    if(pBuf===S.settings.pin){closePin();pBuf='';pMode='auth';doResetAll();}
+    if(inputHash===S.settings.pinHash){closePin();pBuf='';pMode='auth';doResetAll();}
     else{updDots('err');setTimeout(()=>{pBuf='';updDots('normal');toast('❌ PIN이 틀렸어요');},600);}
   }
 }
 function updDots(state){document.querySelectorAll('.pin-dot').forEach((d,i)=>{d.classList.toggle('on',state==='normal'&&i<pBuf.length);d.classList.toggle('err',state==='err');});}
-function lockAdmin(){adminOK=false;toast('🔒 관리자 잠금');goTab('home');}
+
+// 관리자 세션 타이머 (10분 자동 잠금)
+function startAdminSession(){
+  if(_adminSessionTimer)clearTimeout(_adminSessionTimer);
+  _adminSessionTimer=setTimeout(()=>{
+    if(adminOK){adminOK=false;toast('🔒 10분 경과 — 관리자 자동 잠금');goTab('home');}
+  },_ADMIN_TIMEOUT);
+}
+function lockAdmin(){adminOK=false;if(_adminSessionTimer){clearTimeout(_adminSessionTimer);_adminSessionTimer=null;}toast('🔒 관리자 잠금');goTab('home');}
 
 // PIN pad: event delegation on container — touchstart for instant response
 (function(){
@@ -7606,7 +7655,7 @@ function pfMenuAction(action){
   closePfMenu();
   if(action==='admin'){
     if(!adminOK){
-      showPin('auth','🔐 관리자 인증','PIN 4자리를 입력하세요<br><span style="font-size:11px;color:var(--tx3)">(기본 PIN: 1234)</span>');
+      showPin('auth','🔐 관리자 인증','PIN 4자리를 입력하세요');
     }else{
       reallyGoTab('adm');
     }
@@ -8160,7 +8209,7 @@ function meFmAction(action){
   if(action==='admin'){
     closeFamilyPopup();
     if(!adminOK){
-      showPin('auth','🔐 관리자 인증','PIN 4자리를 입력하세요<br><span style="font-size:11px;color:var(--tx3)">(기본 PIN: 1234)</span>');
+      showPin('auth','🔐 관리자 인증','PIN 4자리를 입력하세요');
     }else{
       reallyGoTab('adm');
     }
@@ -9407,10 +9456,23 @@ function cancelAvatarEditor(){
 }
 window.cancelAvatarEditor=cancelAvatarEditor;
 
+// 포토 URL 새니타이징 (XSS 방지)
+function sanitizePhotoUrl(url){
+  if(!url||typeof url!=='string')return '';
+  // data:image/* 또는 https:// 만 허용
+  if(/^data:image\/(png|jpeg|jpg|gif|webp|svg\+xml);base64,/.test(url))return url;
+  if(/^https:\/\//.test(url)){
+    // HTML 특수문자 이스케이프
+    return url.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  return ''; // 허용되지 않는 프로토콜
+}
+
 function getAvatarHTML(userId, size) {
   const photos = S.photos || {};
-  if (photos[userId]) {
-    return `<img src="${photos[userId]}" alt="profile" style="width:${size}px;height:${size}px;object-fit:cover;border-radius:50%">`;
+  const safeUrl=sanitizePhotoUrl(photos[userId]);
+  if (safeUrl) {
+    return `<img src="${safeUrl}" alt="profile" style="width:${size}px;height:${size}px;object-fit:cover;border-radius:50%">`;
   }
   return AVATARS[userId] || '👤';
 }
@@ -9422,7 +9484,7 @@ function renderAdmMemberPhotos() {
     const hasPhoto = S.photos && S.photos[id];
     return `<div class="manage-item" style="align-items:center">
       <div class="avatar-preview" onclick="openAvatarEditor('${id}')">
-        ${hasPhoto ? `<img src="${S.photos[id]}" alt="${m.name}">` : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:${m.color};font-size:24px">${AVATARS[id]}</div>`}
+        ${hasPhoto ? `<img src="${sanitizePhotoUrl(S.photos[id])}" alt="${m.name}">` : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:${m.color};font-size:24px">${AVATARS[id]}</div>`}
       </div>
       <div class="m-info" style="min-width:0;flex:1">
         <div class="m-nm">${m.name}</div>
@@ -9500,6 +9562,9 @@ Object.assign(window, {
   if(S.lastDate && S.lastDate!==_t && S.lastDate!==_ystr){
     S.streak=0;
   }
+
+  // PIN 해시 마이그레이션 (평문 → SHA-256 해시)
+  await migratePinIfNeeded();
 
   // Migrate existing S.moods into moodLog (one-time)
   if(!S.moodLog)S.moodLog=[];
