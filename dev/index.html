@@ -112,7 +112,7 @@ body.dark .dtog{background:#334155}
 body.dark .dtog-in{transform:translateX(24px)}
 
 /* HOME TOP - scrolls away */
-.home-top{background:var(--tab-color,#6366F1);padding:18px 22px 0;padding-top:calc(18px + env(safe-area-inset-top));display:flex;justify-content:space-between;align-items:flex-start;position:relative;overflow:visible;z-index:11}
+.home-top{background:linear-gradient(160deg,var(--tab-color,#6366F1) 0%,var(--tab-color,#6366F1) 100%);padding:18px 22px 0;padding-top:calc(18px + env(safe-area-inset-top));display:flex;justify-content:space-between;align-items:flex-start;position:relative;overflow:visible;z-index:11;margin-bottom:-1px}
 #home-top-content{transition:opacity .1s ease-out}
 .home-top::after{content:'';position:absolute;bottom:-70px;right:10px;width:180px;height:180px;background:rgba(255,255,255,.08);border-radius:50%;pointer-events:none}
 .home-top h1{font-size:26px;font-weight:900;color:rgba(255,255,255,.72)}
@@ -7138,18 +7138,19 @@ function renderNavUsers(){
   let totalUnread=0;
   otherIds.forEach(id=>{totalUnread+=getUnreadCount(id);});
 
-  // Build avatar stack HTML
+  // Build avatar stack HTML — each avatar gets its own onclick
   let avatarsHTML='';
   allIds.forEach((id,i)=>{
     const isMe=id===currentUser;
     const z=i+1;
-    avatarsHTML+=`<div class="nav-stacked-avatar${isMe?' me':''}" style="z-index:${z}" data-user="${id}"${isMe?' id="nav-profile-icon"':''}>${getAvatarHTML(id,isMe?32:30)}</div>`;
+    const clickHandler=isMe?"goTab('adm')":"onUserIconClick('"+id+"')";
+    avatarsHTML+=`<div class="nav-stacked-avatar${isMe?' me':''}" style="z-index:${z}" data-user="${id}"${isMe?' id="nav-profile-icon"':''} onclick="${clickHandler};event.stopPropagation()">${getAvatarHTML(id,isMe?32:30)}</div>`;
   });
 
   // Mood emoji for current user
   const myMood=currentUser?getMoodEmoji(currentUser):null;
 
-  let html=`<div class="nav-avatar-stack" onclick="onAvatarStackClick(event)" id="nav-avatar-stack">
+  let html=`<div class="nav-avatar-stack" id="nav-avatar-stack">
     ${avatarsHTML}
     ${totalUnread>0?`<span class="nav-stack-badge">${totalUnread}</span>`:''}
     ${myMood?`<span class="nav-stack-mood">${myMood}</span>`:''}
@@ -7158,23 +7159,7 @@ function renderNavUsers(){
 }
 window.renderNavUsers=renderNavUsers;
 
-// Handle click on avatar stack - show user selection or go to admin
-function onAvatarStackClick(e){
-  // If clicked on a specific avatar, figure out which
-  const avatar=e.target.closest('.nav-stacked-avatar');
-  if(avatar){
-    const userId=avatar.dataset.user;
-    if(userId===currentUser){
-      goTab('adm');
-      return;
-    }
-    onUserIconClick(userId);
-    return;
-  }
-  // Fallback: go to admin
-  goTab('adm');
-}
-window.onAvatarStackClick=onAvatarStackClick;
+// Avatar stack: each avatar has its own onclick (set in renderNavUsers)
 
 function getMoodEmoji(userId){
   if(!S.moods)return null;
@@ -7325,7 +7310,7 @@ function onUserIconClick(userId){
   document.getElementById('user-fm-bg').style.display='block';
   const menu=document.getElementById('user-fm-menu');
   menu.style.display='block';
-  const icon=document.querySelector(`.nav-user-wrap[onclick*="'${userId}'"]`);
+  const icon=document.querySelector(`.nav-stacked-avatar[data-user="${userId}"]`)||document.querySelector(`.nav-user-wrap[onclick*="'${userId}'"]`);
   if(icon){
     const rect=icon.getBoundingClientRect();
     const menuW=menu.offsetWidth||220;
