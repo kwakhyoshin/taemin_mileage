@@ -1366,16 +1366,15 @@ body.dark .bubble-speech-log{background:rgba(255,255,255,.12);color:rgba(255,255
 <div class="dev-indicator" id="dev-indicator" style="display:none">DEV</div>
 
 <!-- AUTH: 로그인 화면 -->
-<!-- AUTH: 로그인 화면 -->
 <div class="auth-screen" id="auth-login">
   <div class="auth-card">
-    <div class="auth-logo">🏆</div>
+    <div class="auth-logo"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15c3.87 0 7-1.34 7-3V6"/><path d="M5 12V6"/><circle cx="12" cy="6" r="3"/><path d="M5 6c0 1.66 3.13 3 7 3s7-1.34 7-3-3.13-3-7-3-7 1.34-7 3z"/><path d="M5 12c0 1.66 3.13 3 7 3s7-1.34 7-3"/><path d="M5 18c0 1.66 3.13 3 7 3s7-1.34 7-3V12"/></svg></div>
     <div class="auth-title">우리가족 마일리지</div>
     <div class="auth-sub">가족 계정으로 로그인하세요</div>
     <input type="text" class="auth-input" id="login-id" placeholder="아이디" autocomplete="username">
     <div class="pwd-wrap">
       <input type="password" class="auth-input" id="login-pwd" placeholder="비밀번호" autocomplete="current-password">
-      <button type="button" class="pwd-toggle" onclick="togglePwd('login-pwd', this)">👁️</button>
+      <button type="button" class="pwd-toggle" onclick="togglePwd('login-pwd', this)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
     </div>
     <div class="auth-error" id="login-error"></div>
     <button class="auth-btn" onclick="doLogin()">로그인</button>
@@ -1383,17 +1382,17 @@ body.dark .bubble-speech-log{background:rgba(255,255,255,.12);color:rgba(255,255
   </div>
 </div>
 
-<!-- AUTH: 웰컴 — 새 가족 만들기 or 초대받은 가족 합류 -->
+<!-- AUTH: 웰컴 -->
 <div class="auth-screen hidden" id="auth-welcome">
   <div class="auth-card">
-    <div class="auth-logo">👨‍👩‍👧‍👦</div>
+    <div class="auth-logo"><svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg></div>
     <div class="auth-title">환영합니다!</div>
     <div class="auth-sub">우리가족 마일리지로 자녀의 좋은 습관을<br>함께 만들어가요</div>
-    <button class="auth-btn" onclick="startCreateFamily()" style="margin-bottom:10px">
-      🏠 새 가족 만들기
+    <button class="auth-btn" onclick="startCreateFamily()" style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg> 새 가족 만들기
     </button>
-    <button class="auth-btn secondary" onclick="showAuthScreen('join-select')">
-      💌 초대받은 가족 합류
+    <button class="auth-btn secondary" onclick="showAuthScreen('join-select')" style="display:flex;align-items:center;justify-content:center;gap:8px">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></svg> 초대받은 가족 합류
     </button>
     <div class="auth-link" onclick="showAuthScreen('login')">이미 계정이 있어요</div>
   </div>
@@ -1403,30 +1402,28 @@ body.dark .bubble-speech-log{background:rgba(255,255,255,.12);color:rgba(255,255
 <div class="auth-screen hidden" id="auth-create-1">
   <div class="auth-card">
     <div class="auth-steps" id="create-steps-1"></div>
-    <div class="auth-logo">🏠</div>
+    <div class="auth-logo"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg></div>
     <div class="auth-title">가족 이름</div>
     <div class="auth-sub">우리 가족을 부를 이름을 정해주세요</div>
     <input type="text" class="auth-input" id="create-family-name" placeholder="예: 태민이네, 곽씨 패밀리" maxlength="20">
     <div class="auth-error" id="create1-error"></div>
-    <button class="auth-btn" onclick="createStep1Next()">다음 →</button>
-    <button class="auth-btn secondary" onclick="showAuthScreen('welcome')" style="margin-top:8px">← 돌아가기</button>
+    <button class="auth-btn" onclick="createStep1Next()">다음</button>
+    <button class="auth-btn secondary" onclick="showAuthScreen('welcome')" style="margin-top:8px">돌아가기</button>
   </div>
 </div>
 
-<!-- AUTH: 가족 만들기 — 스텝 2: 내 정보 (역할 선택) -->
+<!-- AUTH: 가족 만들기 — 스텝 2: 내 정보 -->
 <div class="auth-screen hidden" id="auth-create-2">
   <div class="auth-card">
     <div class="auth-steps" id="create-steps-2"></div>
     <div class="auth-title">나는 누구?</div>
     <div class="auth-sub">가족에서의 역할을 선택해주세요</div>
-    <div class="role-grid" id="create-role-grid">
-      <!-- 동적 렌더링 -->
-    </div>
+    <div class="role-grid" id="create-role-grid"></div>
     <label class="auth-label" style="margin-top:12px">이름</label>
     <input type="text" class="auth-input" id="create-my-name" placeholder="예: 효신, 은혜" maxlength="10">
     <div class="auth-error" id="create2-error"></div>
-    <button class="auth-btn" onclick="createStep2Next()">다음 →</button>
-    <button class="auth-btn secondary" onclick="showAuthScreen('auth-create-1')" style="margin-top:8px">← 돌아가기</button>
+    <button class="auth-btn" onclick="createStep2Next()">다음</button>
+    <button class="auth-btn secondary" onclick="showAuthScreen('auth-create-1')" style="margin-top:8px">돌아가기</button>
   </div>
 </div>
 
@@ -1435,18 +1432,17 @@ body.dark .bubble-speech-log{background:rgba(255,255,255,.12);color:rgba(255,255
   <div class="auth-card">
     <div class="auth-steps" id="create-steps-3"></div>
     <div class="auth-title">자녀 등록</div>
-    <div class="auth-sub">함께 습관을 만들어갈 자녀를 등록해주세요</div>
-    <div class="child-list" id="create-child-list">
-      <!-- 동적 렌더링 -->
-    </div>
-    <button class="auth-btn secondary" onclick="addChildSlot()" style="margin-top:4px" id="add-child-btn">+ 자녀 추가</button>
+    <div class="auth-sub">함께 습관을 만들어갈 자녀를 등록해주세요<br><span style="font-size:11px;color:#94A3B8">생년월일과 성별은 나중에 입력해도 돼요</span></div>
+    <div class="child-list" id="create-child-list"></div>
+    <button class="auth-btn secondary" onclick="addChildSlot()" style="margin-top:4px;display:flex;align-items:center;justify-content:center;gap:6px" id="add-child-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg> 자녀 추가</button>
     <div class="auth-error" id="create3-error"></div>
-    <button class="auth-btn" onclick="createStep3Next()" style="margin-top:12px">다음 →</button>
-    <button class="auth-btn secondary" onclick="showAuthScreen('auth-create-2')" style="margin-top:8px">← 돌아가기</button>
+    <button class="auth-btn" onclick="createStep3Next()" style="margin-top:12px">다음</button>
+    <div class="auth-link" onclick="createStep3Skip()" style="font-size:12px;color:#94A3B8">나중에 등록할게요, 건너뛰기</div>
+    <button class="auth-btn secondary" onclick="showAuthScreen('auth-create-2')" style="margin-top:8px">돌아가기</button>
   </div>
 </div>
 
-<!-- AUTH: 가족 만들기 — 스텝 4: 관리 모드 선택 (자녀 2명 이상만) -->
+<!-- AUTH: 가족 만들기 — 스텝 4: 관리 모드 선택 -->
 <div class="auth-screen hidden" id="auth-create-4">
   <div class="auth-card">
     <div class="auth-steps" id="create-steps-4"></div>
@@ -1454,24 +1450,24 @@ body.dark .bubble-speech-log{background:rgba(255,255,255,.12);color:rgba(255,255
     <div class="auth-sub">자녀가 여러 명일 때 어떻게 관리할까요?</div>
     <div class="mode-grid" id="create-mode-grid">
       <div class="mode-card selected" onclick="selectMode('independent')" id="mode-independent">
-        <div class="mode-card-title">📋 독립 관리</div>
+        <div class="mode-card-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="2.5" stroke-linecap="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg> 독립 관리</div>
         <div class="mode-card-desc">자녀별로 활동과 보상을 따로 관리해요. 각 자녀에게 맞는 목표를 설정할 수 있어요.</div>
         <div class="mode-card-illust">
-          <div style="background:#DBEAFE;border-radius:10px;padding:8px 12px;font-size:11px;font-weight:700;color:#3B82F6">👦 태민<br><span style="font-size:10px;font-weight:400">양치 ✅ 숙제 ✅</span></div>
-          <div style="background:#FCE7F3;border-radius:10px;padding:8px 12px;font-size:11px;font-weight:700;color:#EC4899">👧 수아<br><span style="font-size:10px;font-weight:400">피아노 ✅ 독서 ✅</span></div>
+          <div style="background:#DBEAFE;border-radius:10px;padding:8px 12px;font-size:11px;font-weight:700;color:#3B82F6"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:-2px"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4"/></svg> 태민<br><span style="font-size:10px;font-weight:400">양치 · 숙제</span></div>
+          <div style="background:#FCE7F3;border-radius:10px;padding:8px 12px;font-size:11px;font-weight:700;color:#EC4899"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:-2px"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4"/></svg> 수아<br><span style="font-size:10px;font-weight:400">피아노 · 독서</span></div>
         </div>
       </div>
       <div class="mode-card" onclick="selectMode('unified')" id="mode-unified">
-        <div class="mode-card-title">👨‍👩‍👧‍👦 통합 관리</div>
+        <div class="mode-card-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg> 통합 관리</div>
         <div class="mode-card-desc">같은 활동 목록을 함께 사용해요. 누가 완료했는지 얼굴 스티커로 표시돼요.</div>
         <div class="mode-card-illust">
-          <div style="background:#F0FDF4;border-radius:10px;padding:8px 12px;font-size:11px;font-weight:700;color:#16A34A;text-align:center">🪥 양치하기<br><span style="font-size:16px">👦👧</span><br><span style="font-size:10px;font-weight:400">둘 다 완료!</span></div>
+          <div style="background:#F0FDF4;border-radius:10px;padding:8px 12px;font-size:11px;font-weight:700;color:#16A34A;text-align:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:-2px"><path d="M9 11l3 3L22 4"/></svg> 양치하기<br><div style="display:flex;gap:4px;justify-content:center;margin:4px 0"><div style="width:22px;height:22px;border-radius:50%;background:#DBEAFE;display:flex;align-items:center;justify-content:center;font-size:10px">A</div><div style="width:22px;height:22px;border-radius:50%;background:#FCE7F3;display:flex;align-items:center;justify-content:center;font-size:10px">B</div></div><span style="font-size:10px;font-weight:400">둘 다 완료!</span></div>
         </div>
       </div>
     </div>
     <div class="auth-error" id="create4-error"></div>
-    <button class="auth-btn" onclick="createStep4Next()">다음 →</button>
-    <button class="auth-btn secondary" onclick="showAuthScreen('auth-create-3')" style="margin-top:8px">← 돌아가기</button>
+    <button class="auth-btn" onclick="createStep4Next()">다음</button>
+    <button class="auth-btn secondary" onclick="showAuthScreen('auth-create-3')" style="margin-top:8px">돌아가기</button>
   </div>
 </div>
 
@@ -1479,35 +1475,33 @@ body.dark .bubble-speech-log{background:rgba(255,255,255,.12);color:rgba(255,255
 <div class="auth-screen hidden" id="auth-create-5">
   <div class="auth-card">
     <div class="auth-steps" id="create-steps-5"></div>
-    <div class="auth-logo">🔑</div>
+    <div class="auth-logo"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/><circle cx="12" cy="16" r="1"/></svg></div>
     <div class="auth-title">계정 만들기</div>
     <div class="auth-sub">로그인에 사용할 아이디와 비밀번호를 설정해주세요</div>
     <input type="text" class="auth-input" id="create-user-id" placeholder="아이디 (4자 이상)" autocomplete="username">
     <div class="pwd-wrap">
       <input type="password" class="auth-input" id="create-user-pwd" placeholder="비밀번호 (4자 이상)" autocomplete="new-password">
-      <button type="button" class="pwd-toggle" onclick="togglePwd('create-user-pwd', this)">👁️</button>
+      <button type="button" class="pwd-toggle" onclick="togglePwd('create-user-pwd', this)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
     </div>
     <div class="pwd-wrap">
       <input type="password" class="auth-input" id="create-user-pwd2" placeholder="비밀번호 확인" autocomplete="new-password">
-      <button type="button" class="pwd-toggle" onclick="togglePwd('create-user-pwd2', this)">👁️</button>
+      <button type="button" class="pwd-toggle" onclick="togglePwd('create-user-pwd2', this)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
     </div>
     <div class="auth-error" id="create5-error"></div>
-    <button class="auth-btn" onclick="createStep5Finish()">🎉 가족 만들기 완료!</button>
-    <button class="auth-btn secondary" onclick="createStepBack5()" style="margin-top:8px">← 돌아가기</button>
+    <button class="auth-btn" onclick="createStep5Finish()">가족 만들기 완료</button>
+    <button class="auth-btn secondary" onclick="createStepBack5()" style="margin-top:8px">돌아가기</button>
   </div>
 </div>
 
 <!-- AUTH: 초대 링크로 합류 — 구성원 선택 -->
 <div class="auth-screen hidden" id="auth-join-select">
   <div class="auth-card">
-    <div class="auth-logo">💌</div>
+    <div class="auth-logo"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg></div>
     <div class="auth-title" id="join-family-title">가족 합류</div>
     <div class="auth-sub">초대받은 가족의 구성원을 선택해주세요</div>
-    <div class="member-grid" id="join-member-grid">
-      <!-- 미가입 구성원 동적 렌더링 -->
-    </div>
+    <div class="member-grid" id="join-member-grid"></div>
     <div class="auth-error" id="join-select-error"></div>
-    <button class="auth-btn secondary" onclick="showAuthScreen('welcome')">← 돌아가기</button>
+    <button class="auth-btn secondary" onclick="showAuthScreen('welcome')">돌아가기</button>
   </div>
 </div>
 
@@ -2493,15 +2487,21 @@ Object.entries(EMOJIS).forEach(([cat,arr])=>arr.forEach(e=>FLAT.push({e,cat,kw:E
 // AUTH SYSTEM
 // ═══════════════════════════════════════════════
 // SVG 아바타 아이콘
-// ── 역할 정의 (다가족) ──────────────────────────
+// ── 역할 정의 (다가족) — SVG 아이콘 ──────────────────────────
+const _SVG_PERSON_M='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg>';
+const _SVG_PERSON_F='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><path d="M8 7c0-3 2-5 4-5s4 2 4 5" stroke-width="2.2"/></svg>';
+const _SVG_ELDER='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><path d="M9 5h6" stroke-width="1.5"/></svg>';
+const _SVG_CHILD_M='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><circle cx="12" cy="7" r="2" fill="currentColor" opacity=".15"/></svg>';
+const _SVG_CHILD_F='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><path d="M8 5c0-2 2-3.5 4-3.5s4 1.5 4 3.5" stroke-width="2"/><circle cx="12" cy="7" r="2" fill="currentColor" opacity=".15"/></svg>';
+
 const ROLE_DEFS = {
-  dad:       {label:'아빠',      emoji:'👨', type:'parent', color:'#DBEAFE'},
-  mom:       {label:'엄마',      emoji:'👩', type:'parent', color:'#FCE7F3'},
-  grandpa:   {label:'할아버지',  emoji:'👴', type:'parent', color:'#FEF3C7'},
-  grandma:   {label:'할머니',    emoji:'👵', type:'parent', color:'#FEF9C3'},
-  grandpa_m: {label:'외할아버지',emoji:'👴', type:'parent', color:'#E0E7FF'},
-  grandma_m: {label:'외할머니',  emoji:'👵', type:'parent', color:'#FCE7F3'},
-  child:     {label:'자녀',      emoji:'👦', type:'child',  color:'#D1FAE5'}
+  dad:       {label:'아빠',      svg:_SVG_PERSON_M, type:'parent', color:'#DBEAFE', textColor:'#3B82F6'},
+  mom:       {label:'엄마',      svg:_SVG_PERSON_F, type:'parent', color:'#FCE7F3', textColor:'#EC4899'},
+  grandpa:   {label:'할아버지',  svg:_SVG_ELDER,    type:'parent', color:'#FEF3C7', textColor:'#D97706'},
+  grandma:   {label:'할머니',    svg:_SVG_ELDER,    type:'parent', color:'#FEF9C3', textColor:'#CA8A04'},
+  grandpa_m: {label:'외할아버지',svg:_SVG_ELDER,    type:'parent', color:'#E0E7FF', textColor:'#6366F1'},
+  grandma_m: {label:'외할머니',  svg:_SVG_ELDER,    type:'parent', color:'#FCE7F3', textColor:'#DB2777'},
+  child:     {label:'자녀',      svg:_SVG_CHILD_M,  type:'child',  color:'#D1FAE5', textColor:'#059669'}
 };
 
 // 기존 하드코딩 MEMBERS/AVATARS → 동적 (familyState.members에서 생성)
@@ -2514,19 +2514,25 @@ function rebuildMembersFromFamily(){
   MEMBERS = {};
   AVATARS = {};
   Object.entries(fm).forEach(([mid, m])=>{
+    const rd=ROLE_DEFS[m.role]||ROLE_DEFS.child;
     MEMBERS[mid] = {
-      name: m.name || ROLE_DEFS[m.role]?.label || '구성원',
-      icon: m.emoji || ROLE_DEFS[m.role]?.emoji || '👤',
-      greeting: `안녕, ${m.name}! 👋`,
-      role: ROLE_DEFS[m.role]?.label || m.role,
-      color: m.color || ROLE_DEFS[m.role]?.color || '#F1F5F9',
-      memberType: ROLE_DEFS[m.role]?.type || 'parent',
+      name: m.name || rd.label || '구성원',
+      icon: '👤', // fallback only
+      greeting: `안녕, ${m.name}!`,
+      role: rd.label || m.role,
+      color: m.color || rd.color || '#F1F5F9',
+      textColor: rd.textColor || '#64748B',
+      memberType: rd.type || 'parent',
       isAdmin: !!m.isAdmin
     };
-    // 기본 SVG 아바타 생성
-    const c = m.color || ROLE_DEFS[m.role]?.color || '#F1F5F9';
-    const e = m.emoji || ROLE_DEFS[m.role]?.emoji || '👤';
-    AVATARS[mid] = `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="20" fill="${c}"/><text x="20" y="26" text-anchor="middle" font-size="18">${e}</text></svg>`;
+    const c = m.color || rd.color || '#F1F5F9';
+    const tc = rd.textColor || '#64748B';
+    // SVG 아바타: 원형 배경 + person 아이콘
+    AVATARS[mid] = `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="20" cy="20" r="20" fill="${c}"/>
+      <g transform="translate(8,8)" stroke="${tc}" fill="none" stroke-width="1.8" stroke-linecap="round">
+        <circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/>
+      </g></svg>`;
   });
 }
 
@@ -2580,6 +2586,7 @@ function showAuthScreen(screen) {
 // ── 가족 만들기 흐름 ──
 function startCreateFamily(){
   _createState={familyName:'',myRole:'',myName:'',children:[{name:'',birthDate:'',gender:''}],mode:'independent',userId:'',pwdHash:''};
+  window._createState=_createState;
   showAuthScreen('create-1');
   document.getElementById('create-family-name').value='';
 }
@@ -2599,8 +2606,8 @@ function renderRoleGrid(){
   grid.innerHTML=parentRoles.map(r=>{
     const d=ROLE_DEFS[r];
     const sel=_createState.myRole===r?'selected':'';
-    return `<div class="role-card ${sel}" onclick="selectCreateRole('${r}')">
-      <div class="role-emoji">${d.emoji}</div>
+    return `<div class="role-card ${sel}" onclick="selectCreateRole('${r}')" style="color:${d.textColor||'#1E293B'}">
+      <div class="role-emoji" style="width:32px;height:32px;margin:0 auto 4px">${d.svg}</div>
       <div class="role-name">${d.label}</div>
     </div>`;
   }).join('');
@@ -2627,8 +2634,8 @@ function renderChildList(){
   list.innerHTML=_createState.children.map((c,i)=>`
     <div class="child-card">
       <div class="child-card-head">
-        <div class="child-card-name">👶 자녀 ${i+1}</div>
-        ${_createState.children.length>1?`<button class="child-card-del" onclick="removeChild(${i})">✕</button>`:''}
+        <div class="child-card-name" style="display:flex;align-items:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg> 자녀 ${i+1}</div>
+        ${_createState.children.length>1?`<button class="child-card-del" onclick="removeChild(${i})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>`:''}
       </div>
       <div class="child-card-row">
         <input type="text" class="auth-input" placeholder="이름" value="${c.name}" oninput="_createState.children[${i}].name=this.value" maxlength="10">
@@ -2660,20 +2667,23 @@ function removeChild(idx){
 
 function createStep3Next(){
   const err=document.getElementById('create3-error');
-  // 최소 1명 자녀 필요, 이름은 필수
   const valid=_createState.children.filter(c=>c.name.trim());
-  if(valid.length===0){err.textContent='자녀를 최소 1명 등록해주세요';return;}
-  // 이름 없는 빈 슬롯 제거
+  if(valid.length===0){err.textContent='자녀 이름을 최소 1명 입력해주세요';return;}
   _createState.children=valid;
   err.textContent='';
-
-  // 자녀 2명 이상이면 모드 선택, 아니면 스킵
   if(_createState.children.length>=2){
     showAuthScreen('create-4');
   }else{
     _createState.mode='independent';
     showAuthScreen('create-5');
   }
+}
+
+function createStep3Skip(){
+  // 자녀 없이 건너뛰기 — 나중에 관리자 페이지에서 추가 가능
+  _createState.children=[];
+  _createState.mode='independent';
+  showAuthScreen('create-5');
 }
 
 function selectMode(mode){
@@ -2737,11 +2747,11 @@ async function createStep5Finish(){
     // 가족 구성원 목록 구축
     const members={};
     // 나 (관리자)
+    const myRoleDef=ROLE_DEFS[_createState.myRole]||ROLE_DEFS.dad;
     members[myMemberId]={
       name:_createState.myName,
       role:_createState.myRole,
-      emoji:ROLE_DEFS[_createState.myRole]?.emoji||'👤',
-      color:ROLE_DEFS[_createState.myRole]?.color||'#F1F5F9',
+      color:myRoleDef.color||'#F1F5F9',
       isAdmin:true,
       type:'parent',
       account:{id:userId,pwdHash,v:2},
@@ -2753,13 +2763,12 @@ async function createStep5Finish(){
       members[childId]={
         name:c.name,
         role:'child',
-        emoji:c.gender==='F'?'👧':'👦',
         color:c.gender==='F'?'#FCE7F3':'#DBEAFE',
         isAdmin:false,
         type:'child',
         birthDate:c.birthDate||'',
         gender:c.gender||'',
-        account:null, // 아직 계정 없음
+        account:null,
         joinedAt:Date.now()
       };
     });
@@ -10000,7 +10009,7 @@ Object.assign(window, {
   admTab, switchDash,
   // Auth functions (multi-family)
   showAuthScreen, doLogin, logout, togglePwd,
-  startCreateFamily, createStep1Next, createStep2Next, createStep3Next, createStep4Next, createStep5Finish, createStepBack5,
+  startCreateFamily, createStep1Next, createStep2Next, createStep3Next, createStep3Skip, createStep4Next, createStep5Finish, createStepBack5,
   selectCreateRole, addChildSlot, removeChild, selectMode,
   selectJoinMember, doJoinRegister,
   isCurrentUserAdmin, rebuildMembersFromFamily,
