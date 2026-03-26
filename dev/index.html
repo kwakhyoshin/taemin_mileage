@@ -1722,12 +1722,27 @@ body.dark .bubble-speech-log{background:rgba(255,255,255,.12);color:rgba(255,255
     </div>
     <div class="adm-sec">
       <div class="adm-sec-lbl">뱃지 관리</div>
-      <div class="adm-card">
-        <div class="adm-row">
-          <div class="adm-row-l"><div class="adm-row-nm">새 뱃지 추가</div><div class="adm-row-sub">커스텀 뱃지 생성</div></div>
-          <button class="btn-sm" onclick="openBadgeForm()">추가</button>
+      <div class="adm-card" style="padding:0">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 14px 10px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="font-size:13px;font-weight:800;color:var(--tx)">전체 뱃지</div>
+            <span id="badge-mgr-count" style="font-size:11px;font-weight:700;color:var(--tx3)">0개</span>
+          </div>
+          <button class="btn-sm" onclick="openBadgeForm()">+ 새 뱃지</button>
         </div>
-        <div id="custom-badges-list" style="margin-top:12px"></div>
+        <div style="padding:0 14px 6px;display:flex;gap:6px;flex-wrap:wrap" id="badge-mgr-filter">
+          <button class="sel-btn on" data-cat="all" onclick="filterBadgeMgr('all',this)" style="font-size:10px;padding:4px 10px">전체</button>
+          <button class="sel-btn" data-cat="custom" onclick="filterBadgeMgr('custom',this)" style="font-size:10px;padding:4px 10px">커스텀</button>
+          <button class="sel-btn" data-cat="공부" onclick="filterBadgeMgr('공부',this)" style="font-size:10px;padding:4px 10px">공부</button>
+          <button class="sel-btn" data-cat="꾸준함" onclick="filterBadgeMgr('꾸준함',this)" style="font-size:10px;padding:4px 10px">꾸준함</button>
+          <button class="sel-btn" data-cat="도전" onclick="filterBadgeMgr('도전',this)" style="font-size:10px;padding:4px 10px">도전</button>
+          <button class="sel-btn" data-cat="성장" onclick="filterBadgeMgr('성장',this)" style="font-size:10px;padding:4px 10px">성장</button>
+          <button class="sel-btn" data-cat="생활습관" onclick="filterBadgeMgr('생활습관',this)" style="font-size:10px;padding:4px 10px">생활습관</button>
+          <button class="sel-btn" data-cat="감정" onclick="filterBadgeMgr('감정',this)" style="font-size:10px;padding:4px 10px">감정</button>
+          <button class="sel-btn" data-cat="마일리지" onclick="filterBadgeMgr('마일리지',this)" style="font-size:10px;padding:4px 10px">마일리지</button>
+          <button class="sel-btn" data-cat="히든" onclick="filterBadgeMgr('히든',this)" style="font-size:10px;padding:4px 10px">히든</button>
+        </div>
+        <div id="badge-mgr-list" style="max-height:400px;overflow-y:auto;padding:0 8px 8px"></div>
       </div>
     </div>
     <div class="adm-sec">
@@ -3637,15 +3652,23 @@ function generateBadgeSVG(badge,earned,size){
     <ellipse cx="42" cy="32" rx="22" ry="18" fill="url(#shine-${id})"/>
     ${notches}
     ${sparkles}
-    <g transform="translate(50,50) scale(1.18) translate(-50,-50)">${iconPath}</g>
+    <g transform="translate(50,50) scale(${(badge.iconScale||100)/100*1.18}) translate(-50,-50)">${iconPath}</g>
   </svg>`;
 }
 window.generateBadgeSVG=generateBadgeSVG;
 
 function checkBadges(){
   const newBadges=[];
+  // Check built-in badges
   BADGES.forEach(badge=>{
     if(!S.badges[badge.id]&&badge.check(S)){
+      S.badges[badge.id]={earnedAt:Date.now(),seen:false,claimed:false};
+      newBadges.push(badge);
+    }
+  });
+  // Check custom badges with condition
+  (S.customBadges||[]).forEach(badge=>{
+    if(!S.badges[badge.id]&&badge.condType&&badge.condType!=='manual'&&evalCustomBadgeCond(badge)){
       S.badges[badge.id]={earnedAt:Date.now(),seen:false,claimed:false};
       newBadges.push(badge);
     }
@@ -4175,7 +4198,7 @@ function showBadgeDetail(badgeOrId){
 window.showBadgeDetail=showBadgeDetail;
 
 function claimBadgeMileage(badgeId){
-  const badge=BADGES.find(b=>b.id===badgeId);
+  const badge=BADGES.find(b=>b.id===badgeId)||(S.customBadges||[]).find(b=>b.id===badgeId);
   if(!badge||!S.badges[badgeId])return;
   const badgeInfo=S.badges[badgeId];
   if(badgeInfo.claimed)return;
@@ -5790,8 +5813,8 @@ function renderAdmSettings(){
     container.innerHTML=html;
   }
 
-  // Render custom badges list
-  renderCustomBadgesList();
+  // Render badge manager list
+  renderBadgeMgrList();
 }
 
 // ── ACTIVITY ACTIONS ──────────────────────────
@@ -6553,105 +6576,389 @@ function saveGreetingCustom(userId){
 }
 window.saveGreetingCustom=saveGreetingCustom;
 
-// ── BADGE MANAGEMENT ──────────────────────────
-function renderCustomBadgesList(){
-  const el=document.getElementById('custom-badges-list');
-  if(!el)return;
-  const custom=S.customBadges||[];
-  if(custom.length===0){
-    el.innerHTML='<div style="font-size:12px;color:var(--tx3);text-align:center;padding:8px">추가한 뱃지가 없어요</div>';
-    return;
-  }
-  el.innerHTML='<div style="margin-top:8px">'+custom.map((b,i)=>`
-    <div style="display:flex;align-items:center;gap:8px;padding:8px;background:rgba(0,0,0,.03);border-radius:8px;margin-bottom:6px">
-      <span style="font-size:18px">${b.emoji}</span>
-      <div style="flex:1"><div style="font-size:11px;font-weight:700;color:var(--tx)">${b.name}</div><div style="font-size:10px;color:var(--tx3)">${b.category} | 보너스 +${b.bonus}</div></div>
-      <button class="btn-sm rd" style="padding:4px 8px;font-size:10px" onclick="delCustomBadge(${i})">삭제</button>
-    </div>
-  `).join('')+'</div>';
+// ── BADGE MANAGEMENT (Full CRUD) ──────────────────────────
+let _badgeMgrFilter='all';
+function filterBadgeMgr(cat,btn){
+  _badgeMgrFilter=cat;
+  document.querySelectorAll('#badge-mgr-filter .sel-btn').forEach(b=>b.classList.remove('on'));
+  if(btn)btn.classList.add('on');
+  renderBadgeMgrList();
+}
+window.filterBadgeMgr=filterBadgeMgr;
+
+function getAllBadgesForMgr(){
+  // Combine built-in BADGES + customBadges, marking source
+  const all=[];
+  BADGES.forEach(b=>all.push({...b,_src:'builtin'}));
+  (S.customBadges||[]).forEach((b,i)=>all.push({...b,_src:'custom',_idx:i}));
+  return all;
 }
 
+function renderBadgeMgrList(){
+  const el=document.getElementById('badge-mgr-list');
+  if(!el)return;
+  const all=getAllBadgesForMgr();
+  const countEl=document.getElementById('badge-mgr-count');
+  if(countEl)countEl.textContent=all.length+'개';
+
+  let filtered=all;
+  if(_badgeMgrFilter==='custom') filtered=all.filter(b=>b._src==='custom');
+  else if(_badgeMgrFilter!=='all') filtered=all.filter(b=>b.category===_badgeMgrFilter);
+
+  if(filtered.length===0){
+    el.innerHTML='<div style="text-align:center;padding:20px;font-size:12px;color:var(--tx3)">해당 뱃지가 없어요</div>';
+    return;
+  }
+
+  el.innerHTML=filtered.map(b=>{
+    const isEarned=S.badges&&S.badges[b.id];
+    const earnDate=isEarned?new Date(isEarned.earnedAt).toLocaleDateString('ko-KR'):'';
+    const isClaimed=isEarned?.claimed;
+    const isCustom=b._src==='custom';
+    const condDesc=getBadgeCondDesc(b);
+
+    return `<div style="display:flex;align-items:center;gap:10px;padding:10px;background:${isEarned?'rgba(99,102,241,.06)':'rgba(0,0,0,.02)'};border-radius:12px;margin-bottom:6px;border:1px solid ${isEarned?'rgba(99,102,241,.15)':'var(--bdr)'}">
+      <div style="width:44px;height:44px;flex-shrink:0;display:flex;align-items:center;justify-content:center">
+        ${generateBadgeSVG(b,!!isEarned,44)}
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">
+          <span style="font-size:12px;font-weight:800;color:var(--tx)">${b.emoji} ${b.name}</span>
+          ${isCustom?'<span style="font-size:9px;background:#EEF2FF;color:#6366F1;padding:1px 5px;border-radius:4px;font-weight:700">커스텀</span>':''}
+          ${b.hidden?'<span style="font-size:9px;background:#FEF3C7;color:#D97706;padding:1px 5px;border-radius:4px;font-weight:700">히든</span>':''}
+        </div>
+        <div style="font-size:10px;color:var(--tx3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${b.desc}</div>
+        <div style="font-size:9px;color:var(--tx3);margin-top:2px;display:flex;gap:6px;flex-wrap:wrap">
+          <span>${b.category}</span>
+          <span>+${b.bonus||0}M</span>
+          <span style="color:${isEarned?'var(--gn2)':'var(--tx3)'}">${isEarned?(isClaimed?'수령완료':'획득 '+earnDate):'미획득'}</span>
+        </div>
+        <div style="font-size:9px;color:#8B5CF6;margin-top:1px">${condDesc}</div>
+      </div>
+      <div style="display:flex;gap:4px;flex-shrink:0">
+        ${isCustom?`
+          <button class="icon-btn" onclick="openBadgeForm('${b.id}')" title="수정"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg></button>
+          <button class="icon-btn del" onclick="delCustomBadge(${b._idx})" title="삭제"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>
+        `:`
+          <button class="icon-btn" onclick="viewBuiltinBadge('${b.id}')" title="상세"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></button>
+        `}
+        ${!isEarned&&isCustom?`<button class="icon-btn" onclick="manualAwardBadge('${b.id}')" title="수동 지급" style="color:#10B981"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function getBadgeCondDesc(badge){
+  if(badge._src==='builtin'){
+    // Parse condition from built-in check functions
+    const id=badge.id;
+    if(id.startsWith('study_first'))return '조건: 공부 1회 이상';
+    if(id.startsWith('study_streak'))return '조건: 공부 연속 '+badge.label;
+    if(id.startsWith('study_weekend'))return '조건: 주말 공부';
+    if(id.startsWith('study_'))return '조건: 공부 '+badge.label;
+    if(id.startsWith('streak_'))return '조건: 연속 출석 '+badge.label;
+    if(id.startsWith('morning_'))return '조건: 아침 활동 7회+';
+    if(id.startsWith('total_'))return '조건: 총 활동 '+badge.label+'회';
+    if(id.startsWith('daily_all'))return '조건: 올클리어 '+badge.label;
+    if(id.startsWith('daily_'))return '조건: 하루 '+badge.label+'개 클리어';
+    if(id.startsWith('health_'))return '조건: 운동+영양제+양치';
+    if(id.startsWith('patience_'))return '조건: 짜증 참기 5회+';
+    if(id.startsWith('happy_'))return '조건: 즐거운 등교 7회+';
+    if(id.startsWith('first_'))return '조건: 첫 달성';
+    if(id.startsWith('pts_'))return '조건: 마일리지 '+badge.label+' 돌파';
+    if(id.startsWith('mood_'))return '조건: 기분 기록';
+    if(id.startsWith('brush_'))return '조건: 양치 30회+';
+    if(id.startsWith('vitamin_'))return '조건: 영양제 20회+';
+    if(id.startsWith('save_'))return '조건: 마일리지 보유 '+badge.label;
+    if(id.startsWith('badge_'))return '조건: 뱃지 수집';
+    if(id.startsWith('reward_'))return '조건: 보상 교환';
+    if(id.startsWith('msg_'))return '조건: 메시지 전송';
+    return '조건: 자동 감지';
+  }
+  // Custom badge condition
+  const ct=badge.condType||'manual';
+  const cv=badge.condValue||0;
+  const COND_LABELS={
+    'manual':'수동 지급',
+    'total_acts':'총 활동 '+cv+'회 이상',
+    'streak':'연속 출석 '+cv+'일 이상',
+    'study_count':'공부 '+cv+'회 이상',
+    'study_streak':'공부 연속 '+cv+'일 이상',
+    'act_name_count':'활동 "'+( badge.condActName||'')+ '" '+cv+'회 이상',
+    'pts_total':'총 획득 마일리지 '+cv+' 이상',
+    'pts_current':'현재 보유 마일리지 '+cv+' 이상',
+    'mood_count':'기분 기록 '+cv+'회 이상',
+    'mood_type_count':'기분 "'+( badge.condMoodType||'')+'" '+cv+'회 이상',
+    'msg_count':'메시지 전송 '+cv+'회 이상',
+    'reward_count':'보상 교환 '+cv+'회 이상',
+    'perfect_days':'올클리어 '+cv+'일 이상',
+    'morning_acts':'아침 활동 '+cv+'회 이상',
+    'daily_max':'하루 최대 '+cv+'개 활동',
+    'badge_count':'뱃지 '+cv+'개 이상 수집'
+  };
+  return '조건: '+(COND_LABELS[ct]||'수동 지급');
+}
+
+function viewBuiltinBadge(badgeId){
+  const badge=BADGES.find(b=>b.id===badgeId);
+  if(badge)showBadgeDetail(badge);
+}
+window.viewBuiltinBadge=viewBuiltinBadge;
+
+function manualAwardBadge(badgeId){
+  if(!confirm('이 뱃지를 수동으로 지급할까요?'))return;
+  if(!S.badges)S.badges={};
+  S.badges[badgeId]={earnedAt:Date.now(),seen:false,claimed:false};
+  save();renderBadgeMgrList();renderBadges();renderBadgeSummary();renderBadgeViewGrid();
+  const badge=(S.customBadges||[]).find(b=>b.id===badgeId)||BADGES.find(b=>b.id===badgeId);
+  if(badge)showBadgeCelebration(badge);
+  toast('뱃지가 지급됐어요!');
+}
+window.manualAwardBadge=manualAwardBadge;
+
+// ── BADGE FORM (Create / Edit) ──────────────────────────
 let _badgeFormModal=null;
+let _badgeEditId=null;
 function closeBadgeForm(){
   if(_badgeFormModal){_badgeFormModal.remove();_badgeFormModal=null;}
+  _badgeEditId=null;
 }
-function openBadgeForm(){
+function openBadgeForm(editId){
   closeBadgeForm();
+  const existing=editId?(S.customBadges||[]).find(b=>b.id===editId):null;
+  _badgeEditId=editId||null;
+
   const modal=document.createElement('div');
   _badgeFormModal=modal;
   modal.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:9999;overflow-y:auto;padding:20px 0';
   modal.onclick=e=>{if(e.target===modal)closeBadgeForm();};
 
-  // Build icon library grid options
+  // Build icon library grid
   const iconNames=typeof BADGE_ICON_LIB==='object'?Object.keys(BADGE_ICON_LIB):[];
+  const selIcon=existing?.icon||'';
   const iconGridHTML=iconNames.map(name=>{
+    const isSel=name===selIcon;
     const svg=`<svg viewBox="0 0 100 100" width="36" height="36" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="46" fill="#EEF2FF"/><g transform="translate(50,50) scale(0.85) translate(-50,-50)">${BADGE_ICON_LIB[name]('#6366F1')}</g></svg>`;
-    return `<div class="icon-pick-item" data-icon="${name}" onclick="pickBadgeIcon(this,'${name}')" title="${name}" style="cursor:pointer;padding:4px;border-radius:10px;border:2px solid transparent;display:flex;align-items:center;justify-content:center;transition:all .15s">${svg}</div>`;
+    return `<div class="icon-pick-item" data-icon="${name}" onclick="pickBadgeIcon(this,'${name}')" title="${name}" style="cursor:pointer;padding:4px;border-radius:10px;border:2px solid ${isSel?'#6366F1':'transparent'};background:${isSel?'#EEF2FF':''};display:flex;align-items:center;justify-content:center;transition:all .15s">${svg}</div>`;
   }).join('');
 
+  // Condition types
+  const condTypes=[
+    {v:'manual',l:'수동 지급 (관리자가 직접)'},
+    {v:'total_acts',l:'총 활동 횟수'},
+    {v:'streak',l:'연속 출석 일수'},
+    {v:'study_count',l:'공부 횟수'},
+    {v:'study_streak',l:'공부 연속 일수'},
+    {v:'act_name_count',l:'특정 활동 횟수'},
+    {v:'pts_total',l:'총 획득 마일리지'},
+    {v:'pts_current',l:'현재 보유 마일리지'},
+    {v:'mood_count',l:'기분 기록 횟수'},
+    {v:'mood_type_count',l:'특정 기분 횟수'},
+    {v:'msg_count',l:'메시지 전송 횟수'},
+    {v:'reward_count',l:'보상 교환 횟수'},
+    {v:'perfect_days',l:'올클리어 일수'},
+    {v:'morning_acts',l:'아침 활동 횟수'},
+    {v:'daily_max',l:'하루 최대 활동 수'},
+    {v:'badge_count',l:'뱃지 수집 개수'}
+  ];
+  const curCond=existing?.condType||'manual';
+  const curCondVal=existing?.condValue||0;
+  const condOptHtml=condTypes.map(c=>`<option value="${c.v}" ${curCond===c.v?'selected':''}>${c.l}</option>`).join('');
+
+  // Activities list for act_name_count
+  const actNames=[...new Set(S.acts.map(a=>a.name))];
+  const actOptHtml=actNames.map(n=>`<option value="${n}" ${existing?.condActName===n?'selected':''}>${n}</option>`).join('');
+
+  // Mood types for mood_type_count
+  const moodTypes=['happy','excited','calm','tired','sad','angry'];
+  const moodLabels={happy:'행복',excited:'신남',calm:'평온',tired:'피곤',sad:'슬픔',angry:'화남'};
+  const moodOptHtml=moodTypes.map(m=>`<option value="${m}" ${existing?.condMoodType===m?'selected':''}>${moodLabels[m]||m}</option>`).join('');
+
+  const iconScale=existing?.iconScale||100;
+
   const card=document.createElement('div');
-  card.style.cssText='background:white;border-radius:16px;padding:24px;max-width:400px;width:100%;margin:auto;max-height:90vh;overflow-y:auto';
+  card.style.cssText='background:white;border-radius:16px;padding:24px;max-width:420px;width:100%;margin:auto;max-height:90vh;overflow-y:auto';
   card.innerHTML=`
-    <div style="font-size:16px;font-weight:900;color:#1F2937;margin-bottom:16px">새 뱃지 추가</div>
+    <div style="font-size:16px;font-weight:900;color:#1F2937;margin-bottom:16px">${existing?'뱃지 수정':'새 뱃지 추가'}</div>
     <div style="display:flex;flex-direction:column;gap:12px">
       <div>
         <label style="font-size:11px;font-weight:700;color:var(--tx3)">뱃지 이름</label>
-        <input id="badge-name" class="txt-inp" type="text" placeholder="예: 특별한 날" maxlength="20" style="margin-top:4px">
+        <input id="bf-name" class="txt-inp" type="text" placeholder="예: 특별한 날" maxlength="20" value="${existing?.name||''}" style="margin-top:4px" oninput="updateBadgePreview()">
       </div>
-      <div>
-        <label style="font-size:11px;font-weight:700;color:var(--tx3)">이모지 (텍스트 표시용)</label>
-        <input id="badge-emoji" class="txt-inp" type="text" placeholder="예: 🎊" maxlength="2" style="margin-top:4px">
-      </div>
-      <div>
-        <label style="font-size:11px;font-weight:700;color:var(--tx3)">SVG 아이콘 선택 <span id="badge-icon-selected" style="color:#6366F1;font-weight:900"></span></label>
-        <input id="badge-icon-search" class="txt-inp" type="text" placeholder="아이콘 검색 (예: star, heart, book...)" style="margin-top:4px;margin-bottom:6px" oninput="filterBadgeIcons(this.value)">
-        <div id="badge-icon-grid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px;max-height:180px;overflow-y:auto;padding:6px;border:1.5px solid var(--bdr);border-radius:10px;background:var(--bg)">${iconGridHTML}</div>
-        <input type="hidden" id="badge-icon-val" value="">
+      <div style="display:flex;gap:10px">
+        <div style="flex:1">
+          <label style="font-size:11px;font-weight:700;color:var(--tx3)">이모지</label>
+          <input id="bf-emoji" class="txt-inp" type="text" placeholder="🎊" maxlength="2" value="${existing?.emoji||''}" style="margin-top:4px" oninput="updateBadgePreview()">
+        </div>
+        <div style="flex:1">
+          <label style="font-size:11px;font-weight:700;color:var(--tx3)">라벨</label>
+          <input id="bf-label" class="txt-inp" type="text" placeholder="×5" maxlength="8" value="${existing?.label||''}" style="margin-top:4px" oninput="updateBadgePreview()">
+        </div>
       </div>
       <div>
         <label style="font-size:11px;font-weight:700;color:var(--tx3)">설명</label>
-        <input id="badge-desc" class="txt-inp" type="text" placeholder="뱃지 설명" maxlength="40" style="margin-top:4px">
+        <input id="bf-desc" class="txt-inp" type="text" placeholder="뱃지 설명" maxlength="50" value="${existing?.desc||''}" style="margin-top:4px">
       </div>
-      <div>
-        <label style="font-size:11px;font-weight:700;color:var(--tx3)">카테고리</label>
-        <select id="badge-category" style="padding:8px 10px;border:1.5px solid var(--bdr);border-radius:9px;font-size:13px;font-weight:700;background:var(--bg);color:var(--tx);font-family:inherit;margin-top:4px;width:100%">
-          <option value="공부">공부</option>
-          <option value="꾸준함">꾸준함</option>
-          <option value="도전">도전</option>
-          <option value="성장">성장</option>
-          <option value="생활습관">생활습관</option>
-          <option value="감정">감정</option>
-          <option value="마일리지">마일리지</option>
-          <option value="히든">히든</option>
-          <option value="특별">특별</option>
-        </select>
+      <div style="display:flex;gap:10px">
+        <div style="flex:1">
+          <label style="font-size:11px;font-weight:700;color:var(--tx3)">카테고리</label>
+          <select id="bf-category" onchange="updateBadgePreview()" style="padding:8px 10px;border:1.5px solid var(--bdr);border-radius:9px;font-size:13px;font-weight:700;background:var(--bg);color:var(--tx);font-family:inherit;margin-top:4px;width:100%">
+            <option value="공부" ${existing?.category==='공부'?'selected':''}>공부</option>
+            <option value="꾸준함" ${existing?.category==='꾸준함'?'selected':''}>꾸준함</option>
+            <option value="도전" ${existing?.category==='도전'?'selected':''}>도전</option>
+            <option value="성장" ${existing?.category==='성장'?'selected':''}>성장</option>
+            <option value="생활습관" ${existing?.category==='생활습관'?'selected':''}>생활습관</option>
+            <option value="감정" ${existing?.category==='감정'?'selected':''}>감정</option>
+            <option value="마일리지" ${existing?.category==='마일리지'?'selected':''}>마일리지</option>
+            <option value="히든" ${existing?.category==='히든'?'selected':''}>히든</option>
+            <option value="특별" ${existing?.category==='특별'?'selected':''}>특별</option>
+          </select>
+        </div>
+        <div style="flex:1">
+          <label style="font-size:11px;font-weight:700;color:var(--tx3)">보너스 M</label>
+          <input id="bf-bonus" class="num-inp" type="number" value="${existing?.bonus||10}" min="0" style="margin-top:4px">
+        </div>
       </div>
-      <div>
-        <label style="font-size:11px;font-weight:700;color:var(--tx3)">보너스 마일리지</label>
-        <input id="badge-bonus" class="num-inp" type="number" value="50" min="1" style="margin-top:4px">
+      <div style="display:flex;gap:10px;align-items:center">
+        <label style="font-size:11px;font-weight:700;color:var(--tx3);flex-shrink:0">히든 뱃지</label>
+        <button id="bf-hidden-tog" class="tog tog-sm${existing?.hidden?'':' off'}" onclick="this.classList.toggle('off')"><div class="tog-dot"></div></button>
       </div>
-      <div style="display:flex;gap:8px;margin-top:12px">
+      <div style="border:1.5px solid var(--bdr);border-radius:12px;padding:12px;background:rgba(99,102,241,.03)">
+        <label style="font-size:11px;font-weight:700;color:#6366F1;display:flex;align-items:center;gap:4px">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#6366F1" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          SVG 아이콘 <span id="bf-icon-selected" style="color:#6366F1;font-weight:900">${selIcon?'✓ '+selIcon:''}</span>
+        </label>
+        <input id="bf-icon-search" class="txt-inp" type="text" placeholder="아이콘 검색 (star, heart, book...)" style="margin-top:6px;margin-bottom:6px;font-size:12px" oninput="filterBadgeIcons(this.value)">
+        <div id="badge-icon-grid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px;max-height:150px;overflow-y:auto;padding:6px;border:1.5px solid var(--bdr);border-radius:10px;background:var(--bg)">${iconGridHTML}</div>
+        <input type="hidden" id="bf-icon-val" value="${selIcon}">
+        <div style="margin-top:10px">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <label style="font-size:11px;font-weight:700;color:var(--tx3)">아이콘 크기</label>
+            <span id="bf-icon-scale-val" style="font-size:11px;font-weight:800;color:#6366F1">${iconScale}%</span>
+          </div>
+          <input type="range" id="bf-icon-scale" min="50" max="200" value="${iconScale}" step="5" style="width:100%;accent-color:#6366F1;margin-top:4px" oninput="updateBadgePreview()">
+        </div>
+        <div style="margin-top:10px;display:flex;align-items:center;justify-content:center;gap:12px">
+          <div style="text-align:center">
+            <div style="font-size:9px;font-weight:700;color:var(--tx3);margin-bottom:4px">미리보기</div>
+            <div id="bf-preview-svg" style="width:80px;height:80px;display:flex;align-items:center;justify-content:center"></div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:9px;font-weight:700;color:var(--tx3);margin-bottom:4px">미획득</div>
+            <div id="bf-preview-locked" style="width:60px;height:60px;display:flex;align-items:center;justify-content:center"></div>
+          </div>
+        </div>
+      </div>
+      <div style="border:1.5px solid var(--bdr);border-radius:12px;padding:12px;background:rgba(16,185,129,.03)">
+        <label style="font-size:11px;font-weight:700;color:#10B981;display:flex;align-items:center;gap:4px;margin-bottom:8px">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#10B981" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          획득 조건 설정
+        </label>
+        <select id="bf-cond-type" onchange="onBadgeCondTypeChange()" style="padding:8px 10px;border:1.5px solid var(--bdr);border-radius:9px;font-size:12px;font-weight:700;background:var(--bg);color:var(--tx);font-family:inherit;width:100%">${condOptHtml}</select>
+        <div id="bf-cond-value-wrap" style="margin-top:8px;display:${curCond==='manual'?'none':'block'}">
+          <label style="font-size:11px;font-weight:700;color:var(--tx3)">목표 수치</label>
+          <input id="bf-cond-value" class="num-inp" type="number" value="${curCondVal}" min="1" style="margin-top:4px;width:100%" oninput="updateCondDesc()">
+        </div>
+        <div id="bf-cond-actname-wrap" style="margin-top:8px;display:${curCond==='act_name_count'?'block':'none'}">
+          <label style="font-size:11px;font-weight:700;color:var(--tx3)">활동 이름</label>
+          <select id="bf-cond-actname" style="padding:8px 10px;border:1.5px solid var(--bdr);border-radius:9px;font-size:12px;font-weight:700;background:var(--bg);color:var(--tx);font-family:inherit;width:100%;margin-top:4px">
+            <option value="">선택...</option>
+            ${actOptHtml}
+          </select>
+        </div>
+        <div id="bf-cond-moodtype-wrap" style="margin-top:8px;display:${curCond==='mood_type_count'?'block':'none'}">
+          <label style="font-size:11px;font-weight:700;color:var(--tx3)">기분 종류</label>
+          <select id="bf-cond-moodtype" style="padding:8px 10px;border:1.5px solid var(--bdr);border-radius:9px;font-size:12px;font-weight:700;background:var(--bg);color:var(--tx);font-family:inherit;width:100%;margin-top:4px">
+            ${moodOptHtml}
+          </select>
+        </div>
+        <div id="bf-cond-desc" style="margin-top:8px;font-size:11px;color:#10B981;font-weight:600;padding:6px 8px;background:rgba(16,185,129,.08);border-radius:6px"></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:8px">
         <button class="btn-sm rd" style="flex:1" onclick="closeBadgeForm()">취소</button>
-        <button class="btn-sm" style="flex:1" onclick="saveBadgeForm()">저장</button>
+        <button class="btn-sm" style="flex:1" onclick="saveBadgeForm()">${existing?'저장하기':'추가하기'}</button>
       </div>
     </div>
   `;
   modal.appendChild(card);
   document.body.appendChild(modal);
+
+  // Initialize preview
+  setTimeout(()=>{updateBadgePreview();updateCondDesc();},50);
 }
 window.openBadgeForm=openBadgeForm;
 window.closeBadgeForm=closeBadgeForm;
 
+function onBadgeCondTypeChange(){
+  const ct=document.getElementById('bf-cond-type').value;
+  document.getElementById('bf-cond-value-wrap').style.display=ct==='manual'?'none':'block';
+  document.getElementById('bf-cond-actname-wrap').style.display=ct==='act_name_count'?'block':'none';
+  document.getElementById('bf-cond-moodtype-wrap').style.display=ct==='mood_type_count'?'block':'none';
+  updateCondDesc();
+}
+window.onBadgeCondTypeChange=onBadgeCondTypeChange;
+
+function updateCondDesc(){
+  const el=document.getElementById('bf-cond-desc');
+  if(!el)return;
+  const ct=document.getElementById('bf-cond-type')?.value||'manual';
+  const cv=parseInt(document.getElementById('bf-cond-value')?.value)||0;
+  const an=document.getElementById('bf-cond-actname')?.value||'';
+  const mt=document.getElementById('bf-cond-moodtype')?.value||'';
+  const moodLabels={happy:'행복',excited:'신남',calm:'평온',tired:'피곤',sad:'슬픔',angry:'화남'};
+  const descMap={
+    'manual':'관리자가 직접 뱃지를 지급합니다',
+    'total_acts':`총 활동 횟수가 ${cv}회 이상이면 자동 획득`,
+    'streak':`연속 출석이 ${cv}일 이상이면 자동 획득`,
+    'study_count':`공부 횟수가 ${cv}회 이상이면 자동 획득`,
+    'study_streak':`공부 연속이 ${cv}일 이상이면 자동 획득`,
+    'act_name_count':`"${an}" 활동을 ${cv}회 이상 하면 자동 획득`,
+    'pts_total':`총 획득 마일리지가 ${cv} 이상이면 자동 획득`,
+    'pts_current':`현재 마일리지가 ${cv} 이상이면 자동 획득`,
+    'mood_count':`기분을 ${cv}회 이상 기록하면 자동 획득`,
+    'mood_type_count':`"${moodLabels[mt]||mt}" 기분을 ${cv}회 이상 기록하면 자동 획득`,
+    'msg_count':`메시지를 ${cv}회 이상 보내면 자동 획득`,
+    'reward_count':`보상을 ${cv}회 이상 교환하면 자동 획득`,
+    'perfect_days':`모든 활동을 완료한 날이 ${cv}일 이상이면 자동 획득`,
+    'morning_acts':`아침(10시 전) 활동이 ${cv}회 이상이면 자동 획득`,
+    'daily_max':`하루 최대 활동 수가 ${cv}개 이상이면 자동 획득`,
+    'badge_count':`뱃지를 ${cv}개 이상 모으면 자동 획득`
+  };
+  el.textContent=descMap[ct]||'';
+}
+window.updateCondDesc=updateCondDesc;
+
+function updateBadgePreview(){
+  const prevEl=document.getElementById('bf-preview-svg');
+  const lockEl=document.getElementById('bf-preview-locked');
+  const scaleEl=document.getElementById('bf-icon-scale');
+  const scaleLbl=document.getElementById('bf-icon-scale-val');
+  if(!prevEl||!scaleEl)return;
+
+  const scale=parseInt(scaleEl.value)||100;
+  if(scaleLbl)scaleLbl.textContent=scale+'%';
+
+  const name=document.getElementById('bf-name')?.value||'미리보기';
+  const emoji=document.getElementById('bf-emoji')?.value||'⭐';
+  const icon=document.getElementById('bf-icon-val')?.value||'';
+  const category=document.getElementById('bf-category')?.value||'특별';
+  const label=document.getElementById('bf-label')?.value||'';
+
+  const tempBadge={id:'_preview',emoji,name,desc:'',category,hidden:false,bonus:0,label,icon,iconScale:scale};
+  prevEl.innerHTML=generateBadgeSVG(tempBadge,true,80);
+  if(lockEl)lockEl.innerHTML=generateBadgeSVG(tempBadge,false,60);
+}
+window.updateBadgePreview=updateBadgePreview;
+
 function pickBadgeIcon(el,name){
-  // Deselect previous
   const grid=document.getElementById('badge-icon-grid');
   if(grid)grid.querySelectorAll('.icon-pick-item').forEach(it=>{it.style.border='2px solid transparent';it.style.background='';});
-  // Select this one
   el.style.border='2px solid #6366F1';
   el.style.background='#EEF2FF';
-  document.getElementById('badge-icon-val').value=name;
-  const lbl=document.getElementById('badge-icon-selected');
+  document.getElementById('bf-icon-val').value=name;
+  const lbl=document.getElementById('bf-icon-selected');
   if(lbl)lbl.textContent='✓ '+name;
+  updateBadgePreview();
 }
 window.pickBadgeIcon=pickBadgeIcon;
 
@@ -6666,43 +6973,85 @@ function filterBadgeIcons(query){
 }
 window.filterBadgeIcons=filterBadgeIcons;
 
+function buildCustomBadgeCheck(condType,condValue,condActName,condMoodType){
+  // Return a serializable condition config; actual check is done in checkBadges
+  return {condType,condValue,condActName:condActName||'',condMoodType:condMoodType||''};
+}
+
+function evalCustomBadgeCond(badge){
+  const ct=badge.condType||'manual';
+  const cv=badge.condValue||0;
+  if(ct==='manual')return false;
+  if(ct==='total_acts')return(S.totalDone||0)>=cv;
+  if(ct==='streak')return(S.streak||0)>=cv||(S.longest||0)>=cv;
+  if(ct==='study_count')return countStudyTotal()>=cv;
+  if(ct==='study_streak')return getStudyStreak()>=cv;
+  if(ct==='act_name_count')return countActivityByName(badge.condActName||'')>=cv;
+  if(ct==='pts_total')return getTotalEarned()>=cv;
+  if(ct==='pts_current')return(S.pts||0)>=cv;
+  if(ct==='mood_count')return(S.moodLog||[]).length>=cv;
+  if(ct==='mood_type_count')return countMoodType(badge.condMoodType||'')>=cv;
+  if(ct==='msg_count')return countSentMessages()>=cv;
+  if(ct==='reward_count')return(S.rewardLog||[]).filter(r=>r.type==='exchange').length>=cv;
+  if(ct==='perfect_days')return countPerfectDays()>=cv;
+  if(ct==='morning_acts')return countMorningActivities()>=cv;
+  if(ct==='daily_max')return getMaxDailyActivities()>=cv;
+  if(ct==='badge_count')return Object.keys(S.badges||{}).length>=cv;
+  return false;
+}
+
 function saveBadgeForm(){
-  const name=document.getElementById('badge-name')?.value.trim();
-  const emoji=document.getElementById('badge-emoji')?.value.trim();
-  const desc=document.getElementById('badge-desc')?.value.trim();
-  const category=document.getElementById('badge-category')?.value;
-  const bonus=parseInt(document.getElementById('badge-bonus')?.value)||50;
-  const icon=document.getElementById('badge-icon-val')?.value.trim()||'';
+  const name=document.getElementById('bf-name')?.value.trim();
+  const emoji=document.getElementById('bf-emoji')?.value.trim();
+  const label=document.getElementById('bf-label')?.value.trim();
+  const desc=document.getElementById('bf-desc')?.value.trim();
+  const category=document.getElementById('bf-category')?.value;
+  const bonus=parseInt(document.getElementById('bf-bonus')?.value)||10;
+  const icon=document.getElementById('bf-icon-val')?.value.trim()||'';
+  const iconScale=parseInt(document.getElementById('bf-icon-scale')?.value)||100;
+  const hidden=!document.getElementById('bf-hidden-tog')?.classList.contains('off');
+  const condType=document.getElementById('bf-cond-type')?.value||'manual';
+  const condValue=parseInt(document.getElementById('bf-cond-value')?.value)||0;
+  const condActName=document.getElementById('bf-cond-actname')?.value||'';
+  const condMoodType=document.getElementById('bf-cond-moodtype')?.value||'';
 
   if(!name||!emoji){toast('이름과 이모지를 입력해주세요');return;}
 
   if(!S.customBadges)S.customBadges=[];
-  S.customBadges.push({
-    id:'custom_'+Date.now(),
-    emoji:emoji,
-    name:name,
-    desc:desc||name,
-    category:category||'특별',
-    hidden:false,
-    bonus:bonus,
-    icon:icon||'',
-    label:name.substring(0,4),
-    condType:'manual',
-    condValue:0,
-    check:S=>false // Custom badges are manually awarded
-  });
 
-  save();renderAdmSettings();
+  const badgeData={
+    emoji,name,desc:desc||name,category:category||'특별',
+    hidden,bonus,icon,iconScale,
+    label:label||name.substring(0,4),
+    condType,condValue,condActName,condMoodType
+  };
+
+  if(_badgeEditId){
+    // Update existing
+    const idx=S.customBadges.findIndex(b=>b.id===_badgeEditId);
+    if(idx>=0){
+      badgeData.id=_badgeEditId;
+      S.customBadges[idx]=badgeData;
+    }
+  }else{
+    // New badge
+    badgeData.id='custom_'+Date.now();
+    S.customBadges.push(badgeData);
+  }
+
+  save();renderAdmSettings();renderBadgeMgrList();
   closeBadgeForm();
-  toast('✅ 뱃지가 추가됐어요!');
+  toast(_badgeEditId?'뱃지가 수정됐어요!':'뱃지가 추가됐어요!');
 }
 window.saveBadgeForm=saveBadgeForm;
 
 function delCustomBadge(idx){
   if(!confirm('이 뱃지를 삭제할까요?'))return;
+  const badge=S.customBadges[idx];
+  if(badge&&S.badges&&S.badges[badge.id])delete S.badges[badge.id];
   S.customBadges.splice(idx,1);
-  save();renderAdmSettings();
-  toast('🗑️ 삭제됐어요');
+  save();renderAdmSettings();renderBadgeMgrList();
+  toast('삭제됐어요');
 }
 window.delCustomBadge=delCustomBadge;
 
