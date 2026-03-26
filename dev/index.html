@@ -795,6 +795,8 @@ body.dark .family-popup-item.selected .family-popup-avatar{border-color:rgba(255
 .family-popup-item.selected .family-popup-name{color:#fff;font-size:12px}
 .family-popup-mood{position:absolute;bottom:-2px;right:-2px;font-size:12px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.3))}
 .family-popup-unread{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;background:#EF4444;color:#fff;font-size:9px;font-weight:900;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 5px;box-shadow:0 2px 6px rgba(239,68,68,.4);line-height:1}
+.family-popup-close{margin-top:16px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.15);color:rgba(255,255,255,.8);font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;position:relative;z-index:1;-webkit-tap-highlight-color:transparent}
+.family-popup-close:active{transform:scale(.85);background:rgba(255,255,255,.25)}
 
 /* Legacy nav-user-wrap (hidden, kept for compat) */
 .nav-user-wrap{display:none}
@@ -7189,11 +7191,30 @@ function openFamilyPopup(){
   const userLabels={taemin:'태민',dad:'아빠',mom:'엄마'};
   const others=allIds.filter(id=>id!==currentUser);
 
-  // Create background
+  // Create background — click closes sub-popups first, then family popup
   const bg=document.createElement('div');
   bg.className='family-popup-bg';
   bg.id='family-popup-bg';
-  bg.onclick=closeFamilyPopup;
+  bg.onclick=function(){
+    // If any sub-popup is open, close it first and stay
+    const ufm=document.getElementById('user-fm-menu');
+    const mfm=document.getElementById('me-fm-menu');
+    const msgPop=document.getElementById('msg-pop');
+    const msgList=document.getElementById('msglist-pop');
+    const hasSubPopup=(ufm&&ufm.style.display==='block')||(mfm&&mfm.style.display==='block')
+      ||(msgPop&&msgPop.style.display==='block')||(msgList&&msgList.style.display!=='none'&&msgList.style.display!=='');
+    if(hasSubPopup){
+      if(ufm&&ufm.style.display==='block')closeUserFm();
+      if(mfm&&mfm.style.display==='block')closeMeFm();
+      if(msgPop&&msgPop.style.display==='block')closeMsgPop();
+      if(msgList&&msgList.style.display==='flex')closeMsgList();
+      // Deselect all icons
+      const fp=document.getElementById('family-popup');
+      if(fp)fp.querySelectorAll('.family-popup-item.selected').forEach(el=>el.classList.remove('selected'));
+      return;
+    }
+    closeFamilyPopup();
+  };
   document.body.appendChild(bg);
 
   // Create popup container
@@ -7254,6 +7275,13 @@ function openFamilyPopup(){
   botRow.appendChild(meItem);
   popup.appendChild(botRow);
 
+  // X close button below the triangle
+  const closeBtn=document.createElement('div');
+  closeBtn.className='family-popup-close';
+  closeBtn.innerHTML='✕';
+  closeBtn.onclick=function(e){e.stopPropagation();closeFamilyPopup();};
+  popup.appendChild(closeBtn);
+
   document.body.appendChild(popup);
 
   // Position at bottom-center of screen (above nav area)
@@ -7265,10 +7293,12 @@ function openFamilyPopup(){
 
   // Draw connecting lines between avatars (balanced inverted triangle)
   requestAnimationFrame(()=>{
+    const pw=popup.offsetWidth;
     const popupRect=popup.getBoundingClientRect();
+    // Use popup horizontal center for me's X to ensure symmetry
     const meAvatar=botRow.querySelector('.family-popup-avatar');
     const meR=meAvatar.getBoundingClientRect();
-    const meCX=meR.left+meR.width/2-popupRect.left;
+    const meCX=pw/2;
     const meCY=meR.top+meR.height/2-popupRect.top;
 
     const topAvatars=topRow.querySelectorAll('.family-popup-avatar');
@@ -7277,6 +7307,15 @@ function openFamilyPopup(){
       const r=av.getBoundingClientRect();
       centers.push({x:r.left+r.width/2-popupRect.left, y:r.top+r.height/2-popupRect.top});
     });
+    // Force symmetric X positions for top avatars
+    if(centers.length>=2){
+      const avgY=(centers[0].y+centers[1].y)/2;
+      const spread=Math.abs(centers[1].x-centers[0].x)/2;
+      centers[0].x=meCX-spread;
+      centers[0].y=avgY;
+      centers[1].x=meCX+spread;
+      centers[1].y=avgY;
+    }
 
     // Lines from me to each top member
     centers.forEach(c=>{
@@ -7460,7 +7499,10 @@ window.getUnreadCount=getUnreadCount;
 
 let _userFmTarget=null;
 function onUserIconClick(userId){
+  // Close me-fm-menu if open
+  closeMeFm();
   _userFmTarget=userId;
+  _familyFlowActive=true;
   const unread=getUnreadCount(userId);
   const name=MEMBERS[userId]?.name||'가족';
   document.getElementById('user-fm-read-label').textContent=name+'의 메시지';
@@ -7474,8 +7516,7 @@ function onUserIconClick(userId){
     if(!badge){badge=document.createElement('span');badge.className='ufm-badge';readBtn.appendChild(badge);}
     badge.textContent=unread;badge.style.display='flex';
   }else if(badge){badge.style.display='none';}
-  // Don't show user-fm-bg — reuse family popup dim
-  // Center the menu on screen — set position BEFORE showing to avoid flicker
+  // Center the menu on screen
   const menu=document.getElementById('user-fm-menu');
   menu.style.left='50%';
   menu.style.top='50%';
@@ -7484,7 +7525,6 @@ function onUserIconClick(userId){
   menu.style.transform='translate(-50%,-50%)';
   menu.style.animation='none';
   menu.style.display='block';
-  // Re-trigger centered animation
   requestAnimationFrame(()=>{menu.style.animation='fadeUpCenter .2s ease';});
 }
 window.onUserIconClick=onUserIconClick;
@@ -7498,6 +7538,8 @@ function closeUserFm(){
 window.closeUserFm=closeUserFm;
 
 function onMeIconClick(){
+  // Close user-fm-menu if open
+  closeUserFm();
   _familyFlowActive=true;
   const menu=document.getElementById('me-fm-menu');
   menu.style.left='50%';
