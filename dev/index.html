@@ -1636,7 +1636,8 @@ body.dark .bubble-speech-log{background:rgba(255,255,255,.12);color:rgba(255,255
   <div class="adm-tabs">
     <button class="adm-tab on" id="at-0" onclick="admTab(0)">활동</button>
     <button class="adm-tab" id="at-1" onclick="admTab(1)">보상</button>
-    <button class="adm-tab" id="at-2" onclick="admTab(2)">설정</button>
+    <button class="adm-tab" id="at-2" onclick="admTab(2)">뱃지</button>
+    <button class="adm-tab" id="at-3" onclick="admTab(3)">설정</button>
   </div>
   <div id="adm-p0">
     <div class="adm-sec">
@@ -1657,6 +1658,29 @@ body.dark .bubble-speech-log{background:rgba(255,255,255,.12);color:rgba(255,255
     </div>
   </div>
   <div id="adm-p2" style="display:none">
+    <div class="adm-sec">
+      <div class="sec-hdr" style="margin:0 0 7px">
+        <div class="adm-sec-lbl" style="margin:0">뱃지 목록</div>
+        <button class="btn-sm" onclick="openBadgeForm()">+ 새 뱃지</button>
+      </div>
+      <div class="adm-card" style="padding:0">
+        <div style="padding:10px 14px 6px;display:flex;gap:5px;flex-wrap:wrap" id="badge-mgr-filter">
+          <button class="sel-btn on" data-cat="all" onclick="filterBadgeMgr('all',this)" style="font-size:10px;padding:4px 8px">전체 <span id="badge-mgr-count" style="font-weight:800"></span></button>
+          <button class="sel-btn" data-cat="custom" onclick="filterBadgeMgr('custom',this)" style="font-size:10px;padding:4px 8px">커스텀</button>
+          <button class="sel-btn" data-cat="공부" onclick="filterBadgeMgr('공부',this)" style="font-size:10px;padding:4px 8px">공부</button>
+          <button class="sel-btn" data-cat="꾸준함" onclick="filterBadgeMgr('꾸준함',this)" style="font-size:10px;padding:4px 8px">꾸준함</button>
+          <button class="sel-btn" data-cat="도전" onclick="filterBadgeMgr('도전',this)" style="font-size:10px;padding:4px 8px">도전</button>
+          <button class="sel-btn" data-cat="성장" onclick="filterBadgeMgr('성장',this)" style="font-size:10px;padding:4px 8px">성장</button>
+          <button class="sel-btn" data-cat="생활습관" onclick="filterBadgeMgr('생활습관',this)" style="font-size:10px;padding:4px 8px">생활</button>
+          <button class="sel-btn" data-cat="감정" onclick="filterBadgeMgr('감정',this)" style="font-size:10px;padding:4px 8px">감정</button>
+          <button class="sel-btn" data-cat="마일리지" onclick="filterBadgeMgr('마일리지',this)" style="font-size:10px;padding:4px 8px">마일리지</button>
+          <button class="sel-btn" data-cat="히든" onclick="filterBadgeMgr('히든',this)" style="font-size:10px;padding:4px 8px">히든</button>
+        </div>
+        <div id="badge-mgr-list" style="max-height:60vh;overflow-y:auto;padding:0 8px 8px"></div>
+      </div>
+    </div>
+  </div>
+  <div id="adm-p3" style="display:none">
     <div class="adm-sec">
       <div class="adm-sec-lbl">스마트 메시지 설정</div>
       <div class="adm-card">
@@ -1718,31 +1742,6 @@ body.dark .bubble-speech-log{background:rgba(255,255,255,.12);color:rgba(255,255
           <div class="adm-row-l"><div class="adm-row-nm">보너스 마일리지</div></div>
           <input class="num-inp" id="bonus-pts-inp" type="number" value="100" min="1" onchange="saveSettings()">
         </div>
-      </div>
-    </div>
-    <div class="adm-sec">
-      <div class="adm-sec-lbl">뱃지 관리</div>
-      <div class="adm-card" style="padding:0">
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 14px 10px">
-          <div style="display:flex;align-items:center;gap:8px">
-            <div style="font-size:13px;font-weight:800;color:var(--tx)">전체 뱃지</div>
-            <span id="badge-mgr-count" style="font-size:11px;font-weight:700;color:var(--tx3)">0개</span>
-          </div>
-          <button class="btn-sm" onclick="openBadgeForm()">+ 새 뱃지</button>
-        </div>
-        <div style="padding:0 14px 6px;display:flex;gap:6px;flex-wrap:wrap" id="badge-mgr-filter">
-          <button class="sel-btn on" data-cat="all" onclick="filterBadgeMgr('all',this)" style="font-size:10px;padding:4px 10px">전체</button>
-          <button class="sel-btn" data-cat="custom" onclick="filterBadgeMgr('custom',this)" style="font-size:10px;padding:4px 10px">커스텀</button>
-          <button class="sel-btn" data-cat="공부" onclick="filterBadgeMgr('공부',this)" style="font-size:10px;padding:4px 10px">공부</button>
-          <button class="sel-btn" data-cat="꾸준함" onclick="filterBadgeMgr('꾸준함',this)" style="font-size:10px;padding:4px 10px">꾸준함</button>
-          <button class="sel-btn" data-cat="도전" onclick="filterBadgeMgr('도전',this)" style="font-size:10px;padding:4px 10px">도전</button>
-          <button class="sel-btn" data-cat="성장" onclick="filterBadgeMgr('성장',this)" style="font-size:10px;padding:4px 10px">성장</button>
-          <button class="sel-btn" data-cat="생활습관" onclick="filterBadgeMgr('생활습관',this)" style="font-size:10px;padding:4px 10px">생활습관</button>
-          <button class="sel-btn" data-cat="감정" onclick="filterBadgeMgr('감정',this)" style="font-size:10px;padding:4px 10px">감정</button>
-          <button class="sel-btn" data-cat="마일리지" onclick="filterBadgeMgr('마일리지',this)" style="font-size:10px;padding:4px 10px">마일리지</button>
-          <button class="sel-btn" data-cat="히든" onclick="filterBadgeMgr('히든',this)" style="font-size:10px;padding:4px 10px">히든</button>
-        </div>
-        <div id="badge-mgr-list" style="max-height:400px;overflow-y:auto;padding:0 8px 8px"></div>
       </div>
     </div>
     <div class="adm-sec">
@@ -2710,6 +2709,7 @@ function defaultState(){
       mom:{mode:'auto',messages:['좋은 아침입니다! 🌸','오늘도 행복한 하루 되세요 💝','힘내세요! 💪','화이팅! 🌟'],custom:'',currentIdx:0}
     },
     customBadges:[], // Array of custom badges
+    badgeOverrides:{}, // Overrides for built-in badges {badgeId: {name, emoji, desc, ...}}
     users:{}, // 가입 정보 저장
     rewardInventory:[], // Array of {id, rwdId, rwdName, rwdEmoji, purchasedAt, pts, status, requestId, approvedBy, approvedAt}
     rewardRequests:[], // Array of {id, rwdInvId, rwdName, rwdEmoji, fromUser, toUsers, status, requestedAt, approvedBy, approvedAt}
@@ -3991,9 +3991,10 @@ function renderBadges(){
   const total=BADGES.length;
   const pct=Math.round(earned.length/total*100);
 
-  // Group badges by category
+  // Group badges by category (apply overrides)
   const byCategory={};
-  BADGES.forEach(b=>{
+  BADGES.forEach(b0=>{
+    const b=getEffectiveBadge(b0);
     if(!byCategory[b.category])byCategory[b.category]=[];
     byCategory[b.category].push(b);
   });
@@ -4285,9 +4286,10 @@ function renderBadgeViewGrid(){
   const countEl=document.getElementById('badge-view-count');
   if(countEl) countEl.textContent=`${earned.length}개 획득`;
 
-  // Group badges by category
+  // Group badges by category (apply overrides)
   const byCategory={};
-  BADGES.forEach(b=>{
+  BADGES.forEach(b0=>{
+    const b=getEffectiveBadge(b0);
     if(!byCategory[b.category])byCategory[b.category]=[];
     byCategory[b.category].push(b);
   });
@@ -6587,11 +6589,21 @@ function filterBadgeMgr(cat,btn){
 window.filterBadgeMgr=filterBadgeMgr;
 
 function getAllBadgesForMgr(){
-  // Combine built-in BADGES + customBadges, marking source
+  // Combine built-in BADGES (with overrides) + customBadges, marking source
   const all=[];
-  BADGES.forEach(b=>all.push({...b,_src:'builtin'}));
+  const ovrs=S.badgeOverrides||{};
+  BADGES.forEach(b=>{
+    const ovr=ovrs[b.id]||{};
+    all.push({...b,...ovr,_src:'builtin'});
+  });
   (S.customBadges||[]).forEach((b,i)=>all.push({...b,_src:'custom',_idx:i}));
   return all;
+}
+// Also apply overrides when generating badge SVG / rendering badges
+function getEffectiveBadge(badge){
+  if(!badge)return badge;
+  const ovr=(S.badgeOverrides||{})[badge.id];
+  return ovr?{...badge,...ovr}:badge;
 }
 
 function renderBadgeMgrList(){
@@ -6636,13 +6648,9 @@ function renderBadgeMgrList(){
         <div style="font-size:9px;color:#8B5CF6;margin-top:1px">${condDesc}</div>
       </div>
       <div style="display:flex;gap:4px;flex-shrink:0">
-        ${isCustom?`
-          <button class="icon-btn" onclick="openBadgeForm('${b.id}')" title="수정"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg></button>
-          <button class="icon-btn del" onclick="delCustomBadge(${b._idx})" title="삭제"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>
-        `:`
-          <button class="icon-btn" onclick="viewBuiltinBadge('${b.id}')" title="상세"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></button>
-        `}
-        ${!isEarned&&isCustom?`<button class="icon-btn" onclick="manualAwardBadge('${b.id}')" title="수동 지급" style="color:#10B981"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></button>`:''}
+        <button class="icon-btn" onclick="openBadgeForm('${b.id}')" title="수정"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg></button>
+        ${isCustom?`<button class="icon-btn del" onclick="delCustomBadge(${b._idx})" title="삭제"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>`:''}
+        ${!isEarned?`<button class="icon-btn" onclick="manualAwardBadge('${b.id}')" title="수동 지급" style="color:#10B981"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></button>`:''}
       </div>
     </div>`;
   }).join('');
@@ -6719,18 +6727,34 @@ window.manualAwardBadge=manualAwardBadge;
 // ── BADGE FORM (Create / Edit) ──────────────────────────
 let _badgeFormModal=null;
 let _badgeEditId=null;
+let _badgeEditBuiltin=false;
 function closeBadgeForm(){
   if(_badgeFormModal){_badgeFormModal.remove();_badgeFormModal=null;}
   _badgeEditId=null;
+  _badgeEditBuiltin=false;
 }
 function openBadgeForm(editId){
   closeBadgeForm();
-  const existing=editId?(S.customBadges||[]).find(b=>b.id===editId):null;
+  // Look up in custom badges first, then builtin, then overrides
+  let existing=null;
+  let _isBuiltin=false;
+  if(editId){
+    existing=(S.customBadges||[]).find(b=>b.id===editId);
+    if(!existing){
+      const builtIn=BADGES.find(b=>b.id===editId);
+      if(builtIn){
+        _isBuiltin=true;
+        _badgeEditBuiltin=true;
+        const ovr=(S.badgeOverrides||{})[editId]||{};
+        existing={...builtIn,...ovr,id:editId};
+      }
+    }
+  }
   _badgeEditId=editId||null;
 
   const modal=document.createElement('div');
   _badgeFormModal=modal;
-  modal.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:9999;overflow-y:auto;padding:20px 0';
+  modal.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:flex;align-items:flex-start;justify-content:center;z-index:9999;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:20px 12px';
   modal.onclick=e=>{if(e.target===modal)closeBadgeForm();};
 
   // Build icon library grid
@@ -6777,9 +6801,9 @@ function openBadgeForm(editId){
   const iconScale=existing?.iconScale||100;
 
   const card=document.createElement('div');
-  card.style.cssText='background:white;border-radius:16px;padding:24px;max-width:420px;width:100%;margin:auto;max-height:90vh;overflow-y:auto';
+  card.style.cssText='background:white;border-radius:16px;padding:20px 16px;max-width:400px;width:100%;margin:auto;max-height:none;overflow-y:visible;box-sizing:border-box';
   card.innerHTML=`
-    <div style="font-size:16px;font-weight:900;color:#1F2937;margin-bottom:16px">${existing?'뱃지 수정':'새 뱃지 추가'}</div>
+    <div style="font-size:16px;font-weight:900;color:#1F2937;margin-bottom:12px">${existing?(_isBuiltin?'기본 뱃지 수정':'커스텀 뱃지 수정'):'새 뱃지 추가'}${_isBuiltin?'<span style="font-size:10px;color:#F59E0B;font-weight:700;margin-left:6px">기본</span>':''}</div>
     <div style="display:flex;flex-direction:column;gap:12px">
       <div>
         <label style="font-size:11px;font-weight:700;color:var(--tx3)">뱃지 이름</label>
@@ -6849,7 +6873,7 @@ function openBadgeForm(editId){
           </div>
         </div>
       </div>
-      <div style="border:1.5px solid var(--bdr);border-radius:12px;padding:12px;background:rgba(16,185,129,.03)">
+      <div style="border:1.5px solid var(--bdr);border-radius:12px;padding:12px;background:rgba(16,185,129,.03);display:${_isBuiltin?'none':'block'}">
         <label style="font-size:11px;font-weight:700;color:#10B981;display:flex;align-items:center;gap:4px;margin-bottom:8px">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#10B981" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
           획득 조건 설정
@@ -6874,6 +6898,7 @@ function openBadgeForm(editId){
         </div>
         <div id="bf-cond-desc" style="margin-top:8px;font-size:11px;color:#10B981;font-weight:600;padding:6px 8px;background:rgba(16,185,129,.08);border-radius:6px"></div>
       </div>
+      ${_isBuiltin&&(S.badgeOverrides||{})[editId]?`<div style="text-align:center;margin-top:4px"><button style="font-size:11px;color:#EF4444;background:none;border:none;font-weight:700;cursor:pointer;text-decoration:underline" onclick="resetBuiltinBadge('${editId}')">기본값으로 초기화</button></div>`:''}
       <div style="display:flex;gap:8px;margin-top:8px">
         <button class="btn-sm rd" style="flex:1" onclick="closeBadgeForm()">취소</button>
         <button class="btn-sm" style="flex:1" onclick="saveBadgeForm()">${existing?'저장하기':'추가하기'}</button>
@@ -7026,8 +7051,12 @@ function saveBadgeForm(){
     condType,condValue,condActName,condMoodType
   };
 
-  if(_badgeEditId){
-    // Update existing
+  if(_badgeEditId&&_badgeEditBuiltin){
+    // Save override for built-in badge
+    if(!S.badgeOverrides)S.badgeOverrides={};
+    S.badgeOverrides[_badgeEditId]={emoji,name,desc:desc||name,category:category||'특별',hidden,bonus,icon,iconScale,label:label||name.substring(0,4)};
+  }else if(_badgeEditId){
+    // Update existing custom badge
     const idx=S.customBadges.findIndex(b=>b.id===_badgeEditId);
     if(idx>=0){
       badgeData.id=_badgeEditId;
@@ -7039,11 +7068,22 @@ function saveBadgeForm(){
     S.customBadges.push(badgeData);
   }
 
-  save();renderAdmSettings();renderBadgeMgrList();
+  save();renderAdmSettings();renderBadgeMgrList();renderBadges();renderBadgeSummary();renderBadgeViewGrid();
   closeBadgeForm();
   toast(_badgeEditId?'뱃지가 수정됐어요!':'뱃지가 추가됐어요!');
 }
 window.saveBadgeForm=saveBadgeForm;
+
+function resetBuiltinBadge(badgeId){
+  if(!confirm('이 뱃지를 기본값으로 초기화할까요?'))return;
+  if(S.badgeOverrides&&S.badgeOverrides[badgeId]){
+    delete S.badgeOverrides[badgeId];
+    save();renderBadgeMgrList();renderBadges();renderBadgeSummary();renderBadgeViewGrid();
+    closeBadgeForm();
+    toast('기본값으로 초기화됐어요');
+  }
+}
+window.resetBuiltinBadge=resetBuiltinBadge;
 
 function delCustomBadge(idx){
   if(!confirm('이 뱃지를 삭제할까요?'))return;
@@ -8362,7 +8402,7 @@ function reallyGoTab(tab){
     themeMeta.content=isDark?'#1E293B':(TAB_COLORS[tab]||'#6366F1');
   }
 }
-function admTab(i){[0,1,2].forEach(j=>{document.getElementById('at-'+j).classList.toggle('on',j===i);document.getElementById('adm-p'+j).style.display=j===i?'block':'none';});}
+function admTab(i){[0,1,2,3].forEach(j=>{document.getElementById('at-'+j).classList.toggle('on',j===i);document.getElementById('adm-p'+j).style.display=j===i?'block':'none';});if(i===2)renderBadgeMgrList();}
 function openModal(id){document.getElementById(id).classList.add('open');}
 function closeModal(id){document.getElementById(id).classList.remove('open');}
 document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
