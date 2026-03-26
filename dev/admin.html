@@ -224,25 +224,25 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// ── Admin credentials (SHA-512 salted) ──
+// ── Admin credentials (SHA-512 salted, pre-computed) ──
 const ADMIN_SALT = 'taemin_sysadmin_v1_';
 const ADMIN_ACCOUNTS = {
-  'nonmarking': { pwdHash: null, name: '곽효신' } // will be set on first load
+  'nonmarking': { pwdHash: 'ca15f3d66b1188096f7a57c663e676e28935911710ab8370681d9556be1e242db664b42c39ea7f397c9397e6b5ee5a9be14d0d433652083d46807d9491075010', name: '곽효신' }
 };
 
-// Pre-compute admin hash
 async function hashPwd(pwd) {
   const salted = ADMIN_SALT + pwd;
-  if (typeof sha512 === 'function') return sha512(salted);
-  const enc = new TextEncoder().encode(salted);
-  const buf = await crypto.subtle.digest('SHA-512', enc);
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+  // crypto.subtle 우선 사용 (가장 안정적)
+  try {
+    const enc = new TextEncoder().encode(salted);
+    const buf = await crypto.subtle.digest('SHA-512', enc);
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+  } catch(e) {
+    // fallback: CDN sha512
+    if (typeof sha512 === 'function') return sha512(salted);
+    throw new Error('SHA-512 not available');
+  }
 }
-
-// Init admin hash
-(async () => {
-  ADMIN_ACCOUNTS['nonmarking'].pwdHash = await hashPwd('promise3807');
-})();
 
 let _loggedIn = false;
 let _adminName = '';
