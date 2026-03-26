@@ -81,8 +81,8 @@ body.popup-open .nav-container{opacity:0;pointer-events:none;transition:opacity 
 
 /* BOTTOM NAV - Floating Glass Pill with SVG Icons */
 .nav-container{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:100}
-.bottom-nav{display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.88);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid rgba(0,0,0,.06);border-radius:28px;padding:8px 10px;box-shadow:0 2px 12px rgba(0,0,0,.08),0 8px 32px rgba(0,0,0,.06)}
-body.dark .bottom-nav{background:rgba(30,41,59,.88);border-color:rgba(255,255,255,.08);box-shadow:0 2px 12px rgba(0,0,0,.2),0 8px 32px rgba(0,0,0,.15)}
+.bottom-nav{display:flex;align-items:center;gap:4px;background:color-mix(in srgb,var(--tab-color,#6366F1) 6%,rgba(255,255,255,.9));backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid color-mix(in srgb,var(--tab-color,#6366F1) 12%,rgba(0,0,0,.04));border-radius:28px;padding:8px 10px;box-shadow:0 2px 12px color-mix(in srgb,var(--tab-color,#6366F1) 8%,rgba(0,0,0,.06)),0 8px 32px rgba(0,0,0,.05)}
+body.dark .bottom-nav{background:color-mix(in srgb,var(--tab-color,#6366F1) 10%,rgba(30,41,59,.9));border-color:color-mix(in srgb,var(--tab-color,#6366F1) 15%,rgba(255,255,255,.06));box-shadow:0 2px 12px rgba(0,0,0,.2),0 8px 32px rgba(0,0,0,.12)}
 .nav-item{display:flex;align-items:center;justify-content:center;gap:4px;padding:10px 10px;border-radius:20px;cursor:pointer;transition:all .25s cubic-bezier(.4,0,.2,1);border:none;background:transparent}
 .nav-item svg{width:22px;height:22px;stroke:var(--tx3);stroke-width:2;fill:none;transition:all .25s}
 body.dark .nav-item svg{stroke:var(--tx2)}
