@@ -1571,12 +1571,13 @@ body.dark .bubble-speech-log{background:rgba(255,255,255,.12);color:rgba(255,255
     <div style="display:flex;align-items:center;justify-content:space-between">
       <div>
         <h2>관리자 <svg class="hdr-ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></h2>
-        <p>부모님 전용 설정 화면</p>
+        <p>부모님 전용 설정 화면 <span style="font-size:10px;color:rgba(255,255,255,.5);font-weight:700">· 개발 환경</span></p>
       </div>
       <button class="adm-lock" onclick="lockAdmin()">🔒 잠금</button>
     </div>
   </div>
   <div id="env-switch-area" style="display:flex;gap:6px;margin:0 16px 10px"></div>
+  <div id="dev-user-switch-area" style="margin:0 16px 10px"></div>
   <div class="stat-row">
     <div class="stat-c"><div class="stat-n" id="adm-pts">0</div><div class="stat-l">마일리지</div></div>
     <div class="stat-c"><div class="stat-n" id="adm-done">0</div><div class="stat-l">완료 횟수</div></div>
@@ -3685,6 +3686,7 @@ function renderAll(){
   renderBadgeSummary();
   renderAdmStats();renderAdmActList();renderAdmRwdList();renderAdmSettings();
   renderMsgSettings();renderAdmMemberPhotos();
+  if(typeof renderDevUserSwitch==='function')renderDevUserSwitch();
   renderNavUsers();
   renderHdrStats();
 }
@@ -7126,10 +7128,10 @@ function renderNavUsers(){
   // Me (right side)
   if(currentUser){
     const myMood=getMoodEmoji(currentUser);
-    html+=`<div class="nav-user-wrap me" onclick="${_ENV==='dev'?'openDevUserSwitch()':'goTab(\'adm\')'}">
+    html+=`<div class="nav-user-wrap me" onclick="goTab('adm')">
       ${myMood?`<span class="nav-mood-badge">${myMood}</span>`:''}
       <div class="nav-profile" id="nav-profile-icon">${getAvatarHTML(currentUser,30)}</div>
-      <span class="nav-user-label">${_ENV==='dev'?'전환':'나'}</span>
+      <span class="nav-user-label">나</span>
     </div>`;
   }else{
     html+=`<div class="nav-user-wrap me" onclick="goTab('adm')">
@@ -8104,49 +8106,35 @@ window.switchEnv=switchEnv;
   area.innerHTML=`<button onclick="switchEnv()" style="flex:1;padding:10px 14px;background:${isProd?'var(--card)':'rgba(239,68,68,.1)'};color:${isProd?'var(--tx2)':'#EF4444'};border:1.5px solid ${isProd?'var(--bdr)':'rgba(239,68,68,.25)'};border-radius:12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px"><span style="font-size:14px">${isProd?'🔧':'🚀'}</span>${isProd?'개발 환경으로 전환':'운영 환경으로 전환'}</button>`;
 })();
 
-// ── DEV: 유저 빠른전환 ──────
-function openDevUserSwitch(){
-  if(_ENV!=='dev') { goTab('adm'); return; }
+// ── DEV: 유저 빠른전환 (관리자 페이지 내 인라인) ──────
+function renderDevUserSwitch(){
+  if(_ENV!=='dev') return;
+  const area=document.getElementById('dev-user-switch-area');
+  if(!area)return;
   const ids=Object.keys(MEMBERS);
   const btns=ids.map(id=>{
     const m=MEMBERS[id];
     const isCur=id===currentUser;
-    return `<button style="flex:1;padding:14px;background:${isCur?'var(--tab-color)':'var(--bg2)'};color:${isCur?'#fff':'var(--tx)'};border:${isCur?'none':'1.5px solid var(--bdr)'};border-radius:14px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:6px" onclick="devSwitchUser('${id}')">
-      <span style="font-size:24px">${m.icon}</span>${m.name}${isCur?' ✓':''}
+    return `<button onclick="devSwitchUser('${id}')" style="flex:1;padding:10px 6px;background:${isCur?'var(--tab-color)':'var(--bg2)'};color:${isCur?'#fff':'var(--tx)'};border:${isCur?'none':'1.5px solid var(--bdr)'};border-radius:12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:4px">
+      <span style="font-size:20px">${m.icon}</span>${m.name}${isCur?' ✓':''}
     </button>`;
   }).join('');
-  const el=document.createElement('div');
-  el.id='dev-switch-overlay';
-  el.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;animation:fadeIn .15s';
-  el.innerHTML=`<div style="background:var(--card);border-radius:20px;padding:20px;width:300px;box-shadow:0 8px 30px rgba(0,0,0,.2)">
-    <div style="font-size:15px;font-weight:900;color:var(--tx);margin-bottom:14px;text-align:center">🔄 유저 전환 <span style="font-size:10px;background:#EF4444;color:#fff;padding:2px 6px;border-radius:6px">DEV</span></div>
-    <div style="display:flex;gap:8px">${btns}</div>
-    <button onclick="document.getElementById('dev-switch-overlay').remove()" style="width:100%;margin-top:12px;padding:10px;background:none;border:1.5px solid var(--bdr);border-radius:12px;font-size:13px;font-weight:700;color:var(--tx2);cursor:pointer;font-family:inherit">닫기</button>
-    <button onclick="goTab('adm');document.getElementById('dev-switch-overlay').remove()" style="width:100%;margin-top:6px;padding:10px;background:none;border:none;font-size:12px;font-weight:600;color:var(--tx3);cursor:pointer;font-family:inherit">⚙️ 관리자 페이지</button>
-  </div>`;
-  el.addEventListener('click',(e)=>{if(e.target===el)el.remove();});
-  document.body.appendChild(el);
+  area.innerHTML=`<div style="display:flex;gap:6px">${btns}</div>
+    <div style="text-align:center;margin-top:6px;font-size:10px;font-weight:600;color:var(--tx3)">🔄 유저 전환 (개발 전용)</div>`;
 }
 function devSwitchUser(userId){
-  const ol=document.getElementById('dev-switch-overlay');
-  if(ol)ol.remove();
   if(userId===currentUser)return;
   currentUser=userId;
   localStorage.setItem(_LS_PREFIX+'current_user',userId);
   renderAll();
   renderNavUsers();
+  renderDevUserSwitch();
   toast('🔄 '+MEMBERS[userId].name+'(으)로 전환됨');
 }
-window.openDevUserSwitch=openDevUserSwitch;
 window.devSwitchUser=devSwitchUser;
-
-// ── DEV: 상단 배너 ──────
-if(_ENV==='dev'){
-  const banner=document.createElement('div');
-  banner.style.cssText='position:fixed;top:0;left:0;right:0;z-index:10000;background:#EF4444;color:#fff;text-align:center;font-size:10px;font-weight:800;padding:2px 0;pointer-events:none;opacity:.85';
-  banner.textContent='🔧 개발 환경 (DEV)';
-  document.body.appendChild(banner);
-}
+window.renderDevUserSwitch=renderDevUserSwitch;
+// Initial render
+renderDevUserSwitch();
 
 // Initialize SW
 initServiceWorker();
