@@ -7169,7 +7169,11 @@ function openFamilyPopup(){
   popup.className='family-popup';
   popup.id='family-popup';
 
-  allIds.forEach(id=>{
+  // Reorder: me in center
+  const others=allIds.filter(id=>id!==currentUser);
+  const ordered=others.length>=2?[others[0],currentUser,...others.slice(1)]:[currentUser,...others];
+
+  ordered.forEach(id=>{
     const isMe=id===currentUser;
     const name=userLabels[id]||MEMBERS[id].name;
     const moodEmoji=getMoodEmoji(id);
