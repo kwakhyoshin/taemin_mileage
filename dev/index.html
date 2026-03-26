@@ -781,9 +781,9 @@ body.dark .nav-family-btn{background:rgba(99,102,241,.12);border-color:rgba(99,1
 @keyframes familyPopUp{from{opacity:0;transform:translateY(20px) scale(.9)}to{opacity:1;transform:translateY(0) scale(1)}}
 .family-popup-item{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .15s}
 .family-popup-item:active{transform:scale(.9)}
-.family-popup-avatar{width:52px;height:52px;border-radius:50%;overflow:hidden;border:3px solid #fff;box-shadow:0 4px 16px rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;background:var(--card);position:relative}
+.family-popup-avatar{width:52px;height:52px;border-radius:50%;overflow:visible;border:3px solid #fff;box-shadow:0 4px 16px rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;background:var(--card);position:relative}
 body.dark .family-popup-avatar{border-color:var(--card)}
-.family-popup-avatar svg,.family-popup-avatar img{width:100%;height:100%;object-fit:cover}
+.family-popup-avatar svg,.family-popup-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
 .family-popup-name{font-size:12px;font-weight:800;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.4);white-space:nowrap}
 .family-popup-mood{position:absolute;bottom:-2px;right:-2px;font-size:12px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.3))}
 .family-popup-unread{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;background:#EF4444;color:#fff;font-size:9px;font-weight:900;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 5px;box-shadow:0 2px 6px rgba(239,68,68,.4);line-height:1}
@@ -7141,7 +7141,7 @@ function renderNavUsers(){
 
   // Family button — compact, single element
   let html=`<div class="nav-family-btn" onclick="openFamilyPopup()" id="nav-family-btn">
-    <span class="nfb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--tab-color,#6366F1)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="3"/><circle cx="5" cy="9" r="2.5"/><circle cx="19" cy="9" r="2.5"/><path d="M16 21v-2a3 3 0 0 0-3-3h-2a3 3 0 0 0-3 3v2"/><path d="M5 21v-1.5A2.5 2.5 0 0 1 7.5 17"/><path d="M19 21v-1.5A2.5 2.5 0 0 0 16.5 17"/></svg></span>
+    <span class="nfb-icon"><svg viewBox="0 0 24 24" fill="var(--tab-color,#6366F1)" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="5.8" r="3" opacity=".9"/><ellipse cx="12" cy="17.5" rx="4" ry="4.5" opacity=".9"/><circle cx="5.2" cy="8.5" r="2.3" opacity=".5"/><ellipse cx="5.2" cy="18.5" rx="3.2" ry="3.5" opacity=".5"/><circle cx="18.8" cy="8.5" r="2.3" opacity=".5"/><ellipse cx="18.8" cy="18.5" rx="3.2" ry="3.5" opacity=".5"/><path d="M12 2.8c-.4 0-.8.3-.8.7 0 .5.8 1.2.8 1.2s.8-.7.8-1.2c0-.4-.4-.7-.8-.7z" opacity=".6"/></svg></span>
     <span class="nfb-label">우리가족</span>
     ${totalUnread>0?`<span class="nfb-badge">${totalUnread}</span>`:''}
   </div>`;
