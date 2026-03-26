@@ -40,7 +40,8 @@
 
   // 3. beforeunload 이벤트로 페이지 이탈 방지 시도
   window.addEventListener('beforeunload',function(e){
-    // PWA에서 뒤로가기로 빈 페이지로 나가는 것 방지
+    // PWA에서 뒤로가기로 빈 페이지로 나가는 것 방지 (캐시 초기화 시 제외)
+    if(window._cacheClearing) return;
     if(document.visibilityState==='visible'){
       e.preventDefault();
       e.returnValue='';
@@ -8772,32 +8773,37 @@ window.addEventListener('focus',()=>{
 
 // ── 앱 캐시 초기화 ──────────────────────────
 async function clearAppCache(){
-  if(!confirm('캐시를 초기화하고 최신 버전으로 새로고침할까요?'))return;
-  const btn=document.querySelector('[onclick="clearAppCache()"]');
-  if(btn){btn.textContent='처리중...';btn.disabled=true;}
+  var btn=document.querySelector('[onclick="clearAppCache()"]');
+  if(btn){btn.textContent='🔄 처리중...';btn.disabled=true;btn.style.background='#888';}
+  var infoEl=document.getElementById('cache-info');
+  if(infoEl)infoEl.textContent='캐시 삭제 중...';
   try{
-    let cleared=0;
+    var cleared=0;
     // 1. Service Worker 캐시 전부 삭제
     if('caches' in window){
-      const names=await caches.keys();
-      for(const name of names){
-        await caches.delete(name);
+      var names=await caches.keys();
+      for(var i=0;i<names.length;i++){
+        await caches.delete(names[i]);
         cleared++;
       }
     }
     // 2. Service Worker 등록 해제
     if('serviceWorker' in navigator){
-      const regs=await navigator.serviceWorker.getRegistrations();
-      for(const reg of regs){
-        await reg.unregister();
+      var regs=await navigator.serviceWorker.getRegistrations();
+      for(var j=0;j<regs.length;j++){
+        await regs[j].unregister();
       }
     }
-    // 3. 강제 새로고침 (캐시 무시)
-    alert('✅ 캐시 '+cleared+'개 삭제 완료!\n확인을 누르면 새로고침합니다.');
-    window.location.href=window.location.pathname+'?_cb='+Date.now();
+    if(infoEl)infoEl.innerHTML='<span style="color:#22C55E;font-weight:700">✅ 캐시 '+cleared+'개 삭제 완료! 3초 후 새로고침...</span>';
+    if(btn){btn.textContent='✅ 완료';btn.style.background='#22C55E';}
+    // beforeunload 우회 플래그
+    window._cacheClearing=true;
+    setTimeout(function(){
+      window.location.href=window.location.pathname+'?_cb='+Date.now();
+    },2000);
   }catch(e){
-    alert('❌ 캐시 초기화 실패: '+e.message);
-    if(btn){btn.textContent='초기화';btn.disabled=false;}
+    if(infoEl)infoEl.innerHTML='<span style="color:#EF4444">❌ 실패: '+e.message+'</span>';
+    if(btn){btn.textContent='초기화';btn.disabled=false;btn.style.background='';}
   }
 }
 // 캐시 정보 표시
