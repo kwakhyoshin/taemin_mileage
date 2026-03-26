@@ -1789,8 +1789,13 @@ body.dark .bubble-speech-log{background:rgba(255,255,255,.12);color:rgba(255,255
           </div>
         </div>
         <div class="adm-row">
-          <div class="adm-row-l"><div class="adm-row-nm">테스트 알림</div><div class="adm-row-sub">알림이 잘 도착하는지 확인</div></div>
+          <div class="adm-row-l"><div class="adm-row-nm">테스트 알림 (Cloud)</div><div class="adm-row-sub">Firestore → Cloud Functions 경유</div></div>
           <button class="btn-sm" onclick="sendTestPush()">보내기</button>
+        </div>
+        <div class="divider"></div>
+        <div class="adm-row">
+          <div class="adm-row-l"><div class="adm-row-nm">직접 알림 테스트</div><div class="adm-row-sub">Cloud Functions 없이 기기에서 직접</div></div>
+          <button class="btn-sm" onclick="sendDirectNotification()">보내기</button>
         </div>
         <div id="push-debug" style="padding:8px 4px 4px;font-size:10px;color:var(--tx3);line-height:1.6"></div>
       </div>
@@ -8819,6 +8824,38 @@ window.addEventListener('focus',()=>{
 });
 
 
+
+async function sendDirectNotification(){
+  try{
+    // Method 1: via SW showNotification
+    if(swRegistration&&swRegistration.active){
+      await swRegistration.showNotification('[DEV] 직접 테스트 알림',{
+        body:'Cloud Functions를 거치지 않는 직접 알림입니다 ✅',
+        icon:'../icon-180.png',
+        badge:'../icon-96.png',
+        vibrate:[100,50,100],
+        tag:'dev-direct-test',
+        renotify:true
+      });
+      toast('✅ 직접 알림 발송 완료! (SW 경유)');
+      return;
+    }
+    // Method 2: via Notification API directly
+    if(typeof Notification!=='undefined'&&Notification.permission==='granted'){
+      new Notification('[DEV] 직접 테스트 알림',{
+        body:'Notification API 직접 알림입니다 ✅',
+        icon:'../icon-180.png'
+      });
+      toast('✅ 직접 알림 발송 완료! (Notification API)');
+      return;
+    }
+    toast('❌ 서비스워커도 Notification API도 사용할 수 없어요');
+  }catch(e){
+    toast('❌ 직접 알림 실패: '+e.message);
+    console.error('[DirectNotif]',e);
+  }
+}
+window.sendDirectNotification=sendDirectNotification;
 // ── 앱 캐시 초기화 ──────────────────────────
 async function clearAppCache(){
   var btn=document.querySelector('[onclick="clearAppCache()"]');
