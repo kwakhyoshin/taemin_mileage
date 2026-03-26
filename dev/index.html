@@ -2849,9 +2849,10 @@ function renderFamilyGraph(){
     const rd=ROLE_DEFS[m.role]||ROLE_DEFS.child;
 
     if(m.name.trim()){
+      // 등록된 구성원: 진하고 굵은 실선
       html+=circleBtn(px, py, OT_SZ+24, mIdx,
         `<div style="display:flex;flex-direction:column;align-items:center">
-          <div style="width:${OT_SZ}px;height:${OT_SZ}px;border-radius:50%;background:${rd.color||'#F1F5F9'};border:3px solid ${rd.textColor||'#64748B'};display:flex;align-items:center;justify-content:center;box-sizing:border-box;box-shadow:0 1px 6px rgba(0,0,0,0.1)">
+          <div style="width:${OT_SZ}px;height:${OT_SZ}px;border-radius:50%;background:${rd.color||'#F1F5F9'};border:4px solid ${rd.textColor||'#64748B'};display:flex;align-items:center;justify-content:center;box-sizing:border-box;box-shadow:0 2px 8px rgba(0,0,0,0.15)">
             <svg width="${Math.round(28*scale)}" height="${Math.round(28*scale)}" viewBox="0 0 24 24" fill="none" stroke="${rd.textColor||'#64748B'}" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg>
           </div>
           <span style="font-size:${Math.round(11*scale)}px;font-weight:700;color:#1E293B;margin-top:3px">${m.name}</span>
@@ -2859,8 +2860,9 @@ function renderFamilyGraph(){
         </div>`
       );
     }else{
+      // 미등록 구성원: 점선 테두리
       html+=circleBtn(px, py, OT_SZ+10, mIdx,
-        `<div style="width:${OT_SZ}px;height:${OT_SZ}px;border-radius:50%;background:#F8FAFC;border:3px dashed #CBD5E1;display:flex;align-items:center;justify-content:center;box-sizing:border-box">
+        `<div style="width:${OT_SZ}px;height:${OT_SZ}px;border-radius:50%;background:#F8FAFC;border:2.5px dashed #B0BEC5;display:flex;align-items:center;justify-content:center;box-sizing:border-box">
           <svg width="${Math.round(26*scale)}" height="${Math.round(26*scale)}" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </div>`
       );
