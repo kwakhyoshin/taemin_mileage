@@ -7279,7 +7279,7 @@ function closeFamilyPopup(){
   if(popup)popup.remove();
   // Also close user-fm-menu if still open
   const ufm=document.getElementById('user-fm-menu');
-  if(ufm){ufm.style.display='none';ufm.style.transform='';}
+  if(ufm){ufm.style.display='none';ufm.style.transform='';ufm.style.animation='';}
   _familyFlowActive=false;
 }
 window.closeFamilyPopup=closeFamilyPopup;
@@ -7364,8 +7364,8 @@ function closeMsgPop(){
   pop.style.top='50%';
   pop.style.transform='translate(-50%,-50%)';
   msgTargetUser=null;
-  if(_familyFlowActive){_familyFlowActive=false;closeFamilyPopup();}
   unlockBodyScroll();
+  // Family flow: go back to family popup (don't close it)
 }
 window.closeMsgPop=closeMsgPop;
 
@@ -7447,27 +7447,34 @@ function onUserIconClick(userId){
     badge.textContent=unread;badge.style.display='flex';
   }else if(badge){badge.style.display='none';}
   // Don't show user-fm-bg — reuse family popup dim
-  // Center the menu on screen
+  // Center the menu on screen — set position BEFORE showing to avoid flicker
   const menu=document.getElementById('user-fm-menu');
-  menu.style.display='block';
   menu.style.left='50%';
   menu.style.top='50%';
   menu.style.bottom='auto';
   menu.style.right='auto';
   menu.style.transform='translate(-50%,-50%)';
+  menu.style.animation='none';
+  menu.style.display='block';
+  // Re-trigger centered animation
+  requestAnimationFrame(()=>{menu.style.animation='fadeUpCenter .2s ease';});
 }
 window.onUserIconClick=onUserIconClick;
 
 function closeUserFm(){
-  document.getElementById('user-fm-menu').style.display='none';
-  document.getElementById('user-fm-menu').style.transform='';
+  const menu=document.getElementById('user-fm-menu');
+  menu.style.display='none';
+  menu.style.transform='';
+  menu.style.animation='';
 }
 window.closeUserFm=closeUserFm;
 
 function userFmAction(action){
   // Just hide the action menu, keep family popup open
-  document.getElementById('user-fm-menu').style.display='none';
-  document.getElementById('user-fm-menu').style.transform='';
+  const menu=document.getElementById('user-fm-menu');
+  menu.style.display='none';
+  menu.style.transform='';
+  menu.style.animation='';
   if(!_userFmTarget)return;
   if(action==='read'){
     openMsgList(_userFmTarget,true);
@@ -7521,9 +7528,12 @@ function closeMsgList(){
   document.getElementById('msglist-body').style.display='block';
   document.getElementById('msglist-footer').style.display='none';
   document.getElementById('msglist-back').style.display='none';
+  document.getElementById('msglist-pop').style.top='50%';
+  document.getElementById('msglist-pop').style.transform='translate(-50%,-50%)';
+  document.getElementById('msglist-pop').style.maxHeight='70vh';
   _msgListFromId=null;
-  if(_familyFlowActive){_familyFlowActive=false;closeFamilyPopup();}
   unlockBodyScroll();
+  // Family flow: go back to family popup (don't close it)
 }
 window.closeMsgList=closeMsgList;
 
