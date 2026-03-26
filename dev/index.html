@@ -101,6 +101,14 @@ body.dark[data-tab="home"]{--tab-color:#5457D9;--tab-color2:#727BE0;--tab-shadow
 body.dark[data-tab="log"]{--tab-color:#DC3550;--tab-color2:#E5606F;--tab-shadow:rgba(220,53,80,0.3)}
 body.dark[data-tab="rwd"]{--tab-color:#D98E09;--tab-color2:#E0A820;--tab-shadow:rgba(217,142,9,0.3)}
 body.dark[data-tab="hist"]{--tab-color:#7A4FDD;--tab-color2:#9578E8;--tab-shadow:rgba(122,79,221,0.3)}
+/* Dark mode: auth & form components */
+body.dark .auth-input{background:#1E293B;color:#F1F5F9;border-color:#334155}
+body.dark .auth-select{background:#1E293B;color:#F1F5F9;border-color:#334155}
+body.dark .role-card{background:#1E293B;border-color:#334155}
+body.dark .mode-card{background:#1E293B;border-color:#334155}
+body.dark .member-card{background:#1E293B;border-color:#334155}
+/* Activity card state transitions */
+.act-card.done,.act-card.partial,.act-card.exhausted{transition:background .25s,transform .15s}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{background:#6366F1;touch-action:pan-y;overscroll-behavior:none}
 body{touch-action:pan-y;overscroll-behavior:none}
@@ -4593,7 +4601,7 @@ function getMemberState() {
 
 // Syncs member data to global S for backward compatibility
 function syncMemberToGlobal() {
-  if (!currentUser) return;
+  if (!currentUser || !S.memberData || !S.memberData[currentUser]) return;
   const ms = getMemberState();
   S.pts = ms.pts;
   S.streak = ms.streak;
@@ -5564,17 +5572,21 @@ function checkBadges(){
   const newBadges=[];
   // Check built-in badges
   BADGES.forEach(badge=>{
+    try{
     if(!S.badges[badge.id]&&badge.check(S)){
       S.badges[badge.id]={earnedAt:Date.now(),seen:false,claimed:false};
       newBadges.push(badge);
     }
+    }catch(e){console.error('Badge check error:',badge.id,e);}
   });
   // Check custom badges with condition
   (S.customBadges||[]).forEach(badge=>{
+    try{
     if(!S.badges[badge.id]&&badge.condType&&badge.condType!=='manual'&&evalCustomBadgeCond(badge)){
       S.badges[badge.id]={earnedAt:Date.now(),seen:false,claimed:false};
       newBadges.push(badge);
     }
+    }catch(e){console.error('Custom badge check error:',badge.id,e);}
   });
   if(newBadges.length>0){
     save();
@@ -8228,11 +8240,15 @@ function openRedeem(id){
   document.getElementById('mr-body').textContent=`${actualPts.toLocaleString()} 마일리지을 사용할까요?\n현재 ${S.pts.toLocaleString()} 마일리지 보유중이에요.`;
   openModal('m-redeem');
 }
+let _isRedeemInProgress=false;
 function confirmRedeem(){
+  if(_isRedeemInProgress)return;
+  _isRedeemInProgress=true;
+  try{
   const r=S.rwds.find(x=>x.id===pRwdId);
   const sale=r.sale&&r.sale.percent&&(!r.sale.endDate||new Date(r.sale.endDate+'T23:59:59')>=new Date())?r.sale:null;
   const actualPts=sale?Math.round(r.pts*(1-sale.percent/100)):r.pts;
-  if(!r||S.pts<actualPts)return;
+  if(!r||S.pts<actualPts){_isRedeemInProgress=false;return;}
   S.pts-=actualPts;
 
   // Add to inventory with 'owned' status
@@ -8253,6 +8269,7 @@ function confirmRedeem(){
   save();closeModal('m-redeem');renderAll();
   checkBadges();
   toast(`🎉 ${r.emoji} ${r.name} 교환 완료!`);confetti();
+  }finally{_isRedeemInProgress=false;}
 }
 function undoRedeem(logId){
   if(!S.rewardLog)S.rewardLog=[];
