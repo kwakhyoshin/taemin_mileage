@@ -1399,6 +1399,687 @@ body.dark .bubble-speech-log{background:rgba(255,255,255,.12);color:rgba(255,255
 .invite-toggle::after{content:'';position:absolute;width:24px;height:24px;background:#fff;border-radius:50%;top:2px;left:2px;transition:left .2s}
 .invite-toggle.on::after{left:22px}
 
+/* ── DESIGN UPGRADE v2 ── */
+
+/* Enhanced CSS Custom Properties */
+:root {
+  /* Primary Colors */
+  --color-primary: #6366F1;
+  --color-primary-light: #EEF2FF;
+  --color-primary-mid: #C7D2FE;
+  --color-primary-dark: #4F46E5;
+
+  /* Tab/Feature Colors */
+  --color-home: #6366F1;
+  --color-home-light: rgba(99, 102, 241, 0.1);
+  --color-home-lighter: #EEF2FF;
+  --color-log: #F43F5E;
+  --color-log-light: rgba(244, 63, 94, 0.1);
+  --color-log-lighter: #FFF5F7;
+  --color-rewards: #F59E0B;
+  --color-rewards-light: rgba(245, 158, 11, 0.1);
+  --color-rewards-lighter: #FFFBF0;
+  --color-history: #8B5CF6;
+  --color-history-light: rgba(139, 92, 246, 0.1);
+  --color-history-lighter: #F5F3FF;
+
+  /* Semantic Colors */
+  --color-success: #10B981;
+  --color-success-light: #D1FAE5;
+  --color-success-dark: #059669;
+  --color-error: #EF4444;
+  --color-error-light: #FEE2E2;
+  --color-warning: #F59E0B;
+  --color-warning-light: #FEF3C7;
+  --color-info: #3B82F6;
+  --color-info-light: #EFF6FF;
+
+  /* Neutral Colors */
+  --color-bg: #EEF2F7;
+  --color-bg-alt: #E2E8F0;
+  --color-card: #FFFFFF;
+  --color-card-alt: #F8FAFC;
+  --color-text: #0F172A;
+  --color-text-secondary: #64748B;
+  --color-text-tertiary: #94A3B8;
+  --color-border: #E2E8F0;
+  --color-border-dark: #CBD5E1;
+
+  /* Spacing Scale */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 20px;
+  --space-2xl: 24px;
+  --space-3xl: 28px;
+  --space-4xl: 32px;
+
+  /* Border Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-3xl: 30px;
+  --radius-full: 9999px;
+
+  /* Typography */
+  --font-family: 'Noto Sans KR', 'Pretendard Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-family-mono: 'Courier New', monospace;
+  --font-xs: 11px;
+  --font-sm: 12px;
+  --font-base: 14px;
+  --font-lg: 16px;
+  --font-xl: 18px;
+  --font-2xl: 20px;
+  --font-3xl: 24px;
+  --font-4xl: 28px;
+  --font-5xl: 32px;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+  --font-weight-black: 900;
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+  --line-height-loose: 2;
+
+  /* Shadows */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+  --shadow-xl: 0 12px 40px rgba(0, 0, 0, 0.15);
+  --shadow-2xl: 0 20px 60px rgba(0, 0, 0, 0.20);
+  --shadow-inner-sm: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-inner-md: inset 0 2px 8px rgba(0, 0, 0, 0.06);
+
+  /* Transitions & Timing */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 300ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --transition-slower: 500ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+  /* Backdrop Filters */
+  --backdrop-blur-sm: blur(4px);
+  --backdrop-blur-md: blur(12px);
+  --backdrop-blur-lg: blur(24px);
+
+  /* Safe Areas */
+  --safe-area-top: max(0px, env(safe-area-inset-top));
+  --safe-area-bottom: max(0px, env(safe-area-inset-bottom));
+  --safe-area-left: max(0px, env(safe-area-inset-left));
+  --safe-area-right: max(0px, env(safe-area-inset-right));
+}
+
+body.dark {
+  --color-bg: #0F172A;
+  --color-bg-alt: #1E293B;
+  --color-card: #1E293B;
+  --color-card-alt: #334155;
+  --color-text: #F1F5F9;
+  --color-text-secondary: #94A3B8;
+  --color-text-tertiary: #475569;
+  --color-border: #334155;
+  --color-border-dark: #475569;
+  --color-home-lighter: rgba(99, 102, 241, 0.15);
+  --color-log-lighter: rgba(244, 63, 94, 0.15);
+  --color-rewards-lighter: rgba(245, 158, 11, 0.15);
+  --color-history-lighter: rgba(139, 92, 246, 0.15);
+}
+
+/* Animation Keyframes */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInOverlay {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: var(--backdrop-blur-md);
+    -webkit-backdrop-filter: var(--backdrop-blur-md);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUpModal {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOutLeft {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes confetti {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--tx, 0), 500px) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+/* Loading States & Skeletons */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-alt) 0%,
+    var(--color-card) 50%,
+    var(--color-bg-alt) 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+}
+
+.skeleton-text {
+  height: 12px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+}
+
+.skeleton-card {
+  height: 120px;
+  border-radius: var(--radius-lg);
+  margin-bottom: 12px;
+}
+
+.skeleton-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 800ms linear infinite;
+}
+
+.pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Empty States */
+.empty-state {
+  padding: 40px 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+}
+
+.empty-state-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+  opacity: 0.6;
+}
+
+.empty-state-title {
+  font-size: var(--font-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+  margin-bottom: 8px;
+}
+
+.empty-state-text {
+  font-size: var(--font-base);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-normal);
+  max-width: 280px;
+}
+
+/* Enhanced Card Styles */
+.card {
+  background: var(--color-card);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  border: 0.5px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  transition: background var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base), transform var(--transition-fast);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-border-dark);
+}
+
+.card:active {
+  transform: translateY(1px);
+}
+
+/* Activity Card Enhancements */
+.act-card {
+  background: var(--color-card);
+  border-radius: var(--radius-md);
+  padding: 16px 14px 20px;
+  cursor: pointer;
+  border: none;
+  position: relative;
+  overflow: visible;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-fast), background var(--transition-base), box-shadow var(--transition-base);
+}
+
+.act-card:active {
+  transform: scale(0.95);
+}
+
+.act-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.act-card.done {
+  background: linear-gradient(145deg, rgba(16, 185, 129, 0.12), rgba(16, 185, 129, 0.05));
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.12);
+}
+
+.act-card.done .n,
+.act-card.done .p {
+  color: var(--color-success-dark);
+}
+
+.act-card.partial {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(245, 158, 11, 0.06));
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.1);
+}
+
+.act-card.exhausted {
+  background: var(--color-bg-alt);
+  opacity: 0.6;
+  cursor: default;
+  box-shadow: none;
+}
+
+/* Enhanced Button Styles */
+button {
+  font-family: var(--font-family);
+  transition: all var(--transition-fast);
+}
+
+.auth-btn {
+  padding: 14px 20px;
+  border-radius: var(--radius-lg);
+  background: var(--color-primary);
+  color: #fff;
+  font-size: var(--font-base);
+  font-weight: var(--font-weight-bold);
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+}
+
+.auth-btn:hover {
+  background: var(--color-primary-dark);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.auth-btn:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-xs);
+}
+
+.auth-btn.secondary {
+  background: var(--color-bg-alt);
+  color: var(--color-text);
+}
+
+.auth-btn.secondary:hover {
+  background: var(--color-border);
+}
+
+/* Enhanced Input Styles */
+.auth-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-card);
+  font-size: var(--font-base);
+  font-family: var(--font-family);
+  color: var(--color-text);
+  transition: all var(--transition-fast);
+}
+
+.auth-input::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+.auth-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1), inset 0 1px 2px rgba(0, 0, 0, 0.04);
+  background: var(--color-card);
+}
+
+.auth-input:hover {
+  border-color: var(--color-border-dark);
+}
+
+/* Enhanced Bottom Navigation with Glassmorphism */
+.tab-bar, .bottom-nav {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  background: color-mix(in srgb, var(--color-primary, #6366F1) 6%, rgba(255, 255, 255, 0.95));
+  backdrop-filter: var(--backdrop-blur-lg) saturate(180%);
+  -webkit-backdrop-filter: var(--backdrop-blur-lg) saturate(180%);
+  border: 1px solid color-mix(in srgb, var(--color-primary, #6366F1) 12%, rgba(0, 0, 0, 0.04));
+  border-radius: var(--radius-3xl);
+  padding: 10px;
+  box-shadow: 0 4px 20px color-mix(in srgb, var(--color-primary, #6366F1) 12%, rgba(0, 0, 0, 0.1)), 0 12px 40px rgba(0, 0, 0, 0.08);
+  transition: all var(--transition-base);
+}
+
+body.dark .tab-bar,
+body.dark .bottom-nav {
+  background: color-mix(in srgb, var(--color-primary, #6366F1) 10%, rgba(20, 30, 50, 0.95));
+  border-color: color-mix(in srgb, var(--color-primary, #6366F1) 15%, rgba(255, 255, 255, 0.06));
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), 0 12px 40px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive and Accessibility Enhancements */
+button, a, input[type="checkbox"], input[type="radio"] {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.auth-input:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Safe Area Support */
+@supports (padding: env(safe-area-inset-bottom)) {
+  body {
+    padding-left: var(--safe-area-left);
+    padding-right: var(--safe-area-right);
+  }
+
+  .nav-container.docked .bottom-nav,
+  .nav-container.docked .tab-bar {
+    padding-bottom: calc(8px + var(--safe-area-bottom));
+  }
+}
+
+/* Dark Mode Media Query */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+  }
+
+  body:not(.dark) {
+    --color-bg: #0F172A;
+    --color-bg-alt: #1E293B;
+    --color-card: #1E293B;
+    --color-card-alt: #334155;
+    --color-text: #F1F5F9;
+    --color-text-secondary: #94A3B8;
+    --color-text-tertiary: #475569;
+    --color-border: #334155;
+    --color-border-dark: #475569;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 50ms !important;
+    transition-duration: 50ms !important;
+  }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: more) {
+  .auth-input {
+    border-width: 2px;
+  }
+
+  .auth-btn {
+    border: 2px solid currentColor;
+  }
+
+  .card {
+    border-width: 2px;
+  }
+}
+
+/* Glassmorphism Effect Utility */
+.glassmorphism {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: var(--backdrop-blur-md);
+  -webkit-backdrop-filter: var(--backdrop-blur-md);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+body.dark .glassmorphism {
+  background: rgba(15, 23, 42, 0.7);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Gradient Utilities */
+.gradient-primary {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+}
+
+.gradient-success {
+  background: linear-gradient(135deg, var(--color-success), var(--color-success-light));
+}
+
+.gradient-error {
+  background: linear-gradient(135deg, var(--color-error), var(--color-error-light));
+}
+
+.gradient-warning {
+  background: linear-gradient(135deg, var(--color-warning), var(--color-warning-light));
+}
+
+/* Typography Utilities */
+.text-xs { font-size: var(--font-xs); }
+.text-sm { font-size: var(--font-sm); }
+.text-base { font-size: var(--font-base); }
+.text-lg { font-size: var(--font-lg); }
+.text-xl { font-size: var(--font-xl); }
+.text-2xl { font-size: var(--font-2xl); }
+
+.font-normal { font-weight: var(--font-weight-normal); }
+.font-medium { font-weight: var(--font-weight-medium); }
+.font-semibold { font-weight: var(--font-weight-semibold); }
+.font-bold { font-weight: var(--font-weight-bold); }
+.font-extrabold { font-weight: var(--font-weight-extrabold); }
+.font-black { font-weight: var(--font-weight-black); }
+
+/* Spacing Utilities */
+.m-0 { margin: 0; }
+.m-xs { margin: var(--space-xs); }
+.m-sm { margin: var(--space-sm); }
+.m-md { margin: var(--space-md); }
+.m-lg { margin: var(--space-lg); }
+
+.p-0 { padding: 0; }
+.p-xs { padding: var(--space-xs); }
+.p-sm { padding: var(--space-sm); }
+.p-md { padding: var(--space-md); }
+.p-lg { padding: var(--space-lg); }
+
+/* Animation Delay Utilities */
+.delay-50 { animation-delay: 50ms; }
+.delay-100 { animation-delay: 100ms; }
+.delay-150 { animation-delay: 150ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+
+/* Accessibility */
+:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+button:disabled {
+  pointer-events: none;
+}
+
+.skip-to-content {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--color-primary);
+  color: white;
+  padding: 8px;
+  text-decoration: none;
+  z-index: 100;
+  font-weight: var(--font-weight-bold);
+}
+
+.skip-to-content:focus {
+  top: 0;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
 </style>
 </head>
 <body data-tab="home">
@@ -2565,6 +3246,58 @@ const ROLE_DEFS = {
   child:     {label:'자녀',      svg:_SVG_CHILD_M,  type:'child',  color:'#D1FAE5', textColor:'#059669'}
 };
 
+/* Design System Icons */
+const ICONS = {
+  home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg>',
+  checklist: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>',
+  activities: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><path d="M9 15l2 2 4-4"/></svg>',
+  gift: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg>',
+  star: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 10.26 24 10.27 17.18 16.70 19.34 24.85 12 18.71 4.66 24.85 6.82 16.70 0 10.27 8.91 10.26 12 2"/></svg>',
+  starFilled: '<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 10.26 24 10.27 17.18 16.70 19.34 24.85 12 18.71 4.66 24.85 6.82 16.70 0 10.27 8.91 10.26 12 2"/></svg>',
+  coin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/><path d="M9 9a3 3 0 110 6"/></svg>',
+  coins: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="12" r="7" fill="none"/><path d="M14 9l6-3"/><path d="M14 15l6 3"/><circle cx="16" cy="12" r="7"/></svg>',
+  calendar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+  clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+  fire: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.48 2 2 6.48 2 12c0 5.52 4.48 10 10 10s10-4.48 10-10S17.52 2 12 2z"/><path d="M12 6v6m0 3v2" stroke-width="2.5"/></svg>',
+  medal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="11" r="5"/><circle cx="17" cy="11" r="5"/><path d="M12 17v5"/><path d="M9.5 3l1.5 4h4l1.5-4"/></svg>',
+  badge: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 9.26H25L13.46 16.7l3.09 9.26L12 20.46l-8.55 5.5 3.09-9.26L1 11.26h9.91L12 2z"/></svg>',
+  crown: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7h20M2 10l1 11a2 2 0 002 2h14a2 2 0 002-2l1-11M7 7l1.5-4h1M10 7v-3h4v3M17 7l-1.5-4h-1"/><circle cx="5" cy="8" r="1.5" fill="currentColor"/><circle cx="12" cy="5" r="1.5" fill="currentColor"/><circle cx="19" cy="8" r="1.5" fill="currentColor"/></svg>',
+  trophy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H3a1 1 0 00-1 1v6a1 1 0 001 1h3"/><path d="M18 9h3a1 1 0 011 1v6a1 1 0 01-1 1h-3"/><rect x="6" y="4" width="12" height="5" rx="1"/><path d="M9 14c0 1.657 1.343 3 3 3s3-1.343 3-3"/><path d="M9 14v3a1 1 0 001 1h4a1 1 0 001-1v-3"/></svg>',
+  sparkle: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 9.26H25L13.46 16.7l3.09 9.26L12 20.46l-8.55 5.5 3.09-9.26L1 11.26h9.91L12 2z"/></svg>',
+  settings: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m5.08 5.08l4.24 4.24M1 12h6m6 0h6M4.22 19.78l4.24-4.24m5.08-5.08l4.24-4.24"/></svg>',
+  gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m5.08 5.08l4.24 4.24M1 12h6m6 0h6M4.22 19.78l4.24-4.24m5.08-5.08l4.24-4.24"/></svg>',
+  shield: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+  user: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+  profile: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+  family: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>',
+  users: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>',
+  add: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+  plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+  edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>',
+  delete: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>',
+  trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+  x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+  close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+  arrowLeft: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>',
+  arrowRight: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>',
+  chevronLeft: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>',
+  chevronRight: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>',
+  share: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>',
+  message: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>',
+  bell: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>',
+  search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+  menu: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>',
+  lock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>',
+  unlock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 019.9 1"/></svg>',
+  eye: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
+  eyeOff: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>',
+  heart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>',
+  refresh: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36M20.49 15a9 9 0 0 1-14.85 3.36"/></svg>',
+  chart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 5H9.5a1.5 1.5 0 00-1.5 1.5v12a1.5 1.5 0 001.5 1.5H17"/></svg>',
+  loader: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.22" y1="4.22" x2="7.34" y2="7.34"/><line x1="16.66" y1="16.66" x2="19.78" y2="19.78"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.22" y1="19.78" x2="7.34" y2="16.66"/><line x1="16.66" y1="7.34" x2="19.78" y2="4.22"/></svg>'
+};
+
 // 기존 하드코딩 MEMBERS/AVATARS → 동적 (familyState.members에서 생성)
 // 호환성: 기존 코드에서 MEMBERS[id].name 등을 참조하는 곳을 위한 동적 프록시
 let MEMBERS = {};
@@ -2698,12 +3431,13 @@ function startCreateFamily(){
   renderRoleGrid();
 }
 
-function createStep1Next(){
+async function createStep1Next(){
   const id=document.getElementById('create-user-id').value.trim();
   const pwd=document.getElementById('create-user-pwd').value;
   const pwd2=document.getElementById('create-user-pwd2').value;
   const name=document.getElementById('create-my-name').value.trim();
   const err=document.getElementById('create1-error');
+  const btn=document.querySelector('#auth-create-1 .auth-btn');
 
   if(id.length<4){err.textContent='아이디는 4자 이상이어야 해요';return;}
   if(pwd.length<4){err.textContent='비밀번호는 4자 이상이어야 해요';return;}
@@ -2711,10 +3445,23 @@ function createStep1Next(){
   if(!name){err.textContent='이름을 입력해주세요';return;}
   if(!_createState.myRole){err.textContent='역할을 선택해주세요';return;}
 
+  // 글로벌 ID 중복 체크
+  try {
+    if(btn){btn.disabled=true;btn.textContent='확인 중...';}
+    const exists=await checkGlobalIdExists(id);
+    if(exists){err.textContent='이미 사용중인 아이디예요';if(btn){btn.disabled=false;btn.textContent='다음';}return;}
+  } catch (e) {
+    console.error('ID check error:', e);
+    err.textContent='아이디 확인 중 오류가 발생했어요';
+    if(btn){btn.disabled=false;btn.textContent='다음';}
+    return;
+  }
+
   _createState.userId=id;
   _createState.myName=name;
   _createState.pwdHash=pwd; // Will be hashed later
   err.textContent='';
+  if(btn){btn.disabled=false;btn.textContent='다음';}
   showAuthScreen('create-2');
   document.getElementById('member-count-display').textContent=_createState.memberCount;
 }
@@ -3213,6 +3960,16 @@ async function saveFamilyToFirestore(){
 
     await setDoc(familyDoc,newState);
 
+    // 글로벌 ID 레지스트리에 등록 (생성자 ID + 자녀 미리생성 계정)
+    try {
+      await registerGlobalId(_createState.userId, docPath, myMemberId);
+      // 미리 생성한 자녀 계정도 레지스트리에 등록
+      for(const [idx,acc] of Object.entries(_createState.childAccounts||{})){
+        const cid=memberIds[parseInt(idx)-1];
+        if(cid && acc.id) await registerGlobalId(acc.id, docPath, cid);
+      }
+    } catch(e) { console.error('Global registry write failed (non-blocking):', e); }
+
     // 글로벌 상태 업데이트
     S=newState;
     _familyId=docPath;
@@ -3253,6 +4010,39 @@ async function hashPassword(pwd){
   const enc=new TextEncoder().encode(salted);
   const buf=await crypto.subtle.digest('SHA-512',enc);
   return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+// ── 글로벌 사용자 ID 레지스트리 함수들 ──
+async function checkGlobalIdExists(loginId) {
+  try {
+    const registryRef = doc(db, 'userIds', _ENV==='dev'?'dev_registry':'registry');
+    const snap = await getDoc(registryRef);
+    if (!snap.exists()) return false;
+    const data = snap.data();
+    return !!data[loginId];
+  } catch (e) {
+    console.error('Error checking global ID:', e);
+    // 네트워크 오류 시 안전하게 true 반환 (중복 허용보다 안전)
+    throw e;
+  }
+}
+
+async function registerGlobalId(loginId, familyId, memberId) {
+  try {
+    const registryRef = doc(db, 'userIds', _ENV==='dev'?'dev_registry':'registry');
+    await runTransaction(db, async (transaction) => {
+      const snap = await transaction.get(registryRef);
+      const data = snap.exists() ? snap.data() : {};
+      if(data[loginId] && data[loginId].memberId !== memberId) {
+        throw new Error('ID_ALREADY_TAKEN');
+      }
+      data[loginId] = { familyId, memberId, createdAt: Date.now() };
+      transaction.set(registryRef, data);
+    });
+  } catch (e) {
+    if(e.message === 'ID_ALREADY_TAKEN') throw e; // 중복이면 상위로 전파
+    console.error('Error registering global ID:', e);
+  }
 }
 
 // ── 가족 ID 생성 ──
@@ -3399,12 +4189,15 @@ async function doJoinRegister(){
   if(pwd.length<4){err.textContent='비밀번호는 4자 이상이어야 해요';return;}
   if(pwd!==pwd2){err.textContent='비밀번호가 일치하지 않아요';return;}
 
-  // 아이디 중복 체크 (자기 자신의 기존 임시 계정은 제외)
-  const users=S.users||{};
+  // 글로벌 ID 중복 체크
   const mid=_joinState.selectedMemberId;
-  for(const k in users){
-    if(k===mid) continue; // 자기 자신의 기존 임시 ID는 무시
-    if(users[k].id===userId){err.textContent='이미 사용중인 아이디예요';return;}
+  try {
+    const exists=await checkGlobalIdExists(userId);
+    if(exists){err.textContent='이미 사용중인 아이디예요';return;}
+  } catch (e) {
+    console.error('Global ID check failed:', e);
+    err.textContent='아이디 확인 중 오류가 발생했어요';
+    return;
   }
 
   try{
@@ -3422,6 +4215,21 @@ async function doJoinRegister(){
     }
 
     await save();
+
+    // 글로벌 ID 레지스트리에 등록 (트랜잭션으로 원자적 처리)
+    try {
+      await registerGlobalId(userId, _familyId, mid);
+    } catch(regErr) {
+      if(regErr.message==='ID_ALREADY_TAKEN'){
+        // 동시 가입으로 ID 충돌 — 롤백
+        S.familyMeta.members[mid].account=null;
+        delete S.users[mid];
+        await save();
+        err.textContent='다른 사람이 방금 같은 아이디를 등록했어요. 다른 아이디를 사용해주세요.';
+        return;
+      }
+      console.error('Registry write failed (non-blocking):', regErr);
+    }
 
     currentUser=mid;
     localStorage.setItem(_LS_PREFIX+'current_user',mid);
@@ -3501,6 +4309,54 @@ async function doLogin(){
         toast(`${fm[mid].name||'회원'}님, 환영해요! 🎉`);
         return;
       }
+    }
+
+    // 글로벌 레지스트리에서 검색 (다른 가족의 사용자)
+    try {
+      const registryRef = doc(db, 'userIds', _ENV==='dev'?'dev_registry':'registry');
+      const snap = await getDoc(registryRef);
+      if (snap.exists()) {
+        const data = snap.data();
+        const regEntry = data[id];
+        if (regEntry) {
+          // 해당 가족 문서를 로드
+          const otherFamilyPath = regEntry.familyId;
+          const familyDoc = doc(db, 'families', otherFamilyPath);
+          const familySnap = await getDoc(familyDoc);
+          if (familySnap.exists()) {
+            const familyData = familySnap.data();
+            if(!familyData || !familyData.familyMeta){errEl.textContent='가족 데이터가 손상되었어요';return;}
+            const otherUsers = familyData.users || {};
+            const otherMid = regEntry.memberId;
+            // users 또는 familyMeta.members.account 에서 비밀번호 검증
+            const u = otherUsers[otherMid] || familyData.familyMeta?.members?.[otherMid]?.account;
+            if (u) {
+              const matched = (u.v===2&&u.id===id&&u.pwdHash===pwdHashSalted)||
+                              (!u.v&&u.id===id&&u.pwdHash===pwdHashLegacy);
+              if (matched) {
+                // 해당 가족으로 전환하고 로그인
+                S = Object.assign(defaultState(), familyData);
+                _familyId = otherFamilyPath;
+                DATA_DOC = familyDoc;
+                localStorage.setItem(_LS_PREFIX+'family_id', otherFamilyPath);
+                if (!S.users) S.users = {};
+                S.users[otherMid] = {id, pwdHash: pwdHashSalted, v: 2};
+                await save();
+                currentUser = otherMid;
+                localStorage.setItem(_LS_PREFIX+'current_user', otherMid);
+                rebuildMembersFromFamily();
+                hideAllAuth();
+                applyUserProfile();
+                renderAll();
+                toast(`${MEMBERS[otherMid]?.name||'회원'}님, 환영해요! 🎉`);
+                return;
+              }
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.error('Global login search error:', e);
     }
 
     errEl.textContent='아이디 또는 비밀번호가 틀렸어요';
@@ -3718,7 +4574,7 @@ const BADGES = [
 
 // ── FIREBASE ──────────────────────────────────
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDTS81EBGgiuo564ThxvTTOpR_iAHLb8tg",
@@ -9614,6 +10470,8 @@ async function checkUrlParams(){
         // 토큰 소비
         S.familyMeta.inviteTokens=tokens.filter(t=>t.token!==token);
         await save();
+        // 글로벌 ID 레지스트리에 등록 (자동 생성 계정)
+        await registerGlobalId(acc.id, docPath, mid);
         currentUser=mid;
         localStorage.setItem(_LS_PREFIX+'current_user',mid);
         rebuildMembersFromFamily();
@@ -10654,6 +11512,8 @@ Object.assign(window, {
   hasMidnightStudy, hasComeback, getBadgeMeaning,
   toggleRwdClosed, setRwdGoalFromShop,
   lockBodyScroll, unlockBodyScroll,
+  // Global registry functions
+  checkGlobalIdExists, registerGlobalId,
 });
 // _createState를 window에 노출 (child card oninput 참조용)
 window._createState = _createState;
