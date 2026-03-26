@@ -2774,69 +2774,74 @@ function renderFamilyGraph(){
   const container=document.getElementById('family-graph');
   const members=_createState.members;
   const total=members.length;
-  const others=total-1; // 나 제외 구성원 수
 
-  // 인원별 레이아웃 (나=center, 나머지=spoke positions)
-  // viewBox 300x300 기준, 나=중앙 허브
+  // 그래프 크기 (px 기준, 컨테이너 내에서 비율 조정)
   const W=300, H=300;
-  const R_ME=32, R_OTHER=24; // 나 / 기타 원 반지름
+  const R_ME=30, R_OTHER=22; // 나 / 기타 원 반지름 (px in viewBox)
 
-  // 나(members[0])의 위치 + 나머지 위치 (인원별 고정 배치)
+  // 나(members[0]) 위치 + 나머지 위치 (인원별 고정 배치, "나" 제외 수에 맞춰)
   const layouts={
     1:{ me:[150,150], pos:[] },
-    2:{ me:[150,190], pos:[[150,60]] },
-    3:{ me:[150,210], pos:[[100,60],[200,60]], extraLines:[[0,1]] },
-    4:{ me:[150,155], pos:[[150,35],[50,220],[250,220]] },
-    5:{ me:[150,150], pos:[[150,28],[268,130],[210,268],[90,268],[32,130]] },
-    6:{ me:[150,155], pos:[[150,25],[268,85],[268,225],[150,280],[32,225],[32,85]] },
+    2:{ me:[150,185], pos:[[150,65]] },
+    3:{ me:[150,200], pos:[[95,65],[205,65]], extraLines:[[0,1]] },
+    4:{ me:[150,150], pos:[[150,35],[55,225],[245,225]] },
+    5:{ me:[150,150], pos:[[150,30],[260,165],[200,275],[100,275],[40,165]] },
+    6:{ me:[150,150], pos:[[150,28],[258,95],[258,215],[150,275],[42,215],[42,95]] },
+    7:{ me:[150,150], pos:[] } // 아래서 계산
   };
 
-  let layout;
-  if(total<=6){
-    layout=layouts[total]||layouts[2];
-  }else{
-    // 7명: 나 중심 + 6명 원형 배치
-    const cx=150,cy=150,rad=115;
+  // 7명: 나 중심 + 6명 원형 배치
+  if(total===7){
+    const cx=150,cy=150,rad=112;
     const pos=[];
     for(let i=0;i<6;i++){
       const a=(2*Math.PI*i)/6 - Math.PI/2;
       pos.push([Math.round(cx+rad*Math.cos(a)), Math.round(cy+rad*Math.sin(a))]);
     }
-    layout={me:[cx,cy],pos};
+    layouts[7]={me:[cx,cy],pos};
   }
 
+  const layout=layouts[total]||layouts[2];
   const [mx,my]=layout.me;
 
-  let svg=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;max-width:320px;display:block;margin:0 auto">`;
-
-  // 선 그리기 (나 → 각 구성원)
-  layout.pos.forEach(([px,py])=>{
-    svg+=`<line x1="${mx}" y1="${my}" x2="${px}" y2="${py}" stroke="#CBD5E1" stroke-width="2.5" stroke-linecap="round"/>`;
+  // ── SVG: 연결선만 ──
+  let linesSvg=`<svg viewBox="0 0 ${W} ${H}" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none">`;
+  layout.pos.forEach(([px,py],i)=>{
+    if(i+1>=members.length)return;
+    linesSvg+=`<line x1="${mx}" y1="${my}" x2="${px}" y2="${py}" stroke="#CBD5E1" stroke-width="2.5" stroke-linecap="round"/>`;
   });
-  // 추가 선 (3명일 때 상단 2개 연결 등)
   if(layout.extraLines){
     layout.extraLines.forEach(([a,b])=>{
+      if(a+1>=members.length||b+1>=members.length)return;
       const [ax,ay]=layout.pos[a],[bx,by]=layout.pos[b];
-      svg+=`<line x1="${ax}" y1="${ay}" x2="${bx}" y2="${by}" stroke="#CBD5E1" stroke-width="2.5" stroke-linecap="round"/>`;
+      linesSvg+=`<line x1="${ax}" y1="${ay}" x2="${bx}" y2="${by}" stroke="#CBD5E1" stroke-width="2.5" stroke-linecap="round"/>`;
     });
   }
+  linesSvg+='</svg>';
 
-  // ── 나 (중앙 허브) 그리기 ──
+  // ── HTML: 노드 버튼들 ──
+  // 좌표를 % 로 변환
+  function pct(v){return (v/W*100).toFixed(1)+'%';}
+  function nodeStyle(x,y,r){return `position:absolute;left:${pct(x-r)};top:${pct(y-r)};width:${pct(r*2)};height:${pct(r*2)};border-radius:50%;display:flex;align-items:center;justify-content:center;flex-direction:column;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .15s;border:none;background:none;padding:0;font-family:inherit`;}
+
+  let nodes='';
+
+  // ── 나 (중앙 허브) ──
   const me=members[0];
   const meRd=ROLE_DEFS[me.role]||ROLE_DEFS.dad;
   const meColor=meRd.color||'#EEF2FF';
   const meTx=meRd.textColor||'#6366F1';
-  svg+=`<g onclick="openNodeForm(0)" style="cursor:pointer">`;
-  svg+=`<circle cx="${mx}" cy="${my}" r="${R_ME}" fill="${meColor}" stroke="${meTx}" stroke-width="2.5"/>`;
-  svg+=`<text x="${mx}" y="${my+1}" text-anchor="middle" dominant-baseline="middle" style="font-size:14px;font-weight:900;fill:${meTx}">나</text>`;
-  svg+=`</g>`;
-  // 나 이름 라벨
-  svg+=`<text x="${mx}" y="${my+R_ME+16}" text-anchor="middle" style="font-size:11px;font-weight:700;fill:#1E293B">${me.name}</text>`;
-  svg+=`<text x="${mx}" y="${my+R_ME+28}" text-anchor="middle" style="font-size:9px;font-weight:600;fill:${meTx}">${meRd.label||''}</text>`;
+  nodes+=`<button onclick="openNodeForm(0)" style="${nodeStyle(mx,my,R_ME)}">
+    <div style="width:100%;height:100%;border-radius:50%;background:${meColor};border:2.5px solid ${meTx};display:flex;align-items:center;justify-content:center;box-sizing:border-box">
+      <span style="font-size:14px;font-weight:900;color:${meTx};line-height:1">나</span>
+    </div>
+    <span style="font-size:10px;font-weight:700;color:#1E293B;margin-top:4px;white-space:nowrap;line-height:1">${me.name}</span>
+    <span style="font-size:8px;font-weight:600;color:${meTx};margin-top:1px;line-height:1">${meRd.label||''}</span>
+  </button>`;
 
-  // ── 나머지 구성원 노드 ──
+  // ── 나머지 구성원 ──
   layout.pos.forEach(([px,py],i)=>{
-    const mIdx=i+1; // members 배열 인덱스
+    const mIdx=i+1;
     if(mIdx>=members.length)return;
     const m=members[mIdx];
     const rd=ROLE_DEFS[m.role]||ROLE_DEFS.child;
@@ -2844,37 +2849,32 @@ function renderFamilyGraph(){
     const tx=rd.textColor||'#64748B';
 
     if(m.name.trim()){
-      // 등록 완료된 노드
-      svg+=`<g onclick="openNodeForm(${mIdx})" style="cursor:pointer">`;
-      svg+=`<circle cx="${px}" cy="${py}" r="${R_OTHER}" fill="${color}" stroke="${tx}" stroke-width="2"/>`;
-      svg+=`<g transform="translate(${px-7},${py-9})" stroke="${tx}" fill="none" stroke-width="1.5" stroke-linecap="round" style="pointer-events:none">
-        <circle cx="7" cy="4" r="2.5"/><path d="M2.5 13v-1a3 3 0 013-3h3a3 3 0 013 3v1"/>
-      </g>`;
-      svg+=`</g>`;
-      // 이름 라벨 (위치에 따라 아래 또는 위)
-      const labelY = py < my ? py - R_OTHER - 4 : py + R_OTHER + 14;
-      svg+=`<text x="${px}" y="${labelY}" text-anchor="middle" style="font-size:10px;font-weight:700;fill:#1E293B">${m.name}</text>`;
-      svg+=`<text x="${px}" y="${labelY+12}" text-anchor="middle" style="font-size:8px;font-weight:600;fill:${tx}">${rd.label||''}</text>`;
+      // 등록 완료
+      nodes+=`<button onclick="openNodeForm(${mIdx})" style="${nodeStyle(px,py,R_OTHER)}">
+        <div style="width:100%;height:100%;border-radius:50%;background:${color};border:2px solid ${tx};display:flex;align-items:center;justify-content:center;box-sizing:border-box">
+          <svg width="60%" height="60%" viewBox="0 0 24 24" fill="none" stroke="${tx}" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg>
+        </div>
+        <span style="font-size:9px;font-weight:700;color:#1E293B;margin-top:3px;white-space:nowrap;line-height:1">${m.name}</span>
+        <span style="font-size:7px;font-weight:600;color:${tx};margin-top:1px;line-height:1">${rd.label||''}</span>
+      </button>`;
     }else{
-      // 미등록 노드 — + 버튼
-      svg+=`<g onclick="openNodeForm(${mIdx})" style="cursor:pointer">`;
-      svg+=`<circle cx="${px}" cy="${py}" r="${R_OTHER}" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="2" stroke-dasharray="5,4"/>`;
-      svg+=`<line x1="${px-8}" y1="${py}" x2="${px+8}" y2="${py}" stroke="#94A3B8" stroke-width="2.5" stroke-linecap="round"/>`;
-      svg+=`<line x1="${px}" y1="${py-8}" x2="${px}" y2="${py+8}" stroke="#94A3B8" stroke-width="2.5" stroke-linecap="round"/>`;
-      svg+=`</g>`;
+      // 미등록 — + 버튼
+      nodes+=`<button onclick="openNodeForm(${mIdx})" style="${nodeStyle(px,py,R_OTHER)}">
+        <div style="width:100%;height:100%;border-radius:50%;background:#F8FAFC;border:2px dashed #CBD5E1;display:flex;align-items:center;justify-content:center;box-sizing:border-box">
+          <svg width="50%" height="50%" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </div>
+      </button>`;
     }
   });
 
-  svg+='</svg>';
-
-  // 안내 텍스트
+  // ── 안내 텍스트 ──
   const filledCount=members.filter(m=>m.name.trim()).length;
   const guideText=filledCount>=total
     ? '<span style="color:#10B981">모든 구성원이 등록되었어요!</span>'
     : `<span style="color:#94A3B8">원을 눌러 구성원을 추가하세요 (${filledCount}/${total})</span>`;
-  svg+=`<div style="text-align:center;margin-top:10px;font-size:12px;font-weight:600">${guideText}</div>`;
 
-  container.innerHTML=svg;
+  container.innerHTML=`<div style="position:relative;width:100%;max-width:300px;margin:0 auto;aspect-ratio:1/1">${linesSvg}${nodes}</div>
+    <div style="text-align:center;margin-top:8px;font-size:12px;font-weight:600">${guideText}</div>`;
   checkGraphComplete();
 }
 
