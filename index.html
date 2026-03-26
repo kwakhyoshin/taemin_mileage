@@ -7412,6 +7412,11 @@ function readMsgFromList(fromId,msgIdx){
     ${actionsHTML}
   `;
   detail.style.display='flex';
+
+  // Play emotion animation when viewing message with emotion
+  if(m.emotion&&EMOTION_MAP[m.emotion]){
+    setTimeout(()=>playEmotionAnimation(m.emotion),300);
+  }
 }
 window.readMsgFromList=readMsgFromList;
 
