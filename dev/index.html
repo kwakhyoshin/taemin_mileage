@@ -8933,13 +8933,27 @@ async function subscribePush(){
     return;
   }
 
-  // If swRegistration is not set yet, try to get it now
-  if(!swRegistration){
+  // 서비스 워커가 없거나 해제된 경우 재등록
+  if(!swRegistration || !swRegistration.active){
     try{
+      swRegistration = await navigator.serviceWorker.register('sw.js');
+      console.log('[Push] re-registered SW');
+      // Wait for activation
+      if(!swRegistration.active){
+        await new Promise(resolve=>{
+          if(swRegistration.installing||swRegistration.waiting){
+            const sw=swRegistration.installing||swRegistration.waiting;
+            sw.addEventListener('statechange',()=>{if(sw.state==='activated')resolve();});
+          }
+          navigator.serviceWorker.ready.then(()=>resolve());
+          setTimeout(resolve,3000); // fallback timeout
+        });
+      }
       swRegistration = await navigator.serviceWorker.ready;
-      console.log('[Push] got SW registration from .ready');
+      console.log('[Push] SW ready after re-register');
     }catch(e){
-      toast('서비스 워커가 준비되지 않았어요');return;
+      console.error('[Push] SW register failed:', e);
+      toast('서비스 워커 등록 실패: '+e.message);return;
     }
   }
   // Step 1: Request notification permission
@@ -8984,12 +8998,14 @@ async function subscribePush(){
 }
 
 async function unsubscribePush(){
-  if(!pushSubscription)return;
   try{
-    await pushSubscription.unsubscribe();
-    pushSubscription=null;
+    // Push 구독 해제
+    if(pushSubscription){
+      await pushSubscription.unsubscribe();
+      pushSubscription=null;
+    }
     localStorage.setItem(_LS_PREFIX+'push_enabled','false');
-    // Remove this device from Firestore
+    // Firestore에서 이 기기 비활성화
     const deviceId=getDeviceId();
     if(S.pushDevices&&S.pushDevices[deviceId]){
       S.pushDevices[deviceId].enabled=false;
@@ -8998,7 +9014,12 @@ async function unsubscribePush(){
     updatePushUI();
     toast('🔕 이 기기에서 알림이 해제됐어요');
   }catch(e){
-    toast('알림 해제 실패: '+e.message);
+    console.error('[Push] unsubscribe error:', e);
+    // 에러가 나도 UI는 업데이트
+    pushSubscription=null;
+    localStorage.setItem(_LS_PREFIX+'push_enabled','false');
+    updatePushUI();
+    toast('🔕 알림이 해제됐어요');
   }
 }
 
