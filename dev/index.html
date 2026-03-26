@@ -4795,7 +4795,7 @@ function renderCalDetail(dateStr){
       return `<div class="hist-item">
         <div class="hist-ico" style="background:var(--gn-lt)">${l.emoji}</div>
         <div style="flex:1"><div class="hist-nm">${l.name}</div><div class="hist-tm">${ap} ${h12}:${min}</div></div>
-        <div class="hist-pts">+${l.pts} 마일리지</div>
+        <div class="hist-pts">+${l.pts} M</div>
       </div>`;
     }).join('');
   }
@@ -5564,7 +5564,7 @@ function renderHistStats(){
   }else if(HP===7){periodLabel='최근 7일';}
   else if(HP===30){periodLabel='최근 30일';}
   document.getElementById('hist-period-lbl').textContent=periodLabel;
-  document.getElementById('hist-earned').textContent='+'+earned.toLocaleString()+' 마일리지';
+  document.getElementById('hist-earned').textContent='+'+earned.toLocaleString()+' M';
   renderTodaySummary();
 }
 function renderHistList(){
@@ -5576,7 +5576,7 @@ function renderHistList(){
       <div class="hist-ico">${i.emoji}</div>
       <div style="flex:1"><div class="hist-nm">${i.name}</div><div class="hist-tm">${fmt(i.ts)}</div></div>
       <div style="display:flex;align-items:center;gap:6px">
-        <div class="hist-pts${i.pts<0?' neg':''}">${i.pts>0?'+':''}${i.pts} 마일리지</div>
+        <div class="hist-pts${i.pts<0?' neg':''}">${i.pts>0?'+':''}${i.pts} M</div>
       </div>
     </div>`).join(''):'<div class="empty">아직 내역이 없어요</div>';
 }
