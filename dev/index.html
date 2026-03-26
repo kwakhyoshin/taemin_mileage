@@ -1477,7 +1477,6 @@ body.dark .bubble-speech-log{background:rgba(255,255,255,.12);color:rgba(255,255
     </div>
     <div class="auth-error" id="create2-error"></div>
     <button class="auth-btn" onclick="createStep2Next()">다음</button>
-    <button class="auth-btn secondary" onclick="showAuthScreen('create-1')" style="margin-top:8px">돌아가기</button>
   </div>
 </div>
 
@@ -1532,9 +1531,8 @@ body.dark .bubble-speech-log{background:rgba(255,255,255,.12);color:rgba(255,255
     <div class="auth-sub">가족 구성원에게 초대 링크를 공유하세요</div>
     <div id="invite-list"></div>
     <div class="auth-error" id="create5-error"></div>
-    <button class="auth-btn" onclick="createStep5Next()">다음</button>
-    <div class="auth-link" onclick="skipInvites()" style="font-size:12px;color:#94A3B8">나중에 할게요</div>
-    <button class="auth-btn secondary" onclick="createStep5Back()" style="margin-top:8px">돌아가기</button>
+    <button class="auth-btn" onclick="createStep5Next()">완료</button>
+    <div class="auth-link" onclick="skipInvites()" style="font-size:12px;color:#94A3B8">초대는 나중에 할게요</div>
   </div>
 </div>
 
@@ -2696,6 +2694,7 @@ function startCreateFamily(){
     childAccounts:{},inviteType:'link'
   };
   window._createState=_createState;
+  _saveFamilyDone=false; // 새 가입 시작 시 리셋
   showAuthScreen('create-1');
   renderRoleGrid();
 }
@@ -2911,7 +2910,7 @@ function checkGraphComplete(){
   if(btn)btn.disabled=!allFilled;
 }
 
-function createStep3Next(){
+async function createStep3Next(){
   const err=document.getElementById('create3-error');
   const childCount=_createState.members.filter(m=>m.role==='child'&&m.name.trim()).length;
 
@@ -2926,6 +2925,8 @@ function createStep3Next(){
     showAuthScreen('create-4');
   }else{
     _createState.mode='independent';
+    // 가족을 DB에 저장한 후 초대 화면으로
+    await saveFamilyToFirestore();
     showAuthScreen('create-5');
     renderInviteOptions();
   }
@@ -2937,7 +2938,9 @@ function selectMode(mode){
   document.getElementById('mode-unified').classList.toggle('selected',mode==='unified');
 }
 
-function createStep4Next(){
+async function createStep4Next(){
+  // 가족을 DB에 저장한 후 초대 화면으로
+  await saveFamilyToFirestore();
   showAuthScreen('create-5');
   renderInviteOptions();
 }
@@ -3081,8 +3084,14 @@ function renderDoneScreen(){
   document.getElementById('create-done-links').innerHTML=links?`<div>생성된 계정: ${links}</div>`:'';
 }
 
-async function createFamilyFinish(){
+// ── 가족을 Firestore에 저장 (초대 화면 진입 전 호출) ──
+let _saveFamilyDone=false;
+async function saveFamilyToFirestore(){
+  if(_saveFamilyDone) return; // 이미 저장됨
   try{
+    const btn=document.querySelector('#auth-create-3 .auth-btn, #auth-create-4 .auth-btn');
+    if(btn){btn.disabled=true;btn.textContent='저장 중...';}
+
     const pwdHash=await hashPassword(_createState.pwdHash);
     const familyId=generateFamilyId();
     const myMemberId=generateMemberId();
@@ -3099,7 +3108,6 @@ async function createFamilyFinish(){
       joinedAt:Date.now()
     };
 
-    // 구성원 추가 (자녀 계정 해싱은 별도 처리)
     const otherMembers=_createState.members.slice(1);
     const memberIds=[];
     for(let i=0;i<otherMembers.length;i++){
@@ -3125,6 +3133,10 @@ async function createFamilyFinish(){
       };
     }
 
+    // memberIds를 _createState에 저장 (초대링크에서 사용)
+    _createState._memberIds=memberIds;
+    _createState._myMemberId=myMemberId;
+
     const familyMeta={
       familyId,
       familyName:_createState.familyName,
@@ -3149,22 +3161,35 @@ async function createFamilyFinish(){
 
     await setDoc(familyDoc,newState);
 
+    // 글로벌 상태 업데이트
     S=newState;
     _familyId=docPath;
     currentUser=myMemberId;
+    DATA_DOC=familyDoc;
 
     localStorage.setItem(_LS_PREFIX+'family_id',docPath);
     localStorage.setItem(_LS_PREFIX+'current_user',myMemberId);
 
     rebuildMembersFromFamily();
-    hideAllAuth();
-    applyUserProfile();
-    renderAll();
-    toast(`🎉 ${_createState.familyName} 가족이 만들어졌어요!`);
+    _saveFamilyDone=true;
+
+    if(btn){btn.disabled=false;btn.textContent='다음';}
+    toast('✅ 가족이 등록되었어요!');
   }catch(e){
-    console.error('Family creation failed:',e);
-    toast('가족 만들기에 실패했어요');
+    console.error('Family save failed:',e);
+    toast('❌ 가족 등록에 실패했어요. 다시 시도해주세요.');
+    const btn=document.querySelector('#auth-create-3 .auth-btn, #auth-create-4 .auth-btn');
+    if(btn){btn.disabled=false;btn.textContent='다음';}
+    throw e; // 상위에서 처리
   }
+}
+
+// ── 완료 화면에서 시작하기 (이미 DB에 저장됨, 로그인만 처리) ──
+async function createFamilyFinish(){
+  hideAllAuth();
+  applyUserProfile();
+  renderAll();
+  toast(`🎉 ${_createState.familyName} 가족이 만들어졌어요!`);
 }
 
 // ── 비밀번호 해싱 유틸 ──
@@ -10510,7 +10535,7 @@ Object.assign(window, {
   admTab, switchDash,
   // Auth functions (multi-family)
   showAuthScreen, doLogin, logout, togglePwd,
-  startCreateFamily, createStep1Next, createStep2Next, createStep3Next, createStep4Next, createStep5Next, createStep5Back, createFamilyFinish, skipInvites,
+  startCreateFamily, createStep1Next, createStep2Next, createStep3Next, createStep4Next, createStep5Next, createFamilyFinish, skipInvites, saveFamilyToFirestore,
   renderRoleGrid, selectCreateRole, incrementMemberCount, decrementMemberCount,
   renderFamilyGraph, openNodeForm, saveNodeForm, closeNodeForm, checkGraphComplete,
   renderInviteOptions, toggleChildAccount, generateChildAccount, shareInviteLink, renderDoneScreen,
