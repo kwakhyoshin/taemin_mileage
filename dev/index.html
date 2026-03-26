@@ -2032,14 +2032,26 @@ body.dark .bubble-speech-log{background:rgba(255,255,255,.12);color:rgba(255,255
 
 <!-- ME MENU (from family popup) -->
 <div class="pfm-menu user-fm" id="me-fm-menu" style="display:none">
-  <div class="pfm-item" onclick="meFmAction('profile')">
+  <button class="pfm-item" onclick="meFmAction('admin')">
+    <svg class="pfm-ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+    <div class="pfm-txt"><div class="pfm-nm">관리자 페이지</div><div class="pfm-desc">설정 및 활동 관리</div></div>
+  </button>
+  <button class="pfm-item" onclick="meFmAction('profile')">
     <svg class="pfm-ico" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-    <div class="pfm-txt"><div class="pfm-nm">내 프로필</div><div class="pfm-desc">프로필 및 설정</div></div>
-  </div>
-  <div class="pfm-item" onclick="meFmAction('sent')">
+    <div class="pfm-txt"><div class="pfm-nm">프로필 사진 변경</div><div class="pfm-desc">내 프로필 사진 바꾸기</div></div>
+  </button>
+  <button class="pfm-item" onclick="meFmAction('mood')">
+    <svg class="pfm-ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+    <div class="pfm-txt"><div class="pfm-nm">기분 표현</div><div class="pfm-desc">지금 기분을 표현해봐요</div></div>
+  </button>
+  <button class="pfm-item" onclick="meFmAction('selfmsg')">
+    <svg class="pfm-ico" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+    <div class="pfm-txt"><div class="pfm-nm">나한테 메시지 보내기</div><div class="pfm-desc">푸시 알림 테스트</div></div>
+  </button>
+  <button class="pfm-item" onclick="meFmAction('sent')">
     <svg class="pfm-ico" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
     <div class="pfm-txt"><div class="pfm-nm">보낸 메시지</div><div class="pfm-desc">내가 보낸 메시지 확인</div></div>
-  </div>
+  </button>
 </div>
 
 <!-- MESSAGE POPUP -->
@@ -7507,9 +7519,23 @@ window.closeMeFm=closeMeFm;
 
 function meFmAction(action){
   closeMeFm();
-  if(action==='profile'){
+  if(action==='admin'){
     closeFamilyPopup();
-    goTab('adm');
+    if(!adminOK){
+      showPin('auth','🔐 관리자 인증','PIN 4자리를 입력하세요<br><span style="font-size:11px;color:var(--tx3)">(기본 PIN: 1234)</span>');
+    }else{
+      reallyGoTab('adm');
+    }
+  }else if(action==='profile'){
+    closeFamilyPopup();
+    if(!currentUser){toast('먼저 로그인해주세요');return;}
+    openAvatarEditor(currentUser);
+  }else if(action==='mood'){
+    closeFamilyPopup();
+    openMoodPop();
+  }else if(action==='selfmsg'){
+    if(!currentUser){toast('먼저 로그인해주세요');return;}
+    openMsgPop(currentUser,true);
   }else if(action==='sent'){
     openSentMsgList();
   }
