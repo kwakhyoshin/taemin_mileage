@@ -7565,7 +7565,8 @@ function openFamilyPopup(){
   bg.className='family-popup-bg';
   bg.id='family-popup-bg';
   bg.onclick=function(){
-    // If any sub-popup is open, close it first and stay
+    // Dim click: close sub-popups if any, but NEVER close family popup
+    // Family popup closes only via X button
     const ufm=document.getElementById('user-fm-menu');
     const mfm=document.getElementById('me-fm-menu');
     const msgPop=document.getElementById('msg-pop');
@@ -7582,12 +7583,10 @@ function openFamilyPopup(){
       if(msgList&&msgList.style.display==='flex')closeMsgList();
       if(moodPop&&moodPop.style.display==='block')closeMoodPop();
       if(avatarOverlay&&avatarOverlay.classList.contains('open'))cancelAvatarEditor();
-      // Deselect all icons
       const fp=document.getElementById('family-popup');
       if(fp)fp.querySelectorAll('.family-popup-item.selected').forEach(el=>el.classList.remove('selected'));
-      return;
     }
-    closeFamilyPopup();
+    // Do NOT closeFamilyPopup() — only X button does that
   };
   document.body.appendChild(bg);
 
