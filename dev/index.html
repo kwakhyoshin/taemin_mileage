@@ -2301,6 +2301,11 @@ body.dark .bubble-speech-log{background:rgba(255,255,255,.12);color:rgba(255,255
     <svg class="pfm-ico" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
     <div class="pfm-txt"><div class="pfm-nm">나한테 메시지 보내기</div><div class="pfm-desc">푸시 알림 테스트</div></div>
   </button>
+  <div style="border-top:1px solid var(--bdr);margin:4px 0"></div>
+  <button class="pfm-item" onclick="pfMenuAction('logout')" style="opacity:.7">
+    <svg class="pfm-ico" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    <div class="pfm-txt"><div class="pfm-nm">로그아웃</div><div class="pfm-desc">계정에서 로그아웃</div></div>
+  </button>
 </div>
 
 <!-- MOOD SELECTOR -->
@@ -2576,27 +2581,56 @@ function rebuildMembersFromFamily(){
   const fm = (S.familyMeta && S.familyMeta.members) || {};
   MEMBERS = {};
   AVATARS = {};
-  Object.entries(fm).forEach(([mid, m])=>{
-    const rd=ROLE_DEFS[m.role]||ROLE_DEFS.child;
-    MEMBERS[mid] = {
-      name: m.name || rd.label || '구성원',
-      icon: '👤', // fallback only
-      greeting: `안녕, ${m.name}!`,
-      role: rd.label || m.role,
-      color: m.color || rd.color || '#F1F5F9',
-      textColor: rd.textColor || '#64748B',
-      memberType: rd.type || 'parent',
-      isAdmin: !!m.isAdmin
+
+  if(Object.keys(fm).length > 0){
+    // 다가족 모드: familyMeta에서 구성원 빌드
+    Object.entries(fm).forEach(([mid, m])=>{
+      const rd=ROLE_DEFS[m.role]||ROLE_DEFS.child;
+      MEMBERS[mid] = {
+        name: m.name || rd.label || '구성원',
+        icon: '👤',
+        greeting: `안녕, ${m.name}!`,
+        role: rd.label || m.role,
+        color: m.color || rd.color || '#F1F5F9',
+        textColor: rd.textColor || '#64748B',
+        memberType: rd.type || 'parent',
+        isAdmin: !!m.isAdmin
+      };
+      const c = m.color || rd.color || '#F1F5F9';
+      const tc = rd.textColor || '#64748B';
+      AVATARS[mid] = `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="20" cy="20" r="20" fill="${c}"/>
+        <g transform="translate(8,8)" stroke="${tc}" fill="none" stroke-width="1.8" stroke-linecap="round">
+          <circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/>
+        </g></svg>`;
+    });
+  } else {
+    // 레거시 모드: S.users 기반 하드코딩 폴백
+    const legacyMap = {
+      taemin: { name:'태민', role:'child', color:'#DBEAFE', textColor:'#3B82F6', type:'child' },
+      dad:    { name:'아빠', role:'dad',   color:'#DBEAFE', textColor:'#3B82F6', type:'parent' },
+      mom:    { name:'엄마', role:'mom',   color:'#FCE7F3', textColor:'#EC4899', type:'parent' }
     };
-    const c = m.color || rd.color || '#F1F5F9';
-    const tc = rd.textColor || '#64748B';
-    // SVG 아바타: 원형 배경 + person 아이콘
-    AVATARS[mid] = `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="${c}"/>
-      <g transform="translate(8,8)" stroke="${tc}" fill="none" stroke-width="1.8" stroke-linecap="round">
-        <circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/>
-      </g></svg>`;
-  });
+    const users = S.users || {};
+    Object.keys(users).forEach(uid => {
+      const info = legacyMap[uid] || { name:uid, role:'child', color:'#F1F5F9', textColor:'#64748B', type:'parent' };
+      MEMBERS[uid] = {
+        name: info.name,
+        icon: '👤',
+        greeting: `안녕, ${info.name}!`,
+        role: ROLE_DEFS[info.role]?.label || info.role,
+        color: info.color,
+        textColor: info.textColor,
+        memberType: info.type,
+        isAdmin: info.type === 'parent'
+      };
+      AVATARS[uid] = `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="20" cy="20" r="20" fill="${info.color}"/>
+        <g transform="translate(8,8)" stroke="${info.textColor}" fill="none" stroke-width="1.8" stroke-linecap="round">
+          <circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/>
+        </g></svg>`;
+    });
+  }
 }
 
 let currentUser = null;
@@ -8509,6 +8543,8 @@ function pfMenuAction(action){
   }else if(action==='selfmsg'){
     if(!currentUser){toast('먼저 로그인해주세요');return;}
     openMsgPop(currentUser);
+  }else if(action==='logout'){
+    logout();
   }
 }
 window.openPfMenu=openPfMenu;
