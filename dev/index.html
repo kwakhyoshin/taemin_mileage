@@ -8591,6 +8591,12 @@ function closeEP(){document.getElementById('ep-pop').classList.remove('open');do
 // ── TABS / MODAL ──────────────────────────────
 function goTab(tab){
   if(tab==='adm'){
+    // 자녀 역할은 관리자 접근 차단
+    const member=S.familyMeta?.members?.[currentUser];
+    if(member&&member.role==='child'){
+      toast('관리자 권한이 없습니다');
+      return;
+    }
     // 관리 탭은 플로팅 메뉴를 먼저 띄움
     openPfMenu();
     return;
@@ -8618,6 +8624,13 @@ function openPfMenu(){
   document.getElementById('pfm-bg').style.display='block';
   const menu=document.getElementById('pfm-menu');
   menu.style.display='block';
+  // 자녀 역할은 관리자 메뉴 숨기기
+  const adminBtn=menu.querySelector('[onclick*="admin"]');
+  if(adminBtn){
+    const member=S.familyMeta?.members?.[currentUser];
+    const isChild=member&&member.role==='child';
+    adminBtn.style.display=isChild?'none':'';
+  }
   positionMenuAboveIcon(menu);
 }
 function closePfMenu(){
@@ -9163,6 +9176,13 @@ function onMeIconClick(){
   closeUserFm();
   _familyFlowActive=true;
   const menu=document.getElementById('me-fm-menu');
+  // 자녀 역할은 관리자 메뉴 숨기기
+  const adminBtn=menu.querySelector('[onclick*="admin"]');
+  if(adminBtn){
+    const member=S.familyMeta?.members?.[currentUser];
+    const isChild=member&&member.role==='child';
+    adminBtn.style.display=isChild?'none':'';
+  }
   menu.style.left='50%';
   menu.style.top='40%';
   menu.style.bottom='auto';
@@ -10750,6 +10770,24 @@ window._createState = _createState;
           if(incoming.stickers && Array.isArray(incoming.stickers)){
             const localIds=new Set((S.stickers||[]).map(s=>s.id));
             incoming.stickers.forEach(s=>{if(!localIds.has(s.id)){if(!S.stickers)S.stickers=[];S.stickers.push(s);}});
+            renderAll();
+          }
+          // Merge photos from other devices (다른 가족이 변경한 프로필 사진)
+          if(incoming.photos){
+            if(!S.photos)S.photos={};
+            let photoChanged=false;
+            for(const [uid,url] of Object.entries(incoming.photos)){
+              if(S.photos[uid]!==url){
+                S.photos[uid]=url;
+                photoChanged=true;
+              }
+            }
+            if(photoChanged){applyUserProfile();renderAll();}
+          }
+          // Merge familyMeta.members 변경사항 (이름, 역할 등)
+          if(incoming.familyMeta&&incoming.familyMeta.members){
+            S.familyMeta=incoming.familyMeta;
+            rebuildMembersFromFamily();
             renderAll();
           }
         }catch(e){}
