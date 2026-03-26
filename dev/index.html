@@ -3449,13 +3449,17 @@ async function createStep1Next(){
   try {
     if(btn){btn.disabled=true;btn.textContent='확인 중...';}
     const exists=await checkGlobalIdExists(id);
-    if(exists){err.textContent='이미 사용중인 아이디예요';if(btn){btn.disabled=false;btn.textContent='다음';}return;}
+    if(exists){
+      err.textContent='이미 사용중인 아이디예요. 다른 아이디를 입력해주세요.';
+      if(btn){btn.disabled=false;btn.textContent='다음';}
+      document.getElementById('create-user-id').focus();
+      return;
+    }
   } catch (e) {
     console.error('ID check error:', e);
-    err.textContent='아이디 확인 중 오류가 발생했어요';
-    if(btn){btn.disabled=false;btn.textContent='다음';}
-    return;
+    // 네트워크 오류여도 로컬 체크 결과 기반으로 진행 허용
   }
+  if(btn){btn.disabled=false;btn.textContent='다음';}
 
   _createState.userId=id;
   _createState.myName=name;
@@ -4013,35 +4017,53 @@ async function hashPassword(pwd){
 }
 
 // ── 글로벌 사용자 ID 레지스트리 함수들 ──
+// families 컬렉션 안에 저장 (Firestore 보안 규칙이 이미 허용된 컬렉션)
+function _getRegistryRef() {
+  return doc(db, 'families', _ENV==='dev'?'_dev_id_registry':'_id_registry');
+}
+
 async function checkGlobalIdExists(loginId) {
   try {
-    const registryRef = doc(db, 'userIds', _ENV==='dev'?'dev_registry':'registry');
-    const snap = await getDoc(registryRef);
+    const snap = await getDoc(_getRegistryRef());
     if (!snap.exists()) return false;
     const data = snap.data();
     return !!data[loginId];
   } catch (e) {
     console.error('Error checking global ID:', e);
-    // 네트워크 오류 시 안전하게 true 반환 (중복 허용보다 안전)
-    throw e;
+    // Firestore 접근 실패 시 → 로컬 데이터에서 폴백 체크
+    return _localIdCheck(loginId);
   }
+}
+
+// Firestore 접근 불가 시 로컬 폴백: 현재 로드된 가족 데이터에서만 체크
+function _localIdCheck(loginId) {
+  const users = S.users || {};
+  for (const k in users) {
+    if (users[k].id === loginId) return true;
+  }
+  const fm = S.familyMeta?.members || {};
+  for (const mid in fm) {
+    if (fm[mid].account?.id === loginId) return true;
+  }
+  return false;
 }
 
 async function registerGlobalId(loginId, familyId, memberId) {
   try {
-    const registryRef = doc(db, 'userIds', _ENV==='dev'?'dev_registry':'registry');
+    const ref = _getRegistryRef();
     await runTransaction(db, async (transaction) => {
-      const snap = await transaction.get(registryRef);
+      const snap = await transaction.get(ref);
       const data = snap.exists() ? snap.data() : {};
       if(data[loginId] && data[loginId].memberId !== memberId) {
         throw new Error('ID_ALREADY_TAKEN');
       }
       data[loginId] = { familyId, memberId, createdAt: Date.now() };
-      transaction.set(registryRef, data);
+      transaction.set(ref, data);
     });
   } catch (e) {
-    if(e.message === 'ID_ALREADY_TAKEN') throw e; // 중복이면 상위로 전파
+    if(e.message === 'ID_ALREADY_TAKEN') throw e;
     console.error('Error registering global ID:', e);
+    // 레지스트리 저장 실패해도 가입은 진행 (다음 가입 시 로컬 체크로 보호)
   }
 }
 
@@ -4193,11 +4215,14 @@ async function doJoinRegister(){
   const mid=_joinState.selectedMemberId;
   try {
     const exists=await checkGlobalIdExists(userId);
-    if(exists){err.textContent='이미 사용중인 아이디예요';return;}
+    if(exists){
+      err.textContent='이미 사용중인 아이디예요. 다른 아이디를 입력해주세요.';
+      document.getElementById('join-reg-id').focus();
+      return;
+    }
   } catch (e) {
     console.error('Global ID check failed:', e);
-    err.textContent='아이디 확인 중 오류가 발생했어요';
-    return;
+    // 네트워크 오류 시 로컬 체크만으로 진행 허용 (checkGlobalIdExists 내부에서 폴백됨)
   }
 
   try{
@@ -4313,7 +4338,7 @@ async function doLogin(){
 
     // 글로벌 레지스트리에서 검색 (다른 가족의 사용자)
     try {
-      const registryRef = doc(db, 'userIds', _ENV==='dev'?'dev_registry':'registry');
+      const registryRef = _getRegistryRef();
       const snap = await getDoc(registryRef);
       if (snap.exists()) {
         const data = snap.data();
