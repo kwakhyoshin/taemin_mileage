@@ -4883,6 +4883,7 @@ async function doLogin(){
     // 글로벌 레지스트리에서 검색 (다른 가족의 사용자)
     try {
       const registryRef = _getRegistryRef();
+      if(!registryRef){console.warn('[mile.ly] Firebase not ready — registry lookup skipped');throw new Error('Firebase not ready');}
       const snap = await getDoc(registryRef);
       if (snap.exists()) {
         const data = snap.data();
@@ -4912,6 +4913,9 @@ async function doLogin(){
                 if (!S.users) S.users = {};
                 S.users[otherMid] = {id, pwdHash: pwdHashSalted, v: 2};
                 await save();
+                // 리스너를 새 DATA_DOC으로 재연결
+                if(_dataListenerUnsub){try{_dataListenerUnsub();}catch(_e){}}
+                try{_dataListenerUnsub=onSnapshot(DATA_DOC,(snap)=>{if(!snap.exists())return;if(_isSaving)return;if(Date.now()-_lastSaveTime<2000)return;const _ij=JSON.stringify(snap.data());if(_ij===_lastSavedJSON||_ij===JSON.stringify(S))return;if(!_hasDirtyLocal){S=Object.assign(defaultState(),snap.data());_lastSavedJSON=_ij;rebuildMembersFromFamily();renderAll();checkNewMessages();renderNavUsers();}});}catch(_e){}
                 currentUser = otherMid;
                 localStorage.setItem(_LS_PREFIX+'current_user', otherMid);
                 syncMemberToGlobal(); // Load member data for this user
@@ -5180,6 +5184,7 @@ if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di)_di.s
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
 let fbApp, db, LEGACY_DOC, DATA_DOC;
 let _firebaseReady = false;
+let _dataListenerUnsub = null; // onSnapshot 구독 해제 함수
 
 async function _initFirebase(){
   try {
@@ -12940,8 +12945,17 @@ window._createState = _createState;
       const data = snap.data();
       S = Object.assign(defaultState(), data);
     } else if(_familyId) {
-      // 가족 문서가 없어짐 — 초기 화면으로
-      S = defaultState();
+      // 가족 문서가 없어짐 — stale localStorage 정리 후 레거시 doc으로 폴백
+      console.warn('[mile.ly] Family doc not found, clearing stale family_id:', _familyId);
+      localStorage.removeItem(_LS_PREFIX+'family_id');
+      localStorage.removeItem(_LS_PREFIX+'current_user');
+      _familyId = null;
+      DATA_DOC = LEGACY_DOC;
+      try {
+        const legSnap = _firebaseReady ? await getDoc(LEGACY_DOC) : {exists:()=>false};
+        if(legSnap.exists()) S = Object.assign(defaultState(), legSnap.data());
+        else S = defaultState();
+      } catch(_e) { S = defaultState(); }
     } else {
       // 레거시 첫 실행 또는 신규 — 웰컴 화면 표시
       S = defaultState();
@@ -13018,7 +13032,7 @@ window._createState = _createState;
 
   // Real-time listener — auto-sync when another device changes data
   try{
-    onSnapshot(DATA_DOC, (snap)=>{
+    _dataListenerUnsub = onSnapshot(DATA_DOC, (snap)=>{
       if(!snap.exists()) return;
 
       const incomingJSON = JSON.stringify(snap.data());
