@@ -8780,6 +8780,7 @@ async function sendFamilyInvite(memberId) {
     token: inviteToken,
     memberId: memberId,
     createdAt: Date.now(),
+    expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7일 후 만료
     type: 'invite'
   };
   S.familyMeta.inviteTokens.push(tokenEntry);
@@ -10829,7 +10830,7 @@ async function checkUrlParams(){
 
       const fm=S.familyMeta?.members||{};
       const tokens=S.familyMeta?.inviteTokens||[];
-      const validToken=tokens.find(t=>t.token===token&&t.expiresAt>Date.now());
+      const validToken=tokens.find(t=>t.token===token&&(!t.expiresAt||t.expiresAt>Date.now()));
 
       if(!validToken){
         toast('❌ 만료되거나 유효하지 않은 초대 링크예요');
@@ -11616,8 +11617,11 @@ renderDevUserSwitch();
 
 // Initialize SW
 initServiceWorker();
-// Check if opened from notification click
-setTimeout(()=>{ if(typeof checkUrlParams==='function')checkUrlParams(); },1000);
+// Check if opened from notification click (invite links are handled earlier in INIT)
+setTimeout(()=>{
+  const p=new URLSearchParams(window.location.search);
+  if(!p.get('invite') && typeof checkUrlParams==='function') checkUrlParams();
+},1000);
 
 // ── PASSWORD TOGGLE ──────────────────────────
 function togglePwd(inputId, btn) {
@@ -11991,9 +11995,26 @@ window._createState = _createState;
 
   hideLoading();
 
-  // 인증 체크 - 로그인 안되어 있으면 로그인 화면 표시
-  checkAuth();
-  
+  // ── 초대 링크가 있으면 먼저 처리 (checkAuth보다 선행) ──
+  const _urlParams = new URLSearchParams(window.location.search);
+  const _hasInvite = !!_urlParams.get('invite');
+  if(_hasInvite && _firebaseReady){
+    await checkUrlParams();
+    // checkUrlParams가 join-register 등 auth 화면을 이미 띄웠으면 checkAuth 건너뛰기
+    const joinScreen = document.getElementById('auth-join-register');
+    const autoScreen = document.getElementById('auth-join-select');
+    if((joinScreen && !joinScreen.classList.contains('hidden')) ||
+       (autoScreen && !autoScreen.classList.contains('hidden')) || currentUser){
+      // 초대 처리 완료 — checkAuth 건너뛰기
+      console.log('[mile.ly] Invite link handled, skipping checkAuth');
+    } else {
+      checkAuth();
+    }
+  } else {
+    // 인증 체크 - 로그인 안되어 있으면 로그인 화면 표시
+    checkAuth();
+  }
+
   loadDarkPref(); // localStorage에서 개인 다크모드 설정 로드
   applyUserProfile(); // 로그인된 사용자 프로필 적용 (인사말 포함)
   cleanExpiredStickers(); // 하루 지난 스티커 자동 삭제
@@ -12160,6 +12181,8 @@ window._createState = _createState;
   window.addEventListener('scroll', updateHeaderCompact, {passive:true});
   window.addEventListener('resize', updateHeaderCompact, {passive:true});
   window.addEventListener('orientationchange', ()=>{setTimeout(updateHeaderCompact,100);});
+  // Initial call to set --sec-sticky-top on page load
+  requestAnimationFrame(updateHeaderCompact);
 
   // ── iOS Weather-style: 섹션 제목 스티키 + 자연스러운 페이드 아웃 ──
   // .sec-group 래퍼 안의 .sec 제목이 sticky로 상단 고정되고,
