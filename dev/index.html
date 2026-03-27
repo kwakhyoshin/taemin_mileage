@@ -161,7 +161,7 @@ body.dark .nav-container.docked .bottom-nav{background:linear-gradient(var(--tab
 .top{padding:52px 18px 10px;display:flex;justify-content:space-between;align-items:flex-start}
 .top-l h1{font-size:32px;font-weight:900;color:var(--tx)}
 .top-l p{font-size:15px;color:var(--tx2);margin-top:2px;font-weight:600}
-.dtog{width:52px;height:28px;border-radius:14px;background:var(--bdr2);border:none;cursor:pointer;position:relative;margin-top:6px;transition:background .25s;flex-shrink:0}
+.dtog{width:52px;height:28px;min-height:28px;max-height:28px;border-radius:14px;background:var(--bdr2);border:none;cursor:pointer;position:relative;margin-top:6px;transition:background .25s;flex-shrink:0;align-self:flex-start;padding:0;box-sizing:content-box}
 body.dark .dtog{background:#334155}
 .dtog-in{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:11px;background:#fff;transition:transform .25s;display:flex;align-items:center;justify-content:center;font-size:13px;line-height:1}
 body.dark .dtog-in{transform:translateX(24px)}
@@ -875,17 +875,21 @@ body.dark .nav-family-btn{background:rgba(99,102,241,.15)}
 @keyframes fpBounceSelect{0%{transform:scale(1)}40%{transform:scale(1.25)}70%{transform:scale(1.12)}100%{transform:scale(1.18)}}
 .family-popup-lines{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
 .family-popup-lines line{stroke:rgba(255,255,255,.25);stroke-width:2;stroke-dasharray:4 3}
+.family-popup-lines path{fill:none;stroke:rgba(255,255,255,.3);stroke-width:2.5;stroke-linecap:round}
+.family-popup-lines circle.line-dot{fill:rgba(255,255,255,.5)}
 .family-popup-top{display:flex;gap:50px;position:relative;z-index:1}
 .family-popup-bottom{margin-top:16px;position:relative;z-index:1}
 .family-popup-item{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .2s}
 .family-popup-item:active{transform:scale(.9)}
 .family-popup-item.selected .family-popup-avatar{animation:fpBounceSelect .35s cubic-bezier(.34,1.56,.64,1) forwards;border-color:#fff;box-shadow:0 0 0 3px var(--tab-color,#6366F1),0 6px 24px rgba(0,0,0,.3)}
-.family-popup-avatar{width:54px;height:54px;border-radius:50%;overflow:visible;border:2.5px solid rgba(255,255,255,.55);box-shadow:0 4px 16px rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;background:var(--card);position:relative;transition:border-color .2s,box-shadow .2s}
+.family-popup-avatar{width:58px;height:58px;border-radius:50%;overflow:visible;border:3px solid rgba(255,255,255,.6);box-shadow:0 4px 20px rgba(0,0,0,.25),0 0 0 1px rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;background:var(--card);position:relative;transition:border-color .2s,box-shadow .2s,transform .2s}
 body.dark .family-popup-avatar{border-color:rgba(255,255,255,.3)}
 body.dark .family-popup-item.selected .family-popup-avatar{border-color:rgba(255,255,255,.8);box-shadow:0 0 0 3px var(--tab-color,#6366F1),0 6px 24px rgba(0,0,0,.4)}
 .family-popup-avatar svg,.family-popup-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
-.family-popup-name{font-size:11px;font-weight:800;color:rgba(255,255,255,.75);text-shadow:0 1px 4px rgba(0,0,0,.4);white-space:nowrap;transition:color .2s}
-.family-popup-item.selected .family-popup-name{color:#fff;font-size:12px}
+.family-popup-name{font-size:12px;font-weight:800;color:rgba(255,255,255,.85);text-shadow:0 1px 4px rgba(0,0,0,.4);white-space:nowrap;transition:color .2s}
+.family-popup-role{font-size:9px;font-weight:700;color:rgba(255,255,255,.5);text-shadow:0 1px 2px rgba(0,0,0,.3);white-space:nowrap;margin-top:-3px}
+.family-popup-item.selected .family-popup-name{color:#fff;font-size:13px}
+.family-popup-item.selected .family-popup-role{color:rgba(255,255,255,.7)}
 .family-popup-mood{position:absolute;bottom:-2px;right:-2px;font-size:12px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.3))}
 .family-popup-unread{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;background:#EF4444;color:#fff;font-size:9px;font-weight:900;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 5px;box-shadow:0 2px 6px rgba(239,68,68,.4);line-height:1}
 .family-popup-close{margin-top:16px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.15);color:rgba(255,255,255,.8);font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;position:relative;z-index:1;-webkit-tap-highlight-color:transparent}
@@ -2201,7 +2205,7 @@ button:disabled {
 <div class="scr on" id="s-home">
   <div class="home-top">
     <div id="home-top-content">
-      <h1 id="greeting-txt">안녕, 태민아! 👋</h1>
+      <h1 id="greeting-txt">안녕하세요! 👋</h1>
       <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:4px">
         <p id="today-str" style="margin:0;font-size:12px;color:rgba(255,255,255,.8)"></p>
         <div id="weather-badge" style="display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.2);padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;color:#fff">
@@ -2220,7 +2224,7 @@ button:disabled {
   </div>
   <div class="hero">
     <div class="streak-pill" id="streak-pill">🔥 0일 연속</div>
-    <div class="hero-lbl">태민이의 마일리지</div>
+    <div class="hero-lbl" id="hero-lbl">나의 마일리지</div>
     <div style="display:flex;align-items:flex-end;gap:6px;margin:4px 0">
       <span class="hero-pts" id="hero-pts">0</span><span class="hero-unit">M</span>
     </div>
@@ -2273,7 +2277,7 @@ button:disabled {
 <div class="scr" id="s-hist">
   <div class="hist-hero">
     <h2>성과 &amp; 통계 <svg class="hdr-ico" viewBox="0 0 24 24"><path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9"/><path d="M21 3l-9 9"/><path d="M15 3h6v6"/></svg></h2>
-    <p>태민이의 활동 분석</p>
+    <p id="hist-hero-sub">나의 활동 분석</p>
     <div class="hdr-stats hdr-stats-5" id="hist-hdr-stats">
       <div class="hdr-stat"><div class="hdr-stat-num" id="hist-hdr-pts">0</div><div class="hdr-stat-lbl">보유 마일리지</div></div>
       <div class="hdr-stat-divider"></div>
@@ -4387,6 +4391,12 @@ function applyUserProfile() {
     greetingEl.textContent = greetingTxt || `안녕, ${member.name}! 👋`;
   }
 
+  // Update hero label & stats header with user name
+  const heroLbl = document.getElementById('hero-lbl');
+  if(heroLbl) heroLbl.textContent = `${member.name}의 마일리지`;
+  const histSub = document.getElementById('hist-hero-sub');
+  if(histSub) histSub.textContent = `${member.name}의 활동 분석`;
+
   // Update admin tab profile section
   const admIcon = document.getElementById('profile-icon-adm');
   const admName = document.getElementById('profile-name-adm');
@@ -4647,11 +4657,9 @@ function defaultState(){
     settings:{streakBonus:true,streakBonusPts:100,pinHash:'',msgMode:'auto',customMsg:''},
     actDone:{},
     dark:false,
-    greeting:'안녕, 태민아! 👋', // deprecated, kept for backwards compat
+    greeting:'안녕하세요! 👋', // deprecated, kept for backwards compat
     greetings:{
-      taemin:{mode:'auto',messages:['안녕, 태민아! 오늘도 화이팅! 👋','태민아, 오늘은 뭘 해볼까? 🌟','좋은 아침! 오늘도 파이팅 💪','태민이, 열심히 해볼까? 🎯'],custom:'',currentIdx:0},
-      dad:{mode:'auto',messages:['좋은 아침, 효신님! 💪','하루를 시작해볼까요? 👋','오늘도 화이팅! 💼','힘내세요! 🌟'],custom:'',currentIdx:0},
-      mom:{mode:'auto',messages:['좋은 아침입니다! 🌸','오늘도 행복한 하루 되세요 💝','힘내세요! 💪','화이팅! 🌟'],custom:'',currentIdx:0}
+      // Legacy defaults — new accounts use dynamic _makeGreetingPool() instead
     },
     customBadges:[], // Array of custom badges
     badgeOverrides:{}, // Overrides for built-in badges {badgeId: {name, emoji, desc, ...}}
@@ -4814,7 +4822,7 @@ function loadDarkPref(){
 }
 
 // ── SMART MESSAGE SYSTEM ─────────────────────
-const DAILY_MSGS=['오늘도 멋진 하루 보내자! 💪','화이팅! 넌 할 수 있어! ⭐','좋은 아침이야! 🌅','잘 잤어? 오늘도 파이팅! 💫','태민아, 오늘도 응원해! 🎯','새로운 하루가 시작됐어! 🌈'];
+const DAILY_MSGS=['오늘도 멋진 하루 보내자! 💪','화이팅! 넌 할 수 있어! ⭐','좋은 아침이야! 🌅','잘 잤어? 오늘도 파이팅! 💫','오늘도 응원해! 🎯','새로운 하루가 시작됐어! 🌈'];
 const WEATHER_MSGS={sunny:{icon:'☀️',msg:'날씨가 화창해! 밖에서 놀기 좋은 날이야 🌳'},cloudy:{icon:'☁️',msg:'구름이 많지만 기분은 맑게! ⛅'},rainy:{icon:'🌧️',msg:'비가 오네! 우산 챙겼어? 🌂'},snowy:{icon:'❄️',msg:'눈이 와요! 따뜻하게 입고 다녀! ⛄'}};
 // 미세먼지 기준: PM10(미세) 0-30좋음, 31-80보통, 81-150나쁨, 151+매우나쁨 / PM2.5(초미세) 0-15좋음, 16-35보통, 36-75나쁨, 76+매우나쁨
 const DUST_GRADES={good:{level:'좋음',color:'#10B981',bgColor:'#D1FAE5',txtColor:'#065F46'},moderate:{level:'보통',color:'#FBBF24',bgColor:'#FEF3C7',txtColor:'#92400E'},bad:{level:'나쁨',color:'#F97316',bgColor:'#FFEDD5',txtColor:'#C2410C',msg:'마스크 쓰고 나가자! 😷'},worst:{level:'매우나쁨',color:'#EF4444',bgColor:'#FEE2E2',txtColor:'#B91C1C',msg:'오늘은 실내에서 놀자! 🏠'}};
@@ -5757,18 +5765,53 @@ function getTimePeriod(){
   if(h>=17&&h<21)return 'evening';
   return 'night';
 }
+// Generate time-based greeting for any user by name
+function _makeGreetingPool(name, isChild){
+  if(isChild){
+    return {
+      morning:[`좋은 아침, ${name}아! ☀️`,`${name}아, 오늘도 화이팅! 👋`,`일어났어? 오늘도 멋진 하루! 🌅`,`${name}아, 좋은 아침이야! 💪`],
+      afternoon:[`${name}아, 오늘 잘하고 있어! 🌟`,`${name}아, 오후도 파이팅! 💪`,`${name}아, 열심히 해볼까? 🎯`,`${name}아, 힘내자! ⭐`],
+      evening:[`${name}아, 오늘 수고했어! 🌙`,`${name}아, 오늘 하루 어땠어? ✨`,`${name}아, 잘 마무리하자! 🌟`,`오늘도 멋진 하루였어! 💫`],
+      night:[`${name}아, 곧 잘 시간이야! 🌜`,`${name}아, 오늘 잘했어! 😴`,`푹 자고 내일 또 만나! 💤`,`${name}아, 좋은 꿈 꿔! 🌙`]
+    };
+  }
+  return {
+    morning:[`좋은 아침, ${name}님! ☀️`,`오늘 하루도 시작해볼까요! 👋`,`활기찬 아침이에요! 💪`,`좋은 아침입니다! 🌅`],
+    afternoon:[`오후도 화이팅! 💼`,`오늘 잘 보내고 계시죠? 🌟`,`힘내세요! 오후도 파이팅! 💪`,`좋은 오후예요! ⭐`],
+    evening:[`수고하셨습니다! 🌙`,`오늘 하루 고생하셨어요! ✨`,`편안한 저녁 보내세요! 🌟`,`좋은 저녁이에요! 💫`],
+    night:[`오늘도 수고하셨어요! 🌜`,`편안한 밤 되세요! 😴`,`좋은 꿈 꾸세요! 💤`,`푹 쉬세요! 🌙`]
+  };
+}
+
 // Get current greeting for a user
 function getCurrentGreeting(userId){
   const gr=S.greetings?.[userId];
   if(!gr){
-    return S.greeting||'안녕하세요!';
+    // No greeting settings — generate dynamically from member name
+    const member=MEMBERS[userId];
+    const name=member?.name||'';
+    if(!name) return S.greeting||'안녕하세요! 👋';
+    const isChild=member?.memberType==='child';
+    const period=getTimePeriod();
+    const pool=_makeGreetingPool(name,isChild)[period];
+    const now=new Date();
+    const slot=Math.floor(now.getHours()/3);
+    const doy=Math.floor((now-new Date(now.getFullYear(),0,0))/86400000);
+    return pool[(doy*8+slot)%pool.length];
   }
   if(gr.mode==='manual'){
     return gr.custom||'안녕하세요!';
   }
-  // Auto mode: pick time-appropriate message, rotate every 3 hours
+  // Auto mode: generate dynamic pool from member name, fall back to static TIME_GREETINGS
   const period=getTimePeriod();
-  const pool=(TIME_GREETINGS[userId]&&TIME_GREETINGS[userId][period])||(gr.messages||['안녕하세요!']);
+  let pool=(TIME_GREETINGS[userId]&&TIME_GREETINGS[userId][period]);
+  if(!pool){
+    const member=MEMBERS[userId];
+    const name=member?.name||userId;
+    const isChild=member?.memberType==='child';
+    pool=_makeGreetingPool(name,isChild)[period];
+  }
+  if(!pool||!pool.length) pool=gr.messages||['안녕하세요!'];
   const now=new Date();
   const slot=Math.floor(now.getHours()/3);
   const doy=Math.floor((now-new Date(now.getFullYear(),0,0))/86400000);
@@ -5794,7 +5837,7 @@ function renderAll(){
 function renderHero(){
   // 인사말은 applyUserProfile에서 관리하므로 여기서는 로그인 안 된 경우만 처리
   if (!currentUser) {
-    document.getElementById('greeting-txt').textContent=S.greeting||'안녕, 태민아! 👋';
+    document.getElementById('greeting-txt').textContent=S.greeting||'안녕하세요! 👋';
   }else{
     const greetingTxt=getCurrentGreeting(currentUser);
     const el=document.getElementById('greeting-txt');
@@ -6075,7 +6118,7 @@ function getBadgeMeaning(badge){
     'study_15':'꾸준한 학습이 진짜 실력을 만들어요. 이미 충분히 대단해요!',
     'study_30':'30번의 공부는 정말 대단한 노력이에요. 공부가 일상이 된 거예요!',
     'study_50':'50번이라니! 공부의 즐거움을 알게 된 거예요!',
-    'study_100':'100번의 공부! 이제 공부는 태민이의 일상이 되었어요!',
+    'study_100':'100번의 공부! 이제 공부가 일상이 되었어요!',
     'study_streak14':'2주 연속 공부는 정말 놀라운 끈기예요!',
     'homework_10':'숙제를 스스로 챙기는 습관은 평생의 보물이에요!',
     'extra_5':'스스로 더 공부하려는 마음이 진짜 실력을 만들어요!',
@@ -9984,7 +10027,6 @@ function openFamilyPopup(){
   closeFamilyPopup();
 
   const allIds=Object.keys(MEMBERS);
-  const userLabels={taemin:'태민',dad:'아빠',mom:'엄마'};
   const others=allIds.filter(id=>id!==currentUser);
 
   // Create background — click closes sub-popups first, then family popup
@@ -10039,20 +10081,22 @@ function openFamilyPopup(){
   const topRow=document.createElement('div');
   topRow.className='family-popup-top';
   others.forEach(id=>{
-    const name=userLabels[id]||MEMBERS[id].name;
+    const name=MEMBERS[id]?.name||id;
     const moodEmoji=getMoodEmoji(id);
     const unread=getUnreadCount(id);
     const item=document.createElement('div');
     item.className='family-popup-item';
     item.setAttribute('data-fp-id',id);
     item.onclick=function(e){ e.stopPropagation(); selectFpItem(id); onUserIconClick(id); };
+    const roleLabel=MEMBERS[id]?.role||'';
     item.innerHTML=`
       <div class="family-popup-avatar">
-        ${getAvatarHTML(id,50)}
+        ${getAvatarHTML(id,54)}
         ${moodEmoji?`<span class="family-popup-mood">${moodEmoji}</span>`:''}
         ${unread>0?`<span class="family-popup-unread">${unread}</span>`:''}
       </div>
-      <span class="family-popup-name">${name}</span>`;
+      <span class="family-popup-name">${name}</span>
+      <span class="family-popup-role">${roleLabel}</span>`;
     topRow.appendChild(item);
   });
   popup.appendChild(topRow);
@@ -10060,18 +10104,20 @@ function openFamilyPopup(){
   // Bottom row — me (same size as others)
   const botRow=document.createElement('div');
   botRow.className='family-popup-bottom';
-  const meName=userLabels[currentUser]||MEMBERS[currentUser].name;
+  const meName=MEMBERS[currentUser]?.name||currentUser;
   const meMood=getMoodEmoji(currentUser);
   const meItem=document.createElement('div');
   meItem.className='family-popup-item';
   meItem.setAttribute('data-fp-id',currentUser);
   meItem.onclick=function(e){ e.stopPropagation(); selectFpItem(currentUser); onMeIconClick(); };
+  const meRole=MEMBERS[currentUser]?.role||'';
   meItem.innerHTML=`
     <div class="family-popup-avatar" id="nav-profile-icon">
-      ${getAvatarHTML(currentUser,50)}
+      ${getAvatarHTML(currentUser,54)}
       ${meMood?`<span class="family-popup-mood">${meMood}</span>`:''}
     </div>
-    <span class="family-popup-name">${meName} (나)</span>`;
+    <span class="family-popup-name">${meName} (나)</span>
+    <span class="family-popup-role">${meRole}</span>`;
   botRow.appendChild(meItem);
   popup.appendChild(botRow);
 
@@ -10117,19 +10163,30 @@ function openFamilyPopup(){
       centers[1].y=avgY;
     }
 
-    // Lines from me to each top member
+    // Curved lines from me to each top member
     centers.forEach(c=>{
-      const line=document.createElementNS(svgNS,'line');
-      line.setAttribute('x1',meCX); line.setAttribute('y1',meCY);
-      line.setAttribute('x2',c.x); line.setAttribute('y2',c.y);
-      linesSvg.appendChild(line);
+      const midY=(meCY+c.y)/2;
+      const path=document.createElementNS(svgNS,'path');
+      path.setAttribute('d',`M${meCX},${meCY} C${meCX},${midY} ${c.x},${midY} ${c.x},${c.y}`);
+      linesSvg.appendChild(path);
+      // Dot at connection point
+      const dot=document.createElementNS(svgNS,'circle');
+      dot.setAttribute('cx',c.x); dot.setAttribute('cy',c.y); dot.setAttribute('r','3');
+      dot.setAttribute('class','line-dot');
+      linesSvg.appendChild(dot);
     });
-    // Line between top members
+    // Dot at me
+    const meDot=document.createElementNS(svgNS,'circle');
+    meDot.setAttribute('cx',meCX); meDot.setAttribute('cy',meCY); meDot.setAttribute('r','3');
+    meDot.setAttribute('class','line-dot');
+    linesSvg.appendChild(meDot);
+    // Curved line between top members (horizontal with slight arc)
     if(centers.length>=2){
-      const line=document.createElementNS(svgNS,'line');
-      line.setAttribute('x1',centers[0].x); line.setAttribute('y1',centers[0].y);
-      line.setAttribute('x2',centers[1].x); line.setAttribute('y2',centers[1].y);
-      linesSvg.appendChild(line);
+      const midX=(centers[0].x+centers[1].x)/2;
+      const arcY=centers[0].y-12;
+      const path=document.createElementNS(svgNS,'path');
+      path.setAttribute('d',`M${centers[0].x},${centers[0].y} Q${midX},${arcY} ${centers[1].x},${centers[1].y}`);
+      linesSvg.appendChild(path);
     }
     linesSvg.setAttribute('width',popup.offsetWidth);
     linesSvg.setAttribute('height',popup.offsetHeight);
@@ -11816,6 +11873,7 @@ Object.assign(window, {
   startCreateFamily, createStep1Next, createStep2Next, createStep3Next, createStep4Next, createStep5Next, createFamilyFinish, skipInvites, saveFamilyToFirestore,
   renderRoleGrid, selectCreateRole, incrementMemberCount, decrementMemberCount,
   renderFamilyGraph, openNodeForm, saveNodeForm, closeNodeForm, checkGraphComplete, addFamilyMember, removeFamilyMember, updateAddMemberBtn,
+  selectMode,
   renderInviteOptions, toggleChildAccount, generateChildAccount, shareInviteLink, renderDoneScreen,
   selectJoinMember, doJoinRegister, joinRegGoBack,
   isCurrentUserAdmin, rebuildMembersFromFamily,
