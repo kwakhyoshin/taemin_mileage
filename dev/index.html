@@ -2987,6 +2987,11 @@ button:disabled {
     <svg class="pfm-ico" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
     <div class="pfm-txt"><div class="pfm-nm">보낸 메시지</div><div class="pfm-desc">내가 보낸 메시지 확인</div></div>
   </button>
+  <div style="border-top:1px solid rgba(0,0,0,.06);margin:6px 0"></div>
+  <button class="pfm-item" onclick="meFmAction('logout')" style="opacity:.7">
+    <svg class="pfm-ico" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    <div class="pfm-txt"><div class="pfm-nm">로그아웃</div><div class="pfm-desc">계정에서 로그아웃</div></div>
+  </button>
 </div>
 
 <!-- MESSAGE POPUP -->
@@ -10481,6 +10486,9 @@ function meFmAction(action){
     openMsgPop(currentUser,true);
   }else if(action==='sent'){
     openSentMsgList();
+  }else if(action==='logout'){
+    closeFamilyPopup();
+    logout();
   }
 }
 window.meFmAction=meFmAction;
