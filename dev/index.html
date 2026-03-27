@@ -3911,7 +3911,7 @@ async function saveFamilyToFirestore(){
     };
 
     const docPath=_ENV==='dev'?`dev_${familyId}`:familyId;
-    const familyDoc=doc(db,'families',docPath);
+    const familyDoc=(_firebaseReady && db) ? doc(db,'families',docPath) : null;
 
     const newState=defaultState();
     newState.familyMeta=familyMeta;
@@ -3922,7 +3922,8 @@ async function saveFamilyToFirestore(){
       if(cid)newState.users[cid]={id:acc.id,pwdHash:await hashPassword(acc.pwd),v:2};
     }
 
-    await setDoc(familyDoc,newState);
+    if(familyDoc) await setDoc(familyDoc,newState);
+    else { localStorage.setItem(_LS_PREFIX+'v6_backup', JSON.stringify(newState)); console.warn('Firebase offline — saved to localStorage'); }
 
     // 글로벌 ID 레지스트리에 등록 (생성자 ID + 자녀 미리생성 계정)
     try {
@@ -3938,7 +3939,7 @@ async function saveFamilyToFirestore(){
     S=newState;
     _familyId=docPath;
     currentUser=myMemberId;
-    DATA_DOC=familyDoc;
+    if(familyDoc) DATA_DOC=familyDoc;
 
     localStorage.setItem(_LS_PREFIX+'family_id',docPath);
     localStorage.setItem(_LS_PREFIX+'current_user',myMemberId);
@@ -3979,12 +3980,15 @@ async function hashPassword(pwd){
 // ── 글로벌 사용자 ID 레지스트리 함수들 ──
 // families 컬렉션 안에 저장 (Firestore 보안 규칙이 이미 허용된 컬렉션)
 function _getRegistryRef() {
+  if(!_firebaseReady || !db) return null;
   return doc(db, 'families', _ENV==='dev'?'_dev_id_registry':'_id_registry');
 }
 
 async function checkGlobalIdExists(loginId) {
   try {
-    const snap = await getDoc(_getRegistryRef());
+    const ref = _getRegistryRef();
+    if(!ref) return _localIdCheck(loginId);
+    const snap = await getDoc(ref);
     if (!snap.exists()) return false;
     const data = snap.data();
     return !!data[loginId];
@@ -4011,6 +4015,7 @@ function _localIdCheck(loginId) {
 async function registerGlobalId(loginId, familyId, memberId) {
   try {
     const ref = _getRegistryRef();
+    if(!ref || !db) { console.warn('Firebase offline — skipping global ID register'); return; }
     await runTransaction(db, async (transaction) => {
       const snap = await transaction.get(ref);
       const data = snap.exists() ? snap.data() : {};
