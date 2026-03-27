@@ -223,6 +223,9 @@ body.dark .nav-container.docked .bottom-nav{background:linear-gradient(var(--tab
 .nav-container.docked .nav-avatar-stack{margin-left:0}
 .nav-container.docked .nav-avatar-stack .nav-stacked-avatar{width:30px;height:30px;margin-left:-8px}
 
+/* NAV BRAND (hidden by default, shown in landscape sidebar) */
+.nav-brand{display:none}
+
 /* TOPBAR */
 .top{padding:52px 18px 10px;display:flex;justify-content:space-between;align-items:flex-start}
 .top-l h1{font-size:32px;font-weight:900;color:var(--tx)}
@@ -1136,7 +1139,15 @@ body.dark .family-popup-avatar{border-color:rgba(255,255,255,.25)}
   body.dark .bottom-nav{border-color:var(--bdr);border-right-color:var(--bdr)}
 
   /* Nav brand */
-  .bottom-nav::before{content:'마일리';display:block;font-size:14px;font-weight:900;color:var(--or);padding:12px 12px 18px;border-bottom:1px solid var(--bdr);margin-bottom:8px;white-space:nowrap}
+  .bottom-nav::before{display:none!important}
+  .nav-brand{display:flex;align-items:center;gap:7px;padding:12px 12px 18px;border-bottom:1px solid var(--bdr);margin-bottom:8px;white-space:nowrap}
+  .nav-brand-ico .nbi-house{fill:rgba(99,102,241,.15);stroke:#6366F1;stroke-width:1.5;stroke-linejoin:round}
+  .nav-brand-ico .nbi-door{stroke:#6366F1;stroke-width:1.5;stroke-linecap:round;fill:none}
+  .nav-brand-ico .nbi-star{fill:#FF6B35}
+  body.dark .nav-brand-ico .nbi-house{fill:rgba(129,140,248,.18);stroke:#818CF8}
+  body.dark .nav-brand-ico .nbi-door{stroke:#818CF8}
+  .nb-indigo{fill:#6366F1}
+  body.dark .nb-indigo{fill:#818CF8}
 
   .nav-item{padding:12px 12px;border-radius:12px;justify-content:flex-start;gap:10px}
   .nav-item.active{padding:12px 12px}
@@ -1283,7 +1294,8 @@ body.dark .family-popup-avatar{border-color:rgba(255,255,255,.25)}
   body.dark .bottom-nav{border-color:var(--bdr);border-right-color:var(--bdr)}
 
   /* Nav brand in sidebar */
-  .bottom-nav::before{content:'마일리';display:block;font-size:16px;font-weight:900;color:var(--or);padding:16px 16px 24px;border-bottom:1px solid var(--bdr);margin-bottom:12px;white-space:nowrap}
+  .bottom-nav::before{display:none!important}
+  .nav-brand{display:flex;align-items:center;gap:8px;padding:16px 16px 24px;border-bottom:1px solid var(--bdr);margin-bottom:12px;white-space:nowrap}
 
   .nav-item{padding:14px 16px;border-radius:14px;justify-content:flex-start;gap:12px}
   .nav-item.active{padding:14px 16px}
@@ -2274,7 +2286,7 @@ button:disabled {
 <div class="auth-screen" id="auth-login">
   <div class="auth-card">
     <div class="auth-logo"><svg width="64" height="64" viewBox="0 0 200 200"><defs><linearGradient id="lb" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#4F46E5"/><stop offset="100%" stop-color="#7C3AED"/></linearGradient></defs><circle cx="100" cy="100" r="96" fill="url(#lb)"/><path d="M62,150 L62,98 L100,64 L138,98 L138,150 Z" fill="#fff" opacity=".96"/><rect x="87" y="118" width="26" height="32" rx="4" fill="#FF6B35"/><circle cx="100" cy="50" r="8" fill="#FF6B35"/></svg></div>
-    <div class="auth-title" style="font-size:28px;letter-spacing:-1px">mile<span style="color:#FF6B35">.</span>ly</div>
+    <svg viewBox="0 0 130 36" xmlns="http://www.w3.org/2000/svg" style="height:32px;width:auto;display:block;margin:0 auto 4px" aria-label="mile.ly"><text x="2" y="27" font-family="'Pretendard Variable',system-ui,-apple-system,sans-serif" font-weight="900" font-size="30" letter-spacing="-1"><tspan fill="#6366F1">mile</tspan><tspan fill="#FF6B35">.</tspan><tspan fill="#6366F1">ly</tspan></text></svg>
     <div class="auth-sub">가족 계정으로 로그인하세요</div>
     <input type="text" class="auth-input" id="login-id" placeholder="아이디" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('login-pwd').focus()">
     <div class="pwd-wrap">
@@ -2291,7 +2303,7 @@ button:disabled {
 <div class="auth-screen hidden" id="auth-welcome">
   <div class="auth-card">
     <div class="auth-logo"><svg width="64" height="64" viewBox="0 0 200 200"><defs><linearGradient id="wb" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#4F46E5"/><stop offset="100%" stop-color="#7C3AED"/></linearGradient></defs><circle cx="100" cy="100" r="96" fill="url(#wb)"/><path d="M62,150 L62,98 L100,64 L138,98 L138,150 Z" fill="#fff" opacity=".96"/><rect x="87" y="118" width="26" height="32" rx="4" fill="#FF6B35"/><circle cx="100" cy="50" r="8" fill="#FF6B35"/></svg></div>
-    <div class="auth-title" style="font-size:28px;letter-spacing:-1px">mile<span style="color:#FF6B35">.</span>ly</div>
+    <svg viewBox="0 0 130 36" xmlns="http://www.w3.org/2000/svg" style="height:32px;width:auto;display:block;margin:0 auto 4px" aria-label="mile.ly"><text x="2" y="27" font-family="'Pretendard Variable',system-ui,-apple-system,sans-serif" font-weight="900" font-size="30" letter-spacing="-1"><tspan fill="#6366F1">mile</tspan><tspan fill="#FF6B35">.</tspan><tspan fill="#6366F1">ly</tspan></text></svg>
     <div class="auth-sub">마일리와 함께 우리 가족의<br>좋은 습관을 만들어가요</div>
     <button class="auth-btn" onclick="startCreateFamily()" style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg> 시작하기
@@ -2684,6 +2696,10 @@ button:disabled {
   <div class="hist-hero">
     <h2>성과 &amp; 통계 <svg class="hdr-ico" viewBox="0 0 24 24"><path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9"/><path d="M21 3l-9 9"/><path d="M15 3h6v6"/></svg></h2>
     <p id="hist-hero-sub">나의 활동 분석</p>
+    <!-- 양육자 다중 자녀 선택기 (independent 모드 + 자녀 2명 이상일 때 표시) -->
+    <div id="hist-child-selector" style="display:none;margin-top:8px">
+      <div id="hist-child-btns" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+    </div>
     <div class="hdr-stats hdr-stats-5" id="hist-hdr-stats">
       <div class="hdr-stat"><div class="hdr-stat-num" id="hist-hdr-pts">0</div><div class="hdr-stat-lbl">보유 마일리지</div></div>
       <div class="hdr-stat-divider"></div>
@@ -3195,6 +3211,19 @@ button:disabled {
 <!-- BOTTOM NAV - Floating Glass Pill with SVG Icons -->
 <div class="nav-container">
   <nav class="bottom-nav">
+    <!-- 사이드바 브랜드 (landscape 태블릿/데스크톱에서만 표시) -->
+    <div class="nav-brand">
+      <svg class="nav-brand-ico" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path class="nbi-house" d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+        <path class="nbi-door" d="M9 22V12h6v10"/>
+        <path class="nbi-star" d="M19.5 2.5l.5 1.5 1.5.5-1.5.5-.5 1.5-.5-1.5-1.5-.5 1.5-.5z"/>
+      </svg>
+      <svg class="nav-brand-txt" viewBox="0 0 88 22" xmlns="http://www.w3.org/2000/svg" width="88" height="22">
+        <text y="17" font-family="'Pretendard Variable',system-ui,sans-serif" font-weight="900" font-size="19" letter-spacing="-0.5">
+          <tspan class="nb-indigo">mile</tspan><tspan fill="#FF6B35">.</tspan><tspan class="nb-indigo">ly</tspan>
+        </text>
+      </svg>
+    </div>
     <div class="nav-item active" data-tab="home" id="tab-home" onclick="goTab('home')">
       <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
       <span class="nav-label">홈</span>
@@ -5167,8 +5196,7 @@ function applyUserProfile() {
   // Update hero label & stats header with user name
   const heroLbl = document.getElementById('hero-lbl');
   if(heroLbl) heroLbl.textContent = `${member.name}의 마일리지`;
-  const histSub = document.getElementById('hist-hero-sub');
-  if(histSub) histSub.textContent = `${member.name}의 활동 분석`;
+  _renderHistHeroSub();
 
   // Update admin tab profile section
   const admIcon = document.getElementById('profile-icon-adm');
@@ -5179,6 +5207,50 @@ function applyUserProfile() {
   if (admRole) admRole.textContent = member.role + (member.isAdmin?' 👑':'');
 
   renderNavUsers();
+}
+
+// 한국어 이름 받침 여부: 마지막 글자에 받침 있으면 '이' 반환
+function _korSuffix(name){
+  if(!name)return'';
+  const cp=name.charCodeAt(name.length-1);
+  if(cp<0xAC00||cp>0xD7A3)return'';
+  return(cp-0xAC00)%28!==0?'이':'';
+}
+
+// 성과 탭 히어로 서브텍스트 + 자녀 선택기 렌더링
+function _renderHistHeroSub(){
+  const histSub=document.getElementById('hist-hero-sub');
+  const histSel=document.getElementById('hist-child-selector');
+  const histBtns=document.getElementById('hist-child-btns');
+  if(isCaregiverUser()&&getFamilyMode()==='independent'){
+    const kids=getChildMemberIds();
+    if(kids.length===0){
+      if(histSub)histSub.textContent='활동 분석';
+      if(histSel)histSel.style.display='none';
+    } else if(kids.length===1){
+      const nm=S.familyMeta?.members?.[kids[0]]?.name||kids[0];
+      if(histSub)histSub.textContent=`${nm}${_korSuffix(nm)}의 성과`;
+      if(histSel)histSel.style.display='none';
+    } else {
+      const viewedId=getViewedMemberId();
+      const nm=S.familyMeta?.members?.[viewedId]?.name||viewedId;
+      if(histSub)histSub.textContent=`${nm}${_korSuffix(nm)}의 성과`;
+      if(histSel)histSel.style.display='block';
+      if(histBtns){
+        histBtns.innerHTML=kids.map(kid=>{
+          const m=S.familyMeta?.members?.[kid];
+          const kn=m?.name||kid;
+          const isOn=kid===viewedId;
+          return `<button onclick="switchViewingChild('${kid}');_renderHistHeroSub()" style="padding:4px 14px;border-radius:20px;border:1.5px solid rgba(255,255,255,${isOn?'.9':'.4'});background:${isOn?'rgba(255,255,255,.25)':'transparent'};color:#fff;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s">${kn}</button>`;
+        }).join('');
+      }
+    }
+  } else {
+    const mem=currentUser&&S.familyMeta?.members?.[currentUser];
+    const nm=mem?.name||currentUser||'나';
+    if(histSub)histSub.textContent=`${nm}의 활동 분석`;
+    if(histSel)histSel.style.display='none';
+  }
 }
 
 function isCurrentUserAdmin(){
