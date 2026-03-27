@@ -24,7 +24,8 @@ while read -r LOCAL_REF LOCAL_SHA REMOTE_REF _REMOTE_SHA; do
       continue
     fi
 
-    ENV_VALUE=$(grep -oP "const _ENV = '\K[^']+" "$INDEX_HTML" 2>/dev/null || true)
+    # BSD grep (macOS) 호환: sed 로 _ENV 값 추출
+    ENV_VALUE=$(sed -n "s/.*const _ENV = '\([^']*\)'.*/\1/p" "$INDEX_HTML" 2>/dev/null | head -1 || true)
 
     if [ "$ENV_VALUE" = "dev" ]; then
       echo ""
