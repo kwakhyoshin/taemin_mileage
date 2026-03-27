@@ -451,10 +451,10 @@ body.dark .rec-day-tag.day-1{background:#312E81;color:#A5B4FC}
 .btn-sm.gy{background:var(--bdr2);color:var(--tx2)}
 .manage-item{display:flex;align-items:center;padding:14px 16px;gap:12px;border-bottom:.5px solid var(--bdr)}
 .manage-item:last-child{border-bottom:none}
-.m-emoji{font-size:28px;flex-shrink:0}
+.m-emoji{font-size:24px;flex-shrink:0;width:28px;text-align:center}
 .m-info{flex:1;min-width:0}
-.m-nm{font-size:15px;font-weight:800;color:var(--tx)}
-.m-sub{font-size:13px;color:var(--tx2);font-weight:600;margin-top:3px}
+.m-nm{font-size:14px;font-weight:800;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.m-sub{font-size:12px;color:var(--tx2);font-weight:600;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .m-btns-row{display:flex;gap:5px;flex-shrink:0;align-items:center}
 .icon-btn{display:flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;width:44px;height:44px;border-radius:10px;border:none;background:var(--bg2);color:var(--tx2);cursor:pointer;flex-shrink:0;transition:all .15s}
 .icon-btn:active{transform:scale(.9)}
@@ -974,8 +974,8 @@ body.dark .pin-key.ck{background:transparent}
 .toss-role-grid .role-card.selected{border-color:var(--rc,#6366F1);background:var(--rb,#EEF2FF)}
 .toss-role-grid .role-icon{width:34px;height:34px;margin:0 auto 6px}
 .toss-role-grid .role-name{font-size:13px;font-weight:800;color:#1E293B}
-.toss-add-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
-.toss-add-btn{padding:18px 12px;border-radius:14px;border:2px dashed;cursor:pointer;font-family:inherit;font-size:13px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:6px;transition:all .2s;-webkit-tap-highlight-color:transparent;background:none}
+.toss-add-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;width:100%;box-sizing:border-box}
+.toss-add-btn{padding:12px 8px;border-radius:12px;border:2px dashed;cursor:pointer;font-family:inherit;font-size:13px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:4px;transition:all .2s;-webkit-tap-highlight-color:transparent;background:none;width:100%;box-sizing:border-box;min-width:0}
 .toss-add-btn-caregiver{background:#EEF2FF;border-color:#C7D2FE;color:#6366F1}
 .toss-add-btn-child{background:#FEF3C7;border-color:#FCD34D;color:#D97706}
 .toss-add-btn-icon{font-size:26px}
@@ -1100,6 +1100,24 @@ body.dark .family-popup-avatar{border-color:rgba(255,255,255,.25)}
 .avatar-preview-sm img{width:100%;height:100%;object-fit:cover}
 
 /* ========================================
+   RESPONSIVE: PORTRAIT OVERRIDE
+   세로 모드(portrait)에서는 사이드바 숨기고 하단 네비로 복귀
+   ======================================== */
+@media(min-width:768px) and (orientation:portrait){
+  body{display:block}
+  .nav-container{position:fixed!important;bottom:0!important;top:auto!important;left:0!important;right:0!important;transform:none!important;width:100%!important;height:auto!important;z-index:100}
+  .nav-container.docked{bottom:0!important;width:100%!important}
+  .bottom-nav{flex-direction:row!important;align-items:center!important;gap:0!important;border-radius:20px 20px 0 0!important;padding:8px 8px calc(8px + env(safe-area-inset-bottom))!important;height:auto!important;background:var(--card)!important;border:none!important;border-top:.5px solid var(--bdr)!important;border-right:none!important;box-shadow:0 -4px 20px rgba(0,0,0,.06)!important;justify-content:center!important;width:100%!important}
+  .bottom-nav::before{display:none!important}
+  .nav-item{padding:8px 12px!important;border-radius:12px!important;flex-direction:column!important;justify-content:center!important;gap:2px!important}
+  .nav-item .nav-label{font-size:10px!important;font-weight:700!important;max-width:none!important;opacity:1!important;margin-left:0!important}
+  .scr{margin-left:0!important;width:100%!important;max-width:430px!important;padding-bottom:calc(80px + env(safe-area-inset-bottom))!important}
+  #s-badge{margin-left:0!important;width:100%!important}
+  .nav-users{flex-direction:row!important;gap:0!important}
+  .nav-divider{width:1px!important;height:22px!important;margin:0 4px!important}
+}
+
+/* ========================================
    RESPONSIVE: TABLET (768px+)
    ======================================== */
 @media(min-width:768px){
@@ -1129,10 +1147,10 @@ body.dark .family-popup-avatar{border-color:rgba(255,255,255,.25)}
   /* ── 사용자 아이콘: 가로 배치 (tablet) ── */
   .nav-users{flex-direction:row;flex-wrap:wrap;gap:4px;justify-content:center}
   .nav-user-wrap{flex-direction:column;align-items:center}
-  .nav-user-wrap .nav-profile{width:44px;height:44px}
-  .nav-user-wrap.me .nav-profile{width:48px;height:48px}
-  .nav-user-label{font-size:13px}
-  .nav-profile{width:44px;height:44px}
+  .nav-user-wrap .nav-profile{width:36px;height:36px}
+  .nav-user-wrap.me .nav-profile{width:40px;height:40px}
+  .nav-user-label{font-size:11px}
+  .nav-profile{width:36px;height:36px}
 
   /* ── MAIN CONTENT — 사이드바 제외 풀 너비 ── */
   .scr{margin-left:200px;width:calc(100vw - 200px);max-width:none;padding-bottom:40px!important;box-sizing:border-box}
@@ -1275,10 +1293,10 @@ body.dark .family-popup-avatar{border-color:rgba(255,255,255,.25)}
 
   .nav-divider{width:auto;height:1px;background:var(--bdr);margin:4px 0}
   /* 사용자 아이콘 가로 배치 (desktop) */
-  .nav-users{flex-direction:row;flex-wrap:wrap;gap:6px;justify-content:center}
-  .nav-user-wrap .nav-profile{width:48px;height:48px}
-  .nav-user-wrap.me .nav-profile{width:52px;height:52px}
-  .nav-user-label{font-size:13px}
+  .nav-users{flex-direction:row;flex-wrap:wrap;gap:4px;justify-content:center}
+  .nav-user-wrap .nav-profile{width:36px;height:36px}
+  .nav-user-wrap.me .nav-profile{width:40px;height:40px}
+  .nav-user-label{font-size:11px}
 
   /* MAIN CONTENT — 풀 너비 */
   .scr{margin-left:240px;width:calc(100vw - 240px);max-width:none;padding-bottom:40px!important;box-sizing:border-box}
@@ -1495,12 +1513,12 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
 body.dark .bubble-speech{background:rgba(255,255,255,.12);color:rgba(255,255,255,.85);border:1px solid rgba(255,255,255,.1);box-shadow:0 1px 4px rgba(0,0,0,.2)}
 .bubble-speech .bbl-text{display:inline-block;white-space:nowrap}
 /* Log list bubble: avatar + dot + speech inline */
-.log-sticker-area{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;align-items:center}
-.bubble-group-log{display:inline-flex;align-items:center;gap:0;cursor:pointer;animation:bubbleDangle 3s ease-in-out infinite;transform-origin:top center;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.log-sticker-area{display:flex;flex-wrap:nowrap;gap:4px;margin-top:6px;align-items:center;overflow:hidden}
+.bubble-group-log{display:inline-flex;align-items:center;gap:0;cursor:pointer;animation:bubbleDangle 3s ease-in-out infinite;transform-origin:top center;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;flex-shrink:0}
 .bubble-group-log:active{transform:scale(1.05)!important}
 .bubble-avatar-log{flex-shrink:0}
 .bubble-dot-log{width:4px;height:4px;border-radius:50%;background:var(--tab-color,#6366F1);opacity:.45;flex-shrink:0;margin:0 2px}
-.bubble-speech-log{background:#fff;color:#333;font-size:13px;font-weight:700;padding:3px 8px;border-radius:10px;white-space:nowrap;max-width:140px;overflow:hidden;text-overflow:ellipsis;box-shadow:0 1px 3px rgba(0,0,0,.06);border:1px solid rgba(0,0,0,.06);line-height:1.2}
+.bubble-speech-log{background:#fff;color:#333;font-size:13px;font-weight:700;padding:3px 8px;border-radius:10px;white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis;box-shadow:0 1px 3px rgba(0,0,0,.06);border:1px solid rgba(0,0,0,.06);line-height:1.2}
 body.dark .bubble-speech-log{background:rgba(255,255,255,.12);color:rgba(255,255,255,.85);border:1px solid rgba(255,255,255,.1);box-shadow:0 1px 3px rgba(0,0,0,.2)}
 
 /* Long-press choice popup */
@@ -3032,16 +3050,6 @@ button:disabled {
               <button class="btn-sm" onclick="sendDirectNotification()">보내기</button>
             </div>
             <div id="push-debug" style="padding:8px 4px 4px;font-size:13px;color:var(--tx3);line-height:1.6"></div>
-          </div>
-        </div>
-        <!-- 관리자 PIN 변경 -->
-        <div class="adm-sec" style="margin-bottom:0">
-          <div class="adm-sec-lbl">관리자 PIN 변경</div>
-          <div class="adm-card">
-            <div class="adm-row">
-              <div class="adm-row-l"><div class="adm-row-nm">현재 PIN</div><div class="adm-row-sub" id="pin-display">●●●●</div></div>
-              <button class="btn-sm" onclick="startChangePIN()">변경하기</button>
-            </div>
           </div>
         </div>
         <!-- 데이터 백업 · 복원 -->
@@ -5607,7 +5615,7 @@ async function fetchWeather(){
     if(geoRes.ok){
       const geoData=await geoRes.json();
       const addr=geoData.address||{};
-      weatherData.locationName=addr.city||addr.town||addr.village||addr.county||addr.state||'서울';
+      weatherData.locationName=addr.city_district||addr.suburb||addr.neighbourhood||addr.county||addr.city||addr.town||addr.village||addr.state||'현재 위치';
     }
   }catch(e){console.log('역지오코딩 실패, 기본값 유지');}
 
@@ -6696,7 +6704,7 @@ function renderHomeGrid(){
       <div class="n">${a.name}</div>
       <div class="p">+${a.pts} 마일리지</div>
       ${a.maxDay>0?`<div class="count-badge">${st.label||'0/'+a.maxDay}</div>`:''}
-      ${timer?`<div class="timer">⏰ ${timer}</div>`:''}
+      ${timer?`<div class="timer"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-1px;margin-right:2px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${timer}</div>`:''}
       <div class="act-card-prog"><div class="act-card-prog-fill" style="width:${st.pct}%;background:${st.cls==='done'||st.cls==='exhausted'?'var(--gn)':st.cls==='partial'?'var(--yw)':'var(--tab-color,var(--or))'}"></div></div>
     </div>`;
   }).join('');
@@ -6758,7 +6766,7 @@ function renderLogList(){
         <div class="log-meta">
           <span class="chip ${cc}">${cycleLabel}</span>
           ${countLabel?`<span class="chip c-yw">${countLabel}</span>`:''}
-          ${timer?`<span class="log-timer">⏰ ${timer}</span>`:''}
+          ${timer?`<span class="log-timer"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-1px;margin-right:2px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${timer}</span>`:''}
         </div>
         ${stickerHTML}
         ${unifiedAvatarsLog}
@@ -11977,6 +11985,9 @@ function renderJoinMemberGrid(){
 window.checkUrlParams=checkUrlParams;
 
 function reallyGoTab(tab){
+  // PIN이 열려 있으면 강제 닫고 scroll lock 해제
+  const pinWrap=document.getElementById('pin-wrap');
+  if(pinWrap&&pinWrap.style.display!=='none'){pinWrap.style.display='none';_scrollLockCount=0;document.body.classList.remove('popup-open');document.documentElement.classList.remove('popup-open');if(_scrollLockTouchHandler){document.removeEventListener('touchmove',_scrollLockTouchHandler);_scrollLockTouchHandler=null;}}
   // 뱃지 상세 화면이 열려있으면 닫기
   const badgeView=document.getElementById('s-badge');
   if(badgeView) badgeView.style.display='none';
@@ -13033,9 +13044,10 @@ Object.assign(window, {
   showAuthScreen, doLogin, logout, togglePwd,
   startCreateFamily, createStep1Next, createStep2Next, createStep3Next, createStep4Next, createStep5Next, createFamilyFinish, skipInvites, saveFamilyToFirestore,
   toSlide, backSlide, create1Back, c1SlideIdNext, c1SlidePwdNext, c1SlideNameNext, c1SlideRoleFinish, c1SkipRole,
+  updateFamilyNamePreview, updatePwdStrength,
   jrBack, jrSlideIdNext,
   renderRoleGrid, selectCreateRole, incrementMemberCount, decrementMemberCount,
-  renderFamilyGraph, openNodeForm, saveNodeForm, closeNodeForm, checkGraphComplete, addFamilyMember, removeFamilyMember, updateAddMemberBtn,
+  renderFamilyGraph, openNodeForm, saveNodeForm, closeNodeForm, checkGraphComplete, addFamilyMember, addCaregiverMember, addChildMember, removeFamilyMember, updateAddMemberBtn,
   selectMode,
   renderInviteOptions, toggleChildAccount, generateChildAccount, shareInviteLink, renderDoneScreen,
   selectJoinMember, doJoinRegister, joinRegGoBack,
