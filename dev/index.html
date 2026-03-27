@@ -5783,8 +5783,8 @@ function renderAll(){
   if(typeof renderDevUserSwitch==='function')renderDevUserSwitch();
   renderNavUsers();
   renderHdrStats();
+  if(typeof checkOnboarding==='function') checkOnboarding();
 }
-  checkOnboarding();
 
 function renderHero(){
   // 인사말은 applyUserProfile에서 관리하므로 여기서는 로그인 안 된 경우만 처리
