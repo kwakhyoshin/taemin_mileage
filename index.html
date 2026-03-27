@@ -804,11 +804,27 @@ body.dark .pin-key.ck{background:transparent}
 .auth-btn.danger{background:#FEE2E2;color:#EF4444}
 .auth-link{font-size:13px;color:#6366F1;font-weight:700;margin-top:16px;cursor:pointer}
 .auth-error{font-size:13px;color:#EF4444;font-weight:600;margin-top:8px;min-height:18px}
-.auth-steps{display:flex;justify-content:center;gap:6px;margin-bottom:20px}
+.auth-steps{margin-bottom:20px}
+.auth-steps-label{text-align:center;font-size:11px;font-weight:700;color:#94A3B8;margin-bottom:6px;letter-spacing:.5px}
+.auth-steps-dots{display:flex;justify-content:center;gap:6px}
 .auth-step{width:8px;height:8px;border-radius:50%;background:#E2E8F0;transition:all .3s}
 .auth-step.active{background:#6366F1;width:24px;border-radius:4px}
 .auth-step.done{background:#10B981}
 .auth-label{font-size:12px;font-weight:700;color:#64748B;text-align:left;margin-bottom:6px;display:block}
+.pwd-strength-bar{display:flex;gap:4px;margin:-4px 0 10px}
+.pwd-strength-seg{flex:1;height:3px;border-radius:2px;background:#E2E8F0;transition:background .3s}
+.pwd-strength-seg.weak{background:#EF4444}
+.pwd-strength-seg.medium{background:#F59E0B}
+.pwd-strength-seg.strong{background:#10B981}
+.pwd-hint{font-size:11px;font-weight:600;color:#94A3B8;margin:-4px 0 10px;text-align:left}
+.member-counter{text-align:center;padding:8px 12px;background:#EEF2FF;border-radius:10px;font-size:12px;font-weight:700;color:#6366F1;margin-bottom:10px}
+.add-member-btns{display:flex;gap:8px;margin-top:8px}
+.add-member-btn-caregiver{flex:1;padding:10px;background:#EEF2FF;border:2px dashed #C7D2FE;border-radius:12px;font-size:13px;font-weight:700;color:#6366F1;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px}
+.add-member-btn-child{flex:1;padding:10px;background:#FEF3C7;border:2px dashed #FCD34D;border-radius:12px;font-size:13px;font-weight:700;color:#D97706;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px}
+.invite-status-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px}
+.invite-status-badge.pending{background:#FEF3C7;color:#D97706}
+.invite-status-badge.done{background:#D1FAE5;color:#059669}
+.family-name-preview{text-align:center;padding:10px 14px;background:#F0FDF4;border-radius:10px;font-size:12px;font-weight:600;color:#16A34A;margin-top:-4px;margin-bottom:12px;line-height:1.5}
 
 /* ROLE OPTION CARDS */
 .role-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0}
@@ -2054,12 +2070,18 @@ button:disabled {
     <div class="auth-steps" id="create-steps-1"></div>
     <div class="auth-logo"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/><circle cx="12" cy="16" r="1"/></svg></div>
     <div class="auth-title">계정 생성</div>
-    <div class="auth-sub">먼저 당신의 계정을 만들어주세요</div>
+    <div class="auth-sub">양육자로 가입합니다</div>
     <input type="text" class="auth-input" id="create-user-id" placeholder="아이디 (4자 이상)" autocomplete="username">
     <div class="pwd-wrap">
-      <input type="password" class="auth-input" id="create-user-pwd" placeholder="비밀번호 (4자 이상)" autocomplete="new-password">
+      <input type="password" class="auth-input" id="create-user-pwd" placeholder="비밀번호 (6자 이상)" autocomplete="new-password" oninput="updatePwdStrength(this.value)">
       <button type="button" class="pwd-toggle" onclick="togglePwd('create-user-pwd', this)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
     </div>
+    <div class="pwd-strength-bar">
+      <div class="pwd-strength-seg" id="pwd-seg-1"></div>
+      <div class="pwd-strength-seg" id="pwd-seg-2"></div>
+      <div class="pwd-strength-seg" id="pwd-seg-3"></div>
+    </div>
+    <div class="pwd-hint" id="pwd-hint">최소 6자 이상 입력해주세요</div>
     <div class="pwd-wrap">
       <input type="password" class="auth-input" id="create-user-pwd2" placeholder="비밀번호 확인" autocomplete="new-password">
       <button type="button" class="pwd-toggle" onclick="togglePwd('create-user-pwd2', this)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
@@ -2082,9 +2104,11 @@ button:disabled {
     <div class="auth-title">가족 정보</div>
     <div class="auth-sub">우리 가족의 이름을 정해주세요</div>
     <label class="auth-label">가족 이름</label>
-    <input type="text" class="auth-input" id="create-family-name" placeholder="예: 태민이네, 곽씨 패밀리" maxlength="20">
+    <input type="text" class="auth-input" id="create-family-name" placeholder="예: 태민이네, 곽씨 패밀리" maxlength="20" oninput="updateFamilyNamePreview(this.value)">
+    <div class="family-name-preview" id="family-name-preview" style="display:none"></div>
     <div class="auth-error" id="create2-error"></div>
     <button class="auth-btn" onclick="createStep2Next()">다음</button>
+    <button class="auth-btn secondary" onclick="showAuthScreen('create-1')" style="margin-top:8px">이전</button>
   </div>
 </div>
 
@@ -2094,13 +2118,19 @@ button:disabled {
     <div class="auth-steps" id="create-steps-3"></div>
     <div class="auth-title">가족 구성원</div>
     <div class="auth-sub">구성원을 추가하거나 수정해주세요</div>
+    <div class="member-counter" id="member-counter">양육자 1명, 아이 0명 / 최대 7명</div>
     <div class="family-graph" id="family-graph"></div>
-    <button type="button" onclick="addFamilyMember()" id="add-member-btn" style="width:100%;padding:12px;margin-top:8px;background:#F1F5F9;border:2px dashed #CBD5E1;border-radius:12px;font-size:14px;font-weight:700;color:#64748B;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 구성원 추가
-    </button>
+    <div class="add-member-btns" id="add-member-btns">
+      <button type="button" class="add-member-btn-caregiver" onclick="addCaregiverMember()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 양육자 추가
+      </button>
+      <button type="button" class="add-member-btn-child" onclick="addChildMember()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 아이 추가
+      </button>
+    </div>
     <div class="auth-error" id="create3-error"></div>
     <button class="auth-btn" onclick="createStep3Next()" id="create-step3-next">다음</button>
-    <button class="auth-btn secondary" onclick="showAuthScreen('create-2')" style="margin-top:8px">돌아가기</button>
+    <button class="auth-btn secondary" onclick="showAuthScreen('create-2')" style="margin-top:8px">이전</button>
   </div>
 </div>
 
@@ -2129,7 +2159,7 @@ button:disabled {
     </div>
     <div class="auth-error" id="create4-error"></div>
     <button class="auth-btn" onclick="createStep4Next()">다음</button>
-    <button class="auth-btn secondary" onclick="showAuthScreen('create-3')" style="margin-top:8px">돌아가기</button>
+    <button class="auth-btn secondary" onclick="showAuthScreen('create-3')" style="margin-top:8px">이전</button>
   </div>
 </div>
 
@@ -2143,7 +2173,8 @@ button:disabled {
     <div id="invite-list"></div>
     <div class="auth-error" id="create5-error"></div>
     <button class="auth-btn" onclick="createStep5Next()">완료</button>
-    <div class="auth-link" onclick="skipInvites()" style="font-size:12px;color:#94A3B8">초대는 나중에 할게요</div>
+    <button class="auth-btn secondary" onclick="createStep5Back()" style="margin-top:8px">이전</button>
+    <div class="auth-link" onclick="skipInvites()" style="font-size:12px;color:#94A3B8;margin-top:12px">나중에 초대할게요</div>
   </div>
 </div>
 
@@ -3383,11 +3414,11 @@ function showAuthScreen(screen) {
     for(let i=1;i<=5;i++){
       const stepsEl=document.getElementById('create-steps-'+i);
       if(stepsEl){
-        let html='';
+        let dots='';
         for(let s=1;s<=totalSteps;s++){
-          html+=`<div class="auth-step${s===n?' active':''}${s<n?' done':''}"></div>`;
+          dots+=`<div class="auth-step${s===n?' active':''}${s<n?' done':''}"></div>`;
         }
-        stepsEl.innerHTML=html;
+        stepsEl.innerHTML=`<div class="auth-steps-label">${n}단계 / ${totalSteps}단계</div><div class="auth-steps-dots">${dots}</div>`;
       }
     }
   }
@@ -3400,7 +3431,8 @@ function startCreateFamily(){
     familyName:'',memberCount:3,
     members:[],
     mode:'independent',
-    childAccounts:{},inviteType:'link'
+    childAccounts:{},inviteType:'link',
+    inviteStatus:{}
   };
   window._createState=_createState;
   _saveFamilyDone=false; // 새 가입 시작 시 리셋
@@ -3417,7 +3449,7 @@ async function createStep1Next(){
   const btn=document.querySelector('#auth-create-1 .auth-btn');
 
   if(id.length<4){err.textContent='아이디는 4자 이상이어야 해요';return;}
-  if(pwd.length<4){err.textContent='비밀번호는 4자 이상이어야 해요';return;}
+  if(pwd.length<6){err.textContent='비밀번호는 6자 이상이어야 해요';return;}
   if(pwd!==pwd2){err.textContent='비밀번호가 일치하지 않아요';return;}
   if(!name){err.textContent='이름을 입력해주세요';return;}
   // 호칭은 선택사항 — 미선택 시 'caregiver'로 자동 설정
@@ -3445,7 +3477,53 @@ async function createStep1Next(){
   err.textContent='';
   if(btn){btn.disabled=false;btn.textContent='다음';}
   showAuthScreen('create-2');
-  document.getElementById('member-count-display').textContent=_createState.memberCount;
+  // 가족 이름 기본값 제안
+  const fnInput=document.getElementById('create-family-name');
+  if(fnInput&&!fnInput.value){
+    const suggested=name+'네 가족';
+    fnInput.value=suggested;
+    updateFamilyNamePreview(suggested);
+  }
+}
+
+function updatePwdStrength(pwd){
+  const s1=document.getElementById('pwd-seg-1');
+  const s2=document.getElementById('pwd-seg-2');
+  const s3=document.getElementById('pwd-seg-3');
+  const hint=document.getElementById('pwd-hint');
+  if(!s1)return;
+  const len=pwd.length;
+  if(len===0){
+    [s1,s2,s3].forEach(s=>{s.className='pwd-strength-seg';});
+    hint.textContent='최소 6자 이상 입력해주세요';
+    hint.style.color='#94A3B8';
+  }else if(len<6){
+    s1.className='pwd-strength-seg weak';
+    [s2,s3].forEach(s=>{s.className='pwd-strength-seg';});
+    hint.textContent='너무 짧아요 ('+len+'/6자)';
+    hint.style.color='#EF4444';
+  }else if(len<9){
+    s1.className='pwd-strength-seg medium';
+    s2.className='pwd-strength-seg medium';
+    s3.className='pwd-strength-seg';
+    hint.textContent='보통 강도의 비밀번호예요';
+    hint.style.color='#F59E0B';
+  }else{
+    [s1,s2,s3].forEach(s=>{s.className='pwd-strength-seg strong';});
+    hint.textContent='안전한 비밀번호예요!';
+    hint.style.color='#10B981';
+  }
+}
+
+function updateFamilyNamePreview(val){
+  const prev=document.getElementById('family-name-preview');
+  if(!prev)return;
+  if(val.trim()){
+    prev.style.display='block';
+    prev.innerHTML='🏠 <b>'+val.trim()+'</b> 으로 가족 홈이 표시돼요';
+  }else{
+    prev.style.display='none';
+  }
 }
 
 function renderRoleGrid(){
@@ -3566,14 +3644,26 @@ function renderFamilyGraph(){
   checkGraphComplete();
 }
 
-function addFamilyMember(){
+function addCaregiverMember(){
+  if(_createState.members.length>=7){toast('최대 7명까지 등록할 수 있어요');return;}
+  _createState.members.push({role:'caregiver', name:'', birthDate:'', gender:'', isSelf:false});
+  _createState.memberCount=_createState.members.length;
+  renderFamilyGraph();
+  updateAddMemberBtn();
+  openNodeForm(_createState.members.length-1);
+}
+
+function addChildMember(){
   if(_createState.members.length>=7){toast('최대 7명까지 등록할 수 있어요');return;}
   _createState.members.push({role:'child', name:'', birthDate:'', gender:'', isSelf:false});
   _createState.memberCount=_createState.members.length;
   renderFamilyGraph();
   updateAddMemberBtn();
-  // 새로 추가된 멤버의 등록 폼 바로 열기
   openNodeForm(_createState.members.length-1);
+}
+
+function addFamilyMember(){
+  addChildMember();
 }
 
 function removeFamilyMember(idx){
@@ -3586,12 +3676,15 @@ function removeFamilyMember(idx){
 }
 
 function updateAddMemberBtn(){
-  const btn=document.getElementById('add-member-btn');
-  if(!btn)return;
-  if(_createState.members.length>=7){
-    btn.style.display='none';
-  }else{
-    btn.style.display='flex';
+  const btns=document.getElementById('add-member-btns');
+  if(btns)btns.style.display=_createState.members.length>=7?'none':'flex';
+  // 멤버 카운터 업데이트
+  const counter=document.getElementById('member-counter');
+  if(counter){
+    const caregiverCount=_createState.members.filter(m=>m.role!=='child').length;
+    const childCount=_createState.members.filter(m=>m.role==='child').length;
+    const total=_createState.members.length;
+    counter.textContent=`양육자 ${caregiverCount}명, 아이 ${childCount}명 / 최대 7명`;
   }
 }
 
@@ -3691,9 +3784,11 @@ function closeNodeForm(){
 
 function checkGraphComplete(){
   const allFilled=_createState.members.every(m=>m.name.trim());
-  const hasMinimum=_createState.members.length>=2 && allFilled;
+  const hasChild=_createState.members.some(m=>m.role==='child'&&m.name.trim());
+  const hasMinimum=_createState.members.length>=2 && allFilled && hasChild;
   const btn=document.getElementById('create-step3-next');
   if(btn)btn.disabled=!hasMinimum;
+  updateAddMemberBtn();
 }
 
 async function createStep3Next(){
@@ -3706,6 +3801,10 @@ async function createStep3Next(){
   }
   if(!_createState.members.every(m=>m.name.trim())){
     err.textContent='모든 구성원의 이름을 입력해주세요';
+    return;
+  }
+  if(!_createState.members.some(m=>m.role==='child'&&m.name.trim())){
+    err.textContent='아이를 최소 1명 등록해주세요';
     return;
   }
 
@@ -3753,11 +3852,15 @@ function renderInviteOptions(){
     const idx=i+1;
     const isChild=m.role==='child';
     const rd=ROLE_DEFS[m.displayRole||m.role]||ROLE_DEFS.child;
+    const invited=_createState.inviteStatus&&_createState.inviteStatus[idx];
+    const statusBadge=invited
+      ?`<span class="invite-status-badge done">✓ 완료</span>`
+      :`<span class="invite-status-badge pending">대기중</span>`;
     return `<div class="invite-card">
       <div class="invite-card-left">
         <div style="width:36px;height:36px;border-radius:50%;background:${rd.color||'#F1F5F9'};display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${rd.textColor||'#64748B'}" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg></div>
         <div>
-          <div class="invite-card-name">${m.name}</div>
+          <div class="invite-card-name" style="display:flex;align-items:center;gap:6px">${m.name} ${statusBadge}</div>
           <div class="invite-card-role">${rd.label||(m.role==='child'?'아이':'양육자')}</div>
         </div>
       </div>
@@ -3866,6 +3969,10 @@ async function shareInviteLink(memberName, memberIdx){
     try{await navigator.clipboard.writeText(url);}catch(e){}
     toast('초대 링크가 복사되었어요!');
   }
+  // 초대 완료 상태 표시
+  if(!_createState.inviteStatus)_createState.inviteStatus={};
+  _createState.inviteStatus[memberIdx]=true;
+  renderInviteOptions();
 }
 
 function skipInvites(){
