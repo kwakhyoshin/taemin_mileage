@@ -1,8 +1,8 @@
 // ═══════════════════════════════════════════════
-// 태민이 마일리지 [DEV] — Service Worker (Push + Cache)
+// 태민이 마일리지 — Service Worker (Push + Cache)
 // ═══════════════════════════════════════════════
 
-const CACHE_NAME = 'taemin-dev-v3';
+const CACHE_NAME = 'taemin-v3';
 
 // Install — cache essential files
 self.addEventListener('install', (e) => {
@@ -16,7 +16,7 @@ self.addEventListener('activate', (e) => {
 
 // Push — receive push notification
 self.addEventListener('push', (e) => {
-  let data = { title: '[DEV] 태민이 마일리지', body: '알림이 도착했어요!', icon: '../icon-180.png' };
+  let data = { title: '태민이 마일리지', body: '알림이 도착했어요!', icon: 'icon-180.png' };
 
   if (e.data) {
     try {
@@ -28,10 +28,10 @@ self.addEventListener('push', (e) => {
 
   const options = {
     body: data.body,
-    icon: data.icon || '../icon-180.png',
-    badge: '../icon-96.png',
+    icon: data.icon || 'icon-180.png',
+    badge: 'icon-96.png',
     vibrate: [100, 50, 100],
-    tag: data.tag || 'dev-default',
+    tag: data.tag || 'default',
     renotify: true,
     data: {
       url: data.url || './',
@@ -58,9 +58,11 @@ self.addEventListener('notificationclick', (e) => {
 
   e.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      // If app is already open, focus it and send message data
       for (const client of clientList) {
-        if ((client.url.includes('taemin_mileage/dev') || client.url.includes('dev/index.html')) && 'focus' in client) {
+        if ((client.url.includes('taemin_mileage') || client.url.includes('index.html')) && 'focus' in client) {
           client.focus();
+          // Send notification data to the app
           client.postMessage({
             type: 'NOTIFICATION_CLICK',
             data: notifData
@@ -68,6 +70,7 @@ self.addEventListener('notificationclick', (e) => {
           return;
         }
       }
+      // Otherwise open new window with query params
       let openUrl = urlToOpen;
       if (notifData.type === 'family_msg' && notifData.from) {
         openUrl += '?showMsg=1&from=' + notifData.from;
