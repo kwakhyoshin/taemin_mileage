@@ -462,8 +462,8 @@ body.dark .rec-day-tag.day-1{background:#312E81;color:#A5B4FC}
 .icon-btn:active{transform:scale(.9)}
 .icon-btn.del{color:#EF4444}
 .icon-btn.del:active{background:#FEE2E2}
-.tog{width:51px;height:31px;border-radius:16px;background:#6366F1;position:relative;cursor:pointer;flex-shrink:0;border:none;transition:background .25s cubic-bezier(.4,0,.2,1);-webkit-tap-highlight-color:transparent;padding:0;box-sizing:content-box}
-.tog.tog-sm{width:44px;height:26px;border-radius:13px}
+.tog{width:51px;height:31px;border-radius:999px;background:#6366F1;position:relative;cursor:pointer;flex-shrink:0;border:none;transition:background .25s cubic-bezier(.4,0,.2,1);-webkit-tap-highlight-color:transparent;padding:0;box-sizing:content-box;-webkit-appearance:none;appearance:none}
+.tog.tog-sm{width:44px;height:26px;border-radius:999px}
 .tog.tog-sm .tog-dot{width:22px;height:22px}
 .tog.tog-sm:not(.off) .tog-dot{transform:translateX(18px)}
 .tog.off{background:#D1D5DB}
@@ -1034,29 +1034,28 @@ body.dark .adm-child-btn.on{background:rgba(255,107,53,.15)}
 
 /* ── Family Popup (Toss-style genealogy) ── */
 .family-popup-bg{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.45);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);animation:fadeIn .15s}
-.family-popup{position:fixed;z-index:501;display:flex;flex-direction:column;align-items:center;gap:0;animation:familyPopUp .3s cubic-bezier(.34,1.2,.64,1);padding:20px 20px 14px;background:rgba(255,255,255,.1);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-radius:24px;border:1px solid rgba(255,255,255,.18);box-shadow:0 8px 32px rgba(0,0,0,.28)}
-body.dark .family-popup{background:rgba(20,20,32,.72);border-color:rgba(255,255,255,.1)}
+.family-popup{position:fixed;z-index:501;display:flex;flex-direction:column;align-items:center;gap:0;animation:familyPopUp .3s cubic-bezier(.34,1.2,.64,1);padding:28px 32px 22px;background:rgba(255,255,255,.12);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border-radius:28px;border:1px solid rgba(255,255,255,.2);box-shadow:0 8px 40px rgba(0,0,0,.32)}
+body.dark .family-popup{background:rgba(15,23,42,.8);border-color:rgba(255,255,255,.12)}
 @keyframes familyPopUp{from{opacity:0;transform:translateY(24px) scale(.85)}to{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes fpBounceSelect{0%{transform:scale(1)}40%{transform:scale(1.25)}70%{transform:scale(1.12)}100%{transform:scale(1.18)}}
 .fp-section{display:flex;flex-direction:column;align-items:center;gap:6px;width:100%}
 .fp-section-label{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.45);align-self:flex-start;padding-left:2px}
-.fp-members-row{display:flex;gap:10px;justify-content:center}
+.fp-members-row{display:flex;gap:20px;justify-content:center}
 .fp-connector{width:2px;height:24px;background:rgba(255,255,255,.22);margin:4px auto}
 .family-popup-row{display:flex;gap:10px;position:relative;z-index:1;justify-content:center}
 .family-popup-parents{margin-bottom:0}
 .family-tree-connector{height:24px;position:relative;z-index:0}
 .family-popup-children{margin-top:0}
-.family-popup-item{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .2s;background:rgba(255,255,255,.1);border-radius:14px;padding:10px 12px 8px;border:1.5px solid rgba(255,255,255,.13);min-width:72px}
-body.dark .family-popup-item{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.09)}
-.family-popup-item:active{transform:scale(.92)}
-.family-popup-item.is-me{border-color:rgba(99,102,241,.65);background:rgba(99,102,241,.12);box-shadow:0 0 0 2px rgba(99,102,241,.25)}
-body.dark .family-popup-item.is-me{border-color:rgba(129,140,248,.7);background:rgba(99,102,241,.18)}
+.family-popup-item{display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .2s;padding:4px 8px 0}
+.family-popup-item:active{transform:scale(.9)}
+.family-popup-item.is-me .family-popup-name{color:#818CF8;font-weight:900}
+body.dark .family-popup-item.is-me .family-popup-name{color:#a5b4fc}
 .family-popup-item.selected .family-popup-avatar{animation:fpBounceSelect .35s cubic-bezier(.34,1.56,.64,1) forwards;border-color:#fff;box-shadow:0 0 0 3px var(--tab-color,#6366F1),0 6px 24px rgba(0,0,0,.3)}
-.family-popup-avatar{width:48px;height:48px;border-radius:50%;overflow:visible;border:2.5px solid rgba(255,255,255,.4);box-shadow:0 4px 14px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;background:var(--card);position:relative;transition:border-color .2s,box-shadow .2s;flex-shrink:0}
-.family-popup-item.is-me .family-popup-avatar{border-color:#818CF8;box-shadow:0 0 0 2px rgba(99,102,241,.35),0 4px 14px rgba(0,0,0,.18)}
+.family-popup-avatar{width:52px;height:52px;border-radius:50%;overflow:visible;border:2.5px solid rgba(255,255,255,.4);box-shadow:0 4px 14px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;background:var(--card);position:relative;transition:border-color .2s,box-shadow .2s;flex-shrink:0}
+.family-popup-item.is-me .family-popup-avatar{border-color:#818CF8;box-shadow:0 0 0 3px rgba(99,102,241,.45),0 4px 14px rgba(0,0,0,.18)}
 body.dark .family-popup-avatar{border-color:rgba(255,255,255,.25)}
 .family-popup-avatar svg,.family-popup-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
-.family-popup-name{font-size:11px;font-weight:800;color:rgba(255,255,255,.92);white-space:nowrap;text-align:center}
+.family-popup-name{font-size:12px;font-weight:800;color:rgba(255,255,255,.95);white-space:nowrap;text-align:center;text-shadow:0 1px 4px rgba(0,0,0,.3)}
 .fp-me-badge{font-size:9px;font-weight:800;color:#818CF8;background:rgba(99,102,241,.2);border-radius:5px;padding:1px 6px;line-height:1.5;white-space:nowrap}
 .family-popup-role,.fp-role-text{font-size:9px;font-weight:600;color:rgba(255,255,255,.48);white-space:nowrap;text-align:center}
 .fp-status{font-size:9px;font-weight:600;color:rgba(255,255,255,.38);white-space:nowrap}
@@ -2261,7 +2260,7 @@ button:disabled {
 <div class="auth-screen" id="auth-login">
   <div class="auth-card">
     <div class="auth-logo"><svg width="64" height="64" viewBox="0 0 200 200"><defs><linearGradient id="lb" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#4F46E5"/><stop offset="100%" stop-color="#7C3AED"/></linearGradient></defs><circle cx="100" cy="100" r="96" fill="url(#lb)"/><path d="M62,150 L62,98 L100,64 L138,98 L138,150 Z" fill="#fff" opacity=".96"/><rect x="87" y="118" width="26" height="32" rx="4" fill="#FF6B35"/><circle cx="100" cy="50" r="8" fill="#FF6B35"/></svg></div>
-    <div class="auth-title" style="font-size:28px;letter-spacing:-1px">mile<span style="color:#FF6B35">.</span>ly</div>
+    <div class="auth-title" style="font-size:28px;letter-spacing:-1px;display:flex;align-items:center;justify-content:center;gap:8px"><svg width="28" height="28" viewBox="0 0 200 200" style="flex-shrink:0"><defs><linearGradient id="ail" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#4F46E5"/><stop offset="100%" stop-color="#7C3AED"/></linearGradient></defs><circle cx="100" cy="100" r="96" fill="url(#ail)"/><path d="M62,150 L62,98 L100,64 L138,98 L138,150 Z" fill="#fff" opacity=".96"/><rect x="87" y="118" width="26" height="32" rx="4" fill="#FF6B35"/><circle cx="100" cy="50" r="8" fill="#FF6B35"/></svg>mile<span style="color:#FF6B35">.</span>ly</div>
     <div class="auth-sub">가족 계정으로 로그인하세요</div>
     <input type="text" class="auth-input" id="login-id" placeholder="아이디" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('login-pwd').focus()">
     <div class="pwd-wrap">
@@ -2278,7 +2277,7 @@ button:disabled {
 <div class="auth-screen hidden" id="auth-welcome">
   <div class="auth-card">
     <div class="auth-logo"><svg width="64" height="64" viewBox="0 0 200 200"><defs><linearGradient id="wb" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#4F46E5"/><stop offset="100%" stop-color="#7C3AED"/></linearGradient></defs><circle cx="100" cy="100" r="96" fill="url(#wb)"/><path d="M62,150 L62,98 L100,64 L138,98 L138,150 Z" fill="#fff" opacity=".96"/><rect x="87" y="118" width="26" height="32" rx="4" fill="#FF6B35"/><circle cx="100" cy="50" r="8" fill="#FF6B35"/></svg></div>
-    <div class="auth-title" style="font-size:28px;letter-spacing:-1px">mile<span style="color:#FF6B35">.</span>ly</div>
+    <div class="auth-title" style="font-size:28px;letter-spacing:-1px;display:flex;align-items:center;justify-content:center;gap:8px"><svg width="28" height="28" viewBox="0 0 200 200" style="flex-shrink:0"><defs><linearGradient id="ail" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#4F46E5"/><stop offset="100%" stop-color="#7C3AED"/></linearGradient></defs><circle cx="100" cy="100" r="96" fill="url(#ail)"/><path d="M62,150 L62,98 L100,64 L138,98 L138,150 Z" fill="#fff" opacity=".96"/><rect x="87" y="118" width="26" height="32" rx="4" fill="#FF6B35"/><circle cx="100" cy="50" r="8" fill="#FF6B35"/></svg>mile<span style="color:#FF6B35">.</span>ly</div>
     <div class="auth-sub">마일리와 함께 우리 가족의<br>좋은 습관을 만들어가요</div>
     <button class="auth-btn" onclick="startCreateFamily()" style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg> 시작하기
@@ -11299,13 +11298,10 @@ function openFamilyPopup(){
     item.onclick=function(e){ e.stopPropagation(); selectFpItem(id); isMe?onMeIconClick():onUserIconClick(id); };
     item.innerHTML=`
       <div class="family-popup-avatar"${isMe?' id="nav-profile-icon"':''}>
-        ${getAvatarHTML(id,46)}
+        ${getAvatarHTML(id,50)}
         ${!isMe&&unread>0?`<span class="family-popup-unread">${unread}</span>`:''}
       </div>
-      <span class="family-popup-name">${name}</span>
-      ${isMe?'<span class="fp-me-badge">나</span>':''}
-      <span class="family-popup-role">${roleLabel}</span>
-      <span class="fp-status${hasAccount?' has-account':''}">${hasAccount?'✓ 가입':'초대 대기'}</span>`;
+      <span class="family-popup-name">${name}</span>`;
     return item;
   }
 
