@@ -2783,27 +2783,6 @@ button:disabled {
   </div>
   <div id="env-switch-area" style="display:flex;gap:6px;margin:0 16px 10px"></div>
   <div id="dev-user-switch-area" style="margin:0 16px 10px"></div>
-  <div class="stat-row">
-    <div class="stat-c"><div class="stat-n" id="adm-pts">0</div><div class="stat-l">마일리지</div></div>
-    <div class="stat-c"><div class="stat-n" id="adm-done">0</div><div class="stat-l">완료 횟수</div></div>
-    <div class="stat-c"><div class="stat-n" id="adm-streak">0</div><div class="stat-l">연속 달성</div></div>
-  </div>
-  <div class="adm-sec" style="margin-top:14px">
-    <div class="adm-sec-lbl">마일리지 조정</div>
-    <div class="adm-card">
-      <div class="adm-row">
-        <div class="adm-row-l"><div class="adm-row-nm">보너스 지급</div><div class="adm-row-sub">특별 보너스 마일리지</div></div>
-        <input class="num-inp" id="bonus-inp" type="number" value="50" min="1">
-        <button class="btn-sm" onclick="giveBonus()">지급</button>
-      </div>
-      <div class="divider"></div>
-      <div class="adm-row">
-        <div class="adm-row-l"><div class="adm-row-nm">마일리지 차감</div><div class="adm-row-sub">패널티 또는 조정</div></div>
-        <input class="num-inp" id="deduct-inp" type="number" value="20" min="1">
-        <button class="btn-sm rd" onclick="deductPts()">차감</button>
-      </div>
-    </div>
-  </div>
   <div class="adm-tabs">
     <button class="adm-tab on" id="at-0" onclick="admTab(0)">활동</button>
     <button class="adm-tab" id="at-1" onclick="admTab(1)">보상</button>
@@ -2812,6 +2791,27 @@ button:disabled {
     <button class="adm-tab" id="at-4" onclick="admTab(4)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>가족</button>
   </div>
   <div id="adm-p0">
+    <div class="stat-row">
+      <div class="stat-c"><div class="stat-n" id="adm-pts">0</div><div class="stat-l">마일리지</div></div>
+      <div class="stat-c"><div class="stat-n" id="adm-done">0</div><div class="stat-l">완료 횟수</div></div>
+      <div class="stat-c"><div class="stat-n" id="adm-streak">0</div><div class="stat-l">연속 달성</div></div>
+    </div>
+    <div class="adm-sec" style="margin-top:14px">
+      <div class="adm-sec-lbl">마일리지 조정</div>
+      <div class="adm-card">
+        <div class="adm-row">
+          <div class="adm-row-l"><div class="adm-row-nm">보너스 지급</div><div class="adm-row-sub">특별 보너스 마일리지</div></div>
+          <input class="num-inp" id="bonus-inp" type="number" value="50" min="1">
+          <button class="btn-sm" onclick="giveBonus()">지급</button>
+        </div>
+        <div class="divider"></div>
+        <div class="adm-row">
+          <div class="adm-row-l"><div class="adm-row-nm">마일리지 차감</div><div class="adm-row-sub">패널티 또는 조정</div></div>
+          <input class="num-inp" id="deduct-inp" type="number" value="20" min="1">
+          <button class="btn-sm rd" onclick="deductPts()">차감</button>
+        </div>
+      </div>
+    </div>
     <!-- independent 모드 자녀 선택기 (renderAdmChildSelector()로 동적 렌더링) -->
     <div id="adm-child-selector-0"></div>
     <div class="adm-sec">
@@ -3589,7 +3589,7 @@ function rebuildMembersFromFamily(){
   if(Object.keys(fm).length > 0){
     // 다가족 모드: familyMeta에서 구성원 빌드
     Object.entries(fm).forEach(([mid, m])=>{
-      const rd=ROLE_DEFS[m.displayRole||m.role]||ROLE_DEFS.child;
+      const rd=ROLE_DEFS[m.displayRole]||ROLE_DEFS[mid]||ROLE_DEFS[m.role]||ROLE_DEFS.child;
       MEMBERS[mid] = {
         name: m.name || rd.label || '구성원',
         icon: '👤',
