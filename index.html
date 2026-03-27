@@ -236,10 +236,46 @@ body.dark .dtog{background:#334155}
 body.dark .dtog-in{transform:translateX(20px)}
 
 /* HOME TOP - scrolls away */
-.home-top{background:var(--tab-color,#6366F1);padding:16px 20px 0;padding-top:calc(16px + env(safe-area-inset-top));display:flex;justify-content:space-between;align-items:flex-start;position:relative;overflow:visible;z-index:11}
+/* APP TOP BAR */
+.app-topbar{background:var(--tab-color,#6366F1);padding:0 16px;padding-top:calc(12px + env(safe-area-inset-top));padding-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:8px;position:sticky;top:0;z-index:12}
+.app-topbar-logo{flex-shrink:0;display:flex;align-items:center}
+.app-topbar-child{flex:1;display:flex;align-items:center;justify-content:center;min-width:0}
+.app-topbar-child .child-name-text{font-size:15px;font-weight:800;color:rgba(255,255,255,.95);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.app-topbar-child select.child-select{background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.35);border-radius:20px;color:#fff;font-size:14px;font-weight:800;padding:5px 28px 5px 12px;font-family:inherit;cursor:pointer;outline:none;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center}
+.app-topbar-child select.child-select option{background:#4B5563;color:#fff}
+/* HOME GREETING (below topbar, still in gradient area) */
+.home-greeting{background:var(--tab-color,#6366F1);padding:0 20px 0;position:relative;overflow:visible;z-index:11}
+.home-greeting::after{content:'';position:absolute;bottom:-70px;right:10px;width:160px;height:160px;background:rgba(255,255,255,.1);border-radius:50%;pointer-events:none}
 #home-top-content{transition:opacity .1s ease-out}
-.home-top::after{content:'';position:absolute;bottom:-70px;right:10px;width:160px;height:160px;background:rgba(255,255,255,.1);border-radius:50%;pointer-events:none}
-.home-top h1{font-size:24px;font-weight:900;color:rgba(255,255,255,.68)}
+.home-greeting h1{font-size:24px;font-weight:900;color:rgba(255,255,255,.68)}
+/* keep .home-top for tablet/desktop media queries */
+.home-top{background:var(--tab-color,#6366F1);padding:0;position:relative;overflow:visible;z-index:11}
+/* MY TAB */
+.my-header{background:linear-gradient(160deg,var(--tab-color,#6366F1),var(--tab-color2,#818CF8));padding:28px 24px 32px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.my-avatar-wrap{width:80px;height:80px;border-radius:50%;overflow:hidden;border:3px solid rgba(255,255,255,.5);box-shadow:0 4px 16px rgba(0,0,0,.2);background:rgba(255,255,255,.2)}
+.my-avatar-wrap img,.my-avatar-wrap svg{width:100%;height:100%;object-fit:cover}
+.my-name{font-size:22px;font-weight:900;color:#fff;margin-top:4px}
+.my-role{font-size:14px;font-weight:700;color:rgba(255,255,255,.75);background:rgba(255,255,255,.15);padding:3px 12px;border-radius:20px}
+.my-section-title{font-size:12px;font-weight:800;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;padding:16px 20px 6px}
+.my-list{background:var(--card);border-radius:16px;margin:0 16px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.my-list-item{display:flex;align-items:center;gap:14px;padding:16px 18px;width:100%;background:transparent;border:none;cursor:pointer;font-family:inherit;text-align:left;border-bottom:.5px solid var(--bdr);-webkit-tap-highlight-color:transparent}
+.my-list-item:last-child{border-bottom:none}
+.my-list-item:active{background:var(--bg2)}
+.my-list-ico{width:36px;height:36px;border-radius:10px;background:var(--tab-lt,rgba(99,102,241,.1));display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.my-list-ico svg{stroke:var(--tab-color,#6366F1)}
+.my-list-txt{flex:1;font-size:15px;font-weight:700;color:var(--tx)}
+.my-list-arr{stroke:var(--tx3);flex-shrink:0}
+.my-list-item-toggle{cursor:default}
+.my-list-item-toggle:active{background:transparent}
+.my-list-item-danger .my-list-ico{background:rgba(239,68,68,.1)}
+.my-list-item-danger .my-list-ico svg{stroke:#EF4444}
+.my-list-item-danger .my-list-txt{color:#EF4444}
+/* CHILD PICKER */
+.child-picker-item{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:14px;background:var(--bg2);border:2px solid transparent;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent}
+.child-picker-item:active{transform:scale(.97)}
+.child-picker-item.selected{border-color:var(--tab-color,#6366F1);background:var(--tab-lt,rgba(99,102,241,.08))}
+.child-picker-avatar{width:44px;height:44px;border-radius:50%;overflow:hidden;flex-shrink:0;background:var(--bg2)}
+.child-picker-name{font-size:16px;font-weight:800;color:var(--tx);flex:1}
 
 /* HERO - Sticky on scroll, full width when stuck */
 .hero{margin:0;background:linear-gradient(180deg,var(--tab-color,#6366F1),var(--tab-color2,#818CF8));border-radius:0 0 38px 38px;padding:14px 20px 22px;color:#fff;position:sticky;top:0;z-index:10;overflow:hidden;box-shadow:0 4px 20px var(--tab-shadow,rgba(99,102,241,0.3));transition:padding .25s}
@@ -2191,6 +2227,14 @@ button:disabled {
   height: 100%;
   filter: drop-shadow(0 0 4px rgba(255,215,0,0.8));
 }
+@keyframes rwd-card-bounce {
+  0%{transform:scale(1)}
+  30%{transform:scale(1.08)}
+  60%{transform:scale(.96)}
+  80%{transform:scale(1.03)}
+  100%{transform:scale(1)}
+}
+.rwd-card-bounce{animation:rwd-card-bounce .45s cubic-bezier(.36,.07,.19,.97)}
 @keyframes hero-pts-bounce {
   0%   { transform: scale(1); }
   40%  { transform: scale(1.22); }
@@ -2612,7 +2656,18 @@ button:disabled {
 
 <!-- HOME -->
 <div class="scr on" id="s-home">
-  <div class="home-top">
+  <div class="app-topbar">
+    <div class="app-topbar-logo">
+      <svg viewBox="0 0 88 22" xmlns="http://www.w3.org/2000/svg" width="72" height="18">
+        <text y="17" font-family="'Pretendard Variable',system-ui,sans-serif" font-weight="900" font-size="19" letter-spacing="-0.5">
+          <tspan fill="rgba(255,255,255,.9)">mile</tspan><tspan fill="#FFD580">.</tspan><tspan fill="rgba(255,255,255,.9)">ly</tspan>
+        </text>
+      </svg>
+    </div>
+    <div class="app-topbar-child" id="app-topbar-child"></div>
+    <button class="dtog" onclick="toggleDark()" style="background:rgba(255,255,255,.2);border:none"><div class="dtog-in" id="dtog-ic" style="background:rgba(255,255,255,.9)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-3px"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></div></button>
+  </div>
+  <div class="home-greeting">
     <div id="home-top-content">
       <h1 id="greeting-txt">안녕하세요! 👋</h1>
       <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:4px">
@@ -2632,7 +2687,6 @@ button:disabled {
       </div>
       <p id="smart-msg" style="font-size:13px;color:rgba(255,255,255,.75);margin-top:4px;font-weight:600;line-height:1.3"></p>
     </div>
-    <button class="dtog" onclick="toggleDark()" style="background:rgba(255,255,255,.2);border:none"><div class="dtog-in" id="dtog-ic" style="background:rgba(255,255,255,.9)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-3px"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></div></button>
   </div>
   <div class="hero">
     <div class="streak-pill" id="streak-pill"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 01-7 7 7 7 0 01-7-7c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg> 0일 연속</div>
@@ -3208,6 +3262,70 @@ button:disabled {
   </div>
 </div>
 
+<!-- MY TAB -->
+<div class="scr" id="s-my">
+  <div class="my-header">
+    <div class="my-avatar-wrap" id="my-avatar-wrap"></div>
+    <div class="my-name" id="my-name">이름</div>
+    <div class="my-role" id="my-role">역할</div>
+  </div>
+  <div class="my-section-title">기분 &amp; 프로필</div>
+  <div class="my-list">
+    <button class="my-list-item" onclick="openMoodPop()">
+      <span class="my-list-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></span>
+      <span class="my-list-txt">기분 표현</span>
+      <svg class="my-list-arr" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
+    <button class="my-list-item" onclick="openAvatarEditor(currentUser)">
+      <span class="my-list-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></span>
+      <span class="my-list-txt">프로필 사진 변경</span>
+      <svg class="my-list-arr" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
+  </div>
+  <div class="my-section-title">가족</div>
+  <div class="my-list">
+    <button class="my-list-item" onclick="openFamilyPopup()">
+      <span class="my-list-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></span>
+      <span class="my-list-txt">가족 가계도 보기</span>
+      <svg class="my-list-arr" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
+    <button class="my-list-item my-admin-only" onclick="myTabAdminAction()" id="my-admin-btn">
+      <span class="my-list-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></span>
+      <span class="my-list-txt">관리 (관리자 페이지)</span>
+      <svg class="my-list-arr" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
+  </div>
+  <div class="my-section-title">앱 설정</div>
+  <div class="my-list">
+    <div class="my-list-item my-list-item-toggle">
+      <span class="my-list-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></span>
+      <span class="my-list-txt">다크 모드</span>
+      <button class="tog off" id="tog-dark-my" onclick="toggleDark()"><div class="tog-dot"></div></button>
+    </div>
+  </div>
+  <div class="my-list" style="margin-top:8px">
+    <button class="my-list-item my-list-item-danger" onclick="logout()">
+      <span class="my-list-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span>
+      <span class="my-list-txt">로그아웃</span>
+      <svg class="my-list-arr" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- CHILD PICKER BOTTOM SHEET -->
+<div class="overlay" id="m-child-picker">
+  <div class="sheet">
+    <div class="sheet-body">
+      <div class="handle"></div>
+      <div class="sheet-title" id="child-picker-title">어떤 아이의 활동인가요?</div>
+      <div id="child-picker-list" style="display:flex;flex-direction:column;gap:8px;margin-top:8px"></div>
+    </div>
+    <div class="sheet-foot">
+      <button class="s-btn canc" onclick="closeModal('m-child-picker')">취소</button>
+    </div>
+  </div>
+</div>
+
 <!-- BOTTOM NAV - Floating Glass Pill with SVG Icons -->
 <div class="nav-container">
   <nav class="bottom-nav">
@@ -3238,11 +3356,11 @@ button:disabled {
     </div>
     <div class="nav-item" data-tab="hist" id="tab-hist" onclick="goTab('hist')">
       <svg viewBox="0 0 24 24"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
-      <span class="nav-label">성과</span>
+      <span class="nav-label">리포트</span>
     </div>
-    <div class="nav-divider"></div>
-    <div class="nav-users" id="tab-adm">
-      <!-- Dynamically rendered by renderNavUsers() -->
+    <div class="nav-item" data-tab="my" id="tab-my" onclick="goTab('my')">
+      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span class="nav-label">MY</span>
     </div>
   </nav>
 </div>
@@ -5714,6 +5832,8 @@ function applyDark(v){
   document.querySelectorAll('.dtog-in').forEach(el=>el.innerHTML=v?'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-3px"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>':'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-3px"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>');
   const td=document.getElementById('tog-dark');
   if(td)td.classList.toggle('off',!v);
+  const tdMy=document.getElementById('tog-dark-my');
+  if(tdMy)tdMy.classList.toggle('off',!v);
   
   // theme-color도 업데이트
   const themeMeta=document.getElementById('theme-color-meta');
@@ -7236,7 +7356,7 @@ function claimBadgeMileage(badgeId){
 
   save();renderAll();
   toast(`🏅 ${badge.name}! ${bonus} 마일리지 획득!`);
-  confetti();flyCoinsToMileage(null,bonus);
+  flyCoinsToMileage(null,bonus);
 }
 window.claimBadgeMileage=claimBadgeMileage;
 
@@ -8971,6 +9091,18 @@ function renderAdmSettings(){
 
 // ── ACTIVITY ACTIONS ──────────────────────────
 function doAct(id){
+  // 양육자 + 자녀 2명 이상: 자녀 선택 먼저
+  if(isCaregiverUser()&&getChildMembers().length>=2){
+    showChildPicker('어떤 아이의 활동인가요?',function(childId){
+      if(!childId)return;
+      if(getFamilyMode()==='independent'&&getViewedMemberId()!==childId)switchViewingChild(childId);
+      _doActCore(id);
+    });
+    return;
+  }
+  _doActCore(id);
+}
+function _doActCore(id){
   const a=S.acts.find(x=>x.id===id);
   if(!a||!canDo(a))return;
   markDone(a);
@@ -8981,35 +9113,28 @@ function doAct(id){
   if(isTodayAllDone()){
     const yd=new Date();yd.setDate(yd.getDate()-1);const y=`${yd.getFullYear()}-${String(yd.getMonth()+1).padStart(2,'0')}-${String(yd.getDate()).padStart(2,'0')}`;
     if(S.lastDate!==t){
-      // 오늘 처음으로 모든 활동 완료!
       if(S.lastDate===y){S.streak++;}
       else{S.streak=1;}
       S.longest=Math.max(S.longest||0,S.streak);S.lastDate=t;
       if(S.settings.streakBonus&&S.streak>0&&S.streak%7===0){bonus=S.settings.streakBonusPts||100;sm=` 🔥 ${S.streak}일 연속 +${bonus} 마일리지!`;}
     }
-    // 이미 오늘 lastDate가 설정된 경우: 취소 후 다시 완료했을 수 있으므로 lastDate 유지
   }
 
   S.pts+=a.pts+bonus;S.totalDone++;
-  // log entry with unique id for undo
   S.log.unshift({id:'l_'+Date.now(),emoji:a.emoji,name:a.name,pts:a.pts+bonus,ts:Date.now(),actId:a.id,user:currentUser});
   if(S.log.length>300)S.log=S.log.slice(0,300);
   save();
-  // 활동 완료 애니메이션 → 완료 후 뱃지 체크
-  // 현재 탭에서 보이는 요소를 찾음 (홈탭 act-card 또는 기록탭 log-item)
   const _curTab=getCurrentTab();
   const _actCard=_curTab==='home'?document.querySelector(`.act-card[data-actid="${id}"]`):null;
   const _logItem=_curTab==='log'?document.querySelector(`.log-item[data-actid="${id}"]`):null;
 
   if(_actCard){
-    // 홈탭: 카드 플립 애니메이션
     const _chk=document.createElement('div');
     _chk.className='act-check-overlay';
     _chk.innerHTML='<div class="act-check-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><polyline points="20 6 9 17 4 12"/></svg></div>';
     _actCard.appendChild(_chk);
     _actCard.classList.add('act-completing');
     toast(`${a.emoji} ${a.name} +${a.pts} 마일리지${sm}`);
-    confetti();
     flyCoinsToMileage(_actCard, a.pts+bonus);
     _actCard.addEventListener('animationend',function _h(ev){
       if(ev.animationName!=='actFlip')return;
@@ -9018,14 +9143,12 @@ function doAct(id){
       setTimeout(()=>checkBadges(),300);
     });
   } else if(_logItem){
-    // 기록탭: 플래시 애니메이션
     const _chk2=document.createElement('div');
     _chk2.className='log-check-overlay';
     _chk2.innerHTML='<div class="log-check-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><polyline points="20 6 9 17 4 12"/></svg></div>';
     _logItem.appendChild(_chk2);
     _logItem.classList.add('log-completing');
     toast(`${a.emoji} ${a.name} +${a.pts} 마일리지${sm}`);
-    confetti();
     flyCoinsToMileage(_logItem, a.pts+bonus);
     _logItem.addEventListener('animationend',function _h2(ev){
       if(ev.animationName!=='logItemFlash')return;
@@ -9036,36 +9159,41 @@ function doAct(id){
   } else {
     renderAll();
     toast(`${a.emoji} ${a.name} +${a.pts} 마일리지${sm}`);
-    confetti();
     flyCoinsToMileage(null, a.pts+bonus);
     setTimeout(()=>checkBadges(),300);
   }
 }
 
 function undoAct(actId){
+  // 양육자 + 자녀 2명 이상: 자녀 선택 먼저
+  if(isCaregiverUser()&&getChildMembers().length>=2){
+    showChildPicker('어떤 아이의 활동을 취소할까요?',function(childId){
+      if(!childId)return;
+      if(getFamilyMode()==='independent'&&getViewedMemberId()!==childId)switchViewingChild(childId);
+      _undoActCore(actId);
+    });
+    return;
+  }
+  _undoActCore(actId);
+}
+function _undoActCore(actId){
   const a=S.acts.find(x=>x.id===actId);
   if(!a)return;
   const done=countDone(a);
   if(done<=0)return;
 
-  // find the most recent log entry for this activity
   const idx=S.log.findIndex(l=>l.actId===actId&&l.pts>0);
   if(idx===-1){toast('취소할 기록이 없어요');return;}
 
   const entry=S.log[idx];
   S.pts=Math.max(0,S.pts-entry.pts);
   S.totalDone=Math.max(0,S.totalDone-1);
-  S.log.splice(idx,1); // remove from log
+  S.log.splice(idx,1);
   unmarkDone(a);
 
-  // 활동 취소 후 오늘 할일이 미완료 상태가 되면 streak에서 오늘분 제거
-  // (getDisplayStreak가 실시간 재검증하므로 표시는 자동 반영됨)
-  // DB값도 보정: 오늘 lastDate인데 더이상 모든 할일이 안끝났으면 streak 롤백
   const _t=todayStr();
   if(S.lastDate===_t && !isTodayAllDone()){
-    // 오늘이 streak에 포함됐었는데 이제 미완료 → streak에서 오늘 제거
     S.streak=Math.max(0,S.streak-1);
-    // lastDate를 어제로 되돌림 (어제까지가 마지막 연속 달성일)
     const _yd=new Date();_yd.setDate(_yd.getDate()-1);
     S.lastDate=S.streak>0?`${_yd.getFullYear()}-${String(_yd.getMonth()+1).padStart(2,'0')}-${String(_yd.getDate()).padStart(2,'0')}`:null;
   }
@@ -9559,14 +9687,27 @@ function changeFamilyMode(newMode){
 // ── END STICKER SYSTEM ──────────────────────
 
 // REDEEM
-let pRwdId=null;
-function openRedeem(id){
+let pRwdId=null,_pRwdEl=null;
+function openRedeem(id,srcEl){
+  // 양육자 + 자녀 2명 이상: 자녀 선택 먼저
+  if(isCaregiverUser()&&getChildMembers().length>=2){
+    showChildPicker('어떤 아이의 보상인가요?',function(childId){
+      if(!childId)return;
+      if(getFamilyMode()==='independent'&&getViewedMemberId()!==childId)switchViewingChild(childId);
+      _openRedeemModal(id,srcEl);
+    });
+    return;
+  }
+  _openRedeemModal(id,srcEl);
+}
+function _openRedeemModal(id,srcEl){
   const r=S.rwds.find(x=>x.id===id);
+  if(!r)return;
   const sale=r.sale&&r.sale.percent&&(!r.sale.endDate||new Date(r.sale.endDate+'T23:59:59')>=new Date())?r.sale:null;
   const actualPts=sale?Math.round(r.pts*(1-sale.percent/100)):r.pts;
-  if(!r||S.pts<actualPts)return;
-  if(!confirm(`🎁 "${r.name}" 보상을 교환하시겠어요?\n(${actualPts.toLocaleString()} 마일리지가 차감됩니다)`))return;
+  if(S.pts<actualPts)return;
   pRwdId=id;
+  _pRwdEl=srcEl||document.querySelector(`.rwd-card[data-rwdid="${id}"]`)||null;
   document.getElementById('mr-emoji').textContent=r.emoji;
   document.getElementById('mr-title').textContent=r.name+' 교환';
   document.getElementById('mr-body').textContent=`${actualPts.toLocaleString()} 마일리지을 사용할까요?\n현재 ${S.pts.toLocaleString()} 마일리지 보유중이에요.`;
@@ -9583,7 +9724,6 @@ function confirmRedeem(){
   if(!r||S.pts<actualPts){_isRedeemInProgress=false;return;}
   S.pts-=actualPts;
 
-  // Add to inventory with 'owned' status
   if(!S.rewardInventory)S.rewardInventory=[];
   S.rewardInventory.push({
     id:'ri_'+Date.now(),
@@ -9593,15 +9733,16 @@ function confirmRedeem(){
     purchasedAt:Date.now(),
     pts:actualPts,
     status:'owned',
-    redeemedBy:currentUser  // 누가 교환했는지 기록
+    redeemedBy:currentUser
   });
 
-  // Add to rewardLog instead of activity log
   if(!S.rewardLog)S.rewardLog=[];
   S.rewardLog.unshift({id:'rl_'+Date.now(),emoji:r.emoji,name:r.name,pts:actualPts,ts:Date.now(),rwdId:r.id,type:'exchange',user:currentUser});
   save();closeModal('m-redeem');renderAll();
   checkBadges();
-  toast(`🎉 ${r.emoji} ${r.name} 교환 완료!`);confetti();
+  toast(`🎉 ${r.emoji} ${r.name} 교환 완료!`);
+  confetti();
+  flyCoinsFromMileage(_pRwdEl, actualPts);
   }finally{_isRedeemInProgress=false;}
 }
 function undoRedeem(logId){
@@ -11066,6 +11207,48 @@ function epSearch(q){
 function pickE(e){document.getElementById(epTarget+'-e').textContent=e;closeEP();}
 function closeEP(){document.getElementById('ep-pop').classList.remove('open');document.getElementById('ep-bg').style.display='none';}
 
+// ── MY TAB RENDERING ──────────────────────────
+function renderMyTab(){
+  if(!currentUser)return;
+  const member=S.familyMeta?.members?.[currentUser];
+  const _RLABELS={dad:'아빠',mom:'엄마',grandpa:'할아버지',grandma:'할머니',grandpa_m:'외할아버지',grandma_m:'외할머니',child:'자녀',caregiver:'양육자',parent:'양육자'};
+  const roleLabel=_RLABELS[member?.displayRole]||_RLABELS[member?.role]||member?.displayRole||member?.role||'멤버';
+  const name=member?.name||MEMBERS[currentUser]?.name||currentUser;
+  // 이름/역할 업데이트
+  const nameEl=document.getElementById('my-name');
+  const roleEl=document.getElementById('my-role');
+  if(nameEl)nameEl.textContent=name;
+  if(roleEl)roleEl.textContent=roleLabel;
+  // 아바타
+  const avatarWrap=document.getElementById('my-avatar-wrap');
+  if(avatarWrap)avatarWrap.innerHTML=getAvatarHTML(currentUser,80);
+  // 관리자 버튼 표시 여부
+  const adminBtn=document.getElementById('my-admin-btn');
+  if(adminBtn)adminBtn.style.display=isCaregiverUser()?'':'none';
+  // 다크모드 토글 상태 동기화
+  const togDarkMy=document.getElementById('tog-dark-my');
+  if(togDarkMy){
+    if(document.body.classList.contains('dark')){
+      togDarkMy.classList.remove('off');
+    }else{
+      togDarkMy.classList.add('off');
+    }
+  }
+}
+window.renderMyTab=renderMyTab;
+
+function myTabAdminAction(){
+  if(isCurrentUserAdmin()){
+    adminOK=true;
+    reallyGoTab('adm');
+  }else if(!adminOK){
+    showPin('auth','<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-4px;margin-right:4px"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> 관리자 인증','PIN 4자리를 입력하세요');
+  }else{
+    reallyGoTab('adm');
+  }
+}
+window.myTabAdminAction=myTabAdminAction;
+
 // ── TABS / MODAL ──────────────────────────────
 function goTab(tab){
   if(tab==='adm'){
@@ -11075,8 +11258,13 @@ function goTab(tab){
       toast('관리자 권한이 없습니다');
       return;
     }
-    // 관리 탭은 플로팅 메뉴를 먼저 띄움
-    openPfMenu();
+    // 관리 탭 → MY 탭으로 통합
+    goTab('my');
+    return;
+  }
+  if(tab==='my'){
+    renderMyTab();
+    reallyGoTab('my');
     return;
   }
   reallyGoTab(tab);
@@ -11098,45 +11286,19 @@ function positionMenuAboveIcon(menuEl){
   menuEl.style.right='auto';
   menuEl.style.top='auto';
 }
-function openPfMenu(){
-  document.getElementById('pfm-bg').style.display='block';
-  const menu=document.getElementById('pfm-menu');
-  menu.style.display='block';
-  // 자녀 역할은 관리자 메뉴 숨기기
-  const adminBtn=menu.querySelector('[onclick*="admin"]');
-  if(adminBtn){
-    const member=S.familyMeta?.members?.[currentUser];
-    const isChild=member&&member.role==='child';
-    adminBtn.style.display=isChild?'none':'';
-  }
-  positionMenuAboveIcon(menu);
-}
+// openPfMenu → MY 탭으로 통합
+function openPfMenu(){goTab('my');}
 function closePfMenu(){
-  document.getElementById('pfm-bg').style.display='none';
-  document.getElementById('pfm-menu').style.display='none';
+  const bg=document.getElementById('pfm-bg');const menu=document.getElementById('pfm-menu');
+  if(bg)bg.style.display='none';if(menu)menu.style.display='none';
 }
 function pfMenuAction(action){
   closePfMenu();
-  if(action==='admin'){
-    if(isCurrentUserAdmin()){
-      adminOK=true;
-      reallyGoTab('adm');
-    }else if(!adminOK){
-      showPin('auth','<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" style=\"vertical-align:-4px;margin-right:4px\"><rect x=\"3\" y=\"11\" width=\"18\" height=\"11\" rx=\"2\"/><path d=\"M7 11V7a5 5 0 0110 0v4\"/></svg> 관리자 인증','PIN 4자리를 입력하세요');
-    }else{
-      reallyGoTab('adm');
-    }
-  }else if(action==='profile'){
-    if(!currentUser){toast('먼저 로그인해주세요');return;}
-    openAvatarEditor(currentUser);
-  }else if(action==='mood'){
-    openMoodPop();
-  }else if(action==='selfmsg'){
-    if(!currentUser){toast('먼저 로그인해주세요');return;}
-    openMsgPop(currentUser);
-  }else if(action==='logout'){
-    logout();
-  }
+  if(action==='admin'){myTabAdminAction();}
+  else if(action==='profile'){if(!currentUser){toast('먼저 로그인해주세요');return;}openAvatarEditor(currentUser);}
+  else if(action==='mood'){openMoodPop();}
+  else if(action==='selfmsg'){if(!currentUser){toast('먼저 로그인해주세요');return;}openMsgPop(currentUser);}
+  else if(action==='logout'){logout();}
 }
 window.openPfMenu=openPfMenu;
 window.closePfMenu=closePfMenu;
@@ -11267,50 +11429,78 @@ function emitMoodParticles(){
   setTimeout(()=>{if(container.children.length)container.innerHTML='';},4500);
 }
 
-// ── NAV USERS RENDERING (Family Button + independent mode child tabs) ──
+// ── CHILD MEMBERS HELPER ──────────────────────
+function getChildMembers(){
+  if(!S.familyMeta?.members)return[];
+  return Object.entries(S.familyMeta.members)
+    .filter(([,m])=>m.memberType==='child'||m.role==='child'||m.type==='child')
+    .map(([id,m])=>({id,name:m.name||id,...m}));
+}
+
+// ── CHILD PICKER BOTTOM SHEET ─────────────────
+let _childPickerCb=null;
+function showChildPicker(title,callback){
+  _childPickerCb=callback;
+  const kids=getChildMembers();
+  if(kids.length===0){callback(null);return;}
+  // 자녀 1명이면 자동 처리
+  if(kids.length===1){callback(kids[0].id);return;}
+  // independent 모드에서 이미 특정 자녀 선택된 경우
+  if(getFamilyMode()==='independent'){
+    const viewed=getViewedMemberId();
+    if(viewed&&kids.some(k=>k.id===viewed)){callback(viewed);return;}
+  }
+  // 2명 이상 → 바텀시트
+  const titleEl=document.getElementById('child-picker-title');
+  if(titleEl)titleEl.textContent=title||'어떤 아이인가요?';
+  const list=document.getElementById('child-picker-list');
+  if(list){
+    list.innerHTML=kids.map(k=>{
+      const avatarHtml=getAvatarHTML(k.id,44);
+      return`<div class="child-picker-item" onclick="_onChildPickerSelect('${k.id}')">
+        <div class="child-picker-avatar">${avatarHtml}</div>
+        <span class="child-picker-name">${k.name}</span>
+      </div>`;
+    }).join('');
+  }
+  openModal('m-child-picker');
+}
+function _onChildPickerSelect(childId){
+  closeModal('m-child-picker');
+  if(_childPickerCb){const cb=_childPickerCb;_childPickerCb=null;cb(childId);}
+}
+window.showChildPicker=showChildPicker;
+window._onChildPickerSelect=_onChildPickerSelect;
+
+// ── NAV USERS RENDERING (상단 자녀 선택기 + hist 탭 show/hide) ──
 function renderNavUsers(){
-  const container=document.getElementById('tab-adm');
-  if(!container)return;
-
-  // Calculate total unread across all other users
-  const otherIds=Object.keys(MEMBERS).filter(id=>id!==currentUser);
-  let totalUnread=0;
-  otherIds.forEach(id=>{totalUnread+=getUnreadCount(id);});
-
   const mode=getFamilyMode();
   const kids=getChildMemberIds();
 
-  // independent 모드 + 양육자 + 자녀 2명 이상: 자녀 아바타 탭 표시
-  if(mode==='independent'&&isCaregiverUser()&&kids.length>=2){
-    const currentViewed=getViewedMemberId();
-    let html='<div class="nav-child-tabs">';
-    kids.forEach(id=>{
-      const nm=MEMBERS[id]?.name||id;
-      const isActive=id===currentViewed;
-      const avatarHtml=getAvatarHTML(id,32);
-      html+=`<div class="nav-child-tab${isActive?' active':''}" onclick="switchViewingChild('${id}')" title="${nm}의 마일리지">
-        <div class="nav-child-avatar">${avatarHtml}</div>
-        <span class="nav-child-name">${nm}</span>
-      </div>`;
-    });
-    html+='</div>';
-    // 가족 버튼도 함께 표시
-    html+=`<div class="nav-family-btn" onclick="openFamilyPopup()" id="nav-family-btn" style="margin-top:2px">
-      <span class="nfb-icon"><svg viewBox="0 0 24 24" fill="var(--tab-color,#6366F1)" xmlns="http://www.w3.org/2000/svg"><circle cx="6" cy="8.5" r="2.4" opacity=".45"/><rect x="3.5" y="14" width="5" height="7.5" rx="2.5" opacity=".45"/><circle cx="18" cy="8.5" r="2.4" opacity=".45"/><rect x="15.5" y="14" width="5" height="7.5" rx="2.5" opacity=".45"/><circle cx="12" cy="6" r="3" opacity=".9"/><rect x="8.5" y="12.5" width="7" height="9" rx="3.5" opacity=".9"/></svg></span>
-      <span class="nfb-label">우리가족</span>
-      ${totalUnread>0?`<span class="nfb-badge">${totalUnread}</span>`:''}
-    </div>`;
-    container.innerHTML=html;
-    return;
+  // 상단 바 자녀 선택기 업데이트
+  const topChild=document.getElementById('app-topbar-child');
+  if(topChild){
+    if(isCaregiverUser()&&kids.length>=1){
+      if(mode==='independent'&&kids.length>=2){
+        const currentViewed=getViewedMemberId();
+        let opts=kids.map(id=>{
+          const nm=MEMBERS[id]?.name||id;
+          return`<option value="${id}"${id===currentViewed?' selected':''}>${nm}의 홈</option>`;
+        }).join('');
+        topChild.innerHTML=`<select class="child-select" onchange="switchViewingChild(this.value)">${opts}</select>`;
+      }else{
+        const childId=mode==='independent'?kids[0]:(getViewedMemberId()||kids[0]);
+        const nm=MEMBERS[childId]?.name||'자녀';
+        topChild.innerHTML=`<span class="child-name-text">${nm}의 홈</span>`;
+      }
+    }else{
+      topChild.innerHTML='';
+    }
   }
 
-  // 기본: Family button — compact, single element
-  let html=`<div class="nav-family-btn" onclick="openFamilyPopup()" id="nav-family-btn">
-    <span class="nfb-icon"><svg viewBox="0 0 24 24" fill="var(--tab-color,#6366F1)" xmlns="http://www.w3.org/2000/svg"><circle cx="6" cy="8.5" r="2.4" opacity=".45"/><rect x="3.5" y="14" width="5" height="7.5" rx="2.5" opacity=".45"/><circle cx="18" cy="8.5" r="2.4" opacity=".45"/><rect x="15.5" y="14" width="5" height="7.5" rx="2.5" opacity=".45"/><circle cx="12" cy="6" r="3" opacity=".9"/><rect x="8.5" y="12.5" width="7" height="9" rx="3.5" opacity=".9"/></svg></span>
-    <span class="nfb-label">우리가족</span>
-    ${totalUnread>0?`<span class="nfb-badge">${totalUnread}</span>`:''}
-  </div>`;
-  container.innerHTML=html;
+  // 리포트 탭: 양육자에게만 표시
+  const histTab=document.getElementById('tab-hist');
+  if(histTab)histTab.style.display=isCaregiverUser()?'':'none';
 }
 window.renderNavUsers=renderNavUsers;
 
@@ -12224,7 +12414,7 @@ function reallyGoTab(tab){
     const lblEl=hero.querySelector('.hero-lbl');if(lblEl)lblEl.style.fontSize='';
     const unitEl=hero.querySelector('.hero-unit');if(unitEl)unitEl.style.fontSize='';
   }
-  const ht=document.querySelector('.home-top');
+  const ht=document.querySelector('.home-greeting');
   if(ht) Array.from(ht.children).forEach(c=>c.style.opacity='1');
   const defaultBr2=window.innerWidth>=768?'0':'0 0 38px 38px';
   const logH=document.querySelector('.log-header-sticky');
@@ -12505,6 +12695,93 @@ function _triggerHeroPtsBounce(targetId) {
   void el.offsetWidth;
   el.classList.add('hero-pts-anim');
   el.addEventListener('animationend', function() { el.classList.remove('hero-pts-anim'); }, { once: true });
+}
+
+// ── REVERSE COIN ANIMATION (마일리지 → 보상 카드) ───────
+/**
+ * flyCoinsFromMileage(targetEl, amount)
+ * 마일리지 숫자에서 별 파티클 생성 → 보상 카드 방향으로 역방향 베지어 곡선
+ */
+function flyCoinsFromMileage(targetEl, amount) {
+  const currentTab = document.body.getAttribute('data-tab') || 'rwd';
+  let sourceId = 'rwd-hdr-pts';
+  if (currentTab === 'home') sourceId = 'hero-pts';
+  const sourceEl = document.getElementById(sourceId);
+  if (!sourceEl) return;
+  const sRect = sourceEl.getBoundingClientRect();
+  const sx = sRect.left + sRect.width / 2;
+  const sy = sRect.top + sRect.height / 2;
+
+  let tx, ty;
+  if (targetEl) {
+    const tRect = targetEl.getBoundingClientRect();
+    tx = tRect.left + tRect.width / 2;
+    ty = tRect.top + tRect.height / 2;
+  } else {
+    tx = window.innerWidth / 2;
+    ty = window.innerHeight * 0.55;
+  }
+
+  const count = 5 + Math.floor(Math.random() * 3);
+  const starSVG = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="cpg2" cx="50%" cy="30%" r="70%"><stop offset="0%" stop-color="#FFF176"/><stop offset="60%" stop-color="#FFD700"/><stop offset="100%" stop-color="#FF8F00"/></radialGradient></defs><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" fill="url(#cpg2)" stroke="#FFC107" stroke-width="0.5"/></svg>';
+
+  const particles = [];
+  for (let i = 0; i < count; i++) {
+    const el = document.createElement('div');
+    el.className = 'coin-particle';
+    el.innerHTML = starSVG;
+    const offX = (Math.random() - 0.5) * 28;
+    const offY = (Math.random() - 0.5) * 28;
+    el.style.left = (sx - 11 + offX) + 'px';
+    el.style.top  = (sy - 11 + offY) + 'px';
+    el.style.opacity = '1';
+    document.body.appendChild(el);
+    particles.push({ el, offX, offY });
+  }
+
+  // 마일리지 카운트다운 바운스
+  _triggerHeroPtsBounce(sourceId);
+
+  particles.forEach(function(p, idx) {
+    const el = p.el, offX = p.offX, offY = p.offY;
+    const delay = idx * 55;
+    const duration = 700 + Math.random() * 200;
+    const startX = sx + offX, startY = sy + offY;
+    // 역방향: 아래로 내려가는 베지어 (위로 올라가던 것의 반대)
+    const midX = (sx + tx) / 2 + (Math.random() - 0.5) * 100;
+    const midY = Math.max(sy, ty) + 60 + Math.random() * 80;
+    const cx1 = startX + (midX - startX) * 0.3;
+    const cy1 = startY + 50;
+    const cx2 = midX;
+    const cy2 = midY;
+    let startTime = null;
+
+    function animate(timestamp) {
+      if (!startTime) startTime = timestamp + delay;
+      const elapsed = timestamp - startTime;
+      if (elapsed < 0) { requestAnimationFrame(animate); return; }
+      const t = Math.min(elapsed / duration, 1);
+      const u = t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2;
+      const bx = Math.pow(1-u,3)*startX + 3*Math.pow(1-u,2)*u*cx1 + 3*(1-u)*u*u*cx2 + u*u*u*tx;
+      const by = Math.pow(1-u,3)*startY + 3*Math.pow(1-u,2)*u*cy1 + 3*(1-u)*u*u*cy2 + u*u*u*ty;
+      const scale = t < 0.8 ? 1 : Math.max(0, 1-(t-0.8)*3.5);
+      const opacity = t < 0.85 ? 1 : Math.max(0, 1-(t-0.85)/0.15);
+      el.style.webkitTransform = 'translate3d('+(bx-startX-11)+'px,'+(by-startY-11)+'px,0) scale('+scale+')';
+      el.style.transform = 'translate3d('+(bx-startX-11)+'px,'+(by-startY-11)+'px,0) scale('+scale+')';
+      el.style.opacity = opacity;
+      if (t < 1) { requestAnimationFrame(animate); }
+      else {
+        el.remove();
+        if (idx === count - 1 && targetEl) {
+          targetEl.classList.remove('rwd-card-bounce');
+          void targetEl.offsetWidth;
+          targetEl.classList.add('rwd-card-bounce');
+          targetEl.addEventListener('animationend',()=>targetEl.classList.remove('rwd-card-bounce'),{once:true});
+        }
+      }
+    }
+    requestAnimationFrame(animate);
+  });
 }
 
 function confetti(){
@@ -13542,7 +13819,7 @@ window._createState = _createState;
   const _ptEl=hero?hero.querySelector('.hero-pts'):null;
   const _lblEl=hero?hero.querySelector('.hero-lbl'):null;
   const _unitEl=hero?hero.querySelector('.hero-unit'):null;
-  const _homTop=document.querySelector('.home-top');
+  const _homTop=document.querySelector('.home-greeting');
   const _homTopChildren=_homTop?Array.from(_homTop.children):[];
   let _uhcRaf=0;
   function updateHeaderCompact(){
