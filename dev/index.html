@@ -1025,35 +1025,38 @@ body.dark .adm-child-btn.on{background:rgba(255,107,53,.15)}
 .unified-avatar{width:20px;height:20px;border-radius:50%;overflow:hidden;border:1.5px solid var(--gn,#10B981);background:var(--bg2,#F1F5F9);flex-shrink:0}
 .unified-avatar svg,.unified-avatar img{width:100%;height:100%}
 
-/* ── Family Popup (가계도 family tree layout) ── */
-.family-popup-bg{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.4);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);animation:fadeIn .15s}
-.family-popup{position:fixed;z-index:501;display:flex;flex-direction:column;align-items:center;padding:24px 28px 18px;animation:familyPopUp .3s cubic-bezier(.34,1.2,.64,1)}
+/* ── Family Popup (Toss-style genealogy) ── */
+.family-popup-bg{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.45);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);animation:fadeIn .15s}
+.family-popup{position:fixed;z-index:501;display:flex;flex-direction:column;align-items:center;gap:0;animation:familyPopUp .3s cubic-bezier(.34,1.2,.64,1);padding:20px 20px 14px;background:rgba(255,255,255,.1);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-radius:24px;border:1px solid rgba(255,255,255,.18);box-shadow:0 8px 32px rgba(0,0,0,.28)}
+body.dark .family-popup{background:rgba(20,20,32,.72);border-color:rgba(255,255,255,.1)}
 @keyframes familyPopUp{from{opacity:0;transform:translateY(24px) scale(.85)}to{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes fpBounceSelect{0%{transform:scale(1)}40%{transform:scale(1.25)}70%{transform:scale(1.12)}100%{transform:scale(1.18)}}
-.family-popup-label{font-size:13px;font-weight:800;color:rgba(255,255,255,.5);letter-spacing:2px;text-transform:uppercase;margin-bottom:18px;position:relative;z-index:1}
-.family-popup-lines{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
-.family-popup-lines line{stroke:rgba(255,255,255,.3);stroke-width:2}
-.family-popup-lines path{fill:none;stroke:rgba(255,255,255,.3);stroke-width:2;stroke-linecap:round}
-.family-popup-lines text{pointer-events:none}
-.family-popup-row{display:flex;gap:36px;position:relative;z-index:1;justify-content:center}
+.fp-section{display:flex;flex-direction:column;align-items:center;gap:6px;width:100%}
+.fp-section-label{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.45);align-self:flex-start;padding-left:2px}
+.fp-members-row{display:flex;gap:10px;justify-content:center}
+.fp-connector{width:2px;height:24px;background:rgba(255,255,255,.22);margin:4px auto}
+.family-popup-row{display:flex;gap:10px;position:relative;z-index:1;justify-content:center}
 .family-popup-parents{margin-bottom:0}
-.family-tree-connector{height:32px;position:relative;z-index:0}
+.family-tree-connector{height:24px;position:relative;z-index:0}
 .family-popup-children{margin-top:0}
-.family-popup-item{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .2s}
-.family-popup-item:active{transform:scale(.9)}
+.family-popup-item{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .2s;background:rgba(255,255,255,.1);border-radius:14px;padding:10px 12px 8px;border:1.5px solid rgba(255,255,255,.13);min-width:72px}
+body.dark .family-popup-item{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.09)}
+.family-popup-item:active{transform:scale(.92)}
+.family-popup-item.is-me{border-color:rgba(99,102,241,.65);background:rgba(99,102,241,.12);box-shadow:0 0 0 2px rgba(99,102,241,.25)}
+body.dark .family-popup-item.is-me{border-color:rgba(129,140,248,.7);background:rgba(99,102,241,.18)}
 .family-popup-item.selected .family-popup-avatar{animation:fpBounceSelect .35s cubic-bezier(.34,1.56,.64,1) forwards;border-color:#fff;box-shadow:0 0 0 3px var(--tab-color,#6366F1),0 6px 24px rgba(0,0,0,.3)}
-.family-popup-avatar{width:58px;height:58px;border-radius:50%;overflow:visible;border:3px solid rgba(255,255,255,.6);box-shadow:0 4px 20px rgba(0,0,0,.25),0 0 0 1px rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;background:var(--card);position:relative;transition:border-color .2s,box-shadow .2s,transform .2s}
-body.dark .family-popup-avatar{border-color:rgba(255,255,255,.3)}
-body.dark .family-popup-item.selected .family-popup-avatar{border-color:rgba(255,255,255,.8);box-shadow:0 0 0 3px var(--tab-color,#6366F1),0 6px 24px rgba(0,0,0,.4)}
+.family-popup-avatar{width:48px;height:48px;border-radius:50%;overflow:visible;border:2.5px solid rgba(255,255,255,.4);box-shadow:0 4px 14px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;background:var(--card);position:relative;transition:border-color .2s,box-shadow .2s;flex-shrink:0}
+.family-popup-item.is-me .family-popup-avatar{border-color:#818CF8;box-shadow:0 0 0 2px rgba(99,102,241,.35),0 4px 14px rgba(0,0,0,.18)}
+body.dark .family-popup-avatar{border-color:rgba(255,255,255,.25)}
 .family-popup-avatar svg,.family-popup-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
-.family-popup-name{font-size:13px;font-weight:800;color:rgba(255,255,255,.85);text-shadow:0 1px 4px rgba(0,0,0,.4);white-space:nowrap;transition:color .2s}
-.family-popup-role{font-size:9px;font-weight:700;color:rgba(255,255,255,.5);text-shadow:0 1px 2px rgba(0,0,0,.3);white-space:nowrap;margin-top:-3px}
-.family-popup-item.selected .family-popup-name{color:#fff;font-size:13px}
-.family-popup-item.selected .family-popup-role{color:rgba(255,255,255,.7)}
-.family-popup-mood{position:absolute;bottom:-2px;right:-2px;font-size:13px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.3))}
+.family-popup-name{font-size:11px;font-weight:800;color:rgba(255,255,255,.92);white-space:nowrap;text-align:center}
+.fp-me-badge{font-size:9px;font-weight:800;color:#818CF8;background:rgba(99,102,241,.2);border-radius:5px;padding:1px 6px;line-height:1.5;white-space:nowrap}
+.family-popup-role,.fp-role-text{font-size:9px;font-weight:600;color:rgba(255,255,255,.48);white-space:nowrap;text-align:center}
+.fp-status{font-size:9px;font-weight:600;color:rgba(255,255,255,.38);white-space:nowrap}
+.fp-status.has-account{color:rgba(74,222,128,.85)}
 .family-popup-unread{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;background:#EF4444;color:#fff;font-size:9px;font-weight:900;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 5px;box-shadow:0 2px 6px rgba(239,68,68,.4);line-height:1}
-.family-popup-close{margin-top:14px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.15);color:rgba(255,255,255,.8);font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;position:relative;z-index:1;-webkit-tap-highlight-color:transparent}
-.family-popup-close:active{transform:scale(.85);background:rgba(255,255,255,.25)}
+.family-popup-close{margin-top:14px;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);font-size:15px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;border:1px solid rgba(255,255,255,.14);-webkit-tap-highlight-color:transparent}
+.family-popup-close:active{transform:scale(.85);background:rgba(255,255,255,.2)}
 
 /* Legacy nav-user-wrap (hidden, kept for compat) */
 .nav-user-wrap{display:none}
@@ -11033,79 +11036,79 @@ function openFamilyPopup(){
   };
   document.body.appendChild(bg);
 
-  // Create popup container
   const popup=document.createElement('div');
   popup.className='family-popup';
   popup.id='family-popup';
 
-  // SVG lines (drawn after layout)
-  const svgNS='http://www.w3.org/2000/svg';
-  const linesSvg=document.createElementNS(svgNS,'svg');
-  linesSvg.setAttribute('class','family-popup-lines');
-  popup.appendChild(linesSvg);
-
-  // Helper: select a family popup item with bounce
   function selectFpItem(id){
     popup.querySelectorAll('.family-popup-item').forEach(el=>{
       el.classList.toggle('selected',el.getAttribute('data-fp-id')===id);
     });
   }
 
-  // Helper: create member item
+  // Build a member card (no mood emoji, "(나)" badge + account status)
   function createMemberItem(id, isMe){
     const name=MEMBERS[id]?.name||id;
-    const moodEmoji=getMoodEmoji(id);
     const unread=isMe?0:getUnreadCount(id);
-    const item=document.createElement('div');
-    item.className='family-popup-item';
-    item.setAttribute('data-fp-id',id);
-    item.onclick=function(e){ e.stopPropagation(); selectFpItem(id); isMe?onMeIconClick():onUserIconClick(id); };
+    const hasAccount=!!(S.users&&S.users[id]);
     const _m=MEMBERS[id];
     const _RLABELS={dad:'아빠',mom:'엄마',grandpa:'할아버지',grandma:'할머니',grandpa_m:'외할아버지',grandma_m:'외할머니',child:'자녀',caregiver:'양육자'};
     const roleLabel=_RLABELS[_m?.displayRole]||_RLABELS[_m?.role]||_m?.displayRole||_m?.role||'';
+    const item=document.createElement('div');
+    item.className='family-popup-item'+(isMe?' is-me':'');
+    item.setAttribute('data-fp-id',id);
+    item.onclick=function(e){ e.stopPropagation(); selectFpItem(id); isMe?onMeIconClick():onUserIconClick(id); };
     item.innerHTML=`
       <div class="family-popup-avatar"${isMe?' id="nav-profile-icon"':''}>
-        ${getAvatarHTML(id,54)}
-        ${moodEmoji?`<span class="family-popup-mood">${moodEmoji}</span>`:''}
+        ${getAvatarHTML(id,46)}
         ${!isMe&&unread>0?`<span class="family-popup-unread">${unread}</span>`:''}
       </div>
-      <span class="family-popup-name">${name}${isMe?' (나)':''}</span>
-      <span class="family-popup-role">${roleLabel}</span>`;
+      <span class="family-popup-name">${name}</span>
+      ${isMe?'<span class="fp-me-badge">나</span>':''}
+      <span class="family-popup-role">${roleLabel}</span>
+      <span class="fp-status${hasAccount?' has-account':''}">${hasAccount?'✓ 가입':'초대 대기'}</span>`;
     return item;
   }
 
-  // 가계도 label
-  const treeLabel=document.createElement('div');
-  treeLabel.className='family-popup-label';
-  treeLabel.textContent='우리 가족';
-  popup.appendChild(treeLabel);
-
   if(hasHierarchy){
-    // ── Row 1: Parents (부모) ──
-    const parentRow=document.createElement('div');
-    parentRow.className='family-popup-row family-popup-parents';
-    parents.forEach(id=>parentRow.appendChild(createMemberItem(id,id===currentUser)));
-    popup.appendChild(parentRow);
+    // 상단: 양육자 섹션
+    const cgSection=document.createElement('div');
+    cgSection.className='fp-section';
+    const cgLabel=document.createElement('div');
+    cgLabel.className='fp-section-label';
+    cgLabel.textContent='양육자';
+    cgSection.appendChild(cgLabel);
+    const cgRow=document.createElement('div');
+    cgRow.className='fp-members-row';
+    parents.forEach(id=>cgRow.appendChild(createMemberItem(id,id===currentUser)));
+    cgSection.appendChild(cgRow);
+    popup.appendChild(cgSection);
 
-    // ── Connector area ──
-    const connectorDiv=document.createElement('div');
-    connectorDiv.className='family-tree-connector';
-    popup.appendChild(connectorDiv);
+    // 연결선
+    const connector=document.createElement('div');
+    connector.className='fp-connector';
+    popup.appendChild(connector);
 
-    // ── Row 2: Children (자녀) ──
-    const childRow=document.createElement('div');
-    childRow.className='family-popup-row family-popup-children';
-    children.forEach(id=>childRow.appendChild(createMemberItem(id,id===currentUser)));
-    popup.appendChild(childRow);
+    // 하단: 자녀 섹션
+    const chSection=document.createElement('div');
+    chSection.className='fp-section';
+    const chLabel=document.createElement('div');
+    chLabel.className='fp-section-label';
+    chLabel.textContent='자녀';
+    chSection.appendChild(chLabel);
+    const chRow=document.createElement('div');
+    chRow.className='fp-members-row';
+    children.forEach(id=>chRow.appendChild(createMemberItem(id,id===currentUser)));
+    chSection.appendChild(chRow);
+    popup.appendChild(chSection);
   }else{
-    // No hierarchy — single row
     const singleRow=document.createElement('div');
-    singleRow.className='family-popup-row';
+    singleRow.className='fp-members-row';
     allIds.forEach(id=>singleRow.appendChild(createMemberItem(id,id===currentUser)));
     popup.appendChild(singleRow);
   }
 
-  // X close button
+  // 닫기 버튼
   const closeBtn=document.createElement('div');
   closeBtn.className='family-popup-close';
   closeBtn.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
@@ -11114,99 +11117,12 @@ function openFamilyPopup(){
 
   document.body.appendChild(popup);
 
-  // Position at bottom-center
+  // 하단 중앙 배치
   const popupW=popup.offsetWidth;
   let left=(window.innerWidth-popupW)/2;
   if(left<12)left=12;
   popup.style.left=left+'px';
   popup.style.bottom='120px';
-
-  // Draw family tree lines
-  requestAnimationFrame(()=>{
-    if(!hasHierarchy){linesSvg.setAttribute('width',popup.offsetWidth);linesSvg.setAttribute('height',popup.offsetHeight);return;}
-    const popupRect=popup.getBoundingClientRect();
-    const pw=popup.offsetWidth;
-
-    // Get parent avatar centers
-    const parentAvatars=popup.querySelectorAll('.family-popup-parents .family-popup-avatar');
-    const parentCenters=[];
-    parentAvatars.forEach(av=>{
-      const r=av.getBoundingClientRect();
-      parentCenters.push({x:r.left+r.width/2-popupRect.left, y:r.top+r.height/2-popupRect.top});
-    });
-
-    // Get child avatar centers
-    const childAvatars=popup.querySelectorAll('.family-popup-children .family-popup-avatar');
-    const childCenters=[];
-    childAvatars.forEach(av=>{
-      const r=av.getBoundingClientRect();
-      childCenters.push({x:r.left+r.width/2-popupRect.left, y:r.top+r.height/2-popupRect.top});
-    });
-
-    // Horizontal line connecting parents (with heart)
-    if(parentCenters.length>=2){
-      const y=parentCenters[0].y;
-      const x1=parentCenters[0].x;
-      const x2=parentCenters[parentCenters.length-1].x;
-      const line=document.createElementNS(svgNS,'line');
-      line.setAttribute('x1',x1);line.setAttribute('y1',y);
-      line.setAttribute('x2',x2);line.setAttribute('y2',y);
-      line.setAttribute('stroke','rgba(255,255,255,.35)');
-      line.setAttribute('stroke-width','2');
-      line.setAttribute('stroke-dasharray','');
-      linesSvg.appendChild(line);
-      // Heart at midpoint
-      const midX=(x1+x2)/2;
-      const heart=document.createElementNS(svgNS,'text');
-      heart.setAttribute('x',midX);heart.setAttribute('y',y+1);
-      heart.setAttribute('text-anchor','middle');heart.setAttribute('dominant-baseline','central');
-      heart.setAttribute('font-size','14');heart.setAttribute('fill','rgba(255,255,255,.6)');
-      heart.textContent='♥';
-      linesSvg.appendChild(heart);
-    }
-
-    // Vertical trunk line from parents down to children
-    const parentBottomY=parentCenters.length>0?Math.max(...parentCenters.map(c=>c.y))+32:0;
-    const childTopY=childCenters.length>0?Math.min(...childCenters.map(c=>c.y))-32:0;
-    const trunkX=pw/2;
-    if(parentCenters.length>0&&childCenters.length>0){
-      // Vertical trunk
-      const trunk=document.createElementNS(svgNS,'line');
-      trunk.setAttribute('x1',trunkX);trunk.setAttribute('y1',parentBottomY);
-      trunk.setAttribute('x2',trunkX);trunk.setAttribute('y2',childTopY);
-      trunk.setAttribute('stroke','rgba(255,255,255,.3)');
-      trunk.setAttribute('stroke-width','2');
-      linesSvg.appendChild(trunk);
-
-      // Horizontal branch to each child
-      if(childCenters.length>1){
-        const branchY=childTopY;
-        const branchLine=document.createElementNS(svgNS,'line');
-        branchLine.setAttribute('x1',childCenters[0].x);branchLine.setAttribute('y1',branchY);
-        branchLine.setAttribute('x2',childCenters[childCenters.length-1].x);branchLine.setAttribute('y2',branchY);
-        branchLine.setAttribute('stroke','rgba(255,255,255,.3)');
-        branchLine.setAttribute('stroke-width','2');
-        linesSvg.appendChild(branchLine);
-      }
-      // Drop lines to each child
-      childCenters.forEach(c=>{
-        const drop=document.createElementNS(svgNS,'line');
-        drop.setAttribute('x1',c.x);drop.setAttribute('y1',childTopY);
-        drop.setAttribute('x2',c.x);drop.setAttribute('y2',c.y-32);
-        drop.setAttribute('stroke','rgba(255,255,255,.3)');
-        drop.setAttribute('stroke-width','2');
-        linesSvg.appendChild(drop);
-        // Small dot
-        const dot=document.createElementNS(svgNS,'circle');
-        dot.setAttribute('cx',c.x);dot.setAttribute('cy',c.y-32);dot.setAttribute('r','2.5');
-        dot.setAttribute('fill','rgba(255,255,255,.5)');
-        linesSvg.appendChild(dot);
-      });
-    }
-
-    linesSvg.setAttribute('width',popup.offsetWidth);
-    linesSvg.setAttribute('height',popup.offsetHeight);
-  });
 }
 window.openFamilyPopup=openFamilyPopup;
 
