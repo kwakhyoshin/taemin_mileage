@@ -193,12 +193,8 @@ body.dark .dtog-in{transform:translateX(24px)}
 .hero.compact .prog-track{margin-top:10px}
 .hero.compact .prog-row{margin-top:3px;font-size:10px}
 
-/* SECTION — iOS Weather-style sticky scroll */
-.sec-group{position:relative;margin-top:4px}
-.sec{font-size:18px;font-weight:800;color:var(--tx);margin:0;display:flex;align-items:center;gap:7px;position:sticky;top:var(--sec-sticky-top,0px);z-index:8;background:color-mix(in srgb,var(--bg) 85%,transparent);padding:12px 16px 8px;transition:opacity .3s,transform .25s;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
-.sec::after{content:'';position:absolute;bottom:0;left:16px;right:16px;height:1px;background:var(--bdr);opacity:.4;transition:opacity .3s}
-.sec.sec-fading{opacity:0;transform:translateY(-8px);pointer-events:none}
-.sec-group>.sec{margin:0}
+/* SECTION */
+.sec{font-size:18px;font-weight:800;color:var(--tx);margin:16px 16px 12px;display:flex;align-items:center;gap:7px}
 .sec-ico{width:22px;height:22px;fill:none;stroke:var(--tab-color,#6366F1);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;margin-top:1px}
 .dtab-ico{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px}
 .cal-detail-sec{margin:0!important;padding:14px 16px 10px!important;border-bottom:1px solid var(--bdr)}
@@ -991,10 +987,7 @@ body.dark .family-popup-item.selected .family-popup-avatar{border-color:rgba(255
   .act-card .n{font-size:14px}
   .act-card .p{font-size:12px}
 
-  /* Section titles — sec-group 안의 .sec은 margin:0 유지 (sticky용) */
-  .sec{font-size:21px;margin:18px 20px 12px;padding:14px 20px 10px}
-  .sec-group>.sec{margin:0;padding:14px 20px 10px}
-  .sec-group{margin-top:6px}
+  .sec{font-size:21px;margin:18px 20px 12px}
   .card{margin:0 20px 14px}
 
   /* Log items bigger */
@@ -1142,10 +1135,7 @@ body.dark .family-popup-item.selected .family-popup-avatar{border-color:rgba(255
   .rwd-e{font-size:50px}
   .rwd-nm{font-size:15px}
 
-  /* Section — sec-group 안의 .sec은 margin:0 유지 (sticky용) */
-  .sec{margin:20px 24px 14px;font-size:22px;padding:14px 24px 10px}
-  .sec-group>.sec{margin:0;padding:14px 24px 10px}
-  .sec-group{margin-top:8px}
+  .sec{margin:20px 24px 14px;font-size:22px}
   .card{margin:0 24px 16px;border-radius:var(--rlg)}
 
   /* Log */
@@ -2244,14 +2234,10 @@ button:disabled {
     <div class="prog-track"><div class="prog-fill" id="hero-bar" style="width:0%"></div></div>
     <div class="prog-row"><span>0</span><span id="hero-bar-lbl"></span></div>
   </div>
-  <div class="sec-group">
-    <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> 오늘 할 일</div>
-    <div class="act-grid" id="home-grid"></div>
-  </div>
-  <div class="sec-group">
-    <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> 최근 활동</div>
-    <div class="rec-list" id="rec-list"></div>
-  </div>
+  <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> 오늘 할 일</div>
+  <div class="act-grid" id="home-grid"></div>
+  <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> 최근 활동</div>
+  <div class="rec-list" id="rec-list"></div>
 </div>
 
 <!-- LOG -->
@@ -2281,18 +2267,12 @@ button:disabled {
       <div class="hdr-stat"><div class="hdr-stat-num" id="rwd-hdr-owned">0</div><div class="hdr-stat-lbl">보유 보상</div></div>
     </div>
   </div>
-  <div class="sec-group">
-    <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg> 교환 가능한 보상</div>
-    <div class="rwd-grid" id="rwd-grid"></div>
-  </div>
-  <div class="sec-group">
-    <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg> 보유 보상 목록</div>
-    <div id="rwd-inventory"></div>
-  </div>
-  <div class="sec-group">
-    <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> 교환/사용 이력</div>
-    <div id="rwd-history" style="margin:0 16px 14px"></div>
-  </div>
+  <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg> 교환 가능한 보상</div>
+  <div class="rwd-grid" id="rwd-grid"></div>
+  <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg> 보유 보상 목록</div>
+  <div id="rwd-inventory"></div>
+  <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> 교환/사용 이력</div>
+  <div id="rwd-history" style="margin:0 16px 14px"></div>
 </div>
 
 <!-- STATS / ACHIEVEMENTS -->
@@ -11043,15 +11023,6 @@ function reallyGoTab(tab){
   const histH=document.querySelector('.hist-hero');
   if(histH){histH.classList.remove('compact');histH.style.borderRadius=defaultBr2;}
 
-  // --sec-sticky-top 재계산 + sec observer 재초기화
-  requestAnimationFrame(()=>{
-    const hdr=document.querySelector('.scr.on .hero, .scr.on .log-header-sticky, .scr.on .rwd-header-sticky, .scr.on .hist-hero');
-    if(hdr){
-      document.documentElement.style.setProperty('--sec-sticky-top', Math.round(hdr.getBoundingClientRect().height)+'px');
-    }
-    initStickySecHeaders();
-  });
-
   // Set tab theme
   document.body.setAttribute('data-tab', tab);
   document.documentElement.style.background = TAB_COLORS[tab] || '#6366F1';
@@ -12080,17 +12051,6 @@ window._createState = _createState;
   cleanExpiredStickers(); // 하루 지난 스티커 자동 삭제
   renderAll();
 
-  // Robust --sec-sticky-top initialization (multiple fallbacks)
-  function _initSecStickyTop(){
-    const hdr=document.querySelector('.scr.on .hero, .scr.on .log-header-sticky, .scr.on .rwd-header-sticky, .scr.on .hist-hero');
-    if(hdr){
-      document.documentElement.style.setProperty('--sec-sticky-top', Math.round(hdr.getBoundingClientRect().height)+'px');
-    }
-  }
-  requestAnimationFrame(_initSecStickyTop);
-  setTimeout(_initSecStickyTop, 300);
-  setTimeout(_initSecStickyTop, 1000);
-
   // 날씨/미세먼지 데이터 가져오기
   fetchWeather();
   setInterval(fetchWeather, 600000); // 10분마다 갱신
@@ -12240,57 +12200,6 @@ window._createState = _createState;
   window.addEventListener('resize', updateHeaderCompact, {passive:true});
   window.addEventListener('orientationchange', ()=>{setTimeout(updateHeaderCompact,100);});
 
-  // ── iOS Weather-style: 섹션 제목 스티키 + 자연스러운 페이드 아웃 ──
-  // .sec-group 래퍼 안의 .sec 제목이 sticky로 상단 고정되고,
-  // .sec-group 하단이 뷰포트를 벗어나면 제목이 자연스럽게 사라짐
-  let _stickyObservers=[];
-  function initStickySecHeaders(){
-    // Cleanup previous observers to prevent leaks on tab switch
-    _stickyObservers.forEach(o=>o.disconnect());
-    _stickyObservers=[];
-    // Clear stale sec-fading classes
-    document.querySelectorAll('.sec.sec-fading').forEach(s=>s.classList.remove('sec-fading'));
-
-    // .sec-group 안의 .sec 처리 (home, rwd 화면)
-    // rootMargin을 현재 헤더 높이 기반으로 설정 (mobile ~80px, tablet ~200px)
-    const groups=document.querySelectorAll('.sec-group');
-    if(groups.length){
-      const stickyPx=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sec-sticky-top'))||100;
-      const groupObserver=new IntersectionObserver((entries)=>{
-        entries.forEach(e=>{
-          const sec=e.target.querySelector('.sec');
-          if(!sec)return;
-          if(e.isIntersecting){
-            sec.classList.remove('sec-fading');
-          }else if(e.boundingClientRect.top<0){
-            sec.classList.add('sec-fading');
-          }
-        });
-      },{threshold:0,rootMargin:`-${stickyPx+40}px 0px 0px 0px`});
-      groups.forEach(g=>groupObserver.observe(g));
-      _stickyObservers.push(groupObserver);
-    }
-
-    // dash-brick 안의 .sec 처리 (hist 화면 — merge-header 스타일)
-    const bricks=document.querySelectorAll('.dash-brick');
-    if(bricks.length){
-      const brickObserver=new IntersectionObserver((entries)=>{
-        entries.forEach(e=>{
-          const sec=e.target.querySelector('.sec');
-          if(!sec)return;
-          if(e.isIntersecting){
-            sec.classList.remove('sec-fading');
-          }else if(e.boundingClientRect.top<0){
-            sec.classList.add('sec-fading');
-          }
-        });
-      },{threshold:0});
-      bricks.forEach(b=>brickObserver.observe(b));
-      _stickyObservers.push(brickObserver);
-    }
-  }
-  // 탭 전환 시 재초기화
-  setTimeout(initStickySecHeaders,500);
 
   // ============ ONBOARDING OVERLAY ============
   function dismissOnboarding() {
