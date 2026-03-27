@@ -177,6 +177,23 @@ function generateMemberId() {
 }
 function log(msg) { console.log('[migrate]', msg); }
 
+/**
+ * 운영기 users 객체(key: taemin/dad/mom)를 개발기 users 객체(key: 동적 memberId)로 변환.
+ * 운영기 비밀번호 해시를 그대로 복사해 운영기 계정으로 개발기 로그인이 가능하도록 함.
+ * v 필드가 없으면 레거시 해시(SHA-512 무솔트)로 인식되어 doLogin()에서 정상 처리됨.
+ */
+function buildDevUsers(prodUsers, memberIds) {
+  const devUsers = {};
+  for (const [key, memberId] of Object.entries(memberIds)) {
+    const u = prodUsers[key];
+    if (u && u.id && u.pwdHash) {
+      devUsers[memberId] = { id: u.id, pwdHash: u.pwdHash };
+      if (u.v) devUsers[memberId].v = u.v;
+    }
+  }
+  return devUsers;
+}
+
 // ── 메인 ──────────────────────────────────────────────────
 async function main() {
   log('Firebase CLI refresh_token 읽는 중...');
@@ -316,7 +333,7 @@ async function migrateToFamilies(token, prodData) {
     greetings:       prodData.greetings       || {},
     customBadges:    prodData.customBadges    || [],
     badgeOverrides:  prodData.badgeOverrides  || {},
-    users:           {}, // 보안상 운영 비밀번호 해시 미복사
+    users:           buildDevUsers(prodData.users || {}, memberIds),
     rewardInventory: prodData.rewardInventory || [],
     rewardRequests:  prodData.rewardRequests  || [],
     rewardLog:       prodData.rewardLog       || [],
@@ -339,6 +356,11 @@ async function migrateToFamilies(token, prodData) {
   const registryData = {};
   for (const [key, memberId] of Object.entries(memberIds)) {
     registryData[`dev_${key}`] = { familyId: DEV_FAMILY_ID, memberId };
+    // 운영기 로그인 ID도 등록 (운영기 계정으로 개발기 로그인 지원)
+    const prodLoginId = prodData.users?.[key]?.id;
+    if (prodLoginId) {
+      registryData[prodLoginId] = { familyId: DEV_FAMILY_ID, memberId };
+    }
   }
   log(`  _dev_id_registry 저장 중...`);
   await request('PATCH', '/families/_dev_id_registry', token, toFirestoreDoc(registryData));
@@ -355,8 +377,9 @@ async function migrateToFamilies(token, prodData) {
   log(`  활동 기록: ${(newState.log || []).length}건`);
   log(`  보상 기록: ${(newState.rewardLog || []).length}건`);
   log(`  뱃지: ${Object.keys(newState.badges || {}).length}개`);
-  log(`\n  ※ 테스트 로그인: dev_taemin / dev_dad / dev_mom`);
-  log(`  ※ 비밀번호는 개발기에서 별도 설정 필요 (운영 해시 미복사)`);
+  log(`\n  ※ 테스트 로그인 ID: dev_taemin / dev_dad / dev_mom (또는 운영기 로그인 ID 직접 사용)`);
+  log(`  ※ 운영기 계정(ID+비밀번호)으로 개발기 로그인 가능 (비밀번호 해시 복사됨)`);
+  log(`  ※ 운영기 로그인 ID 등록: ${Object.keys(prodData.users||{}).map(k=>`${k}→${prodData.users[k]?.id||'(없음)'}`).join(', ')}`);
 }
 
 main().catch(err => {
