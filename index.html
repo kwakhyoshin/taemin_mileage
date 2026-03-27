@@ -12333,7 +12333,11 @@ function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t
  * sourceEl: 출발 요소, null이면 화면 중앙 하단
  */
 function flyCoinsToMileage(sourceEl, amount) {
-  const targetEl = document.getElementById('hero-pts');
+  const currentTab = document.body.getAttribute('data-tab') || 'home';
+  let targetId = 'hero-pts';
+  if (currentTab === 'log') targetId = 'log-today-pts';
+  else if (currentTab === 'rwd') targetId = 'rwd-hdr-pts';
+  const targetEl = document.getElementById(targetId);
   if (!targetEl) return;
   const tRect = targetEl.getBoundingClientRect();
   const tx = tRect.left + tRect.width / 2;
@@ -12400,15 +12404,15 @@ function flyCoinsToMileage(sourceEl, amount) {
         requestAnimationFrame(animate);
       } else {
         el.remove();
-        if (idx === count - 1) { _triggerHeroPtsBounce(); }
+        if (idx === count - 1) { _triggerHeroPtsBounce(targetId); }
       }
     }
     requestAnimationFrame(animate);
   });
 }
 
-function _triggerHeroPtsBounce() {
-  const el = document.getElementById('hero-pts');
+function _triggerHeroPtsBounce(targetId) {
+  const el = document.getElementById(targetId || 'hero-pts');
   if (!el) return;
   el.classList.remove('hero-pts-anim');
   void el.offsetWidth;
