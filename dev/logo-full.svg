@@ -18,10 +18,12 @@
       <polygon points="0,-14 4,-5 13,-4 7,2 9,12 0,7 -9,12 -7,2 -13,-4 -4,-5" fill="#FFD700"/>
     </g>
   </g>
-  <!-- English brand name -->
-  <text x="90" y="44" font-family="'Nunito', -apple-system, sans-serif" font-size="38" font-weight="900" fill="#6366F1" letter-spacing="-0.5">maily</text>
+  <!-- Brand: mile.ly -->
+  <text x="90" y="42" font-family="'Nunito', -apple-system, sans-serif" font-size="36" font-weight="900" fill="#6366F1" letter-spacing="-0.5">mile<tspan fill="#FF6B35">.</tspan>ly</text>
+  <!-- Korean name -->
+  <text x="90" y="66" font-family="'Noto Sans KR', -apple-system, sans-serif" font-size="14" font-weight="700" fill="#94A3B8" letter-spacing="0.5">마일리</text>
   <!-- Tagline -->
-  <text x="90" y="66" font-family="'Nunito', -apple-system, sans-serif" font-size="11" font-weight="700" fill="#10B981" letter-spacing="0.5">family mileage, family magic</text>
+  <text x="90" y="84" font-family="'Noto Sans KR', -apple-system, sans-serif" font-size="11" font-weight="600" fill="#10B981" letter-spacing="0.5">우리 가족의 마일리지 여정</text>
   <!-- Accent star -->
-  <polygon points="248,20 250,26 256,27 252,30 253,36 248,33 243,36 244,30 240,27 246,26" fill="#FFD700" opacity="0.8"/>
+  <polygon points="253,18 255,24 261,25 257,28 258,34 253,31 248,34 249,28 245,25 251,24" fill="#FFD700" opacity="0.8"/>
 </svg>
