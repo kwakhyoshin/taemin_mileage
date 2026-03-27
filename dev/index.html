@@ -3609,6 +3609,17 @@ function unlockBodyScroll(){
     window.scrollTo(0,_savedScrollY);
   }
 }
+// ── HAPTIC FEEDBACK ──────────────────────────
+function haptic(type){
+  if(!navigator.vibrate)return;
+  switch(type){
+    case 'tap':     navigator.vibrate(30);break;
+    case 'success': navigator.vibrate([50,30,50]);break;
+    case 'reward':  navigator.vibrate([50,30,50,30,100]);break;
+    case 'error':   navigator.vibrate([100,50,100]);break;
+    case 'heavy':   navigator.vibrate(150);break;
+  }
+}
 // ═══════════════════════════════════════════════
 // MEGA EMOJI DATA
 // ═══════════════════════════════════════════════
@@ -6629,6 +6640,7 @@ function checkBadges(){
 }
 
 function showBadgeCelebration(badge){
+  haptic('reward');
   confetti();
   const overlay=document.createElement('div');
   overlay.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:9999;animation:fadeIn .3s ease-out;cursor:pointer';
@@ -7474,7 +7486,7 @@ function attachRwdLongPress(){
 
 let _rwdGoalOv=null;
 function showRwdGoalChoice(rwdId,cardEl){
-  if(navigator.vibrate)navigator.vibrate(30);
+  haptic('tap');
   closeRwdGoalOv();
   const r=S.rwds.find(x=>x.id===rwdId);
   if(!r)return;
@@ -8991,6 +9003,7 @@ function doAct(id){
   // log entry with unique id for undo
   S.log.unshift({id:'l_'+Date.now(),emoji:a.emoji,name:a.name,pts:a.pts+bonus,ts:Date.now(),actId:a.id,user:currentUser});
   if(S.log.length>300)S.log=S.log.slice(0,300);
+  haptic('success');
   save();
   // 활동 완료 애니메이션 → 완료 후 뱃지 체크
   // 현재 탭에서 보이는 요소를 찾음 (홈탭 act-card 또는 기록탭 log-item)
@@ -9239,8 +9252,7 @@ function startBubbleMarquees(container){
 
 let _lpOverlay=null;
 function showLongPressChoice(actId,cardEl){
-  // Haptic feedback if available
-  if(navigator.vibrate)navigator.vibrate(30);
+  haptic('tap');
   closeLPOverlay();
   const ov=document.createElement('div');
   ov.className='lp-overlay';
@@ -9389,7 +9401,7 @@ function addSticker(actId,type,content){
   closeStickerPicker();
   closeBubbleInput();
   renderAll();
-  if(navigator.vibrate)navigator.vibrate(15);
+  haptic('tap');
   toast(type==='emoji'?`${content} 스티커를 붙였어요!`:'💬 말풍선을 남겼어요!');
 }
 
@@ -9596,6 +9608,7 @@ function confirmRedeem(){
   // Add to rewardLog instead of activity log
   if(!S.rewardLog)S.rewardLog=[];
   S.rewardLog.unshift({id:'rl_'+Date.now(),emoji:r.emoji,name:r.name,pts:actualPts,ts:Date.now(),rwdId:r.id,type:'exchange',user:currentUser});
+  haptic('heavy');
   save();closeModal('m-redeem');renderAll();
   checkBadges();
   toast(`🎉 ${r.emoji} ${r.name} 교환 완료!`);confetti();
@@ -10965,7 +10978,7 @@ function pk(k){
   if(k==='del'){pBuf=pBuf.slice(0,-1);updDots('normal');return;}
   if(pBuf.length>=4)return;
   pBuf+=k;updDots('normal');
-  if(navigator.vibrate)navigator.vibrate(10);
+  haptic('tap');
   if(pBuf.length===4)setTimeout(handlePin,150);
 }
 function closePin(){document.getElementById('pin-wrap').style.display='none';unlockBodyScroll();}
@@ -10974,13 +10987,13 @@ async function handlePin(){
   const inputHash=await hashPin(pBuf);
   if(pMode==='auth'){
     if(inputHash===S.settings.pinHash){closePin();adminOK=true;pBuf='';startAdminSession();reallyGoTab('adm');}
-    else{updDots('err');setTimeout(()=>{pBuf='';updDots('normal');toast('❌ PIN이 틀렸어요');},600);}
+    else{haptic('error');updDots('err');setTimeout(()=>{pBuf='';updDots('normal');toast('❌ PIN이 틀렸어요');},600);}
   }else if(pMode==='new1'){
     pFirst=pBuf;pBuf='';
     showPin('new2','<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" style=\"vertical-align:-4px;margin-right:4px\"><circle cx=\"7.5\" cy=\"15.5\" r=\"5.5\"/><path d=\"M21 2l-9.6 9.6\"/><path d=\"M15.5 7.5l3 3L21 8l-3-3\"/></svg> PIN 확인','방금 입력한 PIN을 한 번 더 입력하세요');
   }else if(pMode==='new2'){
     if(pBuf===pFirst){S.settings.pinHash=await hashPin(pBuf);delete S.settings.pin;save();closePin();pBuf='';pFirst='';pMode='auth';toast('🔐 PIN이 변경됐어요!');}
-    else{updDots('err');setTimeout(()=>{pBuf='';pFirst='';showPin('new1','<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" style=\"vertical-align:-4px;margin-right:4px\"><circle cx=\"7.5\" cy=\"15.5\" r=\"5.5\"/><path d=\"M21 2l-9.6 9.6\"/><path d=\"M15.5 7.5l3 3L21 8l-3-3\"/></svg> 새 PIN 설정','PIN이 일치하지 않아요. 다시 입력하세요');toast('❌ PIN이 일치하지 않아요');},600);}
+    else{haptic('error');updDots('err');setTimeout(()=>{pBuf='';pFirst='';showPin('new1','<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" style=\"vertical-align:-4px;margin-right:4px\"><circle cx=\"7.5\" cy=\"15.5\" r=\"5.5\"/><path d=\"M21 2l-9.6 9.6\"/><path d=\"M15.5 7.5l3 3L21 8l-3-3\"/></svg> 새 PIN 설정','PIN이 일치하지 않아요. 다시 입력하세요');toast('❌ PIN이 일치하지 않아요');},600);}
   }else if(pMode==='reset_today'){
     if(inputHash===S.settings.pinHash){closePin();pBuf='';pMode='auth';doResetToday();}
     else{updDots('err');setTimeout(()=>{pBuf='';updDots('normal');toast('❌ PIN이 틀렸어요');},600);}
@@ -11239,12 +11252,19 @@ function stopMoodParticles(){
 
 function emitMoodParticles(){
   if(!currentMood||!MOOD_DATA[currentMood])return;
-  const icon=document.getElementById('nav-family-btn')||document.querySelector('.nav-stacked-avatar.me')||document.querySelector('.nav-user-wrap.me')||document.getElementById('tab-adm');
+  const icon=document.getElementById('home-profile-btn')||document.getElementById('nav-family-btn')||document.querySelector('.nav-stacked-avatar.me')||document.querySelector('.nav-user-wrap.me')||document.getElementById('tab-adm');
   if(!icon)return;
   const rect=icon.getBoundingClientRect();
   const container=document.getElementById('mood-particles');
   container.style.left=(rect.left+rect.width/2-30)+'px';
-  container.style.bottom=(window.innerHeight-rect.top+5)+'px';
+  // 상단 아이콘(홈 프로필)이면 top 기준, 하단이면 bottom 기준
+  if(rect.top<window.innerHeight/2){
+    container.style.top=rect.top+'px';
+    container.style.bottom='auto';
+  }else{
+    container.style.bottom=(window.innerHeight-rect.top+5)+'px';
+    container.style.top='auto';
+  }
   container.innerHTML='';
   const particles=MOOD_DATA[currentMood].particles;
   particles.forEach((p,i)=>{
