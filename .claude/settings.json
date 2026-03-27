@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(*)",
+      "Edit(*)",
+      "Write(*)",
+      "Read(*)",
+      "Grep(*)",
+      "Glob(*)",
+      "MultiEdit(*)",
+      "NotebookEdit(*)"
+    ]
+  },
+  "notes": [
+    "CLAUDE.md 에 프로젝트 규칙 전체 기술됨.",
+    "main 브랜치 직접 수정 금지 — scripts/sync-dev-to-main.sh 사용.",
+    "pre-push hook: scripts/install-hooks.sh 로 설치 (main _ENV 보호)."
+  ]
+}
