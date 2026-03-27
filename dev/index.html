@@ -1942,6 +1942,56 @@ button:disabled {
 <body data-tab="home">
 <div class="dev-indicator" id="dev-indicator" style="display:none">DEV</div>
 
+<!-- Auth fallback: ensures buttons work even before module loads -->
+<script>
+(function(){
+  var AUTH_IDS=['auth-login','auth-welcome','auth-create-1','auth-create-2','auth-create-3','auth-create-4','auth-create-5','auth-create-done','auth-join-select','auth-join-register'];
+  // Fallback showAuthScreen that works before module loads
+  if(!window.showAuthScreen){
+    window.showAuthScreen=function(screen){
+      AUTH_IDS.forEach(function(id){
+        var el=document.getElementById(id);
+        if(el){
+          if(id==='auth-'+screen||id===screen) el.classList.remove('hidden');
+          else el.classList.add('hidden');
+        }
+      });
+    };
+  }
+  // Queue: if startCreateFamily isn't loaded yet, wait and retry
+  window._authRetryQueue=[];
+  if(!window.startCreateFamily){
+    window.startCreateFamily=function(){
+      // Module not loaded yet — retry after short delay
+      window._authRetryQueue.push('startCreateFamily');
+      setTimeout(function(){
+        if(window._moduleLoaded && window._origStartCreateFamily){
+          window._origStartCreateFamily();
+        }
+      }, 500);
+    };
+  }
+  if(!window.doLogin){
+    window.doLogin=function(){
+      setTimeout(function(){
+        if(window._moduleLoaded && window._origDoLogin){
+          window._origDoLogin();
+        } else {
+          var err=document.getElementById('login-error');
+          if(err) err.textContent='잠시만 기다려주세요... 로딩 중입니다.';
+        }
+      }, 500);
+    };
+  }
+  if(!window.togglePwd){
+    window.togglePwd=function(id,btn){
+      var inp=document.getElementById(id);
+      if(inp) inp.type = inp.type==='password'?'text':'password';
+    };
+  }
+})();
+</script>
+
 <!-- AUTH: 로그인 화면 -->
 <div class="auth-screen" id="auth-login">
   <div class="auth-card">
@@ -11734,6 +11784,10 @@ Object.assign(window, {
   // Global registry functions
   checkGlobalIdExists, registerGlobalId,
 });
+// Fallback 함수를 실제 함수로 교체 + 모듈 로드 완료 플래그
+window._origStartCreateFamily = startCreateFamily;
+window._origDoLogin = doLogin;
+window._moduleLoaded = true;
 // _createState를 window에 노출 (child card oninput 참조용)
 window._createState = _createState;
 
