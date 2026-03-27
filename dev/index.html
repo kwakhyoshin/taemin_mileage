@@ -325,8 +325,10 @@ body.dark .rec-day-tag.day-1{background:#312E81;color:#A5B4FC}
 .stat-c{flex:1;background:var(--card);border-radius:var(--rsm);padding:14px;text-align:center;transition:background .25s;box-shadow:0 2px 8px rgba(0,0,0,.04);border:.5px solid var(--bdr)}
 .stat-n{font-size:24px;font-weight:900;color:var(--tx)}
 .stat-l{font-size:11px;color:var(--tx3);font-weight:700;margin-top:3px}
-.adm-tabs{display:flex;gap:8px;margin:14px 16px}
-.adm-tab{flex:1;padding:11px;background:var(--card);border-radius:var(--rsm);border:1.5px solid transparent;font-family:inherit;font-size:13px;font-weight:800;color:var(--tx2);cursor:pointer;transition:background .2s}
+.adm-tabs{display:flex;gap:6px;margin:14px 16px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none}
+.adm-tabs::-webkit-scrollbar{display:none}
+.adm-tab{flex:0 0 auto;padding:11px 14px;background:var(--card);border-radius:var(--rsm);border:1.5px solid transparent;font-family:inherit;font-size:13px;font-weight:800;color:var(--tx2);cursor:pointer;transition:background .2s,transform .1s;white-space:nowrap;-webkit-tap-highlight-color:rgba(0,0,0,.05);display:flex;align-items:center;justify-content:center;gap:4px}
+.adm-tab:active{transform:scale(.95)}
 .adm-tab.on{background:var(--tab-lt,var(--or-lt));color:var(--tab-color,var(--or));border-color:var(--tab-color,var(--or))}
 .adm-sec{margin:0 16px 12px}
 .adm-sec-lbl{font-size:14px;font-weight:800;color:var(--tx3);letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px}
@@ -711,7 +713,7 @@ body.dark .pin-key.ck{background:transparent}
 .msg-emo-btn:hover{border-color:var(--tab-color,var(--or))}
 .msg-emo-btn.selected{border-color:var(--tab-color,var(--or));background:var(--tab-color,var(--or));transform:scale(1.15);box-shadow:0 2px 8px rgba(99,102,241,.3)}
 
-.emotion-anim-overlay{position:fixed;top:0;left:0;width:100%;height:100%;z-index:600;pointer-events:none;display:flex;align-items:center;justify-content:center}
+.emotion-anim-overlay{position:fixed;top:0;left:0;width:100%;height:100%;z-index:550;pointer-events:none;display:flex;align-items:center;justify-content:center}
 .emotion-anim-emoji{font-size:80px;animation:emotionBounce 2s ease forwards}
 .emotion-anim-particles{position:absolute;width:100%;height:100%}
 .emotion-particle{position:absolute;font-size:30px;animation:emotionFloat 2s ease-out forwards;opacity:0}
@@ -834,18 +836,21 @@ body.dark .nav-family-btn{background:rgba(99,102,241,.15)}
 .nav-family-btn .nfb-icon svg{width:100%;height:100%}
 .nav-family-btn .nfb-badge{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;background:#EF4444;color:#fff;font-size:9px;font-weight:900;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 5px;pointer-events:none;box-shadow:0 2px 6px rgba(239,68,68,.4);line-height:1}
 
-/* ── Family Popup (inverted triangle layout) ── */
+/* ── Family Popup (가계도 family tree layout) ── */
 .family-popup-bg{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.4);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);animation:fadeIn .15s}
-.family-popup{position:fixed;z-index:501;display:flex;flex-direction:column;align-items:center;animation:familyPopUp .3s cubic-bezier(.34,1.2,.64,1)}
+.family-popup{position:fixed;z-index:501;display:flex;flex-direction:column;align-items:center;padding:24px 28px 18px;animation:familyPopUp .3s cubic-bezier(.34,1.2,.64,1)}
 @keyframes familyPopUp{from{opacity:0;transform:translateY(24px) scale(.85)}to{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes fpBounceSelect{0%{transform:scale(1)}40%{transform:scale(1.25)}70%{transform:scale(1.12)}100%{transform:scale(1.18)}}
+.family-popup-label{font-size:11px;font-weight:800;color:rgba(255,255,255,.5);letter-spacing:2px;text-transform:uppercase;margin-bottom:18px;position:relative;z-index:1}
 .family-popup-lines{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
-.family-popup-lines line{stroke:rgba(255,255,255,.25);stroke-width:2;stroke-dasharray:4 3}
-.family-popup-lines path{fill:none;stroke:rgba(255,255,255,.3);stroke-width:2.5;stroke-linecap:round}
-.family-popup-lines circle.line-dot{fill:rgba(255,255,255,.5)}
-.family-popup-top{display:flex;gap:50px;position:relative;z-index:1}
-.family-popup-bottom{margin-top:16px;position:relative;z-index:1}
-.family-popup-item{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .2s}
+.family-popup-lines line{stroke:rgba(255,255,255,.3);stroke-width:2}
+.family-popup-lines path{fill:none;stroke:rgba(255,255,255,.3);stroke-width:2;stroke-linecap:round}
+.family-popup-lines text{pointer-events:none}
+.family-popup-row{display:flex;gap:36px;position:relative;z-index:1;justify-content:center}
+.family-popup-parents{margin-bottom:0}
+.family-tree-connector{height:32px;position:relative;z-index:0}
+.family-popup-children{margin-top:0}
+.family-popup-item{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .2s}
 .family-popup-item:active{transform:scale(.9)}
 .family-popup-item.selected .family-popup-avatar{animation:fpBounceSelect .35s cubic-bezier(.34,1.56,.64,1) forwards;border-color:#fff;box-shadow:0 0 0 3px var(--tab-color,#6366F1),0 6px 24px rgba(0,0,0,.3)}
 .family-popup-avatar{width:58px;height:58px;border-radius:50%;overflow:visible;border:3px solid rgba(255,255,255,.6);box-shadow:0 4px 20px rgba(0,0,0,.25),0 0 0 1px rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;background:var(--card);position:relative;transition:border-color .2s,box-shadow .2s,transform .2s}
@@ -858,7 +863,7 @@ body.dark .family-popup-item.selected .family-popup-avatar{border-color:rgba(255
 .family-popup-item.selected .family-popup-role{color:rgba(255,255,255,.7)}
 .family-popup-mood{position:absolute;bottom:-2px;right:-2px;font-size:12px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.3))}
 .family-popup-unread{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;background:#EF4444;color:#fff;font-size:9px;font-weight:900;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 5px;box-shadow:0 2px 6px rgba(239,68,68,.4);line-height:1}
-.family-popup-close{margin-top:16px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.15);color:rgba(255,255,255,.8);font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;position:relative;z-index:1;-webkit-tap-highlight-color:transparent}
+.family-popup-close{margin-top:14px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.15);color:rgba(255,255,255,.8);font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;position:relative;z-index:1;-webkit-tap-highlight-color:transparent}
 .family-popup-close:active{transform:scale(.85);background:rgba(255,255,255,.25)}
 
 /* Legacy nav-user-wrap (hidden, kept for compat) */
@@ -1733,10 +1738,11 @@ body.dark {
 /* .card, .act-card, .auth-btn, .auth-input, .tab-bar 원본 유지 */
 
 /* Responsive and Accessibility Enhancements */
-button, a, input[type="checkbox"], input[type="radio"] {
+button:not(.tog):not(.tog-sm), a, input[type="checkbox"], input[type="radio"] {
   min-height: 44px;
   min-width: 44px;
 }
+.tog,.tog.tog-sm{min-height:unset;min-width:unset}
 
 :focus-visible {
   outline: 2px solid var(--color-primary);
@@ -2496,7 +2502,7 @@ button:disabled {
     <button class="adm-tab" id="at-1" onclick="admTab(1)">보상</button>
     <button class="adm-tab" id="at-2" onclick="admTab(2)">뱃지</button>
     <button class="adm-tab" id="at-3" onclick="admTab(3)">설정</button>
-    <button class="adm-tab" id="at-4" onclick="admTab(4)" style="display:flex;align-items:center;gap:4px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>가족</button>
+    <button class="adm-tab" id="at-4" onclick="admTab(4)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>가족</button>
   </div>
   <div id="adm-p0">
     <div class="adm-sec">
@@ -3754,7 +3760,7 @@ async function shareInviteLink(memberName, memberIdx){
   }
 
   // _createState._memberIds 에서 직접 memberId 가져오기 (정확한 매칭)
-  const targetMid=_createState._memberIds?.[memberIdx-1]||'';
+  let targetMid=_createState._memberIds?.[memberIdx-1]||'';
   if(!targetMid){
     // fallback: 이름으로 찾기
     const fm=S.familyMeta?.members||{};
@@ -8667,6 +8673,7 @@ function renderFamilyManager() {
 
   // Invite links for unregistered members
   const unregistered = Object.entries(fm).filter(([mid, m]) => !m.account);
+  if(!inviteContainer) return;
   if(unregistered.length === 0) {
     inviteContainer.innerHTML = '<div style="text-align:center;padding:16px;color:var(--tx3);font-size:13px;font-weight:600">모든 구성원이 가입을 완료했어요 🎉</div>';
   } else {
@@ -10003,20 +10010,23 @@ function renderNavUsers(){
 }
 window.renderNavUsers=renderNavUsers;
 
-// ── Family Popup — inverted triangle layout ──
+// ── Family Popup — 가계도 (family tree) layout ──
 function openFamilyPopup(){
   closeFamilyPopup();
 
   const allIds=Object.keys(MEMBERS);
-  const others=allIds.filter(id=>id!==currentUser);
 
-  // Create background — click closes sub-popups first, then family popup
+  // Separate parents and children based on memberType
+  const parents=allIds.filter(id=>MEMBERS[id]?.memberType==='parent');
+  const children=allIds.filter(id=>MEMBERS[id]?.memberType==='child'||MEMBERS[id]?.memberType!=='parent');
+  // Ensure at least: if no parents, treat all as same row
+  const hasHierarchy=parents.length>0&&children.length>0;
+
+  // Create background
   const bg=document.createElement('div');
   bg.className='family-popup-bg';
   bg.id='family-popup-bg';
   bg.onclick=function(){
-    // Dim click: close sub-popups if any, but NEVER close family popup
-    // Family popup closes only via X button
     const ufm=document.getElementById('user-fm-menu');
     const mfm=document.getElementById('me-fm-menu');
     const msgPop=document.getElementById('msg-pop');
@@ -10036,7 +10046,6 @@ function openFamilyPopup(){
       const fp=document.getElementById('family-popup');
       if(fp)fp.querySelectorAll('.family-popup-item.selected').forEach(el=>el.classList.remove('selected'));
     }
-    // Do NOT closeFamilyPopup() — only X button does that
   };
   document.body.appendChild(bg);
 
@@ -10058,51 +10067,59 @@ function openFamilyPopup(){
     });
   }
 
-  // Top row — other family members
-  const topRow=document.createElement('div');
-  topRow.className='family-popup-top';
-  others.forEach(id=>{
+  // Helper: create member item
+  function createMemberItem(id, isMe){
     const name=MEMBERS[id]?.name||id;
     const moodEmoji=getMoodEmoji(id);
-    const unread=getUnreadCount(id);
+    const unread=isMe?0:getUnreadCount(id);
     const item=document.createElement('div');
     item.className='family-popup-item';
     item.setAttribute('data-fp-id',id);
-    item.onclick=function(e){ e.stopPropagation(); selectFpItem(id); onUserIconClick(id); };
+    item.onclick=function(e){ e.stopPropagation(); selectFpItem(id); isMe?onMeIconClick():onUserIconClick(id); };
     const roleLabel=MEMBERS[id]?.role||'';
     item.innerHTML=`
-      <div class="family-popup-avatar">
+      <div class="family-popup-avatar"${isMe?' id="nav-profile-icon"':''}>
         ${getAvatarHTML(id,54)}
         ${moodEmoji?`<span class="family-popup-mood">${moodEmoji}</span>`:''}
-        ${unread>0?`<span class="family-popup-unread">${unread}</span>`:''}
+        ${!isMe&&unread>0?`<span class="family-popup-unread">${unread}</span>`:''}
       </div>
-      <span class="family-popup-name">${name}</span>
+      <span class="family-popup-name">${name}${isMe?' (나)':''}</span>
       <span class="family-popup-role">${roleLabel}</span>`;
-    topRow.appendChild(item);
-  });
-  popup.appendChild(topRow);
+    return item;
+  }
 
-  // Bottom row — me (same size as others)
-  const botRow=document.createElement('div');
-  botRow.className='family-popup-bottom';
-  const meName=MEMBERS[currentUser]?.name||currentUser;
-  const meMood=getMoodEmoji(currentUser);
-  const meItem=document.createElement('div');
-  meItem.className='family-popup-item';
-  meItem.setAttribute('data-fp-id',currentUser);
-  meItem.onclick=function(e){ e.stopPropagation(); selectFpItem(currentUser); onMeIconClick(); };
-  const meRole=MEMBERS[currentUser]?.role||'';
-  meItem.innerHTML=`
-    <div class="family-popup-avatar" id="nav-profile-icon">
-      ${getAvatarHTML(currentUser,54)}
-      ${meMood?`<span class="family-popup-mood">${meMood}</span>`:''}
-    </div>
-    <span class="family-popup-name">${meName} (나)</span>
-    <span class="family-popup-role">${meRole}</span>`;
-  botRow.appendChild(meItem);
-  popup.appendChild(botRow);
+  // 가계도 label
+  const treeLabel=document.createElement('div');
+  treeLabel.className='family-popup-label';
+  treeLabel.textContent='우리 가족';
+  popup.appendChild(treeLabel);
 
-  // X close button below the triangle
+  if(hasHierarchy){
+    // ── Row 1: Parents (부모) ──
+    const parentRow=document.createElement('div');
+    parentRow.className='family-popup-row family-popup-parents';
+    parents.forEach(id=>parentRow.appendChild(createMemberItem(id,id===currentUser)));
+    popup.appendChild(parentRow);
+
+    // ── Connector area ──
+    const connectorDiv=document.createElement('div');
+    connectorDiv.className='family-tree-connector';
+    popup.appendChild(connectorDiv);
+
+    // ── Row 2: Children (자녀) ──
+    const childRow=document.createElement('div');
+    childRow.className='family-popup-row family-popup-children';
+    children.forEach(id=>childRow.appendChild(createMemberItem(id,id===currentUser)));
+    popup.appendChild(childRow);
+  }else{
+    // No hierarchy — single row
+    const singleRow=document.createElement('div');
+    singleRow.className='family-popup-row';
+    allIds.forEach(id=>singleRow.appendChild(createMemberItem(id,id===currentUser)));
+    popup.appendChild(singleRow);
+  }
+
+  // X close button
   const closeBtn=document.createElement('div');
   closeBtn.className='family-popup-close';
   closeBtn.innerHTML='✕';
@@ -10111,64 +10128,96 @@ function openFamilyPopup(){
 
   document.body.appendChild(popup);
 
-  // Position at bottom-center of screen (above nav area)
+  // Position at bottom-center
   const popupW=popup.offsetWidth;
   let left=(window.innerWidth-popupW)/2;
   if(left<12)left=12;
   popup.style.left=left+'px';
   popup.style.bottom='120px';
 
-  // Draw connecting lines between avatars (balanced inverted triangle)
+  // Draw family tree lines
   requestAnimationFrame(()=>{
-    const pw=popup.offsetWidth;
+    if(!hasHierarchy){linesSvg.setAttribute('width',popup.offsetWidth);linesSvg.setAttribute('height',popup.offsetHeight);return;}
     const popupRect=popup.getBoundingClientRect();
-    // Use popup horizontal center for me's X to ensure symmetry
-    const meAvatar=botRow.querySelector('.family-popup-avatar');
-    const meR=meAvatar.getBoundingClientRect();
-    const meCX=pw/2;
-    const meCY=meR.top+meR.height/2-popupRect.top;
+    const pw=popup.offsetWidth;
 
-    const topAvatars=topRow.querySelectorAll('.family-popup-avatar');
-    const centers=[];
-    topAvatars.forEach(av=>{
+    // Get parent avatar centers
+    const parentAvatars=popup.querySelectorAll('.family-popup-parents .family-popup-avatar');
+    const parentCenters=[];
+    parentAvatars.forEach(av=>{
       const r=av.getBoundingClientRect();
-      centers.push({x:r.left+r.width/2-popupRect.left, y:r.top+r.height/2-popupRect.top});
+      parentCenters.push({x:r.left+r.width/2-popupRect.left, y:r.top+r.height/2-popupRect.top});
     });
-    // Force symmetric X positions for top avatars
-    if(centers.length>=2){
-      const avgY=(centers[0].y+centers[1].y)/2;
-      const spread=Math.abs(centers[1].x-centers[0].x)/2;
-      centers[0].x=meCX-spread;
-      centers[0].y=avgY;
-      centers[1].x=meCX+spread;
-      centers[1].y=avgY;
+
+    // Get child avatar centers
+    const childAvatars=popup.querySelectorAll('.family-popup-children .family-popup-avatar');
+    const childCenters=[];
+    childAvatars.forEach(av=>{
+      const r=av.getBoundingClientRect();
+      childCenters.push({x:r.left+r.width/2-popupRect.left, y:r.top+r.height/2-popupRect.top});
+    });
+
+    // Horizontal line connecting parents (with heart)
+    if(parentCenters.length>=2){
+      const y=parentCenters[0].y;
+      const x1=parentCenters[0].x;
+      const x2=parentCenters[parentCenters.length-1].x;
+      const line=document.createElementNS(svgNS,'line');
+      line.setAttribute('x1',x1);line.setAttribute('y1',y);
+      line.setAttribute('x2',x2);line.setAttribute('y2',y);
+      line.setAttribute('stroke','rgba(255,255,255,.35)');
+      line.setAttribute('stroke-width','2');
+      line.setAttribute('stroke-dasharray','');
+      linesSvg.appendChild(line);
+      // Heart at midpoint
+      const midX=(x1+x2)/2;
+      const heart=document.createElementNS(svgNS,'text');
+      heart.setAttribute('x',midX);heart.setAttribute('y',y+1);
+      heart.setAttribute('text-anchor','middle');heart.setAttribute('dominant-baseline','central');
+      heart.setAttribute('font-size','14');heart.setAttribute('fill','rgba(255,255,255,.6)');
+      heart.textContent='♥';
+      linesSvg.appendChild(heart);
     }
 
-    // Curved lines from me to each top member
-    centers.forEach(c=>{
-      const midY=(meCY+c.y)/2;
-      const path=document.createElementNS(svgNS,'path');
-      path.setAttribute('d',`M${meCX},${meCY} C${meCX},${midY} ${c.x},${midY} ${c.x},${c.y}`);
-      linesSvg.appendChild(path);
-      // Dot at connection point
-      const dot=document.createElementNS(svgNS,'circle');
-      dot.setAttribute('cx',c.x); dot.setAttribute('cy',c.y); dot.setAttribute('r','3');
-      dot.setAttribute('class','line-dot');
-      linesSvg.appendChild(dot);
-    });
-    // Dot at me
-    const meDot=document.createElementNS(svgNS,'circle');
-    meDot.setAttribute('cx',meCX); meDot.setAttribute('cy',meCY); meDot.setAttribute('r','3');
-    meDot.setAttribute('class','line-dot');
-    linesSvg.appendChild(meDot);
-    // Curved line between top members (horizontal with slight arc)
-    if(centers.length>=2){
-      const midX=(centers[0].x+centers[1].x)/2;
-      const arcY=centers[0].y-12;
-      const path=document.createElementNS(svgNS,'path');
-      path.setAttribute('d',`M${centers[0].x},${centers[0].y} Q${midX},${arcY} ${centers[1].x},${centers[1].y}`);
-      linesSvg.appendChild(path);
+    // Vertical trunk line from parents down to children
+    const parentBottomY=parentCenters.length>0?Math.max(...parentCenters.map(c=>c.y))+32:0;
+    const childTopY=childCenters.length>0?Math.min(...childCenters.map(c=>c.y))-32:0;
+    const trunkX=pw/2;
+    if(parentCenters.length>0&&childCenters.length>0){
+      // Vertical trunk
+      const trunk=document.createElementNS(svgNS,'line');
+      trunk.setAttribute('x1',trunkX);trunk.setAttribute('y1',parentBottomY);
+      trunk.setAttribute('x2',trunkX);trunk.setAttribute('y2',childTopY);
+      trunk.setAttribute('stroke','rgba(255,255,255,.3)');
+      trunk.setAttribute('stroke-width','2');
+      linesSvg.appendChild(trunk);
+
+      // Horizontal branch to each child
+      if(childCenters.length>1){
+        const branchY=childTopY;
+        const branchLine=document.createElementNS(svgNS,'line');
+        branchLine.setAttribute('x1',childCenters[0].x);branchLine.setAttribute('y1',branchY);
+        branchLine.setAttribute('x2',childCenters[childCenters.length-1].x);branchLine.setAttribute('y2',branchY);
+        branchLine.setAttribute('stroke','rgba(255,255,255,.3)');
+        branchLine.setAttribute('stroke-width','2');
+        linesSvg.appendChild(branchLine);
+      }
+      // Drop lines to each child
+      childCenters.forEach(c=>{
+        const drop=document.createElementNS(svgNS,'line');
+        drop.setAttribute('x1',c.x);drop.setAttribute('y1',childTopY);
+        drop.setAttribute('x2',c.x);drop.setAttribute('y2',c.y-32);
+        drop.setAttribute('stroke','rgba(255,255,255,.3)');
+        drop.setAttribute('stroke-width','2');
+        linesSvg.appendChild(drop);
+        // Small dot
+        const dot=document.createElementNS(svgNS,'circle');
+        dot.setAttribute('cx',c.x);dot.setAttribute('cy',c.y-32);dot.setAttribute('r','2.5');
+        dot.setAttribute('fill','rgba(255,255,255,.5)');
+        linesSvg.appendChild(dot);
+      });
     }
+
     linesSvg.setAttribute('width',popup.offsetWidth);
     linesSvg.setAttribute('height',popup.offsetHeight);
   });
