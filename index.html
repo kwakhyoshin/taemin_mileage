@@ -2066,7 +2066,7 @@ button:disabled {
     </div>
     <label class="auth-label" style="margin-top:12px">이름</label>
     <input type="text" class="auth-input" id="create-my-name" placeholder="예: 효신, 은혜" maxlength="10">
-    <label class="auth-label" style="margin-top:12px">역할</label>
+    <label class="auth-label" style="margin-top:12px">호칭 <span style="font-size:11px;font-weight:500;color:#94A3B8">(선택사항)</span></label>
     <div class="role-grid" id="create-role-grid"></div>
     <div class="auth-error" id="create1-error"></div>
     <button class="auth-btn" onclick="createStep1Next()">다음</button>
@@ -2485,7 +2485,7 @@ button:disabled {
     <div style="display:flex;align-items:center;justify-content:space-between">
       <div>
         <h2>관리자 <svg class="hdr-ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></h2>
-        <p>부모님 전용 설정 화면 <span style="font-size:10px;color:rgba(255,255,255,.5);font-weight:700">· 개발 환경</span></p>
+        <p>양육자 전용 설정 화면 <span style="font-size:10px;color:rgba(255,255,255,.5);font-weight:700">· 개발 환경</span></p>
       </div>
       <button class="adm-lock" onclick="lockAdmin()">🔒 잠금</button>
     </div>
@@ -2743,13 +2743,18 @@ button:disabled {
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
           <input type="text" class="txt-inp" id="new-member-name" placeholder="이름" style="flex:1;min-width:80px" maxlength="10">
           <select id="new-member-role" style="padding:8px 12px;border:1.5px solid var(--bdr);border-radius:9px;font-size:13px;font-weight:700;background:var(--bg);color:var(--tx);font-family:inherit">
-            <option value="dad">아빠</option>
-            <option value="mom">엄마</option>
-            <option value="grandpa">할아버지</option>
-            <option value="grandma">할머니</option>
-            <option value="grandpa_m">외할아버지</option>
-            <option value="grandma_m">외할머니</option>
-            <option value="child">자녀</option>
+            <optgroup label="양육자 (어른)">
+              <option value="dad">아빠</option>
+              <option value="mom">엄마</option>
+              <option value="grandpa">할아버지</option>
+              <option value="grandma">할머니</option>
+              <option value="grandpa_m">외할아버지</option>
+              <option value="grandma_m">외할머니</option>
+              <option value="caregiver">양육자 (호칭 없음)</option>
+            </optgroup>
+            <optgroup label="아이">
+              <option value="child">자녀</option>
+            </optgroup>
           </select>
           <button class="btn-sm" onclick="addNewFamilyMember()">추가</button>
         </div>
@@ -3208,13 +3213,14 @@ const _SVG_CHILD_M='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" s
 const _SVG_CHILD_F='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><path d="M8 5c0-2 2-3.5 4-3.5s4 1.5 4 3.5" stroke-width="2"/><circle cx="12" cy="7" r="2" fill="currentColor" opacity=".15"/></svg>';
 
 const ROLE_DEFS = {
-  dad:       {label:'아빠',      svg:_SVG_PERSON_M, type:'parent', color:'#DBEAFE', textColor:'#3B82F6'},
-  mom:       {label:'엄마',      svg:_SVG_PERSON_F, type:'parent', color:'#FCE7F3', textColor:'#EC4899'},
-  grandpa:   {label:'할아버지',  svg:_SVG_ELDER,    type:'parent', color:'#FEF3C7', textColor:'#D97706'},
-  grandma:   {label:'할머니',    svg:_SVG_ELDER,    type:'parent', color:'#FEF9C3', textColor:'#CA8A04'},
-  grandpa_m: {label:'외할아버지',svg:_SVG_ELDER,    type:'parent', color:'#E0E7FF', textColor:'#6366F1'},
-  grandma_m: {label:'외할머니',  svg:_SVG_ELDER,    type:'parent', color:'#FCE7F3', textColor:'#DB2777'},
-  child:     {label:'자녀',      svg:_SVG_CHILD_M,  type:'child',  color:'#D1FAE5', textColor:'#059669'}
+  dad:       {label:'아빠',      svg:_SVG_PERSON_M, type:'caregiver', color:'#DBEAFE', textColor:'#3B82F6'},
+  mom:       {label:'엄마',      svg:_SVG_PERSON_F, type:'caregiver', color:'#FCE7F3', textColor:'#EC4899'},
+  grandpa:   {label:'할아버지',  svg:_SVG_ELDER,    type:'caregiver', color:'#FEF3C7', textColor:'#D97706'},
+  grandma:   {label:'할머니',    svg:_SVG_ELDER,    type:'caregiver', color:'#FEF9C3', textColor:'#CA8A04'},
+  grandpa_m: {label:'외할아버지',svg:_SVG_ELDER,    type:'caregiver', color:'#E0E7FF', textColor:'#6366F1'},
+  grandma_m: {label:'외할머니',  svg:_SVG_ELDER,    type:'caregiver', color:'#FCE7F3', textColor:'#DB2777'},
+  child:     {label:'자녀',      svg:_SVG_CHILD_M,  type:'child',     color:'#D1FAE5', textColor:'#059669'},
+  caregiver: {label:'양육자',    svg:_SVG_PERSON_M, type:'caregiver', color:'#EEF2FF', textColor:'#6366F1'}
 };
 
 /* Design System Icons */
@@ -3282,15 +3288,15 @@ function rebuildMembersFromFamily(){
   if(Object.keys(fm).length > 0){
     // 다가족 모드: familyMeta에서 구성원 빌드
     Object.entries(fm).forEach(([mid, m])=>{
-      const rd=ROLE_DEFS[m.role]||ROLE_DEFS.child;
+      const rd=ROLE_DEFS[m.displayRole||m.role]||ROLE_DEFS.child;
       MEMBERS[mid] = {
         name: m.name || rd.label || '구성원',
         icon: '👤',
         greeting: `안녕, ${m.name}!`,
-        role: rd.label || m.role,
+        role: rd.label || m.displayRole || m.role,
         color: m.color || rd.color || '#F1F5F9',
         textColor: rd.textColor || '#64748B',
-        memberType: rd.type || 'parent',
+        memberType: m.type || rd.type || 'caregiver',
         isAdmin: !!m.isAdmin
       };
       const c = m.color || rd.color || '#F1F5F9';
@@ -3304,22 +3310,22 @@ function rebuildMembersFromFamily(){
   } else {
     // 레거시 모드: S.users 기반 하드코딩 폴백
     const legacyMap = {
-      taemin: { name:'태민', role:'child', color:'#DBEAFE', textColor:'#3B82F6', type:'child' },
-      dad:    { name:'아빠', role:'dad',   color:'#DBEAFE', textColor:'#3B82F6', type:'parent' },
-      mom:    { name:'엄마', role:'mom',   color:'#FCE7F3', textColor:'#EC4899', type:'parent' }
+      taemin: { name:'태민', role:'child',    color:'#DBEAFE', textColor:'#3B82F6', type:'child' },
+      dad:    { name:'아빠', role:'caregiver', color:'#DBEAFE', textColor:'#3B82F6', type:'caregiver', displayRole:'dad' },
+      mom:    { name:'엄마', role:'caregiver', color:'#FCE7F3', textColor:'#EC4899', type:'caregiver', displayRole:'mom' }
     };
     const users = S.users || {};
     Object.keys(users).forEach(uid => {
-      const info = legacyMap[uid] || { name:uid, role:'child', color:'#F1F5F9', textColor:'#64748B', type:'parent' };
+      const info = legacyMap[uid] || { name:uid, role:'caregiver', color:'#F1F5F9', textColor:'#64748B', type:'caregiver' };
       MEMBERS[uid] = {
         name: info.name,
         icon: '👤',
         greeting: `안녕, ${info.name}!`,
-        role: ROLE_DEFS[info.role]?.label || info.role,
+        role: ROLE_DEFS[info.displayRole||info.role]?.label || info.role,
         color: info.color,
         textColor: info.textColor,
         memberType: info.type,
-        isAdmin: info.type === 'parent'
+        isAdmin: info.type !== 'child'
       };
       AVATARS[uid] = `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
         <circle cx="20" cy="20" r="20" fill="${info.color}"/>
@@ -3414,7 +3420,8 @@ async function createStep1Next(){
   if(pwd.length<4){err.textContent='비밀번호는 4자 이상이어야 해요';return;}
   if(pwd!==pwd2){err.textContent='비밀번호가 일치하지 않아요';return;}
   if(!name){err.textContent='이름을 입력해주세요';return;}
-  if(!_createState.myRole){err.textContent='역할을 선택해주세요';return;}
+  // 호칭은 선택사항 — 미선택 시 'caregiver'로 자동 설정
+  if(!_createState.myRole) _createState.myRole='caregiver';
 
   // 글로벌 ID 중복 체크
   try {
@@ -3443,8 +3450,8 @@ async function createStep1Next(){
 
 function renderRoleGrid(){
   const grid=document.getElementById('create-role-grid');
-  const parentRoles=['dad','mom','grandpa','grandma','grandpa_m','grandma_m'];
-  grid.innerHTML=parentRoles.map(r=>{
+  const caregiverRoles=['dad','mom','grandpa','grandma','grandpa_m','grandma_m'];
+  grid.innerHTML=caregiverRoles.map(r=>{
     const d=ROLE_DEFS[r];
     const sel=_createState.myRole===r?'selected':'';
     return `<div class="role-card ${sel}" onclick="selectCreateRole('${r}')" style="color:${d.textColor||'#1E293B'}">
@@ -3497,7 +3504,7 @@ function renderFamilyGraph(){
 
   members.forEach((m,idx)=>{
     const isSelf=m.isSelf;
-    const rd=ROLE_DEFS[m.role]||ROLE_DEFS.child;
+    const rd=ROLE_DEFS[m.displayRole||m.role]||ROLE_DEFS.child;
     const filled=m.name.trim();
 
     // 삭제 버튼 (나 제외)
@@ -3598,20 +3605,32 @@ function openNodeForm(idx){
   overlay.className='node-form-overlay';
   overlay.id='node-form-overlay';
 
-  // 이미 사용된 역할 목록 (child 제외, 자기 자신 제외)
-  const usedRoles=_createState.members.filter((_,mi)=>mi!==idx).map(mm=>mm.role).filter(r=>r!=='child');
-  const allRoles=['dad','mom','grandpa','grandma','grandpa_m','grandma_m','child'];
-  const availableRoles=allRoles.filter(r=>r==='child'||!usedRoles.includes(r));
+  // 이미 사용된 호칭 목록 (자기 자신 제외, child 타입 제외)
+  const usedDisplayRoles=_createState.members.filter((_,mi)=>mi!==idx).map(mm=>mm.displayRole||'').filter(Boolean);
+  const allDisplayRoles=['dad','mom','grandpa','grandma','grandpa_m','grandma_m'];
+  const availableDisplayRoles=allDisplayRoles.filter(r=>!usedDisplayRoles.includes(r));
+
+  const currentMemberRole=m.role==='child'?'child':'caregiver';
+  const currentDisplayRole=m.displayRole||(m.role!=='child'&&m.role!=='caregiver'?m.role:'');
 
   let roleHtml='';
   if(!isSelf){
-    roleHtml=`<label style="display:block;font-size:12px;font-weight:600;color:var(--tx3);margin-bottom:6px">역할</label>
-      <select id="node-role" onchange="document.getElementById('node-child-fields').style.display=this.value==='child'?'block':'none'" style="width:100%;padding:10px;border-radius:8px;border:2px solid var(--bdr);background:var(--bg2);font-size:13px;font-weight:600;color:var(--tx);margin-bottom:12px;font-family:inherit">
-      ${availableRoles.map(r=>`<option value="${r}" ${m.role===r?'selected':''}>${ROLE_DEFS[r].label}</option>`).join('')}
-      </select>`;
+    roleHtml=`<label style="display:block;font-size:12px;font-weight:600;color:var(--tx3);margin-bottom:6px">구분</label>
+      <select id="node-member-type" onchange="(function(v){document.getElementById('node-display-role-wrap').style.display=v==='caregiver'?'block':'none';document.getElementById('node-child-fields').style.display=v==='child'?'block':'none';})(this.value)" style="width:100%;padding:10px;border-radius:8px;border:2px solid var(--bdr);background:var(--bg2);font-size:13px;font-weight:600;color:var(--tx);margin-bottom:12px;font-family:inherit">
+        <option value="caregiver" ${currentMemberRole==='caregiver'?'selected':''}>양육자 (어른)</option>
+        <option value="child" ${currentMemberRole==='child'?'selected':''}>아이</option>
+      </select>
+      <div id="node-display-role-wrap" style="display:${currentMemberRole==='caregiver'?'block':'none'}">
+        <label style="display:block;font-size:12px;font-weight:600;color:var(--tx3);margin-bottom:6px">호칭 <span style="font-size:11px;font-weight:500;color:#94A3B8">(선택사항)</span></label>
+        <select id="node-role" style="width:100%;padding:10px;border-radius:8px;border:2px solid var(--bdr);background:var(--bg2);font-size:13px;font-weight:600;color:var(--tx);margin-bottom:12px;font-family:inherit">
+          <option value="">선택 안함</option>
+          ${availableDisplayRoles.map(r=>`<option value="${r}" ${currentDisplayRole===r?'selected':''}>${ROLE_DEFS[r].label}</option>`).join('')}
+          ${currentDisplayRole&&!availableDisplayRoles.includes(currentDisplayRole)?`<option value="${currentDisplayRole}" selected>${ROLE_DEFS[currentDisplayRole]?.label||currentDisplayRole}</option>`:''}
+        </select>
+      </div>`;
   }
 
-  const isChildRole=m.role==='child';
+  const isChildRole=currentMemberRole==='child';
   overlay.innerHTML=`<div class="node-form-modal">
     <h3 style="font-size:16px;font-weight:800;margin-bottom:16px;color:var(--tx)">${isSelf?'내 정보 수정':'구성원 등록'}</h3>
     ${roleHtml}
@@ -3645,8 +3664,17 @@ function saveNodeForm(){
 
   m.name=name;
   if(!m.isSelf){
+    const typeEl=document.getElementById('node-member-type');
     const roleEl=document.getElementById('node-role');
-    if(roleEl)m.role=roleEl.value;
+    if(typeEl){
+      m.role=typeEl.value; // 'caregiver' or 'child'
+      m.displayRole=roleEl?.value||'';
+    } else if(roleEl){
+      // 레거시 폴백
+      const v=roleEl.value;
+      m.role=v==='child'?'child':'caregiver';
+      m.displayRole=v!=='child'&&v!=='caregiver'?v:'';
+    }
   }
   m.birthDate=document.getElementById('node-birthdate')?.value||'';
   m.gender=document.getElementById('node-gender')?.value||'';
@@ -3724,13 +3752,13 @@ function renderInviteOptions(){
   container.innerHTML=nonCreatorMembers.map((m,i)=>{
     const idx=i+1;
     const isChild=m.role==='child';
-    const rd=ROLE_DEFS[m.role]||ROLE_DEFS.child;
+    const rd=ROLE_DEFS[m.displayRole||m.role]||ROLE_DEFS.child;
     return `<div class="invite-card">
       <div class="invite-card-left">
         <div style="width:36px;height:36px;border-radius:50%;background:${rd.color||'#F1F5F9'};display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${rd.textColor||'#64748B'}" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg></div>
         <div>
           <div class="invite-card-name">${m.name}</div>
-          <div class="invite-card-role">${rd.label||m.role}</div>
+          <div class="invite-card-role">${rd.label||(m.role==='child'?'아이':'양육자')}</div>
         </div>
       </div>
       ${isChild?`<div class="invite-card-actions" style="width:100%">
@@ -3812,7 +3840,7 @@ async function shareInviteLink(memberName, memberIdx){
   let url;
   let text;
   const familyName=S.familyMeta?.familyName||_createState.familyName;
-  const rd=ROLE_DEFS[memberData?.role]||ROLE_DEFS.child;
+  const rd=ROLE_DEFS[memberData?.displayRole||memberData?.role]||ROLE_DEFS.child;
 
   if(hasPreAccount){
     // 시나리오 C: 부모가 미리 계정을 만들어줌 → 자동로그인 토큰 링크
@@ -3871,13 +3899,15 @@ async function saveFamilyToFirestore(){
     const myMemberId=generateMemberId();
 
     const members={};
-    const myRoleDef=ROLE_DEFS[_createState.myRole]||ROLE_DEFS.dad;
+    const myDisplayRole=_createState.myRole==='caregiver'?'':_createState.myRole;
+    const myRoleDef=ROLE_DEFS[myDisplayRole||'caregiver']||ROLE_DEFS.caregiver;
     members[myMemberId]={
       name:_createState.myName,
-      role:_createState.myRole,
-      color:myRoleDef.color||'#F1F5F9',
+      role:'caregiver',
+      displayRole:myDisplayRole||'',
+      color:myRoleDef.color||'#EEF2FF',
       isAdmin:true,
-      type:'parent',
+      type:'caregiver',
       account:{id:_createState.userId,pwdHash,v:2},
       joinedAt:Date.now()
     };
@@ -3888,7 +3918,9 @@ async function saveFamilyToFirestore(){
       const m=otherMembers[i];
       const childId=generateMemberId();
       memberIds.push(childId);
-      const childRoleDef=ROLE_DEFS[m.role]||ROLE_DEFS.child;
+      const memberRole=m.role==='child'?'child':'caregiver';
+      const memberDisplayRole=m.displayRole||(m.role!=='child'&&m.role!=='caregiver'?m.role:'');
+      const childRoleDef=ROLE_DEFS[memberDisplayRole||memberRole]||ROLE_DEFS.child;
       let childAccount=null;
       if(_createState.childAccounts[i+1]){
         const acc=_createState.childAccounts[i+1];
@@ -3896,10 +3928,11 @@ async function saveFamilyToFirestore(){
       }
       members[childId]={
         name:m.name,
-        role:m.role,
+        role:memberRole,
+        displayRole:memberDisplayRole||'',
         color:m.color||childRoleDef.color||'#D1FAE5',
         isAdmin:false,
-        type:childRoleDef.type||'child',
+        type:memberRole,
         birthDate:m.birthDate||'',
         gender:m.gender||'',
         account:childAccount,
@@ -4074,13 +4107,15 @@ async function createStep5Finish(){
     // 가족 구성원 목록 구축
     const members={};
     // 나 (관리자)
-    const myRoleDef=ROLE_DEFS[_createState.myRole]||ROLE_DEFS.dad;
+    const myDisplayRole=_createState.myRole==='caregiver'?'':_createState.myRole;
+    const myRoleDef=ROLE_DEFS[myDisplayRole||'caregiver']||ROLE_DEFS.caregiver;
     members[myMemberId]={
       name:_createState.myName,
-      role:_createState.myRole,
-      color:myRoleDef.color||'#F1F5F9',
+      role:'caregiver',
+      displayRole:myDisplayRole||'',
+      color:myRoleDef.color||'#EEF2FF',
       isAdmin:true,
-      type:'parent',
+      type:'caregiver',
       account:{id:userId,pwdHash,v:2},
       joinedAt:Date.now()
     };
@@ -4090,6 +4125,7 @@ async function createStep5Finish(){
       members[childId]={
         name:c.name,
         role:'child',
+        displayRole:'',
         color:c.gender==='F'?'#FCE7F3':'#DBEAFE',
         isAdmin:false,
         type:'child',
@@ -4157,7 +4193,7 @@ function selectJoinMember(memberId){
   if(!m)return;
   const rd=ROLE_DEFS[m.role]||ROLE_DEFS.child;
   document.getElementById('join-reg-avatar').innerHTML=`<div style="width:56px;height:56px;border-radius:50%;background:${rd.color||'#F1F5F9'};border:3px solid ${rd.textColor||'#6366F1'};display:flex;align-items:center;justify-content:center;margin:0 auto"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="${rd.textColor||'#6366F1'}" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg></div>`;
-  document.getElementById('join-reg-title').textContent=`${m.name}(${rd.label||m.role}) 계정 만들기`;
+  document.getElementById('join-reg-title').textContent=`${m.name}(${rd.label||(m.role==='child'?'아이':'양육자')}) 계정 만들기`;
   // 가족 이름 배지 표시
   const badge=document.getElementById('join-reg-family-badge');
   if(badge && S.familyMeta?.familyName){
@@ -8319,7 +8355,7 @@ function showStickerInfo(stkId){
   const preview=stk.type==='emoji'
     ?`<div class="stk-info-preview">${stk.content}</div>`
     :`<div class="stk-info-preview is-bubble">${stk.content.replace(/</g,'&lt;')}</div>`;
-  const canDel=(stk.user===currentUser)||isParentUser();
+  const canDel=(stk.user===currentUser)||isCaregiverUser();
   const ov=document.createElement('div');
   ov.className='stk-info-overlay';
   ov.innerHTML=`<div class="stk-info-box">
@@ -8372,13 +8408,15 @@ function getUserDisplayName(userId){
   return userId;
 }
 
-function isParentUser(){
+function isCaregiverUser(){
   if(!currentUser)return false;
   const fm=S.familyMeta?.members?.[currentUser];
-  if(fm)return fm.type==='parent';
+  if(fm)return fm.type==='caregiver'||fm.type==='parent'; // 레거시 'parent' 호환
   // 레거시 호환
   return currentUser==='dad'||currentUser==='mom';
 }
+// 하위 호환 별칭
+const isParentUser=isCaregiverUser;
 
 // ── END STICKER SYSTEM ──────────────────────
 
@@ -8519,7 +8557,7 @@ function useReward(invId){
   S.rewardLog.unshift({id:'rl_'+Date.now(),emoji:item.rwdEmoji,name:item.rwdName,pts:item.pts,ts:Date.now(),rwdId:item.rwdId,type:'use_request'});
 
   save();renderAll();
-  toast(`📲 사용 요청을 보냈어요! 부모님의 승인을 기다려주세요.`);
+  toast(`📲 사용 요청을 보냈어요! 양육자의 승인을 기다려주세요.`);
 }
 
 function refundReward(invId){
@@ -8666,11 +8704,11 @@ function renderFamilyManager() {
   if(!container) return;
 
   const fm = S.familyMeta?.members || {};
-  const ROLE_LABELS = {dad:'아빠',mom:'엄마',grandpa:'할아버지',grandma:'할머니',grandpa_m:'외할아버지',grandma_m:'외할머니',child:'자녀'};
+  const ROLE_LABELS = {dad:'아빠',mom:'엄마',grandpa:'할아버지',grandma:'할머니',grandpa_m:'외할아버지',grandma_m:'외할머니',child:'자녀',caregiver:'양육자'};
 
   // Member list
   container.innerHTML = Object.entries(fm).map(([mid, m]) => {
-    const rd = ROLE_DEFS[m.role] || ROLE_DEFS.child;
+    const rd = ROLE_DEFS[m.displayRole||m.role] || ROLE_DEFS.child;
     const hasAccount = !!m.account;
     const isMe = mid === currentUser;
     const isAdmin = m.isAdmin;
@@ -8682,7 +8720,7 @@ function renderFamilyManager() {
         </div>
         <div>
           <div style="font-size:14px;font-weight:800;color:var(--tx)">${m.name||'-'} ${isMe?'<span style="font-size:10px;color:var(--or);font-weight:700">(나)</span>':''}</div>
-          <div style="font-size:11px;color:var(--tx3);font-weight:600">${ROLE_LABELS[m.role]||m.role} · ${hasAccount?'가입완료':'미가입'} ${isAdmin?'· 관리자':''}</div>
+          <div style="font-size:11px;color:var(--tx3);font-weight:600">${ROLE_LABELS[m.displayRole||m.role]||m.displayRole||m.role} · ${hasAccount?'가입완료':'미가입'} ${isAdmin?'· 관리자':''}</div>
         </div>
       </div>
       <div style="display:flex;gap:6px;align-items:center">
@@ -8699,7 +8737,7 @@ function renderFamilyManager() {
     inviteContainer.innerHTML = '<div style="text-align:center;padding:16px;color:var(--tx3);font-size:13px;font-weight:600">모든 구성원이 가입을 완료했어요 🎉</div>';
   } else {
     inviteContainer.innerHTML = unregistered.map(([mid, m]) => {
-      const rd = ROLE_DEFS[m.role] || ROLE_DEFS.child;
+      const rd = ROLE_DEFS[m.displayRole||m.role] || ROLE_DEFS.child;
       return `<div class="adm-row" style="padding:12px 8px">
         <div class="adm-row-l">
           <div style="font-size:13px;font-weight:800;color:var(--tx)">${m.name} <span style="font-size:11px;color:${rd.textColor||'var(--tx3)'};font-weight:600">(${rd.label||m.role})</span></div>
@@ -8746,11 +8784,15 @@ async function addNewFamilyMember() {
   const memberCount = Object.keys(S.familyMeta.members).length;
   if(memberCount >= 7) { toast('최대 7명까지 추가할 수 있어요'); return; }
 
-  const rd = ROLE_DEFS[role] || ROLE_DEFS.child;
+  const memberRole = role === 'child' ? 'child' : 'caregiver';
+  const memberDisplayRole = (role !== 'child' && role !== 'caregiver') ? role : '';
+  const rd = ROLE_DEFS[memberDisplayRole || memberRole] || ROLE_DEFS.child;
   const newId = 'mid_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
   S.familyMeta.members[newId] = {
-    name, role,
-    type: role === 'child' ? 'child' : 'parent',
+    name,
+    role: memberRole,
+    displayRole: memberDisplayRole,
+    type: memberRole,
     color: rd.color || '#F1F5F9',
     textColor: rd.textColor || '#64748B',
     isAdmin: false,
@@ -8783,9 +8825,10 @@ async function sendFamilyInvite(memberId) {
 
   const rawFamilyId = _familyId.startsWith('dev_') ? _familyId.slice(4) : _familyId;
   const familyName = S.familyMeta?.familyName || '가족';
-  const rd = ROLE_DEFS[m.role] || ROLE_DEFS.child;
+  const rd = ROLE_DEFS[m.displayRole||m.role] || ROLE_DEFS.child;
   const url = `https://kwakhyoshin.github.io/taemin_mileage/dev/?invite=${rawFamilyId}&token=${inviteToken}&mid=${memberId}`;
-  const text = `${m.name}님, ${familyName} 가족에 초대합니다! 아래 링크로 ${rd.label} 역할로 가입하세요.`;
+  const roleLabel = m.displayRole ? ROLE_DEFS[m.displayRole]?.label||m.displayRole : (m.role==='child'?'아이':'양육자');
+  const text = `${m.name}님, ${familyName} 가족에 초대합니다! 아래 링크로 가입하세요.`;
 
   if(navigator.share) {
     try {
@@ -10037,9 +10080,9 @@ function openFamilyPopup(){
 
   const allIds=Object.keys(MEMBERS);
 
-  // Separate parents and children based on memberType
-  const parents=allIds.filter(id=>MEMBERS[id]?.memberType==='parent');
-  const children=allIds.filter(id=>MEMBERS[id]?.memberType==='child'||MEMBERS[id]?.memberType!=='parent');
+  // Separate caregivers and children based on memberType
+  const parents=allIds.filter(id=>MEMBERS[id]?.memberType==='caregiver'||MEMBERS[id]?.memberType==='parent');
+  const children=allIds.filter(id=>MEMBERS[id]?.memberType==='child'||(!['caregiver','parent'].includes(MEMBERS[id]?.memberType)));
   // Ensure at least: if no parents, treat all as same row
   const hasHierarchy=parents.length>0&&children.length>0;
 
@@ -10882,7 +10925,7 @@ async function checkUrlParams(){
       const member=fm[mid];
       if(!member){toast('❌ 구성원 정보를 찾을 수 없어요');showAuthScreen('login');return;}
 
-      const rd=ROLE_DEFS[member.role]||ROLE_DEFS.child;
+      const rd=ROLE_DEFS[member.displayRole||member.role]||ROLE_DEFS.child;
       const familyName=S.familyMeta?.familyName||'가족';
 
       // ── 시나리오 C: 자동 로그인 (부모가 미리 계정 생성) ──
@@ -10975,7 +11018,7 @@ function renderJoinMemberGrid(){
       <div class="member-avatar" style="background:${m.color||'#F1F5F9'};display:flex;align-items:center;justify-content:center;font-size:24px">${m.emoji||'👤'}</div>
       <div class="member-info">
         <div class="member-name">${m.name}</div>
-        <div class="member-role">${ROLE_DEFS[m.role]?.label||m.role}</div>
+        <div class="member-role">${ROLE_DEFS[m.displayRole||m.role]?.label||m.displayRole||m.role}</div>
       </div>
     </div>`;
   }).filter(Boolean).join('');
