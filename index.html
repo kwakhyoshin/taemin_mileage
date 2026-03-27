@@ -24,8 +24,7 @@
     var w=window.innerWidth;
     startX=x; startY=e.touches[0].clientY;
     isEdge=(x<edgeZone||x>w-edgeZone);
-    if(isEdge) e.preventDefault();
-  },{passive:false,capture:true});
+  },{passive:true,capture:true});
 
   // touchmove에서도 가장자리 수평 스와이프 차단
   document.addEventListener('touchmove',function(e){
@@ -12279,72 +12278,77 @@ window._createState = _createState;
   // 모든 탭 스크롤 시 헤더 축소 (compact)
   const homeScr = document.getElementById('s-home');
   const hero = document.querySelector('.hero');
+  // DOM 쿼리 캐싱 — 매 스크롤마다 querySelector 반복 방지
+  const _progTrack=hero?hero.querySelector('.prog-track'):null;
+  const _ptEl=hero?hero.querySelector('.hero-pts'):null;
+  const _lblEl=hero?hero.querySelector('.hero-lbl'):null;
+  const _unitEl=hero?hero.querySelector('.hero-unit'):null;
+  const _homTop=document.querySelector('.home-top');
+  const _homTopChildren=_homTop?Array.from(_homTop.children):[];
+  let _uhcRaf=0;
   function updateHeaderCompact(){
-    const scrollY = window.scrollY || document.documentElement.scrollTop;
-    const threshold = 60;
-    // Smooth border-radius interpolation for all tab headers: 38px → 28px (mobile only)
-    const isWide=window.innerWidth>=768;
-    const brMax=38,brMin=28;
-    const brRatio=Math.max(0,Math.min(1,scrollY/threshold));
-    const br=isWide?0:(brMax-(brMax-brMin)*brRatio);
-    const brStr=isWide?'0':'0 0 '+br+'px '+br+'px';
-    // Home
-    if(homeScr && homeScr.classList.contains('on') && hero){
-      hero.classList.toggle('compact', scrollY > threshold);
-      hero.style.borderRadius=brStr;
-      // Smooth gauge height: 14px (expanded) → 5px (compact)
-      const progTrack=hero.querySelector('.prog-track');
-      if(progTrack){
-        const gaugeMax=14,gaugeMin=5;
-        const gRatio=Math.max(0,Math.min(1,scrollY/threshold));
-        const gh=gaugeMax-(gaugeMax-gaugeMin)*gRatio;
-        progTrack.style.height=gh+'px';
-        progTrack.style.borderRadius=(gh/2)+'px';
+    if(_uhcRaf) return;
+    _uhcRaf=requestAnimationFrame(function(){
+      _uhcRaf=0;
+      const scrollY = window.scrollY || document.documentElement.scrollTop;
+      const threshold = 60;
+      // Smooth border-radius interpolation for all tab headers: 38px → 28px (mobile only)
+      const isWide=window.innerWidth>=768;
+      const brMax=38,brMin=28;
+      const brRatio=Math.max(0,Math.min(1,scrollY/threshold));
+      const br=isWide?0:(brMax-(brMax-brMin)*brRatio);
+      const brStr=isWide?'0':'0 0 '+br+'px '+br+'px';
+      // Home
+      if(homeScr && homeScr.classList.contains('on') && hero){
+        hero.classList.toggle('compact', scrollY > threshold);
+        hero.style.borderRadius=brStr;
+        // Smooth gauge height: 14px (expanded) → 5px (compact)
+        if(_progTrack){
+          const gaugeMax=14,gaugeMin=5;
+          const gh=gaugeMax-(gaugeMax-gaugeMin)*brRatio;
+          _progTrack.style.height=gh+'px';
+          _progTrack.style.borderRadius=(gh/2)+'px';
+        }
+        // Smooth hero-pts font size: 58px → 32px (gradual, not sudden)
+        if(_ptEl){
+          const fsMax=58,fsMin=32;
+          _ptEl.style.fontSize=(fsMax-(fsMax-fsMin)*brRatio)+'px';
+        }
+        if(_lblEl){
+          const lsMax=14,lsMin=10;
+          _lblEl.style.fontSize=(lsMax-(lsMax-lsMin)*brRatio)+'px';
+        }
+        if(_unitEl){
+          const usMax=18,usMin=14;
+          _unitEl.style.fontSize=(usMax-(usMax-usMin)*brRatio)+'px';
+        }
+        // Fade out home-top children only (not background)
+        if(_homTopChildren.length){
+          const fadeStart=10, fadeEnd=60;
+          const o=scrollY<=fadeStart?1:scrollY>=fadeEnd?0:1-(scrollY-fadeStart)/(fadeEnd-fadeStart);
+          const v=Math.max(0,Math.min(1,o));
+          _homTopChildren.forEach(c=>c.style.opacity=v);
+        }
       }
-      // Smooth hero-pts font size: 58px → 32px (gradual, not sudden)
-      const ptEl=hero.querySelector('.hero-pts');
-      if(ptEl){
-        const fsMax=58,fsMin=32;
-        const fs=fsMax-(fsMax-fsMin)*brRatio;
-        ptEl.style.fontSize=fs+'px';
+      // Log
+      const logHdr = document.querySelector('.log-header-sticky');
+      if(logHdr && document.getElementById('s-log')?.classList.contains('on')){
+        logHdr.classList.toggle('compact', scrollY > threshold);
+        logHdr.style.borderRadius=brStr;
       }
-      const lblEl=hero.querySelector('.hero-lbl');
-      if(lblEl){
-        const lsMax=14,lsMin=10;
-        lblEl.style.fontSize=(lsMax-(lsMax-lsMin)*brRatio)+'px';
+      // Reward
+      const rwdHdr = document.querySelector('.rwd-header-sticky');
+      if(rwdHdr && document.getElementById('s-rwd')?.classList.contains('on')){
+        rwdHdr.classList.toggle('compact', scrollY > threshold);
+        rwdHdr.style.borderRadius=brStr;
       }
-      const unitEl=hero.querySelector('.hero-unit');
-      if(unitEl){
-        const usMax=18,usMin=14;
-        unitEl.style.fontSize=(usMax-(usMax-usMin)*brRatio)+'px';
+      // History/Stats
+      const histHdr = document.querySelector('.hist-hero');
+      if(histHdr && document.getElementById('s-hist')?.classList.contains('on')){
+        histHdr.classList.toggle('compact', scrollY > threshold);
+        histHdr.style.borderRadius=brStr;
       }
-      // Fade out home-top children only (not background)
-      const ht=document.querySelector('.home-top');
-      if(ht){
-        const fadeStart=10, fadeEnd=60;
-        const o=scrollY<=fadeStart?1:scrollY>=fadeEnd?0:1-(scrollY-fadeStart)/(fadeEnd-fadeStart);
-        const v=Math.max(0,Math.min(1,o));
-        Array.from(ht.children).forEach(c=>c.style.opacity=v);
-      }
-    }
-    // Log
-    const logHdr = document.querySelector('.log-header-sticky');
-    if(logHdr && document.getElementById('s-log')?.classList.contains('on')){
-      logHdr.classList.toggle('compact', scrollY > threshold);
-      logHdr.style.borderRadius=brStr;
-    }
-    // Reward
-    const rwdHdr = document.querySelector('.rwd-header-sticky');
-    if(rwdHdr && document.getElementById('s-rwd')?.classList.contains('on')){
-      rwdHdr.classList.toggle('compact', scrollY > threshold);
-      rwdHdr.style.borderRadius=brStr;
-    }
-    // History/Stats
-    const histHdr = document.querySelector('.hist-hero');
-    if(histHdr && document.getElementById('s-hist')?.classList.contains('on')){
-      histHdr.classList.toggle('compact', scrollY > threshold);
-      histHdr.style.borderRadius=brStr;
-    }
+    });
   }
   window.addEventListener('scroll', updateHeaderCompact, {passive:true});
   window.addEventListener('resize', updateHeaderCompact, {passive:true});
