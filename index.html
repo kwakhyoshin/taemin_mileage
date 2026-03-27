@@ -2185,9 +2185,9 @@ button:disabled {
     <div class="auth-logo"><svg width="64" height="64" viewBox="0 0 200 200"><defs><linearGradient id="lb" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#6366F1"/><stop offset="100%" stop-color="#818CF8"/></linearGradient></defs><circle cx="100" cy="100" r="96" fill="url(#lb)"/><path d="M62 95v52c0 6 4 10 10 10h56c6 0 10-4 10-10V95Z" fill="#fff" opacity=".95"/><path d="M52 95l48-40 48 40Z" fill="#FF6B35"/><rect x="88" y="118" width="24" height="34" rx="4" fill="#10B981"/><circle cx="108" cy="136" r="2.5" fill="#FFD700"/><rect x="68" y="106" width="14" height="14" rx="3" fill="#6366F1" opacity=".25"/><rect x="118" y="106" width="14" height="14" rx="3" fill="#6366F1" opacity=".25"/><g transform="translate(100,52)"><polygon points="0,-14 4,-5 13,-4 7,2 9,12 0,7 -9,12 -7,2 -13,-4 -4,-5" fill="#FFD700"/></g></svg></div>
     <div class="auth-title" style="font-size:28px;letter-spacing:-1px">mile<span style="color:#FF6B35">.</span>ly</div>
     <div class="auth-sub">가족 계정으로 로그인하세요</div>
-    <input type="text" class="auth-input" id="login-id" placeholder="아이디" autocomplete="username">
+    <input type="text" class="auth-input" id="login-id" placeholder="아이디" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('login-pwd').focus()">
     <div class="pwd-wrap">
-      <input type="password" class="auth-input" id="login-pwd" placeholder="비밀번호" autocomplete="current-password">
+      <input type="password" class="auth-input" id="login-pwd" placeholder="비밀번호" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
       <button type="button" class="pwd-toggle" onclick="togglePwd('login-pwd', this)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
     </div>
     <div class="auth-error" id="login-error"></div>
