@@ -178,11 +178,11 @@ body.dark .dtog-in{transform:translateX(24px)}
 .hero-lbl{font-size:14px;font-weight:700;opacity:.85}
 .hero-pts{font-size:58px;font-weight:900;letter-spacing:-2px;line-height:1}
 .hero-unit{font-size:18px;font-weight:700;opacity:.85}
-.hero-goal{font-size:15px;opacity:.82;margin-top:6px;font-weight:600;line-height:1.4;transition:max-height .25s,opacity .25s;max-height:50px;overflow:hidden}
+.hero-goal{font-size:15px;opacity:.82;margin-top:6px;font-weight:600;line-height:1.4;max-height:50px;overflow:hidden}
 .streak-pill{position:absolute;top:18px;right:18px;background:rgba(255,255,255,.2);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:800;transition:top .25s,padding .25s,font-size .25s}
 .prog-track{background:rgba(255,255,255,.25);border-radius:7px;height:14px;margin-top:14px}
 .prog-fill{background:rgba(255,255,255,.9);border-radius:7px;height:100%;transition:width .7s}
-.prog-row{display:flex;justify-content:space-between;margin-top:5px;font-size:11px;opacity:.75;font-weight:700;transition:all .25s}
+.prog-row{display:flex;justify-content:space-between;margin-top:5px;font-size:11px;opacity:.75;font-weight:700}
 
 /* HERO compact state — NO padding change to prevent scroll jitter */
 .hero.compact .hero-goal{max-height:0;margin-top:0;opacity:0;overflow:hidden}
@@ -981,8 +981,10 @@ body.dark .family-popup-item.selected .family-popup-avatar{border-color:rgba(255
   .act-card .n{font-size:14px}
   .act-card .p{font-size:12px}
 
-  /* Section titles */
-  .sec{font-size:21px;margin:18px 20px 12px}
+  /* Section titles — sec-group 안의 .sec은 margin:0 유지 (sticky용) */
+  .sec{font-size:21px;margin:18px 20px 12px;padding:14px 20px 10px}
+  .sec-group>.sec{margin:0;padding:14px 20px 10px}
+  .sec-group{margin-top:6px}
   .card{margin:0 20px 14px}
 
   /* Log items bigger */
@@ -1130,8 +1132,10 @@ body.dark .family-popup-item.selected .family-popup-avatar{border-color:rgba(255
   .rwd-e{font-size:50px}
   .rwd-nm{font-size:15px}
 
-  /* Section */
-  .sec{margin:20px 24px 14px;font-size:22px}
+  /* Section — sec-group 안의 .sec은 margin:0 유지 (sticky용) */
+  .sec{margin:20px 24px 14px;font-size:22px;padding:14px 24px 10px}
+  .sec-group>.sec{margin:0;padding:14px 24px 10px}
+  .sec-group{margin-top:8px}
   .card{margin:0 24px 16px;border-radius:var(--rlg)}
 
   /* Log */
@@ -5839,13 +5843,6 @@ function renderAll(){
   renderNavUsers();
   renderHdrStats();
   if(typeof checkOnboarding==='function') checkOnboarding();
-  // Set --sec-sticky-top after render so .sec titles stick below the header
-  requestAnimationFrame(()=>{
-    const hdr=document.querySelector('.scr.on .hero, .scr.on .log-header-sticky, .scr.on .rwd-header-sticky, .scr.on .hist-hero');
-    if(hdr){
-      document.documentElement.style.setProperty('--sec-sticky-top', Math.round(hdr.getBoundingClientRect().height)+'px');
-    }
-  });
 }
 
 function renderHero(){
@@ -12023,6 +12020,17 @@ window._createState = _createState;
   cleanExpiredStickers(); // 하루 지난 스티커 자동 삭제
   renderAll();
 
+  // Robust --sec-sticky-top initialization (multiple fallbacks)
+  function _initSecStickyTop(){
+    const hdr=document.querySelector('.scr.on .hero, .scr.on .log-header-sticky, .scr.on .rwd-header-sticky, .scr.on .hist-hero');
+    if(hdr){
+      document.documentElement.style.setProperty('--sec-sticky-top', Math.round(hdr.getBoundingClientRect().height)+'px');
+    }
+  }
+  requestAnimationFrame(_initSecStickyTop);
+  setTimeout(_initSecStickyTop, 300);
+  setTimeout(_initSecStickyTop, 1000);
+
   // 날씨/미세먼지 데이터 가져오기
   fetchWeather();
   setInterval(fetchWeather, 600000); // 10분마다 갱신
@@ -12194,8 +12202,10 @@ window._createState = _createState;
   // .sec-group 하단이 뷰포트를 벗어나면 제목이 자연스럽게 사라짐
   function initStickySecHeaders(){
     // .sec-group 안의 .sec 처리 (home, rwd 화면)
+    // rootMargin을 현재 헤더 높이 기반으로 설정 (mobile ~80px, tablet ~200px)
     const groups=document.querySelectorAll('.sec-group');
     if(groups.length){
+      const stickyPx=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sec-sticky-top'))||100;
       const groupObserver=new IntersectionObserver((entries)=>{
         entries.forEach(e=>{
           const sec=e.target.querySelector('.sec');
@@ -12206,7 +12216,7 @@ window._createState = _createState;
             sec.classList.add('sec-fading');
           }
         });
-      },{threshold:0,rootMargin:'-60px 0px 0px 0px'});
+      },{threshold:0,rootMargin:`-${stickyPx+40}px 0px 0px 0px`});
       groups.forEach(g=>groupObserver.observe(g));
     }
 
