@@ -173,14 +173,14 @@ body.dark .dtog-in{transform:translateX(24px)}
 .home-top h1{font-size:24px;font-weight:900;color:rgba(255,255,255,.68)}
 
 /* HERO - Sticky on scroll, full width when stuck */
-.hero{margin:0;background:linear-gradient(180deg,var(--tab-color,#6366F1),var(--tab-color2,#818CF8));border-radius:0 0 38px 38px;padding:14px 20px 22px;color:#fff;position:sticky;top:0;z-index:10;overflow:hidden;box-shadow:0 4px 20px var(--tab-shadow,rgba(99,102,241,0.3));transition:padding .25s}
+.hero{margin:0;background:linear-gradient(180deg,var(--tab-color,#6366F1),var(--tab-color2,#818CF8));border-radius:0 0 38px 38px;padding:14px 20px 22px;color:#fff;position:sticky;top:0;z-index:10;overflow:hidden;box-shadow:0 4px 20px var(--tab-shadow,rgba(99,102,241,0.3));transition:border-radius .25s}
 .hero::after{content:'';position:absolute;bottom:-30px;left:20px;width:110px;height:110px;background:rgba(255,255,255,.08);border-radius:50%;pointer-events:none}
-.hero-lbl{font-size:14px;font-weight:700;opacity:.85;transition:font-size .25s}
-.hero-pts{font-size:58px;font-weight:900;letter-spacing:-2px;line-height:1;transition:font-size .25s}
-.hero-unit{font-size:18px;font-weight:700;opacity:.85;transition:font-size .25s}
-.hero-goal{font-size:15px;opacity:.82;margin-top:6px;font-weight:600;line-height:1.4;transition:all .25s;max-height:50px;overflow:hidden}
-.streak-pill{position:absolute;top:18px;right:18px;background:rgba(255,255,255,.2);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:800;transition:all .25s}
-.prog-track{background:rgba(255,255,255,.25);border-radius:7px;height:14px;margin-top:14px;transition:margin .25s}
+.hero-lbl{font-size:14px;font-weight:700;opacity:.85}
+.hero-pts{font-size:58px;font-weight:900;letter-spacing:-2px;line-height:1}
+.hero-unit{font-size:18px;font-weight:700;opacity:.85}
+.hero-goal{font-size:15px;opacity:.82;margin-top:6px;font-weight:600;line-height:1.4;transition:max-height .25s,opacity .25s;max-height:50px;overflow:hidden}
+.streak-pill{position:absolute;top:18px;right:18px;background:rgba(255,255,255,.2);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:800;transition:top .25s,padding .25s,font-size .25s}
+.prog-track{background:rgba(255,255,255,.25);border-radius:7px;height:14px;margin-top:14px}
 .prog-fill{background:rgba(255,255,255,.9);border-radius:7px;height:100%;transition:width .7s}
 .prog-row{display:flex;justify-content:space-between;margin-top:5px;font-size:11px;opacity:.75;font-weight:700;transition:all .25s}
 
@@ -238,7 +238,7 @@ body.dark .dtog-in{transform:translateX(24px)}
 .log-header-sticky p{font-size:14px;color:rgba(255,255,255,.85);margin-top:3px;font-weight:600;transition:all .25s}
 
 /* COMPACT STATE for log/rwd/hist headers */
-.log-header-sticky{transition:padding .25s}
+.log-header-sticky{transition:border-radius .25s}
 .log-header-sticky.compact{padding:10px 20px 10px;padding-top:calc(10px + env(safe-area-inset-top))}
 .log-header-sticky.compact h2{font-size:16px}
 .log-header-sticky.compact p{font-size:0;margin:0;opacity:0;max-height:0;overflow:hidden}
@@ -247,7 +247,7 @@ body.dark .dtog-in{transform:translateX(24px)}
 .log-header-sticky.compact .hdr-stat-lbl{font-size:10px}
 .log-header-sticky.compact .hdr-stat-divider{height:20px}
 
-.rwd-header-sticky{transition:padding .25s}
+.rwd-header-sticky{transition:border-radius .25s}
 .rwd-header-sticky.compact{padding:10px 20px 10px;padding-top:calc(10px + env(safe-area-inset-top))}
 .rwd-header-sticky.compact h2{font-size:16px!important}
 .rwd-header-sticky.compact p{font-size:0!important;margin:0!important;opacity:0;max-height:0;overflow:hidden}
@@ -256,7 +256,7 @@ body.dark .dtog-in{transform:translateX(24px)}
 .rwd-header-sticky.compact .hdr-stat-lbl{font-size:10px}
 .rwd-header-sticky.compact .hdr-stat-divider{height:20px}
 
-.hist-hero{transition:padding .25s}
+.hist-hero{transition:border-radius .25s}
 .hist-hero.compact{padding:10px 20px 10px;padding-top:calc(10px + env(safe-area-inset-top))}
 .hist-hero.compact h2{font-size:16px}
 .hist-hero.compact p{font-size:0;margin:0;opacity:0;max-height:0;overflow:hidden}
@@ -5845,6 +5845,13 @@ function renderAll(){
   renderNavUsers();
   renderHdrStats();
   if(typeof checkOnboarding==='function') checkOnboarding();
+  // Set --sec-sticky-top after render so .sec titles stick below the header
+  requestAnimationFrame(()=>{
+    const hdr=document.querySelector('.scr.on .hero, .scr.on .log-header-sticky, .scr.on .rwd-header-sticky, .scr.on .hist-hero');
+    if(hdr){
+      document.documentElement.style.setProperty('--sec-sticky-top', Math.round(hdr.getBoundingClientRect().height)+'px');
+    }
+  });
 }
 
 function renderHero(){
@@ -10967,11 +10974,15 @@ function reallyGoTab(tab){
     hero.classList.remove('compact');
     const defaultBr=window.innerWidth>=768?'0':'0 0 38px 38px';
     hero.style.borderRadius=defaultBr;
+    hero.style.padding='';
     const progTrack=hero.querySelector('.prog-track');
-    if(progTrack){progTrack.style.height='14px';progTrack.style.borderRadius='7px';}
+    if(progTrack){progTrack.style.height='14px';progTrack.style.borderRadius='7px';progTrack.style.marginTop='';}
     const ptEl=hero.querySelector('.hero-pts');if(ptEl)ptEl.style.fontSize='';
     const lblEl=hero.querySelector('.hero-lbl');if(lblEl)lblEl.style.fontSize='';
     const unitEl=hero.querySelector('.hero-unit');if(unitEl)unitEl.style.fontSize='';
+    const goalEl=hero.querySelector('.hero-goal');if(goalEl){goalEl.style.maxHeight='';goalEl.style.marginTop='';goalEl.style.opacity='';}
+    const progRow=hero.querySelector('.prog-row');if(progRow){progRow.style.marginTop='';progRow.style.fontSize='';}
+    const streakPill=hero.querySelector('.streak-pill');if(streakPill){streakPill.style.top='';streakPill.style.padding='';streakPill.style.fontSize='';}
   }
   const ht=document.querySelector('.home-top');
   if(ht) Array.from(ht.children).forEach(c=>c.style.opacity='1');
@@ -12107,61 +12118,75 @@ window._createState = _createState;
     const brRatio=Math.max(0,Math.min(1,scrollY/threshold));
     const br=isWide?0:(brMax-(brMax-brMin)*brRatio);
     const brStr=isWide?'0':'0 0 '+br+'px '+br+'px';
-    // Home
+    // Home — fully JS-driven smooth interpolation to prevent jitter
     if(homeScr && homeScr.classList.contains('on') && hero){
-      hero.classList.toggle('compact', scrollY > threshold);
+      const r=brRatio; // 0 (top) → 1 (threshold)
+      const isCompact = scrollY >= threshold;
+      hero.classList.toggle('compact', isCompact);
       hero.style.borderRadius=brStr;
-      // Smooth gauge height: 14px (expanded) → 5px (compact)
+      // Smooth padding: 14/20/22 → 12/20/14 (top stays same on mobile, bottom shrinks)
+      const ptTop=14-(14-12)*r, ptBot=22-(22-14)*r;
+      hero.style.padding=`${ptTop}px 20px ${ptBot}px`;
+      if(isCompact) hero.style.paddingTop=`calc(${ptTop}px + env(safe-area-inset-top))`;
+      // Smooth gauge height: 14px → 5px
       const progTrack=hero.querySelector('.prog-track');
       if(progTrack){
-        const gaugeMax=14,gaugeMin=5;
-        const gRatio=Math.max(0,Math.min(1,scrollY/threshold));
-        const gh=gaugeMax-(gaugeMax-gaugeMin)*gRatio;
+        const gh=14-(14-5)*r;
         progTrack.style.height=gh+'px';
         progTrack.style.borderRadius=(gh/2)+'px';
+        progTrack.style.marginTop=(14-(14-10)*r)+'px';
       }
-      // Smooth hero-pts font size: 58px → 32px (gradual, not sudden)
+      // Smooth font sizes
       const ptEl=hero.querySelector('.hero-pts');
-      if(ptEl){
-        const fsMax=58,fsMin=32;
-        const fs=fsMax-(fsMax-fsMin)*brRatio;
-        ptEl.style.fontSize=fs+'px';
-      }
+      if(ptEl) ptEl.style.fontSize=(58-(58-32)*r)+'px';
       const lblEl=hero.querySelector('.hero-lbl');
-      if(lblEl){
-        const lsMax=14,lsMin=10;
-        lblEl.style.fontSize=(lsMax-(lsMax-lsMin)*brRatio)+'px';
-      }
+      if(lblEl) lblEl.style.fontSize=(14-(14-10)*r)+'px';
       const unitEl=hero.querySelector('.hero-unit');
-      if(unitEl){
-        const usMax=18,usMin=14;
-        unitEl.style.fontSize=(usMax-(usMax-usMin)*brRatio)+'px';
+      if(unitEl) unitEl.style.fontSize=(18-(18-14)*r)+'px';
+      // Smooth hero-goal hide
+      const goalEl=hero.querySelector('.hero-goal');
+      if(goalEl){
+        goalEl.style.maxHeight=(50*(1-r))+'px';
+        goalEl.style.marginTop=(6*(1-r))+'px';
+        goalEl.style.opacity=(1-r);
+      }
+      // Smooth prog-row
+      const progRow=hero.querySelector('.prog-row');
+      if(progRow){
+        progRow.style.marginTop=(5-(5-3)*r)+'px';
+        progRow.style.fontSize=(11-(11-10)*r)+'px';
+      }
+      // Smooth streak-pill
+      const streakPill=hero.querySelector('.streak-pill');
+      if(streakPill){
+        streakPill.style.top=(18-(18-12)*r)+'px';
+        streakPill.style.padding=`${5-(5-4)*r}px ${12-(12-10)*r}px`;
+        streakPill.style.fontSize=(12-(12-11)*r)+'px';
       }
       // Fade out home-top children only (not background)
       const ht=document.querySelector('.home-top');
       if(ht){
         const fadeStart=10, fadeEnd=60;
         const o=scrollY<=fadeStart?1:scrollY>=fadeEnd?0:1-(scrollY-fadeStart)/(fadeEnd-fadeStart);
-        const v=Math.max(0,Math.min(1,o));
-        Array.from(ht.children).forEach(c=>c.style.opacity=v);
+        Array.from(ht.children).forEach(c=>c.style.opacity=Math.max(0,Math.min(1,o)));
       }
     }
     // Log
     const logHdr = document.querySelector('.log-header-sticky');
     if(logHdr && document.getElementById('s-log')?.classList.contains('on')){
-      logHdr.classList.toggle('compact', scrollY > threshold);
+      logHdr.classList.toggle('compact', scrollY >= threshold);
       logHdr.style.borderRadius=brStr;
     }
     // Reward
     const rwdHdr = document.querySelector('.rwd-header-sticky');
     if(rwdHdr && document.getElementById('s-rwd')?.classList.contains('on')){
-      rwdHdr.classList.toggle('compact', scrollY > threshold);
+      rwdHdr.classList.toggle('compact', scrollY >= threshold);
       rwdHdr.style.borderRadius=brStr;
     }
     // History/Stats
     const histHdr = document.querySelector('.hist-hero');
     if(histHdr && document.getElementById('s-hist')?.classList.contains('on')){
-      histHdr.classList.toggle('compact', scrollY > threshold);
+      histHdr.classList.toggle('compact', scrollY >= threshold);
       histHdr.style.borderRadius=brStr;
     }
 
