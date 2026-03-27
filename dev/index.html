@@ -292,6 +292,9 @@ body.dark .dtog-in{transform:translateX(20px)}
 .home-greeting h1{font-size:24px;font-weight:900;color:rgba(255,255,255,.68)}
 /* keep .home-top for tablet/desktop media queries */
 .home-top{background:var(--tab-color,#6366F1);padding:0;position:relative;overflow:visible;z-index:11}
+/* greeting↔hero 배경 단차 제거: greeting 하단과 hero 상단 색상 완전 연결 */
+.home-greeting{margin-bottom:0!important;padding-bottom:0!important;}
+.hero{margin-top:0!important;}
 /* MY TAB */
 .my-header{background:linear-gradient(160deg,var(--tab-color,#6366F1),var(--tab-color2,#818CF8));padding:28px 24px 32px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
 .my-avatar-wrap{width:80px;height:80px;border-radius:50%;overflow:hidden;border:3px solid rgba(255,255,255,.5);box-shadow:0 4px 16px rgba(0,0,0,.2);background:rgba(255,255,255,.2)}
@@ -320,7 +323,7 @@ body.dark .dtog-in{transform:translateX(20px)}
 .child-picker-name{font-size:16px;font-weight:800;color:var(--tx);flex:1}
 
 /* HERO - Sticky on scroll, full width when stuck */
-.hero{margin:0;background:linear-gradient(180deg,var(--tab-color,#6366F1),var(--tab-color2,#818CF8));border-radius:0 0 38px 38px;padding:14px 20px 22px;color:#fff;position:sticky;top:0;z-index:10;overflow:hidden;box-shadow:0 4px 20px var(--tab-shadow,rgba(99,102,241,0.3));transition:padding .25s}
+.hero{margin:0;background:linear-gradient(180deg,var(--tab-color,#6366F1),var(--tab-color2,#818CF8));border-radius:0 0 38px 38px;padding:14px 20px 22px;color:#fff;position:sticky;top:var(--topbar-h,0px);z-index:10;overflow:hidden;box-shadow:0 4px 20px var(--tab-shadow,rgba(99,102,241,0.3));transition:padding .25s}
 .hero::after{content:'';position:absolute;bottom:-30px;left:20px;width:110px;height:110px;background:rgba(255,255,255,.08);border-radius:50%;pointer-events:none}
 .hero-lbl{font-size:14px;font-weight:700;opacity:.85;transition:font-size .25s}
 .hero-pts{font-size:58px;font-weight:900;letter-spacing:-2px;line-height:1;transition:font-size .25s}
@@ -333,12 +336,14 @@ body.dark .dtog-in{transform:translateX(20px)}
 
 .hero.compact{padding:12px 20px 14px;padding-top:calc(12px + env(safe-area-inset-top))}
 .hero.compact .hero-lbl{font-size:13px}
-.hero.compact .hero-pts{font-size:32px}
-.hero.compact .hero-unit{font-size:14px}
+.hero.compact .hero-pts{font-size:32px;display:inline!important;opacity:1!important;visibility:visible!important}
+.hero.compact .hero-unit{font-size:14px;display:inline!important;opacity:1!important;visibility:visible!important}
 .hero.compact .hero-goal{max-height:0;margin-top:0;opacity:0}
 .hero.compact .streak-pill{top:calc(12px + env(safe-area-inset-top));padding:4px 10px;font-size:13px}
 .hero.compact .prog-track{margin-top:10px}
 .hero.compact .prog-row{margin-top:3px;font-size:13px}
+/* compact 상태 마일리지 숫자 래퍼 보장 */
+.hero.compact .hero-pts-wrap{display:flex!important;align-items:flex-end!important;gap:6px!important;opacity:1!important}
 
 /* SECTION */
 .sec{font-size:18px;font-weight:800;color:var(--tx);margin:16px 16px 12px;display:flex;align-items:center;gap:7px}
@@ -1107,9 +1112,30 @@ body.dark .nav-child-tab.active{background:rgba(99,102,241,.18)}
 body.dark .adm-child-btn{background:#1E293B;border-color:#334155}
 body.dark .adm-child-btn.on{background:rgba(255,107,53,.15)}
 /* unified 모드 완료 자녀 아바타 */
-.unified-completions{display:flex;gap:3px;padding:2px 0 1px;flex-wrap:wrap}
-.unified-avatar{width:20px;height:20px;border-radius:50%;overflow:hidden;border:1.5px solid var(--gn,#10B981);background:var(--bg2,#F1F5F9);flex-shrink:0}
-.unified-avatar svg,.unified-avatar img{width:100%;height:100%}
+.unified-completions{display:flex;gap:4px;padding:2px 0 1px;flex-wrap:wrap}
+.unified-avatar-wrap{display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0}
+.unified-avatar-wrap>div,.unified-avatar-wrap>svg,.unified-avatar-wrap>img{width:20px;height:20px;border-radius:50%;overflow:hidden;border:1.5px solid var(--gn,#10B981);background:var(--bg2,#F1F5F9)}
+.unified-name-badge{font-size:9px;font-weight:800;color:var(--tx2);background:var(--bg2);border-radius:4px;padding:1px 3px;white-space:nowrap;max-width:36px;overflow:hidden;text-overflow:ellipsis;line-height:1.3}
+/* 독립 모드 자녀 배정 칩 */
+.assign-row{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
+.assign-chip{font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;border:1.5px solid var(--bdr);background:var(--bg2);color:var(--tx3);cursor:pointer;transition:all .15s}
+.assign-chip.on{background:var(--or);border-color:var(--or);color:#fff}
+/* 통합 모드 대시보드 */
+.unified-dash-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;padding:14px}
+.unified-dash-card{background:var(--bg2);border-radius:14px;padding:14px 12px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
+.unified-dash-avatar{width:40px;height:40px;border-radius:50%;overflow:hidden;border:2px solid var(--or);flex-shrink:0}
+.unified-dash-avatar svg,.unified-dash-avatar img{width:100%;height:100%}
+.unified-dash-name{font-size:14px;font-weight:800;color:var(--tx)}
+.unified-dash-pts{font-size:18px;font-weight:900;color:var(--or)}
+.unified-dash-meta{font-size:11px;font-weight:600;color:var(--tx3)}
+/* MY 탭 가족 구성원 */
+.my-family-row{display:flex;gap:12px;overflow-x:auto;padding:4px 16px 8px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.my-family-row::-webkit-scrollbar{display:none}
+.my-family-member{display:flex;flex-direction:column;align-items:center;gap:5px;flex-shrink:0;cursor:pointer}
+.my-family-avatar{width:52px;height:52px;border-radius:50%;overflow:hidden;border:2.5px solid var(--or);background:var(--bg2);flex-shrink:0}
+.my-family-avatar svg,.my-family-avatar img{width:100%;height:100%}
+.my-family-name{font-size:12px;font-weight:800;color:var(--tx);white-space:nowrap}
+.my-family-role{font-size:10px;font-weight:600;color:var(--tx3);white-space:nowrap}
 
 /* ── Family Popup (Toss-style genealogy) ── */
 .family-popup-bg{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.45);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);animation:fadeIn .15s}
@@ -2293,6 +2319,13 @@ button:disabled {
              hero-pts-glow   0.55s ease-out;
 }
 
+/* ── 세로모드 최종 보루 (PORTRAIT SAFETY — 항상 마지막 적용) ── */
+@media (max-width: 767px), (orientation: portrait) and (max-width: 1023px) {
+  .nav-container{position:fixed!important;bottom:0!important;left:0!important;right:0!important;top:auto!important;width:100%!important;height:auto!important;flex-direction:row!important;}
+  body,.scr,.tab-content{margin-left:0!important;padding-left:0!important;}
+  .nav-brand,.sidebar,.side-menu{display:none!important;}
+}
+
 </style>
 </head>
 <body data-tab="home">
@@ -2808,7 +2841,7 @@ button:disabled {
   <div class="hero">
     <div class="streak-pill" id="streak-pill"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 01-7 7 7 7 0 01-7-7c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg> 0일 연속</div>
     <div class="hero-lbl" id="hero-lbl">나의 마일리지</div>
-    <div style="display:flex;align-items:flex-end;gap:6px;margin:4px 0">
+    <div class="hero-pts-wrap" style="display:flex;align-items:flex-end;gap:6px;margin:4px 0">
       <span class="hero-pts" id="hero-pts">0</span><span class="hero-unit">M</span>
     </div>
     <div class="hero-goal" id="hero-goal"></div>
@@ -3386,6 +3419,8 @@ button:disabled {
     <div class="my-name" id="my-name">이름</div>
     <div class="my-role" id="my-role">역할</div>
   </div>
+  <!-- 가족 구성원 아바타 가로 나열 -->
+  <div class="my-family-row" id="my-family-row" style="display:none"></div>
   <div class="my-section-title">기분 &amp; 프로필</div>
   <div class="my-list">
     <button class="my-list-item" onclick="openMoodPop()">
@@ -5596,32 +5631,32 @@ const TAB_COLORS = {home:'#6366F1', log:'#F43F5E', rwd:'#F59E0B', hist:'#8B5CF6'
 const TAB_COLORS2 = {home:'#818CF8', log:'#FB7185', rwd:'#FBBF24', hist:'#A78BFA'};
 
 const DACTS = [
-  {id:'a1', emoji:'🦷',name:'양치질',              desc:'아침/저녁 양치',              pts:20,maxDay:1,cycle:'daily',  active:true,showHome:true},
-  {id:'a2', emoji:'🧼',name:'세수하기',             desc:'아침/저녁 세수',              pts:10,maxDay:1,cycle:'daily',  active:true,showHome:true},
-  {id:'a3', emoji:'💊',name:'영양제 먹기',          desc:'매일 아침 영양제 복용',        pts:15,maxDay:1,cycle:'daily',  active:true,showHome:true},
-  {id:'a4', emoji:'📚',name:'숙제하기',             desc:'학교 숙제 완료',              pts:50,maxDay:1,cycle:'daily',  active:true,showHome:true},
-  {id:'a5', emoji:'📖',name:'추가 공부하기',        desc:'20분 이상 자기주도 학습',      pts:40,maxDay:1,cycle:'daily',  active:true,showHome:true},
-  {id:'a6', emoji:'😊',name:'하루종일 짜증 안내기', desc:'하루 동안 짜증 없이 지내기',   pts:30,maxDay:1,cycle:'daily',  active:true,showHome:true},
-  {id:'a7', emoji:'🤝',name:'어른들께 인사잘하기',  desc:'만나는 어른께 먼저 인사',      pts:20,maxDay:1,cycle:'daily',  active:true,showHome:false},
-  {id:'a8', emoji:'🏃',name:'달리기하기',           desc:'30분 이상 달리기',            pts:35,maxDay:0,cycle:'daily',  active:true,showHome:false},
-  {id:'a9', emoji:'💪',name:'코어운동하기',         desc:'플랭크, 윗몸일으키기 등',      pts:30,maxDay:0,cycle:'daily',  active:true,showHome:false},
-  {id:'a10',emoji:'🛒',name:'심부름하기',          desc:'부모님 심부름 완료',           pts:25,maxDay:0,cycle:'none',   active:true,showHome:false},
-  {id:'a11',emoji:'🚲',name:'오버더바이크 타기',   desc:'오버더바이크 운동 완료',        pts:35,maxDay:0,cycle:'daily',  active:true,showHome:false},
-  {id:'a12',emoji:'🚴',name:'자전거 연습하기',     desc:'자전거 타기 연습',             pts:30,maxDay:0,cycle:'daily',  active:true,showHome:false},
-  {id:'a13',emoji:'🧹',name:'방 청소하기',         desc:'방 정리 및 청소',              pts:40,maxDay:0,cycle:'daily',  active:true,showHome:false},
-  {id:'a14',emoji:'🛏️',name:'이불 개기',           desc:'아침에 이불 정리',             pts:15,maxDay:1,cycle:'daily',  active:true,showHome:false},
-  {id:'a15',emoji:'🍽️',name:'식사 후 정리',        desc:'밥 먹고 그릇 정리하기',        pts:10,maxDay:2,cycle:'daily',  active:true,showHome:false},
+  {id:'a1', emoji:'🦷',name:'양치질',              desc:'아침/저녁 양치',              pts:20,maxDay:1,cycle:'daily',  active:true,showHome:true, assignedTo:['all']},
+  {id:'a2', emoji:'🧼',name:'세수하기',             desc:'아침/저녁 세수',              pts:10,maxDay:1,cycle:'daily',  active:true,showHome:true, assignedTo:['all']},
+  {id:'a3', emoji:'💊',name:'영양제 먹기',          desc:'매일 아침 영양제 복용',        pts:15,maxDay:1,cycle:'daily',  active:true,showHome:true, assignedTo:['all']},
+  {id:'a4', emoji:'📚',name:'숙제하기',             desc:'학교 숙제 완료',              pts:50,maxDay:1,cycle:'daily',  active:true,showHome:true, assignedTo:['all']},
+  {id:'a5', emoji:'📖',name:'추가 공부하기',        desc:'20분 이상 자기주도 학습',      pts:40,maxDay:1,cycle:'daily',  active:true,showHome:true, assignedTo:['all']},
+  {id:'a6', emoji:'😊',name:'하루종일 짜증 안내기', desc:'하루 동안 짜증 없이 지내기',   pts:30,maxDay:1,cycle:'daily',  active:true,showHome:true, assignedTo:['all']},
+  {id:'a7', emoji:'🤝',name:'어른들께 인사잘하기',  desc:'만나는 어른께 먼저 인사',      pts:20,maxDay:1,cycle:'daily',  active:true,showHome:false,assignedTo:['all']},
+  {id:'a8', emoji:'🏃',name:'달리기하기',           desc:'30분 이상 달리기',            pts:35,maxDay:0,cycle:'daily',  active:true,showHome:false,assignedTo:['all']},
+  {id:'a9', emoji:'💪',name:'코어운동하기',         desc:'플랭크, 윗몸일으키기 등',      pts:30,maxDay:0,cycle:'daily',  active:true,showHome:false,assignedTo:['all']},
+  {id:'a10',emoji:'🛒',name:'심부름하기',          desc:'부모님 심부름 완료',           pts:25,maxDay:0,cycle:'none',   active:true,showHome:false,assignedTo:['all']},
+  {id:'a11',emoji:'🚲',name:'오버더바이크 타기',   desc:'오버더바이크 운동 완료',        pts:35,maxDay:0,cycle:'daily',  active:true,showHome:false,assignedTo:['all']},
+  {id:'a12',emoji:'🚴',name:'자전거 연습하기',     desc:'자전거 타기 연습',             pts:30,maxDay:0,cycle:'daily',  active:true,showHome:false,assignedTo:['all']},
+  {id:'a13',emoji:'🧹',name:'방 청소하기',         desc:'방 정리 및 청소',              pts:40,maxDay:0,cycle:'daily',  active:true,showHome:false,assignedTo:['all']},
+  {id:'a14',emoji:'🛏️',name:'이불 개기',           desc:'아침에 이불 정리',             pts:15,maxDay:1,cycle:'daily',  active:true,showHome:false,assignedTo:['all']},
+  {id:'a15',emoji:'🍽️',name:'식사 후 정리',        desc:'밥 먹고 그릇 정리하기',        pts:10,maxDay:2,cycle:'daily',  active:true,showHome:false,assignedTo:['all']},
 ];
 const DRWDS = [
-  {id:'r1',emoji:'🧱',name:'레고 닌자고',         pts:1500,goal:true},
-  {id:'r2',emoji:'🔫',name:'BB탄 총 장난감',      pts:1200,goal:false},
-  {id:'r3',emoji:'🎮',name:'닌텐도 1시간 추가',   pts:200, goal:false},
-  {id:'r4',emoji:'📺',name:'유튜브 1시간 추가',   pts:150, goal:false},
-  {id:'r5',emoji:'📱',name:'패드게임 1시간 추가', pts:150, goal:false},
-  {id:'r6',emoji:'🎬',name:'영화 관람',           pts:600, goal:false},
-  {id:'r7',emoji:'🍕',name:'피자 파티',           pts:800, goal:false},
-  {id:'r8',emoji:'🍦',name:'아이스크림',          pts:100, goal:false},
-  {id:'r9',emoji:'🎳',name:'볼링',                pts:500, goal:false},
+  {id:'r1',emoji:'🧱',name:'레고 닌자고',         pts:1500,goal:true, assignedTo:['all']},
+  {id:'r2',emoji:'🔫',name:'BB탄 총 장난감',      pts:1200,goal:false,assignedTo:['all']},
+  {id:'r3',emoji:'🎮',name:'닌텐도 1시간 추가',   pts:200, goal:false,assignedTo:['all']},
+  {id:'r4',emoji:'📺',name:'유튜브 1시간 추가',   pts:150, goal:false,assignedTo:['all']},
+  {id:'r5',emoji:'📱',name:'패드게임 1시간 추가', pts:150, goal:false,assignedTo:['all']},
+  {id:'r6',emoji:'🎬',name:'영화 관람',           pts:600, goal:false,assignedTo:['all']},
+  {id:'r7',emoji:'🍕',name:'피자 파티',           pts:800, goal:false,assignedTo:['all']},
+  {id:'r8',emoji:'🍦',name:'아이스크림',          pts:100, goal:false,assignedTo:['all']},
+  {id:'r9',emoji:'🎳',name:'볼링',                pts:500, goal:false,assignedTo:['all']},
 ];
 
 // ── BADGES (뱃지/업적) ──────────────────────────────────
@@ -5858,7 +5893,8 @@ function syncMemberToGlobal(targetId) {
   const mode = getFamilyMode();
 
   if (mode === 'unified') {
-    // 통합 모드: pts/log/acts/rwds는 전역 공유 — actDone/streak 등 개인 데이터만 로드
+    // 통합 모드: acts/rwds는 전역 공유 — pts/actDone/streak 등은 자녀별로 분리
+    S.pts = ms.pts || 0;
     S.actDone = ms.actDone || {};
     S.streak = ms.streak || 0;
     S.longest = ms.longest || 0;
@@ -5867,7 +5903,7 @@ function syncMemberToGlobal(targetId) {
     S.moodLog = ms.moodLog || [];
     S.badges = ms.badges || {};
     S.badgeLog = ms.badgeLog || [];
-    // pts/log/acts/rwds는 전역 S에 그대로 유지 (Firestore에서 공유)
+    // log/acts/rwds는 전역 S에 그대로 유지 (Firestore에서 공유)
   } else {
     // 독립 모드: 모든 데이터를 해당 구성원에서 로드
     S.pts = ms.pts || 0;
@@ -5897,7 +5933,8 @@ function syncGlobalToMember(targetId) {
   const mode = getFamilyMode();
 
   if (mode === 'unified') {
-    // 통합 모드: 개인 데이터만 저장 (pts/log/acts/rwds는 전역 공유)
+    // 통합 모드: pts 포함 개인 데이터 저장 (log/acts/rwds는 전역 공유)
+    ms.pts = S.pts;
     ms.actDone = S.actDone;
     ms.streak = S.streak;
     ms.longest = S.longest;
@@ -7119,8 +7156,17 @@ function getCardState(act){
 
 function renderHomeGrid(){
   const g=document.getElementById('home-grid');
-  let acts=S.acts.filter(a=>a.active&&a.showHome&&isAvailableToday(a));
-  if(acts.length===0) acts=S.acts.filter(a=>a.active&&isAvailableToday(a)).slice(0,6);
+  const _hgMode=getFamilyMode();
+  let acts=S.acts.filter(a=>{
+    if(!a.active||!a.showHome||!isAvailableToday(a))return false;
+    if(!isCaregiverUser()&&_hgMode==='unified')return isAssignedToUser(a,currentUser);
+    return true;
+  });
+  if(acts.length===0) acts=S.acts.filter(a=>{
+    if(!a.active||!isAvailableToday(a))return false;
+    if(!isCaregiverUser()&&_hgMode==='unified')return isAssignedToUser(a,currentUser);
+    return true;
+  }).slice(0,6);
   // Empty state
   if(acts.length===0){g.innerHTML=renderEmptyState('acts');return;}
   g.innerHTML=acts.map(a=>{
@@ -7171,7 +7217,12 @@ function renderHomeGrid(){
 
 function renderLogList(){
   const el=document.getElementById('log-list');
-  const acts=S.acts.filter(a=>a.active&&isAvailableToday(a));
+  const _llMode=getFamilyMode();
+  const acts=S.acts.filter(a=>{
+    if(!a.active||!isAvailableToday(a))return false;
+    if(!isCaregiverUser()&&_llMode==='unified')return isAssignedToUser(a,currentUser);
+    return true;
+  });
   // Empty state
   if(acts.length===0){el.innerHTML=renderEmptyState('log');return;}
   el.innerHTML=acts.map(a=>{
@@ -7682,9 +7733,14 @@ window.renderBadgeViewHistory=renderBadgeViewHistory;
 
 function renderRewardGrid(){
   const rg=document.getElementById('rwd-grid');
+  const _rgMode=getFamilyMode();
+  const rwds=S.rwds.filter(r=>{
+    if(!isCaregiverUser()&&_rgMode==='unified')return isAssignedToUser(r,currentUser);
+    return true;
+  });
   // Empty state
-  if(S.rwds.length===0){rg.innerHTML=renderEmptyState('rwds');return;}
-  rg.innerHTML=S.rwds.map(r=>{
+  if(rwds.length===0){rg.innerHTML=renderEmptyState('rwds');return;}
+  rg.innerHTML=rwds.map(r=>{
     // Check if sale is active
     const sale=r.sale&&r.sale.percent&&(!r.sale.endDate||new Date(r.sale.endDate+'T23:59:59')>=new Date())?r.sale:null;
     const actualPts=sale?Math.round(r.pts*(1-sale.percent/100)):r.pts;
@@ -9348,6 +9404,9 @@ function _undoActCore(actId){
     S.lastDate=S.streak>0?`${_yd.getFullYear()}-${String(_yd.getMonth()+1).padStart(2,'0')}-${String(_yd.getDate()).padStart(2,'0')}`:null;
   }
 
+  // 역방향 별 애니메이션: 마일리지 → 활동 카드 방향
+  const _actCard = document.querySelector(`.act-card[data-actid="${actId}"]`);
+  if(_actCard) flyCoinsFromMileage(_actCard, entry.pts);
   save();renderAll();
   toast(`↩ ${a.name} 취소됨 (-${entry.pts} 마일리지)`);
 }
@@ -9456,7 +9515,10 @@ function getUnifiedChildCompletions(actId){
 function renderUnifiedCompletionAvatars(actId){
   const kids=getUnifiedChildCompletions(actId);
   if(!kids.length)return'';
-  return`<div class="unified-completions">${kids.map(id=>`<div class="unified-avatar" title="${MEMBERS[id]?.name||id} 완료">${getAvatarHTML(id,20)}</div>`).join('')}</div>`;
+  return`<div class="unified-completions">${kids.map(id=>{
+    const nm=MEMBERS[id]?.name||id;
+    return`<div class="unified-avatar-wrap" title="${nm} 완료">${getAvatarHTML(id,20)}<span class="unified-name-badge">${nm}</span></div>`;
+  }).join('')}</div>`;
 }
 
 // Attach tap handlers to all sticker/bubble items in a container
@@ -9835,6 +9897,58 @@ function changeFamilyMode(newMode){
 }
 
 // ── END STICKER SYSTEM ──────────────────────
+
+// ── 통합/독립 모드 공통 헬퍼 ──
+function isAssignedToUser(item,userId){
+  if(!item||!item.assignedTo||item.assignedTo.includes('all'))return true;
+  return item.assignedTo.includes(userId);
+}
+function isActInChildList(actId,childId){
+  const ms=S.memberData?.[childId];
+  if(!ms?.acts)return false;
+  return ms.acts.some(a=>a.id===actId);
+}
+function isRwdInChildList(rwdId,childId){
+  const ms=S.memberData?.[childId];
+  if(!ms?.rwds)return false;
+  return ms.rwds.some(r=>r.id===rwdId);
+}
+function toggleActForChild(actId,childId){
+  if(!S.memberData)S.memberData={};
+  if(!S.memberData[childId])S.memberData[childId]={pts:0,streak:0,lastDate:null,actDone:{},log:[],totalDone:0};
+  const ms=S.memberData[childId];
+  if(!ms.acts)ms.acts=[...S.acts];
+  const idx=ms.acts.findIndex(a=>a.id===actId);
+  if(idx>=0){ms.acts.splice(idx,1);}
+  else{const base=S.acts.find(a=>a.id===actId);if(base)ms.acts.push({...base});}
+  save();renderAdmActList();
+}
+function toggleRwdForChild(rwdId,childId){
+  if(!S.memberData)S.memberData={};
+  if(!S.memberData[childId])S.memberData[childId]={pts:0,streak:0,lastDate:null,actDone:{},log:[],totalDone:0};
+  const ms=S.memberData[childId];
+  if(!ms.rwds)ms.rwds=[...S.rwds];
+  const idx=ms.rwds.findIndex(r=>r.id===rwdId);
+  if(idx>=0){ms.rwds.splice(idx,1);}
+  else{const base=S.rwds.find(r=>r.id===rwdId);if(base)ms.rwds.push({...base});}
+  save();renderAdmRwdList();
+}
+function renderAdmUnifiedDashboard(){
+  const el=document.getElementById('adm-unified-dash-sec');
+  if(!el)return;
+  if(getFamilyMode()!=='unified'){el.style.display='none';return;}
+  const kids=getChildMembers();
+  if(!kids.length){el.style.display='none';return;}
+  el.style.display='';
+  const grid=el.querySelector('.unified-dash-grid');
+  if(!grid)return;
+  grid.innerHTML=kids.map(kid=>{
+    const ms=S.memberData?.[kid.id]||{};
+    const pts=ms.pts||0;
+    const streak=ms.streak||0;
+    return `<div class="unified-dash-card"><div class="unified-dash-avatar">${getAvatarHTML(kid.id,44)}</div><div class="unified-dash-name">${kid.name}</div><div class="unified-dash-pts">${pts.toLocaleString()}</div><div class="unified-dash-meta">🔥${streak}일</div></div>`;
+  }).join('');
+}
 
 // REDEEM
 let pRwdId=null,_pRwdEl=null;
@@ -11382,6 +11496,29 @@ function renderMyTab(){
       togDarkMy.classList.remove('off');
     }else{
       togDarkMy.classList.add('off');
+    }
+  }
+  // 가족 구성원 아바타 가로 나열
+  const familyRow=document.getElementById('my-family-row');
+  if(familyRow){
+    const fm=S.familyMeta?.members||{};
+    const ids=Object.keys(fm);
+    if(ids.length>1){
+      const _RLABELS={dad:'아빠',mom:'엄마',grandpa:'할아버지',grandma:'할머니',grandpa_m:'외할아버지',grandma_m:'외할머니',child:'자녀',caregiver:'양육자',parent:'양육자'};
+      familyRow.innerHTML=ids.map(mid=>{
+        const m=fm[mid];
+        const mName=m?.name||MEMBERS[mid]?.name||mid;
+        const mRole=_RLABELS[m?.displayRole]||_RLABELS[m?.role]||m?.displayRole||m?.role||'멤버';
+        const isMe=mid===currentUser;
+        return `<div class="my-family-member" onclick="if('${mid}'!=='${currentUser}')switchViewingChild&&switchViewingChild('${mid}')">
+          <div class="my-family-avatar" style="${isMe?'border-color:var(--tab-color,#6366F1);box-shadow:0 0 0 2px var(--tab-color,#6366F1)':''}">${getAvatarHTML(mid,48)}</div>
+          <div class="my-family-name">${mName}${isMe?'<span style="margin-left:3px;background:var(--tab-color,#6366F1);color:#fff;font-size:9px;font-weight:900;padding:1px 5px;border-radius:8px;vertical-align:middle">나</span>':''}</div>
+          <div class="my-family-role">${mRole}</div>
+        </div>`;
+      }).join('');
+      familyRow.style.display='flex';
+    }else{
+      familyRow.style.display='none';
     }
   }
 }
