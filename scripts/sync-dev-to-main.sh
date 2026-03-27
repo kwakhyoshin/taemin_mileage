@@ -27,7 +27,7 @@ if [ ! -f "$DEV_INDEX" ]; then
   exit 1
 fi
 
-DEV_ENV_VALUE=$(grep -oP "const _ENV = '\K[^']+" "$DEV_INDEX" || true)
+DEV_ENV_VALUE=$(sed -n "s/.*const _ENV = '\([^']*\)'.*/\1/p" "$DEV_INDEX" 2>/dev/null | head -1 || true)
 echo "dev index.html _ENV 값: '$DEV_ENV_VALUE'"
 
 if [ "$DEV_ENV_VALUE" != "dev" ]; then
@@ -63,7 +63,7 @@ fi
 # dev/index.html의 _ENV도 확인
 DEV_FOLDER_INDEX="$REPO_ROOT/dev/index.html"
 if [ -f "$DEV_FOLDER_INDEX" ]; then
-  DEV_FOLDER_ENV=$(grep -oP "const _ENV = '\K[^']+" "$DEV_FOLDER_INDEX" || true)
+  DEV_FOLDER_ENV=$(sed -n "s/.*const _ENV = '\([^']*\)'.*/\1/p" "$DEV_FOLDER_INDEX" 2>/dev/null | head -1 || true)
   echo "dev/index.html _ENV 값: '$DEV_FOLDER_ENV'"
   if [ "$DEV_FOLDER_ENV" != "dev" ]; then
     echo "⚠️  경고: dev/index.html의 _ENV가 'dev'가 아닙니다 (현재: '$DEV_FOLDER_ENV')"
@@ -76,7 +76,7 @@ git -C "$REPO_ROOT" checkout main
 
 # ── 6. main 루트 index.html _ENV 검증 ────────────────────
 MAIN_INDEX="$REPO_ROOT/index.html"
-MAIN_ENV_VALUE=$(grep -oP "const _ENV = '\K[^']+" "$MAIN_INDEX" || true)
+MAIN_ENV_VALUE=$(sed -n "s/.*const _ENV = '\([^']*\)'.*/\1/p" "$MAIN_INDEX" 2>/dev/null | head -1 || true)
 echo "main index.html _ENV 값: '$MAIN_ENV_VALUE'"
 
 if [ "$MAIN_ENV_VALUE" != "prod" ]; then
