@@ -4563,34 +4563,61 @@ const BADGES = [
   {id:'comeback',emoji:'🔄',name:'컴백 히어로',desc:'3일 이상 쉬었다가 다시 돌아왔어!',category:'히든',hidden:true,bonus:15,label:'Back',check:S=>hasComeback()},
 ];
 
-// ── FIREBASE ──────────────────────────────────
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyDTS81EBGgiuo564ThxvTTOpR_iAHLb8tg",
-  authDomain: "taemin-mileage.firebaseapp.com",
-  projectId: "taemin-mileage",
-  storageBucket: "taemin-mileage.firebasestorage.app",
-  messagingSenderId: "1002709736057",
-  appId: "1:1002709736057:web:5e4df58febe004c765d2a8"
-};
-
+// ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
-if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di)_di.style.display='';} // localStorage 키 접두사
-const fbApp = initializeApp(firebaseConfig);
-const db = getFirestore(fbApp);
-// 레거시: 기존 사용자용 문서 경로
-const LEGACY_DOC = doc(db, 'users', _ENV==='dev'?'taemin_dev':'taemin');
+if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di)_di.style.display='';}
+
+let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
+let fbApp, db, LEGACY_DOC, DATA_DOC;
+let _firebaseReady = false;
+
+async function _initFirebase(){
+  try {
+    const fbAppMod = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
+    const fbFsMod = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    initializeApp = fbAppMod.initializeApp;
+    ({getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction} = fbFsMod);
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDTS81EBGgiuo564ThxvTTOpR_iAHLb8tg",
+      authDomain: "taemin-mileage.firebaseapp.com",
+      projectId: "taemin-mileage",
+      storageBucket: "taemin-mileage.firebasestorage.app",
+      messagingSenderId: "1002709736057",
+      appId: "1:1002709736057:web:5e4df58febe004c765d2a8"
+    };
+    fbApp = initializeApp(firebaseConfig);
+    db = getFirestore(fbApp);
+    LEGACY_DOC = doc(db, 'users', _ENV==='dev'?'taemin_dev':'taemin');
+    DATA_DOC = LEGACY_DOC;
+    _firebaseReady = true;
+    console.log('[mile.ly] Firebase loaded OK');
+    return true;
+  } catch(e) {
+    console.error('[mile.ly] Firebase load FAILED:', e);
+    // Stub functions so code doesn't crash
+    if(!doc) doc = ()=>({});
+    if(!getDoc) getDoc = async()=>({exists:()=>false,data:()=>({})});
+    if(!setDoc) setDoc = async()=>{};
+    if(!onSnapshot) onSnapshot = ()=>()=>{};
+    if(!runTransaction) runTransaction = async(_,fn)=>await fn({get:async()=>({exists:()=>false,data:()=>({})}),set:()=>{}});
+    DATA_DOC = {};
+    LEGACY_DOC = {};
+    return false;
+  }
+}
+// 레거시: 기존 사용자용 문서 경로 (초기값, _initFirebase에서 갱신)
 // 다가족: localStorage에서 가족 ID 로드
-let DATA_DOC = LEGACY_DOC; // 초기값은 레거시, init에서 갱신됨
+// DATA_DOC 초기값은 _initFirebase 완료 후 설정됨
 
 function getFamilyDoc(familyId){
+  if(!_firebaseReady || !db) return {};
   return doc(db, 'families', familyId);
 }
 
 function updateDataDoc(){
+  if(!_firebaseReady) return;
   const savedFamilyId = localStorage.getItem(_LS_PREFIX+'family_id');
   if(savedFamilyId){
     _familyId = savedFamilyId;
@@ -11819,12 +11846,15 @@ window._createState = _createState;
 
   showLoading('데이터 불러오는 중...');
 
+  // Firebase 동적 로드 (실패해도 앱 UI는 동작)
+  await _initFirebase();
+
   // 다가족: 저장된 familyId가 있으면 해당 문서 로드
-  updateDataDoc();
+  if(_firebaseReady) updateDataDoc();
 
   try{
     // Load initial data from Firestore
-    const snap = await getDoc(DATA_DOC);
+    const snap = _firebaseReady ? await getDoc(DATA_DOC) : {exists:()=>false};
     if(snap.exists()){
       const data = snap.data();
       S = Object.assign(defaultState(), data);
