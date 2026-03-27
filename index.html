@@ -994,6 +994,30 @@ body.dark .nav-family-btn{background:rgba(99,102,241,.15)}
 .nav-family-btn .nfb-icon{width:18px;height:18px;flex-shrink:0}
 .nav-family-btn .nfb-icon svg{width:100%;height:100%}
 .nav-family-btn .nfb-badge{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;background:#EF4444;color:#fff;font-size:9px;font-weight:900;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 5px;pointer-events:none;box-shadow:0 2px 6px rgba(239,68,68,.4);line-height:1}
+/* 독립 모드 자녀 탭 */
+.nav-child-tabs{display:flex;gap:4px;flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px;-ms-overflow-style:none;scrollbar-width:none}
+.nav-child-tabs::-webkit-scrollbar{display:none}
+.nav-child-tab{display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px 8px;border-radius:14px;cursor:pointer;border:2px solid transparent;background:var(--bg2,#F1F5F9);transition:all .2s;-webkit-tap-highlight-color:transparent;min-width:48px}
+.nav-child-tab.active{background:var(--tab-lt,rgba(99,102,241,.12));border-color:var(--tab-color,#6366F1)}
+.nav-child-tab:active{transform:scale(.93)}
+.nav-child-avatar{width:32px;height:32px;border-radius:50%;overflow:hidden;flex-shrink:0}
+.nav-child-avatar svg,.nav-child-avatar img{width:100%;height:100%}
+.nav-child-name{font-size:9px;font-weight:800;color:var(--tx2,#64748B);white-space:nowrap}
+.nav-child-tab.active .nav-child-name{color:var(--tab-color,#6366F1)}
+body.dark .nav-child-tab{background:#1E293B}
+body.dark .nav-child-tab.active{background:rgba(99,102,241,.18)}
+/* 관리자 자녀 선택바 */
+.adm-child-sel-bar{display:flex;gap:6px;padding:8px 16px 6px;overflow-x:auto;-ms-overflow-style:none;scrollbar-width:none}
+.adm-child-sel-bar::-webkit-scrollbar{display:none}
+.adm-child-btn{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;border:2px solid var(--bdr,#E2E8F0);background:var(--bg2,#F8FAFC);font-size:12px;font-weight:700;color:var(--tx2,#64748B);cursor:pointer;white-space:nowrap;transition:all .2s;-webkit-tap-highlight-color:transparent}
+.adm-child-btn.on{border-color:var(--or,#FF6B35);background:rgba(255,107,53,.08);color:var(--or,#FF6B35)}
+.adm-child-btn:active{transform:scale(.95)}
+body.dark .adm-child-btn{background:#1E293B;border-color:#334155}
+body.dark .adm-child-btn.on{background:rgba(255,107,53,.15)}
+/* unified 모드 완료 자녀 아바타 */
+.unified-completions{display:flex;gap:3px;padding:2px 0 1px;flex-wrap:wrap}
+.unified-avatar{width:20px;height:20px;border-radius:50%;overflow:hidden;border:1.5px solid var(--gn,#10B981);background:var(--bg2,#F1F5F9);flex-shrink:0}
+.unified-avatar svg,.unified-avatar img{width:100%;height:100%}
 
 /* ── Family Popup (가계도 family tree layout) ── */
 .family-popup-bg{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.4);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);animation:fadeIn .15s}
@@ -2716,6 +2740,8 @@ button:disabled {
         <span class="hist-custom-range" id="hist-custom-range"></span>
       </div>
     </div>
+    <!-- unified 모드 자녀 필터 (renderHistChildFilter()로 동적 렌더링) -->
+    <div id="hist-child-filter"></div>
     <div class="card" style="padding:0;overflow:hidden" id="hist-list"></div>
   </div>
 </div>
@@ -2783,6 +2809,8 @@ button:disabled {
     <button class="adm-tab" id="at-4" onclick="admTab(4)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>가족</button>
   </div>
   <div id="adm-p0">
+    <!-- independent 모드 자녀 선택기 (renderAdmChildSelector()로 동적 렌더링) -->
+    <div id="adm-child-selector-0"></div>
     <div class="adm-sec">
       <div class="sec-hdr" style="margin:0 0 7px">
         <div class="adm-sec-lbl" style="margin:0">활동 목록</div>
@@ -2792,6 +2820,8 @@ button:disabled {
     </div>
   </div>
   <div id="adm-p1" style="display:none">
+    <!-- independent 모드 자녀 선택기 -->
+    <div id="adm-child-selector-1"></div>
     <div class="adm-sec">
       <div class="sec-hdr" style="margin:0 0 7px">
         <div class="adm-sec-lbl" style="margin:0">보상 목록</div>
@@ -2847,6 +2877,12 @@ button:disabled {
     <div class="adm-sec">
       <div class="adm-sec-lbl">홈 화면 인사말 변경</div>
       <div id="greetings-settings-container"></div>
+    </div>
+    <div class="adm-sec" id="adm-mode-sec">
+      <div class="adm-sec-lbl">다자녀 운영 모드</div>
+      <div class="adm-card" id="adm-mode-card">
+        <!-- renderAdmModeSection()으로 동적 렌더링 -->
+      </div>
     </div>
     <div class="adm-sec">
       <div class="adm-sec-lbl">화면 설정</div>
@@ -3601,6 +3637,8 @@ function rebuildMembersFromFamily(){
 let currentUser = null;
 let selectedMember = null;
 let _familyId = null; // 현재 가족 ID
+let viewingChildId = null; // independent mode: 양육자가 보고 있는 자녀 ID
+let _admViewChildId = null; // 관리자 패널: 편집 중인 자녀 ID (independent mode)
 
 // ── 가입 흐름 상태 ──
 let _createState = {
@@ -4752,6 +4790,7 @@ async function doJoinRegister(){
     currentUser=mid;
     localStorage.setItem(_LS_PREFIX+'current_user',mid);
     syncMemberToGlobal(); // Load member data for this user
+    postLoginInit();
 
     rebuildMembersFromFamily();
     hideAllAuth();
@@ -4798,6 +4837,7 @@ async function doLogin(){
         currentUser=memberId;
         localStorage.setItem(_LS_PREFIX+'current_user',memberId);
         syncMemberToGlobal(); // Load member data for this user
+        postLoginInit();
         rebuildMembersFromFamily();
         hideAllAuth();
         applyUserProfile();
@@ -4823,6 +4863,7 @@ async function doLogin(){
         currentUser=mid;
         localStorage.setItem(_LS_PREFIX+'current_user',mid);
         syncMemberToGlobal(); // Load member data for this user
+        postLoginInit();
         rebuildMembersFromFamily();
         hideAllAuth();
         applyUserProfile();
@@ -4867,6 +4908,7 @@ async function doLogin(){
                 currentUser = otherMid;
                 localStorage.setItem(_LS_PREFIX+'current_user', otherMid);
                 syncMemberToGlobal(); // Load member data for this user
+                postLoginInit();
                 rebuildMembersFromFamily();
                 hideAllAuth();
                 applyUserProfile();
@@ -4937,9 +4979,29 @@ function isCurrentUserAdmin(){
   return !!S.familyMeta.members[currentUser]?.isAdmin;
 }
 
+// 로그인 후 모드/뷰 초기화: independent 모드에서 양육자는 첫 자녀 뷰로 전환
+function postLoginInit(){
+  viewingChildId = null;
+  _admViewChildId = null;
+  const mode = getFamilyMode();
+  if(mode === 'independent' && isCaregiverUser()){
+    const kids = getChildMemberIds();
+    if(kids.length > 0){
+      viewingChildId = kids[0];
+      // 첫 자녀 memberData 초기화 (없으면)
+      if(!S.memberData) S.memberData = {};
+      if(!S.memberData[viewingChildId]) getMemberState(viewingChildId);
+      syncMemberToGlobal(viewingChildId);
+    }
+  }
+  _admViewChildId = getChildMemberIds()[0] || null;
+}
+
 function logout() {
   if (!confirm('로그아웃 하시겠어요?')) return;
   currentUser = null;
+  viewingChildId = null;
+  _admViewChildId = null;
   adminOK = false;
   localStorage.removeItem(_LS_PREFIX+'current_user');
   showAuthScreen('login');
@@ -4956,6 +5018,7 @@ function checkAuth() {
   if (savedUser && cachedUsers[savedUser]) {
     currentUser = savedUser;
     syncMemberToGlobal(); // Load member data for this user
+    postLoginInit();
     // 관리자 권한이면 자동으로 adminOK
     if(isCurrentUserAdmin()) adminOK = true;
     hideAllAuth();
@@ -5211,69 +5274,113 @@ let _lastSavedJSON = '';    // tracks what we last wrote → prevents echo loop
 let _lastSaveTime = 0;      // timestamp of last save completion — cooldown for echo
 
 // ── PER-MEMBER DATA ISOLATION HELPERS ──────────────────────────────
-// Retrieves or creates the per-member state for the current user
-function getMemberState() {
+// Retrieves or creates the per-member state for the given member (default: currentUser)
+function getMemberState(memberId) {
+  memberId = memberId || currentUser;
   if (!S.memberData) S.memberData = {};
-  if (!S.memberData[currentUser]) {
-    // First time: migrate global data to this member
-    S.memberData[currentUser] = {
-      pts: S.pts || 0,
-      streak: S.streak || 0,
-      longest: S.longest || 0,
-      lastDate: S.lastDate || null,
-      totalDone: S.totalDone || 0,
-      acts: S.acts ? JSON.parse(JSON.stringify(S.acts)) : JSON.parse(JSON.stringify(DACTS)),
-      rwds: S.rwds ? JSON.parse(JSON.stringify(S.rwds)) : JSON.parse(JSON.stringify(DRWDS)),
-      log: S.log ? [...S.log] : [],
-      actDone: S.actDone ? {...S.actDone} : {},
-      moodLog: S.moodLog ? [...S.moodLog] : [],
-      badges: S.badges ? {...S.badges} : {},
-      badgeLog: S.badgeLog ? [...S.badgeLog] : []
+  if (!S.memberData[memberId]) {
+    const isMe = memberId === currentUser;
+    // First time: migrate global data if it's the current user, else start fresh
+    S.memberData[memberId] = {
+      pts: isMe ? (S.pts || 0) : 0,
+      streak: isMe ? (S.streak || 0) : 0,
+      longest: isMe ? (S.longest || 0) : 0,
+      lastDate: isMe ? (S.lastDate || null) : null,
+      totalDone: isMe ? (S.totalDone || 0) : 0,
+      acts: isMe && S.acts ? JSON.parse(JSON.stringify(S.acts)) : JSON.parse(JSON.stringify(DACTS)),
+      rwds: isMe && S.rwds ? JSON.parse(JSON.stringify(S.rwds)) : JSON.parse(JSON.stringify(DRWDS)),
+      log: isMe && S.log ? [...S.log] : [],
+      actDone: isMe && S.actDone ? {...S.actDone} : {},
+      moodLog: isMe && S.moodLog ? [...S.moodLog] : [],
+      badges: isMe && S.badges ? {...S.badges} : {},
+      badgeLog: isMe && S.badgeLog ? [...S.badgeLog] : []
     };
   }
-  return S.memberData[currentUser];
+  return S.memberData[memberId];
 }
 
 // Syncs member data to global S for backward compatibility
-function syncMemberToGlobal() {
-  if (!currentUser || !S.memberData || !S.memberData[currentUser]) return;
-  const ms = getMemberState();
-  S.pts = ms.pts;
-  S.streak = ms.streak;
-  S.longest = ms.longest;
-  S.lastDate = ms.lastDate;
-  S.totalDone = ms.totalDone;
-  S.acts = ms.acts;
-  S.rwds = ms.rwds;
-  S.log = ms.log;
-  S.actDone = ms.actDone;
-  S.moodLog = ms.moodLog;
-  S.badges = ms.badges;
-  S.badgeLog = ms.badgeLog;
+// targetId: 어떤 구성원의 데이터를 로드할지 (기본: currentUser)
+function syncMemberToGlobal(targetId) {
+  const mid = targetId || currentUser;
+  if (!mid || !S.memberData) return;
+  const ms = getMemberState(mid);
+  const mode = getFamilyMode();
+
+  if (mode === 'unified') {
+    // 통합 모드: pts/log/acts/rwds는 전역 공유 — actDone/streak 등 개인 데이터만 로드
+    S.actDone = ms.actDone || {};
+    S.streak = ms.streak || 0;
+    S.longest = ms.longest || 0;
+    S.lastDate = ms.lastDate || null;
+    S.totalDone = ms.totalDone || 0;
+    S.moodLog = ms.moodLog || [];
+    S.badges = ms.badges || {};
+    S.badgeLog = ms.badgeLog || [];
+    // pts/log/acts/rwds는 전역 S에 그대로 유지 (Firestore에서 공유)
+  } else {
+    // 독립 모드: 모든 데이터를 해당 구성원에서 로드
+    S.pts = ms.pts || 0;
+    S.streak = ms.streak || 0;
+    S.longest = ms.longest || 0;
+    S.lastDate = ms.lastDate || null;
+    S.totalDone = ms.totalDone || 0;
+    S.actDone = ms.actDone || {};
+    S.log = ms.log || [];
+    S.moodLog = ms.moodLog || [];
+    S.badges = ms.badges || {};
+    S.badgeLog = ms.badgeLog || [];
+    if (ms.acts && ms.acts.length > 0) S.acts = ms.acts;
+    else if (!S.acts || S.acts.length === 0) S.acts = JSON.parse(JSON.stringify(DACTS));
+    if (ms.rwds && ms.rwds.length > 0) S.rwds = ms.rwds;
+    else if (!S.rwds || S.rwds.length === 0) S.rwds = JSON.parse(JSON.stringify(DRWDS));
+  }
 }
 
 // Syncs global S back to member data before saving
-function syncGlobalToMember() {
-  if (!S.memberData || !currentUser) return;
-  if (!S.memberData[currentUser]) return;
-  const ms = S.memberData[currentUser];
-  ms.pts = S.pts;
-  ms.streak = S.streak;
-  ms.longest = S.longest;
-  ms.lastDate = S.lastDate;
-  ms.totalDone = S.totalDone;
-  ms.acts = S.acts;
-  ms.rwds = S.rwds;
-  ms.log = S.log;
-  ms.actDone = S.actDone;
-  ms.moodLog = S.moodLog;
-  ms.badges = S.badges;
-  ms.badgeLog = S.badgeLog;
+// targetId: 어디에 저장할지 (기본: currentUser)
+function syncGlobalToMember(targetId) {
+  const mid = targetId || currentUser;
+  if (!S.memberData || !mid) return;
+  if (!S.memberData[mid]) getMemberState(mid);
+  const ms = S.memberData[mid];
+  const mode = getFamilyMode();
+
+  if (mode === 'unified') {
+    // 통합 모드: 개인 데이터만 저장 (pts/log/acts/rwds는 전역 공유)
+    ms.actDone = S.actDone;
+    ms.streak = S.streak;
+    ms.longest = S.longest;
+    ms.lastDate = S.lastDate;
+    ms.totalDone = S.totalDone;
+    ms.moodLog = S.moodLog;
+    ms.badges = S.badges;
+    ms.badgeLog = S.badgeLog;
+  } else {
+    // 독립 모드: 모든 데이터 저장
+    ms.pts = S.pts;
+    ms.streak = S.streak;
+    ms.longest = S.longest;
+    ms.lastDate = S.lastDate;
+    ms.totalDone = S.totalDone;
+    ms.acts = S.acts;
+    ms.rwds = S.rwds;
+    ms.log = S.log;
+    ms.actDone = S.actDone;
+    ms.moodLog = S.moodLog;
+    ms.badges = S.badges;
+    ms.badgeLog = S.badgeLog;
+  }
 }
 
 // Robust debounced save with in-flight guard
 function save(){
-  syncGlobalToMember(); // Sync changes back to member data before saving
+  // independent 모드에서 양육자가 자녀 데이터를 보고 있으면 해당 자녀에게 저장
+  if(getFamilyMode()==='independent'&&isCaregiverUser()&&viewingChildId){
+    syncGlobalToMember(viewingChildId);
+  }else{
+    syncGlobalToMember(); // Sync changes back to member data before saving
+  }
   _hasDirtyLocal = true; // 로컬 변경이 아직 저장 안 됨
   if(_isSaving){
     // A write is already in-flight — just mark that another is needed
@@ -6351,6 +6458,7 @@ function renderAll(){
   renderDashboard();renderHistStats();renderHistList();renderCalendar();
   renderBadgeSummary();
   renderAdmStats();renderAdmActList();renderAdmRwdList();renderAdmSettings();
+  renderAdmChildSelector();renderAdmModeSection();
   renderMsgSettings();renderAdmMemberPhotos();
   if(typeof renderDevUserSwitch==='function')renderDevUserSwitch();
   renderNavUsers();
@@ -6367,6 +6475,22 @@ function renderHero(){
     const el=document.getElementById('greeting-txt');
     if(el)el.textContent=greetingTxt;
   }
+
+  // 모드별 hero 라벨 및 pts 표시
+  const mode=getFamilyMode();
+  const heroLbl=document.getElementById('hero-lbl');
+  if(mode==='unified'){
+    // 통합 모드: 합산 pts 표시 (S.pts가 공유 풀)
+    if(heroLbl)heroLbl.textContent='우리 가족 마일리지';
+  }else if(mode==='independent'&&isCaregiverUser()){
+    // 독립 모드 양육자: 보고 있는 자녀 이름 표시
+    const vid=getViewedMemberId();
+    const vname=MEMBERS[vid]?.name||vid||'';
+    if(heroLbl)heroLbl.textContent=vname?(vname+'의 마일리지'):'나의 마일리지';
+  }else{
+    if(heroLbl)heroLbl.textContent='나의 마일리지';
+  }
+
   document.getElementById('hero-pts').textContent=S.pts.toLocaleString();
   document.getElementById('streak-pill').textContent=`🔥 ${getDisplayStreak()}일 연속`;
   const g=S.rwds.find(r=>r.goal)||S.rwds[0];
@@ -6375,7 +6499,17 @@ function renderHero(){
   document.getElementById('hero-bar-lbl').textContent=g?'목표 '+g.pts.toLocaleString()+' 마일리지':'';
   document.getElementById('hero-goal').textContent=g?(S.pts>=g.pts?`${g.emoji} ${g.name} 교환 가능해요! 🎉`:`${g.emoji} ${g.name}까지 ${(g.pts-S.pts).toLocaleString()} 마일리지 남았어요! 💪`):'';
   const rwdBal=document.getElementById('rwd-bal');if(rwdBal)rwdBal.textContent=S.pts.toLocaleString();
-  document.getElementById('adm-pts').textContent=S.pts.toLocaleString();
+  // 관리자 pts: 모드별로 올바른 자녀 pts 표시
+  const admPtsEl=document.getElementById('adm-pts');
+  if(admPtsEl){
+    if(mode==='independent'&&isCaregiverUser()){
+      const admId=_admViewChildId||getViewedMemberId();
+      const admMs=S.memberData?.[admId];
+      admPtsEl.textContent=(admMs?.pts||S.pts).toLocaleString();
+    }else{
+      admPtsEl.textContent=S.pts.toLocaleString();
+    }
+  }
 }
 
 function renderHdrStats(){
@@ -6430,8 +6564,10 @@ function renderHomeGrid(){
     const timer=countdownStr(a);
     const cls=st.cls?' '+st.cls:'';
     const stickerHTML=renderStickersFor(a.id);
+    const unifiedAvatars=renderUnifiedCompletionAvatars(a.id);
     return `<div class="act-card${cls}" data-actid="${a.id}" style="${st.exhausted?'cursor:default;':''}">
       ${stickerHTML}
+      ${unifiedAvatars}
       <div class="e">${a.emoji}</div>
       <div class="n">${a.name}</div>
       <div class="p">+${a.pts} 마일리지</div>
@@ -6489,6 +6625,7 @@ function renderLogList(){
     const cycleLabel=CYCLE_LABEL[a.cycle]||a.cycle;
     const countLabel=max>0?`${done}/${max}회`:'';
     const stickerHTML=renderStickersForLog(a.id);
+    const unifiedAvatarsLog=renderUnifiedCompletionAvatars(a.id);
     return `<div class="log-item${cls}" data-actid="${a.id}" style="${exhausted?'cursor:default':''}position:relative;overflow:visible;">
       <div class="log-ico" style="${pct>0?'--prog:'+pct+'%;':''}">${a.emoji}${pct>0&&pct<100?'<div class="log-prog-ring"></div>':''}</div>
       <div class="log-inf">
@@ -6500,6 +6637,7 @@ function renderLogList(){
           ${timer?`<span class="log-timer">⏰ ${timer}</span>`:''}
         </div>
         ${stickerHTML}
+        ${unifiedAvatarsLog}
       </div>
       <div class="log-right">
         <span class="log-badge">+${a.pts} 마일리지</span>
@@ -8196,12 +8334,59 @@ function applyCustomPeriod(){
 }
 window.applyCustomPeriod=applyCustomPeriod;
 
+// unified 모드 기록 탭 자녀 필터 ('all' or childId)
+let _histChildFilter='all';
+
 function fLog(){
+  const mode=getFamilyMode();
+  let baseLog=S.log;
+
+  // unified 모드: 전체 자녀 로그 또는 필터된 자녀 로그
+  if(mode==='unified'){
+    const kids=getChildMemberIds();
+    if(kids.length>=2){
+      // 모든 자녀의 로그를 합산 (memberData에서)
+      let allLogs=[];
+      kids.forEach(id=>{
+        const ms=S.memberData?.[id];
+        if(ms?.log)ms.log.forEach(l=>allLogs.push({...l,user:l.user||id}));
+      });
+      // S.log에도 user 없는 항목 추가 (하위 호환)
+      S.log.forEach(l=>{
+        if(!allLogs.find(al=>al.id===l.id))allLogs.push(l);
+      });
+      allLogs.sort((a,b)=>b.ts-a.ts);
+      baseLog=allLogs;
+      // 자녀 필터 적용
+      if(_histChildFilter&&_histChildFilter!=='all'){
+        baseLog=baseLog.filter(l=>(l.user||'')===_histChildFilter);
+      }
+    }
+  }
+
   if(HP==='custom'&&customStartTs){
     const endTs=Math.min(customStartTs+60*86400000,Date.now());
-    return S.log.filter(l=>l.ts>=customStartTs&&l.ts<=endTs&&!l.isRedeem&&!l.name?.includes('환불'));
+    return baseLog.filter(l=>l.ts>=customStartTs&&l.ts<=endTs&&!l.isRedeem&&!l.name?.includes('환불'));
   }
-  return S.log.filter(l=>l.ts>Date.now()-HP*86400000&&!l.isRedeem&&!l.name?.includes('환불'));
+  return baseLog.filter(l=>l.ts>Date.now()-HP*86400000&&!l.isRedeem&&!l.name?.includes('환불'));
+}
+
+// unified 모드 기록탭 자녀 필터 렌더링
+function renderHistChildFilter(){
+  const el=document.getElementById('hist-child-filter');
+  if(!el)return;
+  const mode=getFamilyMode();
+  const kids=getChildMemberIds();
+  if(mode!=='unified'||kids.length<2){el.innerHTML='';return;}
+  el.innerHTML=`<div class="hist-child-filter-bar" style="display:flex;gap:6px;padding:8px 0 4px;flex-wrap:wrap">
+    <button class="sel-btn${_histChildFilter==='all'?' on':''}" onclick="setHistChildFilter('all')">전체</button>
+    ${kids.map(id=>`<button class="sel-btn${_histChildFilter===id?' on':''}" onclick="setHistChildFilter('${id}')">${getAvatarHTML(id,16)} ${MEMBERS[id]?.name||id}</button>`).join('')}
+  </div>`;
+}
+function setHistChildFilter(childId){
+  _histChildFilter=childId;
+  renderHistChildFilter();
+  renderHistStats();renderHistList();
 }
 
 function renderHistStats(){
@@ -8222,18 +8407,85 @@ function renderHistStats(){
 function renderHistList(){
   const el=document.getElementById('hist-list');
   if(!el)return;
+  renderHistChildFilter();
+  const mode=getFamilyMode();
   const data=fLog();
-  el.innerHTML=data.length?data.map(i=>`
-    <div class="hist-item">
+  const kids=getChildMemberIds();
+  const showUser=mode==='unified'&&kids.length>=2;
+  el.innerHTML=data.length?data.map(i=>{
+    const userName=showUser&&i.user?MEMBERS[i.user]?.name||i.user:'';
+    return`<div class="hist-item">
       <div class="hist-ico">${i.emoji}</div>
-      <div style="flex:1"><div class="hist-nm">${i.name}</div><div class="hist-tm">${fmt(i.ts)}</div></div>
+      <div style="flex:1">
+        <div class="hist-nm">${i.name}${userName?` <span style="font-size:10px;color:var(--tx3);font-weight:700">${userName}</span>`:''}</div>
+        <div class="hist-tm">${fmt(i.ts)}</div>
+      </div>
       <div style="display:flex;align-items:center;gap:6px">
         <div class="hist-pts${i.pts<0?' neg':''}">${i.pts>0?'+':''}${i.pts} M</div>
       </div>
-    </div>`).join(''):'<div class="empty">아직 내역이 없어요</div>';
+    </div>`;
+  }).join(''):'<div class="empty">아직 내역이 없어요</div>';
 }
 
-function renderAdmStats(){document.getElementById('adm-done').textContent=S.totalDone;document.getElementById('adm-streak').textContent=getDisplayStreak();}
+function renderAdmStats(){
+  const mode=getFamilyMode();
+  let totalDone=S.totalDone;
+  let streak=getDisplayStreak();
+  // independent 모드: 관리자가 선택한 자녀의 stats 표시
+  if(mode==='independent'&&isCaregiverUser()){
+    const admId=_admViewChildId||getViewedMemberId();
+    const ms=S.memberData?.[admId];
+    if(ms){totalDone=ms.totalDone||0;streak=ms.streak||0;}
+  }
+  document.getElementById('adm-done').textContent=totalDone;
+  document.getElementById('adm-streak').textContent=streak;
+}
+
+// 관리자 패널 자녀 선택기 렌더링
+function renderAdmChildSelector(){
+  const mode=getFamilyMode();
+  const kids=getChildMemberIds();
+  // 자녀가 2명 미만이거나 통합 모드면 선택기 숨김
+  ['adm-child-selector-0','adm-child-selector-1'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    if(mode!=='independent'||kids.length<2){el.innerHTML='';return;}
+    const currentAdmId=_admViewChildId||getViewedMemberId();
+    el.innerHTML=`<div class="adm-child-sel-bar">
+      ${kids.map(id=>`<button class="adm-child-btn${id===currentAdmId?' on':''}" data-cid="${id}" onclick="admSelectChild('${id}')">${getAvatarHTML(id,22)} <span>${MEMBERS[id]?.name||id}</span></button>`).join('')}
+    </div>`;
+  });
+}
+
+// 관리자 모드 섹션 렌더링
+function renderAdmModeSection(){
+  const el=document.getElementById('adm-mode-card');
+  if(!el)return;
+  const mode=getFamilyMode();
+  const kids=getChildMemberIds();
+  if(kids.length<2){
+    // 자녀 1명이면 모드 선택 숨김
+    const sec=document.getElementById('adm-mode-sec');
+    if(sec)sec.style.display='none';
+    return;
+  }
+  const sec=document.getElementById('adm-mode-sec');
+  if(sec)sec.style.display='';
+  el.innerHTML=`
+    <div class="adm-row">
+      <div class="adm-row-l">
+        <div class="adm-row-nm">현재 모드</div>
+        <div class="adm-row-sub">${mode==='unified'?'통합(공유) 모드: 마일리지·활동 공유':'독립 모드: 자녀별 마일리지 분리'}</div>
+      </div>
+      <button class="btn-sm" onclick="changeFamilyMode('${mode==='unified'?'independent':'unified'}')" style="flex-shrink:0">${mode==='unified'?'독립 모드로':'통합 모드로'}</button>
+    </div>
+    <div class="divider"></div>
+    <div style="padding:8px 14px 10px;font-size:11px;color:var(--tx3);line-height:1.6">
+      ${mode==='unified'
+        ?'💡 통합 모드: 모든 자녀가 같은 활동·보상 목록을 공유해요. 마일리지 풀은 하나이며, 각자 활동을 완료할 수 있어요.'
+        :'💡 독립 모드: 자녀별로 활동·보상·마일리지가 완전히 분리돼요. 각 자녀에게 맞는 목표를 설정할 수 있어요.'}
+    </div>`;
+}
 function renderAdmActList(){
   const el=document.getElementById('adm-act-list');
   if(!S.acts.length){el.innerHTML='<div class="empty">활동이 없어요</div>';return;}
@@ -8389,6 +8641,10 @@ function renderAdmSettings(){
   const ts=document.getElementById('tog-streak');if(ts)ts.classList.toggle('off',!S.settings.streakBonus);
   const td=document.getElementById('tog-dark');if(td)td.classList.toggle('off',!document.body.classList.contains('dark'));
   const bi=document.getElementById('bonus-pts-inp');if(bi)bi.value=S.settings.streakBonusPts||100;
+  // 다자녀 모드 섹션 렌더링
+  renderAdmModeSection();
+  // 자녀 선택기 렌더링
+  renderAdmChildSelector();
 
   // Render per-user greeting settings
   const container=document.getElementById('greetings-settings-container');
@@ -8442,7 +8698,7 @@ function doAct(id){
 
   S.pts+=a.pts+bonus;S.totalDone++;
   // log entry with unique id for undo
-  S.log.unshift({id:'l_'+Date.now(),emoji:a.emoji,name:a.name,pts:a.pts+bonus,ts:Date.now(),actId:a.id});
+  S.log.unshift({id:'l_'+Date.now(),emoji:a.emoji,name:a.name,pts:a.pts+bonus,ts:Date.now(),actId:a.id,user:currentUser});
   if(S.log.length>300)S.log=S.log.slice(0,300);
   save();
   // 활동 완료 애니메이션 → 완료 후 뱃지 체크
@@ -8607,6 +8863,25 @@ function renderStickersForLog(actId){
   });
   html+='</div>';
   return html;
+}
+
+// unified 모드: 해당 활동을 오늘 완료한 자녀 아바타 목록 반환
+function getUnifiedChildCompletions(actId){
+  if(getFamilyMode()!=='unified')return[];
+  const kids=getChildMemberIds();
+  const today=todayStr();
+  return kids.filter(id=>{
+    const ms=S.memberData?.[id];
+    if(!ms?.actDone?.[actId])return false;
+    const rec=ms.actDone[actId];
+    return rec.count>0&&rec.date===today;
+  });
+}
+// unified 모드용 완료 자녀 아바타 HTML (활동 카드용)
+function renderUnifiedCompletionAvatars(actId){
+  const kids=getUnifiedChildCompletions(actId);
+  if(!kids.length)return'';
+  return`<div class="unified-completions">${kids.map(id=>`<div class="unified-avatar" title="${MEMBERS[id]?.name||id} 완료">${getAvatarHTML(id,20)}</div>`).join('')}</div>`;
 }
 
 // Attach tap handlers to all sticker/bubble items in a container
@@ -8899,6 +9174,91 @@ function isCaregiverUser(){
 // 하위 호환 별칭
 const isParentUser=isCaregiverUser;
 
+// ── 모드 / 자녀 헬퍼 ────────────────────────
+function getFamilyMode(){
+  return S.familyMeta?.mode||'independent';
+}
+function getChildMemberIds(){
+  if(!S.familyMeta?.members)return[];
+  return Object.keys(S.familyMeta.members).filter(id=>{
+    const m=S.familyMeta.members[id];
+    return m.type==='child';
+  });
+}
+// 현재 화면에 표시 중인 구성원 ID (independent: 선택된 자녀, unified: currentUser)
+function getViewedMemberId(){
+  if(getFamilyMode()==='independent'&&isCaregiverUser()){
+    const kids=getChildMemberIds();
+    if(kids.length>0)return viewingChildId||kids[0];
+  }
+  return currentUser;
+}
+// independent mode에서 자녀 전환 (양육자용)
+function switchViewingChild(childId){
+  if(!childId)return;
+  const prevId=getViewedMemberId();
+  if(prevId)syncGlobalToMember(prevId);
+  viewingChildId=childId;
+  // 해당 자녀의 memberData 초기화 (없으면)
+  if(!S.memberData[childId])getMemberState(childId);
+  syncMemberToGlobal(childId);
+  renderAll();
+  const nm=MEMBERS[childId]?.name||childId;
+  toast(`${nm}의 마일리지를 보고 있어요`);
+}
+// 관리자 패널 자녀 선택 (independent mode)
+function admSelectChild(childId){
+  _admViewChildId=childId;
+  renderAdmActList();
+  renderAdmRwdList();
+  renderAdmStats();
+  // 관리자 패널 자녀 탭 활성화 표시
+  document.querySelectorAll('.adm-child-btn').forEach(b=>b.classList.toggle('on',b.dataset.cid===childId));
+}
+// independent↔unified 모드 전환
+function changeFamilyMode(newMode){
+  const oldMode=getFamilyMode();
+  if(oldMode===newMode)return;
+  if(!confirm(`모드를 ${newMode==='unified'?'통합(공유)':'독립'} 모드로 변경할까요?\n(기존 데이터는 변환됩니다)`))return;
+  const kids=getChildMemberIds();
+  if(newMode==='unified'){
+    // 독립 → 통합: 첫 번째 자녀의 acts/rwds를 공유로 올리고, pts는 합산
+    let totalPts=0;
+    const mergedLog=[];
+    kids.forEach(id=>{
+      const ms=S.memberData[id]||{};
+      totalPts+=(ms.pts||0);
+      (ms.log||[]).forEach(l=>mergedLog.push({...l,user:id}));
+    });
+    if(kids.length>0){
+      const firstMs=S.memberData[kids[0]]||{};
+      S.acts=firstMs.acts||S.acts;
+      S.rwds=firstMs.rwds||S.rwds;
+    }
+    mergedLog.sort((a,b)=>b.ts-a.ts);
+    S.pts=totalPts;
+    S.log=mergedLog.slice(0,300);
+    S.actDone={};
+  }else{
+    // 통합 → 독립: 각 자녀에게 현재 공유 pts/acts/rwds/log 복사
+    kids.forEach(id=>{
+      if(!S.memberData[id])S.memberData[id]=getMemberState(id);
+      const ms=S.memberData[id];
+      ms.pts=S.pts;
+      ms.acts=JSON.parse(JSON.stringify(S.acts));
+      ms.rwds=JSON.parse(JSON.stringify(S.rwds));
+      ms.log=[...S.log];
+    });
+    if(kids.length>0){
+      viewingChildId=kids[0];
+      syncMemberToGlobal(kids[0]);
+    }
+  }
+  S.familyMeta.mode=newMode;
+  save();renderAll();
+  toast(newMode==='unified'?'✅ 통합(공유) 모드로 변경됐어요':'✅ 독립 모드로 변경됐어요');
+}
+
 // ── END STICKER SYSTEM ──────────────────────
 
 // REDEEM
@@ -8935,12 +9295,13 @@ function confirmRedeem(){
     rwdEmoji:r.emoji,
     purchasedAt:Date.now(),
     pts:actualPts,
-    status:'owned'
+    status:'owned',
+    redeemedBy:currentUser  // 누가 교환했는지 기록
   });
 
   // Add to rewardLog instead of activity log
   if(!S.rewardLog)S.rewardLog=[];
-  S.rewardLog.unshift({id:'rl_'+Date.now(),emoji:r.emoji,name:r.name,pts:actualPts,ts:Date.now(),rwdId:r.id,type:'exchange'});
+  S.rewardLog.unshift({id:'rl_'+Date.now(),emoji:r.emoji,name:r.name,pts:actualPts,ts:Date.now(),rwdId:r.id,type:'exchange',user:currentUser});
   save();closeModal('m-redeem');renderAll();
   checkBadges();
   toast(`🎉 ${r.emoji} ${r.name} 교환 완료!`);confetti();
@@ -9167,14 +9528,40 @@ window.rejectRewardRequest=rejectRewardRequest;
 // ADMIN
 function giveBonus(){
   const v=parseInt(document.getElementById('bonus-inp').value)||0;if(v<=0)return;
-  S.pts+=v;S.log.unshift({id:'l_'+Date.now(),emoji:'⭐',name:`보너스 +${v} 마일리지`,pts:v,ts:Date.now(),actId:null});
+  const mode=getFamilyMode();
+  // independent 모드 + 양육자: 관리자가 선택한 자녀에게 지급
+  if(mode==='independent'&&isCaregiverUser()){
+    const targetId=_admViewChildId||getViewedMemberId();
+    if(targetId){
+      const ms=getMemberState(targetId);
+      ms.pts+=v;
+      ms.log.unshift({id:'l_'+Date.now(),emoji:'⭐',name:`보너스 +${v} 마일리지`,pts:v,ts:Date.now(),actId:null,user:targetId});
+      // 현재 뷰가 해당 자녀면 S에도 반영
+      if(targetId===getViewedMemberId()){S.pts=ms.pts;S.log=ms.log;}
+      save();renderAll();toast(`⭐ ${MEMBERS[targetId]?.name||'자녀'}에게 +${v} 마일리지 지급!`);confetti();
+      return;
+    }
+  }
+  S.pts+=v;S.log.unshift({id:'l_'+Date.now(),emoji:'⭐',name:`보너스 +${v} 마일리지`,pts:v,ts:Date.now(),actId:null,user:currentUser});
   save();renderAll();toast(`⭐ 보너스 +${v} 마일리지 지급!`);confetti();
 }
 function deductPts(){
   const v=parseInt(document.getElementById('deduct-inp').value)||0;if(v<=0)return;
   if(!confirm(`${v} 마일리지을 차감할까요?`))return;
+  const mode=getFamilyMode();
+  if(mode==='independent'&&isCaregiverUser()){
+    const targetId=_admViewChildId||getViewedMemberId();
+    if(targetId){
+      const ms=getMemberState(targetId);
+      ms.pts=Math.max(0,ms.pts-v);
+      ms.log.unshift({id:'l_'+Date.now(),emoji:'📉',name:`차감 -${v} 마일리지`,pts:-v,ts:Date.now(),actId:null,user:targetId});
+      if(targetId===getViewedMemberId()){S.pts=ms.pts;S.log=ms.log;}
+      save();renderAll();toast(`📉 ${v} 마일리지 차감됨`);
+      return;
+    }
+  }
   S.pts=Math.max(0,S.pts-v);
-  S.log.unshift({id:'l_'+Date.now(),emoji:'📉',name:`차감 -${v} 마일리지`,pts:-v,ts:Date.now(),actId:null});
+  S.log.unshift({id:'l_'+Date.now(),emoji:'📉',name:`차감 -${v} 마일리지`,pts:-v,ts:Date.now(),actId:null,user:currentUser});
   save();renderAll();toast(`📉 ${v} 마일리지 차감됨`);
 }
 
@@ -10535,7 +10922,7 @@ function emitMoodParticles(){
   setTimeout(()=>{if(container.children.length)container.innerHTML='';},4500);
 }
 
-// ── NAV USERS RENDERING (Family Button) ──
+// ── NAV USERS RENDERING (Family Button + independent mode child tabs) ──
 function renderNavUsers(){
   const container=document.getElementById('tab-adm');
   if(!container)return;
@@ -10545,7 +10932,34 @@ function renderNavUsers(){
   let totalUnread=0;
   otherIds.forEach(id=>{totalUnread+=getUnreadCount(id);});
 
-  // Family button — compact, single element
+  const mode=getFamilyMode();
+  const kids=getChildMemberIds();
+
+  // independent 모드 + 양육자 + 자녀 2명 이상: 자녀 아바타 탭 표시
+  if(mode==='independent'&&isCaregiverUser()&&kids.length>=2){
+    const currentViewed=getViewedMemberId();
+    let html='<div class="nav-child-tabs">';
+    kids.forEach(id=>{
+      const nm=MEMBERS[id]?.name||id;
+      const isActive=id===currentViewed;
+      const avatarHtml=getAvatarHTML(id,32);
+      html+=`<div class="nav-child-tab${isActive?' active':''}" onclick="switchViewingChild('${id}')" title="${nm}의 마일리지">
+        <div class="nav-child-avatar">${avatarHtml}</div>
+        <span class="nav-child-name">${nm}</span>
+      </div>`;
+    });
+    html+='</div>';
+    // 가족 버튼도 함께 표시
+    html+=`<div class="nav-family-btn" onclick="openFamilyPopup()" id="nav-family-btn" style="margin-top:2px">
+      <span class="nfb-icon"><svg viewBox="0 0 24 24" fill="var(--tab-color,#6366F1)" xmlns="http://www.w3.org/2000/svg"><circle cx="6" cy="8.5" r="2.4" opacity=".45"/><rect x="3.5" y="14" width="5" height="7.5" rx="2.5" opacity=".45"/><circle cx="18" cy="8.5" r="2.4" opacity=".45"/><rect x="15.5" y="14" width="5" height="7.5" rx="2.5" opacity=".45"/><circle cx="12" cy="6" r="3" opacity=".9"/><rect x="8.5" y="12.5" width="7" height="9" rx="3.5" opacity=".9"/></svg></span>
+      <span class="nfb-label">우리가족</span>
+      ${totalUnread>0?`<span class="nfb-badge">${totalUnread}</span>`:''}
+    </div>`;
+    container.innerHTML=html;
+    return;
+  }
+
+  // 기본: Family button — compact, single element
   let html=`<div class="nav-family-btn" onclick="openFamilyPopup()" id="nav-family-btn">
     <span class="nfb-icon"><svg viewBox="0 0 24 24" fill="var(--tab-color,#6366F1)" xmlns="http://www.w3.org/2000/svg"><circle cx="6" cy="8.5" r="2.4" opacity=".45"/><rect x="3.5" y="14" width="5" height="7.5" rx="2.5" opacity=".45"/><circle cx="18" cy="8.5" r="2.4" opacity=".45"/><rect x="15.5" y="14" width="5" height="7.5" rx="2.5" opacity=".45"/><circle cx="12" cy="6" r="3" opacity=".9"/><rect x="8.5" y="12.5" width="7" height="9" rx="3.5" opacity=".9"/></svg></span>
     <span class="nfb-label">우리가족</span>
@@ -11424,6 +11838,7 @@ async function checkUrlParams(){
         currentUser=mid;
         localStorage.setItem(_LS_PREFIX+'current_user',mid);
         syncMemberToGlobal(); // Load member data for this user
+        postLoginInit();
         rebuildMembersFromFamily();
 
         if(acc.needReset){
@@ -12166,6 +12581,19 @@ window.renderDevUserSwitch=renderDevUserSwitch;
 window.getMemberState=getMemberState;
 window.syncMemberToGlobal=syncMemberToGlobal;
 window.syncGlobalToMember=syncGlobalToMember;
+
+// 모드/자녀 헬퍼 exports
+window.getFamilyMode=getFamilyMode;
+window.getChildMemberIds=getChildMemberIds;
+window.getViewedMemberId=getViewedMemberId;
+window.switchViewingChild=switchViewingChild;
+window.admSelectChild=admSelectChild;
+window.changeFamilyMode=changeFamilyMode;
+window.postLoginInit=postLoginInit;
+window.renderAdmChildSelector=renderAdmChildSelector;
+window.renderAdmModeSection=renderAdmModeSection;
+window.setHistChildFilter=setHistChildFilter;
+window.renderHistChildFilter=renderHistChildFilter;
 
 // Initial render
 renderDevUserSwitch();
