@@ -229,7 +229,7 @@ body.dark .dtog-in{transform:translateX(24px)}
 .log-header-sticky{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,var(--tab-color,#6366F1) 0%,var(--tab-color2,#818CF8) 80%,color-mix(in srgb,var(--tab-color2,#818CF8) 80%,#fff) 100%);padding:18px 22px 18px;padding-top:calc(18px + env(safe-area-inset-top));margin:0 0 16px;border-radius:0 0 38px 38px;box-shadow:0 8px 32px var(--tab-shadow,rgba(99,102,241,0.35));overflow:hidden}
 .log-header-sticky::before{content:'';position:absolute;top:-40px;right:-20px;width:160px;height:160px;background:radial-gradient(circle,rgba(255,255,255,.1) 0%,transparent 70%);border-radius:50%;pointer-events:none}
 .log-header-sticky h2{font-size:26px;font-weight:900;color:#fff;transition:font-size .25s}
-.log-header-sticky p{font-size:14px;color:rgba(255,255,255,.85);margin-top:3px;font-weight:600;transition:font-size .25s,margin .25s,opacity .25s,max-height .25s}
+.log-header-sticky p{font-size:14px;color:rgba(255,255,255,.85);margin-top:3px;font-weight:600;transition:font-size .25s,opacity .25s}
 
 /* COMPACT STATE for log/rwd/hist headers */
 .log-header-sticky{transition:border-radius .25s}
@@ -260,8 +260,8 @@ body.dark .dtog-in{transform:translateX(24px)}
 .hist-hero.compact .hdr-stat-divider{height:18px}
 
 .log-header-sticky h2,.rwd-header-sticky h2,.hist-hero h2{transition:font-size .25s}
-.log-header-sticky p,.rwd-header-sticky p,.hist-hero p{transition:font-size .25s,margin .25s,opacity .25s,max-height .25s}
-.hdr-stats{display:flex;align-items:center;justify-content:center;gap:0;margin-top:12px;background:rgba(255,255,255,.15);border-radius:14px;padding:10px 8px;transition:margin-top .25s,padding .25s,border-radius .25s}
+.log-header-sticky p,.rwd-header-sticky p,.hist-hero p{transition:font-size .25s,opacity .25s}
+.hdr-stats{display:flex;align-items:center;justify-content:center;gap:0;margin-top:12px;background:rgba(255,255,255,.15);border-radius:14px;padding:10px 8px;transition:border-radius .25s}
 .hdr-stats-4{gap:0}
 .hdr-stats-4 .hdr-stat-num{font-size:18px}
 .hdr-stats-4 .hdr-stat-lbl{font-size:9px}
@@ -12178,24 +12178,40 @@ window._createState = _createState;
       histHdr.style.borderRadius=brStr;
     }
 
-    // ── Dynamic --sec-sticky-top for iOS Weather-style sticky ──
-    // Measure the current sticky header height and set as CSS variable
-    // so .sec titles stick right below the main header
-    const activeHdr = (homeScr && homeScr.classList.contains('on')) ? hero
-      : (document.getElementById('s-rwd')?.classList.contains('on')) ? rwdHdr
-      : (document.getElementById('s-log')?.classList.contains('on')) ? logHdr
-      : (document.getElementById('s-hist')?.classList.contains('on')) ? histHdr
-      : null;
-    if(activeHdr){
-      const hdrH = activeHdr.getBoundingClientRect().height;
-      document.documentElement.style.setProperty('--sec-sticky-top', Math.round(hdrH)+'px');
-    }
+    // --sec-sticky-top is now updated via ResizeObserver (below), not on every scroll frame
   }
   window.addEventListener('scroll', updateHeaderCompact, {passive:true});
   window.addEventListener('resize', updateHeaderCompact, {passive:true});
   window.addEventListener('orientationchange', ()=>{setTimeout(updateHeaderCompact,100);});
-  // Initial call to set --sec-sticky-top on page load
+  // Initial call
   requestAnimationFrame(updateHeaderCompact);
+
+  // ── ResizeObserver for --sec-sticky-top (replaces getBoundingClientRect in scroll handler) ──
+  let _hdrResizeObserver=null;
+  let _observedHdr=null;
+  function _updateSecStickyTop(hdr){
+    if(!hdr)return;
+    const h=Math.round(hdr.getBoundingClientRect().height);
+    if(h>0) document.documentElement.style.setProperty('--sec-sticky-top', h+'px');
+  }
+  function _observeActiveHeader(){
+    const hdr=(homeScr&&homeScr.classList.contains('on'))?hero
+      :document.querySelector('.scr.on .log-header-sticky')
+      ||document.querySelector('.scr.on .rwd-header-sticky')
+      ||document.querySelector('.scr.on .hist-hero');
+    if(hdr===_observedHdr)return;
+    if(_hdrResizeObserver) _hdrResizeObserver.disconnect();
+    _observedHdr=hdr;
+    if(!hdr)return;
+    _updateSecStickyTop(hdr);
+    _hdrResizeObserver=new ResizeObserver(()=>_updateSecStickyTop(hdr));
+    _hdrResizeObserver.observe(hdr);
+  }
+  // Re-observe on tab switch (called from reallyGoTab via initStickySecHeaders path)
+  const _origInitSticky=initStickySecHeaders;
+  initStickySecHeaders=function(){_origInitSticky();_observeActiveHeader();};
+  // Initial observe
+  requestAnimationFrame(_observeActiveHeader);
 
   // ── iOS Weather-style: 섹션 제목 스티키 + 자연스러운 페이드 아웃 ──
   // .sec-group 래퍼 안의 .sec 제목이 sticky로 상단 고정되고,
