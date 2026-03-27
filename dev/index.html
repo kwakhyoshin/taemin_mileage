@@ -229,7 +229,7 @@ body.dark .dtog-in{transform:translateX(24px)}
 .log-header-sticky{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,var(--tab-color,#6366F1) 0%,var(--tab-color2,#818CF8) 80%,color-mix(in srgb,var(--tab-color2,#818CF8) 80%,#fff) 100%);padding:18px 22px 18px;padding-top:calc(18px + env(safe-area-inset-top));margin:0 0 16px;border-radius:0 0 38px 38px;box-shadow:0 8px 32px var(--tab-shadow,rgba(99,102,241,0.35));overflow:hidden}
 .log-header-sticky::before{content:'';position:absolute;top:-40px;right:-20px;width:160px;height:160px;background:radial-gradient(circle,rgba(255,255,255,.1) 0%,transparent 70%);border-radius:50%;pointer-events:none}
 .log-header-sticky h2{font-size:26px;font-weight:900;color:#fff;transition:font-size .25s}
-.log-header-sticky p{font-size:14px;color:rgba(255,255,255,.85);margin-top:3px;font-weight:600;transition:all .25s}
+.log-header-sticky p{font-size:14px;color:rgba(255,255,255,.85);margin-top:3px;font-weight:600;transition:font-size .25s,margin .25s,opacity .25s,max-height .25s}
 
 /* COMPACT STATE for log/rwd/hist headers */
 .log-header-sticky{transition:border-radius .25s}
@@ -260,8 +260,8 @@ body.dark .dtog-in{transform:translateX(24px)}
 .hist-hero.compact .hdr-stat-divider{height:18px}
 
 .log-header-sticky h2,.rwd-header-sticky h2,.hist-hero h2{transition:font-size .25s}
-.log-header-sticky p,.rwd-header-sticky p,.hist-hero p{transition:all .25s}
-.hdr-stats{display:flex;align-items:center;justify-content:center;gap:0;margin-top:12px;background:rgba(255,255,255,.15);border-radius:14px;padding:10px 8px;transition:all .25s}
+.log-header-sticky p,.rwd-header-sticky p,.hist-hero p{transition:font-size .25s,margin .25s,opacity .25s,max-height .25s}
+.hdr-stats{display:flex;align-items:center;justify-content:center;gap:0;margin-top:12px;background:rgba(255,255,255,.15);border-radius:14px;padding:10px 8px;transition:margin-top .25s,padding .25s,border-radius .25s}
 .hdr-stats-4{gap:0}
 .hdr-stats-4 .hdr-stat-num{font-size:18px}
 .hdr-stats-4 .hdr-stat-lbl{font-size:9px}
@@ -10983,13 +10983,13 @@ function reallyGoTab(tab){
   const histH=document.querySelector('.hist-hero');
   if(histH){histH.classList.remove('compact');histH.style.borderRadius=defaultBr2;}
 
-  // Reset sec-fading & recalculate sticky top on next frame
-  document.querySelectorAll('.sec.sec-fading').forEach(s=>s.classList.remove('sec-fading'));
+  // Recalculate sticky top & re-init sticky section observers on tab switch
   requestAnimationFrame(()=>{
     const hdr=document.querySelector('.scr.on .hero, .scr.on .log-header-sticky, .scr.on .rwd-header-sticky, .scr.on .hist-hero');
     if(hdr){
       document.documentElement.style.setProperty('--sec-sticky-top', Math.round(hdr.getBoundingClientRect().height)+'px');
     }
+    initStickySecHeaders();
   });
 
   // Set tab theme
@@ -12200,7 +12200,14 @@ window._createState = _createState;
   // ── iOS Weather-style: 섹션 제목 스티키 + 자연스러운 페이드 아웃 ──
   // .sec-group 래퍼 안의 .sec 제목이 sticky로 상단 고정되고,
   // .sec-group 하단이 뷰포트를 벗어나면 제목이 자연스럽게 사라짐
+  let _stickyObservers=[];
   function initStickySecHeaders(){
+    // Cleanup previous observers to prevent leaks on tab switch
+    _stickyObservers.forEach(o=>o.disconnect());
+    _stickyObservers=[];
+    // Clear stale sec-fading classes
+    document.querySelectorAll('.sec.sec-fading').forEach(s=>s.classList.remove('sec-fading'));
+
     // .sec-group 안의 .sec 처리 (home, rwd 화면)
     // rootMargin을 현재 헤더 높이 기반으로 설정 (mobile ~80px, tablet ~200px)
     const groups=document.querySelectorAll('.sec-group');
@@ -12218,6 +12225,7 @@ window._createState = _createState;
         });
       },{threshold:0,rootMargin:`-${stickyPx+40}px 0px 0px 0px`});
       groups.forEach(g=>groupObserver.observe(g));
+      _stickyObservers.push(groupObserver);
     }
 
     // dash-brick 안의 .sec 처리 (hist 화면 — merge-header 스타일)
@@ -12235,6 +12243,7 @@ window._createState = _createState;
         });
       },{threshold:0});
       bricks.forEach(b=>brickObserver.observe(b));
+      _stickyObservers.push(brickObserver);
     }
   }
   // 탭 전환 시 재초기화
