@@ -1942,53 +1942,73 @@ button:disabled {
 <body data-tab="home">
 <div class="dev-indicator" id="dev-indicator" style="display:none">DEV</div>
 
-<!-- Auth fallback: ensures buttons work even before module loads -->
+<!-- Auth: standalone script (no module dependency) for auth screen navigation -->
 <script>
 (function(){
   var AUTH_IDS=['auth-login','auth-welcome','auth-create-1','auth-create-2','auth-create-3','auth-create-4','auth-create-5','auth-create-done','auth-join-select','auth-join-register'];
-  // Fallback showAuthScreen that works before module loads
-  if(!window.showAuthScreen){
-    window.showAuthScreen=function(screen){
-      AUTH_IDS.forEach(function(id){
-        var el=document.getElementById(id);
-        if(el){
-          if(id==='auth-'+screen||id===screen) el.classList.remove('hidden');
-          else el.classList.add('hidden');
-        }
-      });
-    };
-  }
-  // Queue: if startCreateFamily isn't loaded yet, wait and retry
-  window._authRetryQueue=[];
-  if(!window.startCreateFamily){
-    window.startCreateFamily=function(){
-      // Module not loaded yet — retry after short delay
-      window._authRetryQueue.push('startCreateFamily');
-      setTimeout(function(){
-        if(window._moduleLoaded && window._origStartCreateFamily){
-          window._origStartCreateFamily();
-        }
-      }, 500);
-    };
-  }
-  if(!window.doLogin){
-    window.doLogin=function(){
-      setTimeout(function(){
-        if(window._moduleLoaded && window._origDoLogin){
-          window._origDoLogin();
+
+  window._showAuth=function(screen){
+    AUTH_IDS.forEach(function(id){
+      var el=document.getElementById(id);
+      if(el){
+        if(id==='auth-'+screen||id===screen) el.classList.remove('hidden');
+        else el.classList.add('hidden');
+      }
+    });
+  };
+  // showAuthScreen: 모듈에서 오버라이드될 때까지 기본 구현 사용
+  window.showAuthScreen=window._showAuth;
+
+  window.togglePwd=function(id){
+    var inp=document.getElementById(id);
+    if(inp) inp.type=inp.type==='password'?'text':'password';
+  };
+
+  // 모듈 로드 대기 후 실행하는 헬퍼
+  window._waitModule=function(fnName, maxWait){
+    maxWait=maxWait||5000;
+    var start=Date.now();
+    return new Promise(function(resolve){
+      (function check(){
+        if(window._moduleLoaded && typeof window['_m_'+fnName]==='function'){
+          resolve(window['_m_'+fnName]);
+        } else if(Date.now()-start>maxWait){
+          resolve(null);
         } else {
-          var err=document.getElementById('login-error');
-          if(err) err.textContent='잠시만 기다려주세요... 로딩 중입니다.';
+          setTimeout(check, 100);
         }
-      }, 500);
-    };
-  }
-  if(!window.togglePwd){
-    window.togglePwd=function(id,btn){
-      var inp=document.getElementById(id);
-      if(inp) inp.type = inp.type==='password'?'text':'password';
-    };
-  }
+      })();
+    });
+  };
+
+  window.startCreateFamily=function(){
+    if(window._moduleLoaded && window._m_startCreateFamily){
+      window._m_startCreateFamily();
+    } else {
+      // 모듈 로드 중 — 대기 후 재시도
+      var btn=event&&event.target;
+      if(btn){btn.textContent='로딩 중...';btn.disabled=true;}
+      window._waitModule('startCreateFamily').then(function(fn){
+        if(btn){btn.textContent='시작하기';btn.disabled=false;}
+        if(fn) fn();
+        else alert('앱을 로드하지 못했어요. 새로고침해주세요.');
+      });
+    }
+  };
+
+  window.doLogin=function(){
+    if(window._moduleLoaded && window._m_doLogin){
+      window._m_doLogin();
+    } else {
+      var err=document.getElementById('login-error');
+      if(err) err.textContent='로딩 중입니다. 잠시만 기다려주세요...';
+      window._waitModule('doLogin').then(function(fn){
+        if(err) err.textContent='';
+        if(fn) fn();
+        else { if(err) err.textContent='앱을 로드하지 못했어요. 새로고침해주세요.'; }
+      });
+    }
+  };
 })();
 </script>
 
@@ -1996,7 +2016,7 @@ button:disabled {
 <div class="auth-screen" id="auth-login">
   <div class="auth-card">
     <div class="auth-logo"><svg width="64" height="64" viewBox="0 0 200 200"><defs><linearGradient id="lb" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#6366F1"/><stop offset="100%" stop-color="#818CF8"/></linearGradient></defs><circle cx="100" cy="100" r="96" fill="url(#lb)"/><path d="M62 95v52c0 6 4 10 10 10h56c6 0 10-4 10-10V95Z" fill="#fff" opacity=".95"/><path d="M52 95l48-40 48 40Z" fill="#FF6B35"/><rect x="88" y="118" width="24" height="34" rx="4" fill="#10B981"/><circle cx="108" cy="136" r="2.5" fill="#FFD700"/><rect x="68" y="106" width="14" height="14" rx="3" fill="#6366F1" opacity=".25"/><rect x="118" y="106" width="14" height="14" rx="3" fill="#6366F1" opacity=".25"/><g transform="translate(100,52)"><polygon points="0,-14 4,-5 13,-4 7,2 9,12 0,7 -9,12 -7,2 -13,-4 -4,-5" fill="#FFD700"/></g></svg></div>
-    <div class="auth-title" style="font-size:28px;letter-spacing:-1px">maily</div>
+    <div class="auth-title" style="font-size:28px;letter-spacing:-1px">mile<span style="color:#FF6B35">.</span>ly</div>
     <div class="auth-sub">가족 계정으로 로그인하세요</div>
     <input type="text" class="auth-input" id="login-id" placeholder="아이디" autocomplete="username">
     <div class="pwd-wrap">
@@ -2013,7 +2033,7 @@ button:disabled {
 <div class="auth-screen hidden" id="auth-welcome">
   <div class="auth-card">
     <div class="auth-logo"><svg width="64" height="64" viewBox="0 0 200 200"><defs><linearGradient id="wb" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#6366F1"/><stop offset="100%" stop-color="#818CF8"/></linearGradient></defs><circle cx="100" cy="100" r="96" fill="url(#wb)"/><path d="M62 95v52c0 6 4 10 10 10h56c6 0 10-4 10-10V95Z" fill="#fff" opacity=".95"/><path d="M52 95l48-40 48 40Z" fill="#FF6B35"/><rect x="88" y="118" width="24" height="34" rx="4" fill="#10B981"/><circle cx="108" cy="136" r="2.5" fill="#FFD700"/><rect x="68" y="106" width="14" height="14" rx="3" fill="#6366F1" opacity=".25"/><rect x="118" y="106" width="14" height="14" rx="3" fill="#6366F1" opacity=".25"/><g transform="translate(100,52)"><polygon points="0,-14 4,-5 13,-4 7,2 9,12 0,7 -9,12 -7,2 -13,-4 -4,-5" fill="#FFD700"/></g></svg></div>
-    <div class="auth-title" style="font-size:28px;letter-spacing:-1px">maily</div>
+    <div class="auth-title" style="font-size:28px;letter-spacing:-1px">mile<span style="color:#FF6B35">.</span>ly</div>
     <div class="auth-sub">마일리와 함께 우리 가족의<br>좋은 습관을 만들어가요</div>
     <button class="auth-btn" onclick="startCreateFamily()" style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg> 시작하기
@@ -11784,10 +11804,11 @@ Object.assign(window, {
   // Global registry functions
   checkGlobalIdExists, registerGlobalId,
 });
-// Fallback 함수를 실제 함수로 교체 + 모듈 로드 완료 플래그
-window._origStartCreateFamily = startCreateFamily;
-window._origDoLogin = doLogin;
+// 모듈 함수를 window에 _m_ 접두사로 등록 (standalone script에서 참조)
+window._m_startCreateFamily = startCreateFamily;
+window._m_doLogin = doLogin;
 window._moduleLoaded = true;
+console.log('[mile.ly] module loaded OK');
 // _createState를 window에 노출 (child card oninput 참조용)
 window._createState = _createState;
 
