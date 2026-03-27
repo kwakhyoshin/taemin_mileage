@@ -1,29 +1,16 @@
 <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#6366F1"/>
-      <stop offset="100%" stop-color="#818CF8"/>
+      <stop offset="0%" stop-color="#4F46E5"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
     </linearGradient>
   </defs>
-  <!-- Round background -->
+  <!-- Background circle -->
   <circle cx="100" cy="100" r="96" fill="url(#bg)"/>
-  <!-- House body -->
-  <path d="M62 95v52c0 6 4 10 10 10h56c6 0 10-4 10-10V95Z" fill="#fff" opacity="0.95"/>
-  <!-- Roof -->
-  <path d="M52 95l48-40 48 40Z" fill="#FF6B35"/>
-  <!-- Door -->
-  <rect x="88" y="118" width="24" height="34" rx="4" fill="#10B981"/>
-  <circle cx="108" cy="136" r="2.5" fill="#FFD700"/>
-  <!-- Windows -->
-  <rect x="68" y="106" width="14" height="14" rx="3" fill="#6366F1" opacity="0.25"/>
-  <rect x="118" y="106" width="14" height="14" rx="3" fill="#6366F1" opacity="0.25"/>
-  <!-- Star on roof -->
-  <g transform="translate(100,52)">
-    <polygon points="0,-14 4,-5 13,-4 7,2 9,12 0,7 -9,12 -7,2 -13,-4 -4,-5" fill="#FFD700"/>
-  </g>
-  <!-- Small accent stars -->
-  <g opacity="0.85">
-    <polygon points="42,68 44,73 49,74 45,77 46,82 42,79 38,82 39,77 35,74 40,73" fill="#FFD700"/>
-    <polygon points="158,72 160,77 165,78 161,81 162,86 158,83 154,86 155,81 151,78 156,77" fill="#FFD700"/>
-  </g>
+  <!-- House — minimal pentagon silhouette -->
+  <path d="M62,150 L62,98 L100,64 L138,98 L138,150 Z" fill="#fff" opacity="0.96"/>
+  <!-- Door — orange brand accent -->
+  <rect x="87" y="118" width="26" height="32" rx="4" fill="#FF6B35"/>
+  <!-- Dot above peak — echoes "." in mile.ly -->
+  <circle cx="100" cy="50" r="8" fill="#FF6B35"/>
 </svg>

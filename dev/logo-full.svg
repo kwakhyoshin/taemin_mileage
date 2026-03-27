@@ -1,29 +1,21 @@
 <svg viewBox="0 0 320 100" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#6366F1"/>
-      <stop offset="100%" stop-color="#818CF8"/>
+    <linearGradient id="bgF" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4F46E5"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
     </linearGradient>
   </defs>
-  <!-- Icon -->
-  <g transform="translate(42,50) scale(0.38)">
-    <circle cx="0" cy="0" r="96" fill="url(#bg)"/>
-    <path d="M-38-5v52c0 6 4 10 10 10h56c6 0 10-4 10-10V-5Z" fill="#fff" opacity="0.95"/>
-    <path d="M-48-5l48-40 48 40Z" fill="#FF6B35"/>
-    <rect x="-12" y="18" width="24" height="34" rx="4" fill="#10B981"/>
-    <circle cx="8" cy="36" r="2.5" fill="#FFD700"/>
-    <rect x="-32" y="6" width="14" height="14" rx="3" fill="#6366F1" opacity="0.25"/>
-    <rect x="18" y="6" width="14" height="14" rx="3" fill="#6366F1" opacity="0.25"/>
-    <g transform="translate(0,-48)">
-      <polygon points="0,-14 4,-5 13,-4 7,2 9,12 0,7 -9,12 -7,2 -13,-4 -4,-5" fill="#FFD700"/>
-    </g>
+  <!-- Icon — scaled from 200x200 center (100,100) to canvas point (45,50) at 0.4x -->
+  <g transform="translate(45,50) scale(0.4)">
+    <circle cx="0" cy="0" r="96" fill="url(#bgF)"/>
+    <path d="M-38,50 L-38,-2 L0,-36 L38,-2 L38,50 Z" fill="#fff" opacity="0.96"/>
+    <rect x="-13" y="18" width="26" height="32" rx="4" fill="#FF6B35"/>
+    <circle cx="0" cy="-50" r="8" fill="#FF6B35"/>
   </g>
-  <!-- Brand: mile.ly -->
-  <text x="90" y="42" font-family="'Nunito', -apple-system, sans-serif" font-size="36" font-weight="900" fill="#6366F1" letter-spacing="-0.5">mile<tspan fill="#FF6B35">.</tspan>ly</text>
+  <!-- Brand name -->
+  <text x="90" y="42" font-family="'Nunito', -apple-system, BlinkMacSystemFont, sans-serif" font-size="34" font-weight="800" fill="#4F46E5" letter-spacing="-1">mile<tspan fill="#FF6B35">.</tspan>ly</text>
   <!-- Korean name -->
-  <text x="90" y="66" font-family="'Noto Sans KR', -apple-system, sans-serif" font-size="14" font-weight="700" fill="#94A3B8" letter-spacing="0.5">마일리</text>
+  <text x="91" y="62" font-family="'Noto Sans KR', -apple-system, sans-serif" font-size="13" font-weight="700" fill="#94A3B8" letter-spacing="1">마일리</text>
   <!-- Tagline -->
-  <text x="90" y="84" font-family="'Noto Sans KR', -apple-system, sans-serif" font-size="11" font-weight="600" fill="#10B981" letter-spacing="0.5">우리 가족의 마일리지 여정</text>
-  <!-- Accent star -->
-  <polygon points="253,18 255,24 261,25 257,28 258,34 253,31 248,34 249,28 245,25 251,24" fill="#FFD700" opacity="0.8"/>
+  <text x="91" y="78" font-family="'Noto Sans KR', -apple-system, sans-serif" font-size="10" font-weight="500" fill="#6EE7B7" letter-spacing="0.3">우리 가족의 마일리지 여정</text>
 </svg>
