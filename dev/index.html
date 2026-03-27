@@ -184,15 +184,9 @@ body.dark .dtog-in{transform:translateX(24px)}
 .prog-fill{background:rgba(255,255,255,.9);border-radius:7px;height:100%;transition:width .7s}
 .prog-row{display:flex;justify-content:space-between;margin-top:5px;font-size:11px;opacity:.75;font-weight:700;transition:all .25s}
 
-/* HERO compact state */
-.hero.compact{padding:12px 20px 14px;padding-top:calc(12px + env(safe-area-inset-top))}
-.hero.compact .hero-lbl{font-size:10px}
-.hero.compact .hero-pts{font-size:32px}
-.hero.compact .hero-unit{font-size:14px}
-.hero.compact .hero-goal{max-height:0;margin-top:0;opacity:0}
-.hero.compact .streak-pill{top:calc(12px + env(safe-area-inset-top));padding:4px 10px;font-size:11px}
-.hero.compact .prog-track{margin-top:10px}
-.hero.compact .prog-row{margin-top:3px;font-size:10px}
+/* HERO compact state — NO padding change to prevent scroll jitter */
+.hero.compact .hero-goal{max-height:0;margin-top:0;opacity:0;overflow:hidden}
+.hero.compact .prog-row{font-size:10px}
 
 /* SECTION — iOS Weather-style sticky scroll */
 .sec-group{position:relative;margin-top:4px}
@@ -1115,7 +1109,7 @@ body.dark .family-popup-item.selected .family-popup-avatar{border-color:rgba(255
 
   /* Hero — 풀 너비, 라운딩 없음 */
   .hero{border-radius:0;margin:0;position:sticky;top:0}
-  .hero.compact{padding:16px 24px 18px}
+  /* .hero.compact padding removed — JS handles smooth sizing without layout shift */
   .hero-pts{font-size:68px}
   .hero-unit{font-size:24px}
   .hero-goal{font-size:14px}
@@ -10974,15 +10968,13 @@ function reallyGoTab(tab){
     hero.classList.remove('compact');
     const defaultBr=window.innerWidth>=768?'0':'0 0 38px 38px';
     hero.style.borderRadius=defaultBr;
-    hero.style.padding='';
     const progTrack=hero.querySelector('.prog-track');
-    if(progTrack){progTrack.style.height='14px';progTrack.style.borderRadius='7px';progTrack.style.marginTop='';}
+    if(progTrack){progTrack.style.height='14px';progTrack.style.borderRadius='7px';}
     const ptEl=hero.querySelector('.hero-pts');if(ptEl)ptEl.style.fontSize='';
     const lblEl=hero.querySelector('.hero-lbl');if(lblEl)lblEl.style.fontSize='';
     const unitEl=hero.querySelector('.hero-unit');if(unitEl)unitEl.style.fontSize='';
     const goalEl=hero.querySelector('.hero-goal');if(goalEl){goalEl.style.maxHeight='';goalEl.style.marginTop='';goalEl.style.opacity='';}
     const progRow=hero.querySelector('.prog-row');if(progRow){progRow.style.marginTop='';progRow.style.fontSize='';}
-    const streakPill=hero.querySelector('.streak-pill');if(streakPill){streakPill.style.top='';streakPill.style.padding='';streakPill.style.fontSize='';}
   }
   const ht=document.querySelector('.home-top');
   if(ht) Array.from(ht.children).forEach(c=>c.style.opacity='1');
@@ -12118,23 +12110,18 @@ window._createState = _createState;
     const brRatio=Math.max(0,Math.min(1,scrollY/threshold));
     const br=isWide?0:(brMax-(brMax-brMin)*brRatio);
     const brStr=isWide?'0':'0 0 '+br+'px '+br+'px';
-    // Home — fully JS-driven smooth interpolation to prevent jitter
+    // Home — smooth inner content animation, NO padding/height changes to avoid scroll feedback loop
     if(homeScr && homeScr.classList.contains('on') && hero){
       const r=brRatio; // 0 (top) → 1 (threshold)
-      const isCompact = scrollY >= threshold;
-      hero.classList.toggle('compact', isCompact);
+      hero.classList.toggle('compact', scrollY >= threshold);
       hero.style.borderRadius=brStr;
-      // Smooth padding: 14/20/22 → 12/20/14 (top stays same on mobile, bottom shrinks)
-      const ptTop=14-(14-12)*r, ptBot=22-(22-14)*r;
-      hero.style.padding=`${ptTop}px 20px ${ptBot}px`;
-      if(isCompact) hero.style.paddingTop=`calc(${ptTop}px + env(safe-area-inset-top))`;
-      // Smooth gauge height: 14px → 5px
+      // Do NOT change hero padding during scroll — it changes layout height causing jitter
+      // Instead, only animate inner content sizes
       const progTrack=hero.querySelector('.prog-track');
       if(progTrack){
         const gh=14-(14-5)*r;
         progTrack.style.height=gh+'px';
         progTrack.style.borderRadius=(gh/2)+'px';
-        progTrack.style.marginTop=(14-(14-10)*r)+'px';
       }
       // Smooth font sizes
       const ptEl=hero.querySelector('.hero-pts');
@@ -12155,13 +12142,6 @@ window._createState = _createState;
       if(progRow){
         progRow.style.marginTop=(5-(5-3)*r)+'px';
         progRow.style.fontSize=(11-(11-10)*r)+'px';
-      }
-      // Smooth streak-pill
-      const streakPill=hero.querySelector('.streak-pill');
-      if(streakPill){
-        streakPill.style.top=(18-(18-12)*r)+'px';
-        streakPill.style.padding=`${5-(5-4)*r}px ${12-(12-10)*r}px`;
-        streakPill.style.fontSize=(12-(12-11)*r)+'px';
       }
       // Fade out home-top children only (not background)
       const ht=document.querySelector('.home-top');
