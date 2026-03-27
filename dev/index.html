@@ -1078,6 +1078,9 @@ body.dark .family-popup-avatar{border-color:rgba(255,255,255,.25)}
 .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 .conf-p{position:fixed;pointer-events:none;z-index:998;border-radius:2px;animation:fall 1.3s ease-in forwards}
 @keyframes fall{0%{transform:translateY(-10px) rotate(0);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+.bday-conf-p{position:fixed;pointer-events:none;z-index:998;border-radius:2px;animation:bdayFall var(--dur,4s) ease-in forwards}
+@keyframes bdayFall{0%{transform:translateY(-20px) rotate(0) scale(1);opacity:1}80%{opacity:1}100%{transform:translateY(110vh) rotate(900deg) scale(0.5);opacity:0}}
+@keyframes bdayPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.03)}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes fadeOut{from{opacity:1}to{opacity:0}}
 @keyframes popIn{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}
@@ -2298,7 +2301,11 @@ button:disabled {
           <div class="auth-steps" id="create-steps-1"></div>
           <div class="toss-question">반갑습니다!<br>아이디를 정해볼까요?</div>
           <div class="toss-desc">나중에 이 아이디로 로그인해요</div>
-          <input type="text" class="toss-input" id="create-user-id" placeholder="아이디 (4자 이상)" autocomplete="username">
+          <div style="position:relative">
+            <input type="text" class="toss-input" id="create-user-id" placeholder="아이디 (4자 이상)" autocomplete="username" style="padding-right:44px">
+            <span id="c1-id-lock-icon" style="display:none;position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--or)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></span>
+          </div>
+          <button id="c1-id-reset-btn" onclick="resetCreateId()" style="display:none;margin-top:8px;width:100%;padding:10px;background:transparent;border:1.5px solid var(--bdr);border-radius:10px;font-size:13px;font-weight:700;color:var(--tx2);font-family:inherit;cursor:pointer">다른 아이디 사용</button>
           <div class="auth-error" id="c1-id-error" style="margin-top:10px"></div>
         </div>
         <div class="toss-cta">
@@ -2535,7 +2542,11 @@ button:disabled {
           <div id="join-reg-avatar" style="margin-bottom:16px;text-align:center"></div>
           <div class="toss-question" id="join-reg-title">계정을 만들어볼게요!<br>아이디를 정해주세요</div>
           <div class="toss-desc">가족에 합류하기 위한 아이디예요</div>
-          <input type="text" class="toss-input" id="join-reg-id" placeholder="아이디 (4자 이상)" autocomplete="username">
+          <div style="position:relative">
+            <input type="text" class="toss-input" id="join-reg-id" placeholder="아이디 (4자 이상)" autocomplete="username" style="padding-right:44px">
+            <span id="jr-id-lock-icon" style="display:none;position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--or)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></span>
+          </div>
+          <button id="jr-id-reset-btn" onclick="resetJoinRegId()" style="display:none;margin-top:8px;width:100%;padding:10px;background:transparent;border:1.5px solid var(--bdr);border-radius:10px;font-size:13px;font-weight:700;color:var(--tx2);font-family:inherit;cursor:pointer">다른 아이디 사용</button>
           <div class="auth-error" id="jr-id-error" style="margin-top:10px"></div>
         </div>
         <div class="toss-cta">
@@ -2605,6 +2616,12 @@ button:disabled {
     <div class="hero-goal" id="hero-goal"></div>
     <div class="prog-track"><div class="prog-fill" id="hero-bar" style="width:0%"></div></div>
     <div class="prog-row"><span>0</span><span id="hero-bar-lbl"></span></div>
+  </div>
+  <!-- 생일 축하 배너 (동적 표시) -->
+  <div id="birthday-banner" style="display:none;margin:0 16px 12px;border-radius:16px;background:linear-gradient(135deg,#FF6B6B,#FF8E53);padding:16px;position:relative;overflow:hidden">
+    <div style="position:absolute;top:-20px;right:-10px;font-size:60px;opacity:0.2;pointer-events:none">🎂</div>
+    <div style="font-size:18px;font-weight:900;color:#fff;margin-bottom:4px" id="birthday-banner-title"></div>
+    <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,.85)" id="birthday-banner-sub">특별 보너스 100 마일리지가 지급됐어요! 🎁</div>
   </div>
   <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> 오늘 할 일</div>
   <div class="act-grid" id="home-grid"></div>
@@ -3774,7 +3791,9 @@ let _joinState = {
   selectedMemberId: '',
   autoLogin: false,
   fromSelect: false,
-  isReset: false // true면 기존 임시계정 → 새 ID/비번 설정 모드
+  isReset: false, // true면 기존 임시계정 → 새 ID/비번 설정 모드
+  idLocked: false,
+  lockedId: ''
 };
 
 // ── AUTH 화면 관리 ──
@@ -3847,6 +3866,7 @@ function backSlide(wrapId, fallbackFn) {
 function create1Back() { backSlide('c1-wrap', () => showAuthScreen('welcome')); }
 
 async function c1SlideIdNext() {
+  if(_createState.idLocked){ toSlide('c1-wrap','c1-slide-pwd'); setTimeout(()=>document.getElementById('create-user-pwd').focus(),380); return; }
   const id = document.getElementById('create-user-id').value.trim();
   const err = document.getElementById('c1-id-error');
   const btn = document.querySelector('#c1-slide-id .toss-btn');
@@ -3859,10 +3879,30 @@ async function c1SlideIdNext() {
   } catch(e) { console.error('ID check error:', e); }
   finally { if (btn) { btn.disabled = false; btn.textContent = '다음'; } }
   _createState.userId = id;
+  _createState.idLocked = true;
+  const inp = document.getElementById('create-user-id');
+  if(inp) inp.disabled = true;
+  const lockIcon = document.getElementById('c1-id-lock-icon');
+  if(lockIcon) lockIcon.style.display = 'block';
+  const resetBtn = document.getElementById('c1-id-reset-btn');
+  if(resetBtn) resetBtn.style.display = 'block';
   const prog = document.getElementById('c1-progress');
   if (prog) prog.style.width = '30%';
   toSlide('c1-wrap', 'c1-slide-pwd');
   setTimeout(() => document.getElementById('create-user-pwd').focus(), 380);
+}
+
+function resetCreateId() {
+  _createState.idLocked = false;
+  _createState.userId = '';
+  const inp = document.getElementById('create-user-id');
+  if(inp){ inp.disabled = false; inp.value = ''; inp.focus(); }
+  const lockIcon = document.getElementById('c1-id-lock-icon');
+  if(lockIcon) lockIcon.style.display = 'none';
+  const resetBtn = document.getElementById('c1-id-reset-btn');
+  if(resetBtn) resetBtn.style.display = 'none';
+  const err = document.getElementById('c1-id-error');
+  if(err) err.textContent = '';
 }
 
 function c1SlidePwdNext() {
@@ -3918,6 +3958,7 @@ function _goToStep2() {
 function jrBack() { backSlide('jr-wrap', () => joinRegGoBack()); }
 
 async function jrSlideIdNext() {
+  if(_joinState?.idLocked){ toSlide('jr-wrap','jr-slide-pwd'); setTimeout(()=>document.getElementById('join-reg-pwd').focus(),380); return; }
   const id = document.getElementById('join-reg-id').value.trim();
   const err = document.getElementById('jr-id-error');
   const btn = document.querySelector('#jr-slide-id .toss-btn');
@@ -3929,10 +3970,30 @@ async function jrSlideIdNext() {
     if (exists) { err.textContent = '이미 사용중인 아이디예요. 다른 아이디를 입력해주세요.'; return; }
   } catch(e) { console.error('ID check error:', e); }
   finally { if (btn) { btn.disabled = false; btn.textContent = '다음'; } }
+  _joinState.idLocked = true;
+  _joinState.lockedId = id;
+  const inp = document.getElementById('join-reg-id');
+  if(inp) inp.disabled = true;
+  const lockIcon = document.getElementById('jr-id-lock-icon');
+  if(lockIcon) lockIcon.style.display = 'block';
+  const resetBtn = document.getElementById('jr-id-reset-btn');
+  if(resetBtn) resetBtn.style.display = 'block';
   const prog = document.getElementById('jr-progress');
   if (prog) prog.style.width = '60%';
   toSlide('jr-wrap', 'jr-slide-pwd');
   setTimeout(() => document.getElementById('join-reg-pwd').focus(), 380);
+}
+
+function resetJoinRegId() {
+  _joinState.idLocked = false;
+  const inp = document.getElementById('join-reg-id');
+  if(inp){ inp.disabled = false; inp.value = ''; inp.focus(); }
+  const lockIcon = document.getElementById('jr-id-lock-icon');
+  if(lockIcon) lockIcon.style.display = 'none';
+  const resetBtn = document.getElementById('jr-id-reset-btn');
+  if(resetBtn) resetBtn.style.display = 'none';
+  const err = document.getElementById('jr-id-error');
+  if(err) err.textContent = '';
 }
 
 // ── 가족 만들기 흐름 ──
@@ -3943,7 +4004,8 @@ function startCreateFamily(){
     members:[],
     mode:'independent',
     childAccounts:{},inviteType:'link',
-    inviteStatus:{}
+    inviteStatus:{},
+    idLocked:false
   };
   window._createState=_createState;
   _saveFamilyDone=false; // 새 가입 시작 시 리셋
@@ -3963,6 +4025,11 @@ function startCreateFamily(){
     el.style.pointerEvents='';
     requestAnimationFrame(()=>{el.style.transition='';});
   });
+  // ID 잠금 UI 리셋
+  const _c1Inp=document.getElementById('create-user-id');
+  if(_c1Inp){_c1Inp.disabled=false;_c1Inp.value='';}
+  const _c1Lock=document.getElementById('c1-id-lock-icon');if(_c1Lock)_c1Lock.style.display='none';
+  const _c1Rst=document.getElementById('c1-id-reset-btn');if(_c1Rst)_c1Rst.style.display='none';
   showAuthScreen('create-1');
 }
 
@@ -4822,6 +4889,12 @@ async function createStep5Finish(){
 function selectJoinMember(memberId){
   _joinState.selectedMemberId=memberId;
   _joinState.fromSelect=true; // 구성원 선택에서 왔음
+  // ID 잠금 UI 리셋
+  _joinState.idLocked=false; _joinState.lockedId='';
+  const _jrInp=document.getElementById('join-reg-id');
+  if(_jrInp){_jrInp.disabled=false;_jrInp.value='';}
+  const _jrLock=document.getElementById('jr-id-lock-icon');if(_jrLock)_jrLock.style.display='none';
+  const _jrRst=document.getElementById('jr-id-reset-btn');if(_jrRst)_jrRst.style.display='none';
   const fm=S.familyMeta?.members||{};
   const m=fm[memberId];
   if(!m)return;
@@ -5282,6 +5355,7 @@ const BADGES = [
   // 🏆 히든 추가
   {id:'midnight_study',emoji:'🌙',name:'자정의 학자',desc:'자정 넘어서 공부하다니!',category:'히든',hidden:true,bonus:15,label:'12AM',check:S=>hasMidnightStudy()},
   {id:'comeback',emoji:'🔄',name:'컴백 히어로',desc:'3일 이상 쉬었다가 다시 돌아왔어!',category:'히든',hidden:true,bonus:15,label:'Back',check:S=>hasComeback()},
+  {id:'birthday_special',emoji:'🎂',name:'생일 축하',desc:'오늘은 특별한 날! 생일을 축하해요!',category:'히든',hidden:true,bonus:0,label:'🎂',check:S=>false},
 ];
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
@@ -5382,6 +5456,7 @@ function defaultState(){
     pushDevices:{}, // 푸시 디바이스
     familyMeta:null, // 다가족 메타 정보 {familyId, familyName, members, mode, inviteTokens, ...}
     memberData:{}, // Per-member data isolation: {[memberId]: {pts, streak, longest, lastDate, totalDone, acts, rwds, log, actDone, moodLog, badges, badgeLog}}
+    birthdayBonusGiven:{}, // {memberId_YYYY-MM-DD: true} — 생일 보너스 중복 방지
   };
 }
 
@@ -9728,6 +9803,7 @@ function renderFamilyManager() {
         </div>
       </div>
       <div style="display:flex;gap:6px;align-items:center">
+        <button class="btn-sm" onclick="editFamilyMember('${mid}')" style="font-size:13px;padding:6px 12px">수정</button>
         ${!isMe ? `<button class="btn-sm" onclick="toggleFamilyAdmin('${mid}')" style="font-size:13px;padding:6px 12px">${isAdmin?'관리자 해제':'관리자 부여'}</button>` : ''}
         ${!isMe ? `<button class="btn-sm rd" onclick="removeFamilyMemberAdmin('${mid}')" style="font-size:13px;padding:6px 12px">삭제</button>` : ''}
       </div>
@@ -9777,6 +9853,52 @@ async function removeFamilyMemberAdmin(memberId) {
   renderFamilyManager();
   renderAll();
   toast(`${m.name}님이 가족에서 삭제되었어요`);
+}
+
+function editFamilyMember(memberId) {
+  const m = S.familyMeta?.members?.[memberId];
+  if(!m) return;
+  const existing = document.getElementById('family-edit-modal');
+  if(existing) existing.remove();
+  const modal = document.createElement('div');
+  modal.id = 'family-edit-modal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;padding:20px';
+  modal.innerHTML = `
+    <div style="background:var(--bg);border-radius:20px;padding:24px;max-width:340px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.2)">
+      <div style="font-size:17px;font-weight:900;color:var(--tx);margin-bottom:20px">구성원 정보 수정</div>
+      <div style="margin-bottom:12px">
+        <div style="font-size:13px;font-weight:700;color:var(--tx2);margin-bottom:6px">이름</div>
+        <input type="text" id="fem-name" value="${m.name||''}" maxlength="10" placeholder="이름" style="width:100%;padding:10px 12px;border:1.5px solid var(--bdr);border-radius:10px;font-size:15px;font-weight:700;background:var(--bg2);color:var(--tx);font-family:inherit;box-sizing:border-box">
+      </div>
+      <div style="margin-bottom:20px">
+        <div style="font-size:13px;font-weight:700;color:var(--tx2);margin-bottom:6px">생년월일 <span style="font-size:12px;font-weight:600;color:var(--tx3)">(선택)</span></div>
+        <input type="date" id="fem-birth" value="${m.birthDate||''}" style="width:100%;padding:10px 12px;border:1.5px solid var(--bdr);border-radius:10px;font-size:14px;font-weight:600;background:var(--bg2);color:var(--tx);font-family:inherit;box-sizing:border-box;height:42px;-webkit-appearance:none;appearance:none">
+      </div>
+      <div style="display:flex;gap:8px">
+        <button onclick="document.getElementById('family-edit-modal').remove()" style="flex:1;padding:12px;border:1.5px solid var(--bdr);border-radius:12px;font-size:14px;font-weight:700;background:var(--bg2);color:var(--tx);font-family:inherit;cursor:pointer">취소</button>
+        <button onclick="saveFamilyMemberEdit('${memberId}')" style="flex:2;padding:12px;border:none;border-radius:12px;font-size:14px;font-weight:800;background:var(--or);color:#fff;font-family:inherit;cursor:pointer">저장</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if(e.target === modal) modal.remove(); });
+  setTimeout(() => document.getElementById('fem-name')?.focus(), 100);
+}
+
+async function saveFamilyMemberEdit(memberId) {
+  const m = S.familyMeta?.members?.[memberId];
+  if(!m) return;
+  const nameEl = document.getElementById('fem-name');
+  const birthEl = document.getElementById('fem-birth');
+  const name = nameEl?.value.trim();
+  if(!name) { toast('이름을 입력해주세요'); return; }
+  m.name = name;
+  m.birthDate = birthEl?.value || '';
+  await save();
+  rebuildMembersFromFamily();
+  renderFamilyManager();
+  renderAll();
+  document.getElementById('family-edit-modal')?.remove();
+  toast(`${name}님의 정보가 수정되었어요`);
 }
 
 async function addNewFamilyMember() {
@@ -12304,6 +12426,72 @@ function confetti(){
   }
 }
 
+// ── BIRTHDAY BONUS ────────────
+function birthdayConfetti(){
+  const cols=['#FF6B6B','#FF8E53','#FFD700','#FF69B4','#A78BFA','#34D399','#60A5FA'];
+  for(let i=0;i<60;i++){
+    const el=document.createElement('div');
+    el.className='bday-conf-p';
+    const sz=6+Math.random()*10;
+    const dur=(3+Math.random()*2).toFixed(1)+'s';
+    el.style.cssText=`left:${Math.random()*100}vw;top:-10px;width:${sz}px;height:${sz}px;background:${cols[Math.floor(Math.random()*cols.length)]};border-radius:${Math.random()>.4?'50%':'3px'};animation-delay:${(Math.random()*1.5).toFixed(2)}s;--dur:${dur}`;
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),5500);
+  }
+}
+
+async function checkBirthdayBonus(){
+  if(!S.familyMeta?.members) return;
+  const today = todayStr(); // YYYY-MM-DD
+  const [,todayMM,todayDD] = today.split('-');
+  if(!S.birthdayBonusGiven) S.birthdayBonusGiven={};
+  let anyBirthday=false;
+  const birthdayNames=[];
+
+  for(const [mid,m] of Object.entries(S.familyMeta.members)){
+    if(m.role!=='child' && m.type!=='child') continue;
+    if(!m.birthDate) continue;
+    const [,bMM,bDD] = m.birthDate.split('-');
+    if(!bMM||!bDD) continue;
+    if(bMM===todayMM && bDD===todayDD){
+      anyBirthday=true;
+      birthdayNames.push(m.name||'아이');
+      const bonusKey=`${mid}_${today}`;
+      if(!S.birthdayBonusGiven[bonusKey]){
+        // 보너스 지급
+        const targetMid = mid;
+        const ms = S.memberData?.[targetMid];
+        if(ms) ms.pts = (ms.pts||0)+100;
+        else S.pts = (S.pts||0)+100;
+        // 생일 뱃지 부여
+        if(!S.badges) S.badges={};
+        if(!S.badges['birthday_special']){
+          S.badges['birthday_special']={earnedAt:Date.now(),seen:false,claimed:false};
+        }
+        // 로그
+        if(!S.log) S.log=[];
+        S.log.unshift({id:'bday_'+Date.now(),emoji:'🎂',name:`${m.name||'아이'} 생일 보너스`,pts:100,ts:Date.now(),user:targetMid,auto:true});
+        S.birthdayBonusGiven[bonusKey]=true;
+        await save();
+      }
+    }
+  }
+
+  const banner=document.getElementById('birthday-banner');
+  if(!banner) return;
+  if(anyBirthday && birthdayNames.length>0){
+    const title=document.getElementById('birthday-banner-title');
+    if(title) title.textContent=`🎂 ${birthdayNames.join(', ')}의 생일을 축하해요!`;
+    banner.style.display='block';
+    banner.style.animation='bdayPulse 2s ease infinite';
+    birthdayConfetti();
+    setTimeout(birthdayConfetti, 1200);
+    toast(`🎉 ${birthdayNames[0]}의 생일! 100 마일리지 보너스 지급!`);
+  } else {
+    banner.style.display='none';
+  }
+}
+
 // ── AUTO REFRESH & MIDNIGHT RESET ────────────
 let _lastDateStr = todayStr();
 
@@ -12330,6 +12518,7 @@ function checkDayChange(){
     }
 
     renderAll();
+    checkBirthdayBonus();
     toast('🌅 새로운 하루가 시작됐어요! 오늘도 화이팅!');
     return true;
   }
@@ -13177,6 +13366,7 @@ window._createState = _createState;
   applyUserProfile(); // 로그인된 사용자 프로필 적용 (인사말 포함)
   cleanExpiredStickers(); // 하루 지난 스티커 자동 삭제
   renderAll();
+  checkBirthdayBonus(); // 아이 생일 체크 및 보너스 지급
 
   // 날씨/미세먼지 데이터 가져오기
   fetchWeather();
