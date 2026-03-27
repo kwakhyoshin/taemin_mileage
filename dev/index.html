@@ -100,8 +100,6 @@ body.dark[data-tab="home"]{--tab-color:#5457D9;--tab-color2:#727BE0;--tab-shadow
 body.dark[data-tab="log"]{--tab-color:#DC3550;--tab-color2:#E5606F;--tab-shadow:rgba(220,53,80,0.3)}
 body.dark[data-tab="rwd"]{--tab-color:#D98E09;--tab-color2:#E0A820;--tab-shadow:rgba(217,142,9,0.3)}
 body.dark[data-tab="hist"]{--tab-color:#7A4FDD;--tab-color2:#9578E8;--tab-shadow:rgba(122,79,221,0.3)}
-body[data-tab="adm"]{--tab-color:#64748B;--tab-color2:#94A3B8;--tab-shadow:rgba(100,116,139,0.3);--tab-lt:rgba(100,116,139,.1);--tab-lt-dk:rgba(100,116,139,.15)}
-body.dark[data-tab="adm"]{--tab-color:#5A6680;--tab-color2:#7A8AA0;--tab-shadow:rgba(90,102,128,0.3)}
 /* Dark mode: auth & form components */
 body.dark .auth-screen.toss-style{background:#0F172A}
 body.dark .auth-card{background:#1E293B;box-shadow:0 20px 60px rgba(0,0,0,.5)}
@@ -462,8 +460,8 @@ body.dark .rec-day-tag.day-1{background:#312E81;color:#A5B4FC}
 .icon-btn:active{transform:scale(.9)}
 .icon-btn.del{color:#EF4444}
 .icon-btn.del:active{background:#FEE2E2}
-.tog{width:51px;height:31px;border-radius:999px;background:#6366F1;position:relative;cursor:pointer;flex-shrink:0;border:none;transition:background .25s cubic-bezier(.4,0,.2,1);-webkit-tap-highlight-color:transparent;padding:0;box-sizing:content-box;-webkit-appearance:none;appearance:none}
-.tog.tog-sm{width:44px;height:26px;border-radius:999px}
+.tog{width:51px;height:31px;border-radius:16px;background:#6366F1;position:relative;cursor:pointer;flex-shrink:0;border:none;transition:background .25s cubic-bezier(.4,0,.2,1);-webkit-tap-highlight-color:transparent;padding:0;box-sizing:content-box}
+.tog.tog-sm{width:44px;height:26px;border-radius:13px}
 .tog.tog-sm .tog-dot{width:22px;height:22px}
 .tog.tog-sm:not(.off) .tog-dot{transform:translateX(18px)}
 .tog.off{background:#D1D5DB}
@@ -1034,28 +1032,29 @@ body.dark .adm-child-btn.on{background:rgba(255,107,53,.15)}
 
 /* ── Family Popup (Toss-style genealogy) ── */
 .family-popup-bg{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.45);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);animation:fadeIn .15s}
-.family-popup{position:fixed;z-index:501;display:flex;flex-direction:column;align-items:center;gap:0;animation:familyPopUp .3s cubic-bezier(.34,1.2,.64,1);padding:28px 32px 22px;background:rgba(255,255,255,.12);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border-radius:28px;border:1px solid rgba(255,255,255,.2);box-shadow:0 8px 40px rgba(0,0,0,.32)}
-body.dark .family-popup{background:rgba(15,23,42,.8);border-color:rgba(255,255,255,.12)}
+.family-popup{position:fixed;z-index:501;display:flex;flex-direction:column;align-items:center;gap:0;animation:familyPopUp .3s cubic-bezier(.34,1.2,.64,1);padding:20px 20px 14px;background:rgba(255,255,255,.1);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-radius:24px;border:1px solid rgba(255,255,255,.18);box-shadow:0 8px 32px rgba(0,0,0,.28)}
+body.dark .family-popup{background:rgba(20,20,32,.72);border-color:rgba(255,255,255,.1)}
 @keyframes familyPopUp{from{opacity:0;transform:translateY(24px) scale(.85)}to{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes fpBounceSelect{0%{transform:scale(1)}40%{transform:scale(1.25)}70%{transform:scale(1.12)}100%{transform:scale(1.18)}}
 .fp-section{display:flex;flex-direction:column;align-items:center;gap:6px;width:100%}
 .fp-section-label{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.45);align-self:flex-start;padding-left:2px}
-.fp-members-row{display:flex;gap:20px;justify-content:center}
+.fp-members-row{display:flex;gap:10px;justify-content:center}
 .fp-connector{width:2px;height:24px;background:rgba(255,255,255,.22);margin:4px auto}
 .family-popup-row{display:flex;gap:10px;position:relative;z-index:1;justify-content:center}
 .family-popup-parents{margin-bottom:0}
 .family-tree-connector{height:24px;position:relative;z-index:0}
 .family-popup-children{margin-top:0}
-.family-popup-item{display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .2s;padding:4px 8px 0}
-.family-popup-item:active{transform:scale(.9)}
-.family-popup-item.is-me .family-popup-name{color:#818CF8;font-weight:900}
-body.dark .family-popup-item.is-me .family-popup-name{color:#a5b4fc}
+.family-popup-item{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .2s;background:rgba(255,255,255,.1);border-radius:14px;padding:10px 12px 8px;border:1.5px solid rgba(255,255,255,.13);min-width:72px}
+body.dark .family-popup-item{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.09)}
+.family-popup-item:active{transform:scale(.92)}
+.family-popup-item.is-me{border-color:rgba(99,102,241,.65);background:rgba(99,102,241,.12);box-shadow:0 0 0 2px rgba(99,102,241,.25)}
+body.dark .family-popup-item.is-me{border-color:rgba(129,140,248,.7);background:rgba(99,102,241,.18)}
 .family-popup-item.selected .family-popup-avatar{animation:fpBounceSelect .35s cubic-bezier(.34,1.56,.64,1) forwards;border-color:#fff;box-shadow:0 0 0 3px var(--tab-color,#6366F1),0 6px 24px rgba(0,0,0,.3)}
-.family-popup-avatar{width:52px;height:52px;border-radius:50%;overflow:visible;border:2.5px solid rgba(255,255,255,.4);box-shadow:0 4px 14px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;background:var(--card);position:relative;transition:border-color .2s,box-shadow .2s;flex-shrink:0}
-.family-popup-item.is-me .family-popup-avatar{border-color:#818CF8;box-shadow:0 0 0 3px rgba(99,102,241,.45),0 4px 14px rgba(0,0,0,.18)}
+.family-popup-avatar{width:48px;height:48px;border-radius:50%;overflow:visible;border:2.5px solid rgba(255,255,255,.4);box-shadow:0 4px 14px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;background:var(--card);position:relative;transition:border-color .2s,box-shadow .2s;flex-shrink:0}
+.family-popup-item.is-me .family-popup-avatar{border-color:#818CF8;box-shadow:0 0 0 2px rgba(99,102,241,.35),0 4px 14px rgba(0,0,0,.18)}
 body.dark .family-popup-avatar{border-color:rgba(255,255,255,.25)}
 .family-popup-avatar svg,.family-popup-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
-.family-popup-name{font-size:12px;font-weight:800;color:rgba(255,255,255,.95);white-space:nowrap;text-align:center;text-shadow:0 1px 4px rgba(0,0,0,.3)}
+.family-popup-name{font-size:11px;font-weight:800;color:rgba(255,255,255,.92);white-space:nowrap;text-align:center}
 .fp-me-badge{font-size:9px;font-weight:800;color:#818CF8;background:rgba(99,102,241,.2);border-radius:5px;padding:1px 6px;line-height:1.5;white-space:nowrap}
 .family-popup-role,.fp-role-text{font-size:9px;font-weight:600;color:rgba(255,255,255,.48);white-space:nowrap;text-align:center}
 .fp-status{font-size:9px;font-weight:600;color:rgba(255,255,255,.38);white-space:nowrap}
@@ -1108,7 +1107,7 @@ body.dark .family-popup-avatar{border-color:rgba(255,255,255,.25)}
    세로 모드(portrait)에서는 사이드바 숨기고 하단 네비로 복귀
    ======================================== */
 @media(min-width:768px) and (orientation:portrait){
-  body{display:block}
+  body{display:block!important}
   .nav-container{position:fixed!important;bottom:0!important;top:auto!important;left:0!important;right:0!important;transform:none!important;width:100%!important;height:auto!important;z-index:100}
   .nav-container.docked{bottom:0!important;width:100%!important}
   .bottom-nav{flex-direction:row!important;align-items:center!important;gap:0!important;border-radius:20px 20px 0 0!important;padding:8px 8px calc(8px + env(safe-area-inset-bottom))!important;height:auto!important;background:var(--card)!important;border:none!important;border-top:.5px solid var(--bdr)!important;border-right:none!important;box-shadow:0 -4px 20px rgba(0,0,0,.06)!important;justify-content:center!important;width:100%!important}
@@ -1450,6 +1449,21 @@ body.dark .family-popup-avatar{border-color:rgba(255,255,255,.25)}
   #dash-p0 .dash-full-row{padding:0 28px}
   #dash-p0 .dash-masonry{columns:3;column-gap:24px;padding:0 28px}
   #dash-p0 .dash-brick .card{margin:0 0 18px}
+}
+
+/* ========================================
+   PHONE PORTRAIT SAFETY (max-width: 767px)
+   폰에서 절대로 사이드바가 보이지 않도록 강제 리셋
+   ======================================== */
+@media(max-width:767px){
+  body{display:block!important;margin-left:0!important;padding-left:0!important}
+  .nav-container{position:fixed!important;bottom:28px!important;top:auto!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important;width:auto!important;max-width:calc(100vw - 24px)!important;height:auto!important}
+  .nav-container.docked{bottom:0!important;left:0!important;right:0!important;width:100%!important;max-width:100%!important;transform:none!important}
+  .bottom-nav{flex-direction:row!important;height:auto!important;border-right:none!important;border-top:none!important}
+  .bottom-nav::before{display:none!important}
+  .scr{margin-left:0!important;width:100%!important;max-width:430px!important}
+  #s-badge{margin-left:0!important;width:100%!important}
+  .auth-screen{margin-left:0!important;width:100%!important}
 }
 
 /* ── DRAG & DROP ────────────────────────────────── */
@@ -2260,7 +2274,7 @@ button:disabled {
 <div class="auth-screen" id="auth-login">
   <div class="auth-card">
     <div class="auth-logo"><svg width="64" height="64" viewBox="0 0 200 200"><defs><linearGradient id="lb" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#4F46E5"/><stop offset="100%" stop-color="#7C3AED"/></linearGradient></defs><circle cx="100" cy="100" r="96" fill="url(#lb)"/><path d="M62,150 L62,98 L100,64 L138,98 L138,150 Z" fill="#fff" opacity=".96"/><rect x="87" y="118" width="26" height="32" rx="4" fill="#FF6B35"/><circle cx="100" cy="50" r="8" fill="#FF6B35"/></svg></div>
-    <div class="auth-title" style="font-size:28px;letter-spacing:-1px;display:flex;align-items:center;justify-content:center;gap:8px"><svg width="28" height="28" viewBox="0 0 200 200" style="flex-shrink:0"><defs><linearGradient id="ail" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#4F46E5"/><stop offset="100%" stop-color="#7C3AED"/></linearGradient></defs><circle cx="100" cy="100" r="96" fill="url(#ail)"/><path d="M62,150 L62,98 L100,64 L138,98 L138,150 Z" fill="#fff" opacity=".96"/><rect x="87" y="118" width="26" height="32" rx="4" fill="#FF6B35"/><circle cx="100" cy="50" r="8" fill="#FF6B35"/></svg>mile<span style="color:#FF6B35">.</span>ly</div>
+    <div class="auth-title" style="font-size:28px;letter-spacing:-1px">mile<span style="color:#FF6B35">.</span>ly</div>
     <div class="auth-sub">가족 계정으로 로그인하세요</div>
     <input type="text" class="auth-input" id="login-id" placeholder="아이디" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('login-pwd').focus()">
     <div class="pwd-wrap">
@@ -2277,7 +2291,7 @@ button:disabled {
 <div class="auth-screen hidden" id="auth-welcome">
   <div class="auth-card">
     <div class="auth-logo"><svg width="64" height="64" viewBox="0 0 200 200"><defs><linearGradient id="wb" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#4F46E5"/><stop offset="100%" stop-color="#7C3AED"/></linearGradient></defs><circle cx="100" cy="100" r="96" fill="url(#wb)"/><path d="M62,150 L62,98 L100,64 L138,98 L138,150 Z" fill="#fff" opacity=".96"/><rect x="87" y="118" width="26" height="32" rx="4" fill="#FF6B35"/><circle cx="100" cy="50" r="8" fill="#FF6B35"/></svg></div>
-    <div class="auth-title" style="font-size:28px;letter-spacing:-1px;display:flex;align-items:center;justify-content:center;gap:8px"><svg width="28" height="28" viewBox="0 0 200 200" style="flex-shrink:0"><defs><linearGradient id="ail" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#4F46E5"/><stop offset="100%" stop-color="#7C3AED"/></linearGradient></defs><circle cx="100" cy="100" r="96" fill="url(#ail)"/><path d="M62,150 L62,98 L100,64 L138,98 L138,150 Z" fill="#fff" opacity=".96"/><rect x="87" y="118" width="26" height="32" rx="4" fill="#FF6B35"/><circle cx="100" cy="50" r="8" fill="#FF6B35"/></svg>mile<span style="color:#FF6B35">.</span>ly</div>
+    <div class="auth-title" style="font-size:28px;letter-spacing:-1px">mile<span style="color:#FF6B35">.</span>ly</div>
     <div class="auth-sub">마일리와 함께 우리 가족의<br>좋은 습관을 만들어가요</div>
     <button class="auth-btn" onclick="startCreateFamily()" style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg> 시작하기
@@ -2606,15 +2620,8 @@ button:disabled {
       </div>
       <p id="smart-msg" style="font-size:13px;color:rgba(255,255,255,.75);margin-top:4px;font-weight:600;line-height:1.3"></p>
     </div>
-    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0">
-      <button id="home-profile-btn" onclick="openPfMenu()" style="width:36px;height:36px;border-radius:50%;border:2px solid rgba(255,255,255,.5);background:rgba(255,255,255,.15);cursor:pointer;padding:0;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-        <div id="home-profile-avatar" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.9)" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
-      </button>
-      <button class="dtog" onclick="toggleDark()" style="background:rgba(255,255,255,.2);border:none"><div class="dtog-in" id="dtog-ic" style="background:rgba(255,255,255,.9)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-3px"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></div></button>
-    </div>
+    <button class="dtog" onclick="toggleDark()" style="background:rgba(255,255,255,.2);border:none"><div class="dtog-in" id="dtog-ic" style="background:rgba(255,255,255,.9)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-3px"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></div></button>
   </div>
-  <!-- 가족 구성원 아바타 바 (홈탭) -->
-  <div id="home-family-bar" style="display:none;background:var(--tab-color,#6366F1);padding:0 16px 10px;overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch;scrollbar-width:none"></div>
   <div class="hero">
     <div class="streak-pill" id="streak-pill"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 01-7 7 7 7 0 01-7-7c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg> 0일 연속</div>
     <div class="hero-lbl" id="hero-lbl">나의 마일리지</div>
@@ -3204,9 +3211,9 @@ button:disabled {
       <svg viewBox="0 0 24 24"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
       <span class="nav-label">성과</span>
     </div>
-    <div class="nav-item" data-tab="adm" id="tab-adm" onclick="goTab('adm')" style="display:none">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-      <span class="nav-label">관리</span>
+    <div class="nav-divider"></div>
+    <div class="nav-users" id="tab-adm">
+      <!-- Dynamically rendered by renderNavUsers() -->
     </div>
   </nav>
 </div>
@@ -3630,31 +3637,20 @@ Object.entries(EMOJIS).forEach(([cat,arr])=>arr.forEach(e=>FLAT.push({e,cat,kw:E
 // ═══════════════════════════════════════════════
 // AUTH SYSTEM
 // ═══════════════════════════════════════════════
-// SVG 아바타 아이콘 (역할별 고유 캐릭터 일러스트 - viewBox 80x80 상반신)
+// SVG 아바타 아이콘
 // ── 역할 정의 (다가족) — SVG 아이콘 ──────────────────────────
-// 양육자(일반남) - 짧은 머리, 기본 셔츠
-const _SVG_PERSON_M='<svg viewBox="0 0 80 80" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 80C12 62 22 54 40 54C58 54 68 62 68 80" fill="currentColor" opacity=".8"/><rect x="37" y="41" width="6" height="15" rx="3" fill="#FBBF24"/><circle cx="40" cy="27" r="14" fill="#FBBF24"/><path d="M26 26C26 12 54 12 54 26C52 18 48 13 40 13C32 13 28 18 26 26Z" fill="#5C3A1E"/><circle cx="35.5" cy="27.5" r="2" fill="#3D2B1F"/><circle cx="44.5" cy="27.5" r="2" fill="#3D2B1F"/><path d="M35.5 34Q40 37.5 44.5 34" stroke="#A0522D" stroke-width="1.5" fill="none"/></svg>';
-// 양육자(일반여) - 긴 머리, 기본 블라우스
-const _SVG_PERSON_F='<svg viewBox="0 0 80 80" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 80C14 62 22 54 40 54C58 54 66 62 66 80" fill="currentColor" opacity=".8"/><rect x="37" y="41" width="6" height="15" rx="3" fill="#FBBF24"/><circle cx="40" cy="27" r="14" fill="#FBBF24"/><path d="M26 27C26 13 54 13 54 27C54 34 56 46 52 54C47 60 33 60 28 54C24 46 26 34 26 27Z" fill="#8B5E3C"/><circle cx="35.5" cy="27" r="2" fill="#3D2B1F"/><circle cx="44.5" cy="27" r="2" fill="#3D2B1F"/><path d="M35.5 33.5Q40 37 44.5 33.5" stroke="#A0522D" stroke-width="1.5" fill="none"/></svg>';
-// 노인(일반) - 흰 머리
-const _SVG_ELDER='<svg viewBox="0 0 80 80" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 80C12 62 21 54 40 54C59 54 68 62 68 80" fill="currentColor" opacity=".8"/><rect x="37" y="41" width="6" height="15" rx="3" fill="#FBBF24"/><circle cx="40" cy="27" r="14" fill="#FBBF24"/><path d="M26 26C27 13 53 13 54 26C52 18 48 14 40 14C32 14 28 18 26 26Z" fill="#D1D5DB"/><circle cx="35.5" cy="27.5" r="2" fill="#3D2B1F"/><circle cx="44.5" cy="27.5" r="2" fill="#3D2B1F"/><path d="M35.5 35Q40 38.5 44.5 35" stroke="#A0522D" stroke-width="1.5" fill="none"/></svg>';
-// 아이(남) - 큰 머리, 뾰족한 머리카락, 밝은 표정
-const _SVG_CHILD_M='<svg viewBox="0 0 80 80" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M16 80C16 63 24 56 40 56C56 56 64 63 64 80" fill="currentColor" opacity=".8"/><rect x="37" y="43" width="6" height="15" rx="3" fill="#FBBF24"/><circle cx="40" cy="29" r="15" fill="#FBBF24"/><path d="M25 27C25 13 55 13 55 27C53 19 49 14 40 14C31 14 27 19 25 27Z" fill="#5C3A1E"/><path d="M28 21L25 17" stroke="#5C3A1E" stroke-width="2" fill="none"/><path d="M40 15L40 11" stroke="#5C3A1E" stroke-width="2" fill="none"/><path d="M52 21L55 17" stroke="#5C3A1E" stroke-width="2" fill="none"/><circle cx="35" cy="29" r="2.5" fill="#3D2B1F"/><circle cx="45" cy="29" r="2.5" fill="#3D2B1F"/><path d="M34 36Q40 40.5 46 36" stroke="#A0522D" stroke-width="1.8" fill="none"/></svg>';
-// 아이(여) - 큰 머리, 양갈래 머리, 밝은 표정
-const _SVG_CHILD_F='<svg viewBox="0 0 80 80" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M16 80C16 63 24 56 40 56C56 56 64 63 64 80" fill="currentColor" opacity=".8"/><rect x="37" y="43" width="6" height="15" rx="3" fill="#FBBF24"/><circle cx="40" cy="29" r="15" fill="#FBBF24"/><path d="M25 27C25 13 55 13 55 27C53 19 49 14 40 14C31 14 27 19 25 27Z" fill="#8B5E3C"/><circle cx="22" cy="26" r="5" fill="#8B5E3C"/><circle cx="58" cy="26" r="5" fill="#8B5E3C"/><path d="M25 25L22 23" stroke="#8B5E3C" stroke-width="2" fill="none"/><path d="M55 25L58 23" stroke="#8B5E3C" stroke-width="2" fill="none"/><circle cx="35" cy="29" r="2.5" fill="#3D2B1F"/><circle cx="45" cy="29" r="2.5" fill="#3D2B1F"/><path d="M34 36Q40 40.5 46 36" stroke="#A0522D" stroke-width="1.8" fill="none"/></svg>';
-// 역할별 차별화 SVG 아이콘 (80x80 상반신 일러스트)
-// 아빠 - 짧은 검은 머리, 넥타이, 넓은 어깨
-const _SVG_DAD='<svg viewBox="0 0 80 80" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M8 80C8 59 18 54 40 54C62 54 72 59 72 80" fill="currentColor" opacity=".85"/><path d="M35 54L37.5 62L40 59L42.5 62L45 54" fill="white" opacity=".9"/><polygon points="40,61 38.5,71 40,73.5 41.5,71" fill="currentColor" opacity=".45"/><rect x="37" y="41" width="6" height="15" rx="3" fill="#FBBF24"/><circle cx="40" cy="27" r="14" fill="#FBBF24"/><path d="M26 26C26 12 54 12 54 26C52 18 48 13 40 13C32 13 28 18 26 26Z" fill="#3D2B1F"/><path d="M31 22.5L37 21.5" stroke="#3D2B1F" stroke-width="2" fill="none"/><path d="M43 21.5L49 22.5" stroke="#3D2B1F" stroke-width="2" fill="none"/><circle cx="35.5" cy="27" r="2.2" fill="#3D2B1F"/><circle cx="44.5" cy="27" r="2.2" fill="#3D2B1F"/><path d="M38.5 30.5Q40 32 41.5 30.5" stroke="#C8956C" stroke-width="1.2" fill="none"/><path d="M36 34Q40 37.5 44 34" stroke="#A0522D" stroke-width="1.5" fill="none"/></svg>';
-// 엄마 - 긴 갈색 머리(어깨까지), 이어링, 부드러운 표정
-const _SVG_MOM='<svg viewBox="0 0 80 80" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 80C14 61 22 54 40 54C58 54 66 61 66 80" fill="currentColor" opacity=".85"/><rect x="37" y="41" width="6" height="15" rx="3" fill="#FBBF24"/><circle cx="40" cy="27" r="14" fill="#FBBF24"/><path d="M26 27C26 13 54 13 54 27C54 34 56 47 52 54C47 60 33 60 28 54C24 47 26 34 26 27Z" fill="#8B5E3C"/><circle cx="24" cy="33" r="2.5" fill="#F59E0B" stroke="#D97706" stroke-width="1"/><circle cx="56" cy="33" r="2.5" fill="#F59E0B" stroke="#D97706" stroke-width="1"/><path d="M33 22.5L37.5 22" stroke="#5C3A1E" stroke-width="1.5" fill="none"/><path d="M42.5 22L47 22.5" stroke="#5C3A1E" stroke-width="1.5" fill="none"/><circle cx="35.5" cy="27" r="2" fill="#3D2B1F"/><circle cx="44.5" cy="27" r="2" fill="#3D2B1F"/><path d="M38.5 30.5Q40 32 41.5 30.5" stroke="#C8956C" stroke-width="1.2" fill="none"/><path d="M35.5 34Q40 37.5 44.5 34" stroke="#A0522D" stroke-width="1.5" fill="none"/></svg>';
-// 할아버지 - 흰/회색 머리, 둥근 안경, 주름
-const _SVG_GRANDPA='<svg viewBox="0 0 80 80" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 80C12 61 21 54 40 54C59 54 68 61 68 80" fill="currentColor" opacity=".85"/><rect x="37" y="41" width="6" height="15" rx="3" fill="#FBBF24"/><circle cx="40" cy="27" r="14" fill="#FBBF24"/><path d="M26 26C27 13 53 13 54 26C52 18 48 14 40 14C32 14 28 18 26 26Z" fill="#D1D5DB"/><path d="M26 26C24 27 24 31 26 32" stroke="#D1D5DB" stroke-width="3" fill="none"/><path d="M54 26C56 27 56 31 54 32" stroke="#D1D5DB" stroke-width="3" fill="none"/><circle cx="35" cy="27.5" r="4.5" stroke="#6B7280" stroke-width="1.5"/><circle cx="45" cy="27.5" r="4.5" stroke="#6B7280" stroke-width="1.5"/><path d="M39.5 27.5H40.5" stroke="#6B7280" stroke-width="1.5" fill="none"/><path d="M30.5 27.5H27" stroke="#6B7280" stroke-width="1.5" fill="none"/><path d="M49.5 27.5H53" stroke="#6B7280" stroke-width="1.5" fill="none"/><circle cx="35" cy="27.5" r="2" fill="#3D2B1F"/><circle cx="45" cy="27.5" r="2" fill="#3D2B1F"/><path d="M30 33C30.5 31.5 31.5 31 32.5 31.5" stroke="#C8956C" stroke-width="1" fill="none"/><path d="M47.5 31.5C48.5 31 49.5 31.5 50 33" stroke="#C8956C" stroke-width="1" fill="none"/><path d="M35.5 36Q40 39.5 44.5 36" stroke="#A0522D" stroke-width="1.5" fill="none"/></svg>';
-// 할머니 - 흰 올림머리(번), 따뜻한 미소, 진주 목걸이
-const _SVG_GRANDMA='<svg viewBox="0 0 80 80" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 80C14 61 22 54 40 54C58 54 66 61 66 80" fill="currentColor" opacity=".85"/><circle cx="37" cy="49" r="2" fill="#9CA3AF"/><circle cx="40" cy="50.5" r="2" fill="#9CA3AF"/><circle cx="43" cy="49" r="2" fill="#9CA3AF"/><rect x="37" y="41" width="6" height="15" rx="3" fill="#FBBF24"/><circle cx="40" cy="27" r="14" fill="#FBBF24"/><circle cx="40" cy="15" r="7" fill="#E5E7EB"/><path d="M26 27C26 13 54 13 54 27C54 20 50 15 40 15C30 15 26 20 26 27Z" fill="#E5E7EB"/><path d="M26 27C24 28 24 32 26 33" stroke="#E5E7EB" stroke-width="3" fill="none"/><path d="M54 27C56 28 56 32 54 33" stroke="#E5E7EB" stroke-width="3" fill="none"/><path d="M32 23L36 22.5" stroke="#9CA3AF" stroke-width="1.5" fill="none"/><path d="M44 22.5L48 23" stroke="#9CA3AF" stroke-width="1.5" fill="none"/><circle cx="35.5" cy="28" r="2" fill="#3D2B1F"/><circle cx="44.5" cy="28" r="2" fill="#3D2B1F"/><path d="M30 32.5C30.5 31 31.5 30.5 32.5 31" stroke="#C8956C" stroke-width="1" fill="none"/><path d="M47.5 31C48.5 30.5 49.5 31 50 32.5" stroke="#C8956C" stroke-width="1" fill="none"/><path d="M34.5 36Q40 40 45.5 36" stroke="#A0522D" stroke-width="2" fill="none"/></svg>';
-// 외할아버지 - 흰 머리, 사각 안경(할아버지와 구분)
-const _SVG_GRANDPA_M='<svg viewBox="0 0 80 80" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 80C12 61 21 54 40 54C59 54 68 61 68 80" fill="currentColor" opacity=".85"/><rect x="37" y="41" width="6" height="15" rx="3" fill="#FBBF24"/><circle cx="40" cy="27" r="14" fill="#FBBF24"/><path d="M27 25C28 13 52 13 53 25C51 18 47 14 40 14C33 14 29 18 27 25Z" fill="#D1D5DB"/><path d="M27 25C25 27 25 31 27 32" stroke="#D1D5DB" stroke-width="3" fill="none"/><path d="M53 25C55 27 55 31 53 32" stroke="#D1D5DB" stroke-width="3" fill="none"/><rect x="30" y="23.5" width="9" height="6.5" rx="1.5" stroke="#6B7280" stroke-width="1.5"/><rect x="41" y="23.5" width="9" height="6.5" rx="1.5" stroke="#6B7280" stroke-width="1.5"/><path d="M39 26.8H41" stroke="#6B7280" stroke-width="1.5" fill="none"/><path d="M30 26.8H27.5" stroke="#6B7280" stroke-width="1.5" fill="none"/><path d="M50 26.8H52.5" stroke="#6B7280" stroke-width="1.5" fill="none"/><circle cx="34.5" cy="26.8" r="2" fill="#3D2B1F"/><circle cx="45.5" cy="26.8" r="2" fill="#3D2B1F"/><path d="M35.5 35.5Q40 38.5 44.5 35.5" stroke="#A0522D" stroke-width="1.5" fill="none"/></svg>';
-// 외할머니 - 흰 파마 머리(웨이브), 부드러운 미소
-const _SVG_GRANDMA_M='<svg viewBox="0 0 80 80" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 80C14 61 22 54 40 54C58 54 66 61 66 80" fill="currentColor" opacity=".85"/><rect x="37" y="41" width="6" height="15" rx="3" fill="#FBBF24"/><circle cx="40" cy="27" r="14" fill="#FBBF24"/><path d="M26 27C26 21 27 16 31 13C26 15 24 20 26 27Z" fill="#E5E7EB"/><path d="M54 27C54 21 53 16 49 13C54 15 56 20 54 27Z" fill="#E5E7EB"/><path d="M31 13C33 10 36 9 40 9C44 9 47 10 49 13" stroke="#E5E7EB" stroke-width="6" stroke-linecap="round" fill="none"/><path d="M26 29C23 27 21 29 22 31C23 33 26 32 26 29Z" fill="#E5E7EB"/><path d="M54 29C57 27 59 29 58 31C57 33 54 32 54 29Z" fill="#E5E7EB"/><path d="M28 22C29 18 31 15 34 13" stroke="#9CA3AF" stroke-width="1.8" stroke-linecap="round" fill="none"/><path d="M36 11C38 10 42 10 44 11" stroke="#9CA3AF" stroke-width="1.8" stroke-linecap="round" fill="none"/><path d="M46 13C49 15 51 18 52 22" stroke="#9CA3AF" stroke-width="1.8" stroke-linecap="round" fill="none"/><path d="M33 22.5L37.5 22" stroke="#9CA3AF" stroke-width="1.5" fill="none"/><path d="M42.5 22L47 22.5" stroke="#9CA3AF" stroke-width="1.5" fill="none"/><circle cx="35.5" cy="27.5" r="2" fill="#3D2B1F"/><circle cx="44.5" cy="27.5" r="2" fill="#3D2B1F"/><path d="M30 33C30.5 31.5 31 31 32 31.5" stroke="#C8956C" stroke-width="1" fill="none"/><path d="M48 31.5C49 31 49.5 31.5 50 33" stroke="#C8956C" stroke-width="1" fill="none"/><path d="M35 36Q40 39.5 45 36" stroke="#A0522D" stroke-width="1.8" fill="none"/></svg>';
+const _SVG_PERSON_M='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg>';
+const _SVG_PERSON_F='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><path d="M8 7c0-3 2-5 4-5s4 2 4 5" stroke-width="2.2"/></svg>';
+const _SVG_ELDER='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><path d="M9 5h6" stroke-width="1.5"/></svg>';
+const _SVG_CHILD_M='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><circle cx="12" cy="7" r="2" fill="currentColor" opacity=".15"/></svg>';
+const _SVG_CHILD_F='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><path d="M8 5c0-2 2-3.5 4-3.5s4 1.5 4 3.5" stroke-width="2"/><circle cx="12" cy="7" r="2" fill="currentColor" opacity=".15"/></svg>';
+// 역할별 차별화 SVG 아이콘
+const _SVG_DAD='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><path d="M9 5.5c0-1.5 1.3-2.5 3-2.5s3 1 3 2.5" stroke-width="2.6"/></svg>';
+const _SVG_MOM='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><path d="M8.5 6c0-3 1.5-5 3.5-5s3.5 2 3.5 5"/><path d="M7.5 10c-1 1.5-1 4 0 5.5"/><path d="M16.5 10c1 1.5 1 4 0 5.5"/></svg>';
+const _SVG_GRANDPA='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><circle cx="10.2" cy="9.2" r="1.4" stroke-width="1.3"/><circle cx="13.8" cy="9.2" r="1.4" stroke-width="1.3"/><path d="M11.6 9.2h.8M8.8 9.2H8M15.2 9.2H16" stroke-width="1.2"/><path d="M9 6c0-2 1-3 3-3" stroke-width="1.5"/></svg>';
+const _SVG_GRANDMA='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><path d="M8.5 5c-.5-2.5.5-4 3.5-4s4 1.5 3.5 4"/><path d="M7.5 8.5c-2 .3-3-.7-3-1.8s1-2.2 2.5-1.8"/><path d="M16.5 8.5c2 .3 3-.7 3-1.8s-1-2.2-2.5-1.8"/></svg>';
+const _SVG_GRANDPA_M='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><rect x="8.5" y="8.2" width="3" height="2" rx="0.6" stroke-width="1.3"/><rect x="12.5" y="8.2" width="3" height="2" rx="0.6" stroke-width="1.3"/><path d="M11.5 9.2h1M8 9.2H7.5M15.5 9.2H16.5" stroke-width="1.2"/><path d="M9 5.5c0-2 1-3 3-3s3 1 3 3" stroke-width="1.5"/></svg>';
+const _SVG_GRANDMA_M='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.5" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><path d="M9 6c0-2.5 1.3-5 3-5s3 2.5 3 5"/><circle cx="12" cy="2.8" r="1.8" stroke-width="1.5" fill="none"/></svg>';
 
 const ROLE_DEFS = {
   dad:       {label:'아빠',      svg:_SVG_DAD,      type:'caregiver', color:'#DBEAFE', textColor:'#3B82F6'},
@@ -5162,10 +5158,6 @@ function applyUserProfile() {
   const navIcon = document.getElementById('nav-profile-icon');
   if (navIcon) navIcon.innerHTML = getAvatarHTML(currentUser, 44);
 
-  // Update home top profile icon
-  const homeProfileAvatar = document.getElementById('home-profile-avatar');
-  if (homeProfileAvatar) homeProfileAvatar.innerHTML = getAvatarHTML(currentUser, 34);
-
   // Update greeting
   if (greetingEl) {
     const greetingTxt = getCurrentGreeting(currentUser);
@@ -5260,25 +5252,36 @@ const CYCLE_LABEL = {daily:'매일',weekly:'매주',monthly:'매달',none:'제�
 const CYCLE_CHIP  = {daily:'c-or',weekly:'c-pu',monthly:'c-rd',none:'c-gn'};
 
 /* TAB COLOR CONSTANTS */
-const TAB_COLORS = {home:'#6366F1', log:'#F43F5E', rwd:'#F59E0B', hist:'#8B5CF6', adm:'#64748B'};
+const TAB_COLORS = {home:'#6366F1', log:'#F43F5E', rwd:'#F59E0B', hist:'#8B5CF6'};
 const TAB_COLORS2 = {home:'#818CF8', log:'#FB7185', rwd:'#FBBF24', hist:'#A78BFA'};
 
 const DACTS = [
-  {id:'a1', emoji:'🌅',name:'아침 기상',   desc:'일찍 일어나기',           pts:30,maxDay:1,cycle:'daily',active:true,showHome:true},
-  {id:'a2', emoji:'🦷',name:'양치질',      desc:'아침/저녁 양치',           pts:10,maxDay:1,cycle:'daily',active:true,showHome:true},
-  {id:'a3', emoji:'🎒',name:'학교 준비',   desc:'스스로 학교 준비하기',     pts:20,maxDay:1,cycle:'daily',active:true,showHome:true},
-  {id:'a4', emoji:'📚',name:'숙제 완료',   desc:'학교 숙제 완료',           pts:30,maxDay:1,cycle:'daily',active:true,showHome:true},
-  {id:'a5', emoji:'📖',name:'독서 30분',   desc:'30분 이상 독서',           pts:30,maxDay:1,cycle:'daily',active:true,showHome:true},
-  {id:'a6', emoji:'🧹',name:'정리정돈',    desc:'방 정리 및 청소',          pts:20,maxDay:1,cycle:'daily',active:true,showHome:true},
-  {id:'a7', emoji:'🏃',name:'운동/산책',   desc:'운동 또는 산책하기',       pts:30,maxDay:1,cycle:'daily',active:true,showHome:false},
-  {id:'a8', emoji:'🌙',name:'일찍 취침',   desc:'일찍 자리에 들기',         pts:20,maxDay:1,cycle:'daily',active:true,showHome:false},
+  {id:'a1', emoji:'🦷',name:'양치질',              desc:'아침/저녁 양치',              pts:20,maxDay:1,cycle:'daily',  active:true,showHome:true},
+  {id:'a2', emoji:'🧼',name:'세수하기',             desc:'아침/저녁 세수',              pts:10,maxDay:1,cycle:'daily',  active:true,showHome:true},
+  {id:'a3', emoji:'💊',name:'영양제 먹기',          desc:'매일 아침 영양제 복용',        pts:15,maxDay:1,cycle:'daily',  active:true,showHome:true},
+  {id:'a4', emoji:'📚',name:'숙제하기',             desc:'학교 숙제 완료',              pts:50,maxDay:1,cycle:'daily',  active:true,showHome:true},
+  {id:'a5', emoji:'📖',name:'추가 공부하기',        desc:'20분 이상 자기주도 학습',      pts:40,maxDay:1,cycle:'daily',  active:true,showHome:true},
+  {id:'a6', emoji:'😊',name:'하루종일 짜증 안내기', desc:'하루 동안 짜증 없이 지내기',   pts:30,maxDay:1,cycle:'daily',  active:true,showHome:true},
+  {id:'a7', emoji:'🤝',name:'어른들께 인사잘하기',  desc:'만나는 어른께 먼저 인사',      pts:20,maxDay:1,cycle:'daily',  active:true,showHome:false},
+  {id:'a8', emoji:'🏃',name:'달리기하기',           desc:'30분 이상 달리기',            pts:35,maxDay:0,cycle:'daily',  active:true,showHome:false},
+  {id:'a9', emoji:'💪',name:'코어운동하기',         desc:'플랭크, 윗몸일으키기 등',      pts:30,maxDay:0,cycle:'daily',  active:true,showHome:false},
+  {id:'a10',emoji:'🛒',name:'심부름하기',          desc:'부모님 심부름 완료',           pts:25,maxDay:0,cycle:'none',   active:true,showHome:false},
+  {id:'a11',emoji:'🚲',name:'오버더바이크 타기',   desc:'오버더바이크 운동 완료',        pts:35,maxDay:0,cycle:'daily',  active:true,showHome:false},
+  {id:'a12',emoji:'🚴',name:'자전거 연습하기',     desc:'자전거 타기 연습',             pts:30,maxDay:0,cycle:'daily',  active:true,showHome:false},
+  {id:'a13',emoji:'🧹',name:'방 청소하기',         desc:'방 정리 및 청소',              pts:40,maxDay:0,cycle:'daily',  active:true,showHome:false},
+  {id:'a14',emoji:'🛏️',name:'이불 개기',           desc:'아침에 이불 정리',             pts:15,maxDay:1,cycle:'daily',  active:true,showHome:false},
+  {id:'a15',emoji:'🍽️',name:'식사 후 정리',        desc:'밥 먹고 그릇 정리하기',        pts:10,maxDay:2,cycle:'daily',  active:true,showHome:false},
 ];
 const DRWDS = [
-  {id:'r1',emoji:'🍫',name:'간식 선택권', pts:50, goal:false},
-  {id:'r2',emoji:'🎮',name:'게임 30분',   pts:100,goal:false},
-  {id:'r3',emoji:'🍽️',name:'외식 선택',  pts:200,goal:false},
-  {id:'r4',emoji:'🚗',name:'특별 외출',   pts:300,goal:false},
-  {id:'r5',emoji:'🎁',name:'원하는 선물', pts:500,goal:true},
+  {id:'r1',emoji:'🧱',name:'레고 닌자고',         pts:1500,goal:true},
+  {id:'r2',emoji:'🔫',name:'BB탄 총 장난감',      pts:1200,goal:false},
+  {id:'r3',emoji:'🎮',name:'닌텐도 1시간 추가',   pts:200, goal:false},
+  {id:'r4',emoji:'📺',name:'유튜브 1시간 추가',   pts:150, goal:false},
+  {id:'r5',emoji:'📱',name:'패드게임 1시간 추가', pts:150, goal:false},
+  {id:'r6',emoji:'🎬',name:'영화 관람',           pts:600, goal:false},
+  {id:'r7',emoji:'🍕',name:'피자 파티',           pts:800, goal:false},
+  {id:'r8',emoji:'🍦',name:'아이스크림',          pts:100, goal:false},
+  {id:'r9',emoji:'🎳',name:'볼링',                pts:500, goal:false},
 ];
 
 // ── BADGES (뱃지/업적) ──────────────────────────────────
@@ -10994,43 +10997,46 @@ function closeEP(){document.getElementById('ep-pop').classList.remove('open');do
 // ── TABS / MODAL ──────────────────────────────
 function goTab(tab){
   if(tab==='adm'){
-    if(!isCaregiverUser()){
+    // 자녀 역할은 관리자 접근 차단
+    const member=S.familyMeta?.members?.[currentUser];
+    if(member&&member.role==='child'){
       toast('관리자 권한이 없습니다');
       return;
     }
-    adminOK=true;
-    reallyGoTab('adm');
+    // 관리 탭은 플로팅 메뉴를 먼저 띄움
+    openPfMenu();
     return;
   }
   reallyGoTab(tab);
 }
 
 function positionMenuAboveIcon(menuEl){
-  const icon=document.getElementById('home-profile-btn')||document.getElementById('nav-family-btn')||document.querySelector('.nav-stacked-avatar.me')||document.querySelector('.nav-user-wrap.me')||document.getElementById('tab-adm');
+  const icon=document.getElementById('nav-family-btn')||document.querySelector('.nav-stacked-avatar.me')||document.querySelector('.nav-user-wrap.me')||document.getElementById('tab-adm');
   if(!icon){return;}
   const rect=icon.getBoundingClientRect();
-  const menuW=menuEl.offsetWidth||240;
+  const menuW=menuEl.offsetWidth||220;
+  // Position above the icon, centered
   let left=rect.left+rect.width/2-menuW/2;
+  // Keep within viewport
   if(left<8)left=8;
   if(left+menuW>window.innerWidth-8)left=window.innerWidth-8-menuW;
-  // 아이콘이 화면 상반부이면 아래에, 하반부이면 위에 배치
-  if(rect.top<window.innerHeight/2){
-    menuEl.style.top=(rect.bottom+10)+'px';
-    menuEl.style.bottom='auto';
-  }else{
-    menuEl.style.bottom=(window.innerHeight-rect.top+10)+'px';
-    menuEl.style.top='auto';
-  }
+  const bottom=window.innerHeight-rect.top+10;
   menuEl.style.left=left+'px';
+  menuEl.style.bottom=bottom+'px';
   menuEl.style.right='auto';
+  menuEl.style.top='auto';
 }
 function openPfMenu(){
   document.getElementById('pfm-bg').style.display='block';
   const menu=document.getElementById('pfm-menu');
   menu.style.display='block';
-  // 관리 탭이 별도 네비로 분리됐으므로 관리자 버튼 숨김
+  // 자녀 역할은 관리자 메뉴 숨기기
   const adminBtn=menu.querySelector('[onclick*="admin"]');
-  if(adminBtn) adminBtn.style.display='none';
+  if(adminBtn){
+    const member=S.familyMeta?.members?.[currentUser];
+    const isChild=member&&member.role==='child';
+    adminBtn.style.display=isChild?'none':'';
+  }
   positionMenuAboveIcon(menu);
 }
 function closePfMenu(){
@@ -11191,49 +11197,50 @@ function emitMoodParticles(){
 
 // ── NAV USERS RENDERING (Family Button + independent mode child tabs) ──
 function renderNavUsers(){
-  // 양육자에게만 관리 탭 표시
-  const tabAdm=document.getElementById('tab-adm');
-  if(tabAdm) tabAdm.style.display=isCaregiverUser()?'':'none';
-  // 홈탭 가족 아바타 바 렌더
-  renderHomeFamilyBar();
+  const container=document.getElementById('tab-adm');
+  if(!container)return;
+
+  // Calculate total unread across all other users
+  const otherIds=Object.keys(MEMBERS).filter(id=>id!==currentUser);
+  let totalUnread=0;
+  otherIds.forEach(id=>{totalUnread+=getUnreadCount(id);});
+
+  const mode=getFamilyMode();
+  const kids=getChildMemberIds();
+
+  // independent 모드 + 양육자 + 자녀 2명 이상: 자녀 아바타 탭 표시
+  if(mode==='independent'&&isCaregiverUser()&&kids.length>=2){
+    const currentViewed=getViewedMemberId();
+    let html='<div class="nav-child-tabs">';
+    kids.forEach(id=>{
+      const nm=MEMBERS[id]?.name||id;
+      const isActive=id===currentViewed;
+      const avatarHtml=getAvatarHTML(id,32);
+      html+=`<div class="nav-child-tab${isActive?' active':''}" onclick="switchViewingChild('${id}')" title="${nm}의 마일리지">
+        <div class="nav-child-avatar">${avatarHtml}</div>
+        <span class="nav-child-name">${nm}</span>
+      </div>`;
+    });
+    html+='</div>';
+    // 가족 버튼도 함께 표시
+    html+=`<div class="nav-family-btn" onclick="openFamilyPopup()" id="nav-family-btn" style="margin-top:2px">
+      <span class="nfb-icon"><svg viewBox="0 0 24 24" fill="var(--tab-color,#6366F1)" xmlns="http://www.w3.org/2000/svg"><circle cx="6" cy="8.5" r="2.4" opacity=".45"/><rect x="3.5" y="14" width="5" height="7.5" rx="2.5" opacity=".45"/><circle cx="18" cy="8.5" r="2.4" opacity=".45"/><rect x="15.5" y="14" width="5" height="7.5" rx="2.5" opacity=".45"/><circle cx="12" cy="6" r="3" opacity=".9"/><rect x="8.5" y="12.5" width="7" height="9" rx="3.5" opacity=".9"/></svg></span>
+      <span class="nfb-label">우리가족</span>
+      ${totalUnread>0?`<span class="nfb-badge">${totalUnread}</span>`:''}
+    </div>`;
+    container.innerHTML=html;
+    return;
+  }
+
+  // 기본: Family button — compact, single element
+  let html=`<div class="nav-family-btn" onclick="openFamilyPopup()" id="nav-family-btn">
+    <span class="nfb-icon"><svg viewBox="0 0 24 24" fill="var(--tab-color,#6366F1)" xmlns="http://www.w3.org/2000/svg"><circle cx="6" cy="8.5" r="2.4" opacity=".45"/><rect x="3.5" y="14" width="5" height="7.5" rx="2.5" opacity=".45"/><circle cx="18" cy="8.5" r="2.4" opacity=".45"/><rect x="15.5" y="14" width="5" height="7.5" rx="2.5" opacity=".45"/><circle cx="12" cy="6" r="3" opacity=".9"/><rect x="8.5" y="12.5" width="7" height="9" rx="3.5" opacity=".9"/></svg></span>
+    <span class="nfb-label">우리가족</span>
+    ${totalUnread>0?`<span class="nfb-badge">${totalUnread}</span>`:''}
+  </div>`;
+  container.innerHTML=html;
 }
 window.renderNavUsers=renderNavUsers;
-
-// ── 홈탭 가족 구성원 아바타 바 ──────────────────────
-function renderHomeFamilyBar(){
-  const bar=document.getElementById('home-family-bar');
-  if(!bar)return;
-  const allIds=Object.keys(MEMBERS);
-  if(allIds.length<=1){bar.style.display='none';return;}
-  bar.style.display='block';
-  let html='<div style="display:inline-flex;gap:12px;align-items:flex-start;padding:2px 0">';
-  allIds.forEach(id=>{
-    const m=MEMBERS[id];
-    if(!m)return;
-    const isMe=id===currentUser;
-    const nm=m.name||id;
-    const avatarHtml=getAvatarHTML(id,30);
-    const unread=(!isMe)?getUnreadCount(id):0;
-    const unreadBadge=unread>0?`<span style="position:absolute;top:-3px;right:-3px;background:#EF4444;color:#fff;font-size:8px;font-weight:900;border-radius:8px;min-width:14px;height:14px;display:inline-flex;align-items:center;justify-content:center;padding:0 3px;line-height:1">${unread}</span>`:'';
-    html+=`<div style="display:inline-flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;-webkit-tap-highlight-color:transparent" onclick="${isMe?'openPfMenu()':'openHomeMemberMenu(\''+id+'\')'}">
-      <div style="width:30px;height:30px;border-radius:50%;border:2px solid ${isMe?'rgba(255,255,255,.95)':'rgba(255,255,255,.4)'};overflow:visible;position:relative;flex-shrink:0">
-        <div style="width:100%;height:100%;border-radius:50%;overflow:hidden">${avatarHtml}</div>${unreadBadge}
-      </div>
-      <span style="font-size:9px;font-weight:700;color:${isMe?'rgba(255,255,255,.95)':'rgba(255,255,255,.6)'};white-space:nowrap">${isMe?'나':nm}</span>
-    </div>`;
-  });
-  html+='</div>';
-  bar.innerHTML=html;
-}
-window.renderHomeFamilyBar=renderHomeFamilyBar;
-
-function openHomeMemberMenu(userId){
-  // user-fm-bg도 함께 표시 (가족 팝업 없이 단독 호출)
-  document.getElementById('user-fm-bg').style.display='block';
-  _familyFlowActive=false;
-  onUserIconClick(userId);
-}
-window.openHomeMemberMenu=openHomeMemberMenu;
 
 // ── Family Popup — 가계도 (family tree) layout ──
 function openFamilyPopup(){
@@ -11298,10 +11305,13 @@ function openFamilyPopup(){
     item.onclick=function(e){ e.stopPropagation(); selectFpItem(id); isMe?onMeIconClick():onUserIconClick(id); };
     item.innerHTML=`
       <div class="family-popup-avatar"${isMe?' id="nav-profile-icon"':''}>
-        ${getAvatarHTML(id,50)}
+        ${getAvatarHTML(id,46)}
         ${!isMe&&unread>0?`<span class="family-popup-unread">${unread}</span>`:''}
       </div>
-      <span class="family-popup-name">${name}</span>`;
+      <span class="family-popup-name">${name}</span>
+      ${isMe?'<span class="fp-me-badge">나</span>':''}
+      <span class="family-popup-role">${roleLabel}</span>
+      <span class="fp-status${hasAccount?' has-account':''}">${hasAccount?'✓ 가입':'초대 대기'}</span>`;
     return item;
   }
 
@@ -11569,9 +11579,6 @@ function closeUserFm(){
   menu.style.display='none';
   menu.style.transform='';
   menu.style.animation='';
-  // home-family-bar 흐름에서 bg도 함께 닫기
-  const bg=document.getElementById('user-fm-bg');
-  if(bg) bg.style.display='none';
 }
 window.closeUserFm=closeUserFm;
 
@@ -11580,9 +11587,13 @@ function onMeIconClick(){
   closeUserFm();
   _familyFlowActive=true;
   const menu=document.getElementById('me-fm-menu');
-  // 관리 탭이 별도 네비로 분리됐으므로 관리자 버튼 숨김
+  // 자녀 역할은 관리자 메뉴 숨기기
   const adminBtn=menu.querySelector('[onclick*="admin"]');
-  if(adminBtn) adminBtn.style.display='none';
+  if(adminBtn){
+    const member=S.familyMeta?.members?.[currentUser];
+    const isChild=member&&member.role==='child';
+    adminBtn.style.display=isChild?'none':'';
+  }
   menu.style.left='50%';
   menu.style.top='40%';
   menu.style.bottom='auto';
@@ -12337,7 +12348,11 @@ function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t
  * sourceEl: 출발 요소, null이면 화면 중앙 하단
  */
 function flyCoinsToMileage(sourceEl, amount) {
-  const targetEl = document.getElementById('hero-pts');
+  const currentTab = document.body.getAttribute('data-tab') || 'home';
+  let targetId = 'hero-pts';
+  if (currentTab === 'log') targetId = 'log-today-pts';
+  else if (currentTab === 'rwd') targetId = 'rwd-hdr-pts';
+  const targetEl = document.getElementById(targetId);
   if (!targetEl) return;
   const tRect = targetEl.getBoundingClientRect();
   const tx = tRect.left + tRect.width / 2;
@@ -12404,15 +12419,15 @@ function flyCoinsToMileage(sourceEl, amount) {
         requestAnimationFrame(animate);
       } else {
         el.remove();
-        if (idx === count - 1) { _triggerHeroPtsBounce(); }
+        if (idx === count - 1) { _triggerHeroPtsBounce(targetId); }
       }
     }
     requestAnimationFrame(animate);
   });
 }
 
-function _triggerHeroPtsBounce() {
-  const el = document.getElementById('hero-pts');
+function _triggerHeroPtsBounce(targetId) {
+  const el = document.getElementById(targetId || 'hero-pts');
   if (!el) return;
   el.classList.remove('hero-pts-anim');
   void el.offsetWidth;
