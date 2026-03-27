@@ -4886,7 +4886,7 @@ async function fetchWeather(){
   
   // 미세먼지 가져오기 (WAQI API - 무료)
   try{
-    const aqiRes=await fetch(`https://api.waqi.info/feed/geo:${lat};${lon}/?token=demo`);
+    const aqiRes=await fetch(`https://api.waqi.info/feed/geo:${lat};${lon}/?token=bd6d9e6bea020fa25cdc98635e7116728c2a0f5d`);
     if(aqiRes.ok){
       const aqiData=await aqiRes.json();
       if(aqiData.status==='ok'&&aqiData.data&&aqiData.data.iaqi){
