@@ -3708,6 +3708,9 @@ function toSlide(wrapId, nextId) {
   curr.classList.remove('active');
   requestAnimationFrame(() => requestAnimationFrame(() => {
     next.classList.remove('exit-left');
+    next.style.transform='';
+    next.style.opacity='';
+    next.style.pointerEvents='';
     next.classList.add('active');
   }));
 }
@@ -3844,9 +3847,10 @@ function startCreateFamily(){
     if(!el)return;
     el.style.transition='none';
     el.classList.remove('active','exit-left');
-    el.style.transform=i===0?'translateX(0)':'translateX(100%)';
-    el.style.opacity=i===0?'1':'0';
-    el.style.pointerEvents=i===0?'auto':'none';
+    if(i===0) el.classList.add('active');
+    el.style.transform='';
+    el.style.opacity='';
+    el.style.pointerEvents='';
     requestAnimationFrame(()=>{el.style.transition='';});
   });
   showAuthScreen('create-1');
