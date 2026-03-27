@@ -1,0 +1,27 @@
+<svg viewBox="0 0 320 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366F1"/>
+      <stop offset="100%" stop-color="#818CF8"/>
+    </linearGradient>
+  </defs>
+  <!-- Icon -->
+  <g transform="translate(42,50) scale(0.38)">
+    <circle cx="0" cy="0" r="96" fill="url(#bg)"/>
+    <path d="M-38-5v52c0 6 4 10 10 10h56c6 0 10-4 10-10V-5Z" fill="#fff" opacity="0.95"/>
+    <path d="M-48-5l48-40 48 40Z" fill="#FF6B35"/>
+    <rect x="-12" y="18" width="24" height="34" rx="4" fill="#10B981"/>
+    <circle cx="8" cy="36" r="2.5" fill="#FFD700"/>
+    <rect x="-32" y="6" width="14" height="14" rx="3" fill="#6366F1" opacity="0.25"/>
+    <rect x="18" y="6" width="14" height="14" rx="3" fill="#6366F1" opacity="0.25"/>
+    <g transform="translate(0,-48)">
+      <polygon points="0,-14 4,-5 13,-4 7,2 9,12 0,7 -9,12 -7,2 -13,-4 -4,-5" fill="#FFD700"/>
+    </g>
+  </g>
+  <!-- English brand name -->
+  <text x="90" y="44" font-family="'Nunito', -apple-system, sans-serif" font-size="38" font-weight="900" fill="#6366F1" letter-spacing="-0.5">maily</text>
+  <!-- Tagline -->
+  <text x="90" y="66" font-family="'Nunito', -apple-system, sans-serif" font-size="11" font-weight="700" fill="#10B981" letter-spacing="0.5">family mileage, family magic</text>
+  <!-- Accent star -->
+  <polygon points="248,20 250,26 256,27 252,30 253,36 248,33 243,36 244,30 240,27 246,26" fill="#FFD700" opacity="0.8"/>
+</svg>
