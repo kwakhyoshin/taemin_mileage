@@ -173,20 +173,18 @@ body.dark .dtog-in{transform:translateX(24px)}
 .home-top h1{font-size:24px;font-weight:900;color:rgba(255,255,255,.68)}
 
 /* HERO - Sticky on scroll, full width when stuck */
-.hero{margin:0;background:linear-gradient(180deg,var(--tab-color,#6366F1),var(--tab-color2,#818CF8));border-radius:0 0 38px 38px;padding:14px 20px 22px;color:#fff;position:sticky;top:0;z-index:10;overflow:hidden;box-shadow:0 4px 20px var(--tab-shadow,rgba(99,102,241,0.3));transition:border-radius .25s}
+.hero{margin:0;background:linear-gradient(180deg,var(--tab-color,#6366F1),var(--tab-color2,#818CF8));border-radius:0 0 38px 38px;padding:14px 20px 22px;color:#fff;position:sticky;top:0;z-index:10;overflow:hidden;box-shadow:0 4px 20px var(--tab-shadow,rgba(99,102,241,0.3))}
 .hero::after{content:'';position:absolute;bottom:-30px;left:20px;width:110px;height:110px;background:rgba(255,255,255,.08);border-radius:50%;pointer-events:none}
 .hero-lbl{font-size:14px;font-weight:700;opacity:.85}
 .hero-pts{font-size:58px;font-weight:900;letter-spacing:-2px;line-height:1}
 .hero-unit{font-size:18px;font-weight:700;opacity:.85}
 .hero-goal{font-size:15px;opacity:.82;margin-top:6px;font-weight:600;line-height:1.4;max-height:50px;overflow:hidden}
-.streak-pill{position:absolute;top:18px;right:18px;background:rgba(255,255,255,.2);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:800;transition:top .25s,padding .25s,font-size .25s}
+.streak-pill{position:absolute;top:18px;right:18px;background:rgba(255,255,255,.2);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:800}
 .prog-track{background:rgba(255,255,255,.25);border-radius:7px;height:14px;margin-top:14px}
 .prog-fill{background:rgba(255,255,255,.9);border-radius:7px;height:100%;transition:width .7s}
 .prog-row{display:flex;justify-content:space-between;margin-top:5px;font-size:11px;opacity:.75;font-weight:700}
 
-/* HERO compact state — NO padding change to prevent scroll jitter */
-.hero.compact .hero-goal{max-height:0;margin-top:0;opacity:0;overflow:hidden}
-.hero.compact .prog-row{font-size:10px}
+/* HERO compact state removed — rollback */
 
 /* SECTION — iOS Weather-style sticky scroll */
 .sec-group{position:relative;margin-top:4px}
@@ -228,40 +226,11 @@ body.dark .dtog-in{transform:translateX(24px)}
 /* LOG HEADER STICKY */
 .log-header-sticky{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,var(--tab-color,#6366F1) 0%,var(--tab-color2,#818CF8) 80%,color-mix(in srgb,var(--tab-color2,#818CF8) 80%,#fff) 100%);padding:18px 22px 18px;padding-top:calc(18px + env(safe-area-inset-top));margin:0 0 16px;border-radius:0 0 38px 38px;box-shadow:0 8px 32px var(--tab-shadow,rgba(99,102,241,0.35));overflow:hidden}
 .log-header-sticky::before{content:'';position:absolute;top:-40px;right:-20px;width:160px;height:160px;background:radial-gradient(circle,rgba(255,255,255,.1) 0%,transparent 70%);border-radius:50%;pointer-events:none}
-.log-header-sticky h2{font-size:26px;font-weight:900;color:#fff;transition:font-size .25s}
-.log-header-sticky p{font-size:14px;color:rgba(255,255,255,.85);margin-top:3px;font-weight:600;transition:font-size .25s,opacity .25s}
+.log-header-sticky h2{font-size:26px;font-weight:900;color:#fff}
+.log-header-sticky p{font-size:14px;color:rgba(255,255,255,.85);margin-top:3px;font-weight:600}
 
-/* COMPACT STATE for log/rwd/hist headers */
-.log-header-sticky{transition:border-radius .25s}
-.log-header-sticky.compact{padding:10px 20px 10px;padding-top:calc(10px + env(safe-area-inset-top))}
-.log-header-sticky.compact h2{font-size:16px}
-.log-header-sticky.compact p{font-size:0;margin:0;opacity:0;max-height:0;overflow:hidden}
-.log-header-sticky.compact .hdr-stats{margin-top:6px;padding:6px 8px;border-radius:10px}
-.log-header-sticky.compact .hdr-stat-num{font-size:16px}
-.log-header-sticky.compact .hdr-stat-lbl{font-size:10px}
-.log-header-sticky.compact .hdr-stat-divider{height:20px}
-
-.rwd-header-sticky{transition:border-radius .25s}
-.rwd-header-sticky.compact{padding:10px 20px 10px;padding-top:calc(10px + env(safe-area-inset-top))}
-.rwd-header-sticky.compact h2{font-size:16px!important}
-.rwd-header-sticky.compact p{font-size:0!important;margin:0!important;opacity:0;max-height:0;overflow:hidden}
-.rwd-header-sticky.compact .hdr-stats{margin-top:6px;padding:6px 8px;border-radius:10px}
-.rwd-header-sticky.compact .hdr-stat-num{font-size:16px}
-.rwd-header-sticky.compact .hdr-stat-lbl{font-size:10px}
-.rwd-header-sticky.compact .hdr-stat-divider{height:20px}
-
-.hist-hero{transition:border-radius .25s}
-.hist-hero.compact{padding:10px 20px 10px;padding-top:calc(10px + env(safe-area-inset-top))}
-.hist-hero.compact h2{font-size:16px}
-.hist-hero.compact p{font-size:0;margin:0;opacity:0;max-height:0;overflow:hidden}
-.hist-hero.compact .hdr-stats{margin-top:6px;padding:5px 6px;border-radius:10px}
-.hist-hero.compact .hdr-stat-num{font-size:14px}
-.hist-hero.compact .hdr-stat-lbl{font-size:10px}
-.hist-hero.compact .hdr-stat-divider{height:18px}
-
-.log-header-sticky h2,.rwd-header-sticky h2,.hist-hero h2{transition:font-size .25s}
-.log-header-sticky p,.rwd-header-sticky p,.hist-hero p{transition:font-size .25s,opacity .25s}
-.hdr-stats{display:flex;align-items:center;justify-content:center;gap:0;margin-top:12px;background:rgba(255,255,255,.15);border-radius:14px;padding:10px 8px;transition:border-radius .25s}
+/* Compact states removed — rollback */
+.hdr-stats{display:flex;align-items:center;justify-content:center;gap:0;margin-top:12px;background:rgba(255,255,255,.15);border-radius:14px;padding:10px 8px}
 .hdr-stats-4{gap:0}
 .hdr-stats-4 .hdr-stat-num{font-size:18px}
 .hdr-stats-4 .hdr-stat-lbl{font-size:9px}
@@ -1111,7 +1080,7 @@ body.dark .family-popup-item.selected .family-popup-avatar{border-color:rgba(255
 
   /* Hero — 풀 너비, 라운딩 없음 */
   .hero{border-radius:0;margin:0;position:sticky;top:0}
-  /* .hero.compact padding removed — JS handles smooth sizing without layout shift */
+  /* compact removed — rollback */
   .hero-pts{font-size:68px}
   .hero-unit{font-size:24px}
   .hero-goal{font-size:14px}
@@ -10959,31 +10928,7 @@ function reallyGoTab(tab){
     if(navC)navC.classList.remove('docked');
     _navDocked=false;
   }
-  // 모든 탭 compact 상태 초기화 + 홈탭 인사말 opacity 복원
-  const hero=document.querySelector('.hero');
-  if(hero){
-    hero.classList.remove('compact');
-    const defaultBr=window.innerWidth>=768?'0':'0 0 38px 38px';
-    hero.style.borderRadius=defaultBr;
-    const progTrack=hero.querySelector('.prog-track');
-    if(progTrack){progTrack.style.height='14px';progTrack.style.borderRadius='7px';}
-    const ptEl=hero.querySelector('.hero-pts');if(ptEl)ptEl.style.fontSize='';
-    const lblEl=hero.querySelector('.hero-lbl');if(lblEl)lblEl.style.fontSize='';
-    const unitEl=hero.querySelector('.hero-unit');if(unitEl)unitEl.style.fontSize='';
-    const goalEl=hero.querySelector('.hero-goal');if(goalEl){goalEl.style.maxHeight='';goalEl.style.marginTop='';goalEl.style.opacity='';}
-    const progRow=hero.querySelector('.prog-row');if(progRow){progRow.style.marginTop='';progRow.style.fontSize='';}
-  }
-  const ht=document.querySelector('.home-top');
-  if(ht) Array.from(ht.children).forEach(c=>c.style.opacity='1');
-  const defaultBr2=window.innerWidth>=768?'0':'0 0 38px 38px';
-  const logH=document.querySelector('.log-header-sticky');
-  if(logH){logH.classList.remove('compact');logH.style.borderRadius=defaultBr2;}
-  const rwdH=document.querySelector('.rwd-header-sticky');
-  if(rwdH){rwdH.classList.remove('compact');rwdH.style.borderRadius=defaultBr2;}
-  const histH=document.querySelector('.hist-hero');
-  if(histH){histH.classList.remove('compact');histH.style.borderRadius=defaultBr2;}
-
-  // Recalculate sticky top & re-init sticky section observers on tab switch
+  // 탭 전환 시 --sec-sticky-top 재계산 + sec observer 재초기화
   requestAnimationFrame(()=>{
     const hdr=document.querySelector('.scr.on .hero, .scr.on .log-header-sticky, .scr.on .rwd-header-sticky, .scr.on .hist-hero');
     if(hdr){
@@ -12106,112 +12051,18 @@ window._createState = _createState;
     });
   }catch(e){ console.warn('Realtime listener failed:', e); }
   
-  // 모든 탭 스크롤 시 헤더 축소 (compact)
-  const homeScr = document.getElementById('s-home');
-  const hero = document.querySelector('.hero');
-  function updateHeaderCompact(){
-    const scrollY = window.scrollY || document.documentElement.scrollTop;
-    const threshold = 60;
-    // Smooth border-radius interpolation for all tab headers: 38px → 28px (mobile only)
-    const isWide=window.innerWidth>=768;
-    const brMax=38,brMin=28;
-    const brRatio=Math.max(0,Math.min(1,scrollY/threshold));
-    const br=isWide?0:(brMax-(brMax-brMin)*brRatio);
-    const brStr=isWide?'0':'0 0 '+br+'px '+br+'px';
-    // Home — smooth inner content animation, NO padding/height changes to avoid scroll feedback loop
-    if(homeScr && homeScr.classList.contains('on') && hero){
-      const r=brRatio; // 0 (top) → 1 (threshold)
-      hero.classList.toggle('compact', scrollY >= threshold);
-      hero.style.borderRadius=brStr;
-      // Do NOT change hero padding during scroll — it changes layout height causing jitter
-      // Instead, only animate inner content sizes
-      const progTrack=hero.querySelector('.prog-track');
-      if(progTrack){
-        const gh=14-(14-5)*r;
-        progTrack.style.height=gh+'px';
-        progTrack.style.borderRadius=(gh/2)+'px';
-      }
-      // Smooth font sizes
-      const ptEl=hero.querySelector('.hero-pts');
-      if(ptEl) ptEl.style.fontSize=(58-(58-32)*r)+'px';
-      const lblEl=hero.querySelector('.hero-lbl');
-      if(lblEl) lblEl.style.fontSize=(14-(14-10)*r)+'px';
-      const unitEl=hero.querySelector('.hero-unit');
-      if(unitEl) unitEl.style.fontSize=(18-(18-14)*r)+'px';
-      // Smooth hero-goal hide
-      const goalEl=hero.querySelector('.hero-goal');
-      if(goalEl){
-        goalEl.style.maxHeight=(50*(1-r))+'px';
-        goalEl.style.marginTop=(6*(1-r))+'px';
-        goalEl.style.opacity=(1-r);
-      }
-      // Smooth prog-row
-      const progRow=hero.querySelector('.prog-row');
-      if(progRow){
-        progRow.style.marginTop=(5-(5-3)*r)+'px';
-        progRow.style.fontSize=(11-(11-10)*r)+'px';
-      }
-      // Fade out home-top children only (not background)
-      const ht=document.querySelector('.home-top');
-      if(ht){
-        const fadeStart=10, fadeEnd=60;
-        const o=scrollY<=fadeStart?1:scrollY>=fadeEnd?0:1-(scrollY-fadeStart)/(fadeEnd-fadeStart);
-        Array.from(ht.children).forEach(c=>c.style.opacity=Math.max(0,Math.min(1,o)));
-      }
+  // ── Header compact 롤백 — 스크롤 시 헤더 축소 기능 전체 제거 ──
+  // position:sticky는 CSS에서 유지, --sec-sticky-top만 한 번 설정
+  function _setSecStickyTop(){
+    const hdr=document.querySelector('.scr.on .hero, .scr.on .log-header-sticky, .scr.on .rwd-header-sticky, .scr.on .hist-hero');
+    if(hdr){
+      const h=Math.round(hdr.getBoundingClientRect().height);
+      if(h>0) document.documentElement.style.setProperty('--sec-sticky-top', h+'px');
     }
-    // Log
-    const logHdr = document.querySelector('.log-header-sticky');
-    if(logHdr && document.getElementById('s-log')?.classList.contains('on')){
-      logHdr.classList.toggle('compact', scrollY >= threshold);
-      logHdr.style.borderRadius=brStr;
-    }
-    // Reward
-    const rwdHdr = document.querySelector('.rwd-header-sticky');
-    if(rwdHdr && document.getElementById('s-rwd')?.classList.contains('on')){
-      rwdHdr.classList.toggle('compact', scrollY >= threshold);
-      rwdHdr.style.borderRadius=brStr;
-    }
-    // History/Stats
-    const histHdr = document.querySelector('.hist-hero');
-    if(histHdr && document.getElementById('s-hist')?.classList.contains('on')){
-      histHdr.classList.toggle('compact', scrollY >= threshold);
-      histHdr.style.borderRadius=brStr;
-    }
-
-    // --sec-sticky-top is now updated via ResizeObserver (below), not on every scroll frame
   }
-  window.addEventListener('scroll', updateHeaderCompact, {passive:true});
-  window.addEventListener('resize', updateHeaderCompact, {passive:true});
-  window.addEventListener('orientationchange', ()=>{setTimeout(updateHeaderCompact,100);});
-  // Initial call
-  requestAnimationFrame(updateHeaderCompact);
-
-  // ── ResizeObserver for --sec-sticky-top (replaces getBoundingClientRect in scroll handler) ──
-  let _hdrResizeObserver=null;
-  let _observedHdr=null;
-  function _updateSecStickyTop(hdr){
-    if(!hdr)return;
-    const h=Math.round(hdr.getBoundingClientRect().height);
-    if(h>0) document.documentElement.style.setProperty('--sec-sticky-top', h+'px');
-  }
-  function _observeActiveHeader(){
-    const hdr=(homeScr&&homeScr.classList.contains('on'))?hero
-      :document.querySelector('.scr.on .log-header-sticky')
-      ||document.querySelector('.scr.on .rwd-header-sticky')
-      ||document.querySelector('.scr.on .hist-hero');
-    if(hdr===_observedHdr)return;
-    if(_hdrResizeObserver) _hdrResizeObserver.disconnect();
-    _observedHdr=hdr;
-    if(!hdr)return;
-    _updateSecStickyTop(hdr);
-    _hdrResizeObserver=new ResizeObserver(()=>_updateSecStickyTop(hdr));
-    _hdrResizeObserver.observe(hdr);
-  }
-  // Re-observe on tab switch (called from reallyGoTab via initStickySecHeaders path)
-  const _origInitSticky=initStickySecHeaders;
-  initStickySecHeaders=function(){_origInitSticky();_observeActiveHeader();};
-  // Initial observe
-  requestAnimationFrame(_observeActiveHeader);
+  requestAnimationFrame(_setSecStickyTop);
+  window.addEventListener('resize', ()=>requestAnimationFrame(_setSecStickyTop));
+  window.addEventListener('orientationchange', ()=>setTimeout(_setSecStickyTop,200));
 
   // ── iOS Weather-style: 섹션 제목 스티키 + 자연스러운 페이드 아웃 ──
   // .sec-group 래퍼 안의 .sec 제목이 sticky로 상단 고정되고,
