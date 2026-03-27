@@ -126,7 +126,8 @@ body.dark .invite-status-badge.pending{background:rgba(217,119,6,.2);color:#FBBF
 body.dark .invite-status-badge.done{background:rgba(16,185,129,.2);color:#34D399}
 body.dark .role-card{background:#1E293B;border-color:#334155}
 body.dark .role-card:hover{background:#263348;border-color:#6366F1}
-body.dark .role-card.selected{background:rgba(99,102,241,.2);border-color:#818CF8}
+body.dark .role-card.selected{background:rgba(99,102,241,.18);border-color:var(--rc,#818CF8)}
+body.dark .role-card-check{color:var(--rc,#818CF8)}
 body.dark .role-name{color:#F1F5F9}
 body.dark .mode-card{background:#1E293B;border-color:#334155}
 body.dark .mode-card:hover{border-color:#6366F1}
@@ -158,7 +159,7 @@ body.dark .toss-input:focus{border-color:#818CF8;background:#263348}
 body.dark .toss-btn.secondary{background:#1E293B;color:#94A3B8}
 body.dark .toss-btn.ghost{color:#4B5563}
 body.dark .toss-role-grid .role-card{background:#1E293B;border-color:#334155}
-body.dark .toss-role-grid .role-card.selected{background:rgba(99,102,241,.2);border-color:#818CF8}
+body.dark .toss-role-grid .role-card.selected{background:rgba(99,102,241,.18);border-color:var(--rc,#818CF8)}
 body.dark .toss-role-grid .role-name{color:#F1F5F9}
 body.dark .toss-add-btn-caregiver{background:rgba(99,102,241,.15);border-color:#4338CA;color:#818CF8}
 body.dark .toss-add-btn-child{background:rgba(217,119,6,.15);border-color:#92400E;color:#FBBF24}
@@ -895,12 +896,14 @@ body.dark .pin-key.ck{background:transparent}
 
 /* ROLE OPTION CARDS */
 .role-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0}
-.role-card{padding:12px 4px;background:#F8FAFC;border:2px solid #E2E8F0;border-radius:14px;cursor:pointer;transition:all .2s;text-align:center}
-.role-card:hover{background:#EEF2FF;border-color:#C7D2FE}
-.role-card.selected{border-color:#6366F1;background:#EEF2FF}
+.role-card{padding:10px 4px 8px;background:#F8FAFC;border:2px solid #E2E8F0;border-radius:14px;cursor:pointer;transition:all .22s cubic-bezier(.4,0,.2,1);text-align:center;position:relative;overflow:hidden}
+.role-card:hover{background:#EEF2FF;border-color:#C7D2FE;transform:translateY(-1px)}
+.role-card.selected{border-color:var(--rc,#6366F1);background:var(--rb,#EEF2FF)}
 .role-card.disabled{opacity:.35;pointer-events:none}
+.role-card-check{position:absolute;top:4px;right:7px;font-size:11px;font-weight:900;line-height:1;color:var(--rc,#6366F1)}
+.role-icon{width:30px;height:30px;margin:0 auto 5px}
 .role-emoji{font-size:28px;margin-bottom:4px}
-.role-name{font-size:12px;font-weight:700;color:#1E293B}
+.role-name{font-size:12px;font-weight:800;color:#1E293B;line-height:1.2}
 
 /* CHILD ADD CARD */
 .child-list{display:flex;flex-direction:column;gap:10px;margin:12px 0;max-height:220px;overflow-y:auto}
@@ -961,10 +964,11 @@ body.dark .pin-key.ck{background:transparent}
 .toss-btn.secondary{background:#F1F5F9;color:#64748B;margin-top:10px}
 .toss-btn.ghost{background:transparent;color:#94A3B8;font-size:14px;font-weight:600;padding:14px;margin-top:4px}
 .toss-role-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:4px 0 8px}
-.toss-role-grid .role-card{padding:14px 6px;background:#F8FAFC;border:2px solid #E2E8F0;border-radius:14px;cursor:pointer;transition:all .2s;text-align:center}
-.toss-role-grid .role-card.selected{border-color:#6366F1;background:#EEF2FF}
-.toss-role-grid .role-emoji{font-size:30px;margin-bottom:6px}
-.toss-role-grid .role-name{font-size:13px;font-weight:700;color:#1E293B}
+.toss-role-grid .role-card{padding:12px 4px 10px;background:#F8FAFC;border:2px solid #E2E8F0;border-radius:14px;cursor:pointer;transition:all .22s cubic-bezier(.4,0,.2,1);text-align:center;position:relative;overflow:hidden}
+.toss-role-grid .role-card:hover{transform:translateY(-1px);border-color:#C7D2FE}
+.toss-role-grid .role-card.selected{border-color:var(--rc,#6366F1);background:var(--rb,#EEF2FF)}
+.toss-role-grid .role-icon{width:34px;height:34px;margin:0 auto 6px}
+.toss-role-grid .role-name{font-size:13px;font-weight:800;color:#1E293B}
 .toss-add-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
 .toss-add-btn{padding:18px 12px;border-radius:14px;border:2px dashed;cursor:pointer;font-family:inherit;font-size:13px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:6px;transition:all .2s;-webkit-tap-highlight-color:transparent;background:none}
 .toss-add-btn-caregiver{background:#EEF2FF;border-color:#C7D2FE;color:#6366F1}
@@ -1918,11 +1922,11 @@ body.dark {
 /* .card, .act-card, .auth-btn, .auth-input, .tab-bar 원본 유지 */
 
 /* Responsive and Accessibility Enhancements */
-button:not(.tog):not(.tog-sm), a, input[type="checkbox"], input[type="radio"] {
+button:not(.tog):not(.tog-sm):not(.dtog), a, input[type="checkbox"], input[type="radio"] {
   min-height: 44px;
   min-width: 44px;
 }
-.tog,.tog.tog-sm{min-height:unset;min-width:unset}
+.tog,.tog.tog-sm,.dtog{min-height:unset;min-width:unset}
 
 :focus-visible {
   outline: 2px solid var(--color-primary);
@@ -3512,16 +3516,23 @@ const _SVG_PERSON_F='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" 
 const _SVG_ELDER='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><path d="M9 5h6" stroke-width="1.5"/></svg>';
 const _SVG_CHILD_M='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><circle cx="12" cy="7" r="2" fill="currentColor" opacity=".15"/></svg>';
 const _SVG_CHILD_F='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><path d="M8 5c0-2 2-3.5 4-3.5s4 1.5 4 3.5" stroke-width="2"/><circle cx="12" cy="7" r="2" fill="currentColor" opacity=".15"/></svg>';
+// 역할별 차별화 SVG 아이콘
+const _SVG_DAD='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><path d="M9 5.5c0-1.5 1.3-2.5 3-2.5s3 1 3 2.5" stroke-width="2.6"/></svg>';
+const _SVG_MOM='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><path d="M8.5 6c0-3 1.5-5 3.5-5s3.5 2 3.5 5"/><path d="M7.5 10c-1 1.5-1 4 0 5.5"/><path d="M16.5 10c1 1.5 1 4 0 5.5"/></svg>';
+const _SVG_GRANDPA='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><circle cx="10.2" cy="9.2" r="1.4" stroke-width="1.3"/><circle cx="13.8" cy="9.2" r="1.4" stroke-width="1.3"/><path d="M11.6 9.2h.8M8.8 9.2H8M15.2 9.2H16" stroke-width="1.2"/><path d="M9 6c0-2 1-3 3-3" stroke-width="1.5"/></svg>';
+const _SVG_GRANDMA='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><path d="M8.5 5c-.5-2.5.5-4 3.5-4s4 1.5 3.5 4"/><path d="M7.5 8.5c-2 .3-3-.7-3-1.8s1-2.2 2.5-1.8"/><path d="M16.5 8.5c2 .3 3-.7 3-1.8s-1-2.2-2.5-1.8"/></svg>';
+const _SVG_GRANDPA_M='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><rect x="8.5" y="8.2" width="3" height="2" rx="0.6" stroke-width="1.3"/><rect x="12.5" y="8.2" width="3" height="2" rx="0.6" stroke-width="1.3"/><path d="M11.5 9.2h1M8 9.2H7.5M15.5 9.2H16.5" stroke-width="1.2"/><path d="M9 5.5c0-2 1-3 3-3s3 1 3 3" stroke-width="1.5"/></svg>';
+const _SVG_GRANDMA_M='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.5" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><path d="M9 6c0-2.5 1.3-5 3-5s3 2.5 3 5"/><circle cx="12" cy="2.8" r="1.8" stroke-width="1.5" fill="none"/></svg>';
 
 const ROLE_DEFS = {
-  dad:       {label:'아빠',      svg:_SVG_PERSON_M, type:'caregiver', color:'#DBEAFE', textColor:'#3B82F6'},
-  mom:       {label:'엄마',      svg:_SVG_PERSON_F, type:'caregiver', color:'#FCE7F3', textColor:'#EC4899'},
-  grandpa:   {label:'할아버지',  svg:_SVG_ELDER,    type:'caregiver', color:'#FEF3C7', textColor:'#D97706'},
-  grandma:   {label:'할머니',    svg:_SVG_ELDER,    type:'caregiver', color:'#FEF9C3', textColor:'#CA8A04'},
-  grandpa_m: {label:'외할아버지',svg:_SVG_ELDER,    type:'caregiver', color:'#E0E7FF', textColor:'#6366F1'},
-  grandma_m: {label:'외할머니',  svg:_SVG_ELDER,    type:'caregiver', color:'#FCE7F3', textColor:'#DB2777'},
+  dad:       {label:'아빠',      svg:_SVG_DAD,      type:'caregiver', color:'#DBEAFE', textColor:'#3B82F6'},
+  mom:       {label:'엄마',      svg:_SVG_MOM,      type:'caregiver', color:'#FCE7F3', textColor:'#EC4899'},
+  grandpa:   {label:'할아버지',  svg:_SVG_GRANDPA,  type:'caregiver', color:'#FEF3C7', textColor:'#D97706'},
+  grandma:   {label:'할머니',    svg:_SVG_GRANDMA,  type:'caregiver', color:'#FEF9C3', textColor:'#CA8A04'},
+  grandpa_m: {label:'외할아버지',svg:_SVG_GRANDPA_M,type:'caregiver', color:'#E0E7FF', textColor:'#6366F1'},
+  grandma_m: {label:'외할머니',  svg:_SVG_GRANDMA_M,type:'caregiver', color:'#FCE7F3', textColor:'#DB2777'},
   child:     {label:'자녀',      svg:_SVG_CHILD_M,  type:'child',     color:'#D1FAE5', textColor:'#059669'},
-  caregiver: {label:'양육자',    svg:_SVG_PERSON_M, type:'caregiver', color:'#EEF2FF', textColor:'#6366F1'}
+  caregiver: {label:'양육자',    svg:_SVG_PERSON_M,  type:'caregiver', color:'#EEF2FF', textColor:'#6366F1'}
 };
 
 /* Design System Icons */
@@ -3951,8 +3962,9 @@ function renderRoleGrid(){
   grid.innerHTML=caregiverRoles.map(r=>{
     const d=ROLE_DEFS[r];
     const sel=_createState.myRole===r?'selected':'';
-    return `<div class="role-card ${sel}" onclick="selectCreateRole('${r}')" style="color:${d.textColor||'#1E293B'}">
-      <div class="role-emoji" style="width:32px;height:32px;margin:0 auto 4px">${d.svg}</div>
+    return `<div class="role-card ${sel}" onclick="selectCreateRole('${r}')" style="color:${d.textColor||'#1E293B'};--rc:${d.textColor||'#6366F1'};--rb:${d.color||'#EEF2FF'}">
+      ${sel?`<div class="role-card-check">✓</div>`:''}
+      <div class="role-icon">${d.svg}</div>
       <div class="role-name">${d.label}</div>
     </div>`;
   }).join('');
@@ -9584,12 +9596,13 @@ function renderFamilyManager() {
   if(!container) return;
 
   const fm = S.familyMeta?.members || {};
+  const users = S.users || {};
   const ROLE_LABELS = {dad:'아빠',mom:'엄마',grandpa:'할아버지',grandma:'할머니',grandpa_m:'외할아버지',grandma_m:'외할머니',child:'자녀',caregiver:'양육자'};
 
   // Member list
   container.innerHTML = Object.entries(fm).map(([mid, m]) => {
     const rd = ROLE_DEFS[m.displayRole||m.role] || ROLE_DEFS.child;
-    const hasAccount = !!m.account;
+    const hasAccount = !!m.account || !!users[mid];
     const isMe = mid === currentUser;
     const isAdmin = m.isAdmin;
 
@@ -9611,7 +9624,7 @@ function renderFamilyManager() {
   }).join('');
 
   // Invite links for unregistered members
-  const unregistered = Object.entries(fm).filter(([mid, m]) => !m.account);
+  const unregistered = Object.entries(fm).filter(([mid, m]) => !m.account && !users[mid]);
   if(!inviteContainer) return;
   if(unregistered.length === 0) {
     inviteContainer.innerHTML = '<div style="text-align:center;padding:16px;color:var(--tx3);font-size:13px;font-weight:600">모든 구성원이 가입을 완료했어요 🎉</div>';
@@ -11047,7 +11060,9 @@ function openFamilyPopup(){
     item.className='family-popup-item';
     item.setAttribute('data-fp-id',id);
     item.onclick=function(e){ e.stopPropagation(); selectFpItem(id); isMe?onMeIconClick():onUserIconClick(id); };
-    const roleLabel=MEMBERS[id]?.role||'';
+    const _m=MEMBERS[id];
+    const _RLABELS={dad:'아빠',mom:'엄마',grandpa:'할아버지',grandma:'할머니',grandpa_m:'외할아버지',grandma_m:'외할머니',child:'자녀',caregiver:'양육자'};
+    const roleLabel=_RLABELS[_m?.displayRole]||_RLABELS[_m?.role]||_m?.displayRole||_m?.role||'';
     item.innerHTML=`
       <div class="family-popup-avatar"${isMe?' id="nav-profile-icon"':''}>
         ${getAvatarHTML(id,54)}
