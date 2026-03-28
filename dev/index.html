@@ -1028,13 +1028,13 @@ body.dark .pin-key.ck{background:transparent}
 
 /* TOSS-STYLE AUTH WIZARD */
 .auth-screen.toss-style{background:#fff;padding:0;align-items:stretch}
-.toss-wizard{display:flex;flex-direction:column;height:100%;width:100%;max-width:430px;margin:0 auto;background:#fff;position:relative}
+.toss-wizard{display:flex;flex-direction:column;height:100%;min-height:100dvh;min-height:100vh;width:100%;max-width:430px;margin:0 auto;background:#fff;position:relative}
 .toss-top-bar{padding:max(16px,calc(env(safe-area-inset-top,0px) + 12px)) 20px 12px;display:flex;align-items:center;gap:12px;flex-shrink:0;position:sticky;top:0;z-index:2;background:inherit}
 .toss-back-btn{width:40px;height:40px;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:50%;color:#1E293B;flex-shrink:0;-webkit-tap-highlight-color:transparent;padding:0}
 .toss-back-btn:active{background:#F1F5F9}
 .toss-progress-wrap{flex:1;height:3px;background:#E2E8F0;border-radius:2px;overflow:hidden}
 .toss-progress-fill{height:100%;background:#6366F1;border-radius:2px;transition:width .4s cubic-bezier(.4,0,.2,1)}
-.toss-slides-wrap{flex:1;position:relative;overflow:hidden}
+.toss-slides-wrap{flex:1;min-height:0;position:relative;overflow:hidden}
 .toss-slide{position:absolute;inset:0;display:flex;flex-direction:column;padding:28px 24px 0;transform:translateX(100%);opacity:0;transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .25s;pointer-events:none;overflow-y:auto;background:inherit}
 .toss-slide.active{transform:translateX(0);opacity:1;pointer-events:auto}
 .toss-slide.exit-left{transform:translateX(-30%);opacity:0}
@@ -2400,9 +2400,9 @@ button:disabled {
     <div class="auth-logo"><svg width="64" height="64" viewBox="0 0 200 200"><defs><linearGradient id="lb" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#4F46E5"/><stop offset="100%" stop-color="#7C3AED"/></linearGradient></defs><circle cx="100" cy="100" r="96" fill="url(#lb)"/><path d="M62,150 L62,98 L100,64 L138,98 L138,150 Z" fill="#fff" opacity=".96"/><rect x="87" y="118" width="26" height="32" rx="4" fill="#FF6B35"/><circle cx="100" cy="50" r="8" fill="#FF6B35"/></svg></div>
     <svg viewBox="0 0 130 36" xmlns="http://www.w3.org/2000/svg" style="height:32px;width:auto;display:block;margin:0 auto 4px" aria-label="mile.ly"><text x="2" y="27" font-family="'Pretendard Variable',system-ui,-apple-system,sans-serif" font-weight="900" font-size="30" letter-spacing="-1"><tspan fill="#6366F1">mile</tspan><tspan fill="#FF6B35">.</tspan><tspan fill="#6366F1">ly</tspan></text></svg>
     <div class="auth-sub">가족 계정으로 로그인하세요</div>
-    <input type="text" class="auth-input" id="login-id" placeholder="아이디" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('login-pwd').focus()">
+    <input type="text" class="auth-input" id="login-id" placeholder="아이디" autocomplete="username" inputmode="latin" autocapitalize="none" autocorrect="off" onkeydown="if(event.key==='Enter')document.getElementById('login-pwd').focus()">
     <div class="pwd-wrap">
-      <input type="password" class="auth-input" id="login-pwd" placeholder="비밀번호" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+      <input type="password" class="auth-input" id="login-pwd" placeholder="비밀번호" autocomplete="current-password" inputmode="latin" autocapitalize="none" autocorrect="off" onkeydown="if(event.key==='Enter')doLogin()">
       <button type="button" class="pwd-toggle" onclick="togglePwd('login-pwd', this)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
     </div>
     <div class="auth-error" id="login-error"></div>
@@ -2516,7 +2516,7 @@ button:disabled {
           <div class="toss-question">로그인에 사용할<br>아이디를 만들어주세요</div>
           <div class="toss-desc">나중에 이 아이디로 로그인해요</div>
           <div style="position:relative">
-            <input type="text" class="toss-input" id="create-user-id" placeholder="아이디 (4자 이상)" autocomplete="username" style="padding-right:44px">
+            <input type="text" class="toss-input" id="create-user-id" placeholder="아이디 (4자 이상)" autocomplete="username" inputmode="latin" autocapitalize="none" autocorrect="off" style="padding-right:44px">
             <span id="c1-id-lock-icon" style="display:none;position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--or)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></span>
           </div>
           <button id="c1-id-reset-btn" onclick="resetCreateId()" style="display:none;margin-top:8px;width:100%;padding:10px;background:transparent;border:1.5px solid var(--bdr);border-radius:10px;font-size:13px;font-weight:700;color:var(--tx2);font-family:inherit;cursor:pointer">다른 아이디 사용</button>
@@ -2532,7 +2532,7 @@ button:disabled {
           <div class="toss-question">비밀번호를<br>설정해주세요</div>
           <div class="toss-desc">6자 이상의 안전한 비밀번호를 입력해주세요</div>
           <div class="pwd-wrap" style="margin-bottom:0">
-            <input type="password" class="toss-input" id="create-user-pwd" placeholder="비밀번호 (6자 이상)" autocomplete="new-password" oninput="updatePwdStrength(this.value)">
+            <input type="password" class="toss-input" id="create-user-pwd" placeholder="비밀번호 (6자 이상)" autocomplete="new-password" inputmode="latin" autocapitalize="none" autocorrect="off" oninput="updatePwdStrength(this.value)">
             <button type="button" class="toss-pwd-toggle" onclick="togglePwd('create-user-pwd', this)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
           </div>
           <div class="pwd-strength-bar" style="margin:10px 0 4px">
@@ -2542,7 +2542,7 @@ button:disabled {
           </div>
           <div class="pwd-hint" id="pwd-hint" style="margin-bottom:20px">최소 6자 이상 입력해주세요</div>
           <div class="pwd-wrap" style="margin-bottom:0">
-            <input type="password" class="toss-input" id="create-user-pwd2" placeholder="비밀번호 확인" autocomplete="new-password">
+            <input type="password" class="toss-input" id="create-user-pwd2" placeholder="비밀번호 확인" autocomplete="new-password" inputmode="latin" autocapitalize="none" autocorrect="off">
             <button type="button" class="toss-pwd-toggle" onclick="togglePwd('create-user-pwd2', this)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
           </div>
           <div class="auth-error" id="c1-pwd-error" style="margin-top:10px"></div>
@@ -2556,7 +2556,7 @@ button:disabled {
         <div class="toss-slide-content">
           <div class="toss-question">이름을<br>알려주세요</div>
           <div class="toss-desc">앱에서 표시될 이름이에요</div>
-          <input type="text" class="toss-input" id="create-my-name" placeholder="예: 효신, 은혜" maxlength="10" autocomplete="name">
+          <input type="text" class="toss-input" id="create-my-name" placeholder="예: 효신, 은혜" maxlength="10" autocomplete="name" inputmode="text">
           <div class="auth-error" id="c1-name-error" style="margin-top:10px"></div>
         </div>
         <div class="toss-cta">
@@ -2595,7 +2595,7 @@ button:disabled {
           <div class="auth-steps" id="create-steps-2"></div>
           <div class="toss-question">가족 이름을<br>정해주세요</div>
           <div class="toss-desc">우리 가족만의 특별한 이름을 만들어봐요</div>
-          <input type="text" class="toss-input" id="create-family-name" placeholder="예: 태민이네, 곽씨 패밀리" maxlength="20" oninput="updateFamilyNamePreview(this.value)">
+          <input type="text" class="toss-input" id="create-family-name" placeholder="예: 태민이네, 곽씨 패밀리" maxlength="20" inputmode="text" oninput="updateFamilyNamePreview(this.value)">
           <div class="family-name-preview" id="family-name-preview" style="display:none;margin-top:12px"></div>
           <div class="auth-error" id="create2-error" style="margin-top:10px"></div>
         </div>
@@ -2757,7 +2757,7 @@ button:disabled {
           <div class="toss-question" id="join-reg-title">계정을 만들어볼게요!<br>아이디를 정해주세요</div>
           <div class="toss-desc">가족에 합류하기 위한 아이디예요</div>
           <div style="position:relative">
-            <input type="text" class="toss-input" id="join-reg-id" placeholder="아이디 (4자 이상)" autocomplete="username" style="padding-right:44px">
+            <input type="text" class="toss-input" id="join-reg-id" placeholder="아이디 (4자 이상)" autocomplete="username" inputmode="latin" autocapitalize="none" autocorrect="off" style="padding-right:44px">
             <span id="jr-id-lock-icon" style="display:none;position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--or)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></span>
           </div>
           <button id="jr-id-reset-btn" onclick="resetJoinRegId()" style="display:none;margin-top:8px;width:100%;padding:10px;background:transparent;border:1.5px solid var(--bdr);border-radius:10px;font-size:13px;font-weight:700;color:var(--tx2);font-family:inherit;cursor:pointer">다른 아이디 사용</button>
@@ -2773,11 +2773,11 @@ button:disabled {
           <div class="toss-question">비밀번호를<br>설정해주세요</div>
           <div class="toss-desc">4자 이상의 비밀번호를 입력해주세요</div>
           <div class="pwd-wrap" style="margin-bottom:0">
-            <input type="password" class="toss-input" id="join-reg-pwd" placeholder="비밀번호 (4자 이상)" autocomplete="new-password">
+            <input type="password" class="toss-input" id="join-reg-pwd" placeholder="비밀번호 (4자 이상)" autocomplete="new-password" inputmode="latin" autocapitalize="none" autocorrect="off">
             <button type="button" class="toss-pwd-toggle" onclick="togglePwd('join-reg-pwd', this)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
           </div>
           <div style="margin-top:16px" class="pwd-wrap" style="margin-bottom:0">
-            <input type="password" class="toss-input" id="join-reg-pwd2" placeholder="비밀번호 확인" autocomplete="new-password">
+            <input type="password" class="toss-input" id="join-reg-pwd2" placeholder="비밀번호 확인" autocomplete="new-password" inputmode="latin" autocapitalize="none" autocorrect="off">
             <button type="button" class="toss-pwd-toggle" onclick="togglePwd('join-reg-pwd2', this)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
           </div>
           <div class="auth-error" id="join-reg-error" style="margin-top:10px"></div>
@@ -4133,6 +4133,36 @@ function showAuthScreen(screen) {
     }
   }
 }
+
+// ── 회원가입 화면 키보드 핸들링 ──
+(function setupAuthKeyboard() {
+  const AUTH_INPUT_IDS = [
+    'create-user-id','create-user-pwd','create-user-pwd2','create-my-name',
+    'create-family-name','join-reg-id','join-reg-pwd','join-reg-pwd2',
+    'login-id','login-pwd'
+  ];
+  function scrollInputIntoView(inp) {
+    if (!inp) return;
+    inp.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  AUTH_INPUT_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('focus', function() {
+      setTimeout(() => scrollInputIntoView(this), 300);
+    });
+  });
+  // visualViewport: 키보드 표시될 때 focused input이 키보드 위에 보이도록
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', function() {
+      const focused = document.activeElement;
+      if (!focused || !focused.classList.contains('toss-input')) return;
+      const screen = focused.closest('.auth-screen');
+      if (!screen || screen.classList.contains('hidden')) return;
+      setTimeout(() => scrollInputIntoView(focused), 50);
+    });
+  }
+})();
 
 // ── Toss 스타일 슬라이드 전환 ──
 const _slideHistory = {};
