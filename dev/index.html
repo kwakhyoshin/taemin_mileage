@@ -5383,6 +5383,9 @@ async function doJoinRegister(){
     // 멤버 계정 정보 업데이트 (신규 또는 재설정)
     if(!S.familyMeta.members[mid]){err.textContent='구성원 정보를 찾을 수 없어요';return;}
     S.familyMeta.members[mid].account={id:userId,pwdHash,v:2}; // needReset 제거
+    // 양육자/부모 역할이면 자동으로 관리자 권한 부여
+    const _joinRole=S.familyMeta.members[mid].type||S.familyMeta.members[mid].role;
+    if(_joinRole==='caregiver'||_joinRole==='parent') S.familyMeta.members[mid].isAdmin=true;
     if(!S.users)S.users={};
     S.users[mid]={id:userId,pwdHash,v:2};
 
@@ -11746,7 +11749,8 @@ function renderMyTab(){
 window.renderMyTab=renderMyTab;
 
 function myTabAdminAction(){
-  if(isCurrentUserAdmin()){
+  // 양육자(caregiver)는 항상 관리자 접근 가능 (isAdmin 플래그 없어도)
+  if(isCurrentUserAdmin()||isCaregiverUser()){
     adminOK=true;
     reallyGoTab('adm');
   }else if(!adminOK){
