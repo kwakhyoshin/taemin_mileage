@@ -175,12 +175,12 @@ body.dark .toss-invite-role{color:#64748B}
 body.dark .toss-invite-share-btn{background:rgba(99,102,241,.2);color:#818CF8}
 /* ── ONBOARDING WELCOME ── */
 .auth-screen.ob-gradient{background:linear-gradient(160deg,#3730A3 0%,#4F46E5 40%,#6366F1 70%,#7C3AED 100%);padding:0}
-.ob-welcome{display:flex;flex-direction:column;height:100%;width:100%;max-width:430px;margin:0 auto;padding:max(56px,calc(env(safe-area-inset-top,0px)+40px)) 32px max(32px,calc(env(safe-area-inset-bottom,0px)+24px));justify-content:space-between}
-.ob-welcome-top{flex:1;display:flex;flex-direction:column;justify-content:center}
+.ob-welcome{display:flex;flex-direction:column;min-height:100dvh;min-height:100vh;width:100%;max-width:430px;margin:0 auto;padding:max(56px,calc(env(safe-area-inset-top,0px)+40px)) 32px max(32px,calc(env(safe-area-inset-bottom,0px)+24px));justify-content:space-between}
+.ob-welcome-top{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
 .ob-logo-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:36px}
 .ob-logo-icon{width:88px;height:88px;border-radius:28px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.25)}
-.ob-headline{font-size:30px;font-weight:900;color:#fff;line-height:1.4;letter-spacing:-.8px;margin-bottom:12px}
-.ob-sub{font-size:16px;color:rgba(255,255,255,.7);font-weight:500;line-height:1.6}
+.ob-headline{font-size:30px;font-weight:900;color:#fff;line-height:1.4;letter-spacing:-.8px;margin-bottom:12px;text-align:center}
+.ob-sub{font-size:16px;color:rgba(255,255,255,.7);font-weight:500;line-height:1.6;text-align:center}
 .ob-welcome-bottom{flex-shrink:0}
 .ob-start-btn{width:100%;padding:20px;background:#fff;color:#4F46E5;border:none;border-radius:20px;font-size:18px;font-weight:900;cursor:pointer;font-family:inherit;transition:opacity .2s,transform .1s;display:block;box-sizing:border-box;margin-bottom:14px;box-shadow:0 8px 32px rgba(0,0,0,.18)}
 .ob-start-btn:active{opacity:.9;transform:scale(.98)}
