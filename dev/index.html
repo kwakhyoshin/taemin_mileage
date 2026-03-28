@@ -5635,12 +5635,18 @@ function _renderHistHeroSub(){
       if(histSub)histSub.textContent=`${nm}${_korSuffix(nm)}의 성과`;
       if(histSel)histSel.style.display='block';
       if(histBtns){
-        histBtns.innerHTML=kids.map(kid=>{
-          const m=S.familyMeta?.members?.[kid];
-          const kn=m?.name||kid;
-          const isOn=kid===viewedId;
-          return `<button onclick="switchViewingChild('${kid}');_renderHistHeroSub()" style="padding:4px 14px;border-radius:20px;border:1.5px solid rgba(255,255,255,${isOn?'.9':'.4'});background:${isOn?'rgba(255,255,255,.25)':'transparent'};color:#fff;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s">${kn}</button>`;
-        }).join('');
+        if(kids.length===2){
+          histBtns.innerHTML=`<div class="child-sw-toggle">${kids.map(kid=>{
+            const kn=S.familyMeta?.members?.[kid]?.name||kid;
+            return`<button class="child-sw-btn${kid===viewedId?' on':''}" onclick="switchViewingChild('${kid}');_renderHistHeroSub()">${kn}</button>`;
+          }).join('')}</div>`;
+        }else{
+          const opts=kids.map(kid=>{
+            const kn=S.familyMeta?.members?.[kid]?.name||kid;
+            return`<option value="${kid}"${kid===viewedId?' selected':''}>${kn}</option>`;
+          }).join('');
+          histBtns.innerHTML=`<select class="child-sw-select" onchange="switchViewingChild(this.value);_renderHistHeroSub()">${opts}</select>`;
+        }
       }
     }
   } else {
