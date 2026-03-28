@@ -3439,7 +3439,7 @@ button:disabled {
             </div>
             <div class="divider"></div>
             <div class="adm-row">
-              <div class="adm-row-l"><div class="adm-row-nm">전체 데이터 삭제</div><div class="adm-row-sub">마일리지·기록 모두 초기화</div></div>
+              <div class="adm-row-l"><div class="adm-row-nm">활동 이력 초기화</div><div class="adm-row-sub">마일리지·활동기록·보상이력 초기화 (계정 유지)</div></div>
               <button class="btn-sm rd" onclick="resetAll()">삭제</button>
             </div>
           </div>
@@ -11323,8 +11323,39 @@ function resetAll(){
   showPin('reset_all','<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" style=\"vertical-align:-4px;margin-right:4px\"><rect x=\"3\" y=\"11\" width=\"18\" height=\"11\" rx=\"2\"/><path d=\"M7 11V7a5 5 0 0110 0v4\"/></svg> 관리자 인증','⚠️ 전체 데이터 삭제를 위해<br>PIN 4자리를 입력하세요');
 }
 function doResetAll(){
-  if(!confirm('정말 모든 데이터를 삭제할까요? 되돌릴 수 없어요!'))return;
-  setDoc(DATA_DOC, defaultState()).then(()=>{ S=defaultState(); renderAll(); toast('✅ 초기화됐어요'); }).catch(e=>{ toast('오류: '+e.message); });
+  if(!confirm('정말 활동 이력을 모두 삭제할까요?\n(가족·계정 정보는 유지됩니다)\n되돌릴 수 없어요!'))return;
+  // 보존해야 할 데이터: 가족구성, 계정정보, 사진, 푸시, 설정
+  const keep={
+    familyMeta:S.familyMeta?JSON.parse(JSON.stringify(S.familyMeta)):null,
+    users:S.users?JSON.parse(JSON.stringify(S.users)):{},
+    photos:S.photos?JSON.parse(JSON.stringify(S.photos)):{},
+    pushDevices:S.pushDevices?JSON.parse(JSON.stringify(S.pushDevices)):{},
+    settings:S.settings?JSON.parse(JSON.stringify(S.settings)):{streakBonus:true,streakBonusPts:100,pinHash:'',msgMode:'auto',customMsg:''},
+    dark:S.dark||false,
+    customBadges:S.customBadges?JSON.parse(JSON.stringify(S.customBadges)):[],
+    badgeOverrides:S.badgeOverrides?JSON.parse(JSON.stringify(S.badgeOverrides)):{},
+  };
+  const fresh=defaultState();
+  // 보존 데이터 복원
+  fresh.familyMeta=keep.familyMeta;
+  fresh.users=keep.users;
+  fresh.photos=keep.photos;
+  fresh.pushDevices=keep.pushDevices;
+  fresh.settings=keep.settings;
+  fresh.dark=keep.dark;
+  fresh.customBadges=keep.customBadges;
+  fresh.badgeOverrides=keep.badgeOverrides;
+  // memberData도 계정정보만 유지하고 이력 초기화
+  if(keep.familyMeta&&keep.familyMeta.members){
+    fresh.memberData={};
+  }
+  setDoc(DATA_DOC, fresh).then(()=>{
+    S=fresh;
+    _globalDataOwner=null;
+    if(typeof postLoginInit==='function')postLoginInit();
+    renderAll();
+    toast('✅ 활동 이력이 초기화됐어요');
+  }).catch(e=>{ toast('오류: '+e.message); });
 }
 
 // ── ACTIVITY FORM ──────────────────────────────
