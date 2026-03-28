@@ -4145,6 +4145,17 @@ function rebuildMembersFromFamily(){
   AVATARS = {};
 
   if(Object.keys(fm).length > 0){
+    // sortOrder 마이그레이션: 기존 멤버에 sortOrder가 없으면 순서대로 부여
+    let needsSortMigration=false;
+    const fmEntries=Object.entries(fm);
+    let maxOrder=0;
+    fmEntries.forEach(([,m])=>{if(typeof m.sortOrder==='number')maxOrder=Math.max(maxOrder,m.sortOrder);else needsSortMigration=true;});
+    if(needsSortMigration){
+      let order=maxOrder;
+      fmEntries.forEach(([mid,m])=>{
+        if(typeof m.sortOrder!=='number'){order++;fm[mid].sortOrder=order;}
+      });
+    }
     // 다가족 모드: familyMeta에서 구성원 빌드
     Object.entries(fm).forEach(([mid, m])=>{
       const rd=ROLE_DEFS[m.displayRole]||ROLE_DEFS[mid]||ROLE_DEFS[m.role]||ROLE_DEFS.child;
@@ -9976,10 +9987,14 @@ function getFamilyMode(){
 }
 function getChildMemberIds(){
   if(!S.familyMeta?.members)return[];
-  return Object.keys(S.familyMeta.members).filter(id=>{
-    const m=S.familyMeta.members[id];
-    return m.type==='child';
-  });
+  return Object.entries(S.familyMeta.members)
+    .filter(([,m])=>m.type==='child')
+    .sort((a,b)=>{
+      const oA=a[1].sortOrder??a[1].joinedAt??9999999999999;
+      const oB=b[1].sortOrder??b[1].joinedAt??9999999999999;
+      return oA-oB;
+    })
+    .map(([id])=>id);
 }
 // 현재 화면에 표시 중인 구성원 ID (선택된 자녀)
 function getViewedMemberId(){
@@ -10569,6 +10584,9 @@ async function addNewFamilyMember() {
   const memberDisplayRole = (role !== 'child' && role !== 'caregiver') ? role : '';
   const rd = ROLE_DEFS[memberDisplayRole || memberRole] || ROLE_DEFS.child;
   const newId = 'mid_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+  // sortOrder: 기존 멤버 중 최대값+1 로 부여 → 순서 고정
+  const existingOrders=Object.values(S.familyMeta.members).map(m=>m.sortOrder||0);
+  const nextOrder=(existingOrders.length>0?Math.max(...existingOrders):0)+1;
   S.familyMeta.members[newId] = {
     name,
     role: memberRole,
@@ -10577,7 +10595,8 @@ async function addNewFamilyMember() {
     color: rd.color || '#F1F5F9',
     textColor: rd.textColor || '#64748B',
     isAdmin: false,
-    joinedAt: null
+    joinedAt: null,
+    sortOrder: nextOrder
   };
   await save();
   rebuildMembersFromFamily();
@@ -12150,6 +12169,11 @@ function getChildMembers(){
   if(!S.familyMeta?.members)return[];
   return Object.entries(S.familyMeta.members)
     .filter(([,m])=>m.memberType==='child'||m.role==='child'||m.type==='child')
+    .sort((a,b)=>{
+      const oA=a[1].sortOrder??a[1].joinedAt??9999999999999;
+      const oB=b[1].sortOrder??b[1].joinedAt??9999999999999;
+      return oA-oB;
+    })
     .map(([id,m])=>({id,name:m.name||id,...m}));
 }
 
