@@ -10058,8 +10058,10 @@ function switchViewingChild(childId){
 function admSelectChild(childId){
   const prevAdm=_admViewChildId;
   _admViewChildId=childId;
-  // 이전 관리자 선택 자녀 데이터 저장
-  if(prevAdm && S.memberData && prevAdm!==childId) syncGlobalToMember(prevAdm);
+  // 현재 글로벌 데이터를 원래 주인에게 저장 (_globalDataOwner 기준, prevAdm과 다를 수 있음)
+  if(S.memberData && _globalDataOwner && _globalDataOwner!==childId){
+    syncGlobalToMember(_globalDataOwner);
+  }
   // 선택된 자녀 데이터를 S에 로드 (활동/보상/뱃지 반영)
   if(childId && S.memberData){
     if(!S.memberData[childId]) getMemberState(childId);
@@ -13295,14 +13297,18 @@ function reallyGoTab(tab){
     }
   }
   // 관리자 탭에 진입할 때: 현재 글로벌 데이터 저장 → 관리자 선택 자녀 로드
-  if(tab==='adm'&&_prevTab!=='adm'&&_admViewChildId&&S.memberData&&isCaregiverUser()){
-    // 현재 홈/로그 뷰의 자녀 데이터를 먼저 저장
-    if(viewingChildId&&_globalDataOwner===viewingChildId){
-      syncGlobalToMember(viewingChildId);
+  // isCaregiverUser() 뿐 아니라 isCurrentUserAdmin()인 자녀도 동일하게 처리
+  if(tab==='adm'&&_prevTab!=='adm'&&_admViewChildId&&S.memberData&&(isCaregiverUser()||isCurrentUserAdmin())){
+    // 현재 글로벌 데이터를 원래 주인에게 먼저 저장
+    const _saveTarget=isCaregiverUser()?viewingChildId:currentUser;
+    if(_saveTarget&&_globalDataOwner===_saveTarget){
+      syncGlobalToMember(_saveTarget);
     }
-    // 관리자가 선택한 자녀 데이터 로드
-    if(!S.memberData[_admViewChildId])getMemberState(_admViewChildId);
-    syncMemberToGlobal(_admViewChildId);
+    // 관리자가 선택한 자녀 데이터 로드 (자기 자신이면 스킵)
+    if(_admViewChildId!==currentUser){
+      if(!S.memberData[_admViewChildId])getMemberState(_admViewChildId);
+      syncMemberToGlobal(_admViewChildId);
+    }
   }
   // PIN이 열려 있으면 강제 닫고 scroll lock 해제
   const pinWrap=document.getElementById('pin-wrap');
