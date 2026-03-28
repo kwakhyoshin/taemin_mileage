@@ -6015,7 +6015,10 @@ function getMemberState(memberId) {
       moodLog: isMe && S.moodLog ? [...S.moodLog] : [],
       badges: isMe && S.badges ? {...S.badges} : {},
       badgeLog: isMe && S.badgeLog ? [...S.badgeLog] : [],
-      rewardLog: isMe && S.rewardLog ? [...S.rewardLog] : []
+      rewardLog: isMe && S.rewardLog ? [...S.rewardLog] : [],
+      stickers: isMe && S.stickers ? [...S.stickers] : [],
+      rewardInventory: isMe && S.rewardInventory ? JSON.parse(JSON.stringify(S.rewardInventory)) : [],
+      rewardRequests: isMe && S.rewardRequests ? JSON.parse(JSON.stringify(S.rewardRequests)) : []
     };
   }
   return S.memberData[memberId];
@@ -6043,6 +6046,8 @@ function syncMemberToGlobal(targetId) {
   S.rwds = (ms.rwds && ms.rwds.length > 0) ? ms.rwds : JSON.parse(JSON.stringify(DRWDS));
   S.stickers = ms.stickers || [];
   S.rewardLog = ms.rewardLog || [];
+  S.rewardInventory = ms.rewardInventory || [];
+  S.rewardRequests = ms.rewardRequests || [];
 }
 
 // Syncs global S back to member data before saving
@@ -6068,6 +6073,8 @@ function syncGlobalToMember(targetId) {
   ms.badgeLog = S.badgeLog;
   ms.stickers = S.stickers || [];
   ms.rewardLog = S.rewardLog || [];
+  ms.rewardInventory = S.rewardInventory || [];
+  ms.rewardRequests = S.rewardRequests || [];
 }
 
 // Robust debounced save with in-flight guard
