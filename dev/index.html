@@ -11966,7 +11966,13 @@ function renderNavUsers(){
       }
     }else{
       el.style.display='none';
-      el.innerHTML='';
+      // child-switcher는 직접 innerHTML 비우고, 나머지는 내부 btns div만 비움 (btns div 자체를 파괴하지 않음)
+      if(selId==='child-switcher'){
+        el.innerHTML='';
+      }else{
+        const btnsEl=document.getElementById(btnIds[i]);
+        if(btnsEl)btnsEl.innerHTML='';
+      }
     }
   });
 
