@@ -300,7 +300,8 @@ body.dark .dtog-in{transform:translateX(20px)}
 .child-sw-select{background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.35);border-radius:20px;color:#fff;font-size:11px;font-weight:700;padding:3px 20px 3px 8px;font-family:inherit;cursor:pointer;outline:none;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center}
 .child-sw-select option{background:#4B5563;color:#fff}
 /* MY TAB */
-.my-header{background:linear-gradient(160deg,var(--tab-color,#6366F1),var(--tab-color2,#818CF8));padding:16px 20px 20px;padding-top:calc(16px + env(safe-area-inset-top));border-radius:0;position:relative;overflow:hidden;box-shadow:0 4px 20px var(--tab-shadow,rgba(99,102,241,0.3))}
+.my-header{background:linear-gradient(160deg,#475569,#64748B);padding:16px 20px 20px;padding-top:calc(16px + env(safe-area-inset-top));border-radius:0 0 38px 38px;position:relative;overflow:hidden;box-shadow:0 4px 20px rgba(71,85,105,0.3)}
+body.dark .my-header{background:linear-gradient(160deg,#334155,#475569);box-shadow:0 4px 20px rgba(51,65,85,0.35)}
 .my-header::after{content:'';position:absolute;bottom:-30px;right:10px;width:130px;height:130px;background:rgba(255,255,255,.08);border-radius:50%;pointer-events:none}
 .my-header-title{font-size:13px;font-weight:800;color:rgba(255,255,255,.6);margin-bottom:12px;letter-spacing:.5px}
 .my-header-info{display:flex;align-items:center;gap:14px}
@@ -1245,7 +1246,7 @@ body.dark .family-popup-avatar{border-color:rgba(255,255,255,.25)}
   .bottom-nav::before{display:none!important}
   .nav-item{padding:8px 12px!important;border-radius:12px!important;flex-direction:column!important;justify-content:center!important;gap:2px!important}
   .nav-item .nav-label{font-size:10px!important;font-weight:700!important;max-width:none!important;opacity:1!important;margin-left:0!important}
-  .scr{margin-left:0!important;width:100%!important;max-width:430px!important;padding-bottom:calc(80px + env(safe-area-inset-bottom))!important}
+  .scr{margin-left:0!important;width:100%!important;max-width:100%!important;padding-bottom:calc(80px + env(safe-area-inset-bottom))!important}
   #s-badge{margin-left:0!important;width:100%!important}
   .nav-users{flex-direction:row!important;gap:0!important}
   .nav-divider{width:1px!important;height:22px!important;margin:0 4px!important}
@@ -1404,7 +1405,7 @@ body.dark .family-popup-avatar{border-color:rgba(255,255,255,.25)}
   .bottom-nav::before{display:none!important}
   .nav-item{padding:10px 14px!important;justify-content:center!important;flex-direction:column!important;gap:3px!important}
   .nav-item .nav-label{opacity:1!important;max-width:none!important;font-size:11px!important;margin-left:0!important}
-  .scr{margin-left:0!important;width:100%!important;max-width:430px!important;margin-right:auto!important;padding-bottom:110px!important}
+  .scr{margin-left:0!important;width:100%!important;max-width:100%!important;margin-right:auto!important;padding-bottom:110px!important}
   #s-badge{margin-left:0!important;width:100%!important;max-width:100%!important}
   .auth-screen{margin-left:0!important;width:100%!important}
 }
@@ -1601,7 +1602,7 @@ body.dark .family-popup-avatar{border-color:rgba(255,255,255,.25)}
   .nav-container.docked{bottom:0!important;left:0!important;right:0!important;width:100%!important;max-width:100%!important;transform:none!important}
   .bottom-nav{flex-direction:row!important;height:auto!important;border-right:none!important;border-top:none!important}
   .bottom-nav::before{display:none!important}
-  .scr{margin-left:0!important;width:100%!important;max-width:430px!important}
+  .scr{margin-left:0!important;width:100%!important;max-width:100%!important}
   #s-badge{margin-left:0!important;width:100%!important}
   .auth-screen{margin-left:0!important;width:100%!important}
 }
@@ -2351,6 +2352,7 @@ button:disabled {
   .nav-container.docked{bottom:0!important;left:0!important;right:0!important;transform:none!important;width:100%!important;max-width:100%!important;}
   body,.scr,.tab-content{margin-left:0!important;padding-left:0!important;}
   .nav-brand,.sidebar,.side-menu{display:none!important;}
+  .my-header{border-radius:0!important;}
 }
 
 </style>
@@ -2992,12 +2994,13 @@ button:disabled {
 <!-- STATS / ACHIEVEMENTS -->
 <div class="scr" id="s-hist">
   <div class="hist-hero">
-    <h2>성과 &amp; 통계 <svg class="hdr-ico" viewBox="0 0 24 24"><path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9"/><path d="M21 3l-9 9"/><path d="M15 3h6v6"/></svg></h2>
-    <p id="hist-hero-sub">나의 활동 분석</p>
-    <!-- 양육자 다중 자녀 선택기 (independent 모드 + 자녀 2명 이상일 때 표시) -->
-    <div id="hist-child-selector" style="display:none;margin-top:8px">
-      <div id="hist-child-btns" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <h2 style="margin:0">성과 &amp; 통계 <svg class="hdr-ico" viewBox="0 0 24 24"><path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9"/><path d="M21 3l-9 9"/><path d="M15 3h6v6"/></svg></h2>
+      <div id="hist-child-selector" style="display:none;flex-shrink:0">
+        <div id="hist-child-btns" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+      </div>
     </div>
+    <p id="hist-hero-sub">나의 활동 분석</p>
     <div class="hdr-stats hdr-stats-5" id="hist-hdr-stats">
       <div class="hdr-stat"><div class="hdr-stat-num" id="hist-hdr-pts">0</div><div class="hdr-stat-lbl">보유 마일리지</div></div>
       <div class="hdr-stat-divider"></div>
@@ -5675,6 +5678,7 @@ function postLoginInit(){
       if(!S.memberData) S.memberData = {};
       if(!S.memberData[viewingChildId]) getMemberState(viewingChildId);
       syncMemberToGlobal(viewingChildId);
+      applyChildTheme(viewingChildId);
     }
   }
   _admViewChildId = getChildMemberIds()[0] || null;
@@ -5729,8 +5733,8 @@ const CYCLE_LABEL = {daily:'매일',weekly:'매주',monthly:'매달',none:'제�
 const CYCLE_CHIP  = {daily:'c-or',weekly:'c-pu',monthly:'c-rd',none:'c-gn'};
 
 /* TAB COLOR CONSTANTS */
-const TAB_COLORS = {home:'#6366F1', log:'#F43F5E', rwd:'#F59E0B', hist:'#8B5CF6'};
-const TAB_COLORS2 = {home:'#818CF8', log:'#FB7185', rwd:'#FBBF24', hist:'#A78BFA'};
+const TAB_COLORS = {home:'#6366F1', log:'#F43F5E', rwd:'#F59E0B', hist:'#8B5CF6', my:'#475569', adm:'#475569'};
+const TAB_COLORS2 = {home:'#818CF8', log:'#FB7185', rwd:'#FBBF24', hist:'#A78BFA', my:'#64748B', adm:'#64748B'};
 
 /* CHILD THEME COLORS — 자녀 전환 시 홈 탭 색상 변경 (최소 6개, 관리자에서 변경 가능) */
 const CHILD_THEMES = [
@@ -5767,11 +5771,15 @@ function getChildTheme(childId){
 }
 function applyChildTheme(childId){
   const t=getChildTheme(childId);
-  // Update home tab colors directly
-  TAB_COLORS.home=t.c1;
-  TAB_COLORS2.home=t.c2;
-  // Update CSS custom properties for the current tab if on home
-  if(document.body.getAttribute('data-tab')==='home'){
+  // Update tab colors for child-themed tabs (home, log, rwd, hist)
+  TAB_COLORS.home=t.c1; TAB_COLORS2.home=t.c2;
+  TAB_COLORS.log=t.c1;  TAB_COLORS2.log=t.c2;
+  TAB_COLORS.rwd=t.c1;  TAB_COLORS2.rwd=t.c2;
+  TAB_COLORS.hist=t.c1; TAB_COLORS2.hist=t.c2;
+  // Apply CSS variables for child-themed tabs (마이탭/관리자탭 제외)
+  const curTab=document.body.getAttribute('data-tab');
+  const themedTabs=['home','log','rwd','hist'];
+  if(themedTabs.includes(curTab)){
     document.body.style.setProperty('--tab-color',t.c1);
     document.body.style.setProperty('--tab-color2',t.c2);
     document.body.style.setProperty('--tab-shadow',t.shadow);
@@ -11668,7 +11676,7 @@ function renderMyTab(){
   if(roleEl)roleEl.textContent=roleLabel;
   // 아바타
   const avatarWrap=document.getElementById('my-avatar-wrap');
-  if(avatarWrap)avatarWrap.innerHTML=getAvatarHTML(currentUser,80);
+  if(avatarWrap)avatarWrap.innerHTML=getAvatarHTML(currentUser,56);
   // 관리자 버튼 표시 여부
   const adminBtn=document.getElementById('my-admin-btn');
   if(adminBtn)adminBtn.style.display=isCaregiverUser()?'':'none';
@@ -12923,10 +12931,19 @@ function reallyGoTab(tab){
 
   // Set tab theme
   document.body.setAttribute('data-tab', tab);
-  // 홈탭이고 양육자면 현재 선택된 자녀 테마 적용
-  if(tab==='home'&&isCaregiverUser&&isCaregiverUser()){
+  // 자녀 테마 적용 탭 (홈, 활동기록, 보상, 성과통계)
+  const _themedTabs=['home','log','rwd','hist'];
+  if(_themedTabs.includes(tab)&&isCaregiverUser&&isCaregiverUser()){
     const vid=getViewedMemberId&&getViewedMemberId();
     if(vid)applyChildTheme(vid);
+  }
+  // 마이탭: 회색 계열 고정
+  if(tab==='my'){
+    document.body.style.setProperty('--tab-color','#475569');
+    document.body.style.setProperty('--tab-color2','#64748B');
+    document.body.style.setProperty('--tab-shadow','rgba(71,85,105,0.3)');
+    document.body.style.setProperty('--tab-lt','#F1F5F9');
+    document.body.style.setProperty('--tab-lt-dk','#334155');
   }
   document.documentElement.style.background = TAB_COLORS[tab] || '#6366F1';
 
