@@ -4191,6 +4191,7 @@ let selectedMember = null;
 let _familyId = null; // 현재 가족 ID
 let viewingChildId = null; // independent mode: 양육자가 보고 있는 자녀 ID
 let _admViewChildId = null; // 관리자 패널: 편집 중인 자녀 ID (independent mode)
+let _globalDataOwner = null; // 현재 S.acts/S.rwds/S.badges 등이 누구의 데이터인지 추적
 
 // ── 가입 흐름 상태 ──
 let _createState = {
@@ -5675,6 +5676,7 @@ function logout() {
   currentUser = null;
   viewingChildId = null;
   _admViewChildId = null;
+  _globalDataOwner = null;
   adminOK = false;
   localStorage.removeItem(_LS_PREFIX+'current_user');
   showAuthScreen('login');
@@ -6033,6 +6035,11 @@ function getMemberState(memberId) {
     const isMe = memberId === currentUser;
     // 보상 인벤토리/요청: 최초 1회 마이그레이션 — 첫 자녀에게만 글로벌 데이터 할당
     const isFirstChildForInv = _shouldMigrateRewardInv(memberId);
+    // 양육자가 자녀 데이터를 초기화할 때: 부모가 커스텀한 활동/보상 목록을 상속
+    // (기존 형제의 목록이 있으면 그걸 사용, 없으면 현재 S.acts/S.rwds 사용)
+    const isChildInit = !isMe && isCaregiverUser();
+    const inheritActs = isChildInit ? _getInheritableActs() : null;
+    const inheritRwds = isChildInit ? _getInheritableRwds() : null;
     // First time: migrate global data if it's the current user, else start fresh
     S.memberData[memberId] = {
       pts: isMe ? (S.pts || 0) : 0,
@@ -6040,8 +6047,8 @@ function getMemberState(memberId) {
       longest: isMe ? (S.longest || 0) : 0,
       lastDate: isMe ? (S.lastDate || null) : null,
       totalDone: isMe ? (S.totalDone || 0) : 0,
-      acts: isMe && S.acts ? JSON.parse(JSON.stringify(S.acts)) : JSON.parse(JSON.stringify(DACTS)),
-      rwds: isMe && S.rwds ? JSON.parse(JSON.stringify(S.rwds)) : JSON.parse(JSON.stringify(DRWDS)),
+      acts: isMe && S.acts ? JSON.parse(JSON.stringify(S.acts)) : (inheritActs || JSON.parse(JSON.stringify(DACTS))),
+      rwds: isMe && S.rwds ? JSON.parse(JSON.stringify(S.rwds)) : (inheritRwds || JSON.parse(JSON.stringify(DRWDS))),
       log: isMe && S.log ? [...S.log] : [],
       actDone: isMe && S.actDone ? {...S.actDone} : {},
       moodLog: isMe && S.moodLog ? [...S.moodLog] : [],
@@ -6054,6 +6061,27 @@ function getMemberState(memberId) {
     };
   }
   return S.memberData[memberId];
+}
+// 자녀 초기화 시 상속할 활동/보상 목록 결정
+function _getInheritableActs(){
+  // 기존 형제의 acts가 있으면 복사
+  if(S.memberData){
+    for(const [id,md] of Object.entries(S.memberData)){
+      if(md.acts&&md.acts.length>0) return JSON.parse(JSON.stringify(md.acts));
+    }
+  }
+  // 글로벌 S.acts 사용 (독립 모드 전환 전에 설정된 활동)
+  if(S.acts&&S.acts.length>0) return JSON.parse(JSON.stringify(S.acts));
+  return null;
+}
+function _getInheritableRwds(){
+  if(S.memberData){
+    for(const [id,md] of Object.entries(S.memberData)){
+      if(md.rwds&&md.rwds.length>0) return JSON.parse(JSON.stringify(md.rwds));
+    }
+  }
+  if(S.rwds&&S.rwds.length>0) return JSON.parse(JSON.stringify(S.rwds));
+  return null;
 }
 
 // 보상 인벤토리 마이그레이션 판단: 아직 어떤 자녀에게도 rewardInventory가 할당 안 되었으면 true
@@ -6078,6 +6106,7 @@ function _shouldMigrateRewardInv(memberId) {
 function syncMemberToGlobal(targetId) {
   const mid = targetId || currentUser;
   if (!mid || !S.memberData) return;
+  _globalDataOwner = mid; // 누구의 데이터가 S에 로드되었는지 추적
   const ms = getMemberState(mid);
 
   // 독립 모드: 모든 데이터를 해당 구성원에서 로드
@@ -6129,8 +6158,10 @@ function syncGlobalToMember(targetId) {
 // Robust debounced save with in-flight guard
 function save(){
   // independent 모드에서 양육자가 자녀 데이터를 보고 있으면 해당 자녀에게 저장
-  if(getFamilyMode()==='independent'&&isCaregiverUser()&&viewingChildId){
-    syncGlobalToMember(viewingChildId);
+  // _globalDataOwner: syncMemberToGlobal()로 로드된 데이터의 원래 주인 (관리패널 등에서 다른 자녀 편집 시 중요)
+  if(getFamilyMode()==='independent'&&isCaregiverUser()){
+    const syncTarget = _globalDataOwner || viewingChildId;
+    if(syncTarget) syncGlobalToMember(syncTarget);
   }else{
     syncGlobalToMember(); // Sync changes back to member data before saving
   }
@@ -12948,6 +12979,16 @@ function reallyGoTab(tab){
       if(!S.memberData[_restoreId])getMemberState(_restoreId);
       syncMemberToGlobal(_restoreId);
     }
+  }
+  // 관리자 탭에 진입할 때: 현재 글로벌 데이터 저장 → 관리자 선택 자녀 로드
+  if(tab==='adm'&&_prevTab!=='adm'&&_admViewChildId&&S.memberData&&isCaregiverUser()){
+    // 현재 홈/로그 뷰의 자녀 데이터를 먼저 저장
+    if(viewingChildId&&_globalDataOwner===viewingChildId){
+      syncGlobalToMember(viewingChildId);
+    }
+    // 관리자가 선택한 자녀 데이터 로드
+    if(!S.memberData[_admViewChildId])getMemberState(_admViewChildId);
+    syncMemberToGlobal(_admViewChildId);
   }
   // PIN이 열려 있으면 강제 닫고 scroll lock 해제
   const pinWrap=document.getElementById('pin-wrap');
