@@ -6046,8 +6046,11 @@ function syncMemberToGlobal(targetId) {
   S.rwds = (ms.rwds && ms.rwds.length > 0) ? ms.rwds : JSON.parse(JSON.stringify(DRWDS));
   S.stickers = ms.stickers || [];
   S.rewardLog = ms.rewardLog || [];
-  S.rewardInventory = ms.rewardInventory || [];
-  S.rewardRequests = ms.rewardRequests || [];
+  // rewardInventory/rewardRequests: undefined이면 아직 마이그레이션 안 된 것 → 기존 글로벌 값 유지
+  if(ms.rewardInventory !== undefined) S.rewardInventory = ms.rewardInventory;
+  else if(!S.rewardInventory) S.rewardInventory = [];
+  if(ms.rewardRequests !== undefined) S.rewardRequests = ms.rewardRequests;
+  else if(!S.rewardRequests) S.rewardRequests = [];
 }
 
 // Syncs global S back to member data before saving
