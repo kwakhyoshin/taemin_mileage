@@ -287,27 +287,18 @@ body.dark .dtog{background:#334155}
 .dtog-in{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .25s;display:flex;align-items:center;justify-content:center;font-size:11px;line-height:1}
 body.dark .dtog-in{transform:translateX(20px)}
 
-/* HOME TOP - scrolls away */
-/* APP TOP BAR */
-.app-topbar{background:var(--tab-color,#6366F1);padding:0 16px;padding-top:calc(12px + env(safe-area-inset-top));padding-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:8px;position:sticky;top:0;z-index:12;border:0;outline:0}
-.app-topbar-logo{flex-shrink:0;display:flex;align-items:center}
-.app-topbar-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
-/* 자녀 전환기 (양육자 전용) */
-#child-switcher{display:none;align-items:center}
-.child-sw-toggle{display:flex;background:rgba(255,255,255,.2);border-radius:999px;padding:2px;gap:0}
-.child-sw-btn{background:none;border:none;color:rgba(255,255,255,.8);font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;cursor:pointer;white-space:nowrap;transition:background .2s,color .2s;font-family:inherit;line-height:1.4}
-.child-sw-btn.on{background:rgba(255,255,255,.95);color:#5B21B6}
-.child-sw-select{background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.35);border-radius:20px;color:#fff;font-size:11px;font-weight:700;padding:3px 20px 3px 8px;font-family:inherit;cursor:pointer;outline:none;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center}
-.child-sw-select option{background:#4B5563;color:#fff}
-/* HOME GREETING (below topbar, still in gradient area) */
-.home-greeting{background:var(--tab-color,#6366F1);padding:0 20px 0;position:relative;overflow:visible;z-index:11;border:0;outline:0}
-.home-greeting::after{content:'';position:absolute;bottom:-70px;right:10px;width:160px;height:160px;background:rgba(255,255,255,.1);border-radius:50%;pointer-events:none}
+/* HOME TOP */
+.home-top{background:var(--tab-color,#6366F1);padding:16px 20px 0;padding-top:calc(16px + env(safe-area-inset-top));display:flex;justify-content:space-between;align-items:flex-start;position:relative;overflow:visible;z-index:11}
+.home-top::after{content:'';position:absolute;bottom:-70px;right:10px;width:160px;height:160px;background:rgba(255,255,255,.1);border-radius:50%;pointer-events:none}
 #home-top-content{transition:opacity .1s ease-out}
-.home-greeting h1{font-size:24px;font-weight:900;color:rgba(255,255,255,.68)}
-/* keep .home-top for tablet/desktop media queries */
-.home-top{background:var(--tab-color,#6366F1);padding:0;position:relative;overflow:visible;z-index:11}
-/* greeting↔hero 배경 단차 제거: greeting 하단과 hero 상단 색상 완전 연결 */
-.home-greeting{margin-bottom:0!important;padding-bottom:0!important;}
+.home-top h1{font-size:24px;font-weight:900;color:rgba(255,255,255,.68)}
+/* 자녀 선택기 (hero 내부) */
+#child-selector{margin:4px 0 2px}
+.child-toggle{display:inline-flex;background:rgba(255,255,255,.2);border-radius:20px;padding:2px}
+.child-toggle-btn{background:transparent;border:none;color:rgba(255,255,255,.8);font-size:12px;font-weight:700;padding:4px 12px;border-radius:18px;cursor:pointer;transition:all .2s;font-family:inherit}
+.child-toggle-btn.active{background:rgba(255,255,255,.9);color:var(--tab-color,#6366F1)}
+.child-select{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;font-size:12px;font-weight:700;padding:4px 10px;border-radius:18px;cursor:pointer;font-family:inherit}
+.child-select option{color:#1E293B}
 .hero{margin-top:0!important;}
 /* MY TAB */
 .my-header{background:linear-gradient(160deg,var(--tab-color,#6366F1),var(--tab-color2,#818CF8));padding:28px 24px 32px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
@@ -337,7 +328,7 @@ body.dark .dtog-in{transform:translateX(20px)}
 .child-picker-name{font-size:16px;font-weight:800;color:var(--tx);flex:1}
 
 /* HERO - Sticky on scroll, full width when stuck */
-.hero{margin:0;background:linear-gradient(180deg,var(--tab-color,#6366F1),var(--tab-color2,#818CF8));border-radius:0 0 38px 38px;padding:14px 20px 22px;color:#fff;position:sticky;top:var(--topbar-h,0px);z-index:10;overflow:hidden;box-shadow:0 4px 20px var(--tab-shadow,rgba(99,102,241,0.3));transition:padding .25s,overflow .25s;border:0;outline:0}
+.hero{margin:0;background:linear-gradient(180deg,var(--tab-color,#6366F1),var(--tab-color2,#818CF8));border-radius:0 0 38px 38px;padding:14px 20px 22px;color:#fff;position:sticky;top:0;z-index:10;overflow:hidden;box-shadow:0 4px 20px var(--tab-shadow,rgba(99,102,241,0.3));transition:padding .25s;border:0;outline:0}
 .hero::after{content:'';position:absolute;bottom:-30px;left:20px;width:110px;height:110px;background:rgba(255,255,255,.08);border-radius:50%;pointer-events:none}
 .hero-lbl{font-size:14px;font-weight:700;opacity:.85;transition:font-size .25s}
 .hero-pts{font-size:58px;font-weight:900;letter-spacing:-2px;line-height:1;transition:font-size .25s}
@@ -2901,25 +2892,12 @@ button:disabled {
 
 <!-- HOME -->
 <div class="scr on" id="s-home">
-  <div class="app-topbar">
-    <div class="app-topbar-logo">
-      <svg viewBox="0 0 88 22" xmlns="http://www.w3.org/2000/svg" width="72" height="18">
-        <text y="17" font-family="'Pretendard Variable',system-ui,sans-serif" font-weight="900" font-size="19" letter-spacing="-0.5">
-          <tspan fill="rgba(255,255,255,.9)">mile</tspan><tspan fill="#FFD580">.</tspan><tspan fill="rgba(255,255,255,.9)">ly</tspan>
-        </text>
-      </svg>
-    </div>
-    <div class="app-topbar-right">
-      <div id="child-switcher"></div>
-      <button class="dtog" onclick="toggleDark()" style="background:rgba(255,255,255,.2);border:none"><div class="dtog-in" id="dtog-ic" style="background:rgba(255,255,255,.9)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-3px"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></div></button>
-    </div>
-  </div>
-  <div class="home-greeting">
+  <div class="home-top">
     <div id="home-top-content">
       <h1 id="greeting-txt">안녕하세요! 👋</h1>
       <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:4px">
-        <p id="today-str" style="margin:0;font-size:13px;color:rgba(255,255,255,.8)"></p>
-        <div id="weather-badge" style="display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.2);padding:2px 8px;border-radius:20px;font-size:13px;font-weight:700;color:#fff">
+        <p id="today-str" style="margin:0;font-size:12px;color:rgba(255,255,255,.8)"></p>
+        <div id="weather-badge" style="display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.2);padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;color:#fff">
           <span id="weather-icon">☀️</span><span id="weather-temp">--°</span>
         </div>
         <div id="pm25-badge" style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,.2);padding:2px 8px;border-radius:20px;font-size:9px;font-weight:700;color:#fff;white-space:nowrap">
@@ -2932,12 +2910,14 @@ button:disabled {
           <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="flex-shrink:0"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg><span id="location-name">서울</span>
         </div>
       </div>
-      <p id="smart-msg" style="font-size:13px;color:rgba(255,255,255,.75);margin-top:4px;font-weight:600;line-height:1.3"></p>
+      <p id="smart-msg" style="font-size:11px;color:rgba(255,255,255,.75);margin-top:4px;font-weight:600;line-height:1.3"></p>
     </div>
+    <button class="dtog" onclick="toggleDark()" style="background:rgba(255,255,255,.2);border:none;flex-shrink:0"><div class="dtog-in" id="dtog-ic" style="background:rgba(255,255,255,.9)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-3px"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></div></button>
   </div>
   <div class="hero">
     <div class="streak-pill" id="streak-pill"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 01-7 7 7 7 0 01-7-7c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg> 0일 연속</div>
     <div class="hero-lbl" id="hero-lbl">나의 마일리지</div>
+    <div id="child-selector"></div>
     <div class="hero-pts-wrap" style="display:flex;align-items:flex-end;gap:6px;margin:4px 0">
       <span class="hero-pts" id="hero-pts">0</span><span class="hero-unit">M</span>
     </div>
@@ -7187,6 +7167,7 @@ function renderHero(){
   }else{
     if(heroLbl)heroLbl.textContent='나의 마일리지';
   }
+  renderChildSelector();
 
   const _heroPts=getActiveMileage();
   document.getElementById('hero-pts').textContent=_heroPts.toLocaleString();
@@ -7209,6 +7190,22 @@ function renderHero(){
     }
   }
 }
+
+function renderChildSelector(){
+  const el=document.getElementById('child-selector');
+  if(!el)return;
+  if(!isCaregiverUser()){el.style.display='none';return;}
+  const children=getChildMembers();
+  if(children.length<=1){el.style.display='none';return;}
+  el.style.display='block';
+  const viewedId=getViewedMemberId();
+  if(children.length===2){
+    el.innerHTML=`<div class="child-toggle">${children.map(c=>`<button class="child-toggle-btn${viewedId===c.id?' active':''}" onclick="switchViewingChild('${c.id}')">${c.name}</button>`).join('')}</div>`;
+  }else{
+    el.innerHTML=`<select class="child-select" onchange="switchViewingChild(this.value)">${children.map(c=>`<option value="${c.id}"${viewedId===c.id?' selected':''}>${c.name}</option>`).join('')}</select>`;
+  }
+}
+window.renderChildSelector=renderChildSelector;
 
 function renderHdrStats(){
   // Log tab: today's activity count and total mileage (getActiveMileage로 통일)
@@ -12816,7 +12813,7 @@ function reallyGoTab(tab){
     const lblEl=hero.querySelector('.hero-lbl');if(lblEl)lblEl.style.fontSize='';
     const unitEl=hero.querySelector('.hero-unit');if(unitEl)unitEl.style.fontSize='';
   }
-  const ht=document.querySelector('.home-greeting');
+  const ht=document.querySelector('.home-top');
   if(ht) Array.from(ht.children).forEach(c=>c.style.opacity='1');
   const defaultBr2=window.innerWidth>=768?'0':'0 0 38px 38px';
   const logH=document.querySelector('.log-header-sticky');
@@ -14227,108 +14224,76 @@ if(_ENV==='dev'){
     });
   }catch(e){ console.warn('Realtime listener failed:', e); }
   
-  // --topbar-h CSS 변수: hero sticky top 위치를 topbar 높이만큼 내려서 마일리지가 topbar에 가리지 않도록
-  const _topbarEl = document.querySelector('.app-topbar');
-  function _setTopbarH(){
-    if(_topbarEl) document.documentElement.style.setProperty('--topbar-h', _topbarEl.offsetHeight+'px');
-  }
-  _setTopbarH();
-
   // 모든 탭 스크롤 시 헤더 축소 (compact)
   const homeScr = document.getElementById('s-home');
   const hero = document.querySelector('.hero');
-  // DOM 쿼리 캐싱 — 매 스크롤마다 querySelector 반복 방지
-  const _progTrack=hero?hero.querySelector('.prog-track'):null;
-  const _ptEl=hero?hero.querySelector('.hero-pts'):null;
-  const _lblEl=hero?hero.querySelector('.hero-lbl'):null;
-  const _unitEl=hero?hero.querySelector('.hero-unit'):null;
-  const _homTop=document.querySelector('.home-greeting');
-  const _homTopChildren=_homTop?Array.from(_homTop.children):[];
-  let _uhcRaf=0;
   function updateHeaderCompact(){
-    if(_uhcRaf) return;
-    _uhcRaf=requestAnimationFrame(function(){
-      _uhcRaf=0;
-      const scrollY = window.scrollY || document.documentElement.scrollTop;
-      const threshold = 60;
-      const thresholdOff = 40; // hysteresis: compact 해제는 40px 이하에서 (깜박거림 방지)
-      // topbar 높이 보정: home hero는 topbar 아래에 sticky이므로 그만큼 오프셋 차감
-      const _topH = _topbarEl ? _topbarEl.offsetHeight : 0;
-      const effScrollY = Math.max(0, scrollY - _topH); // home hero 전용 보정값
-      // Smooth border-radius interpolation: 38px → 28px (mobile only)
-      const isWide=window.innerWidth>=768;
-      const brMax=38,brMin=28;
-      // 홈: effScrollY 기준, 다른 탭: raw scrollY 기준
-      const brRatioHome=Math.max(0,Math.min(1,effScrollY/threshold));
-      const brRatioOther=Math.max(0,Math.min(1,scrollY/threshold));
-      const brHome=isWide?0:(brMax-(brMax-brMin)*brRatioHome);
-      const brOther=isWide?0:(brMax-(brMax-brMin)*brRatioOther);
-      const brStrHome=isWide?'0':'0 0 '+brHome+'px '+brHome+'px';
-      const brStrOther=isWide?'0':'0 0 '+brOther+'px '+brOther+'px';
-      // Home
-      if(homeScr && homeScr.classList.contains('on') && hero){
-        // hysteresis: compact 켜짐 60px↑, 꺼짐 40px↓ (threshold 근처 깜박거림 방지)
-        const _isCompact=hero.classList.contains('compact');
-        if(!_isCompact && effScrollY > threshold) hero.classList.add('compact');
-        else if(_isCompact && effScrollY < thresholdOff) hero.classList.remove('compact');
-        hero.style.borderRadius=brStrHome;
-        // Smooth gauge height: 14px (expanded) → 5px (compact)
-        if(_progTrack){
-          const gaugeMax=14,gaugeMin=5;
-          const gh=gaugeMax-(gaugeMax-gaugeMin)*brRatioHome;
-          _progTrack.style.height=gh+'px';
-          _progTrack.style.borderRadius=(gh/2)+'px';
-        }
-        // Smooth hero-pts font size: 58px → 32px (gradual, not sudden)
-        if(_ptEl){
-          const fsMax=58,fsMin=32;
-          _ptEl.style.fontSize=(fsMax-(fsMax-fsMin)*brRatioHome)+'px';
-        }
-        if(_lblEl){
-          const lsMax=14,lsMin=10;
-          _lblEl.style.fontSize=(lsMax-(lsMax-lsMin)*brRatioHome)+'px';
-        }
-        if(_unitEl){
-          const usMax=18,usMin=14;
-          _unitEl.style.fontSize=(usMax-(usMax-usMin)*brRatioHome)+'px';
-        }
-        // Fade out home-top children only (not background)
-        if(_homTopChildren.length){
-          const fadeStart=10, fadeEnd=60;
-          const o=effScrollY<=fadeStart?1:effScrollY>=fadeEnd?0:1-(effScrollY-fadeStart)/(fadeEnd-fadeStart);
-          const v=Math.max(0,Math.min(1,o));
-          _homTopChildren.forEach(c=>c.style.opacity=v);
-        }
+    const scrollY = window.scrollY || document.documentElement.scrollTop;
+    const threshold = 60;
+    const isWide=window.innerWidth>=768;
+    const brMax=38,brMin=28;
+    const brRatio=Math.max(0,Math.min(1,scrollY/threshold));
+    const br=isWide?0:(brMax-(brMax-brMin)*brRatio);
+    const brStr=isWide?'0':'0 0 '+br+'px '+br+'px';
+    // Home
+    if(homeScr && homeScr.classList.contains('on') && hero){
+      hero.classList.toggle('compact', scrollY > threshold);
+      hero.style.borderRadius=brStr;
+      // Smooth gauge height: 14px → 5px
+      const progTrack=hero.querySelector('.prog-track');
+      if(progTrack){
+        const gaugeMax=14,gaugeMin=5;
+        const gh=gaugeMax-(gaugeMax-gaugeMin)*brRatio;
+        progTrack.style.height=gh+'px';
+        progTrack.style.borderRadius=(gh/2)+'px';
       }
-      // Log (raw scrollY + hysteresis)
-      const logHdr = document.querySelector('.log-header-sticky');
-      if(logHdr && document.getElementById('s-log')?.classList.contains('on')){
-        const _lc=logHdr.classList.contains('compact');
-        if(!_lc && scrollY > threshold) logHdr.classList.add('compact');
-        else if(_lc && scrollY < thresholdOff) logHdr.classList.remove('compact');
-        logHdr.style.borderRadius=brStrOther;
+      // Smooth hero-pts font size: 58px → 32px
+      const ptEl=hero.querySelector('.hero-pts');
+      if(ptEl){
+        const fsMax=58,fsMin=32;
+        ptEl.style.fontSize=(fsMax-(fsMax-fsMin)*brRatio)+'px';
       }
-      // Reward (raw scrollY + hysteresis)
-      const rwdHdr = document.querySelector('.rwd-header-sticky');
-      if(rwdHdr && document.getElementById('s-rwd')?.classList.contains('on')){
-        const _rc=rwdHdr.classList.contains('compact');
-        if(!_rc && scrollY > threshold) rwdHdr.classList.add('compact');
-        else if(_rc && scrollY < thresholdOff) rwdHdr.classList.remove('compact');
-        rwdHdr.style.borderRadius=brStrOther;
+      const lblEl=hero.querySelector('.hero-lbl');
+      if(lblEl){
+        const lsMax=14,lsMin=10;
+        lblEl.style.fontSize=(lsMax-(lsMax-lsMin)*brRatio)+'px';
       }
-      // History/Stats (raw scrollY + hysteresis)
-      const histHdr = document.querySelector('.hist-hero');
-      if(histHdr && document.getElementById('s-hist')?.classList.contains('on')){
-        const _hc=histHdr.classList.contains('compact');
-        if(!_hc && scrollY > threshold) histHdr.classList.add('compact');
-        else if(_hc && scrollY < thresholdOff) histHdr.classList.remove('compact');
-        histHdr.style.borderRadius=brStrOther;
+      const unitEl=hero.querySelector('.hero-unit');
+      if(unitEl){
+        const usMax=18,usMin=14;
+        unitEl.style.fontSize=(usMax-(usMax-usMin)*brRatio)+'px';
       }
-    });
+      // Fade out home-top children
+      const ht=document.querySelector('.home-top');
+      if(ht){
+        const fadeStart=10, fadeEnd=60;
+        const o=scrollY<=fadeStart?1:scrollY>=fadeEnd?0:1-(scrollY-fadeStart)/(fadeEnd-fadeStart);
+        const v=Math.max(0,Math.min(1,o));
+        Array.from(ht.children).forEach(c=>c.style.opacity=v);
+      }
+    }
+    // Log
+    const logHdr = document.querySelector('.log-header-sticky');
+    if(logHdr && document.getElementById('s-log')?.classList.contains('on')){
+      logHdr.classList.toggle('compact', scrollY > threshold);
+      logHdr.style.borderRadius=brStr;
+    }
+    // Reward
+    const rwdHdr = document.querySelector('.rwd-header-sticky');
+    if(rwdHdr && document.getElementById('s-rwd')?.classList.contains('on')){
+      rwdHdr.classList.toggle('compact', scrollY > threshold);
+      rwdHdr.style.borderRadius=brStr;
+    }
+    // History/Stats
+    const histHdr = document.querySelector('.hist-hero');
+    if(histHdr && document.getElementById('s-hist')?.classList.contains('on')){
+      histHdr.classList.toggle('compact', scrollY > threshold);
+      histHdr.style.borderRadius=brStr;
+    }
   }
   window.addEventListener('scroll', updateHeaderCompact, {passive:true});
-  window.addEventListener('resize', ()=>{_setTopbarH();updateHeaderCompact();}, {passive:true});
-  window.addEventListener('orientationchange', ()=>{setTimeout(()=>{_setTopbarH();updateHeaderCompact();},100);});
+  window.addEventListener('resize', updateHeaderCompact, {passive:true});
+  window.addEventListener('orientationchange', ()=>{setTimeout(updateHeaderCompact,100);});
 
 
   // ============ ONBOARDING OVERLAY ============
