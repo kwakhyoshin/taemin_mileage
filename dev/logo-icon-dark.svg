@@ -1,0 +1,16 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgD" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#EEF2FF"/>
+    </linearGradient>
+  </defs>
+  <!-- Background circle — light for dark mode contexts -->
+  <circle cx="100" cy="100" r="96" fill="url(#bgD)"/>
+  <!-- House — indigo silhouette -->
+  <path d="M62,150 L62,98 L100,64 L138,98 L138,150 Z" fill="#4F46E5"/>
+  <!-- Door — orange brand accent -->
+  <rect x="87" y="118" width="26" height="32" rx="4" fill="#FF6B35"/>
+  <!-- Dot above peak -->
+  <circle cx="100" cy="50" r="8" fill="#FF6B35"/>
+</svg>

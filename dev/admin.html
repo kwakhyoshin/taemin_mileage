@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>시스템 관리자 — 우리가족 마일리지</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ── CSS Variables (Light / Dark) ── */
+:root{
+  --bg:#F1F5F9;--bg2:#fff;--bg3:#F8FAFC;
+  --bdr:#E2E8F0;--bdr2:#F1F5F9;
+  --tx:#1E293B;--tx2:#64748B;--tx3:#94A3B8;
+  --primary:#6366F1;--primary-bg:#EEF2FF;--primary-ring:rgba(99,102,241,.15);
+  --danger:#EF4444;--danger-bg:#FEE2E2;
+  --success:#16A34A;--success-bg:#DCFCE7;
+  --info:#3B82F6;--info-bg:#DBEAFE;
+  --sidebar-bg:#fff;--topbar-bg:#1E293B;
+  --card-shadow:0 1px 4px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.04);
+  --card-shadow-hover:0 4px 12px rgba(99,102,241,.12),0 1px 4px rgba(0,0,0,.06);
+}
+[data-theme="dark"]{
+  --bg:#0F172A;--bg2:#1E293B;--bg3:#162032;
+  --bdr:#334155;--bdr2:#1E293B;
+  --tx:#F1F5F9;--tx2:#94A3B8;--tx3:#64748B;
+  --primary-bg:#1e1f4e;
+  --danger-bg:#3b1212;--success-bg:#0f2d1e;--info-bg:#0f1f3b;
+  --sidebar-bg:#1E293B;--topbar-bg:#0F172A;
+  --card-shadow:0 1px 4px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.2);
+  --card-shadow-hover:0 4px 12px rgba(99,102,241,.2),0 1px 4px rgba(0,0,0,.3);
+}
+@media(prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F172A;--bg2:#1E293B;--bg3:#162032;
+    --bdr:#334155;--bdr2:#1E293B;
+    --tx:#F1F5F9;--tx2:#94A3B8;--tx3:#64748B;
+    --primary-bg:#1e1f4e;
+    --danger-bg:#3b1212;--success-bg:#0f2d1e;--info-bg:#0f1f3b;
+    --sidebar-bg:#1E293B;--topbar-bg:#0F172A;
+    --card-shadow:0 1px 4px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.2);
+    --card-shadow-hover:0 4px 12px rgba(99,102,241,.2),0 1px 4px rgba(0,0,0,.3);
+  }
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;transition:background .2s,color .2s}
+
+/* ── Login ── */
+.login-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(150deg,#1E293B 0%,#312e81 60%,#1E293B 100%)}
+.login-card{background:var(--bg2);border-radius:20px;padding:44px 40px;width:400px;box-shadow:0 24px 64px rgba(0,0,0,.35)}
+.login-logo{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:24px}
+.login-logo-mark{width:44px;height:44px;background:linear-gradient(135deg,#6366F1,#818CF8);border-radius:14px;display:flex;align-items:center;justify-content:center}
+.login-logo-mark svg{width:24px;height:24px}
+.login-logo-text{font-size:22px;font-weight:900;color:var(--tx);letter-spacing:-.5px}
+.login-logo-text span{color:#6366F1}
+.login-card h1{font-size:18px;font-weight:900;margin-bottom:4px;color:var(--tx);text-align:center}
+.login-card p{font-size:14px;color:var(--tx2);margin-bottom:28px;text-align:center}
+.login-card input{width:100%;padding:14px 16px;border:2px solid var(--bdr);border-radius:12px;font-size:15px;font-weight:600;font-family:inherit;outline:none;margin-bottom:12px;transition:border .2s,box-shadow .2s;background:var(--bg);color:var(--tx)}
+.login-card input:focus{border-color:#6366F1;box-shadow:0 0 0 4px var(--primary-ring)}
+.login-card button{width:100%;padding:14px;background:#6366F1;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;transition:background .15s,transform .1s,box-shadow .15s;box-shadow:0 4px 12px rgba(99,102,241,.35)}
+.login-card button:hover{background:#5558e8;box-shadow:0 6px 16px rgba(99,102,241,.45)}
+.login-card button:active{transform:scale(.98)}
+.login-error{font-size:14px;color:#EF4444;font-weight:600;margin-bottom:10px;min-height:20px}
+
+/* ── Layout ── */
+.app{display:none;min-height:100vh}
+.topbar{background:var(--topbar-bg);color:#fff;padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 1px 0 rgba(255,255,255,.06)}
+.topbar-left{display:flex;align-items:center;gap:14px}
+.topbar-left svg{opacity:.5}
+.topbar-title{font-size:15px;font-weight:800;letter-spacing:-.3px}
+.topbar-env{font-size:10px;font-weight:800;background:#EF4444;padding:2px 8px;border-radius:6px;letter-spacing:1px}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.topbar-user{font-size:14px;font-weight:600;opacity:.6}
+.topbar-logout{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:#fff;padding:6px 16px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .15s}
+.topbar-logout:hover{background:rgba(255,255,255,.16)}
+.topbar-theme-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:#fff;padding:6px 10px;border-radius:10px;font-size:16px;cursor:pointer;line-height:1;transition:background .15s}
+.topbar-theme-btn:hover{background:rgba(255,255,255,.16)}
+.hamburger-btn{display:none;background:none;border:none;color:#fff;cursor:pointer;font-size:20px;padding:8px}
+
+.layout{display:flex;min-height:calc(100vh - 60px)}
+.sidebar{width:232px;background:var(--sidebar-bg);border-right:1px solid var(--bdr);padding:20px 0;flex-shrink:0;max-height:calc(100vh - 60px);overflow-y:auto;transition:transform .3s,background .2s}
+.sidebar.mobile-open{transform:translateX(0)}
+.sidebar-section-label{font-size:11px;font-weight:800;color:var(--tx3);text-transform:uppercase;letter-spacing:1px;padding:0 20px;margin:16px 0 6px}
+.sidebar-item{display:flex;align-items:center;gap:10px;padding:11px 20px;font-size:14px;font-weight:700;color:var(--tx2);cursor:pointer;transition:all .15s;border-left:3px solid transparent;border-radius:0}
+.sidebar-item:hover{background:var(--bg3);color:var(--tx)}
+.sidebar-item.active{background:var(--primary-bg);color:#6366F1;border-left-color:#6366F1}
+.sidebar-item svg{width:18px;height:18px;flex-shrink:0}
+.sidebar-divider{height:1px;background:var(--bdr);margin:10px 0}
+
+.main{flex:1;padding:28px 32px;overflow-y:auto;max-height:calc(100vh - 60px);background:var(--bg)}
+.main h2{font-size:20px;font-weight:900;margin-bottom:4px;color:var(--tx);letter-spacing:-.4px}
+.main .subtitle{font-size:14px;color:var(--tx2);font-weight:600;margin-bottom:24px}
+
+/* ── Stat Cards ── */
+.stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:28px}
+.stat-card{background:var(--bg2);border-radius:16px;padding:22px;border:1px solid var(--bdr);box-shadow:var(--card-shadow);transition:box-shadow .2s}
+.stat-card:hover{box-shadow:var(--card-shadow-hover)}
+.stat-card .stat-label{font-size:13px;color:var(--tx2);font-weight:700;margin-bottom:6px}
+.stat-card .stat-value{font-size:30px;font-weight:900;color:var(--tx);letter-spacing:-.5px}
+.stat-card .stat-sub{font-size:12px;color:var(--tx3);font-weight:600;margin-top:3px}
+
+/* ── Tables ── */
+.data-table{width:100%;border-collapse:collapse;background:var(--bg2);border-radius:16px;overflow:hidden;border:1px solid var(--bdr);box-shadow:var(--card-shadow)}
+.data-table th{background:var(--bg3);padding:13px 16px;text-align:left;font-size:12px;font-weight:800;color:var(--tx2);text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--bdr)}
+.data-table td{padding:13px 16px;font-size:14px;font-weight:600;border-bottom:1px solid var(--bdr2);vertical-align:middle;color:var(--tx)}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tr:hover td{background:var(--bg3)}
+
+/* ── Badges ── */
+.badge-pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700}
+.badge-admin{background:var(--primary-bg);color:#6366F1}
+.badge-parent{background:var(--info-bg);color:#3B82F6}
+.badge-child{background:var(--success-bg);color:#16A34A}
+.badge-inactive{background:var(--bg3);color:var(--tx3)}
+.badge-active{background:var(--success-bg);color:#16A34A}
+.badge-expired{background:var(--danger-bg);color:#DC2626}
+
+/* ── Section ── */
+.section{margin-bottom:32px}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:12px}
+.section-title{font-size:16px;font-weight:800;color:var(--tx)}
+
+/* ── Buttons ── */
+.btn-sm{padding:8px 16px;border-radius:10px;font-size:14px;font-weight:700;border:none;cursor:pointer;font-family:inherit;transition:opacity .15s,transform .1s}
+.btn-sm:hover{opacity:.85}
+.btn-sm:active{opacity:.7;transform:scale(.97)}
+.btn-primary{background:#6366F1;color:#fff}
+.btn-danger{background:var(--danger-bg);color:#EF4444}
+.btn-ghost{background:var(--bg3);color:var(--tx2)}
+.btn-success{background:var(--success-bg);color:#16A34A}
+
+.empty-state{text-align:center;padding:48px;color:var(--tx3);font-size:14px;font-weight:600}
+
+/* ── Panels ── */
+.panel{display:none}
+.panel.active{display:block}
+
+/* ── Family Cards ── */
+.family-card{background:var(--bg2);border:1px solid var(--bdr);border-radius:16px;padding:20px;margin-bottom:12px;cursor:pointer;transition:all .18s;box-shadow:var(--card-shadow)}
+.family-card:hover{border-color:#C7D2FE;box-shadow:var(--card-shadow-hover);transform:translateY(-1px)}
+.family-card-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.family-card-name{font-size:15px;font-weight:800;color:var(--tx)}
+.family-card-meta{font-size:13px;color:var(--tx2);font-weight:600;margin-top:4px}
+.family-card-members{display:flex;gap:4px;margin-top:10px;flex-wrap:wrap}
+.family-card-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;border:2px solid var(--bg2);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+
+/* ── Detail ── */
+.detail-back{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700;color:#6366F1;cursor:pointer;margin-bottom:18px;background:none;border:none;font-family:inherit}
+.detail-back:hover{text-decoration:underline}
+
+.member-row{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--bdr2);flex-wrap:wrap}
+.member-row:last-child{border-bottom:none}
+.member-row-avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.member-row-avatar svg{width:100%;height:100%}
+.member-row-info{flex:1;min-width:200px}
+.member-row-name{font-size:15px;font-weight:800;color:var(--tx)}
+.member-row-role{font-size:12px;color:var(--tx2);font-weight:600;margin-top:1px}
+.member-row-actions{display:flex;gap:6px;flex-wrap:wrap;flex-shrink:0}
+
+/* ── Tabs ── */
+.tabs-header{display:flex;border-bottom:2px solid var(--bdr);margin-bottom:18px;gap:0}
+.tab-button{padding:12px 20px;font-size:14px;font-weight:700;background:none;border:none;color:var(--tx2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;font-family:inherit}
+.tab-button.active{color:#6366F1;border-bottom-color:#6366F1}
+.tab-button:hover{color:var(--tx)}
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+/* ── Search ── */
+.search-bar{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.search-input{flex:1;min-width:200px;padding:11px 14px;border:1.5px solid var(--bdr);border-radius:10px;font-size:14px;font-weight:600;font-family:inherit;background:var(--bg2);color:var(--tx);transition:border .2s,box-shadow .2s}
+.search-input:focus{outline:none;border-color:#6366F1;box-shadow:0 0 0 3px var(--primary-ring)}
+
+/* ── Modal ── */
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal-overlay.show{display:flex}
+.modal-box{background:var(--bg2);border-radius:20px;padding:32px;max-width:500px;width:90%;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.35);border:1px solid var(--bdr)}
+.modal-title{font-size:19px;font-weight:900;margin-bottom:8px;color:var(--tx)}
+.modal-description{font-size:14px;color:var(--tx2);margin-bottom:20px;font-weight:600}
+.modal-actions{display:flex;gap:12px;margin-top:24px}
+.modal-actions button{flex:1;padding:12px 16px;border-radius:12px;font-size:14px;font-weight:700;border:none;cursor:pointer;font-family:inherit;transition:opacity .15s}
+.modal-btn-cancel{background:var(--bg3);color:var(--tx2)}
+.modal-btn-confirm{background:#EF4444;color:#fff}
+.modal-btn-confirm.success{background:#10B981;color:#fff}
+
+.modal-input{width:100%;padding:11px 14px;border:1.5px solid var(--bdr);border-radius:10px;font-size:14px;font-weight:600;font-family:inherit;margin-bottom:12px;background:var(--bg);color:var(--tx)}
+.modal-input:focus{outline:none;border-color:#6366F1;box-shadow:0 0 0 3px var(--primary-ring)}
+
+/* ── Activity Feed ── */
+.activity-item{display:flex;gap:12px;padding:14px;background:var(--bg3);border-radius:12px;margin-bottom:8px;border-left:4px solid #6366F1}
+.activity-time{font-size:12px;color:var(--tx3);font-weight:600;white-space:nowrap}
+.activity-text{font-size:14px;font-weight:600;color:var(--tx)}
+
+/* ── Code block ── */
+.code-block{background:#0F172A;color:#E2E8F0;padding:16px;border-radius:12px;font-family:'Courier New',monospace;font-size:13px;overflow-x:auto;word-break:break-word;border:1px solid #1E293B}
+
+@media(max-width:768px){
+  .sidebar{position:fixed;left:0;top:60px;height:calc(100vh - 60px);z-index:99;transform:translateX(-100%);box-shadow:4px 0 20px rgba(0,0,0,.2)}
+  .sidebar.mobile-open{transform:translateX(0)}
+  .hamburger-btn{display:block}
+  .main{padding:16px}
+  .stat-row{grid-template-columns:1fr 1fr}
+  .data-table{font-size:13px}
+  .data-table th,.data-table td{padding:10px 12px}
+  .modal-box{width:95%;padding:24px}
+  .section-header{flex-direction:column;align-items:flex-start}
+  .member-row{flex-direction:column;align-items:flex-start}
+  .member-row-actions{width:100%;margin-top:8px}
+  .member-row-actions button{flex:1}
+}
+</style>
+</head>
+<body>
+<!-- LOGIN -->
+<div class="login-wrap" id="login-wrap">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      </div>
+      <div class="login-logo-text">mile<span>.ly</span></div>
+    </div>
+    <h1>시스템 관리자</h1>
+    <p>관리자 계정으로 로그인하세요</p>
+    <input type="text" id="admin-id" placeholder="아이디" autofocus>
+    <input type="password" id="admin-pwd" placeholder="비밀번호">
+    <div class="login-error" id="login-error"></div>
+    <button onclick="doAdminLogin()">로그인</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app" id="app">
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="hamburger-btn" onclick="toggleSidebarMobile()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      <div class="topbar-title">우리가족 마일리지 — 시스템 관리자</div>
+      <div class="topbar-env">DEV</div>
+    </div>
+    <div class="topbar-right">
+      <span class="topbar-user" id="topbar-user"></span>
+      <button class="topbar-theme-btn" id="theme-toggle-btn" onclick="toggleTheme()" title="다크모드 전환">🌙</button>
+      <button class="topbar-logout" onclick="doAdminLogout()">로그아웃</button>
+    </div>
+  </div>
+  <div class="layout">
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-item active" onclick="showPanel('dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        대시보드
+      </div>
+      <div class="sidebar-item" onclick="showPanel('families')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg>
+        가족 관리
+      </div>
+      <div class="sidebar-item" onclick="showPanel('registry')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        사용자 레지스트리
+      </div>
+      <div class="sidebar-item" onclick="showPanel('members')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        전체 회원
+      </div>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-item" onclick="showPanel('logs')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16v16H4z"/><path d="M4 10h16M10 4v16"/></svg>
+        감사 로그
+      </div>
+      <div class="sidebar-item" onclick="showPanel('settings')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        시스템 설정
+      </div>
+    </div>
+    <div class="main">
+      <!-- Dashboard -->
+      <div class="panel active" id="panel-dashboard">
+        <h2>대시보드</h2>
+        <div class="subtitle">시스템 전체 현황</div>
+        <div class="stat-row" id="dash-stats"></div>
+        <div class="section">
+          <div class="section-header"><div class="section-title">최근 가입 가족</div></div>
+          <div id="dash-recent-families"></div>
+        </div>
+        <div class="section">
+          <div class="section-header"><div class="section-title">최근 활동</div></div>
+          <div id="dash-activity"></div>
+        </div>
+      </div>
+
+      <!-- Families -->
+      <div class="panel" id="panel-families">
+        <div id="families-list-view">
+          <h2>가족 관리</h2>
+          <div class="subtitle">등록된 모든 가족 목록</div>
+          <div class="search-bar">
+            <input type="text" class="search-input" id="family-search" placeholder="가족명 또는 ID로 검색..." onkeyup="filterFamiliesList()">
+          </div>
+          <div id="families-list"></div>
+        </div>
+        <div id="family-detail-view" style="display:none">
+          <button class="detail-back" onclick="closeFamilyDetail()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            가족 목록으로
+          </button>
+          <div id="family-detail-content"></div>
+        </div>
+      </div>
+
+      <!-- User Registry -->
+      <div class="panel" id="panel-registry">
+        <h2>사용자 레지스트리</h2>
+        <div class="subtitle">로그인 ID → familyId, memberId 매핑 현황</div>
+        <div class="search-bar">
+          <input type="text" class="search-input" id="registry-search" placeholder="로그인 ID로 검색..." onkeyup="filterRegistry()">
+        </div>
+        <div id="registry-stats" class="stat-row"></div>
+        <div id="registry-table"></div>
+      </div>
+
+      <!-- Members -->
+      <div class="panel" id="panel-members">
+        <h2>전체 회원</h2>
+        <div class="subtitle">모든 가족의 가입된 회원 목록</div>
+        <div class="search-bar">
+          <input type="text" class="search-input" id="members-search" placeholder="이름, 로그인 ID, 가족명으로 검색..." onkeyup="filterMembersTable()">
+        </div>
+        <div id="members-table-wrap"></div>
+      </div>
+
+      <!-- Audit Logs -->
+      <div class="panel" id="panel-logs">
+        <h2>감사 로그</h2>
+        <div class="subtitle">관리자 작업 기록</div>
+        <button class="btn-sm btn-ghost" onclick="clearLogs()" style="margin-bottom:16px">로그 초기화</button>
+        <div id="logs-container"></div>
+      </div>
+
+      <!-- Settings -->
+      <div class="panel" id="panel-settings">
+        <h2>시스템 설정</h2>
+        <div class="subtitle">관리자 도구 및 유지보수</div>
+
+        <div class="section">
+          <div class="section-header"><div class="section-title">데이터 관리</div></div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px">
+            <button class="btn-sm btn-primary" onclick="exportFamiliesData()">가족 데이터 내보내기 (JSON)</button>
+            <button class="btn-sm btn-primary" onclick="exportRegistryData()">레지스트리 내보내기</button>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-header"><div class="section-title">Firestore 문서 현황</div></div>
+          <div id="firestore-info" style="background:#fff;border-radius:12px;padding:16px;border:1px solid #E2E8F0;font-size:13px;font-weight:600;line-height:2;word-break:break-all"></div>
+        </div>
+
+        <div class="section">
+          <div class="section-header"><div class="section-title">환경 정보</div></div>
+          <div style="background:#fff;border-radius:12px;padding:16px;border:1px solid #E2E8F0;font-size:13px;font-weight:600;line-height:2">
+            환경: <span style="color:#EF4444;font-weight:800">DEV</span><br>
+            Firebase 프로젝트: taemin-mileage<br>
+            Firestore 컬렉션: families (dev_*)<br>
+            레지스트리 경로: families/_dev_id_registry<br>
+            로그 경로: adminLogs/dev_log<br>
+            로드 시간: <span id="load-time">—</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div class="modal-overlay" id="confirm-modal">
+  <div class="modal-box">
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-description" id="modal-description"></div>
+    <div id="modal-input-container"></div>
+    <div class="modal-actions">
+      <button class="modal-btn-cancel" onclick="closeModal()">취소</button>
+      <button class="modal-btn-confirm" id="modal-confirm-btn" onclick="confirmModal()">확인</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha512/0.8.0/sha512.min.js"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, doc, getDoc, getDocs, setDoc, deleteDoc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDTS81EBGgiuo564ThxvTTOpR_iAHLb8tg",
+  authDomain: "taemin-mileage.firebaseapp.com",
+  projectId: "taemin-mileage",
+  storageBucket: "taemin-mileage.firebasestorage.app",
+  messagingSenderId: "1002709736057",
+  appId: "1:1002709736057:web:5e4df58febe004c765d2a8"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// ── Admin credentials ──
+const ADMIN_SALT = 'taemin_sysadmin_v1_';
+const ADMIN_ACCOUNTS = {
+  'nonmarking': { pwdHash: 'ca15f3d66b1188096f7a57c663e676e28935911710ab8370681d9556be1e242db664b42c39ea7f397c9397e6b5ee5a9be14d0d433652083d46807d9491075010', name: '곽효신' }
+};
+
+async function hashPwd(pwd) {
+  const salted = ADMIN_SALT + pwd;
+  try {
+    const enc = new TextEncoder().encode(salted);
+    const buf = await crypto.subtle.digest('SHA-512', enc);
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+  } catch(e) {
+    if (typeof sha512 === 'function') return sha512(salted);
+    throw new Error('SHA-512 not available');
+  }
+}
+
+let _loggedIn = false;
+let _adminName = '';
+let _allFamilies = [];
+let _registry = {};
+let _adminLogs = [];
+let _loadedAt = Date.now();
+let _lastFamilyId = null;
+let _lastMemberId = null;
+let _lastAction = '';
+
+// ── Modal state ──
+let _modalCallback = null;
+let _modalInputField = false;
+
+// ── Dark mode ──
+(function initTheme() {
+  const saved = localStorage.getItem('admin-theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const isDark = saved ? saved === 'dark' : prefersDark;
+  if (isDark) document.documentElement.setAttribute('data-theme', 'dark');
+  else document.documentElement.setAttribute('data-theme', 'light');
+  const btn = document.getElementById('theme-toggle-btn');
+  if (btn) btn.textContent = isDark ? '☀️' : '🌙';
+})();
+
+window.toggleTheme = function() {
+  const current = document.documentElement.getAttribute('data-theme');
+  const next = current === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('admin-theme', next);
+  const btn = document.getElementById('theme-toggle-btn');
+  if (btn) btn.textContent = next === 'dark' ? '☀️' : '🌙';
+};
+
+// ── Login ──
+window.doAdminLogin = async function() {
+  const id = document.getElementById('admin-id').value.trim();
+  const pwd = document.getElementById('admin-pwd').value;
+  const err = document.getElementById('login-error');
+
+  if (!id || !pwd) { err.textContent = '아이디와 비밀번호를 입력해주세요'; return; }
+
+  const account = ADMIN_ACCOUNTS[id];
+  if (!account) { err.textContent = '등록되지 않은 관리자입니다'; return; }
+
+  const hash = await hashPwd(pwd);
+  if (hash !== account.pwdHash) { err.textContent = '비밀번호가 틀렸어요'; return; }
+
+  _loggedIn = true;
+  _adminName = account.name;
+  document.getElementById('login-wrap').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('topbar-user').textContent = _adminName;
+  sessionStorage.setItem('sysadmin', id);
+  await loadAllData();
+  logAdminAction('로그인');
+};
+
+window.doAdminLogout = function() {
+  sessionStorage.removeItem('sysadmin');
+  location.reload();
+};
+
+(async function checkSession() {
+  const saved = sessionStorage.getItem('sysadmin');
+  if (saved && ADMIN_ACCOUNTS[saved]) {
+    await new Promise(r => setTimeout(r, 200));
+    _loggedIn = true;
+    _adminName = ADMIN_ACCOUNTS[saved].name;
+    document.getElementById('login-wrap').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    document.getElementById('topbar-user').textContent = _adminName;
+    await loadAllData();
+  }
+  document.getElementById('admin-pwd').addEventListener('keydown', e => { if (e.key === 'Enter') window.doAdminLogin(); });
+  document.getElementById('admin-id').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('admin-pwd').focus(); });
+})();
+
+// ── Data Loading ──
+async function loadAllData() {
+  _allFamilies = [];
+  _registry = {};
+  _adminLogs = [];
+
+  try {
+    const familiesSnap = await getDocs(collection(db, 'families'));
+    familiesSnap.forEach(docSnap => {
+      const id = docSnap.id;
+      if (id.startsWith('dev_')) {
+        _allFamilies.push({ id, ...docSnap.data() });
+      }
+    });
+  } catch (e) {
+    console.error('Failed to load families:', e);
+  }
+
+  try {
+    const legacySnap = await getDoc(doc(db, 'users', 'taemin_dev'));
+    if (legacySnap.exists()) {
+      const data = legacySnap.data();
+      _allFamilies.push({
+        id: '_legacy_taemin_dev',
+        _isLegacy: true,
+        familyMeta: {
+          familyId: '_legacy',
+          familyName: '태민이네 (레거시)',
+          createdAt: 0,
+          members: {},
+          mode: 'independent'
+        },
+        ...data
+      });
+    }
+  } catch (e) {}
+
+  try {
+    const regSnap = await getDoc(doc(db, 'families', '_dev_id_registry'));
+    if (regSnap.exists()) {
+      _registry = regSnap.data() || {};
+    }
+  } catch (e) {
+    console.error('Failed to load registry:', e);
+  }
+
+  try {
+    const logsSnap = await getDoc(doc(db, 'adminLogs', 'dev_log'));
+    if (logsSnap.exists()) {
+      const data = logsSnap.data();
+      _adminLogs = data.entries || [];
+    }
+  } catch (e) {
+    console.error('Failed to load logs:', e);
+  }
+
+  document.getElementById('load-time').textContent = new Date(_loadedAt).toLocaleString('ko-KR');
+  renderDashboard();
+  renderFamiliesList();
+  renderMembersTable();
+  renderRegistry();
+  renderLogs();
+}
+
+// ── Admin Logging ──
+async function logAdminAction(action, details = '') {
+  _adminLogs.push({
+    timestamp: Date.now(),
+    admin: _adminName,
+    action,
+    details,
+    familyId: _lastFamilyId || '',
+    memberId: _lastMemberId || ''
+  });
+  try {
+    await setDoc(doc(db, 'adminLogs', 'dev_log'), { entries: _adminLogs });
+  } catch (e) {
+    console.error('Failed to save log:', e);
+  }
+}
+
+window.clearLogs = async function() {
+  showModal(
+    '로그 초기화',
+    '모든 감사 로그를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.',
+    async () => {
+      _adminLogs = [];
+      try {
+        await setDoc(doc(db, 'adminLogs', 'dev_log'), { entries: [] });
+        renderLogs();
+        alert('로그가 초기화되었습니다');
+        await logAdminAction('로그 초기화');
+      } catch (e) {
+        alert('오류: ' + e.message);
+      }
+    }
+  );
+};
+
+function renderLogs() {
+  const container = document.getElementById('logs-container');
+  if (_adminLogs.length === 0) {
+    container.innerHTML = '<div class="empty-state">기록된 작업이 없습니다</div>';
+    return;
+  }
+  const sorted = [..._adminLogs].reverse();
+  container.innerHTML = sorted.map(log => {
+    const time = new Date(log.timestamp).toLocaleString('ko-KR');
+    const details = log.details ? ` - ${log.details}` : '';
+    const family = log.familyId ? ` (${log.familyId})` : '';
+    return `<div class="activity-item"><div class="activity-time">${time}</div><div class="activity-text"><strong>${log.admin}</strong>: ${log.action}${family}${details}</div></div>`;
+  }).join('');
+}
+
+// ── Panel Navigation ──
+window.showPanel = function(panel) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + panel).classList.add('active');
+  document.querySelectorAll('.sidebar-item').forEach(s => {
+    const texts = { dashboard: '대시보드', families: '가족 관리', registry: '사용자 레지스트리', members: '전체 회원', logs: '감사 로그', settings: '시스템 설정' };
+    s.classList.toggle('active', s.textContent.trim() === texts[panel]);
+  });
+  if (panel === 'families') {
+    document.getElementById('families-list-view').style.display = '';
+    document.getElementById('family-detail-view').style.display = 'none';
+  }
+  closeSidebarMobile();
+};
+
+window.toggleSidebarMobile = function() {
+  document.getElementById('sidebar').classList.toggle('mobile-open');
+};
+
+window.closeSidebarMobile = function() {
+  document.getElementById('sidebar').classList.remove('mobile-open');
+};
+
+// ── Dashboard ──
+function renderDashboard() {
+  const totalFamilies = _allFamilies.filter(f => !f._isLegacy).length;
+  const totalMembers = _allFamilies.reduce((sum, f) => {
+    const fm = f.familyMeta?.members || {};
+    return sum + Object.keys(fm).length;
+  }, 0);
+  const totalRegistered = _allFamilies.reduce((sum, f) => {
+    const users = f.users || {};
+    return sum + Object.keys(users).length;
+  }, 0);
+  const activeToday = _allFamilies.reduce((sum, f) => {
+    const log = f.log || {};
+    const today = new Date().toISOString().split('T')[0];
+    return sum + Object.values(log).filter(l => l && l.includes && l.includes(today)).length;
+  }, 0);
+
+  document.getElementById('dash-stats').innerHTML = `
+    <div class="stat-card"><div class="stat-label">총 가족 수</div><div class="stat-value">${totalFamilies}</div><div class="stat-sub">레거시 제외</div></div>
+    <div class="stat-card"><div class="stat-label">총 구성원</div><div class="stat-value">${totalMembers}</div><div class="stat-sub">모든 가족 합계</div></div>
+    <div class="stat-card"><div class="stat-label">가입 완료</div><div class="stat-value">${totalRegistered}</div><div class="stat-sub">계정 생성 완료</div></div>
+    <div class="stat-card"><div class="stat-label">오늘 활동</div><div class="stat-value">${activeToday}</div><div class="stat-sub">오늘 로그인한 계정</div></div>
+  `;
+
+  const recent = [..._allFamilies].filter(f => !f._isLegacy).sort((a, b) => (b.familyMeta?.createdAt || 0) - (a.familyMeta?.createdAt || 0)).slice(0, 5);
+  document.getElementById('dash-recent-families').innerHTML = recent.length === 0
+    ? '<div class="empty-state">아직 등록된 가족이 없습니다</div>'
+    : recent.map(f => renderFamilyCard(f)).join('');
+
+  const recentLogs = [..._adminLogs].reverse().slice(0, 10);
+  document.getElementById('dash-activity').innerHTML = recentLogs.length === 0
+    ? '<div class="empty-state">최근 활동이 없습니다</div>'
+    : recentLogs.map(log => {
+        const time = new Date(log.timestamp).toLocaleTimeString('ko-KR');
+        return `<div class="activity-item"><div class="activity-time">${time}</div><div class="activity-text"><strong>${log.admin}</strong>: ${log.action} ${log.details}</div></div>`;
+      }).join('');
+}
+
+// ── Families ──
+function renderFamilyCard(f) {
+  const fm = f.familyMeta || {};
+  const members = fm.members || {};
+  const memberCount = Object.keys(members).length;
+  const registeredCount = Object.keys(f.users || {}).length;
+  const created = fm.createdAt ? new Date(fm.createdAt).toLocaleDateString('ko-KR') : '-';
+  const colors = ['#6366F1', '#EC4899', '#F59E0B', '#10B981', '#8B5CF6', '#EF4444', '#06B6D4'];
+
+  return `<div class="family-card" onclick="openFamilyDetail('${f.id}')">
+    <div class="family-card-head">
+      <div>
+        <div class="family-card-name">${fm.familyName || f.id} ${f._isLegacy ? '<span class="badge-pill badge-inactive">레거시</span>' : ''}</div>
+        <div class="family-card-meta">구성원 ${memberCount}명 · 가입 ${registeredCount}명 · 모드: ${fm.mode === 'unified' ? '통합' : '독립'} · 생성: ${created}</div>
+      </div>
+      <div style="font-size:12px;color:#94A3B8;font-weight:600">${f.id}</div>
+    </div>
+    <div class="family-card-members">
+      ${Object.values(members).slice(0, 7).map((m, i) =>
+        `<div class="family-card-avatar" style="background:${colors[i % colors.length]}" title="${m.name}">${(m.name || '?')[0]}</div>`
+      ).join('')}
+    </div>
+  </div>`;
+}
+
+function renderFamiliesList() {
+  const wrap = document.getElementById('families-list');
+  if (_allFamilies.length === 0) {
+    wrap.innerHTML = '<div class="empty-state">등록된 가족이 없습니다</div>';
+    return;
+  }
+  wrap.innerHTML = _allFamilies.map(f => renderFamilyCard(f)).join('');
+}
+
+window.filterFamiliesList = function() {
+  const query = document.getElementById('family-search').value.toLowerCase();
+  const wrap = document.getElementById('families-list');
+  if (!query) {
+    renderFamiliesList();
+    return;
+  }
+  const filtered = _allFamilies.filter(f => {
+    const fm = f.familyMeta || {};
+    return fm.familyName?.toLowerCase().includes(query) || f.id.toLowerCase().includes(query);
+  });
+  wrap.innerHTML = filtered.length === 0 ? '<div class="empty-state">검색 결과가 없습니다</div>' : filtered.map(f => renderFamilyCard(f)).join('');
+};
+
+window.openFamilyDetail = function(familyId) {
+  const f = _allFamilies.find(x => x.id === familyId);
+  if (!f) return;
+
+  _lastFamilyId = familyId;
+  document.getElementById('families-list-view').style.display = 'none';
+  document.getElementById('family-detail-view').style.display = '';
+
+  const fm = f.familyMeta || {};
+  const members = fm.members || {};
+  const users = f.users || {};
+
+  const ROLE_LABELS = { dad: '아빠', mom: '엄마', grandpa: '할아버지', grandma: '할머니', grandpa_m: '외할아버지', grandma_m: '외할머니', child: '자녀' };
+
+  let membersHtml = Object.entries(members).map(([mid, m]) => {
+    const hasAccount = !!m.account || !!users[mid];
+    const roleBadge = m.type === 'child' ? 'badge-child' : 'badge-parent';
+    const adminBadge = m.isAdmin ? ' <span class="badge-pill badge-admin">관리자</span>' : '';
+    const loginId = m.account?.id || (users[mid]?.id) || null;
+    const accountStatus = hasAccount ? '<span style="color:#10B981;font-weight:700">가입완료</span>' : '<span style="color:#94A3B8">미가입</span>';
+    const loginIdDisplay = loginId ? `<span style="color:#6366F1;font-weight:700">${loginId}</span>` : '<span style="color:#CBD5E1">-</span>';
+    const birthInfo = m.birthDate ? ` · ${m.birthDate}` : '';
+    const genderInfo = m.gender === 'M' ? ' · 남' : m.gender === 'F' ? ' · 여' : '';
+
+    return `<div class="member-row">
+      <div class="member-row-avatar" style="background:${m.color || '#F1F5F9'};border-radius:50%">
+        <svg viewBox="0 0 24 24" fill="none" stroke="${m.type === 'child' ? '#059669' : '#3B82F6'}" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg>
+      </div>
+      <div class="member-row-info">
+        <div class="member-row-name">${m.name || '-'} <span class="badge-pill ${roleBadge}">${ROLE_LABELS[m.role] || m.role}</span>${adminBadge}</div>
+        <div class="member-row-role">${accountStatus} · 로그인ID: ${loginIdDisplay}${birthInfo}${genderInfo}</div>
+      </div>
+      <div class="member-row-actions">
+        <button class="btn-sm btn-primary" onclick="resetMemberPassword('${familyId}','${mid}','${m.name}')">비밀번호 재설정</button>
+        <button class="btn-sm btn-primary" onclick="toggleAdmin('${familyId}','${mid}',${!m.isAdmin})">${m.isAdmin ? '관리자 해제' : '관리자 부여'}</button>
+        <button class="btn-sm btn-danger" onclick="deleteMember('${familyId}','${mid}','${m.name}')">삭제</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('family-detail-content').innerHTML = `
+    <h2>${fm.familyName || f.id}</h2>
+    <div class="subtitle">ID: ${f.id} · 모드: ${fm.mode === 'unified' ? '통합 관리' : '독립 관리'} · 생성: ${fm.createdAt ? new Date(fm.createdAt).toLocaleString('ko-KR') : '-'}</div>
+    <div class="stat-row">
+      <div class="stat-card"><div class="stat-label">마일리지</div><div class="stat-value">${f.pts || 0}</div></div>
+      <div class="stat-card"><div class="stat-label">연속 출석</div><div class="stat-value">${f.streak || 0}일</div></div>
+      <div class="stat-card"><div class="stat-label">총 활동</div><div class="stat-value">${f.totalDone || 0}회</div></div>
+      <div class="stat-card"><div class="stat-label">뱃지</div><div class="stat-value">${Object.keys(f.badges || {}).length}개</div></div>
+    </div>
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">구성원 (${Object.keys(members).length}명)</div>
+        <button class="btn-sm btn-primary" onclick="addMember('${familyId}')">구성원 추가</button>
+      </div>
+      ${membersHtml || '<div class="empty-state">구성원이 없습니다</div>'}
+    </div>
+  `;
+};
+
+window.closeFamilyDetail = function() {
+  document.getElementById('families-list-view').style.display = '';
+  document.getElementById('family-detail-view').style.display = 'none';
+  _lastFamilyId = null;
+};
+
+window.toggleAdmin = async function(familyId, memberId, grant) {
+  const f = _allFamilies.find(x => x.id === familyId);
+  if (!f || !f.familyMeta?.members?.[memberId]) return;
+
+  _lastFamilyId = familyId;
+  _lastMemberId = memberId;
+  const memberName = f.familyMeta.members[memberId].name;
+
+  f.familyMeta.members[memberId].isAdmin = grant;
+  try {
+    if (f._isLegacy) {
+      await setDoc(doc(db, 'users', 'taemin_dev'), f);
+    } else {
+      await setDoc(doc(db, 'families', familyId), f);
+    }
+    await logAdminAction(grant ? '관리자 부여' : '관리자 해제', memberName);
+    window.openFamilyDetail(familyId);
+  } catch (e) {
+    alert('저장 실패: ' + e.message);
+  }
+};
+
+window.resetMemberPassword = function(familyId, memberId, memberName) {
+  _lastFamilyId = familyId;
+  _lastMemberId = memberId;
+  const tempPwd = Math.random().toString(36).substring(2, 10).toUpperCase();
+  showModal(
+    '비밀번호 재설정',
+    `${memberName}의 비밀번호를 재설정하시겠습니까?`,
+    async () => {
+      const f = _allFamilies.find(x => x.id === familyId);
+      if (!f) return;
+      try {
+        const hash = await hashPwd(tempPwd);
+        f.familyMeta.members[memberId].account = { id: f.familyMeta.members[memberId].account?.id || '', pwdHash: hash, v: 1 };
+        f.users = f.users || {};
+        f.users[memberId] = { id: f.familyMeta.members[memberId].account.id, pwdHash: hash, v: 1 };
+        if (f._isLegacy) {
+          await setDoc(doc(db, 'users', 'taemin_dev'), f);
+        } else {
+          await setDoc(doc(db, 'families', familyId), f);
+        }
+        await logAdminAction('비밀번호 재설정', memberName);
+        alert(`임시 비밀번호: ${tempPwd}`);
+        window.openFamilyDetail(familyId);
+      } catch (e) {
+        alert('오류: ' + e.message);
+      }
+    }
+  );
+};
+
+window.deleteMember = function(familyId, memberId, memberName) {
+  _lastFamilyId = familyId;
+  _lastMemberId = memberId;
+  showModal(
+    '구성원 삭제',
+    `${memberName}을(를) 가족에서 제거하시겠습니까? 이 작업은 되돌릴 수 없습니다.`,
+    async () => {
+      const f = _allFamilies.find(x => x.id === familyId);
+      if (!f) return;
+      try {
+        delete f.familyMeta.members[memberId];
+        if (f.users) delete f.users[memberId];
+        if (f._isLegacy) {
+          await setDoc(doc(db, 'users', 'taemin_dev'), f);
+        } else {
+          await setDoc(doc(db, 'families', familyId), f);
+        }
+        await logAdminAction('구성원 삭제', memberName);
+        window.openFamilyDetail(familyId);
+        alert('구성원이 제거되었습니다');
+      } catch (e) {
+        alert('오류: ' + e.message);
+      }
+    }
+  );
+};
+
+window.addMember = function(familyId) {
+  _lastFamilyId = familyId;
+  showModalWithInput(
+    '구성원 추가',
+    '새 구성원의 이름을 입력하세요:',
+    async (name) => {
+      const f = _allFamilies.find(x => x.id === familyId);
+      if (!f) return;
+      try {
+        const newMemberId = 'm_' + Date.now();
+        f.familyMeta.members[newMemberId] = {
+          name,
+          role: 'child',
+          type: 'child',
+          isAdmin: false,
+          joinedAt: Date.now()
+        };
+        if (f._isLegacy) {
+          await setDoc(doc(db, 'users', 'taemin_dev'), f);
+        } else {
+          await setDoc(doc(db, 'families', familyId), f);
+        }
+        await logAdminAction('구성원 추가', name);
+        window.openFamilyDetail(familyId);
+        alert('구성원이 추가되었습니다');
+      } catch (e) {
+        alert('오류: ' + e.message);
+      }
+    }
+  );
+};
+
+// ── User Registry ──
+function renderRegistry() {
+  const keys = Object.keys(_registry);
+  const duplicates = findDuplicates();
+
+  document.getElementById('registry-stats').innerHTML = `
+    <div class="stat-card"><div class="stat-label">등록된 로그인 ID</div><div class="stat-value">${keys.length}</div></div>
+    <div class="stat-card"><div class="stat-label">중복 감지</div><div class="stat-value">${duplicates.length}</div><div class="stat-sub">중복 등록</div></div>
+  `;
+
+  let html = '<table class="data-table"><thead><tr><th>로그인 ID</th><th>가족 ID</th><th>구성원 ID</th><th>생성일</th><th>상태</th></tr></thead><tbody>';
+
+  const sorted = [...keys].sort();
+  sorted.forEach(loginId => {
+    const entry = _registry[loginId];
+    const isDuplicate = duplicates.find(d => d.loginId === loginId);
+    const status = isDuplicate ? '<span class="badge-pill badge-expired">중복 ⚠</span>' : '<span class="badge-pill badge-active">정상</span>';
+    const created = entry.createdAt ? new Date(entry.createdAt).toLocaleDateString('ko-KR') : '-';
+    html += `<tr><td style="color:#6366F1;font-weight:800">${loginId}</td><td style="color:#64748B">${entry.familyId || '-'}</td><td style="color:#64748B">${entry.memberId || '-'}</td><td style="font-size:12px;color:#94A3B8">${created}</td><td>${status}</td></tr>`;
+  });
+
+  html += '</tbody></table>';
+  if (sorted.length === 0) html = '<div class="empty-state">등록된 로그인 ID가 없습니다</div>';
+
+  document.getElementById('registry-table').innerHTML = html;
+}
+
+function findDuplicates() {
+  const counts = {};
+  Object.keys(_registry).forEach(loginId => {
+    counts[loginId] = (counts[loginId] || 0) + 1;
+  });
+  return Object.entries(counts).filter(([_, count]) => count > 1).map(([loginId]) => ({ loginId }));
+}
+
+window.filterRegistry = function() {
+  const query = document.getElementById('registry-search').value.toLowerCase();
+  const tableContainer = document.getElementById('registry-table');
+  const rows = document.querySelectorAll('.data-table tbody tr');
+  let visible = 0;
+  rows.forEach(row => {
+    const text = row.textContent.toLowerCase();
+    const match = text.includes(query);
+    row.style.display = match ? '' : 'none';
+    if (match) visible++;
+  });
+};
+
+// ── Members Table ──
+function renderMembersTable() {
+  const wrap = document.getElementById('members-table-wrap');
+  const ROLE_LABELS = { dad: '아빠', mom: '엄마', grandpa: '할아버지', grandma: '할머니', grandpa_m: '외할아버지', grandma_m: '외할머니', child: '자녀' };
+
+  let rows = [];
+  _allFamilies.forEach(f => {
+    const fm = f.familyMeta || {};
+    const members = fm.members || {};
+    const users = f.users || {};
+    Object.entries(members).forEach(([mid, m]) => {
+      const hasAccount = !!m.account || !!users[mid];
+      const loginId = m.account?.id || users[mid]?.id || null;
+      rows.push({
+        familyName: fm.familyName || f.id,
+        familyId: f.id,
+        name: m.name || '-',
+        role: ROLE_LABELS[m.role] || m.role,
+        type: m.type,
+        isAdmin: m.isAdmin,
+        hasAccount,
+        loginId,
+        joinedAt: m.joinedAt
+      });
+    });
+  });
+
+  if (rows.length === 0) {
+    wrap.innerHTML = '<div class="empty-state">등록된 회원이 없습니다</div>';
+    return;
+  }
+
+  wrap.innerHTML = `<table class="data-table">
+    <thead><tr><th>이름</th><th>역할</th><th>가족</th><th>로그인 ID</th><th>권한</th><th>계정</th><th>가입일</th></tr></thead>
+    <tbody>${rows.map(r => `<tr>
+      <td style="font-weight:800">${r.name}</td>
+      <td><span class="badge-pill ${r.type === 'child' ? 'badge-child' : 'badge-parent'}">${r.role}</span></td>
+      <td style="color:#64748B">${r.familyName}</td>
+      <td style="color:#6366F1;font-weight:700">${r.loginId || '<span style="color:#CBD5E1">-</span>'}</td>
+      <td>${r.isAdmin ? '<span class="badge-pill badge-admin">관리자</span>' : '-'}</td>
+      <td>${r.hasAccount ? '<span style="color:#10B981;font-weight:700">가입완료</span>' : '<span style="color:#CBD5E1">미가입</span>'}</td>
+      <td style="color:#94A3B8;font-size:12px">${r.joinedAt ? new Date(r.joinedAt).toLocaleDateString('ko-KR') : '-'}</td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+window.filterMembersTable = function() {
+  const query = document.getElementById('members-search').value.toLowerCase();
+  const rows = document.querySelectorAll('#members-table-wrap tbody tr');
+  rows.forEach(row => {
+    const text = row.textContent.toLowerCase();
+    row.style.display = text.includes(query) ? '' : 'none';
+  });
+};
+
+// ── Export Data ──
+window.exportFamiliesData = function() {
+  const data = _allFamilies.map(f => ({
+    id: f.id,
+    familyName: f.familyMeta?.familyName,
+    mode: f.familyMeta?.mode,
+    createdAt: f.familyMeta?.createdAt,
+    members: f.familyMeta?.members,
+    stats: { pts: f.pts, streak: f.streak, totalDone: f.totalDone }
+  }));
+  downloadJSON(data, 'families-export.json');
+  logAdminAction('데이터 내보내기', '가족 데이터 JSON 다운로드');
+};
+
+window.exportRegistryData = function() {
+  downloadJSON(_registry, 'registry-export.json');
+  logAdminAction('데이터 내보내기', '레지스트리 데이터 JSON 다운로드');
+};
+
+function downloadJSON(data, filename) {
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── Modal ──
+function showModal(title, description, callback) {
+  _modalCallback = callback;
+  _modalInputField = false;
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-description').textContent = description;
+  document.getElementById('modal-input-container').innerHTML = '';
+  document.getElementById('confirm-modal').classList.add('show');
+}
+
+function showModalWithInput(title, description, callback) {
+  _modalCallback = callback;
+  _modalInputField = true;
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-description').textContent = description;
+  document.getElementById('modal-input-container').innerHTML = '<input type="text" class="modal-input" id="modal-input" autofocus>';
+  document.getElementById('confirm-modal').classList.add('show');
+  setTimeout(() => document.getElementById('modal-input')?.focus(), 0);
+}
+
+window.confirmModal = function() {
+  if (_modalInputField) {
+    const value = document.getElementById('modal-input').value.trim();
+    if (!value) { alert('입력해주세요'); return; }
+    _modalCallback(value);
+  } else {
+    _modalCallback?.();
+  }
+  closeModal();
+};
+
+window.closeModal = function() {
+  document.getElementById('confirm-modal').classList.remove('show');
+  _modalCallback = null;
+};
+
+document.getElementById('confirm-modal').addEventListener('click', e => {
+  if (e.target.id === 'confirm-modal') closeModal();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+  if (e.key === 'Enter' && document.getElementById('confirm-modal').classList.contains('show')) confirmModal();
+});
+
+</script>
+</body>
+</html>
