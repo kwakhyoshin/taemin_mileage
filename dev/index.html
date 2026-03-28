@@ -351,7 +351,7 @@ body.dark .dtog-in{transform:translateX(20px)}
 .prog-fill{background:rgba(255,255,255,.9);border-radius:7px;height:100%;transition:width .7s}
 .prog-row{display:flex;justify-content:space-between;margin-top:5px;font-size:13px;opacity:.75;font-weight:700;transition:all .25s}
 
-.hero.compact{padding:12px 20px 14px;padding-top:calc(12px + env(safe-area-inset-top));overflow:visible}
+.hero.compact{padding:12px 20px 14px;padding-top:calc(12px + env(safe-area-inset-top));overflow:hidden}
 .hero.compact .hero-lbl{font-size:13px}
 .hero.compact .hero-pts{font-size:32px;display:inline!important;opacity:1!important;visibility:visible!important}
 .hero.compact .hero-unit{font-size:14px;display:inline!important;opacity:1!important;visibility:visible!important}
@@ -10419,7 +10419,14 @@ function renderFamilyManager() {
 
     // 자녀인 경우 테마 색상 선택기 표시
     const isChild=m.role==='child';
-    const currentTheme=m.themeColor||'';
+    // themeColor가 명시적으로 설정되지 않은 경우 자동 배정된 테마를 표시
+    let currentTheme=m.themeColor||'';
+    if(!currentTheme&&isChild){
+      const _kids=getChildMembers();
+      const _kidIdx=_kids.findIndex(c=>c.id===mid);
+      const _autoTheme=CHILD_THEMES[(_kidIdx>=0?_kidIdx:0)%CHILD_THEMES.length];
+      if(_autoTheme)currentTheme=_autoTheme.id;
+    }
     const themeRow=isChild?`<div style="display:flex;gap:4px;margin-top:6px;flex-wrap:wrap">${CHILD_THEMES.map(ct=>{
       const sel=currentTheme===ct.id;
       return `<button onclick="setChildThemeColor('${mid}','${ct.id}')" style="width:22px;height:22px;border-radius:50%;background:${ct.c1};border:${sel?'2.5px solid var(--tx)':'2px solid transparent'};cursor:pointer;flex-shrink:0;box-shadow:${sel?'0 0 0 2px var(--bg),0 0 0 4px '+ct.c1:'none'}" title="${ct.name}"></button>`;
@@ -14442,6 +14449,8 @@ function saveAvatarCrop() {
   applyUserProfile();
   renderMemberGrid();
   renderAdmMemberPhotos();
+  renderMyTab();
+  renderNavUsers();
   toast('📸 프로필 사진이 저장됐어요!');
 }
 
