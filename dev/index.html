@@ -3503,7 +3503,7 @@ button:disabled {
 <!-- MY TAB -->
 <div class="scr" id="s-my">
   <div class="my-header">
-    <h2>My <svg class="hdr-ico" viewBox="0 0 24 24" style="width:24px;height:24px"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></h2>
+    <h2>나의 메뉴 <svg class="hdr-ico" viewBox="0 0 24 24" style="width:24px;height:24px"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></h2>
     <p class="my-header-sub" id="my-header-sub">내 정보</p>
   </div>
   <div class="my-profile-card">
@@ -11764,10 +11764,11 @@ let moodInterval=null;
 let _moodFromFamily=false;
 function openMoodPop(fromFamily){
   _moodFromFamily=!!fromFamily;
-  if(!_moodFromFamily) document.getElementById('mood-bg').style.display='block';
+  document.getElementById('mood-bg').style.display='block';
   const pop=document.getElementById('mood-pop');
-  if(_moodFromFamily){
-    // Center on screen like other family flow popups (slightly above center)
+  // My탭 또는 가족 플로우에서 호출 시 화면 중앙에 표시
+  const isMyTab=document.getElementById('s-my')?.classList.contains('on');
+  if(_moodFromFamily||isMyTab){
     pop.style.left='50%';
     pop.style.top='40%';
     pop.style.bottom='auto';
