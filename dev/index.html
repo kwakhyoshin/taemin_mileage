@@ -1227,7 +1227,7 @@ body.dark .family-popup-avatar{border-color:rgba(255,255,255,.25)}
    세로 모드(portrait)에서는 사이드바 숨기고 하단 네비로 복귀
    ======================================== */
 @media(min-width:768px) and (orientation:portrait){
-  body{display:block!important}
+  body{display:block!important;max-width:100%!important;margin:0!important}
   .nav-container{position:fixed!important;bottom:0!important;top:auto!important;left:0!important;right:0!important;transform:none!important;width:100%!important;height:auto!important;z-index:100}
   .nav-container.docked{bottom:0!important;width:100%!important}
   .bottom-nav{flex-direction:row!important;align-items:center!important;gap:0!important;border-radius:20px 20px 0 0!important;padding:8px 8px calc(8px + env(safe-area-inset-bottom))!important;height:auto!important;background:var(--card)!important;border:none!important;border-top:.5px solid var(--bdr)!important;border-right:none!important;box-shadow:0 -4px 20px rgba(0,0,0,.06)!important;justify-content:center!important;width:100%!important}
@@ -1385,7 +1385,7 @@ body.dark .family-popup-avatar{border-color:rgba(255,255,255,.25)}
    세로모드에서 사이드바 레이아웃 제거
    ======================================== */
 @media(min-width:768px) and (max-width:1023px) and (orientation:portrait){
-  body{display:block!important}
+  body{display:block!important;max-width:100%!important;margin:0!important}
   .nav-container{position:fixed!important;bottom:28px!important;left:50%!important;transform:translateX(-50%)!important;width:auto!important;height:auto!important;max-width:calc(100vw - 24px)!important}
   .nav-container.docked{bottom:0!important;left:0!important;right:0!important;width:100%!important;max-width:100%!important;transform:none!important}
   .bottom-nav{flex-direction:row!important;align-items:center!important;border-right:none!important;border-radius:var(--rxl)!important;height:auto!important;padding:8px 16px!important}
@@ -1585,7 +1585,7 @@ body.dark .family-popup-avatar{border-color:rgba(255,255,255,.25)}
    폰에서 절대로 사이드바가 보이지 않도록 강제 리셋
    ======================================== */
 @media(max-width:767px){
-  body{display:block!important;margin-left:0!important;padding-left:0!important}
+  body{display:block!important;max-width:100%!important;margin:0!important;padding-left:0!important}
   .nav-container{position:fixed!important;bottom:28px!important;top:auto!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important;width:auto!important;max-width:calc(100vw - 24px)!important;height:auto!important}
   .nav-container.docked{bottom:0!important;left:0!important;right:0!important;width:100%!important;max-width:100%!important;transform:none!important}
   .bottom-nav{flex-direction:row!important;height:auto!important;border-right:none!important;border-top:none!important}
@@ -2338,7 +2338,8 @@ button:disabled {
   .nav-container{position:fixed!important;bottom:28px!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important;top:auto!important;width:auto!important;max-width:calc(100vw - 24px)!important;height:auto!important;}
   /* 도킹 상태: 전체 너비 하단 고정 */
   .nav-container.docked{bottom:0!important;left:0!important;right:0!important;transform:none!important;width:100%!important;max-width:100%!important;}
-  body,.scr,.tab-content{margin-left:0!important;padding-left:0!important;}
+  body{max-width:100%!important;margin:0!important;padding-left:0!important;}
+  .scr,.tab-content{margin-left:0!important;padding-left:0!important;}
   .nav-brand,.sidebar,.side-menu{display:none!important;}
   .my-header{border-radius:0!important;}
 }
@@ -3252,7 +3253,7 @@ button:disabled {
   <div id="adm-p2" style="display:none">
     <div class="adm-sec">
       <div class="sec-hdr" style="margin:0 0 7px">
-        <div class="adm-sec-lbl" style="margin:0">뱃지 목록</div>
+        <div class="adm-sec-lbl" style="margin:0">뱃지 목록 <span id="badge-mgr-child-name" style="font-size:12px;color:var(--tab-color,#6366F1);font-weight:700"></span></div>
         <button class="btn-sm" onclick="openBadgeForm()">+ 새 뱃지</button>
       </div>
       <div class="adm-card" style="padding:0">
@@ -9889,9 +9890,18 @@ function switchViewingChild(childId){
 // 관리자 패널 자녀 선택 (independent mode)
 function admSelectChild(childId){
   _admViewChildId=childId;
+  // 선택된 자녀의 데이터를 S에 동기화 (뱃지/활동/보상 반영)
+  if(childId && S.memberData){
+    const prevViewed = getViewedMemberId();
+    if(prevViewed && prevViewed !== childId) syncGlobalToMember(prevViewed);
+    if(!S.memberData[childId]) getMemberState(childId);
+    syncMemberToGlobal(childId);
+    viewingChildId = childId;
+  }
   renderAdmActList();
   renderAdmRwdList();
   renderAdmStats();
+  renderBadgeMgrList();
   // 관리자 패널 자녀 탭 활성화 표시
   document.querySelectorAll('.adm-child-btn').forEach(b=>b.classList.toggle('on',b.dataset.cid===childId));
 }
@@ -10559,6 +10569,13 @@ function renderBadgeMgrList(){
   const all=getAllBadgesForMgr();
   const countEl=document.getElementById('badge-mgr-count');
   if(countEl)countEl.textContent=all.length+'개';
+  // 자녀 이름 표시
+  const childNameEl=document.getElementById('badge-mgr-child-name');
+  if(childNameEl){
+    const vid=_admViewChildId||getViewedMemberId();
+    const nm=MEMBERS[vid]?.name||S.familyMeta?.members?.[vid]?.name||'';
+    childNameEl.textContent=nm?`(${nm})`:'';}
+
 
   let filtered=all;
   if(_badgeMgrFilter==='custom') filtered=all.filter(b=>b._src==='custom');
