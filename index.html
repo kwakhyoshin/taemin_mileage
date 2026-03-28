@@ -13994,8 +13994,7 @@ Object.assign(window, {
   selectMode,
   renderInviteOptions, toggleChildAccount, generateChildAccount, shareInviteLink, renderDoneScreen,
   selectJoinMember, doJoinRegister, joinRegGoBack,
-  // Signup back-nav (missing from window)
-  create2Back, create3Back, create4Back, resetJoinRegId,
+  resetJoinRegId,
   isCurrentUserAdmin, rebuildMembersFromFamily,
   // Settings/cache
   clearAppCache,
@@ -14378,7 +14377,7 @@ window._createState = _createState;
     if(window._m_startCreateFamily){
       window._m_startCreateFamily();
     } else {
-      window._waitModule('startCreateFamily').then(function(fn){
+      window._waitModule('startCreateFamily', 60).then(function(fn){
         if(fn) fn(); else window._showAuth('create-1');
       });
     }
