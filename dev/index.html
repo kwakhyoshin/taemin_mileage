@@ -3272,6 +3272,8 @@ button:disabled {
     </div>
   </div>
   <div id="adm-p2" style="display:none">
+    <!-- independent 모드 자녀 선택기 (뱃지) -->
+    <div id="adm-child-selector-2"></div>
     <div class="adm-sec">
       <div class="sec-hdr" style="margin:0 0 7px">
         <div class="adm-sec-lbl" style="margin:0">뱃지 목록 <span id="badge-mgr-child-name" style="font-size:12px;color:var(--tab-color,#6366F1);font-weight:700"></span></div>
@@ -9258,7 +9260,7 @@ function renderAdmChildSelector(){
   const mode=getFamilyMode();
   const kids=getChildMemberIds();
   // 자녀가 2명 미만이거나 통합 모드면 선택기 숨김
-  ['adm-child-selector-0','adm-child-selector-1'].forEach(id=>{
+  ['adm-child-selector-0','adm-child-selector-1','adm-child-selector-2'].forEach(id=>{
     const el=document.getElementById(id);
     if(!el)return;
     if(mode!=='independent'||kids.length<2){el.innerHTML='';return;}
@@ -13350,7 +13352,7 @@ function reallyGoTab(tab){
     themeMeta.content=isDark?'#1E293B':(TAB_COLORS[tab]||'#6366F1');
   }
 }
-function admTab(i){[0,1,2,3,4].forEach(j=>{document.getElementById('at-'+j).classList.toggle('on',j===i);document.getElementById('adm-p'+j).style.display=j===i?'block':'none';});if(i===2)renderBadgeMgrList();if(i===3){showCacheInfo();showPushDebug();renderAdmMemberPhotos();}if(i===4)renderFamilyManager();}
+function admTab(i){[0,1,2,3,4].forEach(j=>{document.getElementById('at-'+j).classList.toggle('on',j===i);document.getElementById('adm-p'+j).style.display=j===i?'block':'none';});if(i===2){renderAdmChildSelector();renderBadgeMgrList();}if(i===3){showCacheInfo();showPushDebug();renderAdmMemberPhotos();}if(i===4)renderFamilyManager();}
 function toggleAdvSettings(){
   const body=document.getElementById('adv-settings-body');
   const btn=document.getElementById('adv-settings-btn');
