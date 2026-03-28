@@ -5743,26 +5743,27 @@ function getChildTheme(childId){
   const preset=CHILD_THEMES[(idx>=0?idx:0)%CHILD_THEMES.length];
   return themeFromColor(preset.c1);
 }
+// 원래 탭별 고유 색상 (불변)
+const _ORIG_TAB_COLORS  = {home:'#5457D9', log:'#DC3550', rwd:'#D98E09', hist:'#7A4FDD', my:'#475569', adm:'#475569'};
+const _ORIG_TAB_COLORS2 = {home:'#727BE0', log:'#E5606F', rwd:'#E0A820', hist:'#9578E8', my:'#64748B', adm:'#64748B'};
+
 function applyChildTheme(childId){
-  const t=getChildTheme(childId);
-  // Update tab colors for child-themed tabs (home, log, rwd, hist)
-  TAB_COLORS.home=t.c1; TAB_COLORS2.home=t.c2;
-  TAB_COLORS.log=t.c1;  TAB_COLORS2.log=t.c2;
-  TAB_COLORS.rwd=t.c1;  TAB_COLORS2.rwd=t.c2;
-  TAB_COLORS.hist=t.c1; TAB_COLORS2.hist=t.c2;
-  // Apply CSS variables for child-themed tabs (마이탭/관리자탭 제외)
+  // 자녀별 테마 색상은 보존하되, 탭별 고유 색상을 유지
+  // TAB_COLORS를 원래 값으로 복원 — 탭 전환 시 탭별 고유 색상 사용
+  TAB_COLORS.home=_ORIG_TAB_COLORS.home; TAB_COLORS2.home=_ORIG_TAB_COLORS2.home;
+  TAB_COLORS.log=_ORIG_TAB_COLORS.log;   TAB_COLORS2.log=_ORIG_TAB_COLORS2.log;
+  TAB_COLORS.rwd=_ORIG_TAB_COLORS.rwd;   TAB_COLORS2.rwd=_ORIG_TAB_COLORS2.rwd;
+  TAB_COLORS.hist=_ORIG_TAB_COLORS.hist;  TAB_COLORS2.hist=_ORIG_TAB_COLORS2.hist;
+  // 현재 탭의 CSS 변수를 원래 탭 색상으로 리셋 (인라인 스타일 제거 → CSS body[data-tab] 적용)
+  document.body.style.removeProperty('--tab-color');
+  document.body.style.removeProperty('--tab-color2');
+  document.body.style.removeProperty('--tab-shadow');
+  document.body.style.removeProperty('--tab-lt');
+  document.body.style.removeProperty('--tab-lt-dk');
   const curTab=document.body.getAttribute('data-tab');
-  const themedTabs=['home','log','rwd','hist'];
-  if(themedTabs.includes(curTab)){
-    document.body.style.setProperty('--tab-color',t.c1);
-    document.body.style.setProperty('--tab-color2',t.c2);
-    document.body.style.setProperty('--tab-shadow',t.shadow);
-    document.body.style.setProperty('--tab-lt',t.lt);
-    document.body.style.setProperty('--tab-lt-dk',t.ltDk);
-    document.documentElement.style.background=t.c1;
-    const themeMeta=document.getElementById('theme-color-meta');
-    if(themeMeta&&!document.body.classList.contains('dark'))themeMeta.content=t.c1;
-  }
+  document.documentElement.style.background=TAB_COLORS[curTab]||'#5457D9';
+  const themeMeta=document.getElementById('theme-color-meta');
+  if(themeMeta&&!document.body.classList.contains('dark'))themeMeta.content=TAB_COLORS[curTab]||'#5457D9';
 }
 function setChildThemeColor(childId,themeId){
   // 관리자가 자녀의 테마 색상을 변경
@@ -12915,20 +12916,12 @@ function reallyGoTab(tab){
 
   // Set tab theme
   document.body.setAttribute('data-tab', tab);
-  // 자녀 테마 적용 탭 (홈, 활동기록, 보상, 성과통계)
-  const _themedTabs=['home','log','rwd','hist'];
-  if(_themedTabs.includes(tab)&&isCaregiverUser()){
-    const vid=getViewedMemberId&&getViewedMemberId();
-    if(vid)applyChildTheme(vid);
-  }
-  // 마이탭: 회색 계열 고정
-  if(tab==='my'){
-    document.body.style.setProperty('--tab-color','#475569');
-    document.body.style.setProperty('--tab-color2','#64748B');
-    document.body.style.setProperty('--tab-shadow','rgba(71,85,105,0.3)');
-    document.body.style.setProperty('--tab-lt','#F1F5F9');
-    document.body.style.setProperty('--tab-lt-dk','#334155');
-  }
+  // 탭별 고유 색상 사용 — 인라인 스타일 제거하여 CSS body[data-tab] 변수 적용
+  document.body.style.removeProperty('--tab-color');
+  document.body.style.removeProperty('--tab-color2');
+  document.body.style.removeProperty('--tab-shadow');
+  document.body.style.removeProperty('--tab-lt');
+  document.body.style.removeProperty('--tab-lt-dk');
   document.documentElement.style.background = TAB_COLORS[tab] || '#6366F1';
 
   // 탭별 상단바 색상 변경 (아이폰 사파리)
