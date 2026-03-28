@@ -12262,6 +12262,20 @@ function getUnreadCount(fromId){
 window.getUnreadCount=getUnreadCount;
 
 let _userFmTarget=null;
+// 팝업 메뉴 배경 오버레이 (다른 영역 터치 시 닫기용)
+function _showFmOverlay(onClose){
+  _removeFmOverlay();
+  const ov=document.createElement('div');
+  ov.id='fm-overlay';
+  ov.style.cssText='position:fixed;inset:0;z-index:499;background:rgba(0,0,0,.25);animation:fadeIn .15s';
+  ov.onclick=function(){if(onClose)onClose();};
+  document.body.appendChild(ov);
+}
+function _removeFmOverlay(){
+  const ov=document.getElementById('fm-overlay');
+  if(ov)ov.remove();
+}
+
 function onUserIconClick(userId){
   // Close me-fm-menu if open
   closeMeFm();
@@ -12296,6 +12310,7 @@ function onUserIconClick(userId){
   menu.style.transform='translate(-50%,-50%)';
   menu.style.animation='none';
   menu.style.display='block';
+  _showFmOverlay(()=>closeUserFm());
   requestAnimationFrame(()=>{menu.style.animation='fadeUpCenter .2s ease';});
 }
 window.onUserIconClick=onUserIconClick;
@@ -12305,6 +12320,7 @@ function closeUserFm(){
   menu.style.display='none';
   menu.style.transform='';
   menu.style.animation='';
+  _removeFmOverlay();
 }
 window.closeUserFm=closeUserFm;
 
@@ -12327,6 +12343,7 @@ function onMeIconClick(){
   menu.style.transform='translate(-50%,-50%)';
   menu.style.animation='none';
   menu.style.display='block';
+  _showFmOverlay(()=>closeMeFm());
   requestAnimationFrame(()=>{menu.style.animation='fadeUpCenter .2s ease';});
 }
 window.onMeIconClick=onMeIconClick;
@@ -12336,6 +12353,7 @@ function closeMeFm(){
   menu.style.display='none';
   menu.style.transform='';
   menu.style.animation='';
+  _removeFmOverlay();
 }
 window.closeMeFm=closeMeFm;
 
