@@ -5581,10 +5581,8 @@ function applyUserProfile() {
   const heroLbl = document.getElementById('hero-lbl');
   if(heroLbl){
     const _hMode=getFamilyMode();
-    if(_hMode==='unified'){
-      heroLbl.textContent='우리 가족 마일리지';
-    }else if(_hMode==='independent'&&isCaregiverUser()){
-      // 자녀 이름 즉시 반영 (renderHero 호출 전 flash 방지)
+    if(isCaregiverUser()){
+      // 양육자: 모드 무관하게 보고 있는 자녀 이름 표시 (flash 방지)
       const _hVid=getViewedMemberId();
       const _hVname=MEMBERS[_hVid]?.name||S.familyMeta?.members?.[_hVid]?.name||'';
       heroLbl.textContent=_hVname?(_hVname+'의 마일리지'):(member.name+'의 마일리지');
@@ -7173,11 +7171,8 @@ function renderHero(){
   // 모드별 hero 라벨 및 pts 표시
   const mode=getFamilyMode();
   const heroLbl=document.getElementById('hero-lbl');
-  if(mode==='unified'){
-    // 통합 모드: 합산 pts 표시 (S.pts가 공유 풀)
-    if(heroLbl)heroLbl.textContent='우리 가족 마일리지';
-  }else if(mode==='independent'&&isCaregiverUser()){
-    // 독립 모드 양육자: 보고 있는 자녀 이름 표시
+  if(isCaregiverUser()){
+    // 양육자: 모드 무관하게 보고 있는 자녀 이름 표시
     const vid=getViewedMemberId();
     const vname=MEMBERS[vid]?.name||S.familyMeta?.members?.[vid]?.name||'';
     // fallback: 자녀 이름 미확인 시 MEMBERS에서 첫 번째 자녀 이름 탐색 (로딩 초기 대비)
