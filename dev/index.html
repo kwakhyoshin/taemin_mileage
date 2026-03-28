@@ -4209,6 +4209,77 @@ function rebuildMembersFromFamily(){
   }
 }
 
+// ── 레거시 → familyMeta 마이그레이션 함수 ──
+// 기존 S.users 기반 운영 데이터를 다가족 구조(familyMeta)로 변환
+function _migrateLegacyToFamilyMeta(){
+  const LEGACY_ROLE_MAP={
+    taemin:{name:'태민',type:'child',role:'child',displayRole:'',color:'#DBEAFE',textColor:'#3B82F6'},
+    dad:{name:'아빠',type:'caregiver',role:'caregiver',displayRole:'dad',color:'#DBEAFE',textColor:'#3B82F6'},
+    mom:{name:'엄마',type:'caregiver',role:'caregiver',displayRole:'mom',color:'#FCE7F3',textColor:'#EC4899'}
+  };
+  const users=S.users||{};
+  const members={};
+  let order=0;
+  // 양육자 먼저, 그 다음 자녀 순서로
+  const sortedIds=Object.keys(users).sort((a,b)=>{
+    const aType=LEGACY_ROLE_MAP[a]?.type||'caregiver';
+    const bType=LEGACY_ROLE_MAP[b]?.type||'caregiver';
+    if(aType==='caregiver'&&bType==='child')return -1;
+    if(aType==='child'&&bType==='caregiver')return 1;
+    return 0;
+  });
+  sortedIds.forEach(uid=>{
+    const info=LEGACY_ROLE_MAP[uid]||{name:uid,type:'caregiver',role:'caregiver',displayRole:'',color:'#F1F5F9',textColor:'#64748B'};
+    order++;
+    members[uid]={
+      name:info.name,
+      type:info.type,
+      role:info.role,
+      displayRole:info.displayRole,
+      color:info.color,
+      textColor:info.textColor,
+      isAdmin:info.type==='caregiver', // 양육자는 자동 관리자
+      account:users[uid]||null,
+      joinedAt:Date.now(),
+      sortOrder:order
+    };
+  });
+  S.familyMeta={
+    familyId:'legacy_taemin',
+    familyName:'우리 가족',
+    createdAt:Date.now(),
+    createdBy:'dad',
+    mode:'independent',
+    members:members,
+    inviteTokens:[]
+  };
+  // memberData 초기화: 각 구성원에게 현재 글로벌 데이터 배분
+  if(!S.memberData)S.memberData={};
+  // 자녀에게 현재 S 데이터(활동/뱃지/로그 등) 부여
+  const childIds=Object.keys(members).filter(id=>members[id].type==='child');
+  childIds.forEach(cid=>{
+    S.memberData[cid]={
+      pts:S.pts||0, streak:S.streak||0, longest:S.longest||0,
+      lastDate:S.lastDate||null, totalDone:S.totalDone||0,
+      acts:JSON.parse(JSON.stringify(S.acts||[])),
+      rwds:JSON.parse(JSON.stringify(S.rwds||[])),
+      log:JSON.parse(JSON.stringify(S.log||[])),
+      actDone:JSON.parse(JSON.stringify(S.actDone||{})),
+      moodLog:S.moodLog?[...S.moodLog]:[],
+      badges:S.badges?{...S.badges}:{},
+      badgeLog:S.badgeLog?[...S.badgeLog]:[],
+      stickers:JSON.parse(JSON.stringify(S.stickers||[])),
+      rewardLog:S.rewardLog?[...S.rewardLog]:[],
+      rewardInventory:JSON.parse(JSON.stringify(S.rewardInventory||[])),
+      rewardRequests:JSON.parse(JSON.stringify(S.rewardRequests||[]))
+    };
+  });
+  // 주의: localStorage에 family_id를 설정하지 않음
+  // 레거시 데이터는 users/taemin (LEGACY_DOC)에 그대로 유지
+  // familyMeta는 S 안에만 존재하며 save() 시 LEGACY_DOC에 함께 저장됨
+  console.log('🔄 레거시 데이터 → familyMeta 마이그레이션 완료',Object.keys(members));
+}
+
 let currentUser = null;
 let selectedMember = null;
 let _familyId = null; // 현재 가족 ID
@@ -14703,6 +14774,13 @@ window._createState = _createState;
       if(backup) S = Object.assign(defaultState(), JSON.parse(backup));
     }catch(e2){}
     toast('⚠️ 오프라인 모드 — 인터넷 연결을 확인해주세요');
+  }
+
+  // ── 레거시 → familyMeta 마이그레이션 (1회성) ──
+  if(!S.familyMeta && S.users && Object.keys(S.users).length>0){
+    _migrateLegacyToFamilyMeta();
+    // 마이그레이션 결과를 즉시 Firestore에 저장 (LEGACY_DOC 경로)
+    try{ if(_firebaseReady) await setDoc(DATA_DOC, S); }catch(e){ console.warn('Migration save failed',e); }
   }
 
   // familyMeta가 있으면 MEMBERS 재구축
