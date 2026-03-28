@@ -190,17 +190,27 @@ body.dark .toss-invite-share-btn{background:rgba(99,102,241,.2);color:#818CF8}
 .ob-fade-2{animation:obFadeUp .65s cubic-bezier(.4,0,.2,1) .2s both}
 .ob-fade-3{animation:obFadeUp .65s cubic-bezier(.4,0,.2,1) .4s both}
 .ob-fade-4{animation:obFadeUp .65s cubic-bezier(.4,0,.2,1) .6s both}
-/* ── INSIGHT SCREEN ── */
-.ob-insight-wrap{display:flex;flex-direction:column;align-items:flex-start;padding-top:16px}
-.ob-insight-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#EEF2FF;border-radius:20px;font-size:13px;font-weight:700;color:#6366F1;margin-bottom:28px}
-body.dark .ob-insight-badge{background:rgba(99,102,241,.2);color:#818CF8}
-.ob-days-num{font-size:80px;font-weight:900;color:#6366F1;line-height:1;margin:8px 0 4px;letter-spacing:-4px}
-body.dark .ob-days-num{color:#818CF8}
-.ob-days-label{font-size:22px;font-weight:900;color:#1E293B;margin-bottom:10px;letter-spacing:-.5px}
-body.dark .ob-days-label{color:#F1F5F9}
-.ob-days-cite{font-size:13px;color:#94A3B8;font-weight:500;margin-bottom:24px}
-.ob-insight-desc{font-size:15px;color:#64748B;line-height:1.65;font-weight:500}
-body.dark .ob-insight-desc{color:#64748B}
+/* ── INSIGHT SWIPE CARDS ── */
+.ins-cards-scroll{flex:1;min-height:0;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;overscroll-behavior-x:contain}
+.ins-cards-scroll::-webkit-scrollbar{display:none}
+.ins-card{flex:0 0 100%;scroll-snap-align:start;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 32px 12px;box-sizing:border-box;transition:background .3s}
+.ins-card-1{background:#EEF2FF}
+.ins-card-2{background:#FFF0F6}
+.ins-card-3{background:#FFFBEB}
+body.dark .ins-card-1{background:rgba(99,102,241,.09)}
+body.dark .ins-card-2{background:rgba(236,72,153,.08)}
+body.dark .ins-card-3{background:rgba(245,158,11,.08)}
+.ins-illust{width:188px;height:188px;margin-bottom:24px;flex-shrink:0}
+.ins-illust svg{width:100%;height:100%}
+.ins-keyword{font-size:26px;font-weight:900;color:#1E293B;text-align:center;line-height:1.35;letter-spacing:-.5px;margin-bottom:10px}
+.ins-sub{font-size:15px;color:#64748B;text-align:center;font-weight:500;line-height:1.6}
+.ins-dots{display:flex;justify-content:center;gap:8px;padding:14px 0 6px;flex-shrink:0}
+.ins-dot{width:8px;height:8px;border-radius:50%;background:#E2E8F0;transition:all .28s cubic-bezier(.4,0,.2,1);cursor:pointer}
+.ins-dot.active{width:24px;border-radius:4px;background:#6366F1}
+body.dark .ins-keyword{color:#F1F5F9}
+body.dark .ins-sub{color:#94A3B8}
+body.dark .ins-dot{background:#334155}
+body.dark .ins-dot.active{background:#818CF8}
 /* ── ROLE TYPE SELECTION CARDS ── */
 .c1-role-type-grid{display:flex;flex-direction:column;gap:14px;margin:8px 0 16px}
 .c1-role-type-card{padding:20px 18px;background:#F8FAFC;border:2.5px solid #E2E8F0;border-radius:20px;cursor:pointer;transition:all .22s cubic-bezier(.4,0,.2,1);display:flex;align-items:center;gap:16px;position:relative;-webkit-tap-highlight-color:transparent}
@@ -2443,31 +2453,107 @@ button:disabled {
 
 <!-- AUTH: 과학적 인사이트 (Step 0.5) -->
 <div class="auth-screen hidden toss-style" id="auth-insight">
-  <div class="toss-wizard">
+  <div class="toss-wizard" style="overflow:hidden">
     <div class="toss-top-bar">
       <button class="toss-back-btn" onclick="showAuthScreen('welcome')">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
       </button>
       <div class="toss-progress-wrap"><div class="toss-progress-fill" style="width:0%"></div></div>
     </div>
-    <div class="toss-slides-wrap">
-      <div class="toss-slide active">
-        <div class="toss-slide-content">
-          <div class="ob-insight-wrap">
-            <div class="ob-insight-badge">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 2l3.09 8.26H22l-6.19 5.14 2.36 8.26L12 18.27l-6.17 5.39 2.36-8.26L2 10.26h6.91L12 2z"/></svg>
-              알고 계셨나요?
-            </div>
-            <div class="ob-days-num">66</div>
-            <div class="ob-days-label">일이면 습관이 됩니다</div>
-            <div class="ob-days-cite">University College London, 2009</div>
-            <p class="ob-insight-desc">매일 조금씩 반복하는 것만으로<br>좋은 습관이 자연스럽게 자리잡아요.<br>mile.ly가 그 66일을 함께할게요.</p>
-          </div>
+    <!-- Swipe cards -->
+    <div class="ins-cards-scroll" id="insCardsScroll">
+      <!-- Card 1: 매일 작은 활동이 습관이 돼요 -->
+      <div class="ins-card ins-card-1">
+        <div class="ins-illust">
+          <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="100" cy="100" r="88" fill="#E0E7FF" opacity=".5"/>
+            <!-- Row 1: checked -->
+            <rect x="20" y="46" width="160" height="36" rx="18" fill="white"/>
+            <circle cx="49" cy="64" r="14" fill="#6366F1"/>
+            <path d="M42 64l5 5 10-10" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="71" y="57" width="78" height="7" rx="3.5" fill="#C7D2FE"/>
+            <rect x="71" y="67" width="56" height="5" rx="2.5" fill="#E0E7FF"/>
+            <!-- Row 2: checked -->
+            <rect x="20" y="90" width="160" height="36" rx="18" fill="white"/>
+            <circle cx="49" cy="108" r="14" fill="#6366F1"/>
+            <path d="M42 108l5 5 10-10" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="71" y="101" width="84" height="7" rx="3.5" fill="#C7D2FE"/>
+            <rect x="71" y="111" width="62" height="5" rx="2.5" fill="#E0E7FF"/>
+            <!-- Row 3: in progress -->
+            <rect x="20" y="134" width="160" height="36" rx="18" fill="white" opacity=".6"/>
+            <circle cx="49" cy="152" r="14" fill="#E0E7FF" stroke="#C7D2FE" stroke-width="2.5"/>
+            <rect x="71" y="145" width="68" height="7" rx="3.5" fill="#E2E8F0"/>
+            <rect x="71" y="155" width="48" height="5" rx="2.5" fill="#F1F5F9"/>
+          </svg>
         </div>
-        <div class="toss-cta">
-          <button class="toss-btn" onclick="startCreateFamily()">다음</button>
-        </div>
+        <div class="ins-keyword">매일 작은 활동이<br>습관이 돼요</div>
+        <div class="ins-sub">66일이면 자연스러운 일상이 됩니다</div>
       </div>
+      <!-- Card 2: 가족이 함께하면 동기부여가 달라져요 -->
+      <div class="ins-card ins-card-2">
+        <div class="ins-illust">
+          <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="100" cy="100" r="88" fill="#FCE7F3" opacity=".6"/>
+            <!-- Star goal -->
+            <polygon points="100,26 106,45 127,45 111,57 117,76 100,64 83,76 89,57 73,45 94,45" fill="#F472B6"/>
+            <line x1="100" y1="16" x2="100" y2="10" stroke="#F472B6" stroke-width="3" stroke-linecap="round"/>
+            <line x1="124" y1="22" x2="128" y2="18" stroke="#F472B6" stroke-width="2.5" stroke-linecap="round" opacity=".7"/>
+            <line x1="76" y1="22" x2="72" y2="18" stroke="#F472B6" stroke-width="2.5" stroke-linecap="round" opacity=".7"/>
+            <!-- Ground path -->
+            <path d="M18 160 Q100 144 182 160" stroke="#FBCFE8" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <!-- Adult silhouette -->
+            <circle cx="66" cy="96" r="17" fill="#F472B6"/>
+            <rect x="51" y="113" width="30" height="48" rx="15" fill="#F472B6"/>
+            <!-- Child silhouette -->
+            <circle cx="118" cy="110" r="13" fill="#FCA5A5"/>
+            <rect x="105" y="123" width="26" height="38" rx="13" fill="#FCA5A5"/>
+            <!-- Floating hearts -->
+            <path d="M150 88 C150 85 153.5 83 153.5 86.5 C153.5 83 157 85 157 88 C157 93 153.5 96 153.5 96 C153.5 96 150 93 150 88Z" fill="#F472B6" opacity=".8"/>
+            <path d="M160 66 C160 63.5 163 62 163 64.5 C163 62 166 63.5 166 66 C166 70 163 72.5 163 72.5 C163 72.5 160 70 160 66Z" fill="#F472B6" opacity=".5"/>
+          </svg>
+        </div>
+        <div class="ins-keyword">가족이 함께하면<br>동기부여가 달라져요</div>
+        <div class="ins-sub">응원과 격려가 습관의 힘이 됩니다</div>
+      </div>
+      <!-- Card 3: 마일리지로 성취감을 느껴요 -->
+      <div class="ins-card ins-card-3">
+        <div class="ins-illust">
+          <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="100" cy="100" r="88" fill="#FEF3C7" opacity=".6"/>
+            <!-- Gauge bar background -->
+            <rect x="42" y="36" width="22" height="126" rx="11" fill="#E2E8F0"/>
+            <!-- Gauge fill -->
+            <rect x="42" y="86" width="22" height="76" rx="11" fill="#F59E0B"/>
+            <!-- Gauge top indicator -->
+            <circle cx="53" cy="84" r="14" fill="#F59E0B"/>
+            <!-- Main coin -->
+            <circle cx="120" cy="110" r="52" fill="#FDE68A"/>
+            <circle cx="120" cy="110" r="44" fill="#FCD34D"/>
+            <!-- Star on coin -->
+            <polygon points="120,83 124.5,97 140,97 128,106 132.5,120 120,111 107.5,120 112,106 100,97 115.5,97" fill="#F59E0B"/>
+            <!-- Rising coin 1 -->
+            <circle cx="150" cy="62" r="13" fill="#FCD34D" opacity=".75"/>
+            <polygon points="150,54 153,62 161,62 155,67 157,75 150,70 143,75 145,67 139,62 147,62" fill="#F59E0B" opacity=".75"/>
+            <!-- Rising coin 2 (small) -->
+            <circle cx="158" cy="36" r="8" fill="#FCD34D" opacity=".42"/>
+            <!-- Up arrow -->
+            <path d="M150 52 L150 44 M146 48 L150 44 L154 48" stroke="#F59E0B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity=".85"/>
+          </svg>
+        </div>
+        <div class="ins-keyword">마일리지로<br>성취감을 느껴요</div>
+        <div class="ins-sub">작은 보상이 큰 변화를 만듭니다</div>
+      </div>
+    </div>
+    <!-- Dot indicators -->
+    <div class="ins-dots" id="insDots">
+      <div class="ins-dot active"></div>
+      <div class="ins-dot"></div>
+      <div class="ins-dot"></div>
+    </div>
+    <!-- CTA -->
+    <div class="toss-cta">
+      <button class="toss-btn" id="insNextBtn" disabled onclick="insNext()">다음</button>
+      <button class="toss-btn ghost" onclick="startCreateFamily()">건너뛰기</button>
     </div>
   </div>
 </div>
@@ -14259,5 +14345,32 @@ window._createState = _createState;
   </div>
 </div>
 
+<script>
+/* ── Insight swipe cards ── */
+(function(){
+  var scroll=document.getElementById('insCardsScroll');
+  if(!scroll)return;
+  var dots=document.querySelectorAll('#insDots .ins-dot');
+  var btn=document.getElementById('insNextBtn');
+  var total=3,cur=0;
+  function update(){
+    var w=scroll.clientWidth||1;
+    cur=Math.round(scroll.scrollLeft/w);
+    cur=Math.max(0,Math.min(total-1,cur));
+    dots.forEach(function(d,i){d.classList.toggle('active',i===cur);});
+    btn.disabled=cur<total-1;
+  }
+  scroll.addEventListener('scroll',update,{passive:true});
+  dots.forEach(function(d,i){
+    d.addEventListener('click',function(){
+      scroll.scrollTo({left:i*scroll.clientWidth,behavior:'smooth'});
+    });
+  });
+  window.insNext=function(){
+    if(cur>=total-1){startCreateFamily();return;}
+    scroll.scrollTo({left:(cur+1)*scroll.clientWidth,behavior:'smooth'});
+  };
+})();
+</script>
 </body>
 </html>
