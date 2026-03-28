@@ -5560,8 +5560,8 @@ function applyUserProfile() {
   const heroLbl = document.getElementById('hero-lbl');
   if(heroLbl){
     const _hMode=getFamilyMode();
-    if(isCaregiverUser()){
-      // 양육자: 모드 무관하게 보고 있는 자녀 이름 표시 (flash 방지)
+    if(isCaregiverUser()||isCurrentUserAdmin()){
+      // 양육자/관리자: 모드 무관하게 보고 있는 자녀 이름 표시 (flash 방지)
       const _hVid=getViewedMemberId();
       const _hVname=MEMBERS[_hVid]?.name||S.familyMeta?.members?.[_hVid]?.name||'';
       // fallback: 자녀 이름 미확인 시 첫 번째 자녀 이름 사용 (양육자 본인 이름 절대 사용 안 함)
@@ -5600,7 +5600,7 @@ function _korSuffix(name){
 function _renderHistHeroSub(){
   const histSub=document.getElementById('hist-hero-sub');
   if(!histSub)return;
-  if(isCaregiverUser()){
+  if(isCaregiverUser()||isCurrentUserAdmin()){
     const kids=getChildMemberIds();
     if(kids.length===0){
       histSub.textContent='활동 분석';
@@ -5621,15 +5621,17 @@ function isCurrentUserAdmin(){
   return !!S.familyMeta.members[currentUser]?.isAdmin;
 }
 
-// 로그인 후 모드/뷰 초기화: independent 모드에서 양육자는 첫 자녀 뷰로 전환
+// 로그인 후 모드/뷰 초기화: independent 모드에서 양육자/관리자는 첫 자녀 뷰로 전환
 function postLoginInit(){
   viewingChildId = null;
   _admViewChildId = null;
   const mode = getFamilyMode();
-  if(mode === 'independent' && isCaregiverUser()){
+  if(mode === 'independent' && (isCaregiverUser()||isCurrentUserAdmin())){
     const kids = getChildMemberIds();
     if(kids.length > 0){
-      viewingChildId = kids[0];
+      // 관리자 권한 자녀: 자기 자신이 kids에 포함되면 자기부터
+      const selfIdx = kids.indexOf(currentUser);
+      viewingChildId = selfIdx>=0 ? kids[selfIdx] : kids[0];
       // 첫 자녀 memberData 초기화 (없으면)
       if(!S.memberData) S.memberData = {};
       if(!S.memberData[viewingChildId]) getMemberState(viewingChildId);
@@ -6062,7 +6064,7 @@ function syncGlobalToMember(targetId) {
 // Robust debounced save with in-flight guard
 function save(){
   // independent 모드에서 양육자가 자녀 데이터를 보고 있으면 해당 자녀에게 저장
-  if(getFamilyMode()==='independent'&&isCaregiverUser()&&viewingChildId){
+  if(getFamilyMode()==='independent'&&(isCaregiverUser()||isCurrentUserAdmin())&&viewingChildId){
     syncGlobalToMember(viewingChildId);
   }else{
     syncGlobalToMember(); // Sync changes back to member data before saving
@@ -7179,8 +7181,8 @@ function renderHero(){
   // 모드별 hero 라벨 및 pts 표시
   const mode=getFamilyMode();
   const heroLbl=document.getElementById('hero-lbl');
-  if(isCaregiverUser()){
-    // 양육자: 모드 무관하게 보고 있는 자녀 이름 표시
+  if(isCaregiverUser()||isCurrentUserAdmin()){
+    // 양육자/관리자: 모드 무관하게 보고 있는 자녀 이름 표시
     const vid=getViewedMemberId();
     const vname=MEMBERS[vid]?.name||S.familyMeta?.members?.[vid]?.name||'';
     // fallback: 자녀 이름 미확인 시 MEMBERS에서 첫 번째 자녀 이름 탐색 (로딩 초기 대비)
@@ -7204,7 +7206,7 @@ function renderHero(){
   // 관리자 pts: 모드별로 올바른 자녀 pts 표시
   const admPtsEl=document.getElementById('adm-pts');
   if(admPtsEl){
-    if(mode==='independent'&&isCaregiverUser()){
+    if(mode==='independent'&&(isCaregiverUser()||isCurrentUserAdmin())){
       const admId=_admViewChildId||getViewedMemberId();
       const admMs=S.memberData?.[admId];
       admPtsEl.textContent=(admMs?.pts||S.pts).toLocaleString();
@@ -9090,7 +9092,7 @@ function renderAdmStats(){
   let totalDone=S.totalDone;
   let streak=getDisplayStreak();
   // independent 모드: 관리자가 선택한 자녀의 stats 표시
-  if(mode==='independent'&&isCaregiverUser()){
+  if(mode==='independent'&&(isCaregiverUser()||isCurrentUserAdmin())){
     const admId=_admViewChildId||getViewedMemberId();
     const ms=S.memberData?.[admId];
     if(ms){totalDone=ms.totalDone||0;streak=ms.streak||0;}
@@ -9327,8 +9329,8 @@ function renderAdmSettings(){
 
 // ── ACTIVITY ACTIONS ──────────────────────────
 function doAct(id){
-  // 양육자 + 자녀 2명 이상: 자녀 선택 먼저
-  if(isCaregiverUser()&&getChildMembers().length>=2){
+  // 양육자/관리자 + 자녀 2명 이상: 자녀 선택 먼저
+  if((isCaregiverUser()||isCurrentUserAdmin())&&getChildMembers().length>=2){
     showChildPicker('어떤 아이의 활동인가요?',function(childId){
       if(!childId)return;
       if(getFamilyMode()==='independent'&&getViewedMemberId()!==childId)switchViewingChild(childId);
@@ -9401,8 +9403,8 @@ function _doActCore(id){
 }
 
 function undoAct(actId){
-  // 양육자 + 자녀 2명 이상: 자녀 선택 먼저
-  if(isCaregiverUser()&&getChildMembers().length>=2){
+  // 양육자/관리자 + 자녀 2명 이상: 자녀 선택 먼저
+  if((isCaregiverUser()||isCurrentUserAdmin())&&getChildMembers().length>=2){
     showChildPicker('어떤 아이의 활동을 취소할까요?',function(childId){
       if(!childId)return;
       if(getFamilyMode()==='independent'&&getViewedMemberId()!==childId)switchViewingChild(childId);
@@ -9833,15 +9835,15 @@ function getChildMemberIds(){
 }
 // 현재 화면에 표시 중인 구성원 ID (선택된 자녀)
 function getViewedMemberId(){
-  if(getFamilyMode()==='independent'&&isCaregiverUser()){
+  if(getFamilyMode()==='independent'&&(isCaregiverUser()||isCurrentUserAdmin())){
     const kids=getChildMemberIds();
     if(kids.length>0)return viewingChildId||kids[0];
   }
   return currentUser;
 }
-// 현재 활성 마일리지 반환: 양육자(independent)면 선택된 자녀의 pts, 아니면 S.pts
+// 현재 활성 마일리지 반환: 양육자/관리자(independent)면 선택된 자녀의 pts, 아니면 S.pts
 function getActiveMileage(){
-  if(getFamilyMode()==='independent'&&isCaregiverUser()){
+  if(getFamilyMode()==='independent'&&(isCaregiverUser()||isCurrentUserAdmin())){
     const vid=getViewedMemberId();
     if(vid&&S.memberData&&S.memberData[vid]!==undefined)return S.memberData[vid].pts||0;
   }
@@ -9935,8 +9937,8 @@ function toggleRwdForChild(rwdId,childId){
 // REDEEM
 let pRwdId=null,_pRwdEl=null;
 function openRedeem(id,srcEl){
-  // 양육자 + 자녀 2명 이상: 자녀 선택 먼저
-  if(isCaregiverUser()&&getChildMembers().length>=2){
+  // 양육자/관리자 + 자녀 2명 이상: 자녀 선택 먼저
+  if((isCaregiverUser()||isCurrentUserAdmin())&&getChildMembers().length>=2){
     showChildPicker('어떤 아이의 보상인가요?',function(childId){
       if(!childId)return;
       if(getFamilyMode()==='independent'&&getViewedMemberId()!==childId)switchViewingChild(childId);
@@ -10213,8 +10215,8 @@ window.rejectRewardRequest=rejectRewardRequest;
 function giveBonus(){
   const v=parseInt(document.getElementById('bonus-inp').value)||0;if(v<=0)return;
   const mode=getFamilyMode();
-  // independent 모드 + 양육자: 관리자가 선택한 자녀에게 지급
-  if(mode==='independent'&&isCaregiverUser()){
+  // independent 모드 + 관리자: 선택한 자녀에게 지급
+  if(mode==='independent'&&(isCaregiverUser()||isCurrentUserAdmin())){
     const targetId=_admViewChildId||getViewedMemberId();
     if(targetId){
       const ms=getMemberState(targetId);
@@ -10233,7 +10235,7 @@ function deductPts(){
   const v=parseInt(document.getElementById('deduct-inp').value)||0;if(v<=0)return;
   if(!confirm(`${v} 마일리지을 차감할까요?`))return;
   const mode=getFamilyMode();
-  if(mode==='independent'&&isCaregiverUser()){
+  if(mode==='independent'&&(isCaregiverUser()||isCurrentUserAdmin())){
     const targetId=_admViewChildId||getViewedMemberId();
     if(targetId){
       const ms=getMemberState(targetId);
@@ -11477,9 +11479,9 @@ function renderMyTab(){
   // 아바타
   const avatarWrap=document.getElementById('my-avatar-wrap');
   if(avatarWrap)avatarWrap.innerHTML=getAvatarHTML(currentUser,56);
-  // 관리자 버튼 표시 여부
+  // 관리자 버튼 표시 여부 (양육자 또는 isAdmin 권한이 있는 자녀)
   const adminBtn=document.getElementById('my-admin-btn');
-  if(adminBtn)adminBtn.style.display=isCaregiverUser()?'':'none';
+  if(adminBtn)adminBtn.style.display=(isCaregiverUser()||isCurrentUserAdmin())?'':'none';
   // 다크모드 토글 상태 동기화
   const togDarkMy=document.getElementById('tog-dark-my');
   if(togDarkMy){
@@ -11534,9 +11536,9 @@ window.myTabAdminAction=myTabAdminAction;
 // ── TABS / MODAL ──────────────────────────────
 function goTab(tab){
   if(tab==='adm'){
-    // 자녀 역할은 관리자 접근 차단
+    // 자녀 역할은 관리자 권한이 없으면 접근 차단
     const member=S.familyMeta?.members?.[currentUser];
-    if(member&&member.role==='child'){
+    if(member&&member.role==='child'&&!member.isAdmin){
       toast('관리자 권한이 없습니다');
       return;
     }
@@ -11757,7 +11759,7 @@ window._onChildPickerSelect=_onChildPickerSelect;
 // ── NAV USERS RENDERING (모든 탭 자녀 선택기 + hist 탭 show/hide) ──
 function renderNavUsers(){
   const kids=getChildMemberIds();
-  const showSwitcher=isCaregiverUser()&&kids.length>=2;
+  const showSwitcher=(isCaregiverUser()||isCurrentUserAdmin())&&kids.length>=2;
   const currentViewed=getViewedMemberId();
 
   // 자녀 선택기 HTML 생성 (공통)
@@ -11797,9 +11799,9 @@ function renderNavUsers(){
     }
   });
 
-  // 리포트 탭: 양육자에게만 표시
+  // 리포트 탭: 양육자 또는 관리자 권한이 있는 유저에게 표시
   const histTab=document.getElementById('tab-hist');
-  if(histTab)histTab.style.display=isCaregiverUser()?'':'none';
+  if(histTab)histTab.style.display=(isCaregiverUser()||isCurrentUserAdmin())?'':'none';
 }
 window.renderNavUsers=renderNavUsers;
 
@@ -12164,11 +12166,11 @@ function onMeIconClick(){
   closeUserFm();
   _familyFlowActive=true;
   const menu=document.getElementById('me-fm-menu');
-  // 자녀 역할은 관리자 메뉴 숨기기
+  // 자녀 역할은 관리자 권한이 없으면 관리자 메뉴 숨기기
   const adminBtn=menu.querySelector('[onclick*="admin"]');
   if(adminBtn){
     const member=S.familyMeta?.members?.[currentUser];
-    const isChild=member&&member.role==='child';
+    const isChild=member&&member.role==='child'&&!member.isAdmin;
     adminBtn.style.display=isChild?'none':'';
   }
   menu.style.left='50%';
@@ -12745,7 +12747,7 @@ function reallyGoTab(tab){
   document.body.setAttribute('data-tab', tab);
   // 자녀 테마 적용 탭 (홈, 활동기록, 보상, 성과통계)
   const _themedTabs=['home','log','rwd','hist'];
-  if(_themedTabs.includes(tab)&&isCaregiverUser&&isCaregiverUser()){
+  if(_themedTabs.includes(tab)&&(isCaregiverUser()||isCurrentUserAdmin())){
     const vid=getViewedMemberId&&getViewedMemberId();
     if(vid)applyChildTheme(vid);
   }
@@ -14126,7 +14128,7 @@ window._createState = _createState;
       S = Object.assign(defaultState(), snap.data());
       _lastSavedJSON = incomingJSON;
       rebuildMembersFromFamily();
-      if(viewingChildId&&isCaregiverUser()&&getFamilyMode()==='independent') syncMemberToGlobal(viewingChildId);
+      if(viewingChildId&&(isCaregiverUser()||isCurrentUserAdmin())&&getFamilyMode()==='independent') syncMemberToGlobal(viewingChildId);
       renderAll();
       checkNewMessages();
       renderNavUsers();
