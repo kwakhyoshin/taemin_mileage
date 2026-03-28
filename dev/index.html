@@ -556,6 +556,18 @@ body.dark .adm-top{background:linear-gradient(180deg,#334155 0%,#475569 80%,#647
 .icon-btn:active{transform:scale(.9)}
 .icon-btn.del{color:#EF4444}
 .icon-btn.del:active{background:#FEE2E2}
+/* 관리자 목록 상태 필 */
+.adm-pill{display:inline-flex;align-items:center;font-size:11px;font-weight:700;color:var(--tx3);background:var(--bg2);padding:2px 8px;border-radius:10px;white-space:nowrap;line-height:1.4}
+.adm-pill-tap{cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all .15s;user-select:none}
+.adm-pill-tap:active{transform:scale(.93)}
+.adm-pill-on{background:#EFF6FF;color:#3B82F6}
+body.dark .adm-pill-on{background:rgba(59,130,246,.15);color:#60A5FA}
+.adm-pill-gn{background:#ECFDF5;color:#10B981}
+body.dark .adm-pill-gn{background:rgba(16,185,129,.15);color:#34D399}
+.adm-pill-rd{background:#FEF2F2;color:#EF4444}
+body.dark .adm-pill-rd{background:rgba(239,68,68,.15);color:#F87171}
+.adm-pill-off{background:#FEF2F2;color:#EF4444;font-weight:800}
+body.dark .adm-pill-off{background:rgba(239,68,68,.12);color:#F87171}
 .tog{width:51px;height:31px;border-radius:16px;background:#6366F1;position:relative;cursor:pointer;flex-shrink:0;border:none;transition:background .25s cubic-bezier(.4,0,.2,1);-webkit-tap-highlight-color:transparent;padding:0;box-sizing:content-box;-webkit-appearance:none;appearance:none}
 .tog.tog-sm{width:44px;height:26px;border-radius:13px}
 .tog.tog-sm .tog-dot{width:22px;height:22px}
@@ -9260,30 +9272,21 @@ function renderAdmActList(){
   el.innerHTML=S.acts.map(a=>{
     const done=countDone(a);
     const isDone=a.maxDay>0&&done>=a.maxDay;
+    const doneLabel=a.maxDay>0?`${done}/${a.maxDay}`:'✓';
     return `
-    <div class="manage-item" style="padding:12px 14px">
-      <div class="drag-handle"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"><line x1=\"4\" y1=\"8\" x2=\"20\" y2=\"8\"/><line x1=\"4\" y1=\"12\" x2=\"20\" y2=\"12\"/><line x1=\"4\" y1=\"16\" x2=\"20\" y2=\"16\"/></svg></div>
+    <div class="manage-item" style="padding:10px 14px">
+      <div class="drag-handle"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="4" y1="8" x2="20" y2="8"/><line x1="4" y1="16" x2="20" y2="16"/></svg></div>
       <div class="m-emoji">${a.emoji}</div>
       <div class="m-info" style="flex:1;min-width:0">
-        <div class="m-nm">${a.name}</div>
-        <div class="m-sub">${a.pts}M · ${a.maxDay===0?'무제한':a.maxDay+'회/'+CYCLE_LABEL[a.cycle]}${a.days&&a.days.length>0&&a.days.length<7?' · '+a.days.map(d=>['일','월','화','수','목','금','토'][d]).join(''):''}</div>
+        <div class="m-nm" style="font-size:15px">${a.name}</div>
+        <div style="display:flex;gap:4px;margin-top:4px;flex-wrap:wrap">
+          <span class="adm-pill">${a.pts}M · ${a.maxDay===0?'무제한':a.maxDay+'회/'+CYCLE_LABEL[a.cycle]}</span>
+          <span class="adm-pill adm-pill-tap${isDone?' adm-pill-on':''}" onclick="togActDone('${a.id}')">${isDone?'✓ 완료':'미완료'}</span>
+          <span class="adm-pill adm-pill-tap${a.showHome?' adm-pill-gn':''}" onclick="togActHome('${a.id}')">${a.showHome?'홈 표시':'홈 숨김'}</span>
+          ${!a.active?'<span class="adm-pill adm-pill-off">비활성</span>':''}
+        </div>
       </div>
-      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
-        <div style="display:flex;flex-direction:column;align-items:center;gap:3px">
-          <button class="tog tog-sm${isDone?'':' off'}" onclick="togActDone('${a.id}')"><div class="tog-dot"></div></button>
-          <span style="font-size:11px;font-weight:800;color:${isDone?'var(--or)':'var(--tx3)'}">완료</span>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:center;gap:3px">
-          <button class="tog tog-sm${a.showHome?' ':' off'}" onclick="togActHome('${a.id}')"><div class="tog-dot"></div></button>
-          <span style="font-size:11px;font-weight:800;color:${a.showHome?'var(--gn2)':'var(--tx3)'}">홈</span>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:center;gap:3px">
-          <button class="tog tog-sm${a.active?'':' off'}" onclick="togAct('${a.id}')"><div class="tog-dot"></div></button>
-          <span style="font-size:11px;font-weight:800;color:${a.active?'var(--gn2)':'var(--tx3)'}">활성</span>
-        </div>
-        <button class="icon-btn" onclick="openActForm('${a.id}')" title="수정"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg></button>
-        <button class="icon-btn del" onclick="delAct('${a.id}')" title="삭제"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></button>
-      </div>
+      <button class="icon-btn" onclick="openActForm('${a.id}')" style="width:36px;height:36px;min-width:36px;min-height:36px"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg></button>
     </div>`;
   }).join('');
   initActDrag();
@@ -9391,18 +9394,23 @@ function initRwdDrag(){
 }
 
 function renderAdmRwdList(){
-  document.getElementById('adm-rwd-list').innerHTML=S.rwds.map(r=>`
-    <div class="manage-item" style="padding:12px 14px">
-      <div class="drag-handle"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"><line x1=\"4\" y1=\"8\" x2=\"20\" y2=\"8\"/><line x1=\"4\" y1=\"12\" x2=\"20\" y2=\"12\"/><line x1=\"4\" y1=\"16\" x2=\"20\" y2=\"16\"/></svg></div>
+  document.getElementById('adm-rwd-list').innerHTML=S.rwds.map(r=>{
+    const hasSale=r.sale&&r.sale.percent&&(!r.sale.endDate||new Date(r.sale.endDate+'T23:59:59')>=new Date());
+    return `
+    <div class="manage-item" style="padding:10px 14px">
+      <div class="drag-handle"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="4" y1="8" x2="20" y2="8"/><line x1="4" y1="16" x2="20" y2="16"/></svg></div>
       <div class="m-emoji">${r.emoji}</div>
-      <div class="m-info"><div class="m-nm">${r.name}${r.goal?' 🎯':''}${r.closed?' <span style="font-size:11px;color:#EF4444;font-weight:800">종료</span>':''}</div><div class="m-sub">${r.pts.toLocaleString()} 마일리지</div>${r.sale&&r.sale.percent&&(!r.sale.endDate||new Date(r.sale.endDate+'T23:59:59')>=new Date())?`<div style="font-size:11px;font-weight:800;color:#EF4444;margin-top:2px">🏷️ ${r.sale.percent}% 할인 중${r.sale.endDate?' (~'+r.sale.endDate.slice(5).replace('-','/')+')':''}</div>`:''}</div>
-      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
-        <span style="font-size:11px;font-weight:700;color:${r.closed?'#EF4444':'var(--tx3)'};white-space:nowrap">${r.closed?'종료':'운영'}</span>
-        <button class="tog tog-sm ${r.closed?'off':''}" onclick="toggleRwdClosed('${r.id}')" title="${r.closed?'종료됨':'운영중'}"><div class="tog-dot"></div></button>
-        <button class="icon-btn" onclick="openRwdForm('${r.id}')" title="수정"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg></button>
-        <button class="icon-btn del" onclick="delRwd('${r.id}')" title="삭제"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></button>
+      <div class="m-info" style="flex:1;min-width:0">
+        <div class="m-nm" style="font-size:15px">${r.name}${r.goal?' 🎯':''}</div>
+        <div style="display:flex;gap:4px;margin-top:4px;flex-wrap:wrap">
+          <span class="adm-pill">${r.pts.toLocaleString()}M</span>
+          <span class="adm-pill adm-pill-tap${r.closed?' adm-pill-rd':' adm-pill-gn'}" onclick="toggleRwdClosed('${r.id}')">${r.closed?'종료':'운영중'}</span>
+          ${hasSale?`<span class="adm-pill adm-pill-rd">${r.sale.percent}% 할인${r.sale.endDate?' ~'+r.sale.endDate.slice(5).replace('-','/'):''}</span>`:''}
+        </div>
       </div>
-    </div>`).join('');
+      <button class="icon-btn" onclick="openRwdForm('${r.id}')" style="width:36px;height:36px;min-width:36px;min-height:36px"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg></button>
+    </div>`;
+  }).join('');
   initRwdDrag();
 }
 function renderAdmSettings(){
