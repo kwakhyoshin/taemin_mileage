@@ -914,6 +914,17 @@ body.dark .pin-key.ck{background:transparent}
 .mood-particle:nth-child(7){animation-delay:1.8s;left:12px}
 .mood-particle:nth-child(8){animation-delay:2.1s;left:-10px}
 
+/* FAMILY POPUP MOOD ANIMATION */
+.fp-mood-badge{position:absolute;bottom:-2px;right:-2px;font-size:16px;line-height:1;pointer-events:none;z-index:2;animation:fpMoodPulse 2s ease-in-out infinite;filter:drop-shadow(0 1px 3px rgba(0,0,0,.3))}
+@keyframes fpMoodPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
+.fp-mood-particles{position:absolute;top:50%;left:50%;width:0;height:0;pointer-events:none;z-index:3;overflow:visible}
+.fp-mood-p{position:absolute;font-size:14px;opacity:0;pointer-events:none;animation:fpMoodFloat 2.8s ease-out forwards}
+@keyframes fpMoodFloat{
+  0%{opacity:1;transform:translate(0,0) scale(.4)}
+  15%{opacity:1;transform:translate(var(--dx,0),var(--dy,-15px)) scale(1)}
+  100%{opacity:0;transform:translate(calc(var(--dx,0)*2.5),calc(var(--dy,-15px)*3)) scale(.3)}
+}
+
 /* MESSAGE POPUP */
 .msg-pop{position:fixed;z-index:510;background:var(--card);border-radius:20px;box-shadow:0 8px 30px rgba(0,0,0,.2);padding:20px;width:300px;animation:fadeUpCenter .2s ease;left:50%;top:40%;transform:translate(-50%,-50%)}
 .msg-pop-header{display:flex;align-items:center;gap:10px;margin-bottom:14px}
@@ -12031,7 +12042,7 @@ function openFamilyPopup(){
     });
   }
 
-  // Build a member card (no mood emoji, "(나)" badge + account status)
+  // Build a member card with mood emoji badge + animation
   function createMemberItem(id, isMe){
     const name=MEMBERS[id]?.name||id;
     const unread=isMe?0:getUnreadCount(id);
@@ -12039,14 +12050,19 @@ function openFamilyPopup(){
     const _m=MEMBERS[id];
     const _RLABELS={dad:'아빠',mom:'엄마',grandpa:'할아버지',grandma:'할머니',grandpa_m:'외할아버지',grandma_m:'외할머니',child:'자녀',caregiver:'양육자'};
     const roleLabel=_RLABELS[_m?.displayRole]||_RLABELS[_m?.role]||_m?.displayRole||_m?.role||'';
+    const moodEmoji=getMoodEmoji(id);
+    const moodKey=S.moods&&S.moods[id]?S.moods[id].mood:null;
     const item=document.createElement('div');
     item.className='family-popup-item'+(isMe?' is-me':'');
     item.setAttribute('data-fp-id',id);
+    item.setAttribute('data-fp-mood',moodKey||'');
     item.onclick=function(e){ e.stopPropagation(); selectFpItem(id); isMe?onMeIconClick():onUserIconClick(id); };
     item.innerHTML=`
-      <div class="family-popup-avatar"${isMe?' id="nav-profile-icon"':''}>
+      <div class="family-popup-avatar"${isMe?' id="nav-profile-icon"':''} style="position:relative;overflow:visible">
         ${getAvatarHTML(id,46)}
         ${!isMe&&unread>0?`<span class="family-popup-unread">${unread}</span>`:''}
+        ${moodEmoji?`<span class="fp-mood-badge">${moodEmoji}</span>`:''}
+        <div class="fp-mood-particles" data-fp-particles="${id}"></div>
       </div>
       <span class="family-popup-name">${name}</span>
       ${isMe?'<span class="fp-me-badge">나</span>':''}
@@ -12108,10 +12124,14 @@ function openFamilyPopup(){
   if(left<12)left=12;
   popup.style.left=left+'px';
   popup.style.bottom='120px';
+
+  // 기분 표현 애니메이션 시작
+  startFpMoodAnimations();
 }
 window.openFamilyPopup=openFamilyPopup;
 
 function closeFamilyPopup(){
+  stopFpMoodAnimations();
   const bg=document.getElementById('family-popup-bg');
   const popup=document.getElementById('family-popup');
   if(bg)bg.remove();
@@ -12124,6 +12144,45 @@ function closeFamilyPopup(){
   _familyFlowActive=false;
 }
 window.closeFamilyPopup=closeFamilyPopup;
+
+// ── Family Popup Mood Particle Animations ──
+let _fpMoodInterval=null;
+function startFpMoodAnimations(){
+  stopFpMoodAnimations();
+  _emitFpMoodParticles();
+  _fpMoodInterval=setInterval(_emitFpMoodParticles,3500);
+}
+function stopFpMoodAnimations(){
+  if(_fpMoodInterval){clearInterval(_fpMoodInterval);_fpMoodInterval=null;}
+}
+function _emitFpMoodParticles(){
+  const popup=document.getElementById('family-popup');
+  if(!popup)return stopFpMoodAnimations();
+  const items=popup.querySelectorAll('.family-popup-item[data-fp-mood]');
+  items.forEach(item=>{
+    const moodKey=item.getAttribute('data-fp-mood');
+    if(!moodKey||!MOOD_DATA[moodKey])return;
+    const container=item.querySelector('.fp-mood-particles');
+    if(!container)return;
+    container.innerHTML='';
+    const particles=MOOD_DATA[moodKey].particles;
+    // Emit 5 random particles in a radial burst pattern
+    const count=Math.min(5,particles.length);
+    for(let i=0;i<count;i++){
+      const span=document.createElement('span');
+      span.className='fp-mood-p';
+      span.textContent=particles[Math.floor(Math.random()*particles.length)];
+      // Random direction for radial burst
+      const angle=Math.random()*Math.PI*2;
+      const dist=12+Math.random()*10;
+      span.style.setProperty('--dx',(Math.cos(angle)*dist)+'px');
+      span.style.setProperty('--dy',(Math.sin(angle)*dist-15)+'px');
+      span.style.animationDelay=(i*0.35)+'s';
+      span.style.animationDuration=(2+Math.random()*1.2)+'s';
+      container.appendChild(span);
+    }
+  });
+}
 
 function getMoodEmoji(userId){
   if(!S.moods)return null;
