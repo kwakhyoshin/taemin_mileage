@@ -291,10 +291,14 @@ body.dark .dtog-in{transform:translateX(20px)}
 /* APP TOP BAR */
 .app-topbar{background:var(--tab-color,#6366F1);padding:0 16px;padding-top:calc(12px + env(safe-area-inset-top));padding-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:8px;position:sticky;top:0;z-index:12}
 .app-topbar-logo{flex-shrink:0;display:flex;align-items:center}
-.app-topbar-child{flex:1;display:flex;align-items:center;justify-content:center;min-width:0}
-.app-topbar-child .child-name-text{font-size:15px;font-weight:800;color:rgba(255,255,255,.95);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.app-topbar-child select.child-select{background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.35);border-radius:20px;color:#fff;font-size:14px;font-weight:800;padding:5px 28px 5px 12px;font-family:inherit;cursor:pointer;outline:none;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center}
-.app-topbar-child select.child-select option{background:#4B5563;color:#fff}
+.app-topbar-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+/* 자녀 전환기 (양육자 전용) */
+#child-switcher{display:none;align-items:center}
+.child-sw-toggle{display:flex;background:rgba(255,255,255,.2);border-radius:999px;padding:2px;gap:0}
+.child-sw-btn{background:none;border:none;color:rgba(255,255,255,.8);font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;cursor:pointer;white-space:nowrap;transition:background .2s,color .2s;font-family:inherit;line-height:1.4}
+.child-sw-btn.on{background:rgba(255,255,255,.95);color:#5B21B6}
+.child-sw-select{background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.35);border-radius:20px;color:#fff;font-size:11px;font-weight:700;padding:3px 20px 3px 8px;font-family:inherit;cursor:pointer;outline:none;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center}
+.child-sw-select option{background:#4B5563;color:#fff}
 /* HOME GREETING (below topbar, still in gradient area) */
 .home-greeting{background:var(--tab-color,#6366F1);padding:0 20px 0;position:relative;overflow:visible;z-index:11}
 .home-greeting::after{content:'';position:absolute;bottom:-70px;right:10px;width:160px;height:160px;background:rgba(255,255,255,.1);border-radius:50%;pointer-events:none}
@@ -2905,8 +2909,10 @@ button:disabled {
         </text>
       </svg>
     </div>
-    <div class="app-topbar-child" id="app-topbar-child"></div>
-    <button class="dtog" onclick="toggleDark()" style="background:rgba(255,255,255,.2);border:none"><div class="dtog-in" id="dtog-ic" style="background:rgba(255,255,255,.9)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-3px"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></div></button>
+    <div class="app-topbar-right">
+      <div id="child-switcher"></div>
+      <button class="dtog" onclick="toggleDark()" style="background:rgba(255,255,255,.2);border:none"><div class="dtog-in" id="dtog-ic" style="background:rgba(255,255,255,.9)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-3px"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></div></button>
+    </div>
   </div>
   <div class="home-greeting">
     <div id="home-top-content">
@@ -11847,29 +11853,34 @@ function _onChildPickerSelect(childId){
 window.showChildPicker=showChildPicker;
 window._onChildPickerSelect=_onChildPickerSelect;
 
-// ── NAV USERS RENDERING (상단 자녀 선택기 + hist 탭 show/hide) ──
+// ── NAV USERS RENDERING (자녀 전환기 + hist 탭 show/hide) ──
 function renderNavUsers(){
   const mode=getFamilyMode();
   const kids=getChildMemberIds();
 
-  // 상단 바 자녀 선택기 업데이트
-  const topChild=document.getElementById('app-topbar-child');
-  if(topChild){
-    if(isCaregiverUser()&&kids.length>=1){
-      if(mode==='independent'&&kids.length>=2){
-        const currentViewed=getViewedMemberId();
-        let opts=kids.map(id=>{
+  // 자녀 전환기: 양육자 + independent 모드 + 자녀 2명 이상일 때만 표시
+  const switcher=document.getElementById('child-switcher');
+  if(switcher){
+    if(isCaregiverUser()&&mode==='independent'&&kids.length>=2){
+      const currentViewed=getViewedMemberId();
+      switcher.style.display='flex';
+      if(kids.length===2){
+        // 토글 형태 (자녀 2명)
+        switcher.innerHTML=`<div class="child-sw-toggle">${kids.map(id=>{
           const nm=MEMBERS[id]?.name||id;
-          return`<option value="${id}"${id===currentViewed?' selected':''}>${nm}의 홈</option>`;
-        }).join('');
-        topChild.innerHTML=`<select class="child-select" onchange="switchViewingChild(this.value)">${opts}</select>`;
+          return`<button class="child-sw-btn${id===currentViewed?' on':''}" onclick="switchViewingChild('${id}')">${nm}</button>`;
+        }).join('')}</div>`;
       }else{
-        const childId=mode==='independent'?kids[0]:(getViewedMemberId()||kids[0]);
-        const nm=MEMBERS[childId]?.name||'자녀';
-        topChild.innerHTML=`<span class="child-name-text">${nm}의 홈</span>`;
+        // 드롭다운 (자녀 3명 이상)
+        const opts=kids.map(id=>{
+          const nm=MEMBERS[id]?.name||id;
+          return`<option value="${id}"${id===currentViewed?' selected':''}>${nm}</option>`;
+        }).join('');
+        switcher.innerHTML=`<select class="child-sw-select" onchange="switchViewingChild(this.value)">${opts}</select>`;
       }
     }else{
-      topChild.innerHTML='';
+      switcher.style.display='none';
+      switcher.innerHTML='';
     }
   }
 
