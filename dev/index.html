@@ -239,7 +239,7 @@ body.popup-open .nav-container{opacity:0;pointer-events:none;transition:opacity 
 @media(min-width:1024px){body{margin:0}}
 
 /* SCREENS */
-.scr{display:none;min-height:100vh;min-height:100dvh;padding-bottom:110px}
+.scr{display:none;min-height:100vh;min-height:100dvh;padding-bottom:110px;overscroll-behavior:contain}
 .scr.on{display:block;animation:fadeIn .3s ease}
 .scr.slide-left{display:block;animation:slideInLeft .3s cubic-bezier(.25,.46,.45,.94) forwards}
 .scr.slide-right{display:block;animation:slideInRight .3s cubic-bezier(.25,.46,.45,.94) forwards}
@@ -2341,7 +2341,6 @@ button:disabled {
   body{max-width:100%!important;margin:0!important;padding-left:0!important;}
   .scr,.tab-content{margin-left:0!important;padding-left:0!important;}
   .nav-brand,.sidebar,.side-menu{display:none!important;}
-  .my-header{border-radius:0!important;}
 }
 
 </style>
@@ -3660,6 +3659,11 @@ button:disabled {
           <button class="day-btn" data-d="6" onclick="toggleDay(this)">토</button>
         </div>
       </div>
+      <div class="field" id="act-child-field" style="display:none">
+        <label>적용 대상 자녀</label>
+        <div style="font-size:13px;color:var(--tx3);margin-bottom:6px">선택한 자녀에게 동시 적용됩니다</div>
+        <div id="act-child-checks" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+      </div>
       <input type="hidden" id="act-eid">
     </div>
     <div class="sheet-foot">
@@ -3708,6 +3712,11 @@ button:disabled {
           <label>이벤트 이름 (선택)</label>
           <input type="text" class="txt-inp" id="rwd-sale-label" placeholder="예: 봄맞이 할인" maxlength="20">
         </div>
+      </div>
+      <div class="field" id="rwd-child-field" style="display:none">
+        <label>적용 대상 자녀</label>
+        <div style="font-size:13px;color:var(--tx3);margin-bottom:6px">선택한 자녀에게 동시 적용됩니다</div>
+        <div id="rwd-child-checks" style="display:flex;gap:6px;flex-wrap:wrap"></div>
       </div>
       <input type="hidden" id="rwd-eid">
     </div>
@@ -5561,8 +5570,8 @@ function applyUserProfile() {
   const heroLbl = document.getElementById('hero-lbl');
   if(heroLbl){
     const _hMode=getFamilyMode();
-    if(isCaregiverUser()||isCurrentUserAdmin()){
-      // 양육자/관리자: 모드 무관하게 보고 있는 자녀 이름 표시 (flash 방지)
+    if(isCaregiverUser()){
+      // 양육자: 모드 무관하게 보고 있는 자녀 이름 표시 (flash 방지)
       const _hVid=getViewedMemberId();
       const _hVname=MEMBERS[_hVid]?.name||S.familyMeta?.members?.[_hVid]?.name||'';
       // fallback: 자녀 이름 미확인 시 첫 번째 자녀 이름 사용 (양육자 본인 이름 절대 사용 안 함)
@@ -5601,7 +5610,7 @@ function _korSuffix(name){
 function _renderHistHeroSub(){
   const histSub=document.getElementById('hist-hero-sub');
   if(!histSub)return;
-  if(isCaregiverUser()||isCurrentUserAdmin()){
+  if(isCaregiverUser()){
     const kids=getChildMemberIds();
     if(kids.length===0){
       histSub.textContent='활동 분석';
@@ -5627,12 +5636,10 @@ function postLoginInit(){
   viewingChildId = null;
   _admViewChildId = null;
   const mode = getFamilyMode();
-  if(mode === 'independent' && (isCaregiverUser()||isCurrentUserAdmin())){
+  if(mode === 'independent' && isCaregiverUser()){
     const kids = getChildMemberIds();
     if(kids.length > 0){
-      // 관리자 권한 자녀: 자기 자신이 kids에 포함되면 자기부터
-      const selfIdx = kids.indexOf(currentUser);
-      viewingChildId = selfIdx>=0 ? kids[selfIdx] : kids[0];
+      viewingChildId = kids[0];
       // 첫 자녀 memberData 초기화 (없으면)
       if(!S.memberData) S.memberData = {};
       if(!S.memberData[viewingChildId]) getMemberState(viewingChildId);
@@ -6031,10 +6038,8 @@ function syncMemberToGlobal(targetId) {
   S.moodLog = ms.moodLog || [];
   S.badges = ms.badges || {};
   S.badgeLog = ms.badgeLog || [];
-  if (ms.acts && ms.acts.length > 0) S.acts = ms.acts;
-  else if (!S.acts || S.acts.length === 0) S.acts = JSON.parse(JSON.stringify(DACTS));
-  if (ms.rwds && ms.rwds.length > 0) S.rwds = ms.rwds;
-  else if (!S.rwds || S.rwds.length === 0) S.rwds = JSON.parse(JSON.stringify(DRWDS));
+  S.acts = (ms.acts && ms.acts.length > 0) ? ms.acts : JSON.parse(JSON.stringify(DACTS));
+  S.rwds = (ms.rwds && ms.rwds.length > 0) ? ms.rwds : JSON.parse(JSON.stringify(DRWDS));
   S.stickers = ms.stickers || [];
 }
 
@@ -6065,7 +6070,7 @@ function syncGlobalToMember(targetId) {
 // Robust debounced save with in-flight guard
 function save(){
   // independent 모드에서 양육자가 자녀 데이터를 보고 있으면 해당 자녀에게 저장
-  if(getFamilyMode()==='independent'&&(isCaregiverUser()||isCurrentUserAdmin())&&viewingChildId){
+  if(getFamilyMode()==='independent'&&isCaregiverUser()&&viewingChildId){
     syncGlobalToMember(viewingChildId);
   }else{
     syncGlobalToMember(); // Sync changes back to member data before saving
@@ -7182,8 +7187,8 @@ function renderHero(){
   // 모드별 hero 라벨 및 pts 표시
   const mode=getFamilyMode();
   const heroLbl=document.getElementById('hero-lbl');
-  if(isCaregiverUser()||isCurrentUserAdmin()){
-    // 양육자/관리자: 모드 무관하게 보고 있는 자녀 이름 표시
+  if(isCaregiverUser()){
+    // 양육자: 모드 무관하게 보고 있는 자녀 이름 표시
     const vid=getViewedMemberId();
     const vname=MEMBERS[vid]?.name||S.familyMeta?.members?.[vid]?.name||'';
     // fallback: 자녀 이름 미확인 시 MEMBERS에서 첫 번째 자녀 이름 탐색 (로딩 초기 대비)
@@ -7207,7 +7212,7 @@ function renderHero(){
   // 관리자 pts: 모드별로 올바른 자녀 pts 표시
   const admPtsEl=document.getElementById('adm-pts');
   if(admPtsEl){
-    if(mode==='independent'&&(isCaregiverUser()||isCurrentUserAdmin())){
+    if(mode==='independent'&&isCaregiverUser()){
       const admId=_admViewChildId||getViewedMemberId();
       const admMs=S.memberData?.[admId];
       admPtsEl.textContent=(admMs?.pts||S.pts).toLocaleString();
@@ -9093,7 +9098,7 @@ function renderAdmStats(){
   let totalDone=S.totalDone;
   let streak=getDisplayStreak();
   // independent 모드: 관리자가 선택한 자녀의 stats 표시
-  if(mode==='independent'&&(isCaregiverUser()||isCurrentUserAdmin())){
+  if(mode==='independent'){
     const admId=_admViewChildId||getViewedMemberId();
     const ms=S.memberData?.[admId];
     if(ms){totalDone=ms.totalDone||0;streak=ms.streak||0;}
@@ -9330,8 +9335,8 @@ function renderAdmSettings(){
 
 // ── ACTIVITY ACTIONS ──────────────────────────
 function doAct(id){
-  // 양육자/관리자 + 자녀 2명 이상: 자녀 선택 먼저
-  if((isCaregiverUser()||isCurrentUserAdmin())&&getChildMembers().length>=2){
+  // 양육자 + 자녀 2명 이상: 자녀 선택 먼저
+  if(isCaregiverUser()&&getChildMembers().length>=2){
     showChildPicker('어떤 아이의 활동인가요?',function(childId){
       if(!childId)return;
       if(getFamilyMode()==='independent'&&getViewedMemberId()!==childId)switchViewingChild(childId);
@@ -9404,8 +9409,8 @@ function _doActCore(id){
 }
 
 function undoAct(actId){
-  // 양육자/관리자 + 자녀 2명 이상: 자녀 선택 먼저
-  if((isCaregiverUser()||isCurrentUserAdmin())&&getChildMembers().length>=2){
+  // 양육자 + 자녀 2명 이상: 자녀 선택 먼저
+  if(isCaregiverUser()&&getChildMembers().length>=2){
     showChildPicker('어떤 아이의 활동을 취소할까요?',function(childId){
       if(!childId)return;
       if(getFamilyMode()==='independent'&&getViewedMemberId()!==childId)switchViewingChild(childId);
@@ -9836,15 +9841,15 @@ function getChildMemberIds(){
 }
 // 현재 화면에 표시 중인 구성원 ID (선택된 자녀)
 function getViewedMemberId(){
-  if(getFamilyMode()==='independent'&&(isCaregiverUser()||isCurrentUserAdmin())){
+  if(getFamilyMode()==='independent'&&isCaregiverUser()){
     const kids=getChildMemberIds();
     if(kids.length>0)return viewingChildId||kids[0];
   }
   return currentUser;
 }
-// 현재 활성 마일리지 반환: 양육자/관리자(independent)면 선택된 자녀의 pts, 아니면 S.pts
+// 현재 활성 마일리지 반환: 양육자(independent)면 선택된 자녀의 pts, 아니면 S.pts
 function getActiveMileage(){
-  if(getFamilyMode()==='independent'&&(isCaregiverUser()||isCurrentUserAdmin())){
+  if(getFamilyMode()==='independent'&&isCaregiverUser()){
     const vid=getViewedMemberId();
     if(vid&&S.memberData&&S.memberData[vid]!==undefined)return S.memberData[vid].pts||0;
   }
@@ -9889,14 +9894,14 @@ function switchViewingChild(childId){
 }
 // 관리자 패널 자녀 선택 (independent mode)
 function admSelectChild(childId){
+  const prevAdm=_admViewChildId;
   _admViewChildId=childId;
-  // 선택된 자녀의 데이터를 S에 동기화 (뱃지/활동/보상 반영)
+  // 이전 관리자 선택 자녀 데이터 저장
+  if(prevAdm && S.memberData && prevAdm!==childId) syncGlobalToMember(prevAdm);
+  // 선택된 자녀 데이터를 S에 로드 (활동/보상/뱃지 반영)
   if(childId && S.memberData){
-    const prevViewed = getViewedMemberId();
-    if(prevViewed && prevViewed !== childId) syncGlobalToMember(prevViewed);
     if(!S.memberData[childId]) getMemberState(childId);
     syncMemberToGlobal(childId);
-    viewingChildId = childId;
   }
   renderAdmActList();
   renderAdmRwdList();
@@ -9947,8 +9952,8 @@ function toggleRwdForChild(rwdId,childId){
 // REDEEM
 let pRwdId=null,_pRwdEl=null;
 function openRedeem(id,srcEl){
-  // 양육자/관리자 + 자녀 2명 이상: 자녀 선택 먼저
-  if((isCaregiverUser()||isCurrentUserAdmin())&&getChildMembers().length>=2){
+  // 양육자 + 자녀 2명 이상: 자녀 선택 먼저
+  if(isCaregiverUser()&&getChildMembers().length>=2){
     showChildPicker('어떤 아이의 보상인가요?',function(childId){
       if(!childId)return;
       if(getFamilyMode()==='independent'&&getViewedMemberId()!==childId)switchViewingChild(childId);
@@ -10225,8 +10230,8 @@ window.rejectRewardRequest=rejectRewardRequest;
 function giveBonus(){
   const v=parseInt(document.getElementById('bonus-inp').value)||0;if(v<=0)return;
   const mode=getFamilyMode();
-  // independent 모드 + 관리자: 선택한 자녀에게 지급
-  if(mode==='independent'&&(isCaregiverUser()||isCurrentUserAdmin())){
+  // independent 모드: 선택한 자녀에게 지급
+  if(mode==='independent'&&(isCaregiverUser()||_admViewChildId)){
     const targetId=_admViewChildId||getViewedMemberId();
     if(targetId){
       const ms=getMemberState(targetId);
@@ -10245,7 +10250,7 @@ function deductPts(){
   const v=parseInt(document.getElementById('deduct-inp').value)||0;if(v<=0)return;
   if(!confirm(`${v} 마일리지을 차감할까요?`))return;
   const mode=getFamilyMode();
-  if(mode==='independent'&&(isCaregiverUser()||isCurrentUserAdmin())){
+  if(mode==='independent'&&(isCaregiverUser()||_admViewChildId)){
     const targetId=_admViewChildId||getViewedMemberId();
     if(targetId){
       const ms=getMemberState(targetId);
@@ -11236,6 +11241,8 @@ function openActForm(id){
     b.classList.toggle('on',hasDays&&a.days.includes(parseInt(b.dataset.d)));
   });
   document.getElementById('act-save-btn').textContent=a?'저장하기':'추가하기';
+  // 자녀 다중선택 체크박스 (자녀 2명 이상 + 새 활동 추가 시)
+  _renderFormChildChecks('act',id);
   openModal('m-act');
 }
 function pickCycle(btn){
@@ -11259,6 +11266,35 @@ function toggleDaysMode(){
   }
 }
 function toggleDay(btn){btn.classList.toggle('on');}
+
+// ── 활동/보상 폼 자녀 다중선택 ──
+function _renderFormChildChecks(prefix,editId){
+  const field=document.getElementById(prefix+'-child-field');
+  const container=document.getElementById(prefix+'-child-checks');
+  if(!field||!container)return;
+  const kids=getChildMemberIds();
+  if(kids.length<2){field.style.display='none';return;}
+  field.style.display='block';
+  // 현재 admin 선택 자녀를 기본 체크
+  const currentAdm=_admViewChildId||getViewedMemberId();
+  container.innerHTML=kids.map(id=>{
+    const nm=MEMBERS[id]?.name||S.familyMeta?.members?.[id]?.name||id;
+    const checked=editId?id===currentAdm:true; // 새 항목이면 전체 선택, 수정이면 현재 자녀만
+    return `<label style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--bg2);border-radius:10px;cursor:pointer;font-size:14px;font-weight:700;border:2px solid ${checked?'var(--tab-color,#6366F1)':'transparent'}" onclick="this.querySelector('input').checked=!this.querySelector('input').checked;this.style.borderColor=this.querySelector('input').checked?'var(--tab-color,#6366F1)':'transparent'">
+      <input type="checkbox" value="${id}" ${checked?'checked':''} style="display:none" class="${prefix}-child-chk">
+      <span style="width:20px;height:20px;border-radius:50%;background:${checked?'var(--tab-color,#6366F1)':'var(--bdr)'};display:flex;align-items:center;justify-content:center;transition:all .2s">
+        ${checked?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>':''}
+      </span>
+      ${nm}
+    </label>`;
+  }).join('');
+}
+function _getFormCheckedChildren(prefix){
+  const checks=document.querySelectorAll('.'+prefix+'-child-chk:checked');
+  return checks.length>0?Array.from(checks).map(c=>c.value):null;
+}
+window._renderFormChildChecks=_renderFormChildChecks;
+
 function saveActivity(){
   const name=document.getElementById('act-name').value.trim();
   if(!name){toast('❗ 활동 이름을 입력해주세요');return;}
@@ -11276,10 +11312,40 @@ function saveActivity(){
     document.querySelectorAll('#act-days-row .day-btn.on').forEach(b=>days.push(parseInt(b.dataset.d)));
     if(days.length===0||days.length===7)days=null; // 전체 선택이면 null
   }
-  if(id){const a=S.acts.find(x=>x.id===id);if(a)Object.assign(a,{emoji,name,desc,pts,maxDay,cycle,days});}
-  else S.acts.push({id:'a_'+Date.now(),emoji,name,desc,pts,maxDay,cycle,days,active:true,showHome:false});
+  const actData={emoji,name,desc,pts,maxDay,cycle,days};
+  const targetKids=_getFormCheckedChildren('act');
+  if(id){
+    // 수정: 현재 S.acts에 반영
+    const a=S.acts.find(x=>x.id===id);if(a)Object.assign(a,actData);
+    // 선택된 다른 자녀에도 동일 수정 적용
+    if(targetKids&&targetKids.length>0){
+      const curAdm=_admViewChildId||getViewedMemberId();
+      targetKids.forEach(kid=>{
+        if(kid===curAdm)return; // 이미 S.acts에 반영됨
+        const ms=getMemberState(kid);
+        if(ms.acts){const ka=ms.acts.find(x=>x.id===id);if(ka)Object.assign(ka,actData);}
+      });
+    }
+  }else{
+    const newId='a_'+Date.now();
+    const newAct={id:newId,...actData,active:true,showHome:false};
+    // 선택된 모든 자녀에 추가
+    if(targetKids&&targetKids.length>0){
+      const curAdm=_admViewChildId||getViewedMemberId();
+      targetKids.forEach(kid=>{
+        if(kid===curAdm){S.acts.push({...newAct});return;}
+        const ms=getMemberState(kid);
+        if(!ms.acts)ms.acts=[];
+        ms.acts.push(JSON.parse(JSON.stringify(newAct)));
+      });
+      if(!targetKids.includes(curAdm))S.acts.push({...newAct});
+    }else{
+      S.acts.push(newAct);
+    }
+  }
   save();renderAll();closeModal('m-act');
-  toast(id?'✏️ 활동이 수정됐어요':'✅ 새 활동이 추가됐어요!');
+  const appliedCount=targetKids?targetKids.length:1;
+  toast(id?'✏️ 활동이 수정됐어요'+(appliedCount>1?` (${appliedCount}명 적용)`:''):'✅ 새 활동이 추가됐어요!'+(appliedCount>1?` (${appliedCount}명 적용)`:''));
 }
 
 // ── REWARD FORM ────────────────────────────────
@@ -11316,6 +11382,7 @@ function openRwdForm(id){
   }
 
   document.getElementById('rwd-save-btn').textContent=r?'저장하기':'추가하기';
+  _renderFormChildChecks('rwd',id);
   openModal('m-rwd');
 }
 function setGoalT(v){rwdGoal=v;document.getElementById('rwd-goal-y').classList.toggle('on',v);document.getElementById('rwd-goal-n').classList.toggle('on',!v);}
@@ -11334,11 +11401,42 @@ function saveReward(){
     label:document.getElementById('rwd-sale-label').value.trim()
   }:null;
 
+  const rwdData={emoji,name,pts,goal:rwdGoal,sale:saleData};
+  const targetKids=_getFormCheckedChildren('rwd');
   if(rwdGoal)S.rwds.forEach(r=>r.goal=false);
-  if(id){const r=S.rwds.find(x=>x.id===id);if(r)Object.assign(r,{emoji,name,pts,goal:rwdGoal,sale:saleData});}
-  else S.rwds.push({id:'r_'+Date.now(),emoji,name,pts,goal:rwdGoal,sale:saleData});
+  if(id){
+    const r=S.rwds.find(x=>x.id===id);if(r)Object.assign(r,rwdData);
+    if(targetKids&&targetKids.length>0){
+      const curAdm=_admViewChildId||getViewedMemberId();
+      targetKids.forEach(kid=>{
+        if(kid===curAdm)return;
+        const ms=getMemberState(kid);
+        if(ms.rwds){
+          if(rwdGoal)ms.rwds.forEach(r=>r.goal=false);
+          const kr=ms.rwds.find(x=>x.id===id);if(kr)Object.assign(kr,rwdData);
+        }
+      });
+    }
+  }else{
+    const newId='r_'+Date.now();
+    const newRwd={id:newId,...rwdData};
+    if(targetKids&&targetKids.length>0){
+      const curAdm=_admViewChildId||getViewedMemberId();
+      targetKids.forEach(kid=>{
+        if(kid===curAdm){S.rwds.push({...newRwd});return;}
+        const ms=getMemberState(kid);
+        if(!ms.rwds)ms.rwds=[];
+        if(rwdGoal)ms.rwds.forEach(r=>r.goal=false);
+        ms.rwds.push(JSON.parse(JSON.stringify(newRwd)));
+      });
+      if(!targetKids.includes(curAdm))S.rwds.push({...newRwd});
+    }else{
+      S.rwds.push(newRwd);
+    }
+  }
   save();renderAll();closeModal('m-rwd');
-  toast(id?'✏️ 보상이 수정됐어요':'🎁 새 보상이 추가됐어요!');
+  const appliedCount=targetKids?targetKids.length:1;
+  toast(id?'✏️ 보상이 수정됐어요'+(appliedCount>1?` (${appliedCount}명 적용)`:''):'🎁 새 보상이 추가됐어요!'+(appliedCount>1?` (${appliedCount}명 적용)`:''));
 }
 
 // ── PIN (해시 기반 보안) ────────────────────────────────────────
@@ -11776,7 +11874,7 @@ window._onChildPickerSelect=_onChildPickerSelect;
 // ── NAV USERS RENDERING (모든 탭 자녀 선택기 + hist 탭 show/hide) ──
 function renderNavUsers(){
   const kids=getChildMemberIds();
-  const showSwitcher=(isCaregiverUser()||isCurrentUserAdmin())&&kids.length>=2;
+  const showSwitcher=isCaregiverUser()&&kids.length>=2;
   const currentViewed=getViewedMemberId();
 
   // 자녀 선택기 HTML 생성 (공통)
@@ -12720,6 +12818,16 @@ function renderJoinMemberGrid(){
 window.checkUrlParams=checkUrlParams;
 
 function reallyGoTab(tab){
+  // 관리자 탭에서 나갈 때: 관리자 선택 자녀 데이터 저장 → 원래 뷰 자녀 복원
+  const _prevTab=document.body.getAttribute('data-tab');
+  if(_prevTab==='adm'&&tab!=='adm'&&_admViewChildId&&S.memberData){
+    syncGlobalToMember(_admViewChildId);
+    const _restoreId=isCaregiverUser()?viewingChildId:currentUser;
+    if(_restoreId&&_restoreId!==_admViewChildId){
+      if(!S.memberData[_restoreId])getMemberState(_restoreId);
+      syncMemberToGlobal(_restoreId);
+    }
+  }
   // PIN이 열려 있으면 강제 닫고 scroll lock 해제
   const pinWrap=document.getElementById('pin-wrap');
   if(pinWrap&&pinWrap.style.display!=='none'){pinWrap.style.display='none';_scrollLockCount=0;document.body.classList.remove('popup-open');document.documentElement.classList.remove('popup-open');if(_scrollLockTouchHandler){document.removeEventListener('touchmove',_scrollLockTouchHandler);_scrollLockTouchHandler=null;}}
@@ -12764,7 +12872,7 @@ function reallyGoTab(tab){
   document.body.setAttribute('data-tab', tab);
   // 자녀 테마 적용 탭 (홈, 활동기록, 보상, 성과통계)
   const _themedTabs=['home','log','rwd','hist'];
-  if(_themedTabs.includes(tab)&&(isCaregiverUser()||isCurrentUserAdmin())){
+  if(_themedTabs.includes(tab)&&isCaregiverUser()){
     const vid=getViewedMemberId&&getViewedMemberId();
     if(vid)applyChildTheme(vid);
   }
@@ -14145,7 +14253,7 @@ window._createState = _createState;
       S = Object.assign(defaultState(), snap.data());
       _lastSavedJSON = incomingJSON;
       rebuildMembersFromFamily();
-      if(viewingChildId&&(isCaregiverUser()||isCurrentUserAdmin())&&getFamilyMode()==='independent') syncMemberToGlobal(viewingChildId);
+      if(viewingChildId&&isCaregiverUser()&&getFamilyMode()==='independent') syncMemberToGlobal(viewingChildId);
       renderAll();
       checkNewMessages();
       renderNavUsers();
