@@ -556,7 +556,7 @@ body.dark .rec-day-tag.day-1{background:#312E81;color:#A5B4FC}
 .icon-btn:active{transform:scale(.9)}
 .icon-btn.del{color:#EF4444}
 .icon-btn.del:active{background:#FEE2E2}
-.tog{width:51px;height:31px;border-radius:16px;background:#6366F1;position:relative;cursor:pointer;flex-shrink:0;border:none;transition:background .25s cubic-bezier(.4,0,.2,1);-webkit-tap-highlight-color:transparent;padding:0;box-sizing:content-box}
+.tog{width:51px;height:31px;border-radius:16px;background:#6366F1;position:relative;cursor:pointer;flex-shrink:0;border:none;transition:background .25s cubic-bezier(.4,0,.2,1);-webkit-tap-highlight-color:transparent;padding:0;box-sizing:content-box;-webkit-appearance:none;appearance:none}
 .tog.tog-sm{width:44px;height:26px;border-radius:13px}
 .tog.tog-sm .tog-dot{width:22px;height:22px}
 .tog.tog-sm:not(.off) .tog-dot{transform:translateX(18px)}
@@ -2664,7 +2664,7 @@ button:disabled {
       <!-- 슬라이드 4: 호칭 -->
       <div class="toss-slide" id="c1-slide-role">
         <div class="toss-slide-content">
-          <div class="toss-question">가족이 당신을<br>뭐라고 부르나요?</div>
+          <div class="toss-question">좋은 습관을 만들어주고 싶은 아이와<br>어떤 관계인가요?</div>
           <div class="toss-desc">나중에 언제든 바꿀 수 있어요</div>
           <div class="toss-role-grid" id="create-role-grid"></div>
           <div class="auth-error" id="c1-role-error" style="margin-top:10px"></div>
@@ -14176,6 +14176,13 @@ window._createState = _createState;
     });
   }catch(e){ console.warn('Realtime listener failed:', e); }
   
+  // --topbar-h CSS 변수: hero sticky top 위치를 topbar 높이만큼 내려서 마일리지가 topbar에 가리지 않도록
+  const _topbarEl = document.querySelector('.app-topbar');
+  function _setTopbarH(){
+    if(_topbarEl) document.documentElement.style.setProperty('--topbar-h', _topbarEl.offsetHeight+'px');
+  }
+  _setTopbarH();
+
   // 모든 탭 스크롤 시 헤더 축소 (compact)
   const homeScr = document.getElementById('s-home');
   const hero = document.querySelector('.hero');
@@ -14252,8 +14259,8 @@ window._createState = _createState;
     });
   }
   window.addEventListener('scroll', updateHeaderCompact, {passive:true});
-  window.addEventListener('resize', updateHeaderCompact, {passive:true});
-  window.addEventListener('orientationchange', ()=>{setTimeout(updateHeaderCompact,100);});
+  window.addEventListener('resize', ()=>{_setTopbarH();updateHeaderCompact();}, {passive:true});
+  window.addEventListener('orientationchange', ()=>{setTimeout(()=>{_setTopbarH();updateHeaderCompact();},100);});
 
 
   // ============ ONBOARDING OVERLAY ============
