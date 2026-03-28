@@ -6164,6 +6164,7 @@ function _shouldMigrateRewardInv(memberId) {
 function syncMemberToGlobal(targetId) {
   const mid = targetId || currentUser;
   if (!mid || !S.memberData) return;
+  if (!S.familyMeta?.members) return; // 레거시 모드(familyMeta 없음)에서는 memberData 분리 불필요
   _globalDataOwner = mid; // 누구의 데이터가 S에 로드되었는지 추적
   const ms = getMemberState(mid);
 
@@ -6191,6 +6192,7 @@ function syncMemberToGlobal(targetId) {
 function syncGlobalToMember(targetId) {
   const mid = targetId || currentUser;
   if (!S.memberData || !mid) return;
+  if (!S.familyMeta?.members) return; // 레거시 모드(familyMeta 없음)에서는 memberData 분리 불필요
   if (!S.memberData[mid]) getMemberState(mid);
   const ms = S.memberData[mid];
 
