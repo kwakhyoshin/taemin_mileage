@@ -152,6 +152,14 @@ body.dark .dtog-in{transform:translateX(24px)}
 .prog-fill{background:rgba(255,255,255,.9);border-radius:7px;height:100%;transition:width .7s}
 .prog-row{display:flex;justify-content:space-between;margin-top:5px;font-size:11px;opacity:.75;font-weight:700;transition:all .25s}
 
+/* CHILD SELECTOR */
+#child-selector{margin:4px 0 2px}
+.child-toggle{display:inline-flex;background:rgba(255,255,255,.2);border-radius:20px;padding:2px}
+.child-toggle-btn{background:transparent;border:none;color:rgba(255,255,255,.8);font-size:12px;font-weight:700;padding:4px 12px;border-radius:18px;cursor:pointer;transition:all .2s}
+.child-toggle-btn.active{background:rgba(255,255,255,.9);color:var(--tab-color,#6366F1)}
+.child-select{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;font-size:12px;font-weight:700;padding:4px 10px;border-radius:18px;cursor:pointer}
+.child-select option{color:#1E293B}
+
 /* HERO compact state */
 .hero.compact{padding:12px 20px 14px;padding-top:calc(12px + env(safe-area-inset-top))}
 .hero.compact .hero-lbl{font-size:10px}
@@ -1386,7 +1394,8 @@ body.dark .bubble-speech-log{background:rgba(255,255,255,.12);color:rgba(255,255
   </div>
   <div class="hero">
     <div class="streak-pill" id="streak-pill">🔥 0일 연속</div>
-    <div class="hero-lbl">태민이의 마일리지</div>
+    <div class="hero-lbl" id="hero-lbl">태민이의 마일리지</div>
+    <div id="child-selector"></div>
     <div style="display:flex;align-items:flex-end;gap:6px;margin:4px 0">
       <span class="hero-pts" id="hero-pts">0</span><span class="hero-unit">M</span>
     </div>
@@ -2565,11 +2574,16 @@ function applyUserProfile() {
   if (admName) admName.textContent = member.name;
   if (admRole) admRole.textContent = member.role;
 
+  if(isParentUser()&&!_viewingChild){
+    const children=getChildMembers();
+    if(children.length>0)_viewingChild=children[0].id;
+  }
   renderNavUsers();
 }
 
 function logout() {
   if (!confirm('로그아웃 하시겠어요?')) return;
+  _viewingChild=null;
   currentUser = null;
   localStorage.removeItem(_LS_PREFIX+'current_user');
   showAuthScreen('login');
@@ -3852,6 +3866,16 @@ function renderHero(){
     const el=document.getElementById('greeting-txt');
     if(el)el.textContent=greetingTxt;
   }
+  const heroLbl=document.getElementById('hero-lbl');
+  if(heroLbl){
+    if(isParentUser()){
+      const child=MEMBERS[_viewingChild];
+      heroLbl.textContent=child?child.name+'의 마일리지':'마일리지';
+    }else{
+      heroLbl.textContent='나의 마일리지';
+    }
+  }
+  renderChildSelector();
   document.getElementById('hero-pts').textContent=S.pts.toLocaleString();
   document.getElementById('streak-pill').textContent=`🔥 ${getDisplayStreak()}일 연속`;
   const g=S.rwds.find(r=>r.goal)||S.rwds[0];
@@ -6364,6 +6388,34 @@ function isParentUser(){
   if(!currentUser)return false;
   if(S.users&&S.users[currentUser])return S.users[currentUser].role==='parent';
   return currentUser==='dad'||currentUser==='mom';
+}
+
+let _viewingChild = null;
+
+function getChildMembers(){
+  return Object.entries(MEMBERS).filter(([id])=>{
+    if(S.users&&S.users[id]&&S.users[id].role==='parent')return false;
+    return id!=='dad'&&id!=='mom';
+  }).map(([id,m])=>({id,name:m.name}));
+}
+
+function switchViewingChild(childId){
+  _viewingChild=childId;
+  renderAll();
+}
+
+function renderChildSelector(){
+  const el=document.getElementById('child-selector');
+  if(!el)return;
+  if(!isParentUser()){el.style.display='none';return;}
+  const children=getChildMembers();
+  if(children.length<=1){el.style.display='none';return;}
+  el.style.display='block';
+  if(children.length===2){
+    el.innerHTML=`<div class="child-toggle">${children.map(c=>`<button class="child-toggle-btn${_viewingChild===c.id?' active':''}" onclick="switchViewingChild('${c.id}')">${c.name}</button>`).join('')}</div>`;
+  }else{
+    el.innerHTML=`<select class="child-select" onchange="switchViewingChild(this.value)">${children.map(c=>`<option value="${c.id}"${_viewingChild===c.id?' selected':''}>${c.name}</option>`).join('')}</select>`;
+  }
 }
 
 // ── END STICKER SYSTEM ──────────────────────
