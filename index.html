@@ -5607,9 +5607,9 @@ function applyUserProfile() {
   if (admName) admName.textContent = member.name;
   if (admRole) admRole.textContent = member.role + (member.isAdmin?' 👑':'');
 
-  if(isParentUser()&&!_viewingChild){
+  if(isParentUser()&&!viewingChildId){
     const children=getChildMembers();
-    if(children.length>0)_viewingChild=children[0].id;
+    if(children.length>0)viewingChildId=children[0].id;
   }
   renderNavUsers();
 }
@@ -5683,7 +5683,7 @@ function postLoginInit(){
 
 function logout() {
   if (!confirm('로그아웃 하시겠어요?')) return;
-  _viewingChild=null;
+  viewingChildId=null;
   currentUser = null;
   viewingChildId = null;
   _admViewChildId = null;
@@ -7194,7 +7194,7 @@ function renderHero(){
   }else{
     if(heroLbl)heroLbl.textContent='나의 마일리지';
   }
-  renderChildSelector();
+  renderNavUsers();
 
   const _heroPts=getActiveMileage();
   document.getElementById('hero-pts').textContent=_heroPts.toLocaleString();
@@ -10009,34 +10009,6 @@ function changeFamilyMode(newMode){
   S.familyMeta.mode=newMode;
   save();renderAll();
   toast(newMode==='unified'?'✅ 통합(공유) 모드로 변경됐어요':'✅ 독립 모드로 변경됐어요');
-}
-
-let _viewingChild = null;
-
-function getChildMembers(){
-  return Object.entries(MEMBERS).filter(([id])=>{
-    if(S.users&&S.users[id]&&S.users[id].role==='parent')return false;
-    return id!=='dad'&&id!=='mom';
-  }).map(([id,m])=>({id,name:m.name}));
-}
-
-function switchViewingChild(childId){
-  _viewingChild=childId;
-  renderAll();
-}
-
-function renderChildSelector(){
-  const el=document.getElementById('child-selector');
-  if(!el)return;
-  if(!isParentUser()){el.style.display='none';return;}
-  const children=getChildMembers();
-  if(children.length<=1){el.style.display='none';return;}
-  el.style.display='block';
-  if(children.length===2){
-    el.innerHTML=`<div class="child-toggle">${children.map(c=>`<button class="child-toggle-btn${_viewingChild===c.id?' active':''}" onclick="switchViewingChild('${c.id}')">${c.name}</button>`).join('')}</div>`;
-  }else{
-    el.innerHTML=`<select class="child-select" onchange="switchViewingChild(this.value)">${children.map(c=>`<option value="${c.id}"${_viewingChild===c.id?' selected':''}>${c.name}</option>`).join('')}</select>`;
-  }
 }
 
 // ── END STICKER SYSTEM ──────────────────────
