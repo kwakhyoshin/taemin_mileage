@@ -5716,7 +5716,11 @@ function checkAuth() {
 
   if (savedUser && cachedUsers[savedUser]) {
     currentUser = savedUser;
-    syncMemberToGlobal(); // Load member data for this user
+    // 양육자(caregiver)는 postLoginInit에서 자녀 데이터를 로드하므로 여기서 parent sync 생략
+    // (parent의 memberData에 마지막 자녀의 stale 데이터가 오염되는 것을 방지)
+    if(!(getFamilyMode()==='independent'&&isCaregiverUser())){
+      syncMemberToGlobal(); // Load member data for this user
+    }
     postLoginInit();
     // 관리자 권한이면 자동으로 adminOK
     if(isCurrentUserAdmin()) adminOK = true;
@@ -6149,23 +6153,23 @@ function syncMemberToGlobal(targetId) {
   _globalDataOwner = mid; // 누구의 데이터가 S에 로드되었는지 추적
   const ms = getMemberState(mid);
 
-  // 독립 모드: 모든 데이터를 해당 구성원에서 로드
+  // 독립 모드: 모든 데이터를 해당 구성원에서 로드 (deep copy로 참조 공유 방지)
   S.pts = ms.pts || 0;
   S.streak = ms.streak || 0;
   S.longest = ms.longest || 0;
   S.lastDate = ms.lastDate || null;
   S.totalDone = ms.totalDone || 0;
-  S.actDone = ms.actDone || {};
-  S.log = ms.log || [];
-  S.moodLog = ms.moodLog || [];
-  S.badges = ms.badges || {};
-  S.badgeLog = ms.badgeLog || [];
-  S.acts = (ms.acts && ms.acts.length > 0) ? ms.acts : JSON.parse(JSON.stringify(DACTS));
-  S.rwds = (ms.rwds && ms.rwds.length > 0) ? ms.rwds : JSON.parse(JSON.stringify(DRWDS));
-  S.stickers = ms.stickers || [];
-  S.rewardLog = ms.rewardLog || [];
-  S.rewardInventory = ms.rewardInventory || [];
-  S.rewardRequests = ms.rewardRequests || [];
+  S.actDone = ms.actDone ? JSON.parse(JSON.stringify(ms.actDone)) : {};
+  S.log = ms.log ? JSON.parse(JSON.stringify(ms.log)) : [];
+  S.moodLog = ms.moodLog ? [...ms.moodLog] : [];
+  S.badges = ms.badges ? {...ms.badges} : {};
+  S.badgeLog = ms.badgeLog ? [...ms.badgeLog] : [];
+  S.acts = (ms.acts && ms.acts.length > 0) ? JSON.parse(JSON.stringify(ms.acts)) : JSON.parse(JSON.stringify(DACTS));
+  S.rwds = (ms.rwds && ms.rwds.length > 0) ? JSON.parse(JSON.stringify(ms.rwds)) : JSON.parse(JSON.stringify(DRWDS));
+  S.stickers = ms.stickers ? JSON.parse(JSON.stringify(ms.stickers)) : [];
+  S.rewardLog = ms.rewardLog ? [...ms.rewardLog] : [];
+  S.rewardInventory = ms.rewardInventory ? JSON.parse(JSON.stringify(ms.rewardInventory)) : [];
+  S.rewardRequests = ms.rewardRequests ? JSON.parse(JSON.stringify(ms.rewardRequests)) : [];
 }
 
 // Syncs global S back to member data before saving
@@ -6176,23 +6180,23 @@ function syncGlobalToMember(targetId) {
   if (!S.memberData[mid]) getMemberState(mid);
   const ms = S.memberData[mid];
 
-  // 독립 모드: 모든 데이터 저장
+  // 독립 모드: 모든 데이터 저장 (deep copy로 참조 공유 방지)
   ms.pts = S.pts;
   ms.streak = S.streak;
   ms.longest = S.longest;
   ms.lastDate = S.lastDate;
   ms.totalDone = S.totalDone;
-  ms.acts = S.acts;
-  ms.rwds = S.rwds;
-  ms.log = S.log;
-  ms.actDone = S.actDone;
-  ms.moodLog = S.moodLog;
-  ms.badges = S.badges;
-  ms.badgeLog = S.badgeLog;
-  ms.stickers = S.stickers || [];
-  ms.rewardLog = S.rewardLog || [];
-  ms.rewardInventory = S.rewardInventory || [];
-  ms.rewardRequests = S.rewardRequests || [];
+  ms.acts = JSON.parse(JSON.stringify(S.acts||[]));
+  ms.rwds = JSON.parse(JSON.stringify(S.rwds||[]));
+  ms.log = JSON.parse(JSON.stringify(S.log||[]));
+  ms.actDone = JSON.parse(JSON.stringify(S.actDone||{}));
+  ms.moodLog = S.moodLog ? [...S.moodLog] : [];
+  ms.badges = S.badges ? {...S.badges} : {};
+  ms.badgeLog = S.badgeLog ? [...S.badgeLog] : [];
+  ms.stickers = JSON.parse(JSON.stringify(S.stickers||[]));
+  ms.rewardLog = S.rewardLog ? [...S.rewardLog] : [];
+  ms.rewardInventory = JSON.parse(JSON.stringify(S.rewardInventory||[]));
+  ms.rewardRequests = JSON.parse(JSON.stringify(S.rewardRequests||[]));
 }
 
 // Robust debounced save with in-flight guard
@@ -7301,6 +7305,7 @@ function renderAll(){
   if(typeof renderDevUserSwitch==='function')renderDevUserSwitch();
   renderNavUsers();
   renderHdrStats();
+  _renderHistHeroSub();
   if(typeof checkOnboarding==='function') checkOnboarding();
 }
 
@@ -9595,7 +9600,13 @@ function cleanExpiredStickers(){
 function getTodayStickers(actId){
   if(!S.stickers)S.stickers=[];
   const todayStart=new Date();todayStart.setHours(0,0,0,0);
-  return S.stickers.filter(s=>s.actId===actId&&s.ts>=todayStart.getTime());
+  const currentChild=getViewedMemberId()||currentUser;
+  return S.stickers.filter(s=>{
+    if(s.actId!==actId||s.ts<todayStart.getTime())return false;
+    // childId가 있는 스티커는 현재 보고 있는 자녀와 일치해야 표시
+    if(s.childId&&s.childId!==currentChild)return false;
+    return true;
+  });
 }
 
 function getStickerAvatar(userId,size){
@@ -9872,7 +9883,8 @@ function addSticker(actId,type,content){
     type:type,
     content:content,
     user:currentUser||'unknown',
-    ts:Date.now()
+    ts:Date.now(),
+    childId:getViewedMemberId()||currentUser
   };
   S.stickers.push(stk);
   save();
@@ -10019,6 +10031,8 @@ function switchViewingChild(childId){
   window.scrollTo({top:0});
 
   renderAll();
+  applyUserProfile();
+  renderMyTab();
   const nm=MEMBERS[childId]?.name||childId;
   toast(`${nm}의 마일리지를 보고 있어요`);
 }
