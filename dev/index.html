@@ -5655,16 +5655,24 @@ function isCurrentUserAdmin(){
 function postLoginInit(){
   viewingChildId = null;
   _admViewChildId = null;
+  _globalDataOwner = null;
   const mode = getFamilyMode();
-  if(mode === 'independent' && isCaregiverUser()){
-    const kids = getChildMemberIds();
-    if(kids.length > 0){
-      viewingChildId = kids[0];
-      // 첫 자녀 memberData 초기화 (없으면)
-      if(!S.memberData) S.memberData = {};
-      if(!S.memberData[viewingChildId]) getMemberState(viewingChildId);
-      syncMemberToGlobal(viewingChildId);
-      applyChildTheme(viewingChildId);
+  if(mode === 'independent'){
+    if(!S.memberData) S.memberData = {};
+    if(isCaregiverUser()){
+      // 양육자: 첫 자녀 뷰로 전환
+      const kids = getChildMemberIds();
+      if(kids.length > 0){
+        viewingChildId = kids[0];
+        if(!S.memberData[viewingChildId]) getMemberState(viewingChildId);
+        syncMemberToGlobal(viewingChildId);
+        applyChildTheme(viewingChildId);
+      }
+    } else if(currentUser) {
+      // 자녀 직접 로그인: 자신의 memberData를 글로벌에 로드
+      // (S.acts/actDone 등이 다른 사용자의 데이터일 수 있으므로 반드시 자신의 것으로 교체)
+      if(!S.memberData[currentUser]) getMemberState(currentUser);
+      syncMemberToGlobal(currentUser);
     }
   }
   _admViewChildId = getChildMemberIds()[0] || null;
@@ -6036,26 +6044,30 @@ function getMemberState(memberId) {
     // 보상 인벤토리/요청: 최초 1회 마이그레이션 — 첫 자녀에게만 글로벌 데이터 할당
     const isFirstChildForInv = _shouldMigrateRewardInv(memberId);
     // 양육자가 자녀 데이터를 초기화할 때: 부모가 커스텀한 활동/보상 목록을 상속
-    // (기존 형제의 목록이 있으면 그걸 사용, 없으면 현재 S.acts/S.rwds 사용)
     const isChildInit = !isMe && isCaregiverUser();
     const inheritActs = isChildInit ? _getInheritableActs() : null;
     const inheritRwds = isChildInit ? _getInheritableRwds() : null;
+    // isMe인데 독립 모드이고 _globalDataOwner가 다른 사람이면:
+    // 글로벌 S 값이 다른 자녀의 데이터이므로 상속 대신 형제/기본값 사용
+    const isStaleGlobal = isMe && getFamilyMode()==='independent' && _globalDataOwner && _globalDataOwner !== memberId;
+    const safeInheritActs = isStaleGlobal ? _getInheritableActs() : null;
+    const safeInheritRwds = isStaleGlobal ? _getInheritableRwds() : null;
     // First time: migrate global data if it's the current user, else start fresh
     S.memberData[memberId] = {
-      pts: isMe ? (S.pts || 0) : 0,
-      streak: isMe ? (S.streak || 0) : 0,
-      longest: isMe ? (S.longest || 0) : 0,
-      lastDate: isMe ? (S.lastDate || null) : null,
-      totalDone: isMe ? (S.totalDone || 0) : 0,
-      acts: isMe && S.acts ? JSON.parse(JSON.stringify(S.acts)) : (inheritActs || JSON.parse(JSON.stringify(DACTS))),
-      rwds: isMe && S.rwds ? JSON.parse(JSON.stringify(S.rwds)) : (inheritRwds || JSON.parse(JSON.stringify(DRWDS))),
-      log: isMe && S.log ? [...S.log] : [],
-      actDone: isMe && S.actDone ? {...S.actDone} : {},
-      moodLog: isMe && S.moodLog ? [...S.moodLog] : [],
-      badges: isMe && S.badges ? {...S.badges} : {},
-      badgeLog: isMe && S.badgeLog ? [...S.badgeLog] : [],
-      rewardLog: isMe && S.rewardLog ? [...S.rewardLog] : [],
-      stickers: isMe && S.stickers ? [...S.stickers] : [],
+      pts: (isMe && !isStaleGlobal) ? (S.pts || 0) : 0,
+      streak: (isMe && !isStaleGlobal) ? (S.streak || 0) : 0,
+      longest: (isMe && !isStaleGlobal) ? (S.longest || 0) : 0,
+      lastDate: (isMe && !isStaleGlobal) ? (S.lastDate || null) : null,
+      totalDone: (isMe && !isStaleGlobal) ? (S.totalDone || 0) : 0,
+      acts: (isMe && !isStaleGlobal && S.acts) ? JSON.parse(JSON.stringify(S.acts)) : (inheritActs || safeInheritActs || JSON.parse(JSON.stringify(DACTS))),
+      rwds: (isMe && !isStaleGlobal && S.rwds) ? JSON.parse(JSON.stringify(S.rwds)) : (inheritRwds || safeInheritRwds || JSON.parse(JSON.stringify(DRWDS))),
+      log: (isMe && !isStaleGlobal && S.log) ? [...S.log] : [],
+      actDone: (isMe && !isStaleGlobal && S.actDone) ? {...S.actDone} : {},
+      moodLog: (isMe && !isStaleGlobal && S.moodLog) ? [...S.moodLog] : [],
+      badges: (isMe && !isStaleGlobal && S.badges) ? {...S.badges} : {},
+      badgeLog: (isMe && !isStaleGlobal && S.badgeLog) ? [...S.badgeLog] : [],
+      rewardLog: (isMe && !isStaleGlobal) && S.rewardLog ? [...S.rewardLog] : [],
+      stickers: (isMe && !isStaleGlobal) && S.stickers ? [...S.stickers] : [],
       rewardInventory: isFirstChildForInv && S.rewardInventory ? JSON.parse(JSON.stringify(S.rewardInventory)) : [],
       rewardRequests: isFirstChildForInv && S.rewardRequests ? JSON.parse(JSON.stringify(S.rewardRequests)) : []
     };
@@ -14414,7 +14426,15 @@ window._createState = _createState;
       S = Object.assign(defaultState(), snap.data());
       _lastSavedJSON = incomingJSON;
       rebuildMembersFromFamily();
-      if(viewingChildId&&isCaregiverUser()&&getFamilyMode()==='independent') syncMemberToGlobal(viewingChildId);
+      // 독립 모드: 올바른 구성원의 memberData를 글로벌에 복원
+      if(getFamilyMode()==='independent'){
+        if(isCaregiverUser()&&viewingChildId){
+          syncMemberToGlobal(viewingChildId);
+        }else if(currentUser&&S.memberData&&S.memberData[currentUser]){
+          // 자녀 직접 로그인: 자신의 memberData 복원
+          syncMemberToGlobal(currentUser);
+        }
+      }
       renderAll();
       checkNewMessages();
       renderNavUsers();
