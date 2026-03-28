@@ -2553,7 +2553,7 @@ button:disabled {
     <!-- CTA -->
     <div class="toss-cta">
       <button class="toss-btn" id="insNextBtn" disabled onclick="insNext()">다음</button>
-      <button class="toss-btn ghost" onclick="startCreateFamily()">건너뛰기</button>
+      <button class="toss-btn ghost" onclick="insSkip()">건너뛰기</button>
     </div>
   </div>
 </div>
@@ -14366,10 +14366,20 @@ window._createState = _createState;
       scroll.scrollTo({left:i*scroll.clientWidth,behavior:'smooth'});
     });
   });
+  function goCreateFamily(){
+    if(window._m_startCreateFamily){
+      window._m_startCreateFamily();
+    } else {
+      window._waitModule('startCreateFamily').then(function(fn){
+        if(fn) fn(); else window._showAuth('create-1');
+      });
+    }
+  }
   window.insNext=function(){
-    if(cur>=total-1){startCreateFamily();return;}
+    if(cur>=total-1){goCreateFamily();return;}
     scroll.scrollTo({left:(cur+1)*scroll.clientWidth,behavior:'smooth'});
   };
+  window.insSkip=function(){goCreateFamily();};
 })();
 </script>
 </body>
