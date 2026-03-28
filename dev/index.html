@@ -288,14 +288,10 @@ body.dark .dtog{background:#334155}
 body.dark .dtog-in{transform:translateX(20px)}
 
 /* HOME TOP - scrolls away */
-/* APP TOP BAR */
-.app-topbar{background:var(--tab-color,#6366F1);padding:0 16px;padding-top:calc(12px + env(safe-area-inset-top));padding-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:8px;position:sticky;top:0;z-index:12;border:0;outline:0;transition:padding-top .2s ease,padding-bottom .2s ease}
-.app-topbar.compact{padding-top:calc(4px + env(safe-area-inset-top))!important;padding-bottom:4px!important}
-.app-topbar.compact .app-topbar-logo svg{width:60px!important;height:15px!important;opacity:.9;transition:all .2s}
-.app-topbar.compact .dtog{transform:scale(.75);transform-origin:right center;transition:transform .2s,opacity .2s}
-.app-topbar.compact #child-switcher{transform:scale(.85);transform-origin:right center;transition:transform .2s}
-.app-topbar-logo{flex-shrink:0;display:flex;align-items:center}
-.app-topbar-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.home-top{background:var(--tab-color,#6366F1);padding:16px 20px 0;padding-top:calc(16px + env(safe-area-inset-top));display:flex;justify-content:space-between;align-items:flex-start;position:relative;overflow:visible;z-index:11}
+#home-top-content{transition:opacity .1s ease-out}
+.home-top::after{content:'';position:absolute;bottom:-70px;right:10px;width:160px;height:160px;background:rgba(255,255,255,.1);border-radius:50%;pointer-events:none}
+.home-top h1{font-size:24px;font-weight:900;color:rgba(255,255,255,.68)}
 /* 자녀 전환기 (양육자 전용) */
 #child-switcher{display:none;align-items:center}
 .child-sw-toggle{display:flex;background:rgba(255,255,255,.2);border-radius:999px;padding:2px;gap:0}
@@ -303,16 +299,6 @@ body.dark .dtog-in{transform:translateX(20px)}
 .child-sw-btn.on{background:rgba(255,255,255,.95);color:#5B21B6}
 .child-sw-select{background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.35);border-radius:20px;color:#fff;font-size:11px;font-weight:700;padding:3px 20px 3px 8px;font-family:inherit;cursor:pointer;outline:none;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center}
 .child-sw-select option{background:#4B5563;color:#fff}
-/* HOME GREETING (below topbar, still in gradient area) */
-.home-greeting{background:var(--tab-color,#6366F1);padding:0 20px 0;position:relative;overflow:visible;z-index:11;border:0;outline:0}
-.home-greeting::after{content:'';position:absolute;bottom:-70px;right:10px;width:160px;height:160px;background:rgba(255,255,255,.1);border-radius:50%;pointer-events:none}
-#home-top-content{transition:opacity .1s ease-out}
-.home-greeting h1{font-size:24px;font-weight:900;color:rgba(255,255,255,.68)}
-/* keep .home-top for tablet/desktop media queries */
-.home-top{background:var(--tab-color,#6366F1);padding:0;position:relative;overflow:visible;z-index:11}
-/* greeting↔hero 배경 단차 제거: greeting 하단과 hero 상단 색상 완전 연결 */
-.home-greeting{margin-bottom:0!important;padding-bottom:0!important;}
-.hero{margin-top:0!important;}
 /* MY TAB */
 .my-header{background:linear-gradient(160deg,var(--tab-color,#6366F1),var(--tab-color2,#818CF8));padding:28px 24px 32px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
 .my-avatar-wrap{width:80px;height:80px;border-radius:50%;overflow:hidden;border:3px solid rgba(255,255,255,.5);box-shadow:0 4px 16px rgba(0,0,0,.2);background:rgba(255,255,255,.2)}
@@ -341,7 +327,7 @@ body.dark .dtog-in{transform:translateX(20px)}
 .child-picker-name{font-size:16px;font-weight:800;color:var(--tx);flex:1}
 
 /* HERO - Sticky on scroll, full width when stuck */
-.hero{margin:0;background:linear-gradient(180deg,var(--tab-color,#6366F1),var(--tab-color2,#818CF8));border-radius:0 0 38px 38px;padding:14px 20px 22px;color:#fff;position:sticky;top:var(--topbar-h,0px);z-index:10;overflow:hidden;box-shadow:0 4px 20px var(--tab-shadow,rgba(99,102,241,0.3));transition:padding .25s,overflow .25s,top .2s ease;border:0;outline:0}
+.hero{margin:0;background:linear-gradient(180deg,var(--tab-color,#6366F1),var(--tab-color2,#818CF8));border-radius:0 0 38px 38px;padding:14px 20px 22px;color:#fff;position:sticky;top:0;z-index:10;overflow:hidden;box-shadow:0 4px 20px var(--tab-shadow,rgba(99,102,241,0.3));transition:padding .25s}
 .hero::after{content:'';position:absolute;bottom:-30px;left:20px;width:110px;height:110px;background:rgba(255,255,255,.08);border-radius:50%;pointer-events:none}
 .hero-lbl{font-size:14px;font-weight:700;opacity:.85;transition:font-size .25s}
 .hero-pts{font-size:58px;font-weight:900;letter-spacing:-2px;line-height:1;transition:font-size .25s}
@@ -2905,20 +2891,7 @@ button:disabled {
 
 <!-- HOME -->
 <div class="scr on" id="s-home">
-  <div class="app-topbar">
-    <div class="app-topbar-logo">
-      <svg viewBox="0 0 88 22" xmlns="http://www.w3.org/2000/svg" width="72" height="18">
-        <text y="17" font-family="'Pretendard Variable',system-ui,sans-serif" font-weight="900" font-size="19" letter-spacing="-0.5">
-          <tspan fill="rgba(255,255,255,.9)">mile</tspan><tspan fill="#FFD580">.</tspan><tspan fill="rgba(255,255,255,.9)">ly</tspan>
-        </text>
-      </svg>
-    </div>
-    <div class="app-topbar-right">
-      <div id="child-switcher"></div>
-      <button class="dtog" onclick="toggleDark()" style="background:rgba(255,255,255,.2);border:none"><div class="dtog-in" id="dtog-ic" style="background:rgba(255,255,255,.9)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-3px"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></div></button>
-    </div>
-  </div>
-  <div class="home-greeting">
+  <div class="home-top">
     <div id="home-top-content">
       <h1 id="greeting-txt">안녕하세요! 👋</h1>
       <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:4px">
@@ -2937,6 +2910,10 @@ button:disabled {
         </div>
       </div>
       <p id="smart-msg" style="font-size:13px;color:rgba(255,255,255,.75);margin-top:4px;font-weight:600;line-height:1.3"></p>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+      <div id="child-switcher"></div>
+      <button class="dtog" onclick="toggleDark()" style="background:rgba(255,255,255,.2);border:none"><div class="dtog-in" id="dtog-ic" style="background:rgba(255,255,255,.9)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-3px"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></div></button>
     </div>
   </div>
   <div class="hero">
@@ -12821,7 +12798,7 @@ function reallyGoTab(tab){
     const lblEl=hero.querySelector('.hero-lbl');if(lblEl)lblEl.style.fontSize='';
     const unitEl=hero.querySelector('.hero-unit');if(unitEl)unitEl.style.fontSize='';
   }
-  const ht=document.querySelector('.home-greeting');
+  const ht=document.querySelector('.home-top');
   if(ht) Array.from(ht.children).forEach(c=>c.style.opacity='1');
   const defaultBr2=window.innerWidth>=768?'0':'0 0 38px 38px';
   const logH=document.querySelector('.log-header-sticky');
@@ -14211,12 +14188,7 @@ window._createState = _createState;
     });
   }catch(e){ console.warn('Realtime listener failed:', e); }
   
-  // --topbar-h CSS 변수: hero sticky top 위치를 topbar 높이만큼 내려서 마일리지가 topbar에 가리지 않도록
-  const _topbarEl = document.querySelector('.app-topbar');
-  function _setTopbarH(){
-    if(_topbarEl) document.documentElement.style.setProperty('--topbar-h', _topbarEl.offsetHeight+'px');
-  }
-  _setTopbarH();
+
 
   // 모든 탭 스크롤 시 헤더 축소 (compact)
   const homeScr = document.getElementById('s-home');
@@ -14226,7 +14198,7 @@ window._createState = _createState;
   const _ptEl=hero?hero.querySelector('.hero-pts'):null;
   const _lblEl=hero?hero.querySelector('.hero-lbl'):null;
   const _unitEl=hero?hero.querySelector('.hero-unit'):null;
-  const _homTop=document.querySelector('.home-greeting');
+  const _homTop=document.querySelector('.home-top');
   const _homTopChildren=_homTop?Array.from(_homTop.children):[];
   let _uhcRaf=0;
   function updateHeaderCompact(){
@@ -14236,17 +14208,10 @@ window._createState = _createState;
       const scrollY = window.scrollY || document.documentElement.scrollTop;
       const threshold = 60;
       const thresholdOff = 40; // hysteresis: compact 해제는 40px 이하에서 (깜박거림 방지)
-      // 1. topbar compact (on:30px↑, off:15px↓) — 부드럽게 축소
-      if(_topbarEl){
-        const _tc=_topbarEl.classList.contains('compact');
-        if(!_tc && scrollY > 30) _topbarEl.classList.add('compact');
-        else if(_tc && scrollY < 15) _topbarEl.classList.remove('compact');
-        // --topbar-h를 실제 topbar 높이로 매 프레임 갱신 → hero가 topbar에 밀착
-        document.documentElement.style.setProperty('--topbar-h',_topbarEl.offsetHeight+'px');
-      }
+
       // 2. effScrollY: hero가 sticky가 되는 시점(=인사말 영역 높이)부터 기산
       //    (topbarH 기준 대신 homeGreeting 높이 기준으로 변경 → compact 애니메이션이 hero가 붙은 후에 시작)
-      const _greetH = _homTop ? _homTop.offsetHeight : (_topbarEl ? _topbarEl.offsetHeight : 0);
+      const _greetH = _homTop ? _homTop.offsetHeight : 0;
       const effScrollY = Math.max(0, scrollY - _greetH); // home hero 전용 보정값
       // Smooth border-radius interpolation: 38px → 28px (mobile only)
       const isWide=window.innerWidth>=768;
