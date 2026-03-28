@@ -92,14 +92,14 @@ body.dark{
   --pu-lt:rgba(139,92,246,.15);--yw-lt:rgba(245,158,11,.15);
 }
 /* TAB THEME COLORS */
-body[data-tab="home"]{--tab-color:#6366F1;--tab-color2:#818CF8;--tab-shadow:rgba(99,102,241,0.3);--tab-lt:rgba(99,102,241,.1);--tab-lt-dk:rgba(99,102,241,.15)}
-body[data-tab="log"]{--tab-color:#F43F5E;--tab-color2:#FB7185;--tab-shadow:rgba(244,63,94,0.3);--tab-lt:rgba(244,63,94,.1);--tab-lt-dk:rgba(244,63,94,.15)}
-body[data-tab="rwd"]{--tab-color:#F59E0B;--tab-color2:#FBBF24;--tab-shadow:rgba(245,158,11,0.3);--tab-lt:rgba(245,158,11,.1);--tab-lt-dk:rgba(245,158,11,.15)}
-body[data-tab="hist"]{--tab-color:#8B5CF6;--tab-color2:#A78BFA;--tab-shadow:rgba(139,92,246,0.3);--tab-lt:rgba(139,92,246,.1);--tab-lt-dk:rgba(139,92,246,.15)}
-body.dark[data-tab="home"]{--tab-color:#5457D9;--tab-color2:#727BE0;--tab-shadow:rgba(84,87,217,0.3)}
-body.dark[data-tab="log"]{--tab-color:#DC3550;--tab-color2:#E5606F;--tab-shadow:rgba(220,53,80,0.3)}
-body.dark[data-tab="rwd"]{--tab-color:#D98E09;--tab-color2:#E0A820;--tab-shadow:rgba(217,142,9,0.3)}
-body.dark[data-tab="hist"]{--tab-color:#7A4FDD;--tab-color2:#9578E8;--tab-shadow:rgba(122,79,221,0.3)}
+body[data-tab="home"]{--tab-color:#5457D9;--tab-color2:#727BE0;--tab-shadow:rgba(84,87,217,0.3);--tab-lt:rgba(84,87,217,.1);--tab-lt-dk:rgba(84,87,217,.15)}
+body[data-tab="log"]{--tab-color:#DC3550;--tab-color2:#E5606F;--tab-shadow:rgba(220,53,80,0.3);--tab-lt:rgba(220,53,80,.1);--tab-lt-dk:rgba(220,53,80,.15)}
+body[data-tab="rwd"]{--tab-color:#D98E09;--tab-color2:#E0A820;--tab-shadow:rgba(217,142,9,0.3);--tab-lt:rgba(217,142,9,.1);--tab-lt-dk:rgba(217,142,9,.15)}
+body[data-tab="hist"]{--tab-color:#7A4FDD;--tab-color2:#9578E8;--tab-shadow:rgba(122,79,221,0.3);--tab-lt:rgba(122,79,221,.1);--tab-lt-dk:rgba(122,79,221,.15)}
+body.dark[data-tab="home"]{--tab-color:#4345B8;--tab-color2:#5C63C9;--tab-shadow:rgba(67,69,184,0.3)}
+body.dark[data-tab="log"]{--tab-color:#B82A42;--tab-color2:#CC4A5C;--tab-shadow:rgba(184,42,66,0.3)}
+body.dark[data-tab="rwd"]{--tab-color:#B57808;--tab-color2:#C8901A;--tab-shadow:rgba(181,120,8,0.3)}
+body.dark[data-tab="hist"]{--tab-color:#6540BF;--tab-color2:#7E60D2;--tab-shadow:rgba(101,64,191,0.3)}
 /* Dark mode: auth & form components */
 body.dark .auth-screen.toss-style{background:#0F172A}
 body.dark .auth-card{background:#1E293B;box-shadow:0 20px 60px rgba(0,0,0,.5)}
@@ -6014,7 +6014,8 @@ function getMemberState(memberId) {
       actDone: isMe && S.actDone ? {...S.actDone} : {},
       moodLog: isMe && S.moodLog ? [...S.moodLog] : [],
       badges: isMe && S.badges ? {...S.badges} : {},
-      badgeLog: isMe && S.badgeLog ? [...S.badgeLog] : []
+      badgeLog: isMe && S.badgeLog ? [...S.badgeLog] : [],
+      rewardLog: isMe && S.rewardLog ? [...S.rewardLog] : []
     };
   }
   return S.memberData[memberId];
@@ -6041,6 +6042,7 @@ function syncMemberToGlobal(targetId) {
   S.acts = (ms.acts && ms.acts.length > 0) ? ms.acts : JSON.parse(JSON.stringify(DACTS));
   S.rwds = (ms.rwds && ms.rwds.length > 0) ? ms.rwds : JSON.parse(JSON.stringify(DRWDS));
   S.stickers = ms.stickers || [];
+  S.rewardLog = ms.rewardLog || [];
 }
 
 // Syncs global S back to member data before saving
@@ -6065,6 +6067,7 @@ function syncGlobalToMember(targetId) {
   ms.badges = S.badges;
   ms.badgeLog = S.badgeLog;
   ms.stickers = S.stickers || [];
+  ms.rewardLog = S.rewardLog || [];
 }
 
 // Robust debounced save with in-flight guard
