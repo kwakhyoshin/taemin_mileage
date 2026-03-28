@@ -12247,19 +12247,34 @@ function renderNavUsers(){
 window.renderNavUsers=renderNavUsers;
 
 function _updateFamilyBtnBadge(){
-  const btn=document.getElementById('nav-family-btn');
-  if(!btn||!currentUser)return;
-  let badge=btn.querySelector('.nfb-badge');
+  if(!currentUser)return;
   let total=0;
   if(S.familyMessages){
     total=S.familyMessages.filter(m=>m.to===currentUser&&!m.read).length;
   }
-  if(total>0){
-    if(!badge){badge=document.createElement('span');badge.className='nfb-badge';btn.appendChild(badge);}
-    badge.textContent=total>99?'99+':total;
-    badge.style.display='flex';
-  }else{
-    if(badge)badge.style.display='none';
+  // MY탭 네비게이션 아이템에 뱃지 표시
+  const myTab=document.getElementById('tab-my');
+  if(myTab){
+    let badge=myTab.querySelector('.nav-unread-badge');
+    if(total>0){
+      if(!badge){badge=document.createElement('span');badge.className='nav-unread-badge';myTab.style.position='relative';myTab.appendChild(badge);}
+      badge.textContent=total>99?'99+':total;
+      badge.style.display='flex';
+    }else{
+      if(badge)badge.style.display='none';
+    }
+  }
+  // 구 nav-family-btn (있는 경우 호환)
+  const btn=document.getElementById('nav-family-btn');
+  if(btn){
+    let fbBadge=btn.querySelector('.nfb-badge');
+    if(total>0){
+      if(!fbBadge){fbBadge=document.createElement('span');fbBadge.className='nfb-badge';btn.appendChild(fbBadge);}
+      fbBadge.textContent=total>99?'99+':total;
+      fbBadge.style.display='flex';
+    }else{
+      if(fbBadge)fbBadge.style.display='none';
+    }
   }
 }
 
@@ -12572,6 +12587,15 @@ function sendFamilyMsg(){
   const sentText=text;
   const sentMsg=S.familyMessages[S.familyMessages.length-1];
   const toName=(MEMBERS[msgTargetUser]?.name)||'가족';  // closeMsgPop 전에 캡처!
+  const fromName=(MEMBERS[currentUser]?.name)||'가족';
+  // Push 알림 트리거 (Cloud Functions 경유)
+  if(!isSelfMessage){
+    S.pushBroadcast={
+      title:`💌 ${fromName}의 메시지`,
+      body:text.length>50?text.slice(0,50)+'…':text,
+      ts:Date.now()
+    };
+  }
   save();
   closeMsgPop();  // 여기서 msgTargetUser=null이 됨
   if(isSelfMessage){
@@ -14707,14 +14731,24 @@ window._createState = _createState;
           // pushDevices, pushBroadcast 등 인프라 필드만 머지 (메시지/상태는 로컬 우선)
           if(incoming.pushDevices) S.pushDevices = incoming.pushDevices;
           if(incoming.pushUpdatedAt) S.pushUpdatedAt = incoming.pushUpdatedAt;
-          // Merge read status from other devices for family messages
-          if(incoming.familyMessages && S.familyMessages) {
+          // Merge family messages from other devices (새 메시지 + 읽음 상태)
+          if(incoming.familyMessages) {
+            if(!S.familyMessages)S.familyMessages=[];
+            let msgChanged=false;
+            // 새 메시지 머지: incoming에만 있는 메시지 추가
+            if(incoming.familyMessages.length>S.familyMessages.length){
+              const newMsgs=incoming.familyMessages.slice(S.familyMessages.length);
+              newMsgs.forEach(m=>{S.familyMessages.push(m);});
+              msgChanged=true;
+            }
+            // 읽음 상태 머지
             incoming.familyMessages.forEach((imsg, i) => {
               if(imsg.read && S.familyMessages[i] && !S.familyMessages[i].read) {
                 S.familyMessages[i].read = true;
+                msgChanged=true;
               }
             });
-            renderNavUsers();
+            if(msgChanged){renderNavUsers();checkNewMessages();}
           }
           // Merge stickers from other devices
           if(incoming.stickers && Array.isArray(incoming.stickers)){
