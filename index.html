@@ -9895,7 +9895,7 @@ const isParentUser=isCaregiverUser;
 
 // ── 모드 / 자녀 헬퍼 ────────────────────────
 function getFamilyMode(){
-  return S.familyMeta?.mode||'independent';
+  return 'independent'; // 통합모드 비활성화 — 항상 독립모드
 }
 function getChildMemberIds(){
   if(!S.familyMeta?.members)return[];
@@ -9946,6 +9946,7 @@ function admSelectChild(childId){
 }
 // independent↔unified 모드 전환
 function changeFamilyMode(newMode){
+  toast('현재 독립 모드만 지원합니다');return; // 통합모드 비활성화
   const oldMode=getFamilyMode();
   if(oldMode===newMode)return;
   if(!confirm(`모드를 ${newMode==='unified'?'통합(공유)':'독립'} 모드로 변경할까요?\n(기존 데이터는 변환됩니다)`))return;
