@@ -310,8 +310,10 @@ body.dark .dtog-in{transform:translateX(20px)}
 .my-header.compact h2{font-size:16px}
 .my-header.compact .my-header-sub{font-size:0;margin:0;opacity:0;max-height:0;overflow:hidden}
 .my-profile-card{display:flex;align-items:center;gap:14px;background:var(--card);border-radius:16px;margin:16px 16px 0;padding:16px 18px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
-.my-avatar-wrap{width:50px;height:50px;border-radius:50%;overflow:hidden;border:2.5px solid var(--tab-color,#475569);box-shadow:0 2px 8px rgba(0,0,0,.1);background:var(--bg2);flex-shrink:0}
-.my-avatar-wrap img,.my-avatar-wrap svg{width:100%;height:100%;object-fit:cover}
+.my-avatar-wrap{width:50px;height:50px;border-radius:50%;overflow:visible;border:2.5px solid var(--tab-color,#475569);box-shadow:0 2px 8px rgba(0,0,0,.1);background:var(--bg2);flex-shrink:0;position:relative}
+.my-mood-badge{position:absolute;bottom:-2px;right:-4px;font-size:18px;line-height:1;z-index:2;animation:fpMoodPulse 2s ease-in-out infinite;filter:drop-shadow(0 1px 3px rgba(0,0,0,.3));pointer-events:none}
+.my-mood-particles{position:absolute;top:50%;left:50%;width:0;height:0;pointer-events:none;z-index:3;overflow:visible}
+.my-avatar-wrap img,.my-avatar-wrap svg{width:100%;height:100%;object-fit:cover;border-radius:50%}
 .my-info-text{flex:1}
 .my-name{font-size:17px;font-weight:900;color:var(--tx);line-height:1.2}
 .my-role{font-size:11px;font-weight:700;color:var(--tx3);background:var(--bg2);padding:2px 10px;border-radius:20px;display:inline-block;margin-top:4px}
@@ -11706,6 +11708,7 @@ function renderMyTab(){
   // 아바타
   const avatarWrap=document.getElementById('my-avatar-wrap');
   if(avatarWrap)avatarWrap.innerHTML=getAvatarHTML(currentUser,50);
+  updateMyAvatarMoodBadge();
   // 관리자 버튼 표시 여부 (양육자 또는 isAdmin 권한이 있는 자녀)
   const adminBtn=document.getElementById('my-admin-btn');
   if(adminBtn)adminBtn.style.display=(isCaregiverUser()||isCurrentUserAdmin())?'':'none';
@@ -11883,6 +11886,7 @@ function selectMood(mood){
       save();
     }
     toast('기분 표현을 껐어요');
+    updateMyAvatarMoodBadge();
     renderNavUsers();
     return;
   }
@@ -11902,6 +11906,7 @@ function selectMood(mood){
     checkBadges();
   }
   toast(m.emoji+' '+m.label);
+  updateMyAvatarMoodBadge();
   startMoodParticles();
   renderNavUsers();
 }
@@ -11938,8 +11943,54 @@ function emitMoodParticles(){
     span.style.animationDuration=(2+Math.random()*1.5)+'s';
     container.appendChild(span);
   });
+  // My탭 프로필 아바타에서도 파티클 발생
+  _emitMyAvatarMoodParticles();
   // Clean up after animation
   setTimeout(()=>{if(container.children.length)container.innerHTML='';},4500);
+}
+
+// My탭 프로필 아바타 기분 파티클 + 뱃지
+function _emitMyAvatarMoodParticles(){
+  const wrap=document.getElementById('my-avatar-wrap');
+  if(!wrap)return;
+  const isMyTab=document.getElementById('s-my')?.classList.contains('on');
+  if(!isMyTab)return;
+  if(!currentMood||!MOOD_DATA[currentMood])return;
+  // 파티클 컨테이너
+  let pc=wrap.querySelector('.my-mood-particles');
+  if(!pc){pc=document.createElement('div');pc.className='my-mood-particles';wrap.appendChild(pc);}
+  pc.innerHTML='';
+  const particles=MOOD_DATA[currentMood].particles;
+  const count=Math.min(5,particles.length);
+  for(let i=0;i<count;i++){
+    const span=document.createElement('span');
+    span.className='fp-mood-p';
+    span.textContent=particles[Math.floor(Math.random()*particles.length)];
+    const angle=Math.random()*Math.PI*2;
+    const dist=14+Math.random()*12;
+    span.style.setProperty('--dx',(Math.cos(angle)*dist)+'px');
+    span.style.setProperty('--dy',(Math.sin(angle)*dist-18)+'px');
+    span.style.animationDelay=(i*0.35)+'s';
+    span.style.animationDuration=(2+Math.random()*1.2)+'s';
+    pc.appendChild(span);
+  }
+}
+function updateMyAvatarMoodBadge(){
+  const wrap=document.getElementById('my-avatar-wrap');
+  if(!wrap)return;
+  // 기존 뱃지 제거
+  const old=wrap.querySelector('.my-mood-badge');
+  if(old)old.remove();
+  const emoji=getMoodEmoji(currentUser);
+  if(emoji){
+    const badge=document.createElement('span');
+    badge.className='my-mood-badge';
+    badge.textContent=emoji;
+    wrap.appendChild(badge);
+  }
+  // 파티클 컨테이너 준비
+  let pc=wrap.querySelector('.my-mood-particles');
+  if(!pc){pc=document.createElement('div');pc.className='my-mood-particles';wrap.appendChild(pc);}
 }
 
 // ── CHILD MEMBERS HELPER ──────────────────────
