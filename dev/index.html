@@ -300,12 +300,17 @@ body.dark .dtog-in{transform:translateX(20px)}
 .child-sw-select{background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.35);border-radius:20px;color:#fff;font-size:11px;font-weight:700;padding:3px 20px 3px 8px;font-family:inherit;cursor:pointer;outline:none;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center}
 .child-sw-select option{background:#4B5563;color:#fff}
 /* MY TAB */
-.my-header{background:linear-gradient(160deg,var(--tab-color,#6366F1),var(--tab-color2,#818CF8));padding:28px 24px 32px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
-.my-avatar-wrap{width:80px;height:80px;border-radius:50%;overflow:hidden;border:3px solid rgba(255,255,255,.5);box-shadow:0 4px 16px rgba(0,0,0,.2);background:rgba(255,255,255,.2)}
+.my-header{background:linear-gradient(160deg,var(--tab-color,#6366F1),var(--tab-color2,#818CF8));padding:16px 20px 20px;padding-top:calc(16px + env(safe-area-inset-top));border-radius:0 0 38px 38px;position:relative;overflow:hidden;box-shadow:0 4px 20px var(--tab-shadow,rgba(99,102,241,0.3))}
+.my-header::after{content:'';position:absolute;bottom:-30px;right:10px;width:130px;height:130px;background:rgba(255,255,255,.08);border-radius:50%;pointer-events:none}
+.my-header-title{font-size:13px;font-weight:800;color:rgba(255,255,255,.6);margin-bottom:12px;letter-spacing:.5px}
+.my-header-info{display:flex;align-items:center;gap:14px}
+.my-avatar-wrap{width:56px;height:56px;border-radius:50%;overflow:hidden;border:2.5px solid rgba(255,255,255,.5);box-shadow:0 3px 12px rgba(0,0,0,.15);background:rgba(255,255,255,.2);flex-shrink:0;order:2}
 .my-avatar-wrap img,.my-avatar-wrap svg{width:100%;height:100%;object-fit:cover}
-.my-name{font-size:22px;font-weight:900;color:#fff;margin-top:4px}
-.my-role{font-size:14px;font-weight:700;color:rgba(255,255,255,.75);background:rgba(255,255,255,.15);padding:3px 12px;border-radius:20px}
-.my-section-title{font-size:12px;font-weight:800;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;padding:16px 20px 6px}
+.my-info-text{flex:1;order:1}
+.my-name{font-size:20px;font-weight:900;color:#fff;line-height:1.2}
+.my-role{font-size:12px;font-weight:700;color:rgba(255,255,255,.75);background:rgba(255,255,255,.15);padding:2px 10px;border-radius:20px;display:inline-block;margin-top:4px}
+.my-section-title{font-size:12px;font-weight:800;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;padding:16px 20px 6px;display:flex;align-items:center;gap:6px}
+.my-section-title svg{flex-shrink:0}
 .my-list{background:var(--card);border-radius:16px;margin:0 16px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06)}
 .my-list-item{display:flex;align-items:center;gap:14px;padding:16px 18px;width:100%;background:transparent;border:none;cursor:pointer;font-family:inherit;text-align:left;border-bottom:.5px solid var(--bdr);-webkit-tap-highlight-color:transparent}
 .my-list-item:last-child{border-bottom:none}
@@ -1135,7 +1140,7 @@ body.dark .adm-child-btn.on{background:rgba(255,107,53,.15)}
 .unified-dash-pts{font-size:18px;font-weight:900;color:var(--or)}
 .unified-dash-meta{font-size:11px;font-weight:600;color:var(--tx3)}
 /* MY 탭 가족 구성원 */
-.my-family-row{display:flex;gap:12px;overflow-x:auto;padding:4px 16px 8px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.my-family-row{display:flex;gap:12px;overflow-x:auto;padding:4px 16px 12px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .my-family-row::-webkit-scrollbar{display:none}
 .my-family-member{display:flex;flex-direction:column;align-items:center;gap:5px;flex-shrink:0;cursor:pointer}
 .my-family-avatar{width:52px;height:52px;border-radius:50%;overflow:hidden;border:2.5px solid var(--or);background:var(--bg2);flex-shrink:0}
@@ -2911,10 +2916,7 @@ button:disabled {
       </div>
       <p id="smart-msg" style="font-size:13px;color:rgba(255,255,255,.75);margin-top:4px;font-weight:600;line-height:1.3"></p>
     </div>
-    <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
-      <div id="child-switcher"></div>
-      <button class="dtog" onclick="toggleDark()" style="background:rgba(255,255,255,.2);border:none"><div class="dtog-in" id="dtog-ic" style="background:rgba(255,255,255,.9)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-3px"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></div></button>
-    </div>
+    <div id="child-switcher" style="flex-shrink:0"></div>
   </div>
   <div class="hero">
     <div class="streak-pill" id="streak-pill"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 01-7 7 7 7 0 01-7-7c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg> 0일 연속</div>
@@ -3493,11 +3495,17 @@ button:disabled {
 <!-- MY TAB -->
 <div class="scr" id="s-my">
   <div class="my-header">
-    <div class="my-avatar-wrap" id="my-avatar-wrap"></div>
-    <div class="my-name" id="my-name">이름</div>
-    <div class="my-role" id="my-role">역할</div>
+    <div class="my-header-title">my 메뉴</div>
+    <div class="my-header-info">
+      <div class="my-info-text">
+        <div class="my-name" id="my-name">이름</div>
+        <div class="my-role" id="my-role">역할</div>
+      </div>
+      <div class="my-avatar-wrap" id="my-avatar-wrap"></div>
+    </div>
   </div>
   <!-- 가족 구성원 아바타 가로 나열 -->
+  <div class="my-section-title" id="my-family-title" style="display:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg> 우리가족</div>
   <div class="my-family-row" id="my-family-row" style="display:none"></div>
   <div class="my-section-title">기분 &amp; 프로필</div>
   <div class="my-list">
@@ -3514,11 +3522,6 @@ button:disabled {
   </div>
   <div class="my-section-title">가족</div>
   <div class="my-list">
-    <button class="my-list-item" onclick="openFamilyPopup()">
-      <span class="my-list-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></span>
-      <span class="my-list-txt">가족 가계도 보기</span>
-      <svg class="my-list-arr" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
-    </button>
     <button class="my-list-item my-admin-only" onclick="myTabAdminAction()" id="my-admin-btn">
       <span class="my-list-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></span>
       <span class="my-list-txt">관리 (관리자 페이지)</span>
@@ -5710,6 +5713,43 @@ const CYCLE_CHIP  = {daily:'c-or',weekly:'c-pu',monthly:'c-rd',none:'c-gn'};
 const TAB_COLORS = {home:'#6366F1', log:'#F43F5E', rwd:'#F59E0B', hist:'#8B5CF6'};
 const TAB_COLORS2 = {home:'#818CF8', log:'#FB7185', rwd:'#FBBF24', hist:'#A78BFA'};
 
+/* CHILD THEME COLORS — 자녀 전환 시 홈 탭 색상 변경 */
+const CHILD_THEMES = [
+  {c1:'#6366F1',c2:'#818CF8',shadow:'rgba(99,102,241,0.3)',lt:'rgba(99,102,241,.1)',ltDk:'rgba(99,102,241,.15)'},
+  {c1:'#10B981',c2:'#34D399',shadow:'rgba(16,185,129,0.3)',lt:'rgba(16,185,129,.1)',ltDk:'rgba(16,185,129,.15)'},
+  {c1:'#F97316',c2:'#FB923C',shadow:'rgba(249,115,22,0.3)',lt:'rgba(249,115,22,.1)',ltDk:'rgba(249,115,22,.15)'},
+  {c1:'#EC4899',c2:'#F472B6',shadow:'rgba(236,72,153,0.3)',lt:'rgba(236,72,153,.1)',ltDk:'rgba(236,72,153,.15)'},
+  {c1:'#8B5CF6',c2:'#A78BFA',shadow:'rgba(139,92,246,0.3)',lt:'rgba(139,92,246,.1)',ltDk:'rgba(139,92,246,.15)'}
+];
+function getChildThemeIndex(childId){
+  const children=getChildMembers();
+  const idx=children.findIndex(c=>c.id===childId);
+  return idx>=0?idx%CHILD_THEMES.length:0;
+}
+function applyChildTheme(childId){
+  const t=CHILD_THEMES[getChildThemeIndex(childId)];
+  const s=document.documentElement.style;
+  s.setProperty('--child-home-c1',t.c1);
+  s.setProperty('--child-home-c2',t.c2);
+  s.setProperty('--child-home-shadow',t.shadow);
+  s.setProperty('--child-home-lt',t.lt);
+  s.setProperty('--child-home-ltDk',t.ltDk);
+  // Update home tab colors directly
+  TAB_COLORS.home=t.c1;
+  TAB_COLORS2.home=t.c2;
+  // Update CSS custom properties for the current tab if on home
+  if(document.body.getAttribute('data-tab')==='home'){
+    document.body.style.setProperty('--tab-color',t.c1);
+    document.body.style.setProperty('--tab-color2',t.c2);
+    document.body.style.setProperty('--tab-shadow',t.shadow);
+    document.body.style.setProperty('--tab-lt',t.lt);
+    document.body.style.setProperty('--tab-lt-dk',t.ltDk);
+    document.documentElement.style.background=t.c1;
+    const themeMeta=document.getElementById('theme-color-meta');
+    if(themeMeta&&!document.body.classList.contains('dark'))themeMeta.content=t.c1;
+  }
+}
+
 const DACTS = [
   {id:'a1', emoji:'🦷',name:'양치질',              desc:'아침/저녁 양치',              pts:20,maxDay:1,cycle:'daily',  active:true,showHome:true, assignedTo:['all']},
   {id:'a2', emoji:'🧼',name:'세수하기',             desc:'아침/저녁 세수',              pts:10,maxDay:1,cycle:'daily',  active:true,showHome:true, assignedTo:['all']},
@@ -6000,6 +6040,7 @@ function syncMemberToGlobal(targetId) {
     else if (!S.acts || S.acts.length === 0) S.acts = JSON.parse(JSON.stringify(DACTS));
     if (ms.rwds && ms.rwds.length > 0) S.rwds = ms.rwds;
     else if (!S.rwds || S.rwds.length === 0) S.rwds = JSON.parse(JSON.stringify(DRWDS));
+    S.stickers = ms.stickers || [];
   }
 }
 
@@ -6037,6 +6078,7 @@ function syncGlobalToMember(targetId) {
     ms.moodLog = S.moodLog;
     ms.badges = S.badges;
     ms.badgeLog = S.badgeLog;
+    ms.stickers = S.stickers || [];
   }
 }
 
@@ -9931,6 +9973,7 @@ function switchViewingChild(childId){
   // 해당 자녀의 memberData 초기화 (없으면)
   if(!S.memberData[childId])getMemberState(childId);
   syncMemberToGlobal(childId);
+  applyChildTheme(childId);
   renderAll();
   const nm=MEMBERS[childId]?.name||childId;
   toast(`${nm}의 마일리지를 보고 있어요`);
@@ -11593,6 +11636,7 @@ function renderMyTab(){
   }
   // 가족 구성원 아바타 가로 나열
   const familyRow=document.getElementById('my-family-row');
+  const familyTitle=document.getElementById('my-family-title');
   if(familyRow){
     const fm=S.familyMeta?.members||{};
     const ids=Object.keys(fm);
@@ -11603,15 +11647,18 @@ function renderMyTab(){
         const mName=m?.name||MEMBERS[mid]?.name||mid;
         const mRole=_RLABELS[m?.displayRole]||_RLABELS[m?.role]||m?.displayRole||m?.role||'멤버';
         const isMe=mid===currentUser;
-        return `<div class="my-family-member" onclick="if('${mid}'!=='${currentUser}')switchViewingChild&&switchViewingChild('${mid}')">
+        const clickAction=isMe?'onMeIconClick()':'onUserIconClick(\''+mid+'\')';
+        return `<div class="my-family-member" onclick="${clickAction}">
           <div class="my-family-avatar" style="${isMe?'border-color:var(--tab-color,#6366F1);box-shadow:0 0 0 2px var(--tab-color,#6366F1)':''}">${getAvatarHTML(mid,48)}</div>
           <div class="my-family-name">${mName}${isMe?'<span style="margin-left:3px;background:var(--tab-color,#6366F1);color:#fff;font-size:9px;font-weight:900;padding:1px 5px;border-radius:8px;vertical-align:middle">나</span>':''}</div>
           <div class="my-family-role">${mRole}</div>
         </div>`;
       }).join('');
       familyRow.style.display='flex';
+      if(familyTitle)familyTitle.style.display='flex';
     }else{
       familyRow.style.display='none';
+      if(familyTitle)familyTitle.style.display='none';
     }
   }
 }
@@ -12811,6 +12858,11 @@ function reallyGoTab(tab){
 
   // Set tab theme
   document.body.setAttribute('data-tab', tab);
+  // 홈탭이고 양육자면 현재 선택된 자녀 테마 적용
+  if(tab==='home'&&isCaregiverUser&&isCaregiverUser()){
+    const vid=getViewedMemberId&&getViewedMemberId();
+    if(vid)applyChildTheme(vid);
+  }
   document.documentElement.style.background = TAB_COLORS[tab] || '#6366F1';
 
   // 탭별 상단바 색상 변경 (아이폰 사파리)
@@ -14286,8 +14338,8 @@ window._createState = _createState;
     });
   }
   window.addEventListener('scroll', updateHeaderCompact, {passive:true});
-  window.addEventListener('resize', ()=>{_setTopbarH();updateHeaderCompact();}, {passive:true});
-  window.addEventListener('orientationchange', ()=>{setTimeout(()=>{_setTopbarH();updateHeaderCompact();},100);});
+  window.addEventListener('resize', updateHeaderCompact, {passive:true});
+  window.addEventListener('orientationchange', ()=>{setTimeout(updateHeaderCompact,100);});
 
 
   // ============ ONBOARDING OVERLAY ============
