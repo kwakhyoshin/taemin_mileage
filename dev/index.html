@@ -289,7 +289,11 @@ body.dark .dtog-in{transform:translateX(20px)}
 
 /* HOME TOP - scrolls away */
 /* APP TOP BAR */
-.app-topbar{background:var(--tab-color,#6366F1);padding:0 16px;padding-top:calc(12px + env(safe-area-inset-top));padding-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:8px;position:sticky;top:0;z-index:12;border:0;outline:0}
+.app-topbar{background:var(--tab-color,#6366F1);padding:0 16px;padding-top:calc(12px + env(safe-area-inset-top));padding-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:8px;position:sticky;top:0;z-index:12;border:0;outline:0;transition:padding-top .2s ease,padding-bottom .2s ease}
+.app-topbar.compact{padding-top:calc(4px + env(safe-area-inset-top))!important;padding-bottom:4px!important}
+.app-topbar.compact .app-topbar-logo svg{width:60px!important;height:15px!important;opacity:.9;transition:all .2s}
+.app-topbar.compact .dtog{transform:scale(.75);transform-origin:right center;transition:transform .2s,opacity .2s}
+.app-topbar.compact #child-switcher{transform:scale(.85);transform-origin:right center;transition:transform .2s}
 .app-topbar-logo{flex-shrink:0;display:flex;align-items:center}
 .app-topbar-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
 /* 자녀 전환기 (양육자 전용) */
@@ -337,7 +341,7 @@ body.dark .dtog-in{transform:translateX(20px)}
 .child-picker-name{font-size:16px;font-weight:800;color:var(--tx);flex:1}
 
 /* HERO - Sticky on scroll, full width when stuck */
-.hero{margin:0;background:linear-gradient(180deg,var(--tab-color,#6366F1),var(--tab-color2,#818CF8));border-radius:0 0 38px 38px;padding:14px 20px 22px;color:#fff;position:sticky;top:var(--topbar-h,0px);z-index:10;overflow:hidden;box-shadow:0 4px 20px var(--tab-shadow,rgba(99,102,241,0.3));transition:padding .25s,overflow .25s;border:0;outline:0}
+.hero{margin:0;background:linear-gradient(180deg,var(--tab-color,#6366F1),var(--tab-color2,#818CF8));border-radius:0 0 38px 38px;padding:14px 20px 22px;color:#fff;position:sticky;top:var(--topbar-h,0px);z-index:10;overflow:hidden;box-shadow:0 4px 20px var(--tab-shadow,rgba(99,102,241,0.3));transition:padding .25s,overflow .25s,top .2s ease;border:0;outline:0}
 .hero::after{content:'';position:absolute;bottom:-30px;left:20px;width:110px;height:110px;background:rgba(255,255,255,.08);border-radius:50%;pointer-events:none}
 .hero-lbl{font-size:14px;font-weight:700;opacity:.85;transition:font-size .25s}
 .hero-pts{font-size:58px;font-weight:900;letter-spacing:-2px;line-height:1;transition:font-size .25s}
@@ -5585,7 +5589,9 @@ function applyUserProfile() {
       // 양육자: 모드 무관하게 보고 있는 자녀 이름 표시 (flash 방지)
       const _hVid=getViewedMemberId();
       const _hVname=MEMBERS[_hVid]?.name||S.familyMeta?.members?.[_hVid]?.name||'';
-      heroLbl.textContent=_hVname?(_hVname+'의 마일리지'):(member.name+'의 마일리지');
+      // fallback: 자녀 이름 미확인 시 첫 번째 자녀 이름 사용 (양육자 본인 이름 절대 사용 안 함)
+      const _hFallback=(()=>{const kids=getChildMemberIds();return(kids.length>0&&(MEMBERS[kids[0]]?.name||S.familyMeta?.members?.[kids[0]]?.name))||'';})();
+      heroLbl.textContent=(_hVname||_hFallback)?((_hVname||_hFallback)+'의 마일리지'):'나의 마일리지';
     }else{
       heroLbl.textContent=`${member.name}의 마일리지`;
     }
@@ -5672,10 +5678,13 @@ function postLoginInit(){
 
 function logout() {
   if (!confirm('로그아웃 하시겠어요?')) return;
+  // Firestore 실시간 리스너 해제
+  if(_dataListenerUnsub){try{_dataListenerUnsub();}catch(e){}_dataListenerUnsub=null;}
   currentUser = null;
   viewingChildId = null;
   _admViewChildId = null;
   adminOK = false;
+  _hasDirtyLocal = false;
   localStorage.removeItem(_LS_PREFIX+'current_user');
   showAuthScreen('login');
   document.getElementById('login-id').value = '';
@@ -12542,6 +12551,7 @@ function handleRewardAction(action){
   _currentRecvMsg=null; // closeRecvMsg에서 중복 save 방지
   document.getElementById('recv-msg-bg').style.display='none';
   document.getElementById('recv-msg-pop').style.display='none';
+  unlockBodyScroll();
   if(action==='approve'){
     approveRewardRequest(reqId,currentUser);
   }else{
@@ -14247,9 +14257,18 @@ if(_ENV==='dev'){
       const scrollY = window.scrollY || document.documentElement.scrollTop;
       const threshold = 60;
       const thresholdOff = 40; // hysteresis: compact 해제는 40px 이하에서 (깜박거림 방지)
-      // topbar 높이 보정: home hero는 topbar 아래에 sticky이므로 그만큼 오프셋 차감
-      const _topH = _topbarEl ? _topbarEl.offsetHeight : 0;
-      const effScrollY = Math.max(0, scrollY - _topH); // home hero 전용 보정값
+      // 1. topbar compact (on:30px↑, off:15px↓) — 부드럽게 축소
+      if(_topbarEl){
+        const _tc=_topbarEl.classList.contains('compact');
+        if(!_tc && scrollY > 30) _topbarEl.classList.add('compact');
+        else if(_tc && scrollY < 15) _topbarEl.classList.remove('compact');
+        // --topbar-h를 실제 topbar 높이로 매 프레임 갱신 → hero가 topbar에 밀착
+        document.documentElement.style.setProperty('--topbar-h',_topbarEl.offsetHeight+'px');
+      }
+      // 2. effScrollY: hero가 sticky가 되는 시점(=인사말 영역 높이)부터 기산
+      //    (topbarH 기준 대신 homeGreeting 높이 기준으로 변경 → compact 애니메이션이 hero가 붙은 후에 시작)
+      const _greetH = _homTop ? _homTop.offsetHeight : (_topbarEl ? _topbarEl.offsetHeight : 0);
+      const effScrollY = Math.max(0, scrollY - _greetH); // home hero 전용 보정값
       // Smooth border-radius interpolation: 38px → 28px (mobile only)
       const isWide=window.innerWidth>=768;
       const brMax=38,brMin=28;
