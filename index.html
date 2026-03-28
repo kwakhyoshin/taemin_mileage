@@ -174,9 +174,9 @@ body.dark .toss-invite-name{color:#F1F5F9}
 body.dark .toss-invite-role{color:#64748B}
 body.dark .toss-invite-share-btn{background:rgba(99,102,241,.2);color:#818CF8}
 /* ── ONBOARDING WELCOME ── */
-.auth-screen.ob-gradient{background:linear-gradient(160deg,#3730A3 0%,#4F46E5 40%,#6366F1 70%,#7C3AED 100%);padding:0}
-.ob-welcome{display:flex;flex-direction:column;height:100%;width:100%;max-width:430px;margin:0 auto;padding:max(56px,calc(env(safe-area-inset-top,0px)+40px)) 32px max(32px,calc(env(safe-area-inset-bottom,0px)+24px));justify-content:space-between}
-.ob-welcome-top{flex:1;display:flex;flex-direction:column;justify-content:center}
+.auth-screen.ob-gradient{background:linear-gradient(160deg,#3730A3 0%,#4F46E5 40%,#6366F1 70%,#7C3AED 100%);padding:0;overflow:hidden}
+.ob-welcome{display:flex;flex-direction:column;height:100%;width:100%;max-width:430px;margin:0 auto;padding:max(56px,calc(env(safe-area-inset-top,0px)+40px)) 32px max(32px,calc(env(safe-area-inset-bottom,0px)+24px));justify-content:space-between;box-sizing:border-box}
+.ob-welcome-top{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
 .ob-logo-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:36px}
 .ob-logo-icon{width:88px;height:88px;border-radius:28px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.25)}
 .ob-headline{font-size:30px;font-weight:900;color:#fff;line-height:1.4;letter-spacing:-.8px;margin-bottom:12px}
@@ -13900,7 +13900,13 @@ Object.assign(window, {
   selectMode,
   renderInviteOptions, toggleChildAccount, generateChildAccount, shareInviteLink, renderDoneScreen,
   selectJoinMember, doJoinRegister, joinRegGoBack,
+  // Signup back-nav (missing from window)
+  create2Back, create3Back, create4Back, resetJoinRegId,
   isCurrentUserAdmin, rebuildMembersFromFamily,
+  // Settings/cache
+  clearAppCache,
+  // Activity/family management
+  togActDone, editFamilyMember, saveFamilyMemberEdit,
   // Avatar functions
   openAvatarEditor, saveAvatarCrop, renderAdmMemberPhotos,
   // Badge functions
