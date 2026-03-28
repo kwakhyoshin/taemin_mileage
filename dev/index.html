@@ -96,10 +96,12 @@ body[data-tab="home"]{--tab-color:#5457D9;--tab-color2:#727BE0;--tab-shadow:rgba
 body[data-tab="log"]{--tab-color:#DC3550;--tab-color2:#E5606F;--tab-shadow:rgba(220,53,80,0.3);--tab-lt:rgba(220,53,80,.1);--tab-lt-dk:rgba(220,53,80,.15)}
 body[data-tab="rwd"]{--tab-color:#D98E09;--tab-color2:#E0A820;--tab-shadow:rgba(217,142,9,0.3);--tab-lt:rgba(217,142,9,.1);--tab-lt-dk:rgba(217,142,9,.15)}
 body[data-tab="hist"]{--tab-color:#7A4FDD;--tab-color2:#9578E8;--tab-shadow:rgba(122,79,221,0.3);--tab-lt:rgba(122,79,221,.1);--tab-lt-dk:rgba(122,79,221,.15)}
+body[data-tab="my"]{--tab-color:#475569;--tab-color2:#64748B;--tab-shadow:rgba(71,85,105,0.3);--tab-lt:rgba(71,85,105,.1);--tab-lt-dk:rgba(71,85,105,.15)}
 body.dark[data-tab="home"]{--tab-color:#4345B8;--tab-color2:#5C63C9;--tab-shadow:rgba(67,69,184,0.3)}
 body.dark[data-tab="log"]{--tab-color:#B82A42;--tab-color2:#CC4A5C;--tab-shadow:rgba(184,42,66,0.3)}
 body.dark[data-tab="rwd"]{--tab-color:#B57808;--tab-color2:#C8901A;--tab-shadow:rgba(181,120,8,0.3)}
 body.dark[data-tab="hist"]{--tab-color:#6540BF;--tab-color2:#7E60D2;--tab-shadow:rgba(101,64,191,0.3)}
+body.dark[data-tab="my"]{--tab-color:#334155;--tab-color2:#475569;--tab-shadow:rgba(51,65,85,0.35)}
 /* Dark mode: auth & form components */
 body.dark .auth-screen.toss-style{background:#0F172A}
 body.dark .auth-card{background:#1E293B;box-shadow:0 20px 60px rgba(0,0,0,.5)}
@@ -300,16 +302,19 @@ body.dark .dtog-in{transform:translateX(20px)}
 .child-sw-select{background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.35);border-radius:20px;color:#fff;font-size:11px;font-weight:700;padding:3px 20px 3px 8px;font-family:inherit;cursor:pointer;outline:none;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center}
 .child-sw-select option{background:#4B5563;color:#fff}
 /* MY TAB */
-.my-header{background:linear-gradient(160deg,#475569,#64748B);padding:16px 20px 20px;padding-top:calc(16px + env(safe-area-inset-top));border-radius:0 0 38px 38px;position:relative;overflow:hidden;box-shadow:0 4px 20px rgba(71,85,105,0.3)}
-body.dark .my-header{background:linear-gradient(160deg,#334155,#475569);box-shadow:0 4px 20px rgba(51,65,85,0.35)}
-.my-header::after{content:'';position:absolute;bottom:-30px;right:10px;width:130px;height:130px;background:rgba(255,255,255,.08);border-radius:50%;pointer-events:none}
-.my-header-title{font-size:13px;font-weight:800;color:rgba(255,255,255,.6);margin-bottom:12px;letter-spacing:.5px}
-.my-header-info{display:flex;align-items:center;gap:14px}
-.my-avatar-wrap{width:56px;height:56px;border-radius:50%;overflow:hidden;border:2.5px solid rgba(255,255,255,.5);box-shadow:0 3px 12px rgba(0,0,0,.15);background:rgba(255,255,255,.2);flex-shrink:0;order:2}
+.my-header{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,var(--tab-color,#475569),var(--tab-color2,#64748B));padding:18px 22px 18px;padding-top:calc(18px + env(safe-area-inset-top));border-radius:0 0 38px 38px;overflow:hidden;box-shadow:0 4px 20px var(--tab-shadow,rgba(71,85,105,0.3));transition:padding .25s}
+.my-header::before{content:'';position:absolute;top:-40px;right:-20px;width:160px;height:160px;background:radial-gradient(circle,rgba(255,255,255,.1) 0%,transparent 70%);border-radius:50%;pointer-events:none}
+.my-header h2{font-size:26px;font-weight:900;color:#fff;margin:0;transition:font-size .25s}
+.my-header-sub{font-size:14px;color:rgba(255,255,255,.85);margin-top:3px;font-weight:600;transition:all .25s}
+.my-header.compact{padding:10px 20px 10px;padding-top:calc(10px + env(safe-area-inset-top))}
+.my-header.compact h2{font-size:16px}
+.my-header.compact .my-header-sub{font-size:0;margin:0;opacity:0;max-height:0;overflow:hidden}
+.my-profile-card{display:flex;align-items:center;gap:14px;background:var(--card);border-radius:16px;margin:16px 16px 0;padding:16px 18px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.my-avatar-wrap{width:50px;height:50px;border-radius:50%;overflow:hidden;border:2.5px solid var(--tab-color,#475569);box-shadow:0 2px 8px rgba(0,0,0,.1);background:var(--bg2);flex-shrink:0}
 .my-avatar-wrap img,.my-avatar-wrap svg{width:100%;height:100%;object-fit:cover}
-.my-info-text{flex:1;order:1}
-.my-name{font-size:20px;font-weight:900;color:#fff;line-height:1.2}
-.my-role{font-size:12px;font-weight:700;color:rgba(255,255,255,.75);background:rgba(255,255,255,.15);padding:2px 10px;border-radius:20px;display:inline-block;margin-top:4px}
+.my-info-text{flex:1}
+.my-name{font-size:17px;font-weight:900;color:var(--tx);line-height:1.2}
+.my-role{font-size:11px;font-weight:700;color:var(--tx3);background:var(--bg2);padding:2px 10px;border-radius:20px;display:inline-block;margin-top:4px}
 .my-section-title{font-size:12px;font-weight:800;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;padding:16px 20px 6px;display:flex;align-items:center;gap:6px}
 .my-section-title svg{flex-shrink:0}
 .my-list{background:var(--card);border-radius:16px;margin:0 16px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06)}
@@ -1329,6 +1334,8 @@ body.dark .family-popup-avatar{border-color:rgba(255,255,255,.25)}
   .log-header-sticky h2{font-size:26px}
   .rwd-header-sticky{padding:20px 24px;border-radius:0;margin:0 0 14px}
   .hist-hero{padding:22px 24px 18px;border-radius:0;margin:0 0 14px}
+  .my-header{padding:20px 24px;border-radius:0;margin:0}
+  .my-header h2{font-size:26px}
   .badge-hero{border-radius:0!important}
   #s-badge{margin-left:200px;width:calc(100vw - 200px)}
   .hist-stats-card{margin:0 20px 14px}
@@ -3496,13 +3503,14 @@ button:disabled {
 <!-- MY TAB -->
 <div class="scr" id="s-my">
   <div class="my-header">
-    <div class="my-header-title">my 메뉴</div>
-    <div class="my-header-info">
-      <div class="my-info-text">
-        <div class="my-name" id="my-name">이름</div>
-        <div class="my-role" id="my-role">역할</div>
-      </div>
-      <div class="my-avatar-wrap" id="my-avatar-wrap"></div>
+    <h2>My <svg class="hdr-ico" viewBox="0 0 24 24" style="width:24px;height:24px"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></h2>
+    <p class="my-header-sub" id="my-header-sub">내 정보</p>
+  </div>
+  <div class="my-profile-card">
+    <div class="my-avatar-wrap" id="my-avatar-wrap"></div>
+    <div class="my-info-text">
+      <div class="my-name" id="my-name">이름</div>
+      <div class="my-role" id="my-role">역할</div>
     </div>
   </div>
   <!-- 가족 구성원 아바타 가로 나열 -->
@@ -11624,9 +11632,12 @@ function renderMyTab(){
   const roleEl=document.getElementById('my-role');
   if(nameEl)nameEl.textContent=name;
   if(roleEl)roleEl.textContent=roleLabel;
+  // 헤더 서브타이틀 업데이트
+  const myHeaderSub=document.getElementById('my-header-sub');
+  if(myHeaderSub)myHeaderSub.textContent=`${name} · ${roleLabel}`;
   // 아바타
   const avatarWrap=document.getElementById('my-avatar-wrap');
-  if(avatarWrap)avatarWrap.innerHTML=getAvatarHTML(currentUser,56);
+  if(avatarWrap)avatarWrap.innerHTML=getAvatarHTML(currentUser,50);
   // 관리자 버튼 표시 여부 (양육자 또는 isAdmin 권한이 있는 자녀)
   const adminBtn=document.getElementById('my-admin-btn');
   if(adminBtn)adminBtn.style.display=(isCaregiverUser()||isCurrentUserAdmin())?'':'none';
@@ -14387,6 +14398,14 @@ window._createState = _createState;
         if(!_hc && scrollY > threshold) histHdr.classList.add('compact');
         else if(_hc && scrollY < thresholdOff) histHdr.classList.remove('compact');
         histHdr.style.borderRadius=brStrOther;
+      }
+      // My (raw scrollY + hysteresis)
+      const myHdr = document.querySelector('.my-header');
+      if(myHdr && document.getElementById('s-my')?.classList.contains('on')){
+        const _mc=myHdr.classList.contains('compact');
+        if(!_mc && scrollY > threshold) myHdr.classList.add('compact');
+        else if(_mc && scrollY < thresholdOff) myHdr.classList.remove('compact');
+        myHdr.style.borderRadius=brStrOther;
       }
     });
   }
