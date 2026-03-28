@@ -9932,7 +9932,10 @@ function getViewedMemberId(){
 function getActiveMileage(){
   if(getFamilyMode()==='independent'&&isCaregiverUser()){
     const vid=getViewedMemberId();
-    if(vid&&S.memberData&&S.memberData[vid]!==undefined)return S.memberData[vid].pts||0;
+    if(vid&&S.memberData){
+      if(S.memberData[vid]!==undefined)return S.memberData[vid].pts||0;
+      return 0; // 자녀 memberData 미초기화 — 양육자 pts 오표시 방지
+    }
   }
   return S.pts||0;
 }
@@ -14037,6 +14040,27 @@ window._moduleLoaded = true;
 console.log('[mile.ly] module loaded OK');
 // _createState를 window에 노출 (child card oninput 참조용)
 window._createState = _createState;
+
+// ── DEV 전용: 테스트 상태 주입 훅 ──────────────
+if(_ENV==='dev'){
+  window._injectTestState=function(stateObj,viewChildId){
+    S=Object.assign(defaultState(),stateObj);
+    if(stateObj.memberData)S.memberData=stateObj.memberData;
+    rebuildMembersFromFamily();
+    if(viewChildId){viewingChildId=viewChildId;}
+    const savedUser=stateObj._testCurrentUser||currentUser;
+    if(savedUser&&S.users&&S.users[savedUser]){
+      currentUser=savedUser;
+      syncMemberToGlobal(savedUser);
+      if(isCurrentUserAdmin())adminOK=true;
+      hideAllAuth();
+    }
+    renderAll();
+  };
+  window._getS=function(){return S;};
+  window._getCurrentUser=function(){return currentUser;};
+  window._setViewingChild=function(id){viewingChildId=id;};
+}
 
 // ── INIT (Firebase async) ─────────────────────
 (async function(){
