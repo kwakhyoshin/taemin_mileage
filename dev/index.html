@@ -2939,7 +2939,10 @@ button:disabled {
 <!-- LOG -->
 <div class="scr" id="s-log">
   <div class="log-header-sticky">
-    <h2>활동 기록하기 <svg class="hdr-ico" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><path d="M9 15l2 2 4-4"/></svg></h2>
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <h2 style="margin:0">활동 기록하기 <svg class="hdr-ico" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><path d="M9 15l2 2 4-4"/></svg></h2>
+      <div id="log-child-selector" style="display:none;flex-shrink:0"><div id="log-child-btns"></div></div>
+    </div>
     <p>탭해서 마일리지를 받아요</p>
     <div class="hdr-stats" id="log-hdr-stats">
       <div class="hdr-stat"><div class="hdr-stat-num" id="log-today-count">0</div><div class="hdr-stat-lbl">오늘 활동</div></div>
@@ -2953,7 +2956,10 @@ button:disabled {
 <!-- REWARDS -->
 <div class="scr" id="s-rwd">
   <div class="rwd-header-sticky">
-    <h2 style="font-size:24px;font-weight:900;color:#fff">보상 상점 <svg class="hdr-ico" viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg></h2>
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <h2 style="font-size:24px;font-weight:900;color:#fff;margin:0">보상 상점 <svg class="hdr-ico" viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg></h2>
+      <div id="rwd-child-selector" style="display:none;flex-shrink:0"><div id="rwd-child-btns"></div></div>
+    </div>
     <p style="font-size:14px;color:rgba(255,255,255,.85);margin-top:2px;font-weight:600">모은 마일리지로 교환해요</p>
     <div class="hdr-stats" id="rwd-hdr-stats">
       <div class="hdr-stat"><div class="hdr-stat-num" id="rwd-hdr-pts">0</div><div class="hdr-stat-lbl">보유 마일리지</div></div>
@@ -4831,15 +4837,11 @@ async function createStep3Next(){
 
   err.textContent='';
 
-  if(childCount>=2){
-    showAuthScreen('create-4');
-  }else{
-    _createState.mode='independent';
-    // 가족을 DB에 저장한 후 초대 화면으로
-    await saveFamilyToFirestore();
-    showAuthScreen('create-5');
-    renderInviteOptions();
-  }
+  // 항상 독립 모드 (통합모드 제거됨)
+  _createState.mode='independent';
+  await saveFamilyToFirestore();
+  showAuthScreen('create-5');
+  renderInviteOptions();
 }
 
 function selectMode(mode){
@@ -4855,13 +4857,8 @@ async function createStep4Next(){
 }
 
 function createStep5Back(){
-  const childCount=_createState.members.filter(m=>m.role==='child'&&m.name.trim()).length;
-  if(childCount>=2){
-    showAuthScreen('create-4');
-  }else{
-    showAuthScreen('create-3');
-    renderFamilyGraph();
-  }
+  showAuthScreen('create-3');
+  renderFamilyGraph();
 }
 
 function renderInviteOptions(){
@@ -5595,45 +5592,23 @@ function _korSuffix(name){
   return(cp-0xAC00)%28!==0?'이':'';
 }
 
-// 성과 탭 히어로 서브텍스트 + 자녀 선택기 렌더링
+// 성과 탭 히어로 서브텍스트 렌더링 (자녀 선택기는 renderNavUsers에서 통합 관리)
 function _renderHistHeroSub(){
   const histSub=document.getElementById('hist-hero-sub');
-  const histSel=document.getElementById('hist-child-selector');
-  const histBtns=document.getElementById('hist-child-btns');
-  if(isCaregiverUser()&&getFamilyMode()==='independent'){
+  if(!histSub)return;
+  if(isCaregiverUser()){
     const kids=getChildMemberIds();
     if(kids.length===0){
-      if(histSub)histSub.textContent='활동 분석';
-      if(histSel)histSel.style.display='none';
-    } else if(kids.length===1){
-      const nm=S.familyMeta?.members?.[kids[0]]?.name||kids[0];
-      if(histSub)histSub.textContent=`${nm}${_korSuffix(nm)}의 성과`;
-      if(histSel)histSel.style.display='none';
+      histSub.textContent='활동 분석';
     } else {
       const viewedId=getViewedMemberId();
       const nm=S.familyMeta?.members?.[viewedId]?.name||viewedId;
-      if(histSub)histSub.textContent=`${nm}${_korSuffix(nm)}의 성과`;
-      if(histSel)histSel.style.display='block';
-      if(histBtns){
-        if(kids.length===2){
-          histBtns.innerHTML=`<div class="child-sw-toggle">${kids.map(kid=>{
-            const kn=S.familyMeta?.members?.[kid]?.name||kid;
-            return`<button class="child-sw-btn${kid===viewedId?' on':''}" onclick="switchViewingChild('${kid}');_renderHistHeroSub()">${kn}</button>`;
-          }).join('')}</div>`;
-        }else{
-          const opts=kids.map(kid=>{
-            const kn=S.familyMeta?.members?.[kid]?.name||kid;
-            return`<option value="${kid}"${kid===viewedId?' selected':''}>${kn}</option>`;
-          }).join('');
-          histBtns.innerHTML=`<select class="child-sw-select" onchange="switchViewingChild(this.value);_renderHistHeroSub()">${opts}</select>`;
-        }
-      }
+      histSub.textContent=`${nm}${_korSuffix(nm)}의 성과`;
     }
   } else {
     const mem=currentUser&&S.familyMeta?.members?.[currentUser];
     const nm=mem?.name||currentUser||'나';
-    if(histSub)histSub.textContent=`${nm}의 활동 분석`;
-    if(histSel)histSel.style.display='none';
+    histSub.textContent=`${nm}의 활동 분석`;
   }
 }
 
@@ -11755,36 +11730,48 @@ function _onChildPickerSelect(childId){
 window.showChildPicker=showChildPicker;
 window._onChildPickerSelect=_onChildPickerSelect;
 
-// ── NAV USERS RENDERING (상단 자녀 선택기 + hist 탭 show/hide) ──
+// ── NAV USERS RENDERING (모든 탭 자녀 선택기 + hist 탭 show/hide) ──
 function renderNavUsers(){
-  const mode=getFamilyMode();
   const kids=getChildMemberIds();
+  const showSwitcher=isCaregiverUser()&&kids.length>=2;
+  const currentViewed=getViewedMemberId();
 
-  // 자녀 전환기: 양육자 + independent 모드 + 자녀 2명 이상일 때만 표시
-  const switcher=document.getElementById('child-switcher');
-  if(switcher){
-    if(isCaregiverUser()&&mode==='independent'&&kids.length>=2){
-      const currentViewed=getViewedMemberId();
-      switcher.style.display='flex';
-      if(kids.length===2){
-        // 토글 형태 (자녀 2명)
-        switcher.innerHTML=`<div class="child-sw-toggle">${kids.map(id=>{
-          const nm=MEMBERS[id]?.name||id;
-          return`<button class="child-sw-btn${id===currentViewed?' on':''}" onclick="switchViewingChild('${id}')">${nm}</button>`;
-        }).join('')}</div>`;
-      }else{
-        // 드롭다운 (자녀 3명 이상)
-        const opts=kids.map(id=>{
-          const nm=MEMBERS[id]?.name||id;
-          return`<option value="${id}"${id===currentViewed?' selected':''}>${nm}</option>`;
-        }).join('');
-        switcher.innerHTML=`<select class="child-sw-select" onchange="switchViewingChild(this.value)">${opts}</select>`;
-      }
+  // 자녀 선택기 HTML 생성 (공통)
+  function _childSwHTML(){
+    if(kids.length===2){
+      return`<div class="child-sw-toggle">${kids.map(id=>{
+        const nm=MEMBERS[id]?.name||id;
+        return`<button class="child-sw-btn${id===currentViewed?' on':''}" onclick="switchViewingChild('${id}')">${nm}</button>`;
+      }).join('')}</div>`;
     }else{
-      switcher.style.display='none';
-      switcher.innerHTML='';
+      const opts=kids.map(id=>{
+        const nm=MEMBERS[id]?.name||id;
+        return`<option value="${id}"${id===currentViewed?' selected':''}>${nm}</option>`;
+      }).join('');
+      return`<select class="child-sw-select" onchange="switchViewingChild(this.value)">${opts}</select>`;
     }
   }
+
+  // 홈, 활동기록, 보상, 성과 탭에 자녀 선택기 렌더링
+  const selectorIds=['child-switcher','log-child-selector','rwd-child-selector','hist-child-selector'];
+  const btnIds=[null,'log-child-btns','rwd-child-btns','hist-child-btns'];
+  selectorIds.forEach((selId,i)=>{
+    const el=document.getElementById(selId);
+    if(!el)return;
+    if(showSwitcher){
+      el.style.display=selId==='child-switcher'?'flex':'block';
+      // 홈탭은 switcher 자체에 innerHTML, 나머지는 btns에
+      if(selId==='child-switcher'){
+        el.innerHTML=_childSwHTML();
+      }else{
+        const btnsEl=document.getElementById(btnIds[i]);
+        if(btnsEl)btnsEl.innerHTML=_childSwHTML();
+      }
+    }else{
+      el.style.display='none';
+      el.innerHTML='';
+    }
+  });
 
   // 리포트 탭: 양육자에게만 표시
   const histTab=document.getElementById('tab-hist');
@@ -14185,10 +14172,10 @@ window._createState = _createState;
           const usMax=18,usMin=14;
           _unitEl.style.fontSize=(usMax-(usMax-usMin)*brRatioHome)+'px';
         }
-        // Fade out home-top children only (not background)
+        // Fade out home-top children only (not background) — raw scrollY 기준 (아이폰 시계 겹침 방지)
         if(_homTopChildren.length){
           const fadeStart=10, fadeEnd=60;
-          const o=effScrollY<=fadeStart?1:effScrollY>=fadeEnd?0:1-(effScrollY-fadeStart)/(fadeEnd-fadeStart);
+          const o=scrollY<=fadeStart?1:scrollY>=fadeEnd?0:1-(scrollY-fadeStart)/(fadeEnd-fadeStart);
           const v=Math.max(0,Math.min(1,o));
           _homTopChildren.forEach(c=>c.style.opacity=v);
         }
