@@ -2422,9 +2422,9 @@ button:disabled {
     <div class="auth-logo"><svg width="64" height="64" viewBox="0 0 200 200"><defs><linearGradient id="lb" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#4F46E5"/><stop offset="100%" stop-color="#7C3AED"/></linearGradient></defs><circle cx="100" cy="100" r="96" fill="url(#lb)"/><path d="M62,150 L62,98 L100,64 L138,98 L138,150 Z" fill="#fff" opacity=".96"/><rect x="87" y="118" width="26" height="32" rx="4" fill="#FF6B35"/><circle cx="100" cy="50" r="8" fill="#FF6B35"/></svg></div>
     <svg viewBox="0 0 130 36" xmlns="http://www.w3.org/2000/svg" style="height:32px;width:auto;display:block;margin:0 auto 4px" aria-label="mile.ly"><text x="2" y="27" font-family="'Pretendard Variable',system-ui,-apple-system,sans-serif" font-weight="900" font-size="30" letter-spacing="-1"><tspan fill="#6366F1">mile</tspan><tspan fill="#FF6B35">.</tspan><tspan fill="#6366F1">ly</tspan></text></svg>
     <div class="auth-sub">가족 계정으로 로그인하세요</div>
-    <input type="text" class="auth-input" id="login-id" placeholder="아이디" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('login-pwd').focus()">
+    <input type="text" class="auth-input" id="login-id" placeholder="아이디" autocomplete="username" inputmode="latin" autocapitalize="none" onkeydown="if(event.key==='Enter')document.getElementById('login-pwd').focus()">
     <div class="pwd-wrap">
-      <input type="password" class="auth-input" id="login-pwd" placeholder="비밀번호" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+      <input type="password" class="auth-input" id="login-pwd" placeholder="비밀번호" autocomplete="current-password" inputmode="latin" onkeydown="if(event.key==='Enter')doLogin()">
       <button type="button" class="pwd-toggle" onclick="togglePwd('login-pwd', this)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
     </div>
     <div class="auth-error" id="login-error"></div>
@@ -2614,7 +2614,7 @@ button:disabled {
           <div class="toss-question">로그인에 사용할<br>아이디를 만들어주세요</div>
           <div class="toss-desc">나중에 이 아이디로 로그인해요</div>
           <div style="position:relative">
-            <input type="text" class="toss-input" id="create-user-id" placeholder="아이디 (4자 이상)" autocomplete="username" style="padding-right:44px">
+            <input type="text" class="toss-input" id="create-user-id" placeholder="아이디 (4자 이상)" autocomplete="username" inputmode="latin" autocapitalize="none" style="padding-right:44px">
             <span id="c1-id-lock-icon" style="display:none;position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--or)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></span>
           </div>
           <button id="c1-id-reset-btn" onclick="resetCreateId()" style="display:none;margin-top:8px;width:100%;padding:10px;background:transparent;border:1.5px solid var(--bdr);border-radius:10px;font-size:13px;font-weight:700;color:var(--tx2);font-family:inherit;cursor:pointer">다른 아이디 사용</button>
@@ -2630,7 +2630,7 @@ button:disabled {
           <div class="toss-question">비밀번호를<br>설정해주세요</div>
           <div class="toss-desc">6자 이상의 안전한 비밀번호를 입력해주세요</div>
           <div class="pwd-wrap" style="margin-bottom:0">
-            <input type="password" class="toss-input" id="create-user-pwd" placeholder="비밀번호 (6자 이상)" autocomplete="new-password" oninput="updatePwdStrength(this.value)">
+            <input type="password" class="toss-input" id="create-user-pwd" placeholder="비밀번호 (6자 이상)" autocomplete="new-password" inputmode="latin" oninput="updatePwdStrength(this.value)">
             <button type="button" class="toss-pwd-toggle" onclick="togglePwd('create-user-pwd', this)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
           </div>
           <div class="pwd-strength-bar" style="margin:10px 0 4px">
@@ -2640,7 +2640,7 @@ button:disabled {
           </div>
           <div class="pwd-hint" id="pwd-hint" style="margin-bottom:20px">최소 6자 이상 입력해주세요</div>
           <div class="pwd-wrap" style="margin-bottom:0">
-            <input type="password" class="toss-input" id="create-user-pwd2" placeholder="비밀번호 확인" autocomplete="new-password">
+            <input type="password" class="toss-input" id="create-user-pwd2" placeholder="비밀번호 확인" autocomplete="new-password" inputmode="latin">
             <button type="button" class="toss-pwd-toggle" onclick="togglePwd('create-user-pwd2', this)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
           </div>
           <div class="auth-error" id="c1-pwd-error" style="margin-top:10px"></div>
@@ -2654,7 +2654,7 @@ button:disabled {
         <div class="toss-slide-content">
           <div class="toss-question">이름을<br>알려주세요</div>
           <div class="toss-desc">앱에서 표시될 이름이에요</div>
-          <input type="text" class="toss-input" id="create-my-name" placeholder="예: 효신, 은혜" maxlength="10" autocomplete="name">
+          <input type="text" class="toss-input" id="create-my-name" placeholder="예: 효신, 은혜" maxlength="10" autocomplete="name" inputmode="text">
           <div class="auth-error" id="c1-name-error" style="margin-top:10px"></div>
         </div>
         <div class="toss-cta">
@@ -2693,7 +2693,7 @@ button:disabled {
           <div class="auth-steps" id="create-steps-2"></div>
           <div class="toss-question">가족 이름을<br>정해주세요</div>
           <div class="toss-desc">우리 가족만의 특별한 이름을 만들어봐요</div>
-          <input type="text" class="toss-input" id="create-family-name" placeholder="예: 태민이네, 곽씨 패밀리" maxlength="20" oninput="updateFamilyNamePreview(this.value)">
+          <input type="text" class="toss-input" id="create-family-name" placeholder="예: 태민이네, 곽씨 패밀리" maxlength="20" inputmode="text" oninput="updateFamilyNamePreview(this.value)">
           <div class="family-name-preview" id="family-name-preview" style="display:none;margin-top:12px"></div>
           <div class="auth-error" id="create2-error" style="margin-top:10px"></div>
         </div>
@@ -2855,7 +2855,7 @@ button:disabled {
           <div class="toss-question" id="join-reg-title">계정을 만들어볼게요!<br>아이디를 정해주세요</div>
           <div class="toss-desc">가족에 합류하기 위한 아이디예요</div>
           <div style="position:relative">
-            <input type="text" class="toss-input" id="join-reg-id" placeholder="아이디 (4자 이상)" autocomplete="username" style="padding-right:44px">
+            <input type="text" class="toss-input" id="join-reg-id" placeholder="아이디 (4자 이상)" autocomplete="username" inputmode="latin" autocapitalize="none" style="padding-right:44px">
             <span id="jr-id-lock-icon" style="display:none;position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--or)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></span>
           </div>
           <button id="jr-id-reset-btn" onclick="resetJoinRegId()" style="display:none;margin-top:8px;width:100%;padding:10px;background:transparent;border:1.5px solid var(--bdr);border-radius:10px;font-size:13px;font-weight:700;color:var(--tx2);font-family:inherit;cursor:pointer">다른 아이디 사용</button>
@@ -2871,11 +2871,11 @@ button:disabled {
           <div class="toss-question">비밀번호를<br>설정해주세요</div>
           <div class="toss-desc">4자 이상의 비밀번호를 입력해주세요</div>
           <div class="pwd-wrap" style="margin-bottom:0">
-            <input type="password" class="toss-input" id="join-reg-pwd" placeholder="비밀번호 (4자 이상)" autocomplete="new-password">
+            <input type="password" class="toss-input" id="join-reg-pwd" placeholder="비밀번호 (4자 이상)" autocomplete="new-password" inputmode="latin">
             <button type="button" class="toss-pwd-toggle" onclick="togglePwd('join-reg-pwd', this)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
           </div>
           <div style="margin-top:16px" class="pwd-wrap" style="margin-bottom:0">
-            <input type="password" class="toss-input" id="join-reg-pwd2" placeholder="비밀번호 확인" autocomplete="new-password">
+            <input type="password" class="toss-input" id="join-reg-pwd2" placeholder="비밀번호 확인" autocomplete="new-password" inputmode="latin">
             <button type="button" class="toss-pwd-toggle" onclick="togglePwd('join-reg-pwd2', this)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
           </div>
           <div class="auth-error" id="join-reg-error" style="margin-top:10px"></div>
@@ -2959,7 +2959,7 @@ button:disabled {
     <div class="hdr-stats" id="log-hdr-stats">
       <div class="hdr-stat"><div class="hdr-stat-num" id="log-today-count">0</div><div class="hdr-stat-lbl">오늘 활동</div></div>
       <div class="hdr-stat-divider"></div>
-      <div class="hdr-stat"><div class="hdr-stat-num" id="log-today-pts">0</div><div class="hdr-stat-lbl">획득 마일리지</div></div>
+      <div class="hdr-stat"><div class="hdr-stat-num" id="log-today-pts">0</div><div class="hdr-stat-lbl">보유 마일리지</div></div>
     </div>
   </div>
   <div class="log-wrap" id="log-list"></div>
@@ -3202,12 +3202,11 @@ button:disabled {
     <div style="display:flex;align-items:center;justify-content:space-between">
       <div>
         <h2>관리자 <svg class="hdr-ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></h2>
-        <p>양육자 전용 설정 화면 <span style="font-size:13px;color:rgba(255,255,255,.5);font-weight:700">· 개발 환경</span></p>
+        <p>양육자 전용 설정 화면</p>
       </div>
       <button class="adm-lock" onclick="lockAdmin()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> 잠금</button>
     </div>
   </div>
-  <div id="env-switch-area" style="display:flex;gap:6px;margin:0 16px 10px"></div>
   <div id="dev-user-switch-area" style="margin:0 16px 10px"></div>
   <div class="adm-tabs">
     <button class="adm-tab on" id="at-0" onclick="admTab(0)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="12" y2="16"/></svg> 활동</button>
@@ -4029,18 +4028,18 @@ Object.entries(EMOJIS).forEach(([cat,arr])=>arr.forEach(e=>FLAT.push({e,cat,kw:E
 // ═══════════════════════════════════════════════
 // SVG 아바타 아이콘
 // ── 역할 정의 (다가족) — SVG 아이콘 ──────────────────────────
-const _SVG_PERSON_M='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg>';
-const _SVG_PERSON_F='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><path d="M8 7c0-3 2-5 4-5s4 2 4 5" stroke-width="2.2"/></svg>';
+const _SVG_PERSON_M='<svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="40" cy="27" r="13"/><path d="M20 70v-7a13 13 0 0 1 13-13h14a13 13 0 0 1 13 13v7"/></svg>';
+const _SVG_PERSON_F='<svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="40" cy="27" r="13"/><path d="M27 21Q26 12 40 10Q54 12 53 21"/><path d="M20 70v-7a13 13 0 0 1 13-13h14a13 13 0 0 1 13 13v7"/></svg>';
 const _SVG_ELDER='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><path d="M9 5h6" stroke-width="1.5"/></svg>';
-const _SVG_CHILD_M='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><circle cx="12" cy="7" r="2" fill="currentColor" opacity=".15"/></svg>';
-const _SVG_CHILD_F='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><path d="M8 5c0-2 2-3.5 4-3.5s4 1.5 4 3.5" stroke-width="2"/><circle cx="12" cy="7" r="2" fill="currentColor" opacity=".15"/></svg>';
+const _SVG_CHILD_M='<svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="40" cy="27" r="13"/><path d="M31 18L33 12L36 17L38 8L40 16L42 8L44 17L47 12L49 18" stroke-width="2.5"/><path d="M20 70v-7a13 13 0 0 1 13-13h14a13 13 0 0 1 13 13v7"/></svg>';
+const _SVG_CHILD_F='<svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="40" cy="27" r="13"/><path d="M27 21Q27 14 40 14Q53 14 53 21"/><path d="M27 21Q21 18 19 24Q18 31 24 34Q27 35 27 29"/><circle cx="21" cy="28" r="3.5" stroke-width="2"/><path d="M53 21Q59 18 61 24Q62 31 56 34Q53 35 53 29"/><circle cx="59" cy="28" r="3.5" stroke-width="2"/><path d="M20 70v-7a13 13 0 0 1 13-13h14a13 13 0 0 1 13 13v7"/></svg>';
 // 역할별 차별화 SVG 아이콘
-const _SVG_DAD='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><path d="M9 5.5c0-1.5 1.3-2.5 3-2.5s3 1 3 2.5" stroke-width="2.6"/></svg>';
-const _SVG_MOM='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><path d="M8.5 6c0-3 1.5-5 3.5-5s3.5 2 3.5 5"/><path d="M7.5 10c-1 1.5-1 4 0 5.5"/><path d="M16.5 10c1 1.5 1 4 0 5.5"/></svg>';
-const _SVG_GRANDPA='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><circle cx="10.2" cy="9.2" r="1.4" stroke-width="1.3"/><circle cx="13.8" cy="9.2" r="1.4" stroke-width="1.3"/><path d="M11.6 9.2h.8M8.8 9.2H8M15.2 9.2H16" stroke-width="1.2"/><path d="M9 6c0-2 1-3 3-3" stroke-width="1.5"/></svg>';
-const _SVG_GRANDMA='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><path d="M8.5 5c-.5-2.5.5-4 3.5-4s4 1.5 3.5 4"/><path d="M7.5 8.5c-2 .3-3-.7-3-1.8s1-2.2 2.5-1.8"/><path d="M16.5 8.5c2 .3 3-.7 3-1.8s-1-2.2-2.5-1.8"/></svg>';
-const _SVG_GRANDPA_M='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><rect x="8.5" y="8.2" width="3" height="2" rx="0.6" stroke-width="1.3"/><rect x="12.5" y="8.2" width="3" height="2" rx="0.6" stroke-width="1.3"/><path d="M11.5 9.2h1M8 9.2H7.5M15.5 9.2H16.5" stroke-width="1.2"/><path d="M9 5.5c0-2 1-3 3-3s3 1 3 3" stroke-width="1.5"/></svg>';
-const _SVG_GRANDMA_M='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.5" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><path d="M9 6c0-2.5 1.3-5 3-5s3 2.5 3 5"/><circle cx="12" cy="2.8" r="1.8" stroke-width="1.5" fill="none"/></svg>';
+const _SVG_DAD='<svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="40" cy="27" r="13"/><path d="M28 21Q28 14 40 14Q52 14 52 21" stroke-width="5"/><path d="M20 70v-7a13 13 0 0 1 13-13h14a13 13 0 0 1 13 13v7"/><path d="M36 41L40 46L44 41"/><path d="M38.5 46L37 58L40 62L43 58L41.5 46Z"/></svg>';
+const _SVG_MOM='<svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="40" cy="27" r="13"/><path d="M27 21Q26 10 40 9Q54 10 53 21"/><path d="M27 27Q23 40 24 53Q26 62 30 66"/><path d="M53 27Q57 40 56 53Q54 62 50 66"/><line x1="27" y1="31" x2="27" y2="36" stroke-width="2"/><circle cx="27" cy="38.5" r="2.5" stroke-width="2"/><line x1="53" y1="31" x2="53" y2="36" stroke-width="2"/><circle cx="53" cy="38.5" r="2.5" stroke-width="2"/><path d="M20 70v-7a13 13 0 0 1 13-13h14a13 13 0 0 1 13 13v7"/></svg>';
+const _SVG_GRANDPA='<svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="40" cy="27" r="13"/><path d="M29 18Q30 14 35 14" stroke-width="2"/><path d="M51 18Q50 14 45 14" stroke-width="2"/><circle cx="34" cy="28" r="4.5" stroke-width="2"/><circle cx="46" cy="28" r="4.5" stroke-width="2"/><line x1="38.5" y1="28" x2="41.5" y2="28" stroke-width="1.5"/><line x1="29.5" y1="27" x2="27" y2="26" stroke-width="1.5"/><line x1="50.5" y1="27" x2="53" y2="26" stroke-width="1.5"/><path d="M20 70v-7a13 13 0 0 1 13-13h14a13 13 0 0 1 13 13v7"/></svg>';
+const _SVG_GRANDMA='<svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="40" cy="27" r="13"/><path d="M33 19Q34 13 40 11Q46 13 47 19"/><circle cx="40" cy="11" r="4.5" stroke-width="2"/><path d="M34 42Q40 47 46 42" stroke-width="1.5"/><circle cx="40" cy="47" r="2" stroke-width="1.5"/><path d="M20 70v-7a13 13 0 0 1 13-13h14a13 13 0 0 1 13 13v7"/></svg>';
+const _SVG_GRANDPA_M='<svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="40" cy="27" r="13"/><path d="M29 18Q30 14 35 14" stroke-width="2"/><path d="M51 18Q50 14 45 14" stroke-width="2"/><rect x="28.5" y="23" width="9.5" height="8" rx="1.5" stroke-width="2"/><rect x="42" y="23" width="9.5" height="8" rx="1.5" stroke-width="2"/><line x1="38" y1="27" x2="42" y2="27" stroke-width="1.5"/><line x1="28.5" y1="27" x2="26" y2="26" stroke-width="1.5"/><line x1="51.5" y1="27" x2="54" y2="26" stroke-width="1.5"/><path d="M20 70v-7a13 13 0 0 1 13-13h14a13 13 0 0 1 13 13v7"/></svg>';
+const _SVG_GRANDMA_M='<svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="40" cy="27" r="13"/><path d="M28 23Q26 15 28 11Q31 7 36 7Q40 6 44 7Q49 7 52 11Q54 15 52 23"/><path d="M28 23Q25 30 26 37"/><path d="M52 23Q55 30 54 37"/><path d="M27 17Q26 14 29 13Q32 12 31 15" stroke-width="2"/><path d="M35 9Q34 6 37 7Q40 8 39 11" stroke-width="2"/><path d="M45 9Q46 6 43 7Q40 8 41 11" stroke-width="2"/><path d="M53 17Q54 14 51 13Q48 12 49 15" stroke-width="2"/><path d="M20 70v-7a13 13 0 0 1 13-13h14a13 13 0 0 1 13 13v7"/></svg>';
 
 const ROLE_DEFS = {
   dad:       {label:'아빠',      svg:_SVG_DAD,      type:'caregiver', color:'#DBEAFE', textColor:'#3B82F6'},
@@ -4901,39 +4900,17 @@ function renderInviteOptions(){
           <div class="invite-card-role">${rd.label||(m.role==='child'?'아이':'양육자')}</div>
         </div>
       </div>
-      ${isChild?`<div class="invite-card-actions" style="width:100%">
-        <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
-          <label class="invite-toggle-wrap">
-            <span>계정 만들기</span>
-            <button class="invite-toggle ${_createState.childAccounts[idx]?'on':''}" onclick="toggleChildAccount(${idx})"></button>
-          </label>
-          <button class="share-btn" onclick="shareInviteLink('${m.name}',${idx})" style="font-size:13px">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg> 공유
-          </button>
-        </div>
-        ${_createState.childAccounts[idx]?`<div style="margin-top:8px;padding:8px 10px;background:rgba(99,102,241,.08);border-radius:8px;font-size:13px;color:var(--tx2);width:100%">
-          <div>아이디: <b>${_createState.childAccounts[idx].id}</b></div>
-          <div>비밀번호: <b>${_createState.childAccounts[idx].pwd}</b></div>
-        </div>`:'<div style="margin-top:4px;font-size:13px;color:var(--tx3)">계정 없이 초대 링크만 공유합니다</div>'}
-      </div>`:`<div class="invite-card-actions">
+      <div class="invite-card-actions">
         <button class="share-btn" onclick="shareInviteLink('${m.name}',${idx})">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/>
           </svg> 초대 링크
         </button>
-      </div>`}
+      </div>
     </div>`;
   }).join('');
 }
 
-function toggleChildAccount(idx){
-  if(_createState.childAccounts[idx]){
-    delete _createState.childAccounts[idx];
-  }else{
-    generateChildAccount(idx);
-  }
-  renderInviteOptions();
-}
 
 function generateChildAccount(idx){
   const m=_createState.members[idx];
@@ -13648,24 +13625,6 @@ function togglePush(){
 window.togglePush=togglePush;
 window.sendTestPush=sendTestPush;
 
-// ── 환경 스위치 ──────
-function switchEnv(){
-  const baseUrl=location.pathname.replace(/\/dev\/index\.html$/,'/').replace(/\/index\.html$/,'/');
-  if(_ENV==='prod'){
-    location.href=baseUrl+'dev/index.html';
-  }else{
-    location.href=baseUrl.replace(/\/dev\/$/,'/')+'index.html';
-  }
-}
-window.switchEnv=switchEnv;
-
-// 환경 스위치 버튼 렌더링
-(function(){
-  const area=document.getElementById('env-switch-area');
-  if(!area)return;
-  const isProd=_ENV==='prod';
-  area.innerHTML=`<button onclick="switchEnv()" style="flex:1;padding:10px 14px;background:${isProd?'var(--card)':'rgba(239,68,68,.1)'};color:${isProd?'var(--tx2)':'#EF4444'};border:1.5px solid ${isProd?'var(--bdr)':'rgba(239,68,68,.25)'};border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px"><span style="font-size:14px">${isProd?'🔧':'🚀'}</span>${isProd?'개발 환경으로 전환':'운영 환경으로 전환'}</button>`;
-})();
 
 // ── DEV: 유저 빠른전환 (관리자 페이지 내 인라인) ──────
 function renderDevUserSwitch(){
@@ -14006,7 +13965,7 @@ Object.assign(window, {
   renderRoleGrid, selectCreateRole, incrementMemberCount, decrementMemberCount,
   renderFamilyGraph, openNodeForm, saveNodeForm, closeNodeForm, checkGraphComplete, addFamilyMember, addCaregiverMember, addChildMember, removeFamilyMember, updateAddMemberBtn,
   selectMode,
-  renderInviteOptions, toggleChildAccount, generateChildAccount, shareInviteLink, renderDoneScreen,
+  renderInviteOptions, generateChildAccount, shareInviteLink, renderDoneScreen,
   selectJoinMember, doJoinRegister, joinRegGoBack,
   resetJoinRegId,
   isCurrentUserAdmin, rebuildMembersFromFamily,
