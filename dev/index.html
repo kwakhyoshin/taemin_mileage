@@ -3557,6 +3557,11 @@ button:disabled {
       <span class="my-list-txt">다크 모드</span>
       <button class="tog off" id="tog-dark-my" onclick="toggleDark()"><div class="tog-dot"></div></button>
     </div>
+    <button class="my-list-item" id="my-pwa-install-btn" onclick="showPwaInstallPopup()" style="display:none">
+      <span class="my-list-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span>
+      <span class="my-list-txt">홈 화면에 앱 추가</span>
+      <svg class="my-list-arr" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
   </div>
   <div class="my-list" style="margin-top:8px">
     <button class="my-list-item my-list-item-danger" onclick="logout()">
@@ -5144,6 +5149,8 @@ async function createFamilyFinish(){
   applyUserProfile();
   renderAll();
   toast(`🎉 ${_createState.familyName} 가족이 만들어졌어요!`);
+  // PWA 설치 유도 (브라우저 환경일 때)
+  if(!_pwaInstalled)setTimeout(showPwaInstallPopup,1500);
 }
 
 // ── 비밀번호 해싱 유틸 ──
@@ -5428,6 +5435,8 @@ async function doJoinRegister(){
       toast(`✅ ${memberName}, ID와 비밀번호가 설정되었어요!`);
     }else{
       toast(`🎉 ${memberName}, 가입 완료! 환영해요!`);
+      // PWA 설치 유도 (초대받은 사용자, 브라우저 환경)
+      if(!_pwaInstalled)setTimeout(showPwaInstallPopup,1500);
     }
   }catch(e){
     console.error('Join register failed:',e);
@@ -10537,7 +10546,19 @@ async function addNewFamilyMember() {
   };
   await save();
   rebuildMembersFromFamily();
+  // 자녀 추가 시: 양육자 모드에서 viewingChildId 갱신 + 전체 렌더링
+  if(memberRole==='child'&&isCaregiverUser()){
+    const kids=getChildMemberIds();
+    if(kids.length>=1&&!viewingChildId){
+      viewingChildId=kids[0];
+      if(!S.memberData)S.memberData={};
+      if(!S.memberData[viewingChildId])getMemberState(viewingChildId);
+      syncMemberToGlobal(viewingChildId);
+      applyChildTheme(viewingChildId);
+    }
+  }
   renderFamilyManager();
+  renderAll();
   document.getElementById('new-member-name').value = '';
   toast(`${name}님이 가족에 추가되었어요`);
 }
@@ -11743,6 +11764,9 @@ function renderMyTab(){
   // 관리자 버튼 표시 여부 (양육자 또는 isAdmin 권한이 있는 자녀)
   const adminBtn=document.getElementById('my-admin-btn');
   if(adminBtn)adminBtn.style.display=(isCaregiverUser()||isCurrentUserAdmin())?'':'none';
+  // PWA 설치 버튼 표시 (standalone이 아닌 브라우저 환경에서만)
+  const pwaBtn=document.getElementById('my-pwa-install-btn');
+  if(pwaBtn)pwaBtn.style.display=_pwaInstalled?'none':'flex';
   // 다크모드 토글 상태 동기화
   const togDarkMy=document.getElementById('tog-dark-my');
   if(togDarkMy){
@@ -11918,6 +11942,7 @@ function selectMood(mood){
     }
     toast('기분 표현을 껐어요');
     updateMyAvatarMoodBadge();
+    stopMyAvatarMoodLoop();
     renderNavUsers();
     return;
   }
@@ -11939,6 +11964,8 @@ function selectMood(mood){
   toast(m.emoji+' '+m.label);
   updateMyAvatarMoodBadge();
   startMoodParticles();
+  // My탭이면 아바타 파티클 루프도 시작
+  if(document.getElementById('s-my')?.classList.contains('on'))startMyAvatarMoodLoop();
   renderNavUsers();
 }
 window.selectMood=selectMood;
@@ -11981,11 +12008,23 @@ function emitMoodParticles(){
 }
 
 // My탭 프로필 아바타 기분 파티클 + 뱃지
+let _myMoodInterval=null;
+function startMyAvatarMoodLoop(){
+  stopMyAvatarMoodLoop();
+  if(!currentMood||!MOOD_DATA[currentMood])return;
+  _emitMyAvatarMoodParticles();
+  _myMoodInterval=setInterval(_emitMyAvatarMoodParticles,3200);
+}
+function stopMyAvatarMoodLoop(){
+  if(_myMoodInterval){clearInterval(_myMoodInterval);_myMoodInterval=null;}
+  const wrap=document.getElementById('my-avatar-wrap');
+  if(wrap){const pc=wrap.querySelector('.my-mood-particles');if(pc)pc.innerHTML='';}
+}
 function _emitMyAvatarMoodParticles(){
   const wrap=document.getElementById('my-avatar-wrap');
   if(!wrap)return;
   const isMyTab=document.getElementById('s-my')?.classList.contains('on');
-  if(!isMyTab)return;
+  if(!isMyTab){stopMyAvatarMoodLoop();return;}
   if(!currentMood||!MOOD_DATA[currentMood])return;
   // 파티클 컨테이너
   let pc=wrap.querySelector('.my-mood-particles');
@@ -12119,8 +12158,28 @@ function renderNavUsers(){
   // 리포트 탭: 양육자 또는 관리자 권한이 있는 유저에게 표시
   const histTab=document.getElementById('tab-hist');
   if(histTab)histTab.style.display=(isCaregiverUser()||isCurrentUserAdmin())?'':'none';
+
+  // 가족 버튼에 전체 미읽은 메시지 뱃지 표시
+  _updateFamilyBtnBadge();
 }
 window.renderNavUsers=renderNavUsers;
+
+function _updateFamilyBtnBadge(){
+  const btn=document.getElementById('nav-family-btn');
+  if(!btn||!currentUser)return;
+  let badge=btn.querySelector('.nfb-badge');
+  let total=0;
+  if(S.familyMessages){
+    total=S.familyMessages.filter(m=>m.to===currentUser&&!m.read).length;
+  }
+  if(total>0){
+    if(!badge){badge=document.createElement('span');badge.className='nfb-badge';btn.appendChild(badge);}
+    badge.textContent=total>99?'99+':total;
+    badge.style.display='flex';
+  }else{
+    if(badge)badge.style.display='none';
+  }
+}
 
 // ── Family Popup — 가계도 (family tree) layout ──
 function openFamilyPopup(){
@@ -13145,6 +13204,13 @@ function reallyGoTab(tab){
   }
   document.documentElement.style.background = TAB_COLORS[tab] || '#6366F1';
 
+  // My탭 기분 파티클 루프 관리
+  if(tab==='my'){
+    if(currentMood&&MOOD_DATA[currentMood]) startMyAvatarMoodLoop();
+  }else{
+    stopMyAvatarMoodLoop();
+  }
+
   // 탭별 상단바 색상 변경 (아이폰 사파리)
   const themeMeta=document.getElementById('theme-color-meta');
   if(themeMeta){
@@ -13687,6 +13753,91 @@ async function sendDirectNotification(){
   }
 }
 window.sendDirectNotification=sendDirectNotification;
+// ── PWA 설치 프롬프트 ──────────────────────────
+let _deferredInstallPrompt=null;
+let _pwaInstalled=false;
+window.addEventListener('beforeinstallprompt',function(e){
+  e.preventDefault();
+  _deferredInstallPrompt=e;
+});
+window.addEventListener('appinstalled',function(){
+  _pwaInstalled=true;
+  _deferredInstallPrompt=null;
+});
+// 이미 standalone(홈화면 추가)이면 설치 완료
+if(window.matchMedia('(display-mode:standalone)').matches||window.navigator.standalone)_pwaInstalled=true;
+
+function showPwaInstallPopup(){
+  if(_pwaInstalled)return;
+  // 이미 열려있으면 무시
+  if(document.getElementById('pwa-install-pop'))return;
+  const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
+  const bg=document.createElement('div');
+  bg.id='pwa-install-pop';
+  bg.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center;padding:0;animation:fadeIn .2s';
+  const card=document.createElement('div');
+  card.style.cssText='background:var(--bg,#fff);border-radius:28px 28px 0 0;padding:32px 24px env(safe-area-inset-bottom,16px);max-width:420px;width:100%;box-shadow:0 -10px 40px rgba(0,0,0,.15);text-align:center';
+  if(isIOS){
+    // iOS: beforeinstallprompt 미지원, 수동 안내
+    card.innerHTML=`
+      <div style="font-size:42px;margin-bottom:12px">📲</div>
+      <div style="font-size:19px;font-weight:900;color:var(--tx,#1e293b);margin-bottom:8px">홈 화면에 추가하기</div>
+      <div style="font-size:14px;color:var(--tx2,#64748B);line-height:1.6;margin-bottom:20px">
+        아래 공유 버튼 <span style="font-size:18px;vertical-align:middle">⎋</span> 을 누른 후<br>
+        <b>"홈 화면에 추가"</b>를 선택하세요
+      </div>
+      <div style="background:var(--bg2,#f8fafc);border-radius:16px;padding:16px;margin-bottom:20px;text-align:left">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <span style="font-size:20px;width:28px;text-align:center">1</span>
+          <span style="font-size:14px;color:var(--tx,#1e293b);font-weight:600">하단 공유 버튼 <span style="font-size:16px">⎋</span> 탭</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <span style="font-size:20px;width:28px;text-align:center">2</span>
+          <span style="font-size:14px;color:var(--tx,#1e293b);font-weight:600">"홈 화면에 추가" 선택</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:20px;width:28px;text-align:center">3</span>
+          <span style="font-size:14px;color:var(--tx,#1e293b);font-weight:600">우측 상단 "추가" 탭</span>
+        </div>
+      </div>
+      <button onclick="closePwaInstallPopup()" style="width:100%;padding:14px;border:none;border-radius:14px;font-size:15px;font-weight:800;background:var(--pr,#6366F1);color:#fff;cursor:pointer;font-family:inherit">확인</button>`;
+  }else{
+    // Android/Chrome: beforeinstallprompt 사용
+    card.innerHTML=`
+      <div style="font-size:42px;margin-bottom:12px">📲</div>
+      <div style="font-size:19px;font-weight:900;color:var(--tx,#1e293b);margin-bottom:8px">홈 화면에 추가하기</div>
+      <div style="font-size:14px;color:var(--tx2,#64748B);line-height:1.6;margin-bottom:24px">
+        앱처럼 바로 실행할 수 있어요!<br>홈 화면에 마일리 아이콘을 추가할까요?
+      </div>
+      <div style="display:flex;gap:10px">
+        <button onclick="closePwaInstallPopup()" style="flex:1;padding:14px;border:1.5px solid var(--bdr,#e2e8f0);border-radius:14px;font-size:14px;font-weight:700;background:var(--bg2,#f8fafc);color:var(--tx,#1e293b);cursor:pointer;font-family:inherit">나중에</button>
+        <button onclick="doPwaInstall()" style="flex:2;padding:14px;border:none;border-radius:14px;font-size:15px;font-weight:800;background:var(--pr,#6366F1);color:#fff;cursor:pointer;font-family:inherit">홈에 추가</button>
+      </div>`;
+  }
+  bg.appendChild(card);
+  bg.addEventListener('click',function(e){if(e.target===bg)closePwaInstallPopup();});
+  document.body.appendChild(bg);
+}
+function closePwaInstallPopup(){
+  const pop=document.getElementById('pwa-install-pop');
+  if(pop)pop.remove();
+}
+async function doPwaInstall(){
+  if(_deferredInstallPrompt){
+    _deferredInstallPrompt.prompt();
+    const result=await _deferredInstallPrompt.userChoice;
+    if(result.outcome==='accepted'){_pwaInstalled=true;toast('✅ 홈 화면에 추가되었어요!');}
+    _deferredInstallPrompt=null;
+  }else{
+    // fallback: 수동 안내
+    toast('브라우저 메뉴에서 "홈 화면에 추가"를 선택해주세요');
+  }
+  closePwaInstallPopup();
+}
+window.showPwaInstallPopup=showPwaInstallPopup;
+window.closePwaInstallPopup=closePwaInstallPopup;
+window.doPwaInstall=doPwaInstall;
+
 // ── 앱 캐시 초기화 ──────────────────────────
 async function clearAppCache(){
   var btn=document.querySelector('[onclick="clearAppCache()"]');
