@@ -5779,8 +5779,20 @@ function getChildTheme(childId){
   return themeFromColor(preset.c1);
 }
 function applyChildTheme(childId){
+  // 자녀가 1명이면 탭별 고유 색상 사용 (자녀 직접 로그인과 동일)
+  const kids=getChildMemberIds();
+  if(kids.length<2){
+    resetTabColors();
+    const curTab=document.body.getAttribute('data-tab');
+    if(curTab){
+      document.documentElement.style.background=TAB_COLORS[curTab]||'#6366F1';
+      const themeMeta=document.getElementById('theme-color-meta');
+      if(themeMeta&&!document.body.classList.contains('dark'))themeMeta.content=TAB_COLORS[curTab]||'#6366F1';
+    }
+    return;
+  }
   const t=getChildTheme(childId);
-  // 양육자가 자녀를 볼 때: 모든 탭을 자녀 테마 색상으로 통일
+  // 양육자가 자녀 2명 이상일 때: 모든 탭을 자녀 테마 색상으로 통일
   TAB_COLORS.home=t.c1; TAB_COLORS2.home=t.c2;
   TAB_COLORS.log=t.c1;  TAB_COLORS2.log=t.c2;
   TAB_COLORS.rwd=t.c1;  TAB_COLORS2.rwd=t.c2;
