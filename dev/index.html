@@ -6001,6 +6001,8 @@ function getMemberState(memberId) {
   if (!S.memberData) S.memberData = {};
   if (!S.memberData[memberId]) {
     const isMe = memberId === currentUser;
+    // 보상 인벤토리/요청: 최초 1회 마이그레이션 — 첫 자녀에게만 글로벌 데이터 할당
+    const isFirstChildForInv = _shouldMigrateRewardInv(memberId);
     // First time: migrate global data if it's the current user, else start fresh
     S.memberData[memberId] = {
       pts: isMe ? (S.pts || 0) : 0,
@@ -6017,11 +6019,28 @@ function getMemberState(memberId) {
       badgeLog: isMe && S.badgeLog ? [...S.badgeLog] : [],
       rewardLog: isMe && S.rewardLog ? [...S.rewardLog] : [],
       stickers: isMe && S.stickers ? [...S.stickers] : [],
-      rewardInventory: isMe && S.rewardInventory ? JSON.parse(JSON.stringify(S.rewardInventory)) : [],
-      rewardRequests: isMe && S.rewardRequests ? JSON.parse(JSON.stringify(S.rewardRequests)) : []
+      rewardInventory: isFirstChildForInv && S.rewardInventory ? JSON.parse(JSON.stringify(S.rewardInventory)) : [],
+      rewardRequests: isFirstChildForInv && S.rewardRequests ? JSON.parse(JSON.stringify(S.rewardRequests)) : []
     };
   }
   return S.memberData[memberId];
+}
+
+// 보상 인벤토리 마이그레이션 판단: 아직 어떤 자녀에게도 rewardInventory가 할당 안 되었으면 true
+// viewingChildId와 일치하는 자녀(현재 보고 있는 자녀)에게만 글로벌 데이터를 할당
+function _shouldMigrateRewardInv(memberId) {
+  // 글로벌 인벤토리가 없으면 마이그레이션 불필요
+  if (!S.rewardInventory || S.rewardInventory.length === 0) return false;
+  // 이미 다른 자녀에게 할당된 경우 중복 방지
+  if (S.memberData) {
+    for (const [id, md] of Object.entries(S.memberData)) {
+      if (md.rewardInventory && md.rewardInventory.length > 0) return false;
+    }
+  }
+  // viewingChildId가 있으면 해당 자녀에게만, 없으면 첫 자녀에게
+  if (viewingChildId) return memberId === viewingChildId;
+  const kids = getChildMemberIds();
+  return kids.length > 0 ? memberId === kids[0] : memberId === currentUser;
 }
 
 // Syncs member data to global S for backward compatibility
@@ -6046,11 +6065,8 @@ function syncMemberToGlobal(targetId) {
   S.rwds = (ms.rwds && ms.rwds.length > 0) ? ms.rwds : JSON.parse(JSON.stringify(DRWDS));
   S.stickers = ms.stickers || [];
   S.rewardLog = ms.rewardLog || [];
-  // rewardInventory/rewardRequests: undefined이면 아직 마이그레이션 안 된 것 → 기존 글로벌 값 유지
-  if(ms.rewardInventory !== undefined) S.rewardInventory = ms.rewardInventory;
-  else if(!S.rewardInventory) S.rewardInventory = [];
-  if(ms.rewardRequests !== undefined) S.rewardRequests = ms.rewardRequests;
-  else if(!S.rewardRequests) S.rewardRequests = [];
+  S.rewardInventory = ms.rewardInventory || [];
+  S.rewardRequests = ms.rewardRequests || [];
 }
 
 // Syncs global S back to member data before saving
@@ -10001,6 +10017,7 @@ function confirmRedeem(){
   S.pts-=actualPts;
 
   if(!S.rewardInventory)S.rewardInventory=[];
+  const _invChildId = (isCaregiverUser() && viewingChildId) ? viewingChildId : currentUser;
   S.rewardInventory.push({
     id:'ri_'+Date.now(),
     rwdId:r.id,
@@ -10009,7 +10026,8 @@ function confirmRedeem(){
     purchasedAt:Date.now(),
     pts:actualPts,
     status:'owned',
-    redeemedBy:currentUser
+    redeemedBy:currentUser,
+    forChild:_invChildId
   });
 
   if(!S.rewardLog)S.rewardLog=[];
@@ -10064,12 +10082,14 @@ function useReward(invId){
       if(mid !== currentUser && (m.isAdmin || m.role !== 'child')) adminMembers.push(mid);
     }
   }
+  const _reqChildId = (isCaregiverUser() && viewingChildId) ? viewingChildId : currentUser;
   S.rewardRequests.push({
     id:item.requestId,
     rwdInvId:invId,
     rwdName:item.rwdName,
     rwdEmoji:item.rwdEmoji,
     fromUser:currentUser,
+    forChild:_reqChildId,
     toUsers:adminMembers,
     status:'pending',
     requestedAt:Date.now(),
