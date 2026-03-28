@@ -5672,10 +5672,13 @@ function postLoginInit(){
 
 function logout() {
   if (!confirm('로그아웃 하시겠어요?')) return;
+  // Firestore 실시간 리스너 해제
+  if(_dataListenerUnsub){try{_dataListenerUnsub();}catch(e){}_dataListenerUnsub=null;}
   currentUser = null;
   viewingChildId = null;
   _admViewChildId = null;
   adminOK = false;
+  _hasDirtyLocal = false;
   localStorage.removeItem(_LS_PREFIX+'current_user');
   showAuthScreen('login');
   document.getElementById('login-id').value = '';
@@ -12539,6 +12542,7 @@ function handleRewardAction(action){
   _currentRecvMsg=null; // closeRecvMsg에서 중복 save 방지
   document.getElementById('recv-msg-bg').style.display='none';
   document.getElementById('recv-msg-pop').style.display='none';
+  unlockBodyScroll();
   if(action==='approve'){
     approveRewardRequest(reqId,currentUser);
   }else{
