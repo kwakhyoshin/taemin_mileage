@@ -175,16 +175,16 @@ body.dark .toss-invite-role{color:#64748B}
 body.dark .toss-invite-share-btn{background:rgba(99,102,241,.2);color:#818CF8}
 /* ── ONBOARDING WELCOME ── */
 .auth-screen.ob-gradient{background:linear-gradient(160deg,#3730A3 0%,#4F46E5 40%,#6366F1 70%,#7C3AED 100%);padding:0;overflow:hidden}
-.ob-welcome{display:flex;flex-direction:column;height:100%;width:100%;max-width:430px;margin:0 auto;padding:max(56px,calc(env(safe-area-inset-top,0px)+40px)) 32px max(32px,calc(env(safe-area-inset-bottom,0px)+24px));justify-content:space-between;box-sizing:border-box}
-.ob-welcome-top{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
+.ob-welcome{display:flex;flex-direction:column;height:100%;width:100%;max-width:430px;margin:0 auto;padding:max(56px,calc(env(safe-area-inset-top,0px)+40px)) 0 max(32px,calc(env(safe-area-inset-bottom,0px)+24px));justify-content:space-between;box-sizing:border-box}
+.ob-welcome-top{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:0 32px}
 .ob-logo-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:36px}
 .ob-logo-icon{width:88px;height:88px;border-radius:28px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.25)}
 .ob-headline{font-size:30px;font-weight:900;color:#fff;line-height:1.4;letter-spacing:-.8px;margin-bottom:12px}
 .ob-sub{font-size:16px;color:rgba(255,255,255,.7);font-weight:500;line-height:1.6}
-.ob-welcome-bottom{flex-shrink:0}
-.ob-start-btn{width:100%;padding:20px;background:#fff;color:#4F46E5;border:none;border-radius:20px;font-size:18px;font-weight:900;cursor:pointer;font-family:inherit;transition:opacity .2s,transform .1s;display:block;box-sizing:border-box;margin-bottom:14px;box-shadow:0 8px 32px rgba(0,0,0,.18)}
+.ob-welcome-bottom{flex-shrink:0;padding:0 28px;box-sizing:border-box}
+.ob-start-btn{width:100%;max-width:400px;padding:20px;background:#fff;color:#4F46E5;border:none;border-radius:20px;font-size:18px;font-weight:900;cursor:pointer;font-family:inherit;transition:opacity .2s,transform .1s;display:block;box-sizing:border-box;margin-bottom:14px;margin-left:auto;margin-right:auto;box-shadow:0 8px 32px rgba(0,0,0,.18)}
 .ob-start-btn:active{opacity:.9;transform:scale(.98)}
-.ob-link{text-align:center;font-size:15px;font-weight:600;color:rgba(255,255,255,.65);cursor:pointer;padding:10px}
+.ob-link{text-align:center;font-size:15px;font-weight:600;color:rgba(255,255,255,.65);cursor:pointer;padding:10px 28px}
 @keyframes obFadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
 .ob-fade-1{animation:obFadeUp .65s cubic-bezier(.4,0,.2,1) .05s both}
 .ob-fade-2{animation:obFadeUp .65s cubic-bezier(.4,0,.2,1) .2s both}
@@ -193,7 +193,7 @@ body.dark .toss-invite-share-btn{background:rgba(99,102,241,.2);color:#818CF8}
 /* ── INSIGHT SWIPE CARDS ── */
 .ins-cards-scroll{flex:1;min-height:0;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;overscroll-behavior-x:contain}
 .ins-cards-scroll::-webkit-scrollbar{display:none}
-.ins-card{flex:0 0 100%;scroll-snap-align:start;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 32px 12px;box-sizing:border-box;transition:background .3s}
+.ins-card{flex:0 0 100%;width:100%;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 32px 12px;box-sizing:border-box;transition:background .3s}
 .ins-card-1{background:#EEF2FF}
 .ins-card-2{background:#FFF0F6}
 .ins-card-3{background:#FFFBEB}
@@ -228,7 +228,7 @@ body.dark .c1-role-type-card-title{color:#F1F5F9}
 /* Activity card state transitions */
 .act-card.done,.act-card.partial,.act-card.exhausted{transition:background .25s,transform .15s}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html{background:#6366F1;touch-action:pan-y;overscroll-behavior:none}
+html{background:var(--bg);touch-action:pan-y;overscroll-behavior:none}
 body{touch-action:pan-y;overscroll-behavior:none}
 /* Prevent iOS zoom on input focus */
 input,select,textarea{font-size:16px!important}
@@ -953,6 +953,8 @@ body.dark .pin-key.ck{background:transparent}
 /* AUTH SCREENS */
 .auth-screen{position:fixed;inset:0;background:linear-gradient(135deg,#6366F1,#818CF8);z-index:1000;display:flex;flex-direction:column;align-items:center;padding:20px;padding-top:max(24px, calc(env(safe-area-inset-top, 0px) + 16px));padding-bottom:max(20px, env(safe-area-inset-bottom, 0px));overflow-y:auto;-webkit-overflow-scrolling:touch}
 .auth-screen.hidden{display:none}
+body.auth-active{background:linear-gradient(135deg,#6366F1,#8B5CF6)}
+#auth-insight .toss-cta{margin:0 24px;padding-left:0;padding-right:0}
 .auth-card{background:#fff;border-radius:24px;padding:32px 28px;width:100%;max-width:380px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2);margin:auto;flex-shrink:0}
 @media(min-width:768px){.auth-card{max-width:440px;padding:40px 36px}.auth-title{font-size:28px}.auth-sub{font-size:14px}.auth-input{padding:16px 18px;font-size:16px}}
 .auth-logo{font-size:48px;margin-bottom:12px}
@@ -2341,7 +2343,7 @@ button:disabled {
 
 </style>
 </head>
-<body data-tab="home">
+<body data-tab="home" class="auth-active">
 <div class="dev-indicator" id="dev-indicator" style="display:none">DEV</div>
 
 <!-- Auth: standalone script (no module dependency) for auth screen navigation -->
@@ -4177,6 +4179,7 @@ let _createState = {
   pwdHash: '',
   myName: '',
   myRole: '',
+  myRoleType: '',
   // Step 2
   familyName: '',
   memberCount: 3,
@@ -4203,6 +4206,7 @@ let _joinState = {
 const _AUTH_SCREENS = ['auth-login','auth-welcome','auth-insight','auth-create-1','auth-create-2','auth-create-3','auth-create-4','auth-create-5','auth-create-done','auth-join-select','auth-join-register'];
 
 function showAuthScreen(screen) {
+  document.body.classList.add('auth-active');
   _AUTH_SCREENS.forEach(id=>{
     const el=document.getElementById(id);
     if(el)el.classList.toggle('hidden',id!=='auth-'+screen && id!==screen);
@@ -4277,6 +4281,9 @@ function selectRoleType(type) {
 }
 
 function c1SlideRoleTypeNext() {
+  // 혹시 버튼이 로딩/비활성 상태로 빠진 경우 초기화
+  const _btn = document.querySelector('#c1-slide-role-type .toss-btn');
+  if (_btn) { _btn.disabled = false; _btn.textContent = '다음'; }
   const err = document.getElementById('c1-role-type-error');
   if (!_createState.myRoleType) { if (err) err.textContent = '역할을 선택해주세요'; return; }
   const prog = document.getElementById('c1-progress');
@@ -5561,6 +5568,7 @@ async function doLogin(){
 
 function hideAllAuth() {
   _AUTH_SCREENS.forEach(id=>{const el=document.getElementById(id);if(el)el.classList.add('hidden');});
+  document.body.classList.remove('auth-active');
 }
 
 function applyUserProfile() {
@@ -14370,7 +14378,7 @@ window._createState = _createState;
     if(window._m_startCreateFamily){
       window._m_startCreateFamily();
     } else {
-      window._waitModule('startCreateFamily').then(function(fn){
+      window._waitModule('startCreateFamily', 60).then(function(fn){
         if(fn) fn(); else window._showAuth('create-1');
       });
     }
