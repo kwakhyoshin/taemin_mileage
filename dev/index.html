@@ -9859,6 +9859,27 @@ function switchViewingChild(childId){
   if(!S.memberData[childId])getMemberState(childId);
   syncMemberToGlobal(childId);
   applyChildTheme(childId);
+
+  // compact 상태 초기화 + 스크롤 리셋 (자녀 전환 시 깨짐 방지)
+  const _hero=document.querySelector('.hero');
+  if(_hero){
+    _hero.classList.remove('compact');
+    const _isWide=window.innerWidth>=768;
+    _hero.style.borderRadius=_isWide?'0':'0 0 38px 38px';
+    const _pt=_hero.querySelector('.prog-track');
+    if(_pt){_pt.style.height='14px';_pt.style.borderRadius='7px';}
+    const _pe=_hero.querySelector('.hero-pts');if(_pe)_pe.style.fontSize='';
+    const _le=_hero.querySelector('.hero-lbl');if(_le)_le.style.fontSize='';
+    const _ue=_hero.querySelector('.hero-unit');if(_ue)_ue.style.fontSize='';
+  }
+  const _ht=document.querySelector('.home-top');
+  if(_ht)Array.from(_ht.children).forEach(c=>c.style.opacity='1');
+  // 현재 탭 스크롤 맨 위로
+  const _curTabId='s-'+(document.body.getAttribute('data-tab')||'home');
+  const _curScr=document.getElementById(_curTabId);
+  if(_curScr)_curScr.scrollTop=0;
+  window.scrollTo({top:0});
+
   renderAll();
   const nm=MEMBERS[childId]?.name||childId;
   toast(`${nm}의 마일리지를 보고 있어요`);
