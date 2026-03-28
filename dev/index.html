@@ -2942,6 +2942,7 @@ button:disabled {
   <div class="hero">
     <div class="streak-pill" id="streak-pill"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 01-7 7 7 7 0 01-7-7c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg> 0일 연속</div>
     <div class="hero-lbl" id="hero-lbl">나의 마일리지</div>
+    <div id="child-selector"></div>
     <div class="hero-pts-wrap" style="display:flex;align-items:flex-end;gap:6px;margin:4px 0">
       <span class="hero-pts" id="hero-pts">0</span><span class="hero-unit">M</span>
     </div>
@@ -4040,7 +4041,7 @@ Object.entries(EMOJIS).forEach(([cat,arr])=>arr.forEach(e=>FLAT.push({e,cat,kw:E
 // ── 역할 정의 (다가족) — SVG 아이콘 ──────────────────────────
 const _SVG_PERSON_M='<svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="40" cy="27" r="13"/><path d="M20 70v-7a13 13 0 0 1 13-13h14a13 13 0 0 1 13 13v7"/></svg>';
 const _SVG_PERSON_F='<svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="40" cy="27" r="13"/><path d="M27 21Q26 12 40 10Q54 12 53 21"/><path d="M20 70v-7a13 13 0 0 1 13-13h14a13 13 0 0 1 13 13v7"/></svg>';
-const _SVG_ELDER='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><path d="M9 5h6" stroke-width="1.5"/></svg>';
+const _SVG_ELDER='<svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="40" cy="27" r="13"/><path d="M29 18Q30 14 35 14" stroke-width="2"/><path d="M51 18Q50 14 45 14" stroke-width="2"/><path d="M20 70v-7a13 13 0 0 1 13-13h14a13 13 0 0 1 13 13v7"/></svg>';
 const _SVG_CHILD_M='<svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="40" cy="27" r="13"/><path d="M31 18L33 12L36 17L38 8L40 16L42 8L44 17L47 12L49 18" stroke-width="2.5"/><path d="M20 70v-7a13 13 0 0 1 13-13h14a13 13 0 0 1 13 13v7"/></svg>';
 const _SVG_CHILD_F='<svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="40" cy="27" r="13"/><path d="M27 21Q27 14 40 14Q53 14 53 21"/><path d="M27 21Q21 18 19 24Q18 31 24 34Q27 35 27 29"/><circle cx="21" cy="28" r="3.5" stroke-width="2"/><path d="M53 21Q59 18 61 24Q62 31 56 34Q53 35 53 29"/><circle cx="59" cy="28" r="3.5" stroke-width="2"/><path d="M20 70v-7a13 13 0 0 1 13-13h14a13 13 0 0 1 13 13v7"/></svg>';
 // 역할별 차별화 SVG 아이콘
@@ -5606,6 +5607,10 @@ function applyUserProfile() {
   if (admName) admName.textContent = member.name;
   if (admRole) admRole.textContent = member.role + (member.isAdmin?' 👑':'');
 
+  if(isParentUser()&&!viewingChildId){
+    const children=getChildMembers();
+    if(children.length>0)viewingChildId=children[0].id;
+  }
   renderNavUsers();
 }
 
@@ -5678,13 +5683,11 @@ function postLoginInit(){
 
 function logout() {
   if (!confirm('로그아웃 하시겠어요?')) return;
-  // Firestore 실시간 리스너 해제
-  if(_dataListenerUnsub){try{_dataListenerUnsub();}catch(e){}_dataListenerUnsub=null;}
+  viewingChildId=null;
   currentUser = null;
   viewingChildId = null;
   _admViewChildId = null;
   adminOK = false;
-  _hasDirtyLocal = false;
   localStorage.removeItem(_LS_PREFIX+'current_user');
   showAuthScreen('login');
   document.getElementById('login-id').value = '';
@@ -7191,6 +7194,7 @@ function renderHero(){
   }else{
     if(heroLbl)heroLbl.textContent='나의 마일리지';
   }
+  renderNavUsers();
 
   const _heroPts=getActiveMileage();
   document.getElementById('hero-pts').textContent=_heroPts.toLocaleString();
@@ -9935,10 +9939,7 @@ function getViewedMemberId(){
 function getActiveMileage(){
   if(getFamilyMode()==='independent'&&isCaregiverUser()){
     const vid=getViewedMemberId();
-    if(vid&&S.memberData){
-      if(S.memberData[vid]!==undefined)return S.memberData[vid].pts||0;
-      return 0; // 자녀 memberData 미초기화 — 양육자 pts 오표시 방지
-    }
+    if(vid&&S.memberData&&S.memberData[vid]!==undefined)return S.memberData[vid].pts||0;
   }
   return S.pts||0;
 }
@@ -11873,7 +11874,7 @@ function _onChildPickerSelect(childId){
 window.showChildPicker=showChildPicker;
 window._onChildPickerSelect=_onChildPickerSelect;
 
-// ── NAV USERS RENDERING (자녀 전환기 + hist 탭 show/hide) ──
+// ── NAV USERS RENDERING (상단 자녀 선택기 + hist 탭 show/hide) ──
 function renderNavUsers(){
   const mode=getFamilyMode();
   const kids=getChildMemberIds();
@@ -12551,7 +12552,6 @@ function handleRewardAction(action){
   _currentRecvMsg=null; // closeRecvMsg에서 중복 save 방지
   document.getElementById('recv-msg-bg').style.display='none';
   document.getElementById('recv-msg-pop').style.display='none';
-  unlockBodyScroll();
   if(action==='approve'){
     approveRewardRequest(reqId,currentUser);
   }else{
@@ -14031,27 +14031,6 @@ window._moduleLoaded = true;
 console.log('[mile.ly] module loaded OK');
 // _createState를 window에 노출 (child card oninput 참조용)
 window._createState = _createState;
-
-// ── DEV 전용: 테스트 상태 주입 훅 ──────────────
-if(_ENV==='dev'){
-  window._injectTestState=function(stateObj,viewChildId){
-    S=Object.assign(defaultState(),stateObj);
-    if(stateObj.memberData)S.memberData=stateObj.memberData;
-    rebuildMembersFromFamily();
-    if(viewChildId){viewingChildId=viewChildId;}
-    const savedUser=stateObj._testCurrentUser||currentUser;
-    if(savedUser&&S.users&&S.users[savedUser]){
-      currentUser=savedUser;
-      syncMemberToGlobal(savedUser);
-      if(isCurrentUserAdmin())adminOK=true;
-      hideAllAuth();
-    }
-    renderAll();
-  };
-  window._getS=function(){return S;};
-  window._getCurrentUser=function(){return currentUser;};
-  window._setViewingChild=function(id){viewingChildId=id;};
-}
 
 // ── INIT (Firebase async) ─────────────────────
 (async function(){
