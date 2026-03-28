@@ -1166,6 +1166,7 @@ body.dark .adm-child-btn.on{background:rgba(255,107,53,.15)}
 .my-family-avatar{width:52px;height:52px;border-radius:50%;overflow:visible;border:2.5px solid var(--or);background:var(--bg2);flex-shrink:0;position:relative}
 .my-family-avatar svg,.my-family-avatar img{width:100%!important;height:100%!important;object-fit:cover;border-radius:50%;display:block}
 .mf-mood-badge{position:absolute;bottom:-2px;right:-4px;font-size:16px;line-height:1;z-index:2;animation:fpMoodPulse 2s ease-in-out infinite;filter:drop-shadow(0 1px 3px rgba(0,0,0,.3));pointer-events:none}
+.mf-unread-badge{position:absolute;top:-4px;left:-4px;min-width:18px;height:18px;background:#EF4444;color:#fff;font-size:10px;font-weight:900;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 5px;pointer-events:none;box-shadow:0 2px 6px rgba(239,68,68,.4);line-height:1;z-index:3}
 .mf-mood-particles{position:absolute;top:50%;left:50%;width:0;height:0;pointer-events:none;z-index:3;overflow:visible}
 .my-family-name{font-size:12px;font-weight:800;color:var(--tx);white-space:nowrap}
 .my-family-role{font-size:10px;font-weight:600;color:var(--tx3);white-space:nowrap}
@@ -11847,11 +11848,14 @@ function renderMyTab(){
         const isMe=mid===currentUser;
         const clickAction=isMe?'onMeIconClick()':'onUserIconClick(\''+mid+'\')';
         const moodEmoji=getMoodEmoji(mid);
+        // 해당 멤버로부터 온 미읽은 메시지 수
+        const unreadFromMember=(!isMe&&S.familyMessages)?S.familyMessages.filter(m=>m.from===mid&&m.to===currentUser&&!m.read).length:0;
         return `<div class="my-family-member" onclick="${clickAction}">
           <div class="my-family-avatar" data-mf-id="${mid}" style="${isMe?'border-color:var(--tab-color,#6366F1);box-shadow:0 0 0 2px var(--tab-color,#6366F1)':''}">
             ${getAvatarHTML(mid,48)}
             ${moodEmoji?`<span class="mf-mood-badge">${moodEmoji}</span>`:''}
             <div class="mf-mood-particles" data-mf-particles="${mid}"></div>
+            ${unreadFromMember>0?`<span class="mf-unread-badge">${unreadFromMember>99?'99+':unreadFromMember}</span>`:''}
           </div>
           <div class="my-family-name">${mName}${isMe?'<span style="margin-left:3px;background:var(--tab-color,#6366F1);color:#fff;font-size:9px;font-weight:900;padding:1px 5px;border-radius:8px;vertical-align:middle">나</span>':''}</div>
           <div class="my-family-role">${mRole}</div>
@@ -12290,6 +12294,8 @@ function _updateFamilyBtnBadge(){
       if(badge)badge.style.display='none';
     }
   }
+  // 나의 탭 가족 멤버 아바타에 개별 미읽은 뱃지 업데이트
+  _updateMyFamilyMemberBadges();
   // 구 nav-family-btn (있는 경우 호환)
   const btn=document.getElementById('nav-family-btn');
   if(btn){
@@ -12302,6 +12308,25 @@ function _updateFamilyBtnBadge(){
       if(fbBadge)fbBadge.style.display='none';
     }
   }
+}
+
+function _updateMyFamilyMemberBadges(){
+  if(!currentUser||!S.familyMessages)return;
+  const fm=S.familyMeta?.members||{};
+  Object.keys(fm).forEach(mid=>{
+    if(mid===currentUser)return;
+    const avatarEl=document.querySelector(`.my-family-avatar[data-mf-id="${mid}"]`);
+    if(!avatarEl)return;
+    const cnt=S.familyMessages.filter(m=>m.from===mid&&m.to===currentUser&&!m.read).length;
+    let badge=avatarEl.querySelector('.mf-unread-badge');
+    if(cnt>0){
+      if(!badge){badge=document.createElement('span');badge.className='mf-unread-badge';avatarEl.appendChild(badge);}
+      badge.textContent=cnt>99?'99+':cnt;
+      badge.style.display='flex';
+    }else{
+      if(badge)badge.style.display='none';
+    }
+  });
 }
 
 // ── Family Popup — 가계도 (family tree) layout ──
