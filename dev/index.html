@@ -4885,20 +4885,14 @@ function renderInviteOptions(){
   const container=document.getElementById('invite-list');
   const nonCreatorMembers=_createState.members.slice(1);
 
-  // 모든 구성원 임시 계정 자동 생성
-  nonCreatorMembers.forEach((m,i)=>{
-    const idx=i+1;
-    if(!_createState.childAccounts[idx]) generateChildAccount(idx);
-  });
-
   container.innerHTML=nonCreatorMembers.map((m,i)=>{
     const idx=i+1;
+    const isChild=m.role==='child';
     const rd=ROLE_DEFS[m.displayRole||m.role]||ROLE_DEFS.child;
     const invited=_createState.inviteStatus&&_createState.inviteStatus[idx];
     const statusBadge=invited
       ?`<span class="invite-status-badge done">✓ 완료</span>`
       :`<span class="invite-status-badge pending">대기중</span>`;
-    const acc=_createState.childAccounts[idx];
     return `<div class="invite-card">
       <div class="invite-card-left">
         <div style="width:36px;height:36px;border-radius:50%;background:${rd.color||'#F1F5F9'};display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${rd.textColor||'#64748B'}" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg></div>
@@ -4907,19 +4901,38 @@ function renderInviteOptions(){
           <div class="invite-card-role">${rd.label||(m.role==='child'?'아이':'양육자')}</div>
         </div>
       </div>
-      <div class="invite-card-actions" style="width:100%">
-        <div style="display:flex;align-items:center;justify-content:flex-end;width:100%">
+      ${isChild?`<div class="invite-card-actions" style="width:100%">
+        <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
+          <label class="invite-toggle-wrap">
+            <span>계정 만들기</span>
+            <button class="invite-toggle ${_createState.childAccounts[idx]?'on':''}" onclick="toggleChildAccount(${idx})"></button>
+          </label>
           <button class="share-btn" onclick="shareInviteLink('${m.name}',${idx})" style="font-size:13px">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg> 공유
           </button>
         </div>
-        ${acc?`<div style="margin-top:8px;padding:8px 10px;background:rgba(99,102,241,.08);border-radius:8px;font-size:13px;color:var(--tx2);width:100%">
-          <div>아이디: <b>${acc.id}</b></div>
-          <div>비밀번호: <b>${acc.pwd}</b></div>
-        </div>`:''}
-      </div>
+        ${_createState.childAccounts[idx]?`<div style="margin-top:8px;padding:8px 10px;background:rgba(99,102,241,.08);border-radius:8px;font-size:13px;color:var(--tx2);width:100%">
+          <div>아이디: <b>${_createState.childAccounts[idx].id}</b></div>
+          <div>비밀번호: <b>${_createState.childAccounts[idx].pwd}</b></div>
+        </div>`:'<div style="margin-top:4px;font-size:13px;color:var(--tx3)">계정 없이 초대 링크만 공유합니다</div>'}
+      </div>`:`<div class="invite-card-actions">
+        <button class="share-btn" onclick="shareInviteLink('${m.name}',${idx})">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/>
+          </svg> 초대 링크
+        </button>
+      </div>`}
     </div>`;
   }).join('');
+}
+
+function toggleChildAccount(idx){
+  if(_createState.childAccounts[idx]){
+    delete _createState.childAccounts[idx];
+  }else{
+    generateChildAccount(idx);
+  }
+  renderInviteOptions();
 }
 
 function generateChildAccount(idx){
