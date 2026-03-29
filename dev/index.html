@@ -6081,6 +6081,15 @@ function applyUserProfile() {
   if (admName) admName.textContent = member.name;
   if (admRole) admRole.textContent = member.role + (member.isAdmin?' 👑':'');
 
+  // Firestore에서 currentMood 복원 (오늘 설정한 기분만)
+  const _userMood = S.moods && S.moods[currentUser];
+  const _today = new Date().toISOString().slice(0,10);
+  if(_userMood && _userMood.date === _today && MOOD_DATA && MOOD_DATA[_userMood.mood]){
+    currentMood = _userMood.mood;
+  } else {
+    currentMood = null;
+  }
+
   if(isParentUser()&&!viewingChildId){
     const children=getChildMembers();
     if(children.length>0)viewingChildId=children[0].id;
