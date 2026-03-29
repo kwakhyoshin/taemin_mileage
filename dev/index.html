@@ -3371,7 +3371,7 @@ button:disabled {
         <h2>관리자 <svg class="hdr-ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></h2>
         <p>양육자 전용 설정 화면</p>
       </div>
-      <button class="adm-lock" onclick="lockAdmin()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> 잠금</button>
+      <!-- 잠금 버튼 제거됨: 관리자 잠금 기능 불필요, PIN은 크리티컬 액션에서만 사용 -->
     </div>
   </div>
   <div id="dev-user-switch-area" style="margin:0 16px 10px"></div>
@@ -3607,6 +3607,16 @@ button:disabled {
                 복원
                 <input type="file" id="restore-file" accept=".json" style="display:none" onchange="restoreData(this)">
               </label>
+            </div>
+          </div>
+        </div>
+        <!-- PIN 설정 -->
+        <div class="adm-sec" style="margin-bottom:0">
+          <div class="adm-sec-lbl">보안 PIN</div>
+          <div class="adm-card">
+            <div class="adm-row">
+              <div class="adm-row-l"><div class="adm-row-nm">PIN 변경</div><div class="adm-row-sub">초기화 등 주요 기능에 필요한 4자리 PIN</div></div>
+              <button class="btn-sm" onclick="startChangePIN()">변경</button>
             </div>
           </div>
         </div>
@@ -5864,6 +5874,7 @@ async function doLogin(){
         hideAllAuth();
         applyUserProfile();
         renderAll();
+        reallyGoTab('home');
         toast(`${MEMBERS[memberId]?.name||'회원'}님, 환영해요! 🎉`);
         return;
       }
@@ -5890,6 +5901,7 @@ async function doLogin(){
         hideAllAuth();
         applyUserProfile();
         renderAll();
+        reallyGoTab('home');
         toast(`${fm[mid].name||'회원'}님, 환영해요! 🎉`);
         return;
       }
@@ -5939,6 +5951,7 @@ async function doLogin(){
                 hideAllAuth();
                 applyUserProfile();
                 renderAll();
+                reallyGoTab('home');
                 toast(`${MEMBERS[otherMid]?.name||'회원'}님, 환영해요! 🎉`);
                 return;
               }
@@ -12345,14 +12358,9 @@ async function handlePin(){
 }
 function updDots(state){document.querySelectorAll('.pin-dot').forEach((d,i)=>{d.classList.toggle('on',state==='normal'&&i<pBuf.length);d.classList.toggle('err',state==='err');});}
 
-// 관리자 세션 타이머 (10분 자동 잠금)
-function startAdminSession(){
-  if(_adminSessionTimer)clearTimeout(_adminSessionTimer);
-  _adminSessionTimer=setTimeout(()=>{
-    if(adminOK){adminOK=false;toast('🔒 10분 경과 — 관리자 자동 잠금');goTab('home');}
-  },_ADMIN_TIMEOUT);
-}
-function lockAdmin(){adminOK=false;if(_adminSessionTimer){clearTimeout(_adminSessionTimer);_adminSessionTimer=null;}toast('🔒 관리자 잠금');goTab('home');}
+// 관리자 세션: 자동 잠금 제거됨 (PIN은 크리티컬 액션에서만 사용)
+function startAdminSession(){}
+function lockAdmin(){goTab('home');}
 
 // PIN pad: event delegation on container — touchstart for instant response
 (function(){
@@ -14932,9 +14940,12 @@ function devSwitchUser(userId){
   if(userId===currentUser)return;
   currentUser=userId;
   localStorage.setItem(_LS_PREFIX+'current_user',userId);
+  postLoginInit();
+  applyUserProfile();
   renderAll();
   renderNavUsers();
   renderDevUserSwitch();
+  reallyGoTab('home');
   toast('🔄 '+MEMBERS[userId].name+'(으)로 전환됨');
 }
 window.devSwitchUser=devSwitchUser;
