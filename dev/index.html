@@ -984,9 +984,8 @@ body.dark .pin-key.ck{background:transparent}
 /* AUTH SCREENS */
 .auth-screen{position:fixed;inset:0;background:linear-gradient(135deg,#5B4FC4,#A78BFA);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;padding-top:max(24px, calc(env(safe-area-inset-top, 0px) + 16px));padding-bottom:max(20px, env(safe-area-inset-bottom, 0px));overflow-y:auto;-webkit-overflow-scrolling:touch}
 .auth-screen.hidden{display:none}
-.auth-screen::after{content:'';position:fixed;left:0;right:0;bottom:-300px;height:600px;background:linear-gradient(135deg,#5B4FC4,#A78BFA);z-index:-1;pointer-events:none}
-body.auth-active{background:linear-gradient(135deg,#5B4FC4,#A78BFA);overflow:hidden!important;position:fixed;width:100%;height:100%}
-html:has(body.auth-active){background:#5B4FC4!important;overflow:hidden!important}
+body.auth-active{background:#7B6FD4;overflow:hidden!important;position:fixed;width:100%;height:100%}
+html:has(body.auth-active){background:#7B6FD4!important;overflow:hidden!important}
 #auth-insight .toss-cta{margin:0 24px;padding-left:0;padding-right:0}
 .auth-card{background:#fff;border-radius:24px;padding:32px 28px;width:100%;max-width:380px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2);margin:auto;flex-shrink:0}
 @media(min-width:768px){.auth-card{max-width:440px;padding:40px 36px}.auth-title{font-size:28px}.auth-sub{font-size:14px}.auth-input{padding:16px 18px;font-size:16px}}
@@ -4371,24 +4370,11 @@ function showAuthScreen(screen) {
       activeAuth.style.top=window.visualViewport.offsetTop+'px';
       activeAuth.style.bottom='auto';
       
-      // 하단 커버 오버레이 (홈탭 완전 차단)
-      var cover=document.getElementById('auth-kb-cover');
-      if(!cover){
-        cover=document.createElement('div');
-        cover.id='auth-kb-cover';
-        cover.style.cssText='position:fixed;left:0;right:0;bottom:0;height:'+(kbH+50)+'px;background:linear-gradient(135deg,#5B4FC4,#A78BFA);z-index:999;pointer-events:none';
-        document.body.appendChild(cover);
-      } else {
-        cover.style.height=(kbH+50)+'px';
-        cover.style.display='block';
-      }
     } else {
       // 키보드 내려감 — 원래대로
       activeAuth.style.height='';
       activeAuth.style.top='';
       activeAuth.style.bottom='';
-      var cover=document.getElementById('auth-kb-cover');
-      if(cover) cover.style.display='none';
     }
   }
 
