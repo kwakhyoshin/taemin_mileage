@@ -2432,11 +2432,11 @@ button:disabled {
 #tour-overlay.active{opacity:1;pointer-events:auto}
 #tour-spotlight{position:absolute;border-radius:16px;transition:all .5s cubic-bezier(.4,0,.2,1);box-shadow:0 0 0 9999px rgba(0,0,0,.82)}
 #tour-spotlight::after{content:'';position:absolute;inset:-3px;border-radius:19px;border:2px solid rgba(167,139,250,.6);animation:tourGlow 2s ease-in-out infinite;pointer-events:none}
-#tour-content{position:absolute;pointer-events:auto;opacity:0;transition:opacity .4s .1s;display:flex;flex-direction:column;align-items:center;gap:10px;width:calc(100vw - 48px);max-width:320px}
+#tour-content{position:absolute;pointer-events:auto;opacity:0;transition:opacity .4s .1s;display:flex;flex-direction:column;align-items:center;gap:10px;width:calc(100vw - 48px);max-width:320px;background:rgba(0,0,0,.45);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:20px;padding:24px 20px 18px;border:1px solid rgba(255,255,255,.08)}
 #tour-overlay.active #tour-content{opacity:1}
 .tour-icon{width:44px;height:44px;animation:tourFadeScale .5s cubic-bezier(.175,.885,.32,1.275) .15s both}
-.tour-title{font-size:18px;font-weight:900;color:#fff;text-align:center;text-shadow:0 2px 12px rgba(0,0,0,.4);letter-spacing:-.3px}
-.tour-desc{font-size:13px;font-weight:600;color:rgba(255,255,255,.75);text-align:center;line-height:1.6}
+.tour-title{font-size:18px;font-weight:900;color:#fff;text-align:center;text-shadow:0 1px 2px rgba(0,0,0,.6),0 4px 16px rgba(0,0,0,.3);letter-spacing:-.3px}
+.tour-desc{font-size:13.5px;font-weight:600;color:rgba(255,255,255,.88);text-align:center;line-height:1.65;text-shadow:0 1px 4px rgba(0,0,0,.4)}
 .tour-desc b{color:#A78BFA;font-weight:800}
 .tour-desc em{color:#FBBF24;font-style:normal;font-weight:800}
 .tour-nav{display:flex;align-items:center;gap:16px;margin-top:6px}
@@ -15900,8 +15900,14 @@ window._createState = _createState;
           }
         }
       } else {
-        // no target — center screen (final step)
-        spotlight.style.display = 'none';
+        // no target — full-screen dim (final step)
+        // spotlight을 화면 전체 크기로 설정하여 전체 딤 유지
+        spotlight.style.display = 'block';
+        spotlight.style.left = '0';
+        spotlight.style.top = '0';
+        spotlight.style.width = '0';
+        spotlight.style.height = '0';
+        spotlight.style.borderRadius = '0';
         hand.style.display = 'none';
         content.style.top = '50%';
         content.style.left = '50%';
