@@ -984,6 +984,7 @@ body.dark .pin-key.ck{background:transparent}
 /* AUTH SCREENS */
 .auth-screen{position:fixed;inset:0;background:linear-gradient(135deg,#5B4FC4,#A78BFA);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;padding-top:max(24px, calc(env(safe-area-inset-top, 0px) + 16px));padding-bottom:max(20px, env(safe-area-inset-bottom, 0px));overflow-y:auto;-webkit-overflow-scrolling:touch}
 .auth-screen.hidden{display:none}
+.auth-screen::after{content:'';position:fixed;left:0;right:0;bottom:-300px;height:600px;background:linear-gradient(135deg,#5B4FC4,#A78BFA);z-index:-1;pointer-events:none}
 body.auth-active{background:linear-gradient(135deg,#5B4FC4,#A78BFA);overflow:hidden!important;position:fixed;width:100%;height:100%}
 html:has(body.auth-active){background:#5B4FC4!important;overflow:hidden!important}
 #auth-insight .toss-cta{margin:0 24px;padding-left:0;padding-right:0}
@@ -2444,8 +2445,8 @@ button:disabled {
 <!-- AUTH: 로그인 화면 -->
 <div class="auth-screen" id="auth-login">
   <div class="auth-card">
-    <div class="auth-logo"><svg width="64" height="64" viewBox="0 0 200 200"><defs><linearGradient id="lb" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#5B4FC4"/><stop offset="100%" stop-color="#A78BFA"/></linearGradient></defs><rect width="200" height="200" rx="42" fill="url(#lb)"/><path d="M30,130 L100,55 L170,130" stroke="white" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M100,62 L98.1,60.3 C91.4,54.2 87,50.2 87,45.3 C87,41.3 90.1,38.1 94.2,38.1 C96.4,38.1 98.6,39.2 100,40.9 C101.4,39.2 103.6,38.1 105.9,38.1 C109.8,38.1 113,41.3 113,45.3 C113,50.2 108.6,54.2 101.9,60.3 Z" fill="#FBBF24"/></svg></div>
-    <svg viewBox="0 0 130 36" xmlns="http://www.w3.org/2000/svg" style="height:32px;width:auto;display:block;margin:0 auto 4px" aria-label="mile.ly"><text x="2" y="27" font-family="'Nunito','Pretendard Variable',system-ui,-apple-system,sans-serif" font-weight="900" font-size="30" letter-spacing="-1"><tspan fill="#5B4FC4">mile</tspan><tspan fill="#FBBF24">.</tspan><tspan fill="#A78BFA">ly</tspan></text></svg>
+    <div class="auth-logo"><svg width="64" height="64" viewBox="0 0 200 200"><defs><linearGradient id="lb" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#5B4FC4"/><stop offset="100%" stop-color="#A78BFA"/></linearGradient></defs><rect width="200" height="200" rx="47" fill="url(#lb)"/><path d="M30,130 L100,55 L170,130" stroke="white" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M100,62 L98.1,60.3 C91.4,54.2 87,50.2 87,45.3 C87,41.3 90.1,38.1 94.2,38.1 C96.4,38.1 98.6,39.2 100,40.9 C101.4,39.2 103.6,38.1 105.9,38.1 C109.8,38.1 113,41.3 113,45.3 C113,50.2 108.6,54.2 101.9,60.3 Z" fill="#FBBF24"/></svg></div>
+    <svg viewBox="0 0 130 36" xmlns="http://www.w3.org/2000/svg" style="height:32px;width:auto;display:block;margin:0 auto 4px" aria-label="mile.ly"><text x="65" y="27" text-anchor="middle" font-family="'Nunito','Pretendard Variable',system-ui,-apple-system,sans-serif" font-weight="900" font-size="30" letter-spacing="-1"><tspan fill="#5B4FC4">mile</tspan><tspan fill="#FBBF24">.</tspan><tspan fill="#A78BFA">ly</tspan></text></svg>
     <div class="auth-sub">가족 계정으로 로그인하세요</div>
     <input type="text" class="auth-input" id="login-id" placeholder="아이디" autocomplete="username" inputmode="latin" autocapitalize="none" onkeydown="if(event.key==='Enter')document.getElementById('login-pwd').focus()">
     <div class="pwd-wrap">
@@ -2464,9 +2465,9 @@ button:disabled {
     <div class="ob-welcome-top">
       <div class="ob-logo-wrap ob-fade-1">
         <div class="ob-logo-icon">
-          <svg width="88" height="88" viewBox="0 0 200 200"><defs><linearGradient id="wb2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#5B4FC4"/><stop offset="100%" stop-color="#A78BFA"/></linearGradient></defs><rect width="200" height="200" rx="42" fill="url(#wb2)"/><path d="M30,130 L100,55 L170,130" stroke="white" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M100,62 L98.1,60.3 C91.4,54.2 87,50.2 87,45.3 C87,41.3 90.1,38.1 94.2,38.1 C96.4,38.1 98.6,39.2 100,40.9 C101.4,39.2 103.6,38.1 105.9,38.1 C109.8,38.1 113,41.3 113,45.3 C113,50.2 108.6,54.2 101.9,60.3 Z" fill="#FBBF24"/></svg>
+          <svg width="88" height="88" viewBox="0 0 200 200"><defs><linearGradient id="wb2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#5B4FC4"/><stop offset="100%" stop-color="#A78BFA"/></linearGradient></defs><rect width="200" height="200" rx="47" fill="url(#wb2)"/><path d="M30,130 L100,55 L170,130" stroke="white" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M100,62 L98.1,60.3 C91.4,54.2 87,50.2 87,45.3 C87,41.3 90.1,38.1 94.2,38.1 C96.4,38.1 98.6,39.2 100,40.9 C101.4,39.2 103.6,38.1 105.9,38.1 C109.8,38.1 113,41.3 113,45.3 C113,50.2 108.6,54.2 101.9,60.3 Z" fill="#FBBF24"/></svg>
         </div>
-        <svg viewBox="0 0 130 36" xmlns="http://www.w3.org/2000/svg" style="height:36px;width:auto;display:block" aria-label="mile.ly"><text x="2" y="27" font-family="'Nunito','Pretendard Variable',system-ui,-apple-system,sans-serif" font-weight="900" font-size="30" letter-spacing="-1"><tspan fill="#fff">mile</tspan><tspan fill="#FBBF24">.</tspan><tspan fill="#E0D4FF">ly</tspan></text></svg>
+        <svg viewBox="0 0 130 36" xmlns="http://www.w3.org/2000/svg" style="height:36px;width:auto;display:block" aria-label="mile.ly"><text x="65" y="27" text-anchor="middle" font-family="'Nunito','Pretendard Variable',system-ui,-apple-system,sans-serif" font-weight="900" font-size="30" letter-spacing="-1"><tspan fill="#fff">mile</tspan><tspan fill="#FBBF24">.</tspan><tspan fill="#E0D4FF">ly</tspan></text></svg>
       </div>
       <h1 class="ob-headline ob-fade-2">아이의 좋은 습관,<br>가족이 함께 만들어요</h1>
       <p class="ob-sub ob-fade-3">매일 조금씩, 함께라서 가능해요</p>
@@ -4369,11 +4370,25 @@ function showAuthScreen(screen) {
       activeAuth.style.height=vvH+'px';
       activeAuth.style.top=window.visualViewport.offsetTop+'px';
       activeAuth.style.bottom='auto';
+      
+      // 하단 커버 오버레이 (홈탭 완전 차단)
+      var cover=document.getElementById('auth-kb-cover');
+      if(!cover){
+        cover=document.createElement('div');
+        cover.id='auth-kb-cover';
+        cover.style.cssText='position:fixed;left:0;right:0;bottom:0;height:'+(kbH+50)+'px;background:linear-gradient(135deg,#5B4FC4,#A78BFA);z-index:999;pointer-events:none';
+        document.body.appendChild(cover);
+      } else {
+        cover.style.height=(kbH+50)+'px';
+        cover.style.display='block';
+      }
     } else {
       // 키보드 내려감 — 원래대로
       activeAuth.style.height='';
       activeAuth.style.top='';
       activeAuth.style.bottom='';
+      var cover=document.getElementById('auth-kb-cover');
+      if(cover) cover.style.display='none';
     }
   }
 
