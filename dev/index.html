@@ -2427,42 +2427,34 @@ button:disabled {
   .nav-brand,.sidebar,.side-menu{display:none!important;}
 }
 
-/* ═══════ GUIDED TOUR ═══════ */
-#tour-overlay{position:fixed;inset:0;z-index:8000;pointer-events:none;opacity:0;transition:opacity .3s}
+/* ═══════ GUIDED TOUR v2 ═══════ */
+#tour-overlay{position:fixed;inset:0;z-index:8000;pointer-events:none;opacity:0;transition:opacity .4s}
 #tour-overlay.active{opacity:1;pointer-events:auto}
-#tour-spotlight{position:absolute;border-radius:16px;transition:all .45s cubic-bezier(.4,0,.2,1);box-shadow:0 0 0 9999px rgba(0,0,0,.72)}
-#tour-spotlight::after{content:'';position:absolute;inset:-4px;border-radius:20px;border:2.5px solid rgba(255,255,255,.5);animation:tourPulse 1.8s ease-in-out infinite;pointer-events:none}
-#tour-tooltip{position:absolute;max-width:300px;width:calc(100vw - 40px);background:#fff;border-radius:20px;padding:20px 18px 16px;box-shadow:0 12px 40px rgba(0,0,0,.25);opacity:0;transition:all .4s cubic-bezier(.175,.885,.32,1.275);pointer-events:auto}
-#tour-overlay.active #tour-tooltip{opacity:1}
-#tour-tooltip.centered{left:50%!important;top:50%!important;bottom:auto!important;transform:translate(-50%,-50%)}
-#tour-tooltip:not(.centered){animation:tourSlideUp .4s ease .1s both}
-#tour-tooltip::before{content:'';position:absolute;width:16px;height:16px;background:#fff;transform:rotate(45deg);border-radius:3px}
-#tour-tooltip.arrow-top::before{top:-7px;left:50%;margin-left:-8px}
-#tour-tooltip.arrow-bottom::before{bottom:-7px;left:50%;margin-left:-8px}
-.tour-emoji{font-size:36px;text-align:center;margin-bottom:8px;animation:tourBounce .6s ease .2s both}
-.tour-title{font-size:17px;font-weight:900;color:#1E293B;text-align:center;margin-bottom:6px}
-.tour-desc{font-size:13.5px;font-weight:600;color:#64748B;text-align:center;line-height:1.55;margin-bottom:14px}
-.tour-desc b{color:#6366F1;font-weight:800}
-.tour-footer{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.tour-dots{display:flex;gap:5px;align-items:center}
-.tour-dot{width:7px;height:7px;border-radius:50%;background:#E2E8F0;transition:all .3s}
-.tour-dot.active{width:20px;border-radius:4px;background:#6366F1}
-.tour-dot.done{background:#A5B4FC}
-.tour-skip{background:none;border:none;color:#94A3B8;font-size:12px;font-weight:700;cursor:pointer;padding:4px 8px;font-family:inherit}
-.tour-next{background:linear-gradient(135deg,#6366F1,#818CF8);color:#fff;border:none;border-radius:12px;padding:10px 20px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(99,102,241,.35);transition:transform .15s}
-.tour-next:active{transform:scale(.95)}
-.tour-hand{position:absolute;font-size:28px;pointer-events:none;z-index:8001;filter:drop-shadow(0 2px 4px rgba(0,0,0,.3))}
-@keyframes tourPulse{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:1;transform:scale(1.01)}}
-@keyframes tourBounce{0%{transform:scale(0) rotate(-15deg)}60%{transform:scale(1.3) rotate(5deg)}80%{transform:scale(.9) rotate(-2deg)}100%{transform:scale(1) rotate(0)}}
-@keyframes tourTap{0%{transform:scale(1) translate(0,0)}30%{transform:scale(.85) translate(2px,4px)}50%{transform:scale(1) translate(0,0)}100%{transform:scale(1) translate(0,0)}}
-@keyframes tourLongPress{0%{transform:scale(1)}15%{transform:scale(.82)}70%{transform:scale(.82)}85%{transform:scale(1.05)}100%{transform:scale(1)}}
-@keyframes tourSwipe{0%{transform:translateX(0)}50%{transform:translateX(-30px)}100%{transform:translateX(0)}}
-@keyframes tourWiggle{0%,100%{transform:rotate(0deg)}20%{transform:rotate(-12deg)}40%{transform:rotate(10deg)}60%{transform:rotate(-8deg)}80%{transform:rotate(5deg)}}
-@keyframes tourHandTap{0%,100%{transform:translate(0,0) scale(1)}20%{transform:translate(0,6px) scale(.9)}40%{transform:translate(0,0) scale(1)}}
-@keyframes tourHandHold{0%{transform:translate(0,0) scale(1)}10%{transform:translate(0,4px) scale(.9)}60%{transform:translate(0,4px) scale(.9)}75%{transform:translate(0,0) scale(1.05)}100%{transform:translate(0,0) scale(1)}}
-@keyframes tourSlideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
-@keyframes tourConfetti{0%{opacity:1;transform:translateY(0) rotate(0deg) scale(1)}100%{opacity:0;transform:translateY(-80px) rotate(720deg) scale(0)}}
-.tour-confetti-piece{position:absolute;width:8px;height:8px;border-radius:2px;animation:tourConfetti .8s ease-out forwards;pointer-events:none}
+#tour-spotlight{position:absolute;border-radius:16px;transition:all .5s cubic-bezier(.4,0,.2,1);box-shadow:0 0 0 9999px rgba(0,0,0,.82)}
+#tour-spotlight::after{content:'';position:absolute;inset:-3px;border-radius:19px;border:2px solid rgba(167,139,250,.6);animation:tourGlow 2s ease-in-out infinite;pointer-events:none}
+#tour-content{position:absolute;pointer-events:auto;opacity:0;transition:opacity .4s .1s;display:flex;flex-direction:column;align-items:center;gap:10px;width:calc(100vw - 48px);max-width:320px}
+#tour-overlay.active #tour-content{opacity:1}
+.tour-icon{width:44px;height:44px;animation:tourFadeScale .5s cubic-bezier(.175,.885,.32,1.275) .15s both}
+.tour-title{font-size:18px;font-weight:900;color:#fff;text-align:center;text-shadow:0 2px 12px rgba(0,0,0,.4);letter-spacing:-.3px}
+.tour-desc{font-size:13px;font-weight:600;color:rgba(255,255,255,.75);text-align:center;line-height:1.6}
+.tour-desc b{color:#A78BFA;font-weight:800}
+.tour-desc em{color:#FBBF24;font-style:normal;font-weight:800}
+.tour-nav{display:flex;align-items:center;gap:16px;margin-top:6px}
+.tour-dots{display:flex;gap:6px;align-items:center}
+.tour-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.25);transition:all .35s}
+.tour-dot.active{width:22px;border-radius:3px;background:#A78BFA}
+.tour-dot.done{background:rgba(167,139,250,.45)}
+.tour-skip{background:none;border:none;color:rgba(255,255,255,.4);font-size:12px;font-weight:700;cursor:pointer;padding:6px 10px;font-family:inherit;transition:color .2s}
+.tour-skip:active{color:rgba(255,255,255,.7)}
+.tour-next{background:rgba(255,255,255,.12);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:9px 22px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;transition:all .15s;letter-spacing:.3px}
+.tour-next:active{transform:scale(.95);background:rgba(255,255,255,.2)}
+.tour-hand{position:absolute;pointer-events:none;z-index:8001;filter:drop-shadow(0 2px 8px rgba(0,0,0,.5))}
+.tour-confetti-piece{position:absolute;width:6px;height:6px;border-radius:50%;pointer-events:none;animation:tourConfetti 1s ease-out forwards}
+@keyframes tourGlow{0%,100%{opacity:.4;border-color:rgba(167,139,250,.4)}50%{opacity:1;border-color:rgba(167,139,250,.8)}}
+@keyframes tourFadeScale{from{opacity:0;transform:scale(.5) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes tourHandTap{0%,100%{transform:translate(0,0) scale(1)}20%{transform:translate(0,7px) scale(.88)}40%{transform:translate(0,0) scale(1)}}
+@keyframes tourHandHold{0%{transform:translate(0,0) scale(1)}10%{transform:translate(0,5px) scale(.88)}65%{transform:translate(0,5px) scale(.88)}80%{transform:translate(0,0) scale(1.06)}100%{transform:translate(0,0) scale(1)}}
+@keyframes tourConfetti{0%{opacity:1;transform:translateY(0) rotate(0deg) scale(1)}100%{opacity:0;transform:translateY(-100px) rotate(540deg) scale(0)}}
 
 </style>
 </head>
@@ -15744,74 +15736,46 @@ window._createState = _createState;
   let _tourActive = false;
   const _TOUR_STEPS = [
     {
-      emoji: '🏆',
-      title: '마일리지를 확인해요!',
-      desc: '여기서 <b>현재 마일리지</b>를 확인할 수 있어요.\n목표까지 얼마나 남았는지도 한눈에!',
-      target: '.hero',
-      tab: 'home',
-      hand: null,
-      anim: null,
-      btnText: '다음'
+      icon: '<svg width="44" height="44" viewBox="0 0 44 44" fill="none"><circle cx="22" cy="22" r="20" stroke="#FBBF24" stroke-width="2.5" opacity=".3"/><path d="M22 8l3.5 7 7.5 1.1-5.4 5.3 1.3 7.6L22 25.5l-6.9 3.5 1.3-7.6L11 16.1l7.5-1.1L22 8z" fill="#FBBF24"/></svg>',
+      title: '마일리지를 확인해요',
+      desc: '여기서 <b>현재 마일리지</b>를 확인할 수 있어요\n목표까지 얼마나 남았는지도 한눈에!',
+      target: '.hero', tab: 'home', hand: null, anim: null, btnText: '다음'
     },
     {
-      emoji: '✅',
-      title: '활동을 탭하면 기록돼요!',
-      desc: '오늘 할 일 카드를 <b>톡!</b> 탭하면\n마일리지가 적립돼요.',
-      target: '#home-grid',
-      tab: 'home',
-      hand: 'tap',
-      anim: null,
-      btnText: '다음'
+      icon: '<svg width="44" height="44" viewBox="0 0 44 44" fill="none"><circle cx="22" cy="22" r="20" stroke="#A78BFA" stroke-width="2.5" opacity=".3"/><path d="M15 22l4 4 10-10" stroke="#A78BFA" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+      title: '활동을 탭하면 기록돼요',
+      desc: '오늘 할 일 카드를 <b>톡!</b> 탭하면\n마일리지가 적립돼요',
+      target: '#home-grid', tab: 'home', hand: 'tap', anim: null, btnText: '다음'
     },
     {
-      emoji: '💬',
-      title: '꾹 누르면 특별한 게 나와요!',
-      desc: '활동 카드를 <b>길게 꾹~</b> 누르면\n<b>스티커</b>와 <b>말풍선</b>을 남길 수 있어요!',
-      target: '#home-grid',
-      tab: 'home',
-      hand: 'longpress',
-      anim: null,
-      btnText: '다음'
+      icon: '<svg width="44" height="44" viewBox="0 0 44 44" fill="none"><circle cx="22" cy="22" r="20" stroke="#A78BFA" stroke-width="2.5" opacity=".3"/><path d="M14 28V16a2 2 0 012-2h12a2 2 0 012 2v8a2 2 0 01-2 2H18l-4 4v-2z" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/><circle cx="19" cy="21" r="1.2" fill="#FBBF24"/><circle cx="25" cy="21" r="1.2" fill="#FBBF24"/></svg>',
+      title: '꾹 누르면 특별한 게 나와요',
+      desc: '활동 카드를 <b>길게 꾹~</b> 누르면\n<em>스티커</em>와 <em>말풍선</em>을 남길 수 있어요',
+      target: '#home-grid', tab: 'home', hand: 'longpress', anim: null, btnText: '다음'
     },
     {
-      emoji: '📝',
+      icon: '<svg width="44" height="44" viewBox="0 0 44 44" fill="none"><circle cx="22" cy="22" r="20" stroke="#A78BFA" stroke-width="2.5" opacity=".3"/><path d="M16 14h12M16 20h8M16 26h10" stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity=".85"/><path d="M28 24l2 2-2 2" stroke="#FBBF24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
       title: '기록 탭에서 활동을 기록해요',
-      desc: '이 탭에서 <b>활동을 직접 기록</b>하고\n관리할 수 있어요.',
-      target: '#tab-log',
-      tab: null,
-      hand: 'tap',
-      anim: null,
-      btnText: '다음'
+      desc: '이 탭에서 <b>활동을 직접 기록</b>하고\n관리할 수 있어요',
+      target: '#tab-log', tab: null, hand: 'tap', anim: null, btnText: '다음'
     },
     {
-      emoji: '🎁',
+      icon: '<svg width="44" height="44" viewBox="0 0 44 44" fill="none"><circle cx="22" cy="22" r="20" stroke="#FBBF24" stroke-width="2.5" opacity=".3"/><rect x="14" y="16" width="16" height="14" rx="3" stroke="#fff" stroke-width="2.2" opacity=".85"/><path d="M14 20h16" stroke="#fff" stroke-width="2.2" opacity=".85"/><path d="M22 20v10" stroke="#FBBF24" stroke-width="1.5" stroke-dasharray="2 2" opacity=".6"/><circle cx="19" cy="25" r="1.5" fill="#FBBF24"/><circle cx="25" cy="23" r="1.5" fill="#A78BFA"/></svg>',
       title: '보상으로 동기부여!',
-      desc: '마일리지를 모아서\n<b>원하는 보상</b>으로 교환해요!',
-      target: '#tab-rwd',
-      tab: null,
-      hand: 'tap',
-      anim: null,
-      btnText: '다음'
+      desc: '마일리지를 모아서\n<b>원하는 보상</b>으로 교환해요',
+      target: '#tab-rwd', tab: null, hand: 'tap', anim: null, btnText: '다음'
     },
     {
-      emoji: '📊',
+      icon: '<svg width="44" height="44" viewBox="0 0 44 44" fill="none"><circle cx="22" cy="22" r="20" stroke="#A78BFA" stroke-width="2.5" opacity=".3"/><rect x="14" y="28" width="4" height="6" rx="1" fill="#A78BFA" opacity=".7" transform="rotate(180 16 31)"/><rect x="20" y="22" width="4" height="12" rx="1" fill="#FBBF24" opacity=".8" transform="rotate(180 22 28)"/><rect x="26" y="16" width="4" height="18" rx="1" fill="#A78BFA" transform="rotate(180 28 25)"/></svg>',
       title: '성과를 확인해요',
-      desc: '이 탭에서 <b>통계, 캘린더, 뱃지</b>\n그리고 <b>성과</b>를 확인할 수 있어요!',
-      target: '#tab-hist',
-      tab: null,
-      hand: 'tap',
-      anim: null,
-      btnText: '다음'
+      desc: '이 탭에서 <b>통계</b>, <b>캘린더</b>, <b>뱃지</b>\n그리고 <em>성과</em>를 확인할 수 있어요',
+      target: '#tab-hist', tab: null, hand: 'tap', anim: null, btnText: '다음'
     },
     {
-      emoji: '🎉',
+      icon: '<svg width="44" height="44" viewBox="0 0 44 44" fill="none"><circle cx="22" cy="22" r="20" stroke="#FBBF24" stroke-width="2.5" opacity=".3"/><path d="M22 12l2 4.5 5 .7-3.6 3.5.9 5L22 23.4l-4.3 2.3.9-5L15 17.2l5-.7L22 12z" fill="#FBBF24" opacity=".9"/><line x1="10" y1="32" x2="14" y2="28" stroke="#A78BFA" stroke-width="1.5" stroke-linecap="round"/><line x1="34" y1="32" x2="30" y2="28" stroke="#A78BFA" stroke-width="1.5" stroke-linecap="round"/><line x1="10" y1="14" x2="13" y2="17" stroke="#FBBF24" stroke-width="1.5" stroke-linecap="round"/><line x1="34" y1="14" x2="31" y2="17" stroke="#FBBF24" stroke-width="1.5" stroke-linecap="round"/></svg>',
       title: '준비 완료!',
-      desc: '이제 마일리지 여정을 시작해볼까요?\n매일 활동을 완료하고 보상을 받아봐요!',
-      target: null,
-      tab: 'home',
-      hand: null,
-      anim: 'confetti',
-      btnText: '시작하기!'
+      desc: '이제 <em>마일리지 여정</em>을 시작해볼까요?\n매일 활동을 완료하고 보상을 받아봐요!',
+      target: null, tab: 'home', hand: null, anim: 'confetti', btnText: '시작하기!'
     }
   ];
 
@@ -15819,6 +15783,13 @@ window._createState = _createState;
     _tourStep = -1;
     _tourActive = true;
     const overlay = document.getElementById('tour-overlay');
+    // endTour에서 display:none으로 숨겼으므로 복원
+    overlay.style.display = '';
+    overlay.style.pointerEvents = '';
+    const spotlight = document.getElementById('tour-spotlight');
+    if (spotlight) { spotlight.style.display = ''; spotlight.style.boxShadow = ''; }
+    const tooltip = document.getElementById('tour-content');
+    if (tooltip) tooltip.style.display = '';
     overlay.classList.remove('active');
     // ensure home tab
     reallyGoTab('home');
@@ -15842,29 +15813,40 @@ window._createState = _createState;
     _tourActive = false;
     const overlay = document.getElementById('tour-overlay');
     overlay.classList.remove('active');
-    document.getElementById('tour-hand').style.display = 'none';
+    // 완전 비활성화: display:none + pointer-events:none 강제 (iOS Safari 호환)
+    overlay.style.display = 'none';
+    overlay.style.pointerEvents = 'none';
+    // 자식 요소 정리
+    const spotlight = document.getElementById('tour-spotlight');
+    if (spotlight) { spotlight.style.display = 'none'; spotlight.style.boxShadow = 'none'; }
+    const tooltip = document.getElementById('tour-content');
+    if (tooltip) { tooltip.style.display = 'none'; }
+    const hand = document.getElementById('tour-hand');
+    if (hand) hand.style.display = 'none';
+    // confetti 잔여물 제거
+    overlay.querySelectorAll('.tour-confetti-piece').forEach(p => p.remove());
     localStorage.setItem(_LS_PREFIX + "onboarded", "1");
     localStorage.setItem(_LS_PREFIX + "tour_done", "1");
-    // 마지막 스텝 confetti였으면 홈으로
     reallyGoTab('home');
-    toast('🚀 가이드 완료! 마일리지를 모아봐요!');
   }
 
   function showTourStep(idx) {
     const step = _TOUR_STEPS[idx];
     const overlay = document.getElementById('tour-overlay');
     const spotlight = document.getElementById('tour-spotlight');
-    const tooltip = document.getElementById('tour-tooltip');
+    const content = document.getElementById('tour-content');
     const hand = document.getElementById('tour-hand');
 
     // navigate tab if needed
     if (step.tab) reallyGoTab(step.tab);
 
-    // fill tooltip content
-    document.getElementById('tour-emoji').textContent = step.emoji;
-    document.getElementById('tour-emoji').style.animation = 'none';
-    void document.getElementById('tour-emoji').offsetWidth;
-    document.getElementById('tour-emoji').style.animation = 'tourBounce .6s ease .1s both';
+    // fill content (v2: SVG icon, no tooltip box)
+    const iconEl = document.getElementById('tour-icon');
+    iconEl.innerHTML = step.icon;
+    iconEl.style.animation = 'none';
+    void iconEl.offsetWidth;
+    iconEl.style.animation = '';
+
     document.getElementById('tour-title').textContent = step.title;
     document.getElementById('tour-desc').innerHTML = step.desc.replace(/\n/g, '<br>');
     document.getElementById('tour-next-btn').textContent = step.btnText;
@@ -15876,12 +15858,7 @@ window._createState = _createState;
       `<div class="tour-dot${i === idx ? ' active' : i < idx ? ' done' : ''}"></div>`
     ).join('');
 
-    // Reset tooltip animation
-    tooltip.style.animation = 'none';
-    void tooltip.offsetWidth;
-    tooltip.style.animation = '';
-
-    // Position spotlight and tooltip
+    // Position spotlight and content
     setTimeout(() => {
       if (step.target) {
         const targetEl = document.querySelector(step.target);
@@ -15895,36 +15872,26 @@ window._createState = _createState;
           spotlight.style.borderRadius = '16px';
           spotlight.style.display = 'block';
 
-          // tooltip position: below or above target
-          const tooltipH = 220; // approximate
+          // content position: below or above spotlight
           const spaceBelow = window.innerHeight - rect.bottom;
-          if (spaceBelow > tooltipH + 30) {
-            // below
-            tooltip.className = 'arrow-top';
-            tooltip.style.top = (rect.bottom + 16) + 'px';
-            tooltip.style.bottom = 'auto';
+          if (spaceBelow > 200) {
+            content.style.top = (rect.bottom + 24) + 'px';
+            content.style.bottom = 'auto';
           } else {
-            // above
-            tooltip.className = 'arrow-bottom';
-            tooltip.style.top = 'auto';
-            tooltip.style.bottom = (window.innerHeight - rect.top + 16) + 'px';
+            content.style.top = 'auto';
+            content.style.bottom = (window.innerHeight - rect.top + 24) + 'px';
           }
-          // center horizontally
-          const tooltipW = Math.min(300, window.innerWidth - 40);
-          tooltip.style.left = Math.max(20, Math.min(window.innerWidth - tooltipW - 20,
-            rect.left + rect.width / 2 - tooltipW / 2)) + 'px';
-          tooltip.style.width = tooltipW + 'px';
+          content.style.left = '50%';
+          content.style.transform = 'translateX(-50%)';
 
-          // hand animation
+          // hand animation (SVG pointer)
           if (step.hand === 'tap') {
             hand.style.display = 'block';
-            hand.textContent = '👆';
             hand.style.left = (rect.left + rect.width / 2 - 14) + 'px';
             hand.style.top = (rect.top + rect.height / 2 - 14) + 'px';
             hand.style.animation = 'tourHandTap 1s ease infinite';
           } else if (step.hand === 'longpress') {
             hand.style.display = 'block';
-            hand.textContent = '👆';
             hand.style.left = (rect.left + rect.width / 2 - 14) + 'px';
             hand.style.top = (rect.top + rect.height / 2 - 14) + 'px';
             hand.style.animation = 'tourHandHold 2s ease infinite';
@@ -15936,8 +15903,10 @@ window._createState = _createState;
         // no target — center screen (final step)
         spotlight.style.display = 'none';
         hand.style.display = 'none';
-        tooltip.className = 'centered';
-        tooltip.style.width = Math.min(300, window.innerWidth - 40) + 'px';
+        content.style.top = '50%';
+        content.style.left = '50%';
+        content.style.transform = 'translate(-50%, -50%)';
+        content.style.bottom = 'auto';
 
         if (step.anim === 'confetti') {
           setTimeout(() => launchTourConfetti(), 300);
@@ -15949,7 +15918,7 @@ window._createState = _createState;
   }
 
   function launchTourConfetti() {
-    const colors = ['#6366F1','#F59E0B','#10B981','#EF4444','#EC4899','#8B5CF6','#F97316'];
+    const colors = ['#A78BFA','#FBBF24','#6366F1','#F472B6','#34D399','#818CF8','#FCD34D'];
     const overlay = document.getElementById('tour-overlay');
     for (let i = 0; i < 30; i++) {
       const piece = document.createElement('div');
@@ -16023,20 +15992,24 @@ window._createState = _createState;
 
 })();
 </script>
-<!-- Guided Tour -->
+<!-- Guided Tour v2 -->
 <div id="tour-overlay">
   <div id="tour-spotlight"></div>
-  <div id="tour-tooltip" class="arrow-top">
-    <div class="tour-emoji" id="tour-emoji"></div>
+  <div id="tour-content">
+    <div class="tour-icon" id="tour-icon"></div>
     <div class="tour-title" id="tour-title"></div>
     <div class="tour-desc" id="tour-desc"></div>
-    <div class="tour-footer">
+    <div class="tour-nav">
       <button class="tour-skip" id="tour-skip-btn" onclick="tourSkip()">건너뛰기</button>
       <div class="tour-dots" id="tour-dots"></div>
       <button class="tour-next" id="tour-next-btn" onclick="tourNext()">다음</button>
     </div>
   </div>
-  <div class="tour-hand" id="tour-hand" style="display:none">👆</div>
+  <div class="tour-hand" id="tour-hand" style="display:none">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+      <path d="M12 1C12 1 12 8 12 8L16 6.5C17 6 18 7 17.5 8L12 18H8L6 12C5.5 11 6.5 10 7.5 10.5L9 11.5V3C9 1.9 9.9 1 11 1H12Z" fill="#fff" stroke="#A78BFA" stroke-width="1.2" stroke-linejoin="round"/>
+    </svg>
+  </div>
 </div>
 
 <script>
