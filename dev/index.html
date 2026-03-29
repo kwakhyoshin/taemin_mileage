@@ -3703,6 +3703,7 @@ button:disabled {
     <h2>나의 메뉴 <svg class="hdr-ico" viewBox="0 0 24 24" style="width:24px;height:24px"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></h2>
     <p class="my-header-sub" id="my-header-sub">내 정보</p>
   </div>
+  <div class="my-section-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> 나의 계정</div>
   <div class="my-profile-card">
     <div class="my-avatar-wrap" id="my-avatar-wrap"></div>
     <div class="my-info-text">
@@ -3710,7 +3711,7 @@ button:disabled {
       <div class="my-role" id="my-role">역할</div>
     </div>
   </div>
-  <!-- 가족 구성원 아바타 가로 나열 -->
+  <!-- 가족 구성원 아바타 가로 나열 (나 제외) -->
   <div class="my-section-title" id="my-family-title" style="display:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg> 우리가족</div>
   <div class="my-family-row" id="my-family-row" style="display:none"></div>
   <div class="my-section-title">기분 &amp; 프로필</div>
@@ -12382,31 +12383,30 @@ function renderMyTab(){
       togDarkMy.classList.add('off');
     }
   }
-  // 가족 구성원 아바타 가로 나열
+  // 가족 구성원 아바타 가로 나열 (나 자신 제외)
   const familyRow=document.getElementById('my-family-row');
   const familyTitle=document.getElementById('my-family-title');
   if(familyRow){
     const fm=S.familyMeta?.members||{};
-    const ids=Object.keys(fm);
-    if(ids.length>1){
+    const ids=Object.keys(fm).filter(mid=>mid!==currentUser); // 나 제외
+    if(ids.length>0){
       const _RLABELS={dad:'아빠',mom:'엄마',grandpa:'할아버지',grandma:'할머니',grandpa_m:'외할아버지',grandma_m:'외할머니',child:'자녀',caregiver:'양육자',parent:'양육자'};
       familyRow.innerHTML=ids.map(mid=>{
         const m=fm[mid];
         const mName=m?.name||MEMBERS[mid]?.name||mid;
         const mRole=_RLABELS[m?.displayRole]||_RLABELS[m?.role]||m?.displayRole||m?.role||'멤버';
-        const isMe=mid===currentUser;
-        const clickAction=isMe?'onMeIconClick()':'onUserIconClick(\''+mid+'\')';
+        const clickAction='onUserIconClick(\''+mid+'\')';
         const moodEmoji=getMoodEmoji(mid);
         // 해당 멤버로부터 온 미읽은 메시지 수
-        const unreadFromMember=(!isMe&&S.familyMessages)?S.familyMessages.filter(m=>m.from===mid&&m.to===currentUser&&!m.read).length:0;
+        const unreadFromMember=S.familyMessages?S.familyMessages.filter(m=>m.from===mid&&m.to===currentUser&&!m.read).length:0;
         return `<div class="my-family-member" onclick="${clickAction}">
-          <div class="my-family-avatar" data-mf-id="${mid}" style="${isMe?'border-color:var(--tab-color,#6366F1);box-shadow:0 0 0 2px var(--tab-color,#6366F1)':''}">
+          <div class="my-family-avatar" data-mf-id="${mid}">
             ${getAvatarHTML(mid,48)}
             ${moodEmoji?`<span class="mf-mood-badge">${moodEmoji}</span>`:''}
             <div class="mf-mood-particles" data-mf-particles="${mid}"></div>
             ${unreadFromMember>0?`<span class="mf-unread-badge">${unreadFromMember>99?'99+':unreadFromMember}</span>`:''}
           </div>
-          <div class="my-family-name">${mName}${isMe?'<span style="margin-left:3px;background:var(--tab-color,#6366F1);color:#fff;font-size:9px;font-weight:900;padding:1px 5px;border-radius:8px;vertical-align:middle">나</span>':''}</div>
+          <div class="my-family-name">${mName}</div>
           <div class="my-family-role">${mRole}</div>
         </div>`;
       }).join('');
