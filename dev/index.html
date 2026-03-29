@@ -6648,6 +6648,12 @@ function syncGlobalToMember(targetId) {
   const mid = targetId || currentUser;
   if (!S.memberData || !mid) return;
   if (!S.familyMeta?.members) return; // 레거시 모드(familyMeta 없음)에서는 memberData 분리 불필요
+  // ⚠️ 안전장치: _globalDataOwner가 설정되어 있고 mid와 다르면
+  //   현재 S.*는 다른 자녀의 데이터이므로 mid에 저장하면 안됨
+  if(_globalDataOwner && mid !== _globalDataOwner && getFamilyMode()==='independent'){
+    console.warn(`[syncGlobalToMember] BLOCKED: S.* belongs to ${_globalDataOwner} but tried to save to ${mid}`);
+    return;
+  }
   if (!S.memberData[mid]) getMemberState(mid);
   const ms = S.memberData[mid];
 
@@ -6673,10 +6679,11 @@ function syncGlobalToMember(targetId) {
 // Robust debounced save with in-flight guard
 function save(){
   // independent 모드에서 양육자가 자녀 데이터를 보고 있으면 해당 자녀에게 저장
-  // _globalDataOwner: syncMemberToGlobal()로 로드된 데이터의 원래 주인 (관리패널 등에서 다른 자녀 편집 시 중요)
+  // ⚠️ 반드시 _globalDataOwner만 사용 — viewingChildId를 fallback으로 쓰면
+  //   아직 syncMemberToGlobal이 안 된 상태에서 엉뚱한 자녀에게 S 데이터가 덮어씌워짐
   if(getFamilyMode()==='independent'&&isCaregiverUser()){
-    const syncTarget = _globalDataOwner || viewingChildId;
-    if(syncTarget) syncGlobalToMember(syncTarget);
+    if(_globalDataOwner) syncGlobalToMember(_globalDataOwner);
+    // _globalDataOwner가 null이면 아직 어떤 자녀도 로드하지 않은 상태 → sync 생략
   }else{
     syncGlobalToMember(); // Sync changes back to member data before saving
   }
@@ -10548,8 +10555,10 @@ window.getActiveMileage=getActiveMileage;
 // independent mode에서 자녀 전환 (양육자용)
 function switchViewingChild(childId){
   if(!childId)return;
-  const prevId=getViewedMemberId();
-  if(prevId)syncGlobalToMember(prevId);
+  // ⚠️ _globalDataOwner를 사용해야 함 — getViewedMemberId()는 viewingChildId를 반환하는데
+  //   _globalDataOwner와 다를 수 있음 (관리자 탭 등에서 변경 없이도 불일치 가능)
+  const prevOwner=_globalDataOwner||getViewedMemberId();
+  if(prevOwner)syncGlobalToMember(prevOwner);
   viewingChildId=childId;
   // 해당 자녀의 memberData 초기화 (없으면)
   if(!S.memberData[childId])getMemberState(childId);
@@ -13872,30 +13881,11 @@ function renderJoinMemberGrid(){
 window.checkUrlParams=checkUrlParams;
 
 function reallyGoTab(tab){
-  // 관리자 탭에서 나갈 때: 관리자 선택 자녀 데이터 저장 → 원래 뷰 자녀 복원
+  // 관리자 탭 진입/이탈 시: _globalDataOwner를 변경하지 않음
+  // ⚠️ 이전에는 관리자 탭 진입 시 syncMemberToGlobal(_admViewChildId)로 글로벌 S를 교체했으나,
+  //   이제 관리자 함수들이 memberData를 직접 읽으므로 글로벌 S 오염 불필요
+  // 관리자 탭에서 나갈 때: 홈 뷰 자녀가 여전히 _globalDataOwner이므로 복원 불필요
   const _prevTab=document.body.getAttribute('data-tab');
-  if(_prevTab==='adm'&&tab!=='adm'&&_admViewChildId&&S.memberData){
-    syncGlobalToMember(_admViewChildId);
-    const _restoreId=isCaregiverUser()?viewingChildId:currentUser;
-    if(_restoreId&&_restoreId!==_admViewChildId){
-      if(!S.memberData[_restoreId])getMemberState(_restoreId);
-      syncMemberToGlobal(_restoreId);
-    }
-  }
-  // 관리자 탭에 진입할 때: 현재 글로벌 데이터 저장 → 관리자 선택 자녀 로드
-  // isCaregiverUser() 뿐 아니라 isCurrentUserAdmin()인 자녀도 동일하게 처리
-  if(tab==='adm'&&_prevTab!=='adm'&&_admViewChildId&&S.memberData&&(isCaregiverUser()||isCurrentUserAdmin())){
-    // 현재 글로벌 데이터를 원래 주인에게 먼저 저장
-    const _saveTarget=isCaregiverUser()?viewingChildId:currentUser;
-    if(_saveTarget&&_globalDataOwner===_saveTarget){
-      syncGlobalToMember(_saveTarget);
-    }
-    // 관리자가 선택한 자녀 데이터 로드 (자기 자신이면 스킵)
-    if(_admViewChildId!==currentUser){
-      if(!S.memberData[_admViewChildId])getMemberState(_admViewChildId);
-      syncMemberToGlobal(_admViewChildId);
-    }
-  }
   // PIN이 열려 있으면 강제 닫고 scroll lock 해제
   const pinWrap=document.getElementById('pin-wrap');
   if(pinWrap&&pinWrap.style.display!=='none'){pinWrap.style.display='none';_scrollLockCount=0;document.body.classList.remove('popup-open');document.documentElement.classList.remove('popup-open');if(_scrollLockTouchHandler){document.removeEventListener('touchmove',_scrollLockTouchHandler);_scrollLockTouchHandler=null;}}
