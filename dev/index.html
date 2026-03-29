@@ -92,14 +92,16 @@ body.dark{
   --pu-lt:rgba(139,92,246,.15);--yw-lt:rgba(245,158,11,.15);
 }
 /* TAB THEME COLORS */
-body[data-tab="home"]{--tab-color:#6366F1;--tab-color2:#818CF8;--tab-shadow:rgba(99,102,241,0.3);--tab-lt:rgba(99,102,241,.1);--tab-lt-dk:rgba(99,102,241,.15)}
-body[data-tab="log"]{--tab-color:#F43F5E;--tab-color2:#FB7185;--tab-shadow:rgba(244,63,94,0.3);--tab-lt:rgba(244,63,94,.1);--tab-lt-dk:rgba(244,63,94,.15)}
-body[data-tab="rwd"]{--tab-color:#F59E0B;--tab-color2:#FBBF24;--tab-shadow:rgba(245,158,11,0.3);--tab-lt:rgba(245,158,11,.1);--tab-lt-dk:rgba(245,158,11,.15)}
-body[data-tab="hist"]{--tab-color:#8B5CF6;--tab-color2:#A78BFA;--tab-shadow:rgba(139,92,246,0.3);--tab-lt:rgba(139,92,246,.1);--tab-lt-dk:rgba(139,92,246,.15)}
-body.dark[data-tab="home"]{--tab-color:#5457D9;--tab-color2:#727BE0;--tab-shadow:rgba(84,87,217,0.3)}
-body.dark[data-tab="log"]{--tab-color:#DC3550;--tab-color2:#E5606F;--tab-shadow:rgba(220,53,80,0.3)}
-body.dark[data-tab="rwd"]{--tab-color:#D98E09;--tab-color2:#E0A820;--tab-shadow:rgba(217,142,9,0.3)}
-body.dark[data-tab="hist"]{--tab-color:#7A4FDD;--tab-color2:#9578E8;--tab-shadow:rgba(122,79,221,0.3)}
+body[data-tab="home"]{--tab-color:#5457D9;--tab-color2:#727BE0;--tab-shadow:rgba(84,87,217,0.3);--tab-lt:rgba(84,87,217,.1);--tab-lt-dk:rgba(84,87,217,.15)}
+body[data-tab="log"]{--tab-color:#DC3550;--tab-color2:#E5606F;--tab-shadow:rgba(220,53,80,0.3);--tab-lt:rgba(220,53,80,.1);--tab-lt-dk:rgba(220,53,80,.15)}
+body[data-tab="rwd"]{--tab-color:#D98E09;--tab-color2:#E0A820;--tab-shadow:rgba(217,142,9,0.3);--tab-lt:rgba(217,142,9,.1);--tab-lt-dk:rgba(217,142,9,.15)}
+body[data-tab="hist"]{--tab-color:#7A4FDD;--tab-color2:#9578E8;--tab-shadow:rgba(122,79,221,0.3);--tab-lt:rgba(122,79,221,.1);--tab-lt-dk:rgba(122,79,221,.15)}
+body[data-tab="my"]{--tab-color:#475569;--tab-color2:#64748B;--tab-shadow:rgba(71,85,105,0.3);--tab-lt:rgba(71,85,105,.1);--tab-lt-dk:rgba(71,85,105,.15)}
+body.dark[data-tab="home"]{--tab-color:#4345B8;--tab-color2:#5C63C9;--tab-shadow:rgba(67,69,184,0.3)}
+body.dark[data-tab="log"]{--tab-color:#B82A42;--tab-color2:#CC4A5C;--tab-shadow:rgba(184,42,66,0.3)}
+body.dark[data-tab="rwd"]{--tab-color:#B57808;--tab-color2:#C8901A;--tab-shadow:rgba(181,120,8,0.3)}
+body.dark[data-tab="hist"]{--tab-color:#6540BF;--tab-color2:#7E60D2;--tab-shadow:rgba(101,64,191,0.3)}
+body.dark[data-tab="my"]{--tab-color:#334155;--tab-color2:#475569;--tab-shadow:rgba(51,65,85,0.35)}
 /* Dark mode: auth & form components */
 body.dark .auth-screen.toss-style{background:#0F172A}
 body.dark .auth-card{background:#1E293B;box-shadow:0 20px 60px rgba(0,0,0,.5)}
@@ -239,7 +241,7 @@ body.popup-open .nav-container{opacity:0;pointer-events:none;transition:opacity 
 @media(min-width:1024px){body{margin:0}}
 
 /* SCREENS */
-.scr{display:none;min-height:100vh;min-height:100dvh;padding-bottom:110px}
+.scr{display:none;min-height:100vh;min-height:100dvh;padding-bottom:110px;overscroll-behavior:contain}
 .scr.on{display:block;animation:fadeIn .3s ease}
 .scr.slide-left{display:block;animation:slideInLeft .3s cubic-bezier(.25,.46,.45,.94) forwards}
 .scr.slide-right{display:block;animation:slideInRight .3s cubic-bezier(.25,.46,.45,.94) forwards}
@@ -300,12 +302,23 @@ body.dark .dtog-in{transform:translateX(20px)}
 .child-sw-select{background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.35);border-radius:20px;color:#fff;font-size:11px;font-weight:700;padding:3px 20px 3px 8px;font-family:inherit;cursor:pointer;outline:none;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center}
 .child-sw-select option{background:#4B5563;color:#fff}
 /* MY TAB */
-.my-header{background:linear-gradient(160deg,var(--tab-color,#6366F1),var(--tab-color2,#818CF8));padding:28px 24px 32px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
-.my-avatar-wrap{width:80px;height:80px;border-radius:50%;overflow:hidden;border:3px solid rgba(255,255,255,.5);box-shadow:0 4px 16px rgba(0,0,0,.2);background:rgba(255,255,255,.2)}
-.my-avatar-wrap img,.my-avatar-wrap svg{width:100%;height:100%;object-fit:cover}
-.my-name{font-size:22px;font-weight:900;color:#fff;margin-top:4px}
-.my-role{font-size:14px;font-weight:700;color:rgba(255,255,255,.75);background:rgba(255,255,255,.15);padding:3px 12px;border-radius:20px}
-.my-section-title{font-size:12px;font-weight:800;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;padding:16px 20px 6px}
+.my-header{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,var(--tab-color,#475569),var(--tab-color2,#64748B));padding:18px 22px 18px;padding-top:calc(18px + env(safe-area-inset-top));border-radius:0 0 38px 38px;overflow:hidden;box-shadow:0 4px 20px var(--tab-shadow,rgba(71,85,105,0.3));transition:padding .25s}
+.my-header::before{content:'';position:absolute;top:-40px;right:-20px;width:160px;height:160px;background:radial-gradient(circle,rgba(255,255,255,.1) 0%,transparent 70%);border-radius:50%;pointer-events:none}
+.my-header h2{font-size:26px;font-weight:900;color:#fff;margin:0;transition:font-size .25s}
+.my-header-sub{font-size:14px;color:rgba(255,255,255,.85);margin-top:3px;font-weight:600;transition:all .25s}
+.my-header.compact{padding:10px 20px 10px;padding-top:calc(10px + env(safe-area-inset-top))}
+.my-header.compact h2{font-size:16px}
+.my-header.compact .my-header-sub{font-size:0;margin:0;opacity:0;max-height:0;overflow:hidden}
+.my-profile-card{display:flex;align-items:center;gap:14px;background:var(--card);border-radius:16px;margin:16px 16px 0;padding:16px 18px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.my-avatar-wrap{width:50px;height:50px;border-radius:50%;overflow:visible;border:2.5px solid var(--tab-color,#475569);box-shadow:0 2px 8px rgba(0,0,0,.1);background:var(--bg2);flex-shrink:0;position:relative}
+.my-mood-badge{position:absolute;bottom:-2px;right:-4px;font-size:18px;line-height:1;z-index:2;animation:fpMoodPulse 2s ease-in-out infinite;filter:drop-shadow(0 1px 3px rgba(0,0,0,.3));pointer-events:none}
+.my-mood-particles{position:absolute;top:50%;left:50%;width:0;height:0;pointer-events:none;z-index:3;overflow:visible}
+.my-avatar-wrap img,.my-avatar-wrap svg{width:100%!important;height:100%!important;object-fit:cover;border-radius:50%;display:block}
+.my-info-text{flex:1}
+.my-name{font-size:17px;font-weight:900;color:var(--tx);line-height:1.2}
+.my-role{font-size:11px;font-weight:700;color:var(--tx3);background:var(--bg2);padding:2px 10px;border-radius:20px;display:inline-block;margin-top:4px}
+.my-section-title{font-size:12px;font-weight:800;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;padding:16px 20px 6px;display:flex;align-items:center;gap:6px}
+.my-section-title svg{flex-shrink:0}
 .my-list{background:var(--card);border-radius:16px;margin:0 16px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06)}
 .my-list-item{display:flex;align-items:center;gap:14px;padding:16px 18px;width:100%;background:transparent;border:none;cursor:pointer;font-family:inherit;text-align:left;border-bottom:.5px solid var(--bdr);-webkit-tap-highlight-color:transparent}
 .my-list-item:last-child{border-bottom:none}
@@ -338,7 +351,7 @@ body.dark .dtog-in{transform:translateX(20px)}
 .prog-fill{background:rgba(255,255,255,.9);border-radius:7px;height:100%;transition:width .7s}
 .prog-row{display:flex;justify-content:space-between;margin-top:5px;font-size:13px;opacity:.75;font-weight:700;transition:all .25s}
 
-.hero.compact{padding:12px 20px 14px;padding-top:calc(12px + env(safe-area-inset-top));overflow:visible}
+.hero.compact{padding:12px 20px 14px;padding-top:calc(12px + env(safe-area-inset-top));overflow:hidden}
 .hero.compact .hero-lbl{font-size:13px}
 .hero.compact .hero-pts{font-size:32px;display:inline!important;opacity:1!important;visibility:visible!important}
 .hero.compact .hero-unit{font-size:14px;display:inline!important;opacity:1!important;visibility:visible!important}
@@ -504,7 +517,8 @@ body.dark .rec-day-tag.day-1{background:#312E81;color:#A5B4FC}
 .rec-tm{font-size:13px;color:var(--tx3);font-weight:600;margin-top:2px}
 
 /* ADMIN */
-.adm-top{background:linear-gradient(180deg,var(--tab-color,#6366F1) 0%,var(--tab-color2,#818CF8) 80%,color-mix(in srgb,var(--tab-color2,#818CF8) 80%,#fff) 100%);padding:18px 20px 18px;padding-top:calc(18px + env(safe-area-inset-top));position:sticky;top:0;z-index:10;box-shadow:0 8px 32px var(--tab-shadow,rgba(99,102,241,0.35));border-radius:0 0 var(--rxl) var(--rxl);margin-bottom:16px;overflow:hidden}
+.adm-top{background:linear-gradient(180deg,#475569 0%,#64748B 80%,#94A3B8 100%);padding:18px 20px 18px;padding-top:calc(18px + env(safe-area-inset-top));position:sticky;top:0;z-index:10;box-shadow:0 8px 32px rgba(71,85,105,0.35);border-radius:0 0 var(--rxl) var(--rxl);margin-bottom:16px;overflow:hidden}
+body.dark .adm-top{background:linear-gradient(180deg,#334155 0%,#475569 80%,#64748B 100%);box-shadow:0 8px 32px rgba(51,65,85,0.4)}
 .adm-top::before{content:'';position:absolute;top:-40px;right:-20px;width:160px;height:160px;background:radial-gradient(circle,rgba(255,255,255,.1) 0%,transparent 70%);border-radius:50%;pointer-events:none}
 .adm-top h2{font-size:22px;font-weight:900;color:#fff}
 .adm-top p{font-size:13px;color:rgba(255,255,255,.8);margin-top:3px;font-weight:600}
@@ -550,6 +564,18 @@ body.dark .rec-day-tag.day-1{background:#312E81;color:#A5B4FC}
 .icon-btn:active{transform:scale(.9)}
 .icon-btn.del{color:#EF4444}
 .icon-btn.del:active{background:#FEE2E2}
+/* 관리자 목록 상태 필 */
+.adm-pill{display:inline-flex;align-items:center;font-size:11px;font-weight:700;color:var(--tx3);background:var(--bg2);padding:2px 8px;border-radius:10px;white-space:nowrap;line-height:1.4}
+.adm-pill-tap{cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all .15s;user-select:none}
+.adm-pill-tap:active{transform:scale(.93)}
+.adm-pill-on{background:#EFF6FF;color:#3B82F6}
+body.dark .adm-pill-on{background:rgba(59,130,246,.15);color:#60A5FA}
+.adm-pill-gn{background:#ECFDF5;color:#10B981}
+body.dark .adm-pill-gn{background:rgba(16,185,129,.15);color:#34D399}
+.adm-pill-rd{background:#FEF2F2;color:#EF4444}
+body.dark .adm-pill-rd{background:rgba(239,68,68,.15);color:#F87171}
+.adm-pill-off{background:#FEF2F2;color:#EF4444;font-weight:800}
+body.dark .adm-pill-off{background:rgba(239,68,68,.12);color:#F87171}
 .tog{width:51px;height:31px;border-radius:16px;background:#6366F1;position:relative;cursor:pointer;flex-shrink:0;border:none;transition:background .25s cubic-bezier(.4,0,.2,1);-webkit-tap-highlight-color:transparent;padding:0;box-sizing:content-box;-webkit-appearance:none;appearance:none}
 .tog.tog-sm{width:44px;height:26px;border-radius:13px}
 .tog.tog-sm .tog-dot{width:22px;height:22px}
@@ -829,7 +855,7 @@ body.dark .today-summary-card .ts-msg{background:linear-gradient(135deg,#312E81,
 .landscape-block h2{font-size:20px;font-weight:800;margin-bottom:8px}
 .landscape-block p{font-size:14px;opacity:.8}
 @keyframes rotate-phone{0%,100%{transform:rotate(0deg)}50%{transform:rotate(-90deg)}}
-@media screen and (orientation:landscape) and (max-height:500px) and (max-width:767px){
+@media screen and (orientation:landscape) and (max-height:500px){
   .landscape-block{display:flex}
 }
 
@@ -890,6 +916,17 @@ body.dark .pin-key.ck{background:transparent}
 .mood-particle:nth-child(7){animation-delay:1.8s;left:12px}
 .mood-particle:nth-child(8){animation-delay:2.1s;left:-10px}
 
+/* FAMILY POPUP MOOD ANIMATION */
+.fp-mood-badge{position:absolute;bottom:-2px;right:-2px;font-size:16px;line-height:1;pointer-events:none;z-index:2;animation:fpMoodPulse 2s ease-in-out infinite;filter:drop-shadow(0 1px 3px rgba(0,0,0,.3))}
+@keyframes fpMoodPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
+.fp-mood-particles{position:absolute;top:50%;left:50%;width:0;height:0;pointer-events:none;z-index:3;overflow:visible}
+.fp-mood-p{position:absolute;font-size:14px;opacity:0;pointer-events:none;animation:fpMoodFloat 2.8s ease-out forwards}
+@keyframes fpMoodFloat{
+  0%{opacity:1;transform:translate(0,0) scale(.4)}
+  15%{opacity:1;transform:translate(var(--dx,0),var(--dy,-15px)) scale(1)}
+  100%{opacity:0;transform:translate(calc(var(--dx,0)*2.5),calc(var(--dy,-15px)*3)) scale(.3)}
+}
+
 /* MESSAGE POPUP */
 .msg-pop{position:fixed;z-index:510;background:var(--card);border-radius:20px;box-shadow:0 8px 30px rgba(0,0,0,.2);padding:20px;width:300px;animation:fadeUpCenter .2s ease;left:50%;top:40%;transform:translate(-50%,-50%)}
 .msg-pop-header{display:flex;align-items:center;gap:10px;margin-bottom:14px}
@@ -948,6 +985,7 @@ body.dark .pin-key.ck{background:transparent}
 .auth-screen{position:fixed;inset:0;background:linear-gradient(135deg,#6366F1,#818CF8);z-index:1000;display:flex;flex-direction:column;align-items:center;padding:20px;padding-top:max(24px, calc(env(safe-area-inset-top, 0px) + 16px));padding-bottom:max(20px, env(safe-area-inset-bottom, 0px));overflow-y:auto;-webkit-overflow-scrolling:touch}
 .auth-screen.hidden{display:none}
 body.auth-active{background:linear-gradient(135deg,#6366F1,#8B5CF6)}
+html:has(body.auth-active){background:#6366F1!important}
 #auth-insight .toss-cta{margin:0 24px;padding-left:0;padding-right:0}
 .auth-card{background:#fff;border-radius:24px;padding:32px 28px;width:100%;max-width:380px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2);margin:auto;flex-shrink:0}
 @media(min-width:768px){.auth-card{max-width:440px;padding:40px 36px}.auth-title{font-size:28px}.auth-sub{font-size:14px}.auth-input{padding:16px 18px;font-size:16px}}
@@ -1117,29 +1155,19 @@ body.dark .nav-child-tab.active{background:rgba(99,102,241,.18)}
 .adm-child-btn:active{transform:scale(.95)}
 body.dark .adm-child-btn{background:#1E293B;border-color:#334155}
 body.dark .adm-child-btn.on{background:rgba(255,107,53,.15)}
-/* unified 모드 완료 자녀 아바타 */
-.unified-completions{display:flex;gap:4px;padding:2px 0 1px;flex-wrap:wrap}
-.unified-avatar-wrap{display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0}
-.unified-avatar-wrap>div,.unified-avatar-wrap>svg,.unified-avatar-wrap>img{width:20px;height:20px;border-radius:50%;overflow:hidden;border:1.5px solid var(--gn,#10B981);background:var(--bg2,#F1F5F9)}
-.unified-name-badge{font-size:9px;font-weight:800;color:var(--tx2);background:var(--bg2);border-radius:4px;padding:1px 3px;white-space:nowrap;max-width:36px;overflow:hidden;text-overflow:ellipsis;line-height:1.3}
 /* 독립 모드 자녀 배정 칩 */
 .assign-row{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
 .assign-chip{font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;border:1.5px solid var(--bdr);background:var(--bg2);color:var(--tx3);cursor:pointer;transition:all .15s}
 .assign-chip.on{background:var(--or);border-color:var(--or);color:#fff}
-/* 통합 모드 대시보드 */
-.unified-dash-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;padding:14px}
-.unified-dash-card{background:var(--bg2);border-radius:14px;padding:14px 12px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
-.unified-dash-avatar{width:40px;height:40px;border-radius:50%;overflow:hidden;border:2px solid var(--or);flex-shrink:0}
-.unified-dash-avatar svg,.unified-dash-avatar img{width:100%;height:100%}
-.unified-dash-name{font-size:14px;font-weight:800;color:var(--tx)}
-.unified-dash-pts{font-size:18px;font-weight:900;color:var(--or)}
-.unified-dash-meta{font-size:11px;font-weight:600;color:var(--tx3)}
 /* MY 탭 가족 구성원 */
-.my-family-row{display:flex;gap:12px;overflow-x:auto;padding:4px 16px 8px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.my-family-row{display:flex;gap:12px;overflow-x:auto;padding:4px 16px 12px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .my-family-row::-webkit-scrollbar{display:none}
 .my-family-member{display:flex;flex-direction:column;align-items:center;gap:5px;flex-shrink:0;cursor:pointer}
-.my-family-avatar{width:52px;height:52px;border-radius:50%;overflow:hidden;border:2.5px solid var(--or);background:var(--bg2);flex-shrink:0}
-.my-family-avatar svg,.my-family-avatar img{width:100%;height:100%}
+.my-family-avatar{width:52px;height:52px;border-radius:50%;overflow:visible;border:2.5px solid var(--or);background:var(--bg2);flex-shrink:0;position:relative}
+.my-family-avatar svg,.my-family-avatar img{width:100%!important;height:100%!important;object-fit:cover;border-radius:50%;display:block}
+.mf-mood-badge{position:absolute;bottom:-2px;right:-4px;font-size:16px;line-height:1;z-index:2;animation:fpMoodPulse 2s ease-in-out infinite;filter:drop-shadow(0 1px 3px rgba(0,0,0,.3));pointer-events:none}
+.mf-unread-badge{position:absolute;top:-4px;left:-4px;min-width:18px;height:18px;background:#EF4444;color:#fff;font-size:10px;font-weight:900;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 5px;pointer-events:none;box-shadow:0 2px 6px rgba(239,68,68,.4);line-height:1;z-index:3}
+.mf-mood-particles{position:absolute;top:50%;left:50%;width:0;height:0;pointer-events:none;z-index:3;overflow:visible}
 .my-family-name{font-size:12px;font-weight:800;color:var(--tx);white-space:nowrap}
 .my-family-role{font-size:10px;font-weight:600;color:var(--tx3);white-space:nowrap}
 
@@ -1220,14 +1248,14 @@ body.dark .family-popup-avatar{border-color:rgba(255,255,255,.25)}
    세로 모드(portrait)에서는 사이드바 숨기고 하단 네비로 복귀
    ======================================== */
 @media(min-width:768px) and (orientation:portrait){
-  body{display:block!important}
+  body{display:block!important;max-width:100%!important;margin:0!important}
   .nav-container{position:fixed!important;bottom:0!important;top:auto!important;left:0!important;right:0!important;transform:none!important;width:100%!important;height:auto!important;z-index:100}
   .nav-container.docked{bottom:0!important;width:100%!important}
   .bottom-nav{flex-direction:row!important;align-items:center!important;gap:0!important;border-radius:20px 20px 0 0!important;padding:8px 8px calc(8px + env(safe-area-inset-bottom))!important;height:auto!important;background:var(--card)!important;border:none!important;border-top:.5px solid var(--bdr)!important;border-right:none!important;box-shadow:0 -4px 20px rgba(0,0,0,.06)!important;justify-content:center!important;width:100%!important}
   .bottom-nav::before{display:none!important}
   .nav-item{padding:8px 12px!important;border-radius:12px!important;flex-direction:column!important;justify-content:center!important;gap:2px!important}
   .nav-item .nav-label{font-size:10px!important;font-weight:700!important;max-width:none!important;opacity:1!important;margin-left:0!important}
-  .scr{margin-left:0!important;width:100%!important;max-width:430px!important;padding-bottom:calc(80px + env(safe-area-inset-bottom))!important}
+  .scr{margin-left:0!important;width:100%!important;max-width:100%!important;padding-bottom:calc(80px + env(safe-area-inset-bottom))!important}
   #s-badge{margin-left:0!important;width:100%!important}
   .nav-users{flex-direction:row!important;gap:0!important}
   .nav-divider{width:1px!important;height:22px!important;margin:0 4px!important}
@@ -1241,11 +1269,11 @@ body.dark .family-popup-avatar{border-color:rgba(255,255,255,.25)}
   body{max-width:100%;margin:0;display:flex;flex-direction:row;min-height:100vh}
 
   /* ── SIDEBAR NAV (tablet) ── */
-  .nav-container{position:fixed!important;bottom:auto!important;top:0;left:0;transform:none!important;z-index:100;width:200px;height:100vh}
-  .nav-container.docked{bottom:auto!important;left:0!important;right:auto!important;width:200px!important;transform:none!important}
+  .nav-container{position:fixed!important;bottom:auto!important;top:0;left:0;transform:none!important;z-index:100;width:200px;height:100vh;background:var(--card)}
+  .nav-container.docked{bottom:auto!important;left:0!important;right:auto!important;width:200px!important;transform:none!important;display:block!important;justify-content:initial!important;background:var(--card)!important}
   .nav-container.docked .bottom-nav{border-radius:0!important;width:100%!important;background:var(--card)!important;border:none!important;border-right:1px solid var(--bdr)!important;justify-content:flex-start!important}
   body.dark .nav-container.docked .bottom-nav{background:var(--card)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
-  .bottom-nav{flex-direction:column;align-items:stretch;gap:4px;border-radius:0;padding:16px 10px;height:100%;background:var(--card);border:none;border-right:1px solid var(--bdr);box-shadow:2px 0 16px rgba(0,0,0,.03);backdrop-filter:none;-webkit-backdrop-filter:none}
+  .bottom-nav{flex-direction:column;align-items:stretch;gap:4px;border-radius:0;padding:16px 10px;width:100%;height:100%;background:var(--card);border:none;border-right:1px solid var(--bdr);box-shadow:2px 0 16px rgba(0,0,0,.03);backdrop-filter:none;-webkit-backdrop-filter:none;box-sizing:border-box}
   body.dark .bottom-nav{border-color:var(--bdr);border-right-color:var(--bdr)}
 
   /* Nav brand */
@@ -1322,6 +1350,8 @@ body.dark .family-popup-avatar{border-color:rgba(255,255,255,.25)}
   .log-header-sticky h2{font-size:26px}
   .rwd-header-sticky{padding:20px 24px;border-radius:0;margin:0 0 14px}
   .hist-hero{padding:22px 24px 18px;border-radius:0;margin:0 0 14px}
+  .my-header{padding:20px 24px;border-radius:0;margin:0}
+  .my-header h2{font-size:26px}
   .badge-hero{border-radius:0!important}
   #s-badge{margin-left:200px;width:calc(100vw - 200px)}
   .hist-stats-card{margin:0 20px 14px}
@@ -1378,7 +1408,7 @@ body.dark .family-popup-avatar{border-color:rgba(255,255,255,.25)}
    세로모드에서 사이드바 레이아웃 제거
    ======================================== */
 @media(min-width:768px) and (max-width:1023px) and (orientation:portrait){
-  body{display:block!important}
+  body{display:block!important;max-width:100%!important;margin:0!important}
   .nav-container{position:fixed!important;bottom:28px!important;left:50%!important;transform:translateX(-50%)!important;width:auto!important;height:auto!important;max-width:calc(100vw - 24px)!important}
   .nav-container.docked{bottom:0!important;left:0!important;right:0!important;width:100%!important;max-width:100%!important;transform:none!important}
   .bottom-nav{flex-direction:row!important;align-items:center!important;border-right:none!important;border-radius:var(--rxl)!important;height:auto!important;padding:8px 16px!important}
@@ -1386,7 +1416,7 @@ body.dark .family-popup-avatar{border-color:rgba(255,255,255,.25)}
   .bottom-nav::before{display:none!important}
   .nav-item{padding:10px 14px!important;justify-content:center!important;flex-direction:column!important;gap:3px!important}
   .nav-item .nav-label{opacity:1!important;max-width:none!important;font-size:11px!important;margin-left:0!important}
-  .scr{margin-left:0!important;width:100%!important;max-width:430px!important;margin-right:auto!important;padding-bottom:110px!important}
+  .scr{margin-left:0!important;width:100%!important;max-width:100%!important;margin-right:auto!important;padding-bottom:110px!important}
   #s-badge{margin-left:0!important;width:100%!important;max-width:100%!important}
   .auth-screen{margin-left:0!important;width:100%!important}
 }
@@ -1399,8 +1429,8 @@ body.dark .family-popup-avatar{border-color:rgba(255,255,255,.25)}
   body{max-width:100%;display:flex;flex-direction:row;min-height:100vh}
 
   /* SIDEBAR NAV */
-  .nav-container{position:fixed;bottom:auto;top:0;left:0;transform:none;z-index:100;width:240px;height:100vh}
-  .bottom-nav{flex-direction:column;align-items:stretch;gap:4px;border-radius:0;padding:20px 14px;height:100%;background:var(--card);border:none;border-right:1px solid var(--bdr);box-shadow:2px 0 20px rgba(0,0,0,.04);backdrop-filter:none;-webkit-backdrop-filter:none}
+  .nav-container{position:fixed;bottom:auto;top:0;left:0;transform:none;z-index:100;width:240px;height:100vh;background:var(--card)}
+  .bottom-nav{flex-direction:column;align-items:stretch;gap:4px;border-radius:0;padding:20px 14px;width:100%;height:100%;background:var(--card);border:none;border-right:1px solid var(--bdr);box-shadow:2px 0 20px rgba(0,0,0,.04);backdrop-filter:none;-webkit-backdrop-filter:none;box-sizing:border-box}
   body.dark .bottom-nav{border-color:var(--bdr);border-right-color:var(--bdr)}
 
   /* Nav brand in sidebar */
@@ -1578,12 +1608,12 @@ body.dark .family-popup-avatar{border-color:rgba(255,255,255,.25)}
    폰에서 절대로 사이드바가 보이지 않도록 강제 리셋
    ======================================== */
 @media(max-width:767px){
-  body{display:block!important;margin-left:0!important;padding-left:0!important}
+  body{display:block!important;max-width:100%!important;margin:0!important;padding-left:0!important}
   .nav-container{position:fixed!important;bottom:28px!important;top:auto!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important;width:auto!important;max-width:calc(100vw - 24px)!important;height:auto!important}
   .nav-container.docked{bottom:0!important;left:0!important;right:0!important;width:100%!important;max-width:100%!important;transform:none!important}
   .bottom-nav{flex-direction:row!important;height:auto!important;border-right:none!important;border-top:none!important}
   .bottom-nav::before{display:none!important}
-  .scr{margin-left:0!important;width:100%!important;max-width:430px!important}
+  .scr{margin-left:0!important;width:100%!important;max-width:100%!important}
   #s-badge{margin-left:0!important;width:100%!important}
   .auth-screen{margin-left:0!important;width:100%!important}
 }
@@ -2331,7 +2361,8 @@ button:disabled {
   .nav-container{position:fixed!important;bottom:28px!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important;top:auto!important;width:auto!important;max-width:calc(100vw - 24px)!important;height:auto!important;}
   /* 도킹 상태: 전체 너비 하단 고정 */
   .nav-container.docked{bottom:0!important;left:0!important;right:0!important;transform:none!important;width:100%!important;max-width:100%!important;}
-  body,.scr,.tab-content{margin-left:0!important;padding-left:0!important;}
+  body{max-width:100%!important;margin:0!important;padding-left:0!important;}
+  .scr,.tab-content{margin-left:0!important;padding-left:0!important;}
   .nav-brand,.sidebar,.side-menu{display:none!important;}
 }
 
@@ -2759,13 +2790,6 @@ button:disabled {
               </div>
               <div class="toss-mode-desc">자녀별로 활동과 보상을 따로 관리해요. 각 자녀에게 맞는 목표를 설정할 수 있어요.</div>
             </div>
-            <div class="toss-mode-card" onclick="selectMode('unified')" id="mode-unified">
-              <div class="toss-mode-title">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-                통합 관리
-              </div>
-              <div class="toss-mode-desc">같은 활동 목록을 함께 사용해요. 누가 완료했는지 얼굴 스티커로 표시돼요.</div>
-            </div>
           </div>
           <div class="auth-error" id="create4-error" style="margin-top:10px"></div>
         </div>
@@ -2911,10 +2935,7 @@ button:disabled {
       </div>
       <p id="smart-msg" style="font-size:13px;color:rgba(255,255,255,.75);margin-top:4px;font-weight:600;line-height:1.3"></p>
     </div>
-    <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
-      <div id="child-switcher"></div>
-      <button class="dtog" onclick="toggleDark()" style="background:rgba(255,255,255,.2);border:none"><div class="dtog-in" id="dtog-ic" style="background:rgba(255,255,255,.9)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-3px"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></div></button>
-    </div>
+    <div id="child-switcher" style="flex-shrink:0"></div>
   </div>
   <div class="hero">
     <div class="streak-pill" id="streak-pill"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 01-7 7 7 7 0 01-7-7c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg> 0일 연속</div>
@@ -2942,7 +2963,10 @@ button:disabled {
 <!-- LOG -->
 <div class="scr" id="s-log">
   <div class="log-header-sticky">
-    <h2>활동 기록하기 <svg class="hdr-ico" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><path d="M9 15l2 2 4-4"/></svg></h2>
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <h2 style="margin:0">활동 기록하기 <svg class="hdr-ico" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><path d="M9 15l2 2 4-4"/></svg></h2>
+      <div id="log-child-selector" style="display:none;flex-shrink:0"><div id="log-child-btns"></div></div>
+    </div>
     <p>탭해서 마일리지를 받아요</p>
     <div class="hdr-stats" id="log-hdr-stats">
       <div class="hdr-stat"><div class="hdr-stat-num" id="log-today-count">0</div><div class="hdr-stat-lbl">오늘 활동</div></div>
@@ -2956,7 +2980,10 @@ button:disabled {
 <!-- REWARDS -->
 <div class="scr" id="s-rwd">
   <div class="rwd-header-sticky">
-    <h2 style="font-size:24px;font-weight:900;color:#fff">보상 상점 <svg class="hdr-ico" viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg></h2>
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <h2 style="font-size:24px;font-weight:900;color:#fff;margin:0">보상 상점 <svg class="hdr-ico" viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg></h2>
+      <div id="rwd-child-selector" style="display:none;flex-shrink:0"><div id="rwd-child-btns"></div></div>
+    </div>
     <p style="font-size:14px;color:rgba(255,255,255,.85);margin-top:2px;font-weight:600">모은 마일리지로 교환해요</p>
     <div class="hdr-stats" id="rwd-hdr-stats">
       <div class="hdr-stat"><div class="hdr-stat-num" id="rwd-hdr-pts">0</div><div class="hdr-stat-lbl">보유 마일리지</div></div>
@@ -2977,12 +3004,13 @@ button:disabled {
 <!-- STATS / ACHIEVEMENTS -->
 <div class="scr" id="s-hist">
   <div class="hist-hero">
-    <h2>성과 &amp; 통계 <svg class="hdr-ico" viewBox="0 0 24 24"><path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9"/><path d="M21 3l-9 9"/><path d="M15 3h6v6"/></svg></h2>
-    <p id="hist-hero-sub">나의 활동 분석</p>
-    <!-- 양육자 다중 자녀 선택기 (independent 모드 + 자녀 2명 이상일 때 표시) -->
-    <div id="hist-child-selector" style="display:none;margin-top:8px">
-      <div id="hist-child-btns" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <h2 style="margin:0">성과 &amp; 통계 <svg class="hdr-ico" viewBox="0 0 24 24"><path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9"/><path d="M21 3l-9 9"/><path d="M15 3h6v6"/></svg></h2>
+      <div id="hist-child-selector" style="display:none;flex-shrink:0">
+        <div id="hist-child-btns" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+      </div>
     </div>
+    <p id="hist-hero-sub">나의 활동 분석</p>
     <div class="hdr-stats hdr-stats-5" id="hist-hdr-stats">
       <div class="hdr-stat"><div class="hdr-stat-num" id="hist-hdr-pts">0</div><div class="hdr-stat-lbl">보유 마일리지</div></div>
       <div class="hdr-stat-divider"></div>
@@ -3157,8 +3185,6 @@ button:disabled {
         <span class="hist-custom-range" id="hist-custom-range"></span>
       </div>
     </div>
-    <!-- unified 모드 자녀 필터 (renderHistChildFilter()로 동적 렌더링) -->
-    <div id="hist-child-filter"></div>
     <div class="card" style="padding:0;overflow:hidden" id="hist-list"></div>
   </div>
 </div>
@@ -3247,9 +3273,11 @@ button:disabled {
     </div>
   </div>
   <div id="adm-p2" style="display:none">
+    <!-- independent 모드 자녀 선택기 (뱃지) -->
+    <div id="adm-child-selector-2"></div>
     <div class="adm-sec">
       <div class="sec-hdr" style="margin:0 0 7px">
-        <div class="adm-sec-lbl" style="margin:0">뱃지 목록</div>
+        <div class="adm-sec-lbl" style="margin:0">뱃지 목록 <span id="badge-mgr-child-name" style="font-size:12px;color:var(--tab-color,#6366F1);font-weight:700"></span></div>
         <button class="btn-sm" onclick="openBadgeForm()">+ 새 뱃지</button>
       </div>
       <div class="adm-card" style="padding:0">
@@ -3416,7 +3444,7 @@ button:disabled {
             </div>
             <div class="divider"></div>
             <div class="adm-row">
-              <div class="adm-row-l"><div class="adm-row-nm">전체 데이터 삭제</div><div class="adm-row-sub">마일리지·기록 모두 초기화</div></div>
+              <div class="adm-row-l"><div class="adm-row-nm">활동 이력 초기화</div><div class="adm-row-sub">마일리지·활동기록·보상이력 초기화 (계정 유지)</div></div>
               <button class="btn-sm rd" onclick="resetAll()">삭제</button>
             </div>
           </div>
@@ -3426,7 +3454,7 @@ button:disabled {
           <div class="adm-sec-lbl">앱 캐시</div>
           <div class="adm-card">
             <div class="adm-row">
-              <div class="adm-row-l"><div class="adm-row-nm"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg> 캐시 초기화</div><div class="adm-row-sub">PWA 캐시 삭제 후 최신 버전으로 새로고침</div></div>
+              <div class="adm-row-l"><div class="adm-row-nm"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg> 캐시 초기화</div><div class="adm-row-sub">앱 캐시 삭제 후 최신 버전으로 새로고침</div></div>
               <button class="btn-sm" onclick="clearAppCache()">초기화</button>
             </div>
             <div id="cache-info" style="padding:8px 4px 0;font-size:13px;color:var(--tx3);line-height:1.5"></div>
@@ -3493,11 +3521,18 @@ button:disabled {
 <!-- MY TAB -->
 <div class="scr" id="s-my">
   <div class="my-header">
+    <h2>나의 메뉴 <svg class="hdr-ico" viewBox="0 0 24 24" style="width:24px;height:24px"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></h2>
+    <p class="my-header-sub" id="my-header-sub">내 정보</p>
+  </div>
+  <div class="my-profile-card">
     <div class="my-avatar-wrap" id="my-avatar-wrap"></div>
-    <div class="my-name" id="my-name">이름</div>
-    <div class="my-role" id="my-role">역할</div>
+    <div class="my-info-text">
+      <div class="my-name" id="my-name">이름</div>
+      <div class="my-role" id="my-role">역할</div>
+    </div>
   </div>
   <!-- 가족 구성원 아바타 가로 나열 -->
+  <div class="my-section-title" id="my-family-title" style="display:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg> 우리가족</div>
   <div class="my-family-row" id="my-family-row" style="display:none"></div>
   <div class="my-section-title">기분 &amp; 프로필</div>
   <div class="my-list">
@@ -3514,11 +3549,6 @@ button:disabled {
   </div>
   <div class="my-section-title">가족</div>
   <div class="my-list">
-    <button class="my-list-item" onclick="openFamilyPopup()">
-      <span class="my-list-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></span>
-      <span class="my-list-txt">가족 가계도 보기</span>
-      <svg class="my-list-arr" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
-    </button>
     <button class="my-list-item my-admin-only" onclick="myTabAdminAction()" id="my-admin-btn">
       <span class="my-list-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></span>
       <span class="my-list-txt">관리 (관리자 페이지)</span>
@@ -3532,6 +3562,11 @@ button:disabled {
       <span class="my-list-txt">다크 모드</span>
       <button class="tog off" id="tog-dark-my" onclick="toggleDark()"><div class="tog-dot"></div></button>
     </div>
+    <button class="my-list-item" id="my-pwa-install-btn" onclick="showPwaInstallPopup()" style="display:none">
+      <span class="my-list-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span>
+      <span class="my-list-txt">홈 화면에 앱 추가</span>
+      <svg class="my-list-arr" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
   </div>
   <div class="my-list" style="margin-top:8px">
     <button class="my-list-item my-list-item-danger" onclick="logout()">
@@ -3655,6 +3690,11 @@ button:disabled {
           <button class="day-btn" data-d="6" onclick="toggleDay(this)">토</button>
         </div>
       </div>
+      <div class="field" id="act-child-field" style="display:none">
+        <label>적용 대상 자녀</label>
+        <div style="font-size:13px;color:var(--tx3);margin-bottom:6px">선택한 자녀에게 동시 적용됩니다</div>
+        <div id="act-child-checks" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+      </div>
       <input type="hidden" id="act-eid">
     </div>
     <div class="sheet-foot">
@@ -3703,6 +3743,11 @@ button:disabled {
           <label>이벤트 이름 (선택)</label>
           <input type="text" class="txt-inp" id="rwd-sale-label" placeholder="예: 봄맞이 할인" maxlength="20">
         </div>
+      </div>
+      <div class="field" id="rwd-child-field" style="display:none">
+        <label>적용 대상 자녀</label>
+        <div style="font-size:13px;color:var(--tx3);margin-bottom:6px">선택한 자녀에게 동시 적용됩니다</div>
+        <div id="rwd-child-checks" style="display:flex;gap:6px;flex-wrap:wrap"></div>
       </div>
       <input type="hidden" id="rwd-eid">
     </div>
@@ -4103,6 +4148,17 @@ function rebuildMembersFromFamily(){
   AVATARS = {};
 
   if(Object.keys(fm).length > 0){
+    // sortOrder 마이그레이션: 기존 멤버에 sortOrder가 없으면 순서대로 부여
+    let needsSortMigration=false;
+    const fmEntries=Object.entries(fm);
+    let maxOrder=0;
+    fmEntries.forEach(([,m])=>{if(typeof m.sortOrder==='number')maxOrder=Math.max(maxOrder,m.sortOrder);else needsSortMigration=true;});
+    if(needsSortMigration){
+      let order=maxOrder;
+      fmEntries.forEach(([mid,m])=>{
+        if(typeof m.sortOrder!=='number'){order++;fm[mid].sortOrder=order;}
+      });
+    }
     // 다가족 모드: familyMeta에서 구성원 빌드
     Object.entries(fm).forEach(([mid, m])=>{
       const rd=ROLE_DEFS[m.displayRole]||ROLE_DEFS[mid]||ROLE_DEFS[m.role]||ROLE_DEFS.child;
@@ -4153,11 +4209,83 @@ function rebuildMembersFromFamily(){
   }
 }
 
+// ── 레거시 → familyMeta 마이그레이션 함수 ──
+// 기존 S.users 기반 운영 데이터를 다가족 구조(familyMeta)로 변환
+function _migrateLegacyToFamilyMeta(){
+  const LEGACY_ROLE_MAP={
+    taemin:{name:'태민',type:'child',role:'child',displayRole:'',color:'#DBEAFE',textColor:'#3B82F6'},
+    dad:{name:'아빠',type:'caregiver',role:'caregiver',displayRole:'dad',color:'#DBEAFE',textColor:'#3B82F6'},
+    mom:{name:'엄마',type:'caregiver',role:'caregiver',displayRole:'mom',color:'#FCE7F3',textColor:'#EC4899'}
+  };
+  const users=S.users||{};
+  const members={};
+  let order=0;
+  // 양육자 먼저, 그 다음 자녀 순서로
+  const sortedIds=Object.keys(users).sort((a,b)=>{
+    const aType=LEGACY_ROLE_MAP[a]?.type||'caregiver';
+    const bType=LEGACY_ROLE_MAP[b]?.type||'caregiver';
+    if(aType==='caregiver'&&bType==='child')return -1;
+    if(aType==='child'&&bType==='caregiver')return 1;
+    return 0;
+  });
+  sortedIds.forEach(uid=>{
+    const info=LEGACY_ROLE_MAP[uid]||{name:uid,type:'caregiver',role:'caregiver',displayRole:'',color:'#F1F5F9',textColor:'#64748B'};
+    order++;
+    members[uid]={
+      name:info.name,
+      type:info.type,
+      role:info.role,
+      displayRole:info.displayRole,
+      color:info.color,
+      textColor:info.textColor,
+      isAdmin:info.type==='caregiver', // 양육자는 자동 관리자
+      account:users[uid]||null,
+      joinedAt:Date.now(),
+      sortOrder:order
+    };
+  });
+  S.familyMeta={
+    familyId:'legacy_taemin',
+    familyName:'우리 가족',
+    createdAt:Date.now(),
+    createdBy:'dad',
+    mode:'independent',
+    members:members,
+    inviteTokens:[]
+  };
+  // memberData 초기화: 각 구성원에게 현재 글로벌 데이터 배분
+  if(!S.memberData)S.memberData={};
+  // 자녀에게 현재 S 데이터(활동/뱃지/로그 등) 부여
+  const childIds=Object.keys(members).filter(id=>members[id].type==='child');
+  childIds.forEach(cid=>{
+    S.memberData[cid]={
+      pts:S.pts||0, streak:S.streak||0, longest:S.longest||0,
+      lastDate:S.lastDate||null, totalDone:S.totalDone||0,
+      acts:JSON.parse(JSON.stringify(S.acts||[])),
+      rwds:JSON.parse(JSON.stringify(S.rwds||[])),
+      log:JSON.parse(JSON.stringify(S.log||[])),
+      actDone:JSON.parse(JSON.stringify(S.actDone||{})),
+      moodLog:S.moodLog?[...S.moodLog]:[],
+      badges:S.badges?{...S.badges}:{},
+      badgeLog:S.badgeLog?[...S.badgeLog]:[],
+      stickers:JSON.parse(JSON.stringify(S.stickers||[])),
+      rewardLog:S.rewardLog?[...S.rewardLog]:[],
+      rewardInventory:JSON.parse(JSON.stringify(S.rewardInventory||[])),
+      rewardRequests:JSON.parse(JSON.stringify(S.rewardRequests||[]))
+    };
+  });
+  // 주의: localStorage에 family_id를 설정하지 않음
+  // 레거시 데이터는 users/taemin (LEGACY_DOC)에 그대로 유지
+  // familyMeta는 S 안에만 존재하며 save() 시 LEGACY_DOC에 함께 저장됨
+  console.log('🔄 레거시 데이터 → familyMeta 마이그레이션 완료',Object.keys(members));
+}
+
 let currentUser = null;
 let selectedMember = null;
 let _familyId = null; // 현재 가족 ID
 let viewingChildId = null; // independent mode: 양육자가 보고 있는 자녀 ID
 let _admViewChildId = null; // 관리자 패널: 편집 중인 자녀 ID (independent mode)
+let _globalDataOwner = null; // 현재 S.acts/S.rwds/S.badges 등이 누구의 데이터인지 추적
 
 // ── 가입 흐름 상태 ──
 let _createState = {
@@ -4194,6 +4322,7 @@ const _AUTH_SCREENS = ['auth-login','auth-welcome','auth-insight','auth-create-1
 
 function showAuthScreen(screen) {
   document.body.classList.add('auth-active');
+  document.documentElement.style.background='#6366F1';
   _AUTH_SCREENS.forEach(id=>{
     const el=document.getElementById(id);
     if(el)el.classList.toggle('hidden',id!=='auth-'+screen && id!==screen);
@@ -4834,21 +4963,16 @@ async function createStep3Next(){
 
   err.textContent='';
 
-  if(childCount>=2){
-    showAuthScreen('create-4');
-  }else{
-    _createState.mode='independent';
-    // 가족을 DB에 저장한 후 초대 화면으로
-    await saveFamilyToFirestore();
-    showAuthScreen('create-5');
-    renderInviteOptions();
-  }
+  // 항상 독립 모드 (통합모드 제거됨)
+  _createState.mode='independent';
+  await saveFamilyToFirestore();
+  showAuthScreen('create-5');
+  renderInviteOptions();
 }
 
 function selectMode(mode){
   _createState.mode=mode;
   document.getElementById('mode-independent').classList.toggle('selected',mode==='independent');
-  document.getElementById('mode-unified').classList.toggle('selected',mode==='unified');
 }
 
 async function createStep4Next(){
@@ -4859,13 +4983,8 @@ async function createStep4Next(){
 }
 
 function createStep5Back(){
-  const childCount=_createState.members.filter(m=>m.role==='child'&&m.name.trim()).length;
-  if(childCount>=2){
-    showAuthScreen('create-4');
-  }else{
-    showAuthScreen('create-3');
-    renderFamilyGraph();
-  }
+  showAuthScreen('create-3');
+  renderFamilyGraph();
 }
 
 function renderInviteOptions(){
@@ -5117,6 +5236,8 @@ async function createFamilyFinish(){
   applyUserProfile();
   renderAll();
   toast(`🎉 ${_createState.familyName} 가족이 만들어졌어요!`);
+  // PWA 설치 유도 (브라우저 환경일 때)
+  if(!_pwaInstalled)setTimeout(showPwaInstallPopup,1500);
 }
 
 // ── 비밀번호 해싱 유틸 ──
@@ -5358,6 +5479,9 @@ async function doJoinRegister(){
     // 멤버 계정 정보 업데이트 (신규 또는 재설정)
     if(!S.familyMeta.members[mid]){err.textContent='구성원 정보를 찾을 수 없어요';return;}
     S.familyMeta.members[mid].account={id:userId,pwdHash,v:2}; // needReset 제거
+    // 양육자/부모 역할이면 자동으로 관리자 권한 부여
+    const _joinRole=S.familyMeta.members[mid].type||S.familyMeta.members[mid].role;
+    if(_joinRole==='caregiver'||_joinRole==='parent') S.familyMeta.members[mid].isAdmin=true;
     if(!S.users)S.users={};
     S.users[mid]={id:userId,pwdHash,v:2};
 
@@ -5398,6 +5522,8 @@ async function doJoinRegister(){
       toast(`✅ ${memberName}, ID와 비밀번호가 설정되었어요!`);
     }else{
       toast(`🎉 ${memberName}, 가입 완료! 환영해요!`);
+      // PWA 설치 유도 (초대받은 사용자, 브라우저 환경)
+      if(!_pwaInstalled)setTimeout(showPwaInstallPopup,1500);
     }
   }catch(e){
     console.error('Join register failed:',e);
@@ -5534,6 +5660,8 @@ async function doLogin(){
 function hideAllAuth() {
   _AUTH_SCREENS.forEach(id=>{const el=document.getElementById(id);if(el)el.classList.add('hidden');});
   document.body.classList.remove('auth-active');
+  const _curTab=document.body.getAttribute('data-tab')||'home';
+  document.documentElement.style.background=TAB_COLORS[_curTab]||'#6366F1';
 }
 
 function applyUserProfile() {
@@ -5599,39 +5727,23 @@ function _korSuffix(name){
   return(cp-0xAC00)%28!==0?'이':'';
 }
 
-// 성과 탭 히어로 서브텍스트 + 자녀 선택기 렌더링
+// 성과 탭 히어로 서브텍스트 렌더링 (자녀 선택기는 renderNavUsers에서 통합 관리)
 function _renderHistHeroSub(){
   const histSub=document.getElementById('hist-hero-sub');
-  const histSel=document.getElementById('hist-child-selector');
-  const histBtns=document.getElementById('hist-child-btns');
-  if(isCaregiverUser()&&getFamilyMode()==='independent'){
+  if(!histSub)return;
+  if(isCaregiverUser()){
     const kids=getChildMemberIds();
     if(kids.length===0){
-      if(histSub)histSub.textContent='활동 분석';
-      if(histSel)histSel.style.display='none';
-    } else if(kids.length===1){
-      const nm=S.familyMeta?.members?.[kids[0]]?.name||kids[0];
-      if(histSub)histSub.textContent=`${nm}${_korSuffix(nm)}의 성과`;
-      if(histSel)histSel.style.display='none';
+      histSub.textContent='활동 분석';
     } else {
       const viewedId=getViewedMemberId();
       const nm=S.familyMeta?.members?.[viewedId]?.name||viewedId;
-      if(histSub)histSub.textContent=`${nm}${_korSuffix(nm)}의 성과`;
-      if(histSel)histSel.style.display='block';
-      if(histBtns){
-        histBtns.innerHTML=kids.map(kid=>{
-          const m=S.familyMeta?.members?.[kid];
-          const kn=m?.name||kid;
-          const isOn=kid===viewedId;
-          return `<button onclick="switchViewingChild('${kid}');_renderHistHeroSub()" style="padding:4px 14px;border-radius:20px;border:1.5px solid rgba(255,255,255,${isOn?'.9':'.4'});background:${isOn?'rgba(255,255,255,.25)':'transparent'};color:#fff;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s">${kn}</button>`;
-        }).join('');
-      }
+      histSub.textContent=`${nm}${_korSuffix(nm)}의 성과`;
     }
   } else {
     const mem=currentUser&&S.familyMeta?.members?.[currentUser];
     const nm=mem?.name||currentUser||'나';
-    if(histSub)histSub.textContent=`${nm}의 활동 분석`;
-    if(histSel)histSel.style.display='none';
+    histSub.textContent=`${nm}의 활동 분석`;
   }
 }
 
@@ -5640,19 +5752,28 @@ function isCurrentUserAdmin(){
   return !!S.familyMeta.members[currentUser]?.isAdmin;
 }
 
-// 로그인 후 모드/뷰 초기화: independent 모드에서 양육자는 첫 자녀 뷰로 전환
+// 로그인 후 모드/뷰 초기화: independent 모드에서 양육자/관리자는 첫 자녀 뷰로 전환
 function postLoginInit(){
   viewingChildId = null;
   _admViewChildId = null;
+  _globalDataOwner = null;
   const mode = getFamilyMode();
-  if(mode === 'independent' && isCaregiverUser()){
-    const kids = getChildMemberIds();
-    if(kids.length > 0){
-      viewingChildId = kids[0];
-      // 첫 자녀 memberData 초기화 (없으면)
-      if(!S.memberData) S.memberData = {};
-      if(!S.memberData[viewingChildId]) getMemberState(viewingChildId);
-      syncMemberToGlobal(viewingChildId);
+  if(mode === 'independent'){
+    if(!S.memberData) S.memberData = {};
+    if(isCaregiverUser()){
+      // 양육자: 첫 자녀 뷰로 전환
+      const kids = getChildMemberIds();
+      if(kids.length > 0){
+        viewingChildId = kids[0];
+        if(!S.memberData[viewingChildId]) getMemberState(viewingChildId);
+        syncMemberToGlobal(viewingChildId);
+        applyChildTheme(viewingChildId);
+      }
+    } else if(currentUser) {
+      // 자녀 직접 로그인: 자신의 memberData를 글로벌에 로드
+      // (S.acts/actDone 등이 다른 사용자의 데이터일 수 있으므로 반드시 자신의 것으로 교체)
+      if(!S.memberData[currentUser]) getMemberState(currentUser);
+      syncMemberToGlobal(currentUser);
     }
   }
   _admViewChildId = getChildMemberIds()[0] || null;
@@ -5664,6 +5785,7 @@ function logout() {
   currentUser = null;
   viewingChildId = null;
   _admViewChildId = null;
+  _globalDataOwner = null;
   adminOK = false;
   localStorage.removeItem(_LS_PREFIX+'current_user');
   showAuthScreen('login');
@@ -5679,7 +5801,11 @@ function checkAuth() {
 
   if (savedUser && cachedUsers[savedUser]) {
     currentUser = savedUser;
-    syncMemberToGlobal(); // Load member data for this user
+    // 양육자(caregiver)는 postLoginInit에서 자녀 데이터를 로드하므로 여기서 parent sync 생략
+    // (parent의 memberData에 마지막 자녀의 stale 데이터가 오염되는 것을 방지)
+    if(!(getFamilyMode()==='independent'&&isCaregiverUser())){
+      syncMemberToGlobal(); // Load member data for this user
+    }
     postLoginInit();
     // 관리자 권한이면 자동으로 adminOK
     if(isCurrentUserAdmin()) adminOK = true;
@@ -5707,8 +5833,95 @@ const CYCLE_LABEL = {daily:'매일',weekly:'매주',monthly:'매달',none:'제�
 const CYCLE_CHIP  = {daily:'c-or',weekly:'c-pu',monthly:'c-rd',none:'c-gn'};
 
 /* TAB COLOR CONSTANTS */
-const TAB_COLORS = {home:'#6366F1', log:'#F43F5E', rwd:'#F59E0B', hist:'#8B5CF6'};
-const TAB_COLORS2 = {home:'#818CF8', log:'#FB7185', rwd:'#FBBF24', hist:'#A78BFA'};
+const TAB_COLORS = {home:'#6366F1', log:'#F43F5E', rwd:'#F59E0B', hist:'#8B5CF6', my:'#475569', adm:'#475569'};
+const TAB_COLORS2 = {home:'#818CF8', log:'#FB7185', rwd:'#FBBF24', hist:'#A78BFA', my:'#64748B', adm:'#64748B'};
+
+/* CHILD THEME COLORS — 자녀 전환 시 홈 탭 색상 변경 (최소 6개, 관리자에서 변경 가능) */
+const CHILD_THEMES = [
+  {id:'indigo', name:'인디고', c1:'#4F46E5',c2:'#6366F1'},
+  {id:'emerald',name:'에메랄드',c1:'#059669',c2:'#10B981'},
+  {id:'orange', name:'오렌지', c1:'#EA580C',c2:'#F97316'},
+  {id:'pink',   name:'핑크',   c1:'#DB2777',c2:'#EC4899'},
+  {id:'purple', name:'퍼플',   c1:'#7C3AED',c2:'#8B5CF6'},
+  {id:'teal',   name:'틸',     c1:'#0D9488',c2:'#14B8A6'},
+  {id:'rose',   name:'로즈',   c1:'#E11D48',c2:'#F43F5E'},
+  {id:'sky',    name:'스카이',  c1:'#0284C7',c2:'#0EA5E9'}
+];
+function themeFromColor(c1){
+  // c1 hex → compute c2, shadow, lt, ltDk
+  const r=parseInt(c1.slice(1,3),16),g=parseInt(c1.slice(3,5),16),b=parseInt(c1.slice(5,7),16);
+  const c2r=Math.min(255,r+30),c2g=Math.min(255,g+30),c2b=Math.min(255,b+30);
+  const c2='#'+[c2r,c2g,c2b].map(x=>x.toString(16).padStart(2,'0')).join('');
+  return{c1,c2,shadow:`rgba(${r},${g},${b},0.3)`,lt:`rgba(${r},${g},${b},.1)`,ltDk:`rgba(${r},${g},${b},.15)`};
+}
+function getChildTheme(childId){
+  // 1. familyMeta에 저장된 테마가 있으면 우선 사용
+  const memberMeta=S.familyMeta?.members?.[childId];
+  if(memberMeta?.themeColor){
+    const preset=CHILD_THEMES.find(t=>t.id===memberMeta.themeColor);
+    if(preset)return themeFromColor(preset.c1);
+    // hex 값이 직접 저장된 경우
+    if(memberMeta.themeColor.startsWith('#'))return themeFromColor(memberMeta.themeColor);
+  }
+  // 2. 기본값: 자녀 순서에 따른 자동 배정
+  const children=getChildMembers();
+  const idx=children.findIndex(c=>c.id===childId);
+  const preset=CHILD_THEMES[(idx>=0?idx:0)%CHILD_THEMES.length];
+  return themeFromColor(preset.c1);
+}
+function applyChildTheme(childId){
+  // 자녀가 1명이면 탭별 고유 색상 사용 (자녀 직접 로그인과 동일)
+  const kids=getChildMemberIds();
+  if(kids.length<2){
+    resetTabColors();
+    const curTab=document.body.getAttribute('data-tab');
+    if(curTab){
+      document.documentElement.style.background=TAB_COLORS[curTab]||'#6366F1';
+      const themeMeta=document.getElementById('theme-color-meta');
+      if(themeMeta&&!document.body.classList.contains('dark'))themeMeta.content=TAB_COLORS[curTab]||'#6366F1';
+    }
+    return;
+  }
+  const t=getChildTheme(childId);
+  // 양육자가 자녀 2명 이상일 때: 모든 탭을 자녀 테마 색상으로 통일
+  TAB_COLORS.home=t.c1; TAB_COLORS2.home=t.c2;
+  TAB_COLORS.log=t.c1;  TAB_COLORS2.log=t.c2;
+  TAB_COLORS.rwd=t.c1;  TAB_COLORS2.rwd=t.c2;
+  TAB_COLORS.hist=t.c1; TAB_COLORS2.hist=t.c2;
+  const curTab=document.body.getAttribute('data-tab');
+  const themedTabs=['home','log','rwd','hist'];
+  if(themedTabs.includes(curTab)){
+    document.body.style.setProperty('--tab-color',t.c1);
+    document.body.style.setProperty('--tab-color2',t.c2);
+    document.body.style.setProperty('--tab-shadow',t.shadow);
+    document.body.style.setProperty('--tab-lt',t.lt);
+    document.body.style.setProperty('--tab-lt-dk',t.ltDk);
+    document.documentElement.style.background=t.c1;
+    const themeMeta=document.getElementById('theme-color-meta');
+    if(themeMeta&&!document.body.classList.contains('dark'))themeMeta.content=t.c1;
+  }
+}
+// 아이가 직접 로그인 시 탭별 고유 색상 복원
+function resetTabColors(){
+  document.body.style.removeProperty('--tab-color');
+  document.body.style.removeProperty('--tab-color2');
+  document.body.style.removeProperty('--tab-shadow');
+  document.body.style.removeProperty('--tab-lt');
+  document.body.style.removeProperty('--tab-lt-dk');
+  TAB_COLORS.home='#5457D9'; TAB_COLORS2.home='#727BE0';
+  TAB_COLORS.log='#DC3550';  TAB_COLORS2.log='#E5606F';
+  TAB_COLORS.rwd='#D98E09';  TAB_COLORS2.rwd='#E0A820';
+  TAB_COLORS.hist='#7A4FDD'; TAB_COLORS2.hist='#9578E8';
+}
+function setChildThemeColor(childId,themeId){
+  // 관리자가 자녀의 테마 색상을 변경
+  if(!S.familyMeta||!S.familyMeta.members||!S.familyMeta.members[childId])return;
+  S.familyMeta.members[childId].themeColor=themeId;
+  save();
+  // 현재 보고 있는 자녀면 즉시 적용
+  if(getViewedMemberId()===childId)applyChildTheme(childId);
+  toast(MEMBERS[childId]?.name+'의 테마 색상이 변경되었어요');
+}
 
 const DACTS = [
   {id:'a1', emoji:'🦷',name:'양치질',              desc:'아침/저녁 양치',              pts:20,maxDay:1,cycle:'daily',  active:true,showHome:true, assignedTo:['all']},
@@ -5945,23 +6158,76 @@ function getMemberState(memberId) {
   if (!S.memberData) S.memberData = {};
   if (!S.memberData[memberId]) {
     const isMe = memberId === currentUser;
+    // 보상 인벤토리/요청: 최초 1회 마이그레이션 — 첫 자녀에게만 글로벌 데이터 할당
+    const isFirstChildForInv = _shouldMigrateRewardInv(memberId);
+    // 양육자가 자녀 데이터를 초기화할 때: 부모가 커스텀한 활동/보상 목록을 상속
+    const isChildInit = !isMe && isCaregiverUser();
+    const inheritActs = isChildInit ? _getInheritableActs() : null;
+    const inheritRwds = isChildInit ? _getInheritableRwds() : null;
+    // isMe인데 독립 모드이고 _globalDataOwner가 다른 사람이면:
+    // 글로벌 S 값이 다른 자녀의 데이터이므로 상속 대신 형제/기본값 사용
+    const isStaleGlobal = isMe && getFamilyMode()==='independent' && _globalDataOwner && _globalDataOwner !== memberId;
+    const safeInheritActs = isStaleGlobal ? _getInheritableActs() : null;
+    const safeInheritRwds = isStaleGlobal ? _getInheritableRwds() : null;
     // First time: migrate global data if it's the current user, else start fresh
     S.memberData[memberId] = {
-      pts: isMe ? (S.pts || 0) : 0,
-      streak: isMe ? (S.streak || 0) : 0,
-      longest: isMe ? (S.longest || 0) : 0,
-      lastDate: isMe ? (S.lastDate || null) : null,
-      totalDone: isMe ? (S.totalDone || 0) : 0,
-      acts: isMe && S.acts ? JSON.parse(JSON.stringify(S.acts)) : JSON.parse(JSON.stringify(DACTS)),
-      rwds: isMe && S.rwds ? JSON.parse(JSON.stringify(S.rwds)) : JSON.parse(JSON.stringify(DRWDS)),
-      log: isMe && S.log ? [...S.log] : [],
-      actDone: isMe && S.actDone ? {...S.actDone} : {},
-      moodLog: isMe && S.moodLog ? [...S.moodLog] : [],
-      badges: isMe && S.badges ? {...S.badges} : {},
-      badgeLog: isMe && S.badgeLog ? [...S.badgeLog] : []
+      pts: (isMe && !isStaleGlobal) ? (S.pts || 0) : 0,
+      streak: (isMe && !isStaleGlobal) ? (S.streak || 0) : 0,
+      longest: (isMe && !isStaleGlobal) ? (S.longest || 0) : 0,
+      lastDate: (isMe && !isStaleGlobal) ? (S.lastDate || null) : null,
+      totalDone: (isMe && !isStaleGlobal) ? (S.totalDone || 0) : 0,
+      acts: (isMe && !isStaleGlobal && S.acts) ? JSON.parse(JSON.stringify(S.acts)) : (inheritActs || safeInheritActs || JSON.parse(JSON.stringify(DACTS))),
+      rwds: (isMe && !isStaleGlobal && S.rwds) ? JSON.parse(JSON.stringify(S.rwds)) : (inheritRwds || safeInheritRwds || JSON.parse(JSON.stringify(DRWDS))),
+      log: (isMe && !isStaleGlobal && S.log) ? [...S.log] : [],
+      actDone: (isMe && !isStaleGlobal && S.actDone) ? {...S.actDone} : {},
+      moodLog: (isMe && !isStaleGlobal && S.moodLog) ? [...S.moodLog] : [],
+      badges: (isMe && !isStaleGlobal && S.badges) ? {...S.badges} : {},
+      badgeLog: (isMe && !isStaleGlobal && S.badgeLog) ? [...S.badgeLog] : [],
+      rewardLog: (isMe && !isStaleGlobal) && S.rewardLog ? [...S.rewardLog] : [],
+      stickers: (isMe && !isStaleGlobal) && S.stickers ? [...S.stickers] : [],
+      rewardInventory: isFirstChildForInv && S.rewardInventory ? JSON.parse(JSON.stringify(S.rewardInventory)) : [],
+      rewardRequests: isFirstChildForInv && S.rewardRequests ? JSON.parse(JSON.stringify(S.rewardRequests)) : []
     };
   }
   return S.memberData[memberId];
+}
+// 자녀 초기화 시 상속할 활동/보상 목록 결정
+function _getInheritableActs(){
+  // 기존 형제의 acts가 있으면 복사
+  if(S.memberData){
+    for(const [id,md] of Object.entries(S.memberData)){
+      if(md.acts&&md.acts.length>0) return JSON.parse(JSON.stringify(md.acts));
+    }
+  }
+  // 글로벌 S.acts 사용 (독립 모드 전환 전에 설정된 활동)
+  if(S.acts&&S.acts.length>0) return JSON.parse(JSON.stringify(S.acts));
+  return null;
+}
+function _getInheritableRwds(){
+  if(S.memberData){
+    for(const [id,md] of Object.entries(S.memberData)){
+      if(md.rwds&&md.rwds.length>0) return JSON.parse(JSON.stringify(md.rwds));
+    }
+  }
+  if(S.rwds&&S.rwds.length>0) return JSON.parse(JSON.stringify(S.rwds));
+  return null;
+}
+
+// 보상 인벤토리 마이그레이션 판단: 아직 어떤 자녀에게도 rewardInventory가 할당 안 되었으면 true
+// viewingChildId와 일치하는 자녀(현재 보고 있는 자녀)에게만 글로벌 데이터를 할당
+function _shouldMigrateRewardInv(memberId) {
+  // 글로벌 인벤토리가 없으면 마이그레이션 불필요
+  if (!S.rewardInventory || S.rewardInventory.length === 0) return false;
+  // 이미 다른 자녀에게 할당된 경우 중복 방지
+  if (S.memberData) {
+    for (const [id, md] of Object.entries(S.memberData)) {
+      if (md.rewardInventory && md.rewardInventory.length > 0) return false;
+    }
+  }
+  // viewingChildId가 있으면 해당 자녀에게만, 없으면 첫 자녀에게
+  if (viewingChildId) return memberId === viewingChildId;
+  const kids = getChildMemberIds();
+  return kids.length > 0 ? memberId === kids[0] : memberId === currentUser;
 }
 
 // Syncs member data to global S for backward compatibility
@@ -5969,38 +6235,27 @@ function getMemberState(memberId) {
 function syncMemberToGlobal(targetId) {
   const mid = targetId || currentUser;
   if (!mid || !S.memberData) return;
+  if (!S.familyMeta?.members) return; // 레거시 모드(familyMeta 없음)에서는 memberData 분리 불필요
+  _globalDataOwner = mid; // 누구의 데이터가 S에 로드되었는지 추적
   const ms = getMemberState(mid);
-  const mode = getFamilyMode();
 
-  if (mode === 'unified') {
-    // 통합 모드: acts/rwds는 전역 공유 — pts/actDone/streak 등은 자녀별로 분리
-    S.pts = ms.pts || 0;
-    S.actDone = ms.actDone || {};
-    S.streak = ms.streak || 0;
-    S.longest = ms.longest || 0;
-    S.lastDate = ms.lastDate || null;
-    S.totalDone = ms.totalDone || 0;
-    S.moodLog = ms.moodLog || [];
-    S.badges = ms.badges || {};
-    S.badgeLog = ms.badgeLog || [];
-    // log/acts/rwds는 전역 S에 그대로 유지 (Firestore에서 공유)
-  } else {
-    // 독립 모드: 모든 데이터를 해당 구성원에서 로드
-    S.pts = ms.pts || 0;
-    S.streak = ms.streak || 0;
-    S.longest = ms.longest || 0;
-    S.lastDate = ms.lastDate || null;
-    S.totalDone = ms.totalDone || 0;
-    S.actDone = ms.actDone || {};
-    S.log = ms.log || [];
-    S.moodLog = ms.moodLog || [];
-    S.badges = ms.badges || {};
-    S.badgeLog = ms.badgeLog || [];
-    if (ms.acts && ms.acts.length > 0) S.acts = ms.acts;
-    else if (!S.acts || S.acts.length === 0) S.acts = JSON.parse(JSON.stringify(DACTS));
-    if (ms.rwds && ms.rwds.length > 0) S.rwds = ms.rwds;
-    else if (!S.rwds || S.rwds.length === 0) S.rwds = JSON.parse(JSON.stringify(DRWDS));
-  }
+  // 독립 모드: 모든 데이터를 해당 구성원에서 로드 (deep copy로 참조 공유 방지)
+  S.pts = ms.pts || 0;
+  S.streak = ms.streak || 0;
+  S.longest = ms.longest || 0;
+  S.lastDate = ms.lastDate || null;
+  S.totalDone = ms.totalDone || 0;
+  S.actDone = ms.actDone ? JSON.parse(JSON.stringify(ms.actDone)) : {};
+  S.log = ms.log ? JSON.parse(JSON.stringify(ms.log)) : [];
+  S.moodLog = ms.moodLog ? [...ms.moodLog] : [];
+  S.badges = ms.badges ? {...ms.badges} : {};
+  S.badgeLog = ms.badgeLog ? [...ms.badgeLog] : [];
+  S.acts = (ms.acts && ms.acts.length > 0) ? JSON.parse(JSON.stringify(ms.acts)) : JSON.parse(JSON.stringify(DACTS));
+  S.rwds = (ms.rwds && ms.rwds.length > 0) ? JSON.parse(JSON.stringify(ms.rwds)) : JSON.parse(JSON.stringify(DRWDS));
+  S.stickers = ms.stickers ? JSON.parse(JSON.stringify(ms.stickers)) : [];
+  S.rewardLog = ms.rewardLog ? [...ms.rewardLog] : [];
+  S.rewardInventory = ms.rewardInventory ? JSON.parse(JSON.stringify(ms.rewardInventory)) : [];
+  S.rewardRequests = ms.rewardRequests ? JSON.parse(JSON.stringify(ms.rewardRequests)) : [];
 }
 
 // Syncs global S back to member data before saving
@@ -6008,43 +6263,36 @@ function syncMemberToGlobal(targetId) {
 function syncGlobalToMember(targetId) {
   const mid = targetId || currentUser;
   if (!S.memberData || !mid) return;
+  if (!S.familyMeta?.members) return; // 레거시 모드(familyMeta 없음)에서는 memberData 분리 불필요
   if (!S.memberData[mid]) getMemberState(mid);
   const ms = S.memberData[mid];
-  const mode = getFamilyMode();
 
-  if (mode === 'unified') {
-    // 통합 모드: pts 포함 개인 데이터 저장 (log/acts/rwds는 전역 공유)
-    ms.pts = S.pts;
-    ms.actDone = S.actDone;
-    ms.streak = S.streak;
-    ms.longest = S.longest;
-    ms.lastDate = S.lastDate;
-    ms.totalDone = S.totalDone;
-    ms.moodLog = S.moodLog;
-    ms.badges = S.badges;
-    ms.badgeLog = S.badgeLog;
-  } else {
-    // 독립 모드: 모든 데이터 저장
-    ms.pts = S.pts;
-    ms.streak = S.streak;
-    ms.longest = S.longest;
-    ms.lastDate = S.lastDate;
-    ms.totalDone = S.totalDone;
-    ms.acts = S.acts;
-    ms.rwds = S.rwds;
-    ms.log = S.log;
-    ms.actDone = S.actDone;
-    ms.moodLog = S.moodLog;
-    ms.badges = S.badges;
-    ms.badgeLog = S.badgeLog;
-  }
+  // 독립 모드: 모든 데이터 저장 (deep copy로 참조 공유 방지)
+  ms.pts = S.pts;
+  ms.streak = S.streak;
+  ms.longest = S.longest;
+  ms.lastDate = S.lastDate;
+  ms.totalDone = S.totalDone;
+  ms.acts = JSON.parse(JSON.stringify(S.acts||[]));
+  ms.rwds = JSON.parse(JSON.stringify(S.rwds||[]));
+  ms.log = JSON.parse(JSON.stringify(S.log||[]));
+  ms.actDone = JSON.parse(JSON.stringify(S.actDone||{}));
+  ms.moodLog = S.moodLog ? [...S.moodLog] : [];
+  ms.badges = S.badges ? {...S.badges} : {};
+  ms.badgeLog = S.badgeLog ? [...S.badgeLog] : [];
+  ms.stickers = JSON.parse(JSON.stringify(S.stickers||[]));
+  ms.rewardLog = S.rewardLog ? [...S.rewardLog] : [];
+  ms.rewardInventory = JSON.parse(JSON.stringify(S.rewardInventory||[]));
+  ms.rewardRequests = JSON.parse(JSON.stringify(S.rewardRequests||[]));
 }
 
 // Robust debounced save with in-flight guard
 function save(){
   // independent 모드에서 양육자가 자녀 데이터를 보고 있으면 해당 자녀에게 저장
-  if(getFamilyMode()==='independent'&&isCaregiverUser()&&viewingChildId){
-    syncGlobalToMember(viewingChildId);
+  // _globalDataOwner: syncMemberToGlobal()로 로드된 데이터의 원래 주인 (관리패널 등에서 다른 자녀 편집 시 중요)
+  if(getFamilyMode()==='independent'&&isCaregiverUser()){
+    const syncTarget = _globalDataOwner || viewingChildId;
+    if(syncTarget) syncGlobalToMember(syncTarget);
   }else{
     syncGlobalToMember(); // Sync changes back to member data before saving
   }
@@ -7144,6 +7392,7 @@ function renderAll(){
   if(typeof renderDevUserSwitch==='function')renderDevUserSwitch();
   renderNavUsers();
   renderHdrStats();
+  _renderHistHeroSub();
   if(typeof checkOnboarding==='function') checkOnboarding();
 }
 
@@ -7238,15 +7487,12 @@ function getCardState(act){
 
 function renderHomeGrid(){
   const g=document.getElementById('home-grid');
-  const _hgMode=getFamilyMode();
   let acts=S.acts.filter(a=>{
     if(!a.active||!a.showHome||!isAvailableToday(a))return false;
-    if(!isCaregiverUser()&&_hgMode==='unified')return isAssignedToUser(a,currentUser);
     return true;
   });
   if(acts.length===0) acts=S.acts.filter(a=>{
     if(!a.active||!isAvailableToday(a))return false;
-    if(!isCaregiverUser()&&_hgMode==='unified')return isAssignedToUser(a,currentUser);
     return true;
   }).slice(0,6);
   // Empty state
@@ -7256,10 +7502,8 @@ function renderHomeGrid(){
     const timer=countdownStr(a);
     const cls=st.cls?' '+st.cls:'';
     const stickerHTML=renderStickersFor(a.id);
-    const unifiedAvatars=renderUnifiedCompletionAvatars(a.id);
     return `<div class="act-card${cls}" data-actid="${a.id}" style="${st.exhausted?'cursor:default;':''}">
       ${stickerHTML}
-      ${unifiedAvatars}
       <div class="e">${a.emoji}</div>
       <div class="n">${a.name}</div>
       <div class="p">+${a.pts} 마일리지</div>
@@ -7299,10 +7543,8 @@ function renderHomeGrid(){
 
 function renderLogList(){
   const el=document.getElementById('log-list');
-  const _llMode=getFamilyMode();
   const acts=S.acts.filter(a=>{
     if(!a.active||!isAvailableToday(a))return false;
-    if(!isCaregiverUser()&&_llMode==='unified')return isAssignedToUser(a,currentUser);
     return true;
   });
   // Empty state
@@ -7322,7 +7564,6 @@ function renderLogList(){
     const cycleLabel=CYCLE_LABEL[a.cycle]||a.cycle;
     const countLabel=max>0?`${done}/${max}회`:'';
     const stickerHTML=renderStickersForLog(a.id);
-    const unifiedAvatarsLog=renderUnifiedCompletionAvatars(a.id);
     return `<div class="log-item${cls}" data-actid="${a.id}" style="${exhausted?'cursor:default':''}position:relative;overflow:visible;">
       <div class="log-ico" style="${pct>0?'--prog:'+pct+'%;':''}">${a.emoji}${pct>0&&pct<100?'<div class="log-prog-ring"></div>':''}</div>
       <div class="log-inf">
@@ -7334,7 +7575,6 @@ function renderLogList(){
           ${timer?`<span class="log-timer"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-1px;margin-right:2px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${timer}</span>`:''}
         </div>
         ${stickerHTML}
-        ${unifiedAvatarsLog}
       </div>
       <div class="log-right">
         <span class="log-badge">+${a.pts} 마일리지</span>
@@ -7815,11 +8055,7 @@ window.renderBadgeViewHistory=renderBadgeViewHistory;
 
 function renderRewardGrid(){
   const rg=document.getElementById('rwd-grid');
-  const _rgMode=getFamilyMode();
-  const rwds=S.rwds.filter(r=>{
-    if(!isCaregiverUser()&&_rgMode==='unified')return isAssignedToUser(r,currentUser);
-    return true;
-  });
+  const rwds=S.rwds;
   // Empty state
   if(rwds.length===0){rg.innerHTML=renderEmptyState('rwds');return;}
   rg.innerHTML=rwds.map(r=>{
@@ -9036,59 +9272,14 @@ function applyCustomPeriod(){
 }
 window.applyCustomPeriod=applyCustomPeriod;
 
-// unified 모드 기록 탭 자녀 필터 ('all' or childId)
-let _histChildFilter='all';
-
 function fLog(){
-  const mode=getFamilyMode();
-  let baseLog=S.log;
-
-  // unified 모드: 전체 자녀 로그 또는 필터된 자녀 로그
-  if(mode==='unified'){
-    const kids=getChildMemberIds();
-    if(kids.length>=2){
-      // 모든 자녀의 로그를 합산 (memberData에서)
-      let allLogs=[];
-      kids.forEach(id=>{
-        const ms=S.memberData?.[id];
-        if(ms?.log)ms.log.forEach(l=>allLogs.push({...l,user:l.user||id}));
-      });
-      // S.log에도 user 없는 항목 추가 (하위 호환)
-      S.log.forEach(l=>{
-        if(!allLogs.find(al=>al.id===l.id))allLogs.push(l);
-      });
-      allLogs.sort((a,b)=>b.ts-a.ts);
-      baseLog=allLogs;
-      // 자녀 필터 적용
-      if(_histChildFilter&&_histChildFilter!=='all'){
-        baseLog=baseLog.filter(l=>(l.user||'')===_histChildFilter);
-      }
-    }
-  }
+  const baseLog=S.log;
 
   if(HP==='custom'&&customStartTs){
     const endTs=Math.min(customStartTs+60*86400000,Date.now());
     return baseLog.filter(l=>l.ts>=customStartTs&&l.ts<=endTs&&!l.isRedeem&&!l.name?.includes('환불'));
   }
   return baseLog.filter(l=>l.ts>Date.now()-HP*86400000&&!l.isRedeem&&!l.name?.includes('환불'));
-}
-
-// unified 모드 기록탭 자녀 필터 렌더링
-function renderHistChildFilter(){
-  const el=document.getElementById('hist-child-filter');
-  if(!el)return;
-  const mode=getFamilyMode();
-  const kids=getChildMemberIds();
-  if(mode!=='unified'||kids.length<2){el.innerHTML='';return;}
-  el.innerHTML=`<div class="hist-child-filter-bar" style="display:flex;gap:6px;padding:8px 0 4px;flex-wrap:wrap">
-    <button class="sel-btn${_histChildFilter==='all'?' on':''}" onclick="setHistChildFilter('all')">전체</button>
-    ${kids.map(id=>`<button class="sel-btn${_histChildFilter===id?' on':''}" onclick="setHistChildFilter('${id}')">${getAvatarHTML(id,16)} ${MEMBERS[id]?.name||id}</button>`).join('')}
-  </div>`;
-}
-function setHistChildFilter(childId){
-  _histChildFilter=childId;
-  renderHistChildFilter();
-  renderHistStats();renderHistList();
 }
 
 function renderHistStats(){
@@ -9109,17 +9300,12 @@ function renderHistStats(){
 function renderHistList(){
   const el=document.getElementById('hist-list');
   if(!el)return;
-  renderHistChildFilter();
-  const mode=getFamilyMode();
   const data=fLog();
-  const kids=getChildMemberIds();
-  const showUser=mode==='unified'&&kids.length>=2;
   el.innerHTML=data.length?data.map(i=>{
-    const userName=showUser&&i.user?MEMBERS[i.user]?.name||i.user:'';
     return`<div class="hist-item">
       <div class="hist-ico">${i.emoji}</div>
       <div style="flex:1">
-        <div class="hist-nm">${i.name}${userName?` <span style="font-size:13px;color:var(--tx3);font-weight:700">${userName}</span>`:''}</div>
+        <div class="hist-nm">${i.name}</div>
         <div class="hist-tm">${fmt(i.ts)}</div>
       </div>
       <div style="display:flex;align-items:center;gap:6px">
@@ -9134,7 +9320,7 @@ function renderAdmStats(){
   let totalDone=S.totalDone;
   let streak=getDisplayStreak();
   // independent 모드: 관리자가 선택한 자녀의 stats 표시
-  if(mode==='independent'&&isCaregiverUser()){
+  if(mode==='independent'){
     const admId=_admViewChildId||getViewedMemberId();
     const ms=S.memberData?.[admId];
     if(ms){totalDone=ms.totalDone||0;streak=ms.streak||0;}
@@ -9148,7 +9334,7 @@ function renderAdmChildSelector(){
   const mode=getFamilyMode();
   const kids=getChildMemberIds();
   // 자녀가 2명 미만이거나 통합 모드면 선택기 숨김
-  ['adm-child-selector-0','adm-child-selector-1'].forEach(id=>{
+  ['adm-child-selector-0','adm-child-selector-1','adm-child-selector-2'].forEach(id=>{
     const el=document.getElementById(id);
     if(!el)return;
     if(mode!=='independent'||kids.length<2){el.innerHTML='';return;}
@@ -9163,7 +9349,6 @@ function renderAdmChildSelector(){
 function renderAdmModeSection(){
   const el=document.getElementById('adm-mode-card');
   if(!el)return;
-  const mode=getFamilyMode();
   const kids=getChildMemberIds();
   if(kids.length<2){
     // 자녀 1명이면 모드 선택 숨김
@@ -9177,15 +9362,12 @@ function renderAdmModeSection(){
     <div class="adm-row">
       <div class="adm-row-l">
         <div class="adm-row-nm">현재 모드</div>
-        <div class="adm-row-sub">${mode==='unified'?'통합(공유) 모드: 마일리지·활동 공유':'독립 모드: 자녀별 마일리지 분리'}</div>
+        <div class="adm-row-sub">독립 모드: 자녀별 마일리지 분리</div>
       </div>
-      <button class="btn-sm" onclick="changeFamilyMode('${mode==='unified'?'independent':'unified'}')" style="flex-shrink:0">${mode==='unified'?'독립 모드로':'통합 모드로'}</button>
     </div>
     <div class="divider"></div>
     <div style="padding:8px 14px 10px;font-size:13px;color:var(--tx3);line-height:1.6">
-      ${mode==='unified'
-        ?'💡 통합 모드: 모든 자녀가 같은 활동·보상 목록을 공유해요. 마일리지 풀은 하나이며, 각자 활동을 완료할 수 있어요.'
-        :'💡 독립 모드: 자녀별로 활동·보상·마일리지가 완전히 분리돼요. 각 자녀에게 맞는 목표를 설정할 수 있어요.'}
+      💡 독립 모드: 자녀별로 활동·보상·마일리지가 완전히 분리돼요. 각 자녀에게 맞는 목표를 설정할 수 있어요.
     </div>`;
 }
 function renderAdmActList(){
@@ -9194,30 +9376,21 @@ function renderAdmActList(){
   el.innerHTML=S.acts.map(a=>{
     const done=countDone(a);
     const isDone=a.maxDay>0&&done>=a.maxDay;
+    const doneLabel=a.maxDay>0?`${done}/${a.maxDay}`:'✓';
     return `
-    <div class="manage-item" style="padding:12px 14px">
-      <div class="drag-handle"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"><line x1=\"4\" y1=\"8\" x2=\"20\" y2=\"8\"/><line x1=\"4\" y1=\"12\" x2=\"20\" y2=\"12\"/><line x1=\"4\" y1=\"16\" x2=\"20\" y2=\"16\"/></svg></div>
+    <div class="manage-item" style="padding:10px 14px">
+      <div class="drag-handle"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="4" y1="8" x2="20" y2="8"/><line x1="4" y1="16" x2="20" y2="16"/></svg></div>
       <div class="m-emoji">${a.emoji}</div>
       <div class="m-info" style="flex:1;min-width:0">
-        <div class="m-nm">${a.name}</div>
-        <div class="m-sub">${a.pts}M · ${a.maxDay===0?'무제한':a.maxDay+'회/'+CYCLE_LABEL[a.cycle]}${a.days&&a.days.length>0&&a.days.length<7?' · '+a.days.map(d=>['일','월','화','수','목','금','토'][d]).join(''):''}</div>
+        <div class="m-nm" style="font-size:15px">${a.name}</div>
+        <div style="display:flex;gap:4px;margin-top:4px;flex-wrap:wrap">
+          <span class="adm-pill">${a.pts}M · ${a.maxDay===0?'무제한':a.maxDay+'회/'+CYCLE_LABEL[a.cycle]}</span>
+          <span class="adm-pill adm-pill-tap${isDone?' adm-pill-on':''}" onclick="togActDone('${a.id}')">${isDone?'✓ 완료':'미완료'}</span>
+          <span class="adm-pill adm-pill-tap${a.showHome?' adm-pill-gn':''}" onclick="togActHome('${a.id}')">${a.showHome?'홈 표시':'홈 숨김'}</span>
+          ${!a.active?'<span class="adm-pill adm-pill-off">비활성</span>':''}
+        </div>
       </div>
-      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
-        <div style="display:flex;flex-direction:column;align-items:center;gap:3px">
-          <button class="tog tog-sm${isDone?'':' off'}" onclick="togActDone('${a.id}')"><div class="tog-dot"></div></button>
-          <span style="font-size:11px;font-weight:800;color:${isDone?'var(--or)':'var(--tx3)'}">완료</span>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:center;gap:3px">
-          <button class="tog tog-sm${a.showHome?' ':' off'}" onclick="togActHome('${a.id}')"><div class="tog-dot"></div></button>
-          <span style="font-size:11px;font-weight:800;color:${a.showHome?'var(--gn2)':'var(--tx3)'}">홈</span>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:center;gap:3px">
-          <button class="tog tog-sm${a.active?'':' off'}" onclick="togAct('${a.id}')"><div class="tog-dot"></div></button>
-          <span style="font-size:11px;font-weight:800;color:${a.active?'var(--gn2)':'var(--tx3)'}">활성</span>
-        </div>
-        <button class="icon-btn" onclick="openActForm('${a.id}')" title="수정"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg></button>
-        <button class="icon-btn del" onclick="delAct('${a.id}')" title="삭제"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></button>
-      </div>
+      <button class="icon-btn" onclick="openActForm('${a.id}')" style="width:36px;height:36px;min-width:36px;min-height:36px"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg></button>
     </div>`;
   }).join('');
   initActDrag();
@@ -9325,18 +9498,23 @@ function initRwdDrag(){
 }
 
 function renderAdmRwdList(){
-  document.getElementById('adm-rwd-list').innerHTML=S.rwds.map(r=>`
-    <div class="manage-item" style="padding:12px 14px">
-      <div class="drag-handle"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"><line x1=\"4\" y1=\"8\" x2=\"20\" y2=\"8\"/><line x1=\"4\" y1=\"12\" x2=\"20\" y2=\"12\"/><line x1=\"4\" y1=\"16\" x2=\"20\" y2=\"16\"/></svg></div>
+  document.getElementById('adm-rwd-list').innerHTML=S.rwds.map(r=>{
+    const hasSale=r.sale&&r.sale.percent&&(!r.sale.endDate||new Date(r.sale.endDate+'T23:59:59')>=new Date());
+    return `
+    <div class="manage-item" style="padding:10px 14px">
+      <div class="drag-handle"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="4" y1="8" x2="20" y2="8"/><line x1="4" y1="16" x2="20" y2="16"/></svg></div>
       <div class="m-emoji">${r.emoji}</div>
-      <div class="m-info"><div class="m-nm">${r.name}${r.goal?' 🎯':''}${r.closed?' <span style="font-size:11px;color:#EF4444;font-weight:800">종료</span>':''}</div><div class="m-sub">${r.pts.toLocaleString()} 마일리지</div>${r.sale&&r.sale.percent&&(!r.sale.endDate||new Date(r.sale.endDate+'T23:59:59')>=new Date())?`<div style="font-size:11px;font-weight:800;color:#EF4444;margin-top:2px">🏷️ ${r.sale.percent}% 할인 중${r.sale.endDate?' (~'+r.sale.endDate.slice(5).replace('-','/')+')':''}</div>`:''}</div>
-      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
-        <span style="font-size:11px;font-weight:700;color:${r.closed?'#EF4444':'var(--tx3)'};white-space:nowrap">${r.closed?'종료':'운영'}</span>
-        <button class="tog tog-sm ${r.closed?'off':''}" onclick="toggleRwdClosed('${r.id}')" title="${r.closed?'종료됨':'운영중'}"><div class="tog-dot"></div></button>
-        <button class="icon-btn" onclick="openRwdForm('${r.id}')" title="수정"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg></button>
-        <button class="icon-btn del" onclick="delRwd('${r.id}')" title="삭제"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></button>
+      <div class="m-info" style="flex:1;min-width:0">
+        <div class="m-nm" style="font-size:15px">${r.name}${r.goal?' 🎯':''}</div>
+        <div style="display:flex;gap:4px;margin-top:4px;flex-wrap:wrap">
+          <span class="adm-pill">${r.pts.toLocaleString()}M</span>
+          <span class="adm-pill adm-pill-tap${r.closed?' adm-pill-rd':' adm-pill-gn'}" onclick="toggleRwdClosed('${r.id}')">${r.closed?'종료':'운영중'}</span>
+          ${hasSale?`<span class="adm-pill adm-pill-rd">${r.sale.percent}% 할인${r.sale.endDate?' ~'+r.sale.endDate.slice(5).replace('-','/'):''}</span>`:''}
+        </div>
       </div>
-    </div>`).join('');
+      <button class="icon-btn" onclick="openRwdForm('${r.id}')" style="width:36px;height:36px;min-width:36px;min-height:36px"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg></button>
+    </div>`;
+  }).join('');
   initRwdDrag();
 }
 function renderAdmSettings(){
@@ -9509,7 +9687,13 @@ function cleanExpiredStickers(){
 function getTodayStickers(actId){
   if(!S.stickers)S.stickers=[];
   const todayStart=new Date();todayStart.setHours(0,0,0,0);
-  return S.stickers.filter(s=>s.actId===actId&&s.ts>=todayStart.getTime());
+  const currentChild=getViewedMemberId()||currentUser;
+  return S.stickers.filter(s=>{
+    if(s.actId!==actId||s.ts<todayStart.getTime())return false;
+    // childId가 있는 스티커는 현재 보고 있는 자녀와 일치해야 표시
+    if(s.childId&&s.childId!==currentChild)return false;
+    return true;
+  });
 }
 
 function getStickerAvatar(userId,size){
@@ -9581,27 +9765,6 @@ function renderStickersForLog(actId){
   return html;
 }
 
-// unified 모드: 해당 활동을 오늘 완료한 자녀 아바타 목록 반환
-function getUnifiedChildCompletions(actId){
-  if(getFamilyMode()!=='unified')return[];
-  const kids=getChildMemberIds();
-  const today=todayStr();
-  return kids.filter(id=>{
-    const ms=S.memberData?.[id];
-    if(!ms?.actDone?.[actId])return false;
-    const rec=ms.actDone[actId];
-    return rec.count>0&&rec.date===today;
-  });
-}
-// unified 모드용 완료 자녀 아바타 HTML (활동 카드용)
-function renderUnifiedCompletionAvatars(actId){
-  const kids=getUnifiedChildCompletions(actId);
-  if(!kids.length)return'';
-  return`<div class="unified-completions">${kids.map(id=>{
-    const nm=MEMBERS[id]?.name||id;
-    return`<div class="unified-avatar-wrap" title="${nm} 완료">${getAvatarHTML(id,20)}<span class="unified-name-badge">${nm}</span></div>`;
-  }).join('')}</div>`;
-}
 
 // Attach tap handlers to all sticker/bubble items in a container
 function attachStickerTapHandlers(container){
@@ -9807,7 +9970,8 @@ function addSticker(actId,type,content){
     type:type,
     content:content,
     user:currentUser||'unknown',
-    ts:Date.now()
+    ts:Date.now(),
+    childId:getViewedMemberId()||currentUser
   };
   S.stickers.push(stk);
   save();
@@ -9899,12 +10063,16 @@ function getFamilyMode(){
 }
 function getChildMemberIds(){
   if(!S.familyMeta?.members)return[];
-  return Object.keys(S.familyMeta.members).filter(id=>{
-    const m=S.familyMeta.members[id];
-    return m.type==='child';
-  });
+  return Object.entries(S.familyMeta.members)
+    .filter(([,m])=>m.type==='child')
+    .sort((a,b)=>{
+      const oA=a[1].sortOrder??a[1].joinedAt??9999999999999;
+      const oB=b[1].sortOrder??b[1].joinedAt??9999999999999;
+      return oA-oB;
+    })
+    .map(([id])=>id);
 }
-// 현재 화면에 표시 중인 구성원 ID (independent: 선택된 자녀, unified: currentUser)
+// 현재 화면에 표시 중인 구성원 ID (선택된 자녀)
 function getViewedMemberId(){
   if(getFamilyMode()==='independent'&&isCaregiverUser()){
     const kids=getChildMemberIds();
@@ -9931,62 +10099,53 @@ function switchViewingChild(childId){
   // 해당 자녀의 memberData 초기화 (없으면)
   if(!S.memberData[childId])getMemberState(childId);
   syncMemberToGlobal(childId);
+  applyChildTheme(childId);
+
+  // compact 상태 초기화 + 스크롤 리셋 (자녀 전환 시 깨짐 방지)
+  const _hero=document.querySelector('.hero');
+  if(_hero){
+    _hero.classList.remove('compact');
+    const _isWide=window.innerWidth>=768;
+    _hero.style.borderRadius=_isWide?'0':'0 0 38px 38px';
+    const _pt=_hero.querySelector('.prog-track');
+    if(_pt){_pt.style.height='14px';_pt.style.borderRadius='7px';}
+    const _pe=_hero.querySelector('.hero-pts');if(_pe)_pe.style.fontSize='';
+    const _le=_hero.querySelector('.hero-lbl');if(_le)_le.style.fontSize='';
+    const _ue=_hero.querySelector('.hero-unit');if(_ue)_ue.style.fontSize='';
+  }
+  const _ht=document.querySelector('.home-top');
+  if(_ht)Array.from(_ht.children).forEach(c=>c.style.opacity='1');
+  // 현재 탭 스크롤 맨 위로
+  const _curTabId='s-'+(document.body.getAttribute('data-tab')||'home');
+  const _curScr=document.getElementById(_curTabId);
+  if(_curScr)_curScr.scrollTop=0;
+  window.scrollTo({top:0});
+
   renderAll();
+  applyUserProfile();
+  renderMyTab();
   const nm=MEMBERS[childId]?.name||childId;
   toast(`${nm}의 마일리지를 보고 있어요`);
 }
 // 관리자 패널 자녀 선택 (independent mode)
 function admSelectChild(childId){
+  const prevAdm=_admViewChildId;
   _admViewChildId=childId;
+  // 현재 글로벌 데이터를 원래 주인에게 저장 (_globalDataOwner 기준, prevAdm과 다를 수 있음)
+  if(S.memberData && _globalDataOwner && _globalDataOwner!==childId){
+    syncGlobalToMember(_globalDataOwner);
+  }
+  // 선택된 자녀 데이터를 S에 로드 (활동/보상/뱃지 반영)
+  if(childId && S.memberData){
+    if(!S.memberData[childId]) getMemberState(childId);
+    syncMemberToGlobal(childId);
+  }
   renderAdmActList();
   renderAdmRwdList();
   renderAdmStats();
+  renderBadgeMgrList();
   // 관리자 패널 자녀 탭 활성화 표시
   document.querySelectorAll('.adm-child-btn').forEach(b=>b.classList.toggle('on',b.dataset.cid===childId));
-}
-// independent↔unified 모드 전환
-function changeFamilyMode(newMode){
-  toast('현재 독립 모드만 지원합니다');return; // 통합모드 비활성화
-  const oldMode=getFamilyMode();
-  if(oldMode===newMode)return;
-  if(!confirm(`모드를 ${newMode==='unified'?'통합(공유)':'독립'} 모드로 변경할까요?\n(기존 데이터는 변환됩니다)`))return;
-  const kids=getChildMemberIds();
-  if(newMode==='unified'){
-    // 독립 → 통합: 첫 번째 자녀의 acts/rwds를 공유로 올리고, pts는 합산
-    let totalPts=0;
-    const mergedLog=[];
-    kids.forEach(id=>{
-      const ms=S.memberData[id]||{};
-      totalPts+=(ms.pts||0);
-      (ms.log||[]).forEach(l=>mergedLog.push({...l,user:id}));
-    });
-    if(kids.length>0){
-      const firstMs=S.memberData[kids[0]]||{};
-      S.acts=firstMs.acts||S.acts;
-      S.rwds=firstMs.rwds||S.rwds;
-    }
-    mergedLog.sort((a,b)=>b.ts-a.ts);
-    S.pts=totalPts;
-    S.log=mergedLog.slice(0,300);
-    S.actDone={};
-  }else{
-    // 통합 → 독립: 각 자녀에게 현재 공유 pts/acts/rwds/log 복사
-    kids.forEach(id=>{
-      if(!S.memberData[id])S.memberData[id]=getMemberState(id);
-      const ms=S.memberData[id];
-      ms.pts=S.pts;
-      ms.acts=JSON.parse(JSON.stringify(S.acts));
-      ms.rwds=JSON.parse(JSON.stringify(S.rwds));
-      ms.log=[...S.log];
-    });
-    if(kids.length>0){
-      viewingChildId=kids[0];
-      syncMemberToGlobal(kids[0]);
-    }
-  }
-  S.familyMeta.mode=newMode;
-  save();renderAll();
-  toast(newMode==='unified'?'✅ 통합(공유) 모드로 변경됐어요':'✅ 독립 모드로 변경됐어요');
 }
 
 // ── END STICKER SYSTEM ──────────────────────
@@ -10025,22 +10184,6 @@ function toggleRwdForChild(rwdId,childId){
   if(idx>=0){ms.rwds.splice(idx,1);}
   else{const base=S.rwds.find(r=>r.id===rwdId);if(base)ms.rwds.push({...base});}
   save();renderAdmRwdList();
-}
-function renderAdmUnifiedDashboard(){
-  const el=document.getElementById('adm-unified-dash-sec');
-  if(!el)return;
-  if(getFamilyMode()!=='unified'){el.style.display='none';return;}
-  const kids=getChildMembers();
-  if(!kids.length){el.style.display='none';return;}
-  el.style.display='';
-  const grid=el.querySelector('.unified-dash-grid');
-  if(!grid)return;
-  grid.innerHTML=kids.map(kid=>{
-    const ms=S.memberData?.[kid.id]||{};
-    const pts=ms.pts||0;
-    const streak=ms.streak||0;
-    return `<div class="unified-dash-card"><div class="unified-dash-avatar">${getAvatarHTML(kid.id,44)}</div><div class="unified-dash-name">${kid.name}</div><div class="unified-dash-pts">${pts.toLocaleString()}</div><div class="unified-dash-meta">🔥${streak}일</div></div>`;
-  }).join('');
 }
 
 // REDEEM
@@ -10082,6 +10225,7 @@ function confirmRedeem(){
   S.pts-=actualPts;
 
   if(!S.rewardInventory)S.rewardInventory=[];
+  const _invChildId = (isCaregiverUser() && viewingChildId) ? viewingChildId : currentUser;
   S.rewardInventory.push({
     id:'ri_'+Date.now(),
     rwdId:r.id,
@@ -10090,7 +10234,8 @@ function confirmRedeem(){
     purchasedAt:Date.now(),
     pts:actualPts,
     status:'owned',
-    redeemedBy:currentUser
+    redeemedBy:currentUser,
+    forChild:_invChildId
   });
 
   if(!S.rewardLog)S.rewardLog=[];
@@ -10145,12 +10290,14 @@ function useReward(invId){
       if(mid !== currentUser && (m.isAdmin || m.role !== 'child')) adminMembers.push(mid);
     }
   }
+  const _reqChildId = (isCaregiverUser() && viewingChildId) ? viewingChildId : currentUser;
   S.rewardRequests.push({
     id:item.requestId,
     rwdInvId:invId,
     rwdName:item.rwdName,
     rwdEmoji:item.rwdEmoji,
     fromUser:currentUser,
+    forChild:_reqChildId,
     toUsers:adminMembers,
     status:'pending',
     requestedAt:Date.now(),
@@ -10324,8 +10471,8 @@ window.rejectRewardRequest=rejectRewardRequest;
 function giveBonus(){
   const v=parseInt(document.getElementById('bonus-inp').value)||0;if(v<=0)return;
   const mode=getFamilyMode();
-  // independent 모드 + 양육자: 관리자가 선택한 자녀에게 지급
-  if(mode==='independent'&&isCaregiverUser()){
+  // independent 모드: 선택한 자녀에게 지급
+  if(mode==='independent'&&(isCaregiverUser()||_admViewChildId)){
     const targetId=_admViewChildId||getViewedMemberId();
     if(targetId){
       const ms=getMemberState(targetId);
@@ -10344,7 +10491,7 @@ function deductPts(){
   const v=parseInt(document.getElementById('deduct-inp').value)||0;if(v<=0)return;
   if(!confirm(`${v} 마일리지을 차감할까요?`))return;
   const mode=getFamilyMode();
-  if(mode==='independent'&&isCaregiverUser()){
+  if(mode==='independent'&&(isCaregiverUser()||_admViewChildId)){
     const targetId=_admViewChildId||getViewedMemberId();
     if(targetId){
       const ms=getMemberState(targetId);
@@ -10377,14 +10524,30 @@ function renderFamilyManager() {
     const isMe = mid === currentUser;
     const isAdmin = m.isAdmin;
 
+    // 자녀인 경우 테마 색상 선택기 표시
+    const isChild=m.role==='child';
+    // themeColor가 명시적으로 설정되지 않은 경우 자동 배정된 테마를 표시
+    let currentTheme=m.themeColor||'';
+    if(!currentTheme&&isChild){
+      const _kids=getChildMembers();
+      const _kidIdx=_kids.findIndex(c=>c.id===mid);
+      const _autoTheme=CHILD_THEMES[(_kidIdx>=0?_kidIdx:0)%CHILD_THEMES.length];
+      if(_autoTheme)currentTheme=_autoTheme.id;
+    }
+    const themeRow=isChild?`<div style="display:flex;gap:4px;margin-top:6px;flex-wrap:wrap">${CHILD_THEMES.map(ct=>{
+      const sel=currentTheme===ct.id;
+      return `<button onclick="setChildThemeColor('${mid}','${ct.id}')" style="width:22px;height:22px;border-radius:50%;background:${ct.c1};border:${sel?'2.5px solid var(--tx)':'2px solid transparent'};cursor:pointer;flex-shrink:0;box-shadow:${sel?'0 0 0 2px var(--bg),0 0 0 4px '+ct.c1:'none'}" title="${ct.name}"></button>`;
+    }).join('')}</div>`:'';
+
     return `<div class="adm-row" style="padding:12px 8px">
-      <div class="adm-row-l" style="display:flex;align-items:center;gap:10px">
+      <div class="adm-row-l" style="display:flex;align-items:center;gap:10px;flex:1">
         <div style="width:36px;height:36px;border-radius:50%;background:${rd.color||'#F1F5F9'};border:2px solid ${rd.textColor||'#64748B'};display:flex;align-items:center;justify-content:center;flex-shrink:0">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${rd.textColor||'#64748B'}" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg>
         </div>
-        <div>
+        <div style="flex:1">
           <div style="font-size:14px;font-weight:800;color:var(--tx)">${m.name||'-'} ${isMe?'<span style="font-size:13px;color:var(--or);font-weight:700">(나)</span>':''}</div>
           <div style="font-size:13px;color:var(--tx3);font-weight:600">${ROLE_LABELS[m.displayRole||m.role]||m.displayRole||m.role} · ${hasAccount?'가입완료':'미가입'} ${isAdmin?'· 관리자':''}</div>
+          ${themeRow}
         </div>
       </div>
       <div style="display:flex;gap:6px;align-items:center">
@@ -10499,6 +10662,9 @@ async function addNewFamilyMember() {
   const memberDisplayRole = (role !== 'child' && role !== 'caregiver') ? role : '';
   const rd = ROLE_DEFS[memberDisplayRole || memberRole] || ROLE_DEFS.child;
   const newId = 'mid_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+  // sortOrder: 기존 멤버 중 최대값+1 로 부여 → 순서 고정
+  const existingOrders=Object.values(S.familyMeta.members).map(m=>m.sortOrder||0);
+  const nextOrder=(existingOrders.length>0?Math.max(...existingOrders):0)+1;
   S.familyMeta.members[newId] = {
     name,
     role: memberRole,
@@ -10507,11 +10673,24 @@ async function addNewFamilyMember() {
     color: rd.color || '#F1F5F9',
     textColor: rd.textColor || '#64748B',
     isAdmin: false,
-    joinedAt: null
+    joinedAt: null,
+    sortOrder: nextOrder
   };
   await save();
   rebuildMembersFromFamily();
+  // 자녀 추가 시: 양육자 모드에서 viewingChildId 갱신 + 전체 렌더링
+  if(memberRole==='child'&&isCaregiverUser()){
+    const kids=getChildMemberIds();
+    if(kids.length>=1&&!viewingChildId){
+      viewingChildId=kids[0];
+      if(!S.memberData)S.memberData={};
+      if(!S.memberData[viewingChildId])getMemberState(viewingChildId);
+      syncMemberToGlobal(viewingChildId);
+      applyChildTheme(viewingChildId);
+    }
+  }
   renderFamilyManager();
+  renderAll();
   document.getElementById('new-member-name').value = '';
   toast(`${name}님이 가족에 추가되었어요`);
 }
@@ -10659,6 +10838,13 @@ function renderBadgeMgrList(){
   const all=getAllBadgesForMgr();
   const countEl=document.getElementById('badge-mgr-count');
   if(countEl)countEl.textContent=all.length+'개';
+  // 자녀 이름 표시
+  const childNameEl=document.getElementById('badge-mgr-child-name');
+  if(childNameEl){
+    const vid=_admViewChildId||getViewedMemberId();
+    const nm=MEMBERS[vid]?.name||S.familyMeta?.members?.[vid]?.name||'';
+    childNameEl.textContent=nm?`(${nm})`:'';}
+
 
   let filtered=all;
   if(_badgeMgrFilter==='custom') filtered=all.filter(b=>b._src==='custom');
@@ -11290,8 +11476,39 @@ function resetAll(){
   showPin('reset_all','<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" style=\"vertical-align:-4px;margin-right:4px\"><rect x=\"3\" y=\"11\" width=\"18\" height=\"11\" rx=\"2\"/><path d=\"M7 11V7a5 5 0 0110 0v4\"/></svg> 관리자 인증','⚠️ 전체 데이터 삭제를 위해<br>PIN 4자리를 입력하세요');
 }
 function doResetAll(){
-  if(!confirm('정말 모든 데이터를 삭제할까요? 되돌릴 수 없어요!'))return;
-  setDoc(DATA_DOC, defaultState()).then(()=>{ S=defaultState(); renderAll(); toast('✅ 초기화됐어요'); }).catch(e=>{ toast('오류: '+e.message); });
+  if(!confirm('정말 활동 이력을 모두 삭제할까요?\n(가족·계정 정보는 유지됩니다)\n되돌릴 수 없어요!'))return;
+  // 보존해야 할 데이터: 가족구성, 계정정보, 사진, 푸시, 설정
+  const keep={
+    familyMeta:S.familyMeta?JSON.parse(JSON.stringify(S.familyMeta)):null,
+    users:S.users?JSON.parse(JSON.stringify(S.users)):{},
+    photos:S.photos?JSON.parse(JSON.stringify(S.photos)):{},
+    pushDevices:S.pushDevices?JSON.parse(JSON.stringify(S.pushDevices)):{},
+    settings:S.settings?JSON.parse(JSON.stringify(S.settings)):{streakBonus:true,streakBonusPts:100,pinHash:'',msgMode:'auto',customMsg:''},
+    dark:S.dark||false,
+    customBadges:S.customBadges?JSON.parse(JSON.stringify(S.customBadges)):[],
+    badgeOverrides:S.badgeOverrides?JSON.parse(JSON.stringify(S.badgeOverrides)):{},
+  };
+  const fresh=defaultState();
+  // 보존 데이터 복원
+  fresh.familyMeta=keep.familyMeta;
+  fresh.users=keep.users;
+  fresh.photos=keep.photos;
+  fresh.pushDevices=keep.pushDevices;
+  fresh.settings=keep.settings;
+  fresh.dark=keep.dark;
+  fresh.customBadges=keep.customBadges;
+  fresh.badgeOverrides=keep.badgeOverrides;
+  // memberData도 계정정보만 유지하고 이력 초기화
+  if(keep.familyMeta&&keep.familyMeta.members){
+    fresh.memberData={};
+  }
+  setDoc(DATA_DOC, fresh).then(()=>{
+    S=fresh;
+    _globalDataOwner=null;
+    if(typeof postLoginInit==='function')postLoginInit();
+    renderAll();
+    toast('✅ 활동 이력이 초기화됐어요');
+  }).catch(e=>{ toast('오류: '+e.message); });
 }
 
 // ── ACTIVITY FORM ──────────────────────────────
@@ -11319,6 +11536,8 @@ function openActForm(id){
     b.classList.toggle('on',hasDays&&a.days.includes(parseInt(b.dataset.d)));
   });
   document.getElementById('act-save-btn').textContent=a?'저장하기':'추가하기';
+  // 자녀 다중선택 체크박스 (자녀 2명 이상 + 새 활동 추가 시)
+  _renderFormChildChecks('act',id);
   openModal('m-act');
 }
 function pickCycle(btn){
@@ -11342,6 +11561,35 @@ function toggleDaysMode(){
   }
 }
 function toggleDay(btn){btn.classList.toggle('on');}
+
+// ── 활동/보상 폼 자녀 다중선택 ──
+function _renderFormChildChecks(prefix,editId){
+  const field=document.getElementById(prefix+'-child-field');
+  const container=document.getElementById(prefix+'-child-checks');
+  if(!field||!container)return;
+  const kids=getChildMemberIds();
+  if(kids.length<2){field.style.display='none';return;}
+  field.style.display='block';
+  // 현재 admin 선택 자녀를 기본 체크
+  const currentAdm=_admViewChildId||getViewedMemberId();
+  container.innerHTML=kids.map(id=>{
+    const nm=MEMBERS[id]?.name||S.familyMeta?.members?.[id]?.name||id;
+    const checked=editId?id===currentAdm:true; // 새 항목이면 전체 선택, 수정이면 현재 자녀만
+    return `<label style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--bg2);border-radius:10px;cursor:pointer;font-size:14px;font-weight:700;border:2px solid ${checked?'var(--tab-color,#6366F1)':'transparent'}" onclick="this.querySelector('input').checked=!this.querySelector('input').checked;this.style.borderColor=this.querySelector('input').checked?'var(--tab-color,#6366F1)':'transparent'">
+      <input type="checkbox" value="${id}" ${checked?'checked':''} style="display:none" class="${prefix}-child-chk">
+      <span style="width:20px;height:20px;border-radius:50%;background:${checked?'var(--tab-color,#6366F1)':'var(--bdr)'};display:flex;align-items:center;justify-content:center;transition:all .2s">
+        ${checked?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>':''}
+      </span>
+      ${nm}
+    </label>`;
+  }).join('');
+}
+function _getFormCheckedChildren(prefix){
+  const checks=document.querySelectorAll('.'+prefix+'-child-chk:checked');
+  return checks.length>0?Array.from(checks).map(c=>c.value):null;
+}
+window._renderFormChildChecks=_renderFormChildChecks;
+
 function saveActivity(){
   const name=document.getElementById('act-name').value.trim();
   if(!name){toast('❗ 활동 이름을 입력해주세요');return;}
@@ -11359,10 +11607,40 @@ function saveActivity(){
     document.querySelectorAll('#act-days-row .day-btn.on').forEach(b=>days.push(parseInt(b.dataset.d)));
     if(days.length===0||days.length===7)days=null; // 전체 선택이면 null
   }
-  if(id){const a=S.acts.find(x=>x.id===id);if(a)Object.assign(a,{emoji,name,desc,pts,maxDay,cycle,days});}
-  else S.acts.push({id:'a_'+Date.now(),emoji,name,desc,pts,maxDay,cycle,days,active:true,showHome:false});
+  const actData={emoji,name,desc,pts,maxDay,cycle,days};
+  const targetKids=_getFormCheckedChildren('act');
+  if(id){
+    // 수정: 현재 S.acts에 반영
+    const a=S.acts.find(x=>x.id===id);if(a)Object.assign(a,actData);
+    // 선택된 다른 자녀에도 동일 수정 적용
+    if(targetKids&&targetKids.length>0){
+      const curAdm=_admViewChildId||getViewedMemberId();
+      targetKids.forEach(kid=>{
+        if(kid===curAdm)return; // 이미 S.acts에 반영됨
+        const ms=getMemberState(kid);
+        if(ms.acts){const ka=ms.acts.find(x=>x.id===id);if(ka)Object.assign(ka,actData);}
+      });
+    }
+  }else{
+    const newId='a_'+Date.now();
+    const newAct={id:newId,...actData,active:true,showHome:false};
+    // 선택된 모든 자녀에 추가
+    if(targetKids&&targetKids.length>0){
+      const curAdm=_admViewChildId||getViewedMemberId();
+      targetKids.forEach(kid=>{
+        if(kid===curAdm){S.acts.push({...newAct});return;}
+        const ms=getMemberState(kid);
+        if(!ms.acts)ms.acts=[];
+        ms.acts.push(JSON.parse(JSON.stringify(newAct)));
+      });
+      if(!targetKids.includes(curAdm))S.acts.push({...newAct});
+    }else{
+      S.acts.push(newAct);
+    }
+  }
   save();renderAll();closeModal('m-act');
-  toast(id?'✏️ 활동이 수정됐어요':'✅ 새 활동이 추가됐어요!');
+  const appliedCount=targetKids?targetKids.length:1;
+  toast(id?'✏️ 활동이 수정됐어요'+(appliedCount>1?` (${appliedCount}명 적용)`:''):'✅ 새 활동이 추가됐어요!'+(appliedCount>1?` (${appliedCount}명 적용)`:''));
 }
 
 // ── REWARD FORM ────────────────────────────────
@@ -11399,6 +11677,7 @@ function openRwdForm(id){
   }
 
   document.getElementById('rwd-save-btn').textContent=r?'저장하기':'추가하기';
+  _renderFormChildChecks('rwd',id);
   openModal('m-rwd');
 }
 function setGoalT(v){rwdGoal=v;document.getElementById('rwd-goal-y').classList.toggle('on',v);document.getElementById('rwd-goal-n').classList.toggle('on',!v);}
@@ -11417,11 +11696,42 @@ function saveReward(){
     label:document.getElementById('rwd-sale-label').value.trim()
   }:null;
 
+  const rwdData={emoji,name,pts,goal:rwdGoal,sale:saleData};
+  const targetKids=_getFormCheckedChildren('rwd');
   if(rwdGoal)S.rwds.forEach(r=>r.goal=false);
-  if(id){const r=S.rwds.find(x=>x.id===id);if(r)Object.assign(r,{emoji,name,pts,goal:rwdGoal,sale:saleData});}
-  else S.rwds.push({id:'r_'+Date.now(),emoji,name,pts,goal:rwdGoal,sale:saleData});
+  if(id){
+    const r=S.rwds.find(x=>x.id===id);if(r)Object.assign(r,rwdData);
+    if(targetKids&&targetKids.length>0){
+      const curAdm=_admViewChildId||getViewedMemberId();
+      targetKids.forEach(kid=>{
+        if(kid===curAdm)return;
+        const ms=getMemberState(kid);
+        if(ms.rwds){
+          if(rwdGoal)ms.rwds.forEach(r=>r.goal=false);
+          const kr=ms.rwds.find(x=>x.id===id);if(kr)Object.assign(kr,rwdData);
+        }
+      });
+    }
+  }else{
+    const newId='r_'+Date.now();
+    const newRwd={id:newId,...rwdData};
+    if(targetKids&&targetKids.length>0){
+      const curAdm=_admViewChildId||getViewedMemberId();
+      targetKids.forEach(kid=>{
+        if(kid===curAdm){S.rwds.push({...newRwd});return;}
+        const ms=getMemberState(kid);
+        if(!ms.rwds)ms.rwds=[];
+        if(rwdGoal)ms.rwds.forEach(r=>r.goal=false);
+        ms.rwds.push(JSON.parse(JSON.stringify(newRwd)));
+      });
+      if(!targetKids.includes(curAdm))S.rwds.push({...newRwd});
+    }else{
+      S.rwds.push(newRwd);
+    }
+  }
   save();renderAll();closeModal('m-rwd');
-  toast(id?'✏️ 보상이 수정됐어요':'🎁 새 보상이 추가됐어요!');
+  const appliedCount=targetKids?targetKids.length:1;
+  toast(id?'✏️ 보상이 수정됐어요'+(appliedCount>1?` (${appliedCount}명 적용)`:''):'🎁 새 보상이 추가됐어요!'+(appliedCount>1?` (${appliedCount}명 적용)`:''));
 }
 
 // ── PIN (해시 기반 보안) ────────────────────────────────────────
@@ -11576,12 +11886,19 @@ function renderMyTab(){
   const roleEl=document.getElementById('my-role');
   if(nameEl)nameEl.textContent=name;
   if(roleEl)roleEl.textContent=roleLabel;
+  // 헤더 서브타이틀 업데이트
+  const myHeaderSub=document.getElementById('my-header-sub');
+  if(myHeaderSub)myHeaderSub.textContent=`${name} · ${roleLabel}`;
   // 아바타
   const avatarWrap=document.getElementById('my-avatar-wrap');
-  if(avatarWrap)avatarWrap.innerHTML=getAvatarHTML(currentUser,80);
-  // 관리자 버튼 표시 여부
+  if(avatarWrap)avatarWrap.innerHTML=getAvatarHTML(currentUser,50);
+  updateMyAvatarMoodBadge();
+  // 관리자 버튼 표시 여부 (양육자 또는 isAdmin 권한이 있는 자녀)
   const adminBtn=document.getElementById('my-admin-btn');
-  if(adminBtn)adminBtn.style.display=isCaregiverUser()?'':'none';
+  if(adminBtn)adminBtn.style.display=(isCaregiverUser()||isCurrentUserAdmin())?'':'none';
+  // PWA 설치 버튼 표시 (standalone이 아닌 브라우저 환경에서만)
+  const pwaBtn=document.getElementById('my-pwa-install-btn');
+  if(pwaBtn)pwaBtn.style.display=_pwaInstalled?'none':'flex';
   // 다크모드 토글 상태 동기화
   const togDarkMy=document.getElementById('tog-dark-my');
   if(togDarkMy){
@@ -11593,6 +11910,7 @@ function renderMyTab(){
   }
   // 가족 구성원 아바타 가로 나열
   const familyRow=document.getElementById('my-family-row');
+  const familyTitle=document.getElementById('my-family-title');
   if(familyRow){
     const fm=S.familyMeta?.members||{};
     const ids=Object.keys(fm);
@@ -11603,22 +11921,36 @@ function renderMyTab(){
         const mName=m?.name||MEMBERS[mid]?.name||mid;
         const mRole=_RLABELS[m?.displayRole]||_RLABELS[m?.role]||m?.displayRole||m?.role||'멤버';
         const isMe=mid===currentUser;
-        return `<div class="my-family-member" onclick="if('${mid}'!=='${currentUser}')switchViewingChild&&switchViewingChild('${mid}')">
-          <div class="my-family-avatar" style="${isMe?'border-color:var(--tab-color,#6366F1);box-shadow:0 0 0 2px var(--tab-color,#6366F1)':''}">${getAvatarHTML(mid,48)}</div>
+        const clickAction=isMe?'onMeIconClick()':'onUserIconClick(\''+mid+'\')';
+        const moodEmoji=getMoodEmoji(mid);
+        // 해당 멤버로부터 온 미읽은 메시지 수
+        const unreadFromMember=(!isMe&&S.familyMessages)?S.familyMessages.filter(m=>m.from===mid&&m.to===currentUser&&!m.read).length:0;
+        return `<div class="my-family-member" onclick="${clickAction}">
+          <div class="my-family-avatar" data-mf-id="${mid}" style="${isMe?'border-color:var(--tab-color,#6366F1);box-shadow:0 0 0 2px var(--tab-color,#6366F1)':''}">
+            ${getAvatarHTML(mid,48)}
+            ${moodEmoji?`<span class="mf-mood-badge">${moodEmoji}</span>`:''}
+            <div class="mf-mood-particles" data-mf-particles="${mid}"></div>
+            ${unreadFromMember>0?`<span class="mf-unread-badge">${unreadFromMember>99?'99+':unreadFromMember}</span>`:''}
+          </div>
           <div class="my-family-name">${mName}${isMe?'<span style="margin-left:3px;background:var(--tab-color,#6366F1);color:#fff;font-size:9px;font-weight:900;padding:1px 5px;border-radius:8px;vertical-align:middle">나</span>':''}</div>
           <div class="my-family-role">${mRole}</div>
         </div>`;
       }).join('');
+      // 기분 파티클 애니메이션 시작
+      startMyFamilyMoodAnimations();
       familyRow.style.display='flex';
+      if(familyTitle)familyTitle.style.display='flex';
     }else{
       familyRow.style.display='none';
+      if(familyTitle)familyTitle.style.display='none';
     }
   }
 }
 window.renderMyTab=renderMyTab;
 
 function myTabAdminAction(){
-  if(isCurrentUserAdmin()){
+  // 양육자(caregiver)는 항상 관리자 접근 가능 (isAdmin 플래그 없어도)
+  if(isCurrentUserAdmin()||isCaregiverUser()){
     adminOK=true;
     reallyGoTab('adm');
   }else if(!adminOK){
@@ -11632,9 +11964,9 @@ window.myTabAdminAction=myTabAdminAction;
 // ── TABS / MODAL ──────────────────────────────
 function goTab(tab){
   if(tab==='adm'){
-    // 자녀 역할은 관리자 접근 차단
+    // 자녀 역할은 관리자 권한이 없으면 접근 차단
     const member=S.familyMeta?.members?.[currentUser];
-    if(member&&member.role==='child'){
+    if(member&&member.role==='child'&&!member.isAdmin){
       toast('관리자 권한이 없습니다');
       return;
     }
@@ -11701,10 +12033,11 @@ let moodInterval=null;
 let _moodFromFamily=false;
 function openMoodPop(fromFamily){
   _moodFromFamily=!!fromFamily;
-  if(!_moodFromFamily) document.getElementById('mood-bg').style.display='block';
+  document.getElementById('mood-bg').style.display='block';
   const pop=document.getElementById('mood-pop');
-  if(_moodFromFamily){
-    // Center on screen like other family flow popups (slightly above center)
+  // My탭 또는 가족 플로우에서 호출 시 화면 중앙에 표시
+  const isMyTab=document.getElementById('s-my')?.classList.contains('on');
+  if(_moodFromFamily||isMyTab){
     pop.style.left='50%';
     pop.style.top='40%';
     pop.style.bottom='auto';
@@ -11750,6 +12083,8 @@ function selectMood(mood){
       save();
     }
     toast('기분 표현을 껐어요');
+    updateMyAvatarMoodBadge();
+    stopMyAvatarMoodLoop();
     renderNavUsers();
     return;
   }
@@ -11769,7 +12104,10 @@ function selectMood(mood){
     checkBadges();
   }
   toast(m.emoji+' '+m.label);
+  updateMyAvatarMoodBadge();
   startMoodParticles();
+  // My탭이면 아바타 파티클 루프도 시작
+  if(document.getElementById('s-my')?.classList.contains('on'))startMyAvatarMoodLoop();
   renderNavUsers();
 }
 window.selectMood=selectMood;
@@ -11805,8 +12143,106 @@ function emitMoodParticles(){
     span.style.animationDuration=(2+Math.random()*1.5)+'s';
     container.appendChild(span);
   });
+  // My탭 프로필 아바타에서도 파티클 발생
+  _emitMyAvatarMoodParticles();
   // Clean up after animation
   setTimeout(()=>{if(container.children.length)container.innerHTML='';},4500);
+}
+
+// My탭 프로필 아바타 기분 파티클 + 뱃지
+let _myMoodInterval=null;
+function startMyAvatarMoodLoop(){
+  stopMyAvatarMoodLoop();
+  if(!currentMood||!MOOD_DATA[currentMood])return;
+  _emitMyAvatarMoodParticles();
+  _myMoodInterval=setInterval(_emitMyAvatarMoodParticles,3200);
+}
+function stopMyAvatarMoodLoop(){
+  if(_myMoodInterval){clearInterval(_myMoodInterval);_myMoodInterval=null;}
+  const wrap=document.getElementById('my-avatar-wrap');
+  if(wrap){const pc=wrap.querySelector('.my-mood-particles');if(pc)pc.innerHTML='';}
+}
+function _emitMyAvatarMoodParticles(){
+  const wrap=document.getElementById('my-avatar-wrap');
+  if(!wrap)return;
+  const isMyTab=document.getElementById('s-my')?.classList.contains('on');
+  if(!isMyTab){stopMyAvatarMoodLoop();return;}
+  if(!currentMood||!MOOD_DATA[currentMood])return;
+  // 파티클 컨테이너
+  let pc=wrap.querySelector('.my-mood-particles');
+  if(!pc){pc=document.createElement('div');pc.className='my-mood-particles';wrap.appendChild(pc);}
+  pc.innerHTML='';
+  const particles=MOOD_DATA[currentMood].particles;
+  const count=Math.min(5,particles.length);
+  for(let i=0;i<count;i++){
+    const span=document.createElement('span');
+    span.className='fp-mood-p';
+    span.textContent=particles[Math.floor(Math.random()*particles.length)];
+    const angle=Math.random()*Math.PI*2;
+    const dist=14+Math.random()*12;
+    span.style.setProperty('--dx',(Math.cos(angle)*dist)+'px');
+    span.style.setProperty('--dy',(Math.sin(angle)*dist-18)+'px');
+    span.style.animationDelay=(i*0.35)+'s';
+    span.style.animationDuration=(2+Math.random()*1.2)+'s';
+    pc.appendChild(span);
+  }
+}
+function updateMyAvatarMoodBadge(){
+  const wrap=document.getElementById('my-avatar-wrap');
+  if(!wrap)return;
+  // 기존 뱃지 제거
+  const old=wrap.querySelector('.my-mood-badge');
+  if(old)old.remove();
+  const emoji=getMoodEmoji(currentUser);
+  if(emoji){
+    const badge=document.createElement('span');
+    badge.className='my-mood-badge';
+    badge.textContent=emoji;
+    wrap.appendChild(badge);
+  }
+  // 파티클 컨테이너 준비
+  let pc=wrap.querySelector('.my-mood-particles');
+  if(!pc){pc=document.createElement('div');pc.className='my-mood-particles';wrap.appendChild(pc);}
+}
+
+// ── MY TAB FAMILY MOOD ANIMATIONS ─────────────
+let _mfMoodInterval=null;
+function startMyFamilyMoodAnimations(){
+  stopMyFamilyMoodAnimations();
+  _emitMfMoodParticles();
+  _mfMoodInterval=setInterval(_emitMfMoodParticles,3500);
+}
+function stopMyFamilyMoodAnimations(){
+  if(_mfMoodInterval){clearInterval(_mfMoodInterval);_mfMoodInterval=null;}
+  document.querySelectorAll('.mf-mood-particles').forEach(el=>el.innerHTML='');
+}
+function _emitMfMoodParticles(){
+  const isMyTab=document.getElementById('s-my')?.classList.contains('on');
+  if(!isMyTab){stopMyFamilyMoodAnimations();return;}
+  document.querySelectorAll('[data-mf-particles]').forEach(pc=>{
+    const uid=pc.getAttribute('data-mf-particles');
+    if(!uid||!S.moods||!S.moods[uid])return;
+    const moodKey=S.moods[uid].mood;
+    if(!moodKey||!MOOD_DATA[moodKey])return;
+    // 오늘 설정한 기분만 표시
+    const today=new Date().toISOString().slice(0,10);
+    if(S.moods[uid].date!==today)return;
+    pc.innerHTML='';
+    const particles=MOOD_DATA[moodKey].particles;
+    const count=Math.min(4,particles.length);
+    for(let i=0;i<count;i++){
+      const span=document.createElement('span');
+      span.className='fp-mood-p';
+      span.textContent=particles[Math.floor(Math.random()*particles.length)];
+      const angle=Math.random()*Math.PI*2;
+      const dist=12+Math.random()*10;
+      span.style.setProperty('--dx',(Math.cos(angle)*dist)+'px');
+      span.style.setProperty('--dy',(Math.sin(angle)*dist-16)+'px');
+      span.style.animationDelay=(i*0.3)+'s';
+      span.style.animationDuration=(2+Math.random()*1)+'s';
+      pc.appendChild(span);
+    }
+  });
 }
 
 // ── CHILD MEMBERS HELPER ──────────────────────
@@ -11814,6 +12250,11 @@ function getChildMembers(){
   if(!S.familyMeta?.members)return[];
   return Object.entries(S.familyMeta.members)
     .filter(([,m])=>m.memberType==='child'||m.role==='child'||m.type==='child')
+    .sort((a,b)=>{
+      const oA=a[1].sortOrder??a[1].joinedAt??9999999999999;
+      const oB=b[1].sortOrder??b[1].joinedAt??9999999999999;
+      return oA-oB;
+    })
     .map(([id,m])=>({id,name:m.name||id,...m}));
 }
 
@@ -11852,42 +12293,116 @@ function _onChildPickerSelect(childId){
 window.showChildPicker=showChildPicker;
 window._onChildPickerSelect=_onChildPickerSelect;
 
-// ── NAV USERS RENDERING (상단 자녀 선택기 + hist 탭 show/hide) ──
+// ── NAV USERS RENDERING (모든 탭 자녀 선택기 + hist 탭 show/hide) ──
 function renderNavUsers(){
-  const mode=getFamilyMode();
   const kids=getChildMemberIds();
+  const showSwitcher=isCaregiverUser()&&kids.length>=2;
+  const currentViewed=getViewedMemberId();
 
-  // 자녀 전환기: 양육자 + independent 모드 + 자녀 2명 이상일 때만 표시
-  const switcher=document.getElementById('child-switcher');
-  if(switcher){
-    if(isCaregiverUser()&&mode==='independent'&&kids.length>=2){
-      const currentViewed=getViewedMemberId();
-      switcher.style.display='flex';
-      if(kids.length===2){
-        // 토글 형태 (자녀 2명)
-        switcher.innerHTML=`<div class="child-sw-toggle">${kids.map(id=>{
-          const nm=MEMBERS[id]?.name||id;
-          return`<button class="child-sw-btn${id===currentViewed?' on':''}" onclick="switchViewingChild('${id}')">${nm}</button>`;
-        }).join('')}</div>`;
-      }else{
-        // 드롭다운 (자녀 3명 이상)
-        const opts=kids.map(id=>{
-          const nm=MEMBERS[id]?.name||id;
-          return`<option value="${id}"${id===currentViewed?' selected':''}>${nm}</option>`;
-        }).join('');
-        switcher.innerHTML=`<select class="child-sw-select" onchange="switchViewingChild(this.value)">${opts}</select>`;
-      }
+  // 자녀 선택기 HTML 생성 (공통)
+  function _childSwHTML(){
+    if(kids.length===2){
+      return`<div class="child-sw-toggle">${kids.map(id=>{
+        const nm=MEMBERS[id]?.name||id;
+        return`<button class="child-sw-btn${id===currentViewed?' on':''}" onclick="switchViewingChild('${id}')">${nm}</button>`;
+      }).join('')}</div>`;
     }else{
-      switcher.style.display='none';
-      switcher.innerHTML='';
+      const opts=kids.map(id=>{
+        const nm=MEMBERS[id]?.name||id;
+        return`<option value="${id}"${id===currentViewed?' selected':''}>${nm}</option>`;
+      }).join('');
+      return`<select class="child-sw-select" onchange="switchViewingChild(this.value)">${opts}</select>`;
     }
   }
 
-  // 리포트 탭: 양육자에게만 표시
+  // 홈, 활동기록, 보상, 성과 탭에 자녀 선택기 렌더링
+  const selectorIds=['child-switcher','log-child-selector','rwd-child-selector','hist-child-selector'];
+  const btnIds=[null,'log-child-btns','rwd-child-btns','hist-child-btns'];
+  selectorIds.forEach((selId,i)=>{
+    const el=document.getElementById(selId);
+    if(!el)return;
+    if(showSwitcher){
+      el.style.display=selId==='child-switcher'?'flex':'block';
+      // 홈탭은 switcher 자체에 innerHTML, 나머지는 btns에
+      if(selId==='child-switcher'){
+        el.innerHTML=_childSwHTML();
+      }else{
+        const btnsEl=document.getElementById(btnIds[i]);
+        if(btnsEl)btnsEl.innerHTML=_childSwHTML();
+      }
+    }else{
+      el.style.display='none';
+      // child-switcher는 직접 innerHTML 비우고, 나머지는 내부 btns div만 비움 (btns div 자체를 파괴하지 않음)
+      if(selId==='child-switcher'){
+        el.innerHTML='';
+      }else{
+        const btnsEl=document.getElementById(btnIds[i]);
+        if(btnsEl)btnsEl.innerHTML='';
+      }
+    }
+  });
+
+  // 리포트 탭: 양육자 또는 관리자 권한이 있는 유저에게 표시
   const histTab=document.getElementById('tab-hist');
-  if(histTab)histTab.style.display=isCaregiverUser()?'':'none';
+  if(histTab)histTab.style.display=(isCaregiverUser()||isCurrentUserAdmin())?'':'none';
+
+  // 가족 버튼에 전체 미읽은 메시지 뱃지 표시
+  _updateFamilyBtnBadge();
 }
 window.renderNavUsers=renderNavUsers;
+
+function _updateFamilyBtnBadge(){
+  if(!currentUser)return;
+  let total=0;
+  if(S.familyMessages){
+    total=S.familyMessages.filter(m=>m.to===currentUser&&!m.read).length;
+  }
+  // MY탭 네비게이션 아이템에 뱃지 표시
+  const myTab=document.getElementById('tab-my');
+  if(myTab){
+    let badge=myTab.querySelector('.nav-unread-badge');
+    if(total>0){
+      if(!badge){badge=document.createElement('span');badge.className='nav-unread-badge';myTab.style.position='relative';myTab.appendChild(badge);}
+      badge.textContent=total>99?'99+':total;
+      badge.style.display='flex';
+    }else{
+      if(badge)badge.style.display='none';
+    }
+  }
+  // 나의 탭 가족 멤버 아바타에 개별 미읽은 뱃지 업데이트
+  _updateMyFamilyMemberBadges();
+  // 구 nav-family-btn (있는 경우 호환)
+  const btn=document.getElementById('nav-family-btn');
+  if(btn){
+    let fbBadge=btn.querySelector('.nfb-badge');
+    if(total>0){
+      if(!fbBadge){fbBadge=document.createElement('span');fbBadge.className='nfb-badge';btn.appendChild(fbBadge);}
+      fbBadge.textContent=total>99?'99+':total;
+      fbBadge.style.display='flex';
+    }else{
+      if(fbBadge)fbBadge.style.display='none';
+    }
+  }
+}
+
+function _updateMyFamilyMemberBadges(){
+  if(!currentUser||!S.familyMessages)return;
+  const fm=S.familyMeta?.members||{};
+  Object.keys(fm).forEach(mid=>{
+    if(mid===currentUser)return;
+    const avatarEl=document.querySelector(`.my-family-avatar[data-mf-id="${mid}"]`);
+    if(!avatarEl)return;
+    const cnt=S.familyMessages.filter(m=>m.from===mid&&m.to===currentUser&&!m.read).length;
+    let badge=avatarEl.querySelector('.mf-unread-badge');
+    if(cnt>0){
+      if(!badge){badge=document.createElement('span');badge.className='mf-unread-badge';avatarEl.appendChild(badge);}
+      badge.textContent=cnt>99?'99+':cnt;
+      badge.style.display='flex';
+    }else{
+      if(badge)badge.style.display='none';
+    }
+  });
+}
 
 // ── Family Popup — 가계도 (family tree) layout ──
 function openFamilyPopup(){
@@ -11938,7 +12453,7 @@ function openFamilyPopup(){
     });
   }
 
-  // Build a member card (no mood emoji, "(나)" badge + account status)
+  // Build a member card with mood emoji badge + animation
   function createMemberItem(id, isMe){
     const name=MEMBERS[id]?.name||id;
     const unread=isMe?0:getUnreadCount(id);
@@ -11946,14 +12461,19 @@ function openFamilyPopup(){
     const _m=MEMBERS[id];
     const _RLABELS={dad:'아빠',mom:'엄마',grandpa:'할아버지',grandma:'할머니',grandpa_m:'외할아버지',grandma_m:'외할머니',child:'자녀',caregiver:'양육자'};
     const roleLabel=_RLABELS[_m?.displayRole]||_RLABELS[_m?.role]||_m?.displayRole||_m?.role||'';
+    const moodEmoji=getMoodEmoji(id);
+    const moodKey=S.moods&&S.moods[id]?S.moods[id].mood:null;
     const item=document.createElement('div');
     item.className='family-popup-item'+(isMe?' is-me':'');
     item.setAttribute('data-fp-id',id);
+    item.setAttribute('data-fp-mood',moodKey||'');
     item.onclick=function(e){ e.stopPropagation(); selectFpItem(id); isMe?onMeIconClick():onUserIconClick(id); };
     item.innerHTML=`
-      <div class="family-popup-avatar"${isMe?' id="nav-profile-icon"':''}>
+      <div class="family-popup-avatar"${isMe?' id="nav-profile-icon"':''} style="position:relative;overflow:visible">
         ${getAvatarHTML(id,46)}
         ${!isMe&&unread>0?`<span class="family-popup-unread">${unread}</span>`:''}
+        ${moodEmoji?`<span class="fp-mood-badge">${moodEmoji}</span>`:''}
+        <div class="fp-mood-particles" data-fp-particles="${id}"></div>
       </div>
       <span class="family-popup-name">${name}</span>
       ${isMe?'<span class="fp-me-badge">나</span>':''}
@@ -12015,10 +12535,14 @@ function openFamilyPopup(){
   if(left<12)left=12;
   popup.style.left=left+'px';
   popup.style.bottom='120px';
+
+  // 기분 표현 애니메이션 시작
+  startFpMoodAnimations();
 }
 window.openFamilyPopup=openFamilyPopup;
 
 function closeFamilyPopup(){
+  stopFpMoodAnimations();
   const bg=document.getElementById('family-popup-bg');
   const popup=document.getElementById('family-popup');
   if(bg)bg.remove();
@@ -12031,6 +12555,45 @@ function closeFamilyPopup(){
   _familyFlowActive=false;
 }
 window.closeFamilyPopup=closeFamilyPopup;
+
+// ── Family Popup Mood Particle Animations ──
+let _fpMoodInterval=null;
+function startFpMoodAnimations(){
+  stopFpMoodAnimations();
+  _emitFpMoodParticles();
+  _fpMoodInterval=setInterval(_emitFpMoodParticles,3500);
+}
+function stopFpMoodAnimations(){
+  if(_fpMoodInterval){clearInterval(_fpMoodInterval);_fpMoodInterval=null;}
+}
+function _emitFpMoodParticles(){
+  const popup=document.getElementById('family-popup');
+  if(!popup)return stopFpMoodAnimations();
+  const items=popup.querySelectorAll('.family-popup-item[data-fp-mood]');
+  items.forEach(item=>{
+    const moodKey=item.getAttribute('data-fp-mood');
+    if(!moodKey||!MOOD_DATA[moodKey])return;
+    const container=item.querySelector('.fp-mood-particles');
+    if(!container)return;
+    container.innerHTML='';
+    const particles=MOOD_DATA[moodKey].particles;
+    // Emit 5 random particles in a radial burst pattern
+    const count=Math.min(5,particles.length);
+    for(let i=0;i<count;i++){
+      const span=document.createElement('span');
+      span.className='fp-mood-p';
+      span.textContent=particles[Math.floor(Math.random()*particles.length)];
+      // Random direction for radial burst
+      const angle=Math.random()*Math.PI*2;
+      const dist=12+Math.random()*10;
+      span.style.setProperty('--dx',(Math.cos(angle)*dist)+'px');
+      span.style.setProperty('--dy',(Math.sin(angle)*dist-15)+'px');
+      span.style.animationDelay=(i*0.35)+'s';
+      span.style.animationDuration=(2+Math.random()*1.2)+'s';
+      container.appendChild(span);
+    }
+  });
+}
 
 function getMoodEmoji(userId){
   if(!S.moods)return null;
@@ -12150,6 +12713,15 @@ function sendFamilyMsg(){
   const sentText=text;
   const sentMsg=S.familyMessages[S.familyMessages.length-1];
   const toName=(MEMBERS[msgTargetUser]?.name)||'가족';  // closeMsgPop 전에 캡처!
+  const fromName=(MEMBERS[currentUser]?.name)||'가족';
+  // Push 알림 트리거 (Cloud Functions 경유)
+  if(!isSelfMessage){
+    S.pushBroadcast={
+      title:`💌 ${fromName}의 메시지`,
+      body:text.length>50?text.slice(0,50)+'…':text,
+      ts:Date.now()
+    };
+  }
   save();
   closeMsgPop();  // 여기서 msgTargetUser=null이 됨
   if(isSelfMessage){
@@ -12183,6 +12755,20 @@ function getUnreadCount(fromId){
 window.getUnreadCount=getUnreadCount;
 
 let _userFmTarget=null;
+// 팝업 메뉴 배경 오버레이 (다른 영역 터치 시 닫기용)
+function _showFmOverlay(onClose){
+  _removeFmOverlay();
+  const ov=document.createElement('div');
+  ov.id='fm-overlay';
+  ov.style.cssText='position:fixed;inset:0;z-index:499;background:rgba(0,0,0,.25);animation:fadeIn .15s';
+  ov.onclick=function(){if(onClose)onClose();};
+  document.body.appendChild(ov);
+}
+function _removeFmOverlay(){
+  const ov=document.getElementById('fm-overlay');
+  if(ov)ov.remove();
+}
+
 function onUserIconClick(userId){
   // Close me-fm-menu if open
   closeMeFm();
@@ -12217,6 +12803,7 @@ function onUserIconClick(userId){
   menu.style.transform='translate(-50%,-50%)';
   menu.style.animation='none';
   menu.style.display='block';
+  _showFmOverlay(()=>closeUserFm());
   requestAnimationFrame(()=>{menu.style.animation='fadeUpCenter .2s ease';});
 }
 window.onUserIconClick=onUserIconClick;
@@ -12226,6 +12813,7 @@ function closeUserFm(){
   menu.style.display='none';
   menu.style.transform='';
   menu.style.animation='';
+  _removeFmOverlay();
 }
 window.closeUserFm=closeUserFm;
 
@@ -12234,11 +12822,11 @@ function onMeIconClick(){
   closeUserFm();
   _familyFlowActive=true;
   const menu=document.getElementById('me-fm-menu');
-  // 자녀 역할은 관리자 메뉴 숨기기
+  // 자녀 역할은 관리자 권한이 없으면 관리자 메뉴 숨기기
   const adminBtn=menu.querySelector('[onclick*="admin"]');
   if(adminBtn){
     const member=S.familyMeta?.members?.[currentUser];
-    const isChild=member&&member.role==='child';
+    const isChild=member&&member.role==='child'&&!member.isAdmin;
     adminBtn.style.display=isChild?'none':'';
   }
   menu.style.left='50%';
@@ -12248,6 +12836,7 @@ function onMeIconClick(){
   menu.style.transform='translate(-50%,-50%)';
   menu.style.animation='none';
   menu.style.display='block';
+  _showFmOverlay(()=>closeMeFm());
   requestAnimationFrame(()=>{menu.style.animation='fadeUpCenter .2s ease';});
 }
 window.onMeIconClick=onMeIconClick;
@@ -12257,6 +12846,7 @@ function closeMeFm(){
   menu.style.display='none';
   menu.style.transform='';
   menu.style.animation='';
+  _removeFmOverlay();
 }
 window.closeMeFm=closeMeFm;
 
@@ -12769,6 +13359,30 @@ function renderJoinMemberGrid(){
 window.checkUrlParams=checkUrlParams;
 
 function reallyGoTab(tab){
+  // 관리자 탭에서 나갈 때: 관리자 선택 자녀 데이터 저장 → 원래 뷰 자녀 복원
+  const _prevTab=document.body.getAttribute('data-tab');
+  if(_prevTab==='adm'&&tab!=='adm'&&_admViewChildId&&S.memberData){
+    syncGlobalToMember(_admViewChildId);
+    const _restoreId=isCaregiverUser()?viewingChildId:currentUser;
+    if(_restoreId&&_restoreId!==_admViewChildId){
+      if(!S.memberData[_restoreId])getMemberState(_restoreId);
+      syncMemberToGlobal(_restoreId);
+    }
+  }
+  // 관리자 탭에 진입할 때: 현재 글로벌 데이터 저장 → 관리자 선택 자녀 로드
+  // isCaregiverUser() 뿐 아니라 isCurrentUserAdmin()인 자녀도 동일하게 처리
+  if(tab==='adm'&&_prevTab!=='adm'&&_admViewChildId&&S.memberData&&(isCaregiverUser()||isCurrentUserAdmin())){
+    // 현재 글로벌 데이터를 원래 주인에게 먼저 저장
+    const _saveTarget=isCaregiverUser()?viewingChildId:currentUser;
+    if(_saveTarget&&_globalDataOwner===_saveTarget){
+      syncGlobalToMember(_saveTarget);
+    }
+    // 관리자가 선택한 자녀 데이터 로드 (자기 자신이면 스킵)
+    if(_admViewChildId!==currentUser){
+      if(!S.memberData[_admViewChildId])getMemberState(_admViewChildId);
+      syncMemberToGlobal(_admViewChildId);
+    }
+  }
   // PIN이 열려 있으면 강제 닫고 scroll lock 해제
   const pinWrap=document.getElementById('pin-wrap');
   if(pinWrap&&pinWrap.style.display!=='none'){pinWrap.style.display='none';_scrollLockCount=0;document.body.classList.remove('popup-open');document.documentElement.classList.remove('popup-open');if(_scrollLockTouchHandler){document.removeEventListener('touchmove',_scrollLockTouchHandler);_scrollLockTouchHandler=null;}}
@@ -12811,7 +13425,29 @@ function reallyGoTab(tab){
 
   // Set tab theme
   document.body.setAttribute('data-tab', tab);
+  const _themedTabs=['home','log','rwd','hist'];
+  if(_themedTabs.includes(tab)&&isCaregiverUser()){
+    // 양육자가 아이 데이터를 볼 때: 자녀 테마 색상 적용
+    const vid=getViewedMemberId&&getViewedMemberId();
+    if(vid)applyChildTheme(vid);
+  }else{
+    // 아이 직접 로그인 또는 my/adm 탭: 인라인 제거 → CSS body[data-tab] 변수 적용
+    document.body.style.removeProperty('--tab-color');
+    document.body.style.removeProperty('--tab-color2');
+    document.body.style.removeProperty('--tab-shadow');
+    document.body.style.removeProperty('--tab-lt');
+    document.body.style.removeProperty('--tab-lt-dk');
+  }
   document.documentElement.style.background = TAB_COLORS[tab] || '#6366F1';
+
+  // My탭 기분 파티클 루프 관리
+  if(tab==='my'){
+    if(currentMood&&MOOD_DATA[currentMood]) startMyAvatarMoodLoop();
+    startMyFamilyMoodAnimations();
+  }else{
+    stopMyAvatarMoodLoop();
+    stopMyFamilyMoodAnimations();
+  }
 
   // 탭별 상단바 색상 변경 (아이폰 사파리)
   const themeMeta=document.getElementById('theme-color-meta');
@@ -12820,7 +13456,7 @@ function reallyGoTab(tab){
     themeMeta.content=isDark?'#1E293B':(TAB_COLORS[tab]||'#6366F1');
   }
 }
-function admTab(i){[0,1,2,3,4].forEach(j=>{document.getElementById('at-'+j).classList.toggle('on',j===i);document.getElementById('adm-p'+j).style.display=j===i?'block':'none';});if(i===2)renderBadgeMgrList();if(i===3){showCacheInfo();showPushDebug();renderAdmMemberPhotos();}if(i===4)renderFamilyManager();}
+function admTab(i){[0,1,2,3,4].forEach(j=>{document.getElementById('at-'+j).classList.toggle('on',j===i);document.getElementById('adm-p'+j).style.display=j===i?'block':'none';});if(i===2){renderAdmChildSelector();renderBadgeMgrList();}if(i===3){showCacheInfo();showPushDebug();renderAdmMemberPhotos();}if(i===4)renderFamilyManager();}
 function toggleAdvSettings(){
   const body=document.getElementById('adv-settings-body');
   const btn=document.getElementById('adv-settings-btn');
@@ -13355,6 +13991,91 @@ async function sendDirectNotification(){
   }
 }
 window.sendDirectNotification=sendDirectNotification;
+// ── PWA 설치 프롬프트 ──────────────────────────
+let _deferredInstallPrompt=null;
+let _pwaInstalled=false;
+window.addEventListener('beforeinstallprompt',function(e){
+  e.preventDefault();
+  _deferredInstallPrompt=e;
+});
+window.addEventListener('appinstalled',function(){
+  _pwaInstalled=true;
+  _deferredInstallPrompt=null;
+});
+// 이미 standalone(홈화면 추가)이면 설치 완료
+if(window.matchMedia('(display-mode:standalone)').matches||window.navigator.standalone)_pwaInstalled=true;
+
+function showPwaInstallPopup(){
+  if(_pwaInstalled)return;
+  // 이미 열려있으면 무시
+  if(document.getElementById('pwa-install-pop'))return;
+  const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
+  const bg=document.createElement('div');
+  bg.id='pwa-install-pop';
+  bg.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center;padding:0;animation:fadeIn .2s';
+  const card=document.createElement('div');
+  card.style.cssText='background:var(--bg,#fff);border-radius:28px 28px 0 0;padding:32px 24px env(safe-area-inset-bottom,16px);max-width:420px;width:100%;box-shadow:0 -10px 40px rgba(0,0,0,.15);text-align:center';
+  if(isIOS){
+    // iOS: beforeinstallprompt 미지원, 수동 안내
+    card.innerHTML=`
+      <div style="font-size:42px;margin-bottom:12px">📲</div>
+      <div style="font-size:19px;font-weight:900;color:var(--tx,#1e293b);margin-bottom:8px">홈 화면에 추가하기</div>
+      <div style="font-size:14px;color:var(--tx2,#64748B);line-height:1.6;margin-bottom:20px">
+        아래 공유 버튼 <span style="font-size:18px;vertical-align:middle">⎋</span> 을 누른 후<br>
+        <b>"홈 화면에 추가"</b>를 선택하세요
+      </div>
+      <div style="background:var(--bg2,#f8fafc);border-radius:16px;padding:16px;margin-bottom:20px;text-align:left">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <span style="font-size:20px;width:28px;text-align:center">1</span>
+          <span style="font-size:14px;color:var(--tx,#1e293b);font-weight:600">하단 공유 버튼 <span style="font-size:16px">⎋</span> 탭</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <span style="font-size:20px;width:28px;text-align:center">2</span>
+          <span style="font-size:14px;color:var(--tx,#1e293b);font-weight:600">"홈 화면에 추가" 선택</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:20px;width:28px;text-align:center">3</span>
+          <span style="font-size:14px;color:var(--tx,#1e293b);font-weight:600">우측 상단 "추가" 탭</span>
+        </div>
+      </div>
+      <button onclick="closePwaInstallPopup()" style="width:100%;padding:14px;border:none;border-radius:14px;font-size:15px;font-weight:800;background:var(--pr,#6366F1);color:#fff;cursor:pointer;font-family:inherit">확인</button>`;
+  }else{
+    // Android/Chrome: beforeinstallprompt 사용
+    card.innerHTML=`
+      <div style="font-size:42px;margin-bottom:12px">📲</div>
+      <div style="font-size:19px;font-weight:900;color:var(--tx,#1e293b);margin-bottom:8px">홈 화면에 추가하기</div>
+      <div style="font-size:14px;color:var(--tx2,#64748B);line-height:1.6;margin-bottom:24px">
+        앱처럼 바로 실행할 수 있어요!<br>홈 화면에 마일리 아이콘을 추가할까요?
+      </div>
+      <div style="display:flex;gap:10px">
+        <button onclick="closePwaInstallPopup()" style="flex:1;padding:14px;border:1.5px solid var(--bdr,#e2e8f0);border-radius:14px;font-size:14px;font-weight:700;background:var(--bg2,#f8fafc);color:var(--tx,#1e293b);cursor:pointer;font-family:inherit">나중에</button>
+        <button onclick="doPwaInstall()" style="flex:2;padding:14px;border:none;border-radius:14px;font-size:15px;font-weight:800;background:var(--pr,#6366F1);color:#fff;cursor:pointer;font-family:inherit">홈에 추가</button>
+      </div>`;
+  }
+  bg.appendChild(card);
+  bg.addEventListener('click',function(e){if(e.target===bg)closePwaInstallPopup();});
+  document.body.appendChild(bg);
+}
+function closePwaInstallPopup(){
+  const pop=document.getElementById('pwa-install-pop');
+  if(pop)pop.remove();
+}
+async function doPwaInstall(){
+  if(_deferredInstallPrompt){
+    _deferredInstallPrompt.prompt();
+    const result=await _deferredInstallPrompt.userChoice;
+    if(result.outcome==='accepted'){_pwaInstalled=true;toast('✅ 홈 화면에 추가되었어요!');}
+    _deferredInstallPrompt=null;
+  }else{
+    // fallback: 수동 안내
+    toast('브라우저 메뉴에서 "홈 화면에 추가"를 선택해주세요');
+  }
+  closePwaInstallPopup();
+}
+window.showPwaInstallPopup=showPwaInstallPopup;
+window.closePwaInstallPopup=closePwaInstallPopup;
+window.doPwaInstall=doPwaInstall;
+
 // ── 앱 캐시 초기화 ──────────────────────────
 async function clearAppCache(){
   var btn=document.querySelector('[onclick="clearAppCache()"]');
@@ -13676,12 +14397,9 @@ window.getChildMemberIds=getChildMemberIds;
 window.getViewedMemberId=getViewedMemberId;
 window.switchViewingChild=switchViewingChild;
 window.admSelectChild=admSelectChild;
-window.changeFamilyMode=changeFamilyMode;
 window.postLoginInit=postLoginInit;
 window.renderAdmChildSelector=renderAdmChildSelector;
 window.renderAdmModeSection=renderAdmModeSection;
-window.setHistChildFilter=setHistChildFilter;
-window.renderHistChildFilter=renderHistChildFilter;
 
 // Initial render
 renderDevUserSwitch();
@@ -13899,6 +14617,8 @@ function saveAvatarCrop() {
   applyUserProfile();
   renderMemberGrid();
   renderAdmMemberPhotos();
+  renderMyTab();
+  renderNavUsers();
   toast('📸 프로필 사진이 저장됐어요!');
 }
 
@@ -13999,6 +14719,8 @@ Object.assign(window, {
   lockBodyScroll, unlockBodyScroll,
   // Global registry functions
   checkGlobalIdExists, registerGlobalId,
+  // Child theme functions
+  setChildThemeColor, applyChildTheme,
 });
 // 모듈 함수를 window에 _m_ 접두사로 등록 (standalone script에서 참조)
 window._m_startCreateFamily = startCreateFamily;
@@ -14052,6 +14774,13 @@ window._createState = _createState;
       if(backup) S = Object.assign(defaultState(), JSON.parse(backup));
     }catch(e2){}
     toast('⚠️ 오프라인 모드 — 인터넷 연결을 확인해주세요');
+  }
+
+  // ── 레거시 → familyMeta 마이그레이션 (1회성) ──
+  if(!S.familyMeta && S.users && Object.keys(S.users).length>0){
+    _migrateLegacyToFamilyMeta();
+    // 마이그레이션 결과를 즉시 Firestore에 저장 (LEGACY_DOC 경로)
+    try{ if(_firebaseReady) await setDoc(DATA_DOC, S); }catch(e){ console.warn('Migration save failed',e); }
   }
 
   // familyMeta가 있으면 MEMBERS 재구축
@@ -14139,14 +14868,24 @@ window._createState = _createState;
           // pushDevices, pushBroadcast 등 인프라 필드만 머지 (메시지/상태는 로컬 우선)
           if(incoming.pushDevices) S.pushDevices = incoming.pushDevices;
           if(incoming.pushUpdatedAt) S.pushUpdatedAt = incoming.pushUpdatedAt;
-          // Merge read status from other devices for family messages
-          if(incoming.familyMessages && S.familyMessages) {
+          // Merge family messages from other devices (새 메시지 + 읽음 상태)
+          if(incoming.familyMessages) {
+            if(!S.familyMessages)S.familyMessages=[];
+            let msgChanged=false;
+            // 새 메시지 머지: incoming에만 있는 메시지 추가
+            if(incoming.familyMessages.length>S.familyMessages.length){
+              const newMsgs=incoming.familyMessages.slice(S.familyMessages.length);
+              newMsgs.forEach(m=>{S.familyMessages.push(m);});
+              msgChanged=true;
+            }
+            // 읽음 상태 머지
             incoming.familyMessages.forEach((imsg, i) => {
               if(imsg.read && S.familyMessages[i] && !S.familyMessages[i].read) {
                 S.familyMessages[i].read = true;
+                msgChanged=true;
               }
             });
-            renderNavUsers();
+            if(msgChanged){renderNavUsers();checkNewMessages();}
           }
           // Merge stickers from other devices
           if(incoming.stickers && Array.isArray(incoming.stickers)){
@@ -14166,6 +14905,32 @@ window._createState = _createState;
             }
             if(photoChanged){applyUserProfile();renderAll();}
           }
+          // Merge moods from other family members
+          if(incoming.moods){
+            if(!S.moods)S.moods={};
+            let moodChanged=false;
+            for(const [uid,moodData] of Object.entries(incoming.moods)){
+              if(uid===currentUser)continue; // 내 기분은 내 로컬 우선
+              if(JSON.stringify(S.moods[uid])!==JSON.stringify(moodData)){
+                S.moods[uid]=moodData;
+                moodChanged=true;
+              }
+            }
+            // 삭제된 기분도 반영 (none 선택 시)
+            for(const uid of Object.keys(S.moods)){
+              if(uid===currentUser)continue;
+              if(!incoming.moods[uid]){delete S.moods[uid];moodChanged=true;}
+            }
+            if(moodChanged){renderNavUsers();renderMyTab();}
+          }
+          // Merge moodLog from other devices
+          if(incoming.moodLog&&Array.isArray(incoming.moodLog)){
+            if(!S.moodLog)S.moodLog=[];
+            const localTs=new Set(S.moodLog.map(l=>l.ts));
+            let added=false;
+            incoming.moodLog.forEach(l=>{if(!localTs.has(l.ts)){S.moodLog.push(l);added=true;}});
+            if(added){S.moodLog.sort((a,b)=>b.ts-a.ts);if(S.moodLog.length>500)S.moodLog=S.moodLog.slice(0,500);}
+          }
           // Merge familyMeta.members 변경사항 (이름, 역할 등)
           if(incoming.familyMeta&&incoming.familyMeta.members){
             S.familyMeta=incoming.familyMeta;
@@ -14181,7 +14946,15 @@ window._createState = _createState;
       S = Object.assign(defaultState(), snap.data());
       _lastSavedJSON = incomingJSON;
       rebuildMembersFromFamily();
-      if(viewingChildId&&isCaregiverUser()&&getFamilyMode()==='independent') syncMemberToGlobal(viewingChildId);
+      // 독립 모드: 올바른 구성원의 memberData를 글로벌에 복원
+      if(getFamilyMode()==='independent'){
+        if(isCaregiverUser()&&viewingChildId){
+          syncMemberToGlobal(viewingChildId);
+        }else if(currentUser&&S.memberData&&S.memberData[currentUser]){
+          // 자녀 직접 로그인: 자신의 memberData 복원
+          syncMemberToGlobal(currentUser);
+        }
+      }
       renderAll();
       checkNewMessages();
       renderNavUsers();
@@ -14251,10 +15024,10 @@ window._createState = _createState;
           const usMax=18,usMin=14;
           _unitEl.style.fontSize=(usMax-(usMax-usMin)*brRatioHome)+'px';
         }
-        // Fade out home-top children only (not background)
+        // Fade out home-top children only (not background) — raw scrollY 기준 (아이폰 시계 겹침 방지)
         if(_homTopChildren.length){
           const fadeStart=10, fadeEnd=60;
-          const o=effScrollY<=fadeStart?1:effScrollY>=fadeEnd?0:1-(effScrollY-fadeStart)/(fadeEnd-fadeStart);
+          const o=scrollY<=fadeStart?1:scrollY>=fadeEnd?0:1-(scrollY-fadeStart)/(fadeEnd-fadeStart);
           const v=Math.max(0,Math.min(1,o));
           _homTopChildren.forEach(c=>c.style.opacity=v);
         }
@@ -14283,11 +15056,19 @@ window._createState = _createState;
         else if(_hc && scrollY < thresholdOff) histHdr.classList.remove('compact');
         histHdr.style.borderRadius=brStrOther;
       }
+      // My (raw scrollY + hysteresis)
+      const myHdr = document.querySelector('.my-header');
+      if(myHdr && document.getElementById('s-my')?.classList.contains('on')){
+        const _mc=myHdr.classList.contains('compact');
+        if(!_mc && scrollY > threshold) myHdr.classList.add('compact');
+        else if(_mc && scrollY < thresholdOff) myHdr.classList.remove('compact');
+        myHdr.style.borderRadius=brStrOther;
+      }
     });
   }
   window.addEventListener('scroll', updateHeaderCompact, {passive:true});
-  window.addEventListener('resize', ()=>{_setTopbarH();updateHeaderCompact();}, {passive:true});
-  window.addEventListener('orientationchange', ()=>{setTimeout(()=>{_setTopbarH();updateHeaderCompact();},100);});
+  window.addEventListener('resize', updateHeaderCompact, {passive:true});
+  window.addEventListener('orientationchange', ()=>{setTimeout(updateHeaderCompact,100);});
 
 
   // ============ ONBOARDING OVERLAY ============
