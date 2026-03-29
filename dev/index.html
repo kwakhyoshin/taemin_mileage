@@ -11250,7 +11250,23 @@ async function sendFamilyInvite(memberId) {
     type: 'invite'
   };
   S.familyMeta.inviteTokens.push(tokenEntry);
-  await save();
+
+  // ⚠️ 초대 토큰은 반드시 families 컬렉션에 즉시 저장해야 함
+  // debounced save()는 DATA_DOC이 LEGACY_DOC을 가리킬 수 있어서
+  // 받는 측에서 families/dev_XXXX를 읽을 때 토큰을 찾지 못할 수 있음
+  const targetDoc = _familyId ? getFamilyDoc(_familyId) : DATA_DOC;
+  console.log('[sendFamilyInvite] saving token to:', targetDoc?.path || 'DATA_DOC', '_familyId:', _familyId);
+  try {
+    await setDoc(targetDoc, S);
+    _lastSavedJSON = JSON.stringify(S);
+    _lastSaveTime = Date.now();
+    localStorage.setItem(_LS_PREFIX+'v6_backup', JSON.stringify(S));
+    console.log('[sendFamilyInvite] token saved OK');
+  } catch(e) {
+    console.error('[sendFamilyInvite] save failed:', e);
+    // fallback: debounced save
+    save();
+  }
 
   const rawFamilyId = _familyId.startsWith('dev_') ? _familyId.slice(4) : _familyId;
   const familyName = S.familyMeta?.familyName || '가족';
@@ -12892,9 +12908,9 @@ function renderNavUsers(){
     }
   });
 
-  // 리포트 탭: 양육자 또는 관리자 권한이 있는 유저에게 표시
+  // 리포트 탭: 모든 사용자에게 표시 (아이도 자신의 성과/통계 확인 가능)
   const histTab=document.getElementById('tab-hist');
-  if(histTab)histTab.style.display=(isCaregiverUser()||isCurrentUserAdmin())?'':'none';
+  if(histTab)histTab.style.display='';
 
   // 가족 버튼에 전체 미읽은 메시지 뱃지 표시
   _updateFamilyBtnBadge();
