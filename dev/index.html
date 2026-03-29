@@ -347,10 +347,19 @@ body.dark .dtog-in{transform:translateX(20px)}
 .my-list-arr{stroke:var(--tx3);flex-shrink:0}
 .my-list-item-toggle{cursor:default}
 .my-list-item-toggle:active{background:transparent}
-.theme-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 0 8px;border:2px solid transparent;border-radius:12px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;background:transparent;color:var(--tx3);transition:all .2s}
-.theme-btn svg{width:22px;height:22px;opacity:.5;transition:opacity .2s}
-.theme-btn.active{background:var(--card);color:var(--primary,#6366F1);border-color:var(--primary,#6366F1);box-shadow:0 2px 8px rgba(99,102,241,.15)}
-.theme-btn.active svg{opacity:1;stroke:var(--primary,#6366F1)}
+/* iOS-style theme picker */
+.theme-picker{display:flex;gap:16px;justify-content:center;padding:8px 0 0}
+.theme-pick{display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.theme-pick-preview{width:100px;height:72px;border-radius:14px;border:3px solid transparent;overflow:hidden;transition:border-color .25s,box-shadow .25s;position:relative}
+.theme-pick.active .theme-pick-preview{border-color:#6366F1;box-shadow:0 2px 10px rgba(99,102,241,.25)}
+.theme-pick-label{font-size:12px;font-weight:700;color:var(--tx2)}
+.theme-pick-radio{width:22px;height:22px;border-radius:50%;border:2px solid #CBD5E1;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.theme-pick.active .theme-pick-radio{border-color:#6366F1;background:#6366F1}
+.theme-pick.active .theme-pick-radio::after{content:'';display:block;width:8px;height:5px;border-left:2.5px solid #fff;border-bottom:2.5px solid #fff;transform:rotate(-45deg) translateY(-1px)}
+.theme-sys-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0 0;margin-top:8px;border-top:1px solid var(--bdr,#e2e8f0)}
+.theme-sys-label{font-size:13px;font-weight:700;color:var(--tx)}
+body.dark .theme-pick-radio{border-color:#475569}
+body.dark .theme-pick.active .theme-pick-radio{border-color:#818CF8;background:#818CF8}
 .my-list-item-danger .my-list-ico{background:rgba(239,68,68,.1)}
 .my-list-item-danger .my-list-ico svg{stroke:#EF4444}
 .my-list-item-danger .my-list-txt{color:#EF4444}
@@ -3619,15 +3628,46 @@ button:disabled {
         <button class="tog off" id="push-tog-my" onclick="togglePush()"><div class="tog-dot"></div></button>
       </div>
     </div>
-    <div class="my-list-item" style="flex-direction:column;align-items:stretch;gap:10px;padding:16px 18px">
-      <div style="display:flex;align-items:center;gap:14px">
+    <div class="my-list-item" style="flex-direction:column;align-items:stretch;gap:4px;padding:16px 18px">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:4px">
         <span class="my-list-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></span>
         <span class="my-list-txt">화면 모드</span>
       </div>
-      <div id="theme-selector" style="display:flex;gap:8px;padding:4px 0 0">
-        <button class="theme-btn active" data-theme="system" onclick="window._setTheme('system')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>시스템</button>
-        <button class="theme-btn" data-theme="light" onclick="window._setTheme('light')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>라이트</button>
-        <button class="theme-btn" data-theme="dark" onclick="window._setTheme('dark')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>다크</button>
+      <!-- iOS-style light/dark thumbnails -->
+      <div class="theme-picker" id="theme-picker">
+        <div class="theme-pick active" data-theme="light" onclick="window._setTheme('light')">
+          <div class="theme-pick-preview">
+            <svg viewBox="0 0 100 72" width="100%" height="100%">
+              <rect width="100" height="72" fill="#F8FAFC"/>
+              <rect x="8" y="6" width="84" height="14" rx="7" fill="#6366F1"/>
+              <rect x="28" y="10" width="44" height="6" rx="3" fill="#A5B4FC" opacity=".6"/>
+              <rect x="8" y="26" width="84" height="12" rx="6" fill="#fff" stroke="#E2E8F0" stroke-width="1"/>
+              <rect x="8" y="42" width="84" height="12" rx="6" fill="#fff" stroke="#E2E8F0" stroke-width="1"/>
+              <rect x="8" y="58" width="84" height="12" rx="6" fill="#fff" stroke="#E2E8F0" stroke-width="1"/>
+            </svg>
+          </div>
+          <span class="theme-pick-label">라이트 모드</span>
+          <div class="theme-pick-radio"></div>
+        </div>
+        <div class="theme-pick" data-theme="dark" onclick="window._setTheme('dark')">
+          <div class="theme-pick-preview">
+            <svg viewBox="0 0 100 72" width="100%" height="100%">
+              <rect width="100" height="72" fill="#0F172A"/>
+              <rect x="8" y="6" width="84" height="14" rx="7" fill="#1E293B"/>
+              <rect x="28" y="10" width="44" height="6" rx="3" fill="#334155" opacity=".6"/>
+              <rect x="8" y="26" width="84" height="12" rx="6" fill="#1E293B" stroke="#334155" stroke-width="1"/>
+              <rect x="8" y="42" width="84" height="12" rx="6" fill="#1E293B" stroke="#334155" stroke-width="1"/>
+              <rect x="8" y="58" width="84" height="12" rx="6" fill="#1E293B" stroke="#334155" stroke-width="1"/>
+            </svg>
+          </div>
+          <span class="theme-pick-label">다크 모드</span>
+          <div class="theme-pick-radio"></div>
+        </div>
+      </div>
+      <!-- 시스템 설정 토글 -->
+      <div class="theme-sys-row">
+        <span class="theme-sys-label">시스템 설정</span>
+        <button class="tog" id="theme-sys-tog" onclick="window._toggleThemeSys()"><div class="tog-dot"></div></button>
       </div>
     </div>
     <button class="my-list-item" id="my-pwa-install-btn" onclick="window._tryPwaInstall()" style="display:none">
@@ -6473,7 +6513,25 @@ function setThemePref(pref){
   applyThemePref(pref);
   updateThemeUI(pref);
 }
-window._setTheme=setThemePref;
+window._setTheme=function(pref){
+  // light/dark 클릭 시 시스템 모드 해제
+  if(pref==='light'||pref==='dark'){
+    setThemePref(pref);
+  }else{
+    setThemePref('system');
+  }
+};
+window._toggleThemeSys=function(){
+  const cur=localStorage.getItem(_LS_PREFIX+'theme')||'system';
+  if(cur==='system'){
+    // 시스템 해제 → 현재 실제 상태로 고정
+    const isDark=document.body.classList.contains('dark');
+    setThemePref(isDark?'dark':'light');
+  }else{
+    // 시스템 켜기
+    setThemePref('system');
+  }
+};
 function applyThemePref(pref){
   if(pref==='system'){
     const sysDark=window.matchMedia('(prefers-color-scheme:dark)').matches;
@@ -6483,12 +6541,19 @@ function applyThemePref(pref){
   }
 }
 function updateThemeUI(pref){
-  document.querySelectorAll('.theme-btn').forEach(btn=>{
-    btn.classList.toggle('active', btn.getAttribute('data-theme')===pref);
+  const isSystem=pref==='system';
+  const isDark=document.body.classList.contains('dark');
+  const activePick=isSystem?(isDark?'dark':'light'):pref;
+  // iOS-style thumbnail selector
+  document.querySelectorAll('.theme-pick').forEach(p=>{
+    p.classList.toggle('active', p.getAttribute('data-theme')===activePick);
   });
+  // 시스템 설정 토글
+  const sysTog=document.getElementById('theme-sys-tog');
+  if(sysTog) sysTog.classList.toggle('off', !isSystem);
   // 관리탭 토글도 동기화
   const td=document.getElementById('tog-dark');
-  if(td) td.classList.toggle('off', !document.body.classList.contains('dark'));
+  if(td) td.classList.toggle('off', !isDark);
 }
 function loadDarkPref(){
   // 새 theme 키 우선, 없으면 레거시 dark 키 마이그레이션
