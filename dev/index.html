@@ -9835,8 +9835,11 @@ function renderAdmModeSection(){
 }
 function renderAdmActList(){
   const el=document.getElementById('adm-act-list');
-  if(!S.acts.length){el.innerHTML='<div class="empty">활동이 없어요</div>';return;}
-  el.innerHTML=S.acts.map(a=>{
+  // independent 모드: 관리자가 선택한 자녀의 acts 사용
+  const _admMs=_getAdmMemberData();
+  const _acts=(_admMs&&_admMs.acts)?_admMs.acts:S.acts;
+  if(!_acts.length){el.innerHTML='<div class="empty">활동이 없어요</div>';return;}
+  el.innerHTML=_acts.map(a=>{
     const done=countDone(a);
     const isDone=a.maxDay>0&&done>=a.maxDay;
     const doneLabel=a.maxDay>0?`${done}/${a.maxDay}`:'✓';
@@ -9899,8 +9902,12 @@ function initActDrag(){
         let targetIdx=-1;
         items.forEach((el,i)=>{if(el===targetItem)targetIdx=i;});
         if(targetIdx>=0&&_dragIdx!==null&&_dragIdx!==targetIdx){
-          const moved=S.acts.splice(_dragIdx,1)[0];
-          S.acts.splice(targetIdx,0,moved);
+          const curAdm=_admViewChildId||getViewedMemberId();
+          const _ms=getMemberState(curAdm);
+          const _acts=(_ms&&_ms.acts)?_ms.acts:S.acts;
+          const moved=_acts.splice(_dragIdx,1)[0];
+          _acts.splice(targetIdx,0,moved);
+          if(_globalDataOwner===curAdm&&_acts!==S.acts){S.acts=[..._acts];}
           save();renderAdmActList();renderHomeGrid();renderLogList();
           toast('📋 순서가 변경됐어요');
         }
@@ -9949,8 +9956,12 @@ function initRwdDrag(){
         let targetIdx=-1;
         items.forEach((el,i)=>{if(el===targetItem)targetIdx=i;});
         if(targetIdx>=0&&_rwdDragIdx!==null&&_rwdDragIdx!==targetIdx){
-          const moved=S.rwds.splice(_rwdDragIdx,1)[0];
-          S.rwds.splice(targetIdx,0,moved);
+          const curAdm=_admViewChildId||getViewedMemberId();
+          const _ms=getMemberState(curAdm);
+          const _rwds=(_ms&&_ms.rwds)?_ms.rwds:S.rwds;
+          const moved=_rwds.splice(_rwdDragIdx,1)[0];
+          _rwds.splice(targetIdx,0,moved);
+          if(_globalDataOwner===curAdm&&_rwds!==S.rwds){S.rwds=[..._rwds];}
           save();renderAdmRwdList();
           toast('🎁 보상 순서가 변경됐어요');
         }
@@ -9961,7 +9972,9 @@ function initRwdDrag(){
 }
 
 function renderAdmRwdList(){
-  document.getElementById('adm-rwd-list').innerHTML=S.rwds.map(r=>{
+  const _admMs=_getAdmMemberData();
+  const _rwds=(_admMs&&_admMs.rwds)?_admMs.rwds:S.rwds;
+  document.getElementById('adm-rwd-list').innerHTML=_rwds.map(r=>{
     const hasSale=r.sale&&r.sale.percent&&(!r.sale.endDate||new Date(r.sale.endDate+'T23:59:59')>=new Date());
     return `
     <div class="manage-item" style="padding:10px 14px">
@@ -10597,17 +10610,12 @@ function switchViewingChild(childId){
   toast(`${nm}의 마일리지를 보고 있어요`);
 }
 // 관리자 패널 자녀 선택 (independent mode)
+// ⚠️ 글로벌 S.*를 오염시키지 않음 — _globalDataOwner/viewingChildId 유지
 function admSelectChild(childId){
-  const prevAdm=_admViewChildId;
   _admViewChildId=childId;
-  // 현재 글로벌 데이터를 원래 주인에게 저장 (_globalDataOwner 기준, prevAdm과 다를 수 있음)
-  if(S.memberData && _globalDataOwner && _globalDataOwner!==childId){
-    syncGlobalToMember(_globalDataOwner);
-  }
-  // 선택된 자녀 데이터를 S에 로드 (활동/보상/뱃지 반영)
+  // memberData 초기화만 (글로벌 S에 로드하지 않음)
   if(childId && S.memberData){
     if(!S.memberData[childId]) getMemberState(childId);
-    syncMemberToGlobal(childId);
   }
   renderAdmActList();
   renderAdmRwdList();
@@ -10615,6 +10623,11 @@ function admSelectChild(childId){
   renderBadgeMgrList();
   // 관리자 패널 자녀 탭 활성화 표시
   document.querySelectorAll('.adm-child-btn').forEach(b=>b.classList.toggle('on',b.dataset.cid===childId));
+}
+// 관리자 패널에서 현재 보고 있는 자녀의 데이터 가져오기
+function _getAdmMemberData(){
+  const admId=_admViewChildId||getViewedMemberId();
+  return S.memberData?.[admId]||null;
 }
 
 // ── END STICKER SYSTEM ──────────────────────
@@ -10947,8 +10960,8 @@ function giveBonus(){
       const ms=getMemberState(targetId);
       ms.pts+=v;
       ms.log.unshift({id:'l_'+Date.now(),emoji:'⭐',name:`보너스 +${v} 마일리지`,pts:v,ts:Date.now(),actId:null,user:targetId});
-      // 현재 뷰가 해당 자녀면 S에도 반영
-      if(targetId===getViewedMemberId()){S.pts=ms.pts;S.log=ms.log;}
+      // 글로벌 데이터 소유자면 S에도 반영
+      if(targetId===_globalDataOwner){S.pts=ms.pts;S.log=ms.log;}
       save();renderAll();toast(`⭐ ${MEMBERS[targetId]?.name||'자녀'}에게 +${v} 마일리지 지급!`);confetti();flyCoinsToMileage(null,v);
       return;
     }
@@ -10966,7 +10979,7 @@ function deductPts(){
       const ms=getMemberState(targetId);
       ms.pts=Math.max(0,ms.pts-v);
       ms.log.unshift({id:'l_'+Date.now(),emoji:'📉',name:`차감 -${v} 마일리지`,pts:-v,ts:Date.now(),actId:null,user:targetId});
-      if(targetId===getViewedMemberId()){S.pts=ms.pts;S.log=ms.log;}
+      if(targetId===_globalDataOwner){S.pts=ms.pts;S.log=ms.log;}
       save();renderAll();toast(`📉 ${v} 마일리지 차감됨`);
       return;
     }
@@ -11221,29 +11234,33 @@ function copyToClipboard(text) {
 }
 
 function togActDone(id){
-  const a=S.acts.find(x=>x.id===id);if(!a)return;
-  if(!S.actDone)S.actDone={};
+  const curAdm=_admViewChildId||getViewedMemberId();
+  const _ms=getMemberState(curAdm);
+  const _acts=(_ms&&_ms.acts)?_ms.acts:S.acts;
+  const a=_acts.find(x=>x.id===id);if(!a)return;
+  const _actDone=_ms.actDone||(_ms.actDone={});
+  if(!_actDone)_ms.actDone={};
   const t=todayStr();
-  const rec=S.actDone[id];
+  const rec=_actDone[id];
   const done=countDone(a);
   const isDone=a.maxDay>0&&done>=a.maxDay;
   if(isDone){
-    // 완료→미완료: actDone 삭제 (마일리지 변동 없음)
-    delete S.actDone[id];
+    delete _actDone[id];
+    if(_globalDataOwner===curAdm&&S.actDone)delete S.actDone[id];
     save();renderAll();
     toast(`↩ "${a.name}" 오늘 완료 상태 해제 (마일리지 변동 없음)`);
   }else{
-    // 미완료→완료: actDone에 maxDay만큼 채움 (마일리지 변동 없음)
-    S.actDone[id]={date:t,count:a.maxDay||1};
+    _actDone[id]={date:t,count:a.maxDay||1};
+    if(_globalDataOwner===curAdm){if(!S.actDone)S.actDone={};S.actDone[id]={date:t,count:a.maxDay||1};}
     save();renderAll();
     toast(`✅ "${a.name}" 오늘 완료 처리됨 (마일리지 변동 없음)`);
   }
 }
-function togAct(id){const a=S.acts.find(x=>x.id===id);if(a){a.active=!a.active;save();renderAdmActList();renderLogList();renderHomeGrid();}}
-function togActHome(id){const a=S.acts.find(x=>x.id===id);if(a){a.showHome=!a.showHome;save();renderAdmActList();renderHomeGrid();toast(a.showHome?`🏠 "${a.name}" 홈에 표시됩니다`:`➖ "${a.name}" 홈에서 제거됩니다`);}}
-function delAct(id){if(!confirm('이 활동을 삭제할까요?'))return;S.acts=S.acts.filter(a=>a.id!==id);if(S.actDone&&S.actDone[id])delete S.actDone[id];save();renderAll();toast('🗑️ 삭제됐어요');}
-function delRwd(id){if(!confirm('이 보상을 삭제할까요?'))return;S.rwds=S.rwds.filter(r=>r.id!==id);save();renderAll();toast('🗑️ 삭제됐어요');}
-function toggleRwdClosed(id){const r=S.rwds.find(x=>x.id===id);if(!r)return;r.closed=!r.closed;save();renderAll();toast(r.closed?'⛔ 보상이 종료됐어요':'✅ 보상이 다시 운영돼요');}
+function togAct(id){const _ms=_getAdmMemberData();const _acts=(_ms&&_ms.acts)?_ms.acts:S.acts;const a=_acts.find(x=>x.id===id);if(a){a.active=!a.active;if(_globalDataOwner===(_admViewChildId||getViewedMemberId())){const sa=S.acts.find(x=>x.id===id);if(sa)sa.active=a.active;}save();renderAdmActList();renderLogList();renderHomeGrid();}}
+function togActHome(id){const _ms=_getAdmMemberData();const _acts=(_ms&&_ms.acts)?_ms.acts:S.acts;const a=_acts.find(x=>x.id===id);if(a){a.showHome=!a.showHome;if(_globalDataOwner===(_admViewChildId||getViewedMemberId())){const sa=S.acts.find(x=>x.id===id);if(sa)sa.showHome=a.showHome;}save();renderAdmActList();renderHomeGrid();toast(a.showHome?`🏠 "${a.name}" 홈에 표시됩니다`:`➖ "${a.name}" 홈에서 제거됩니다`);}}
+function delAct(id){if(!confirm('이 활동을 삭제할까요?'))return;const curAdm=_admViewChildId||getViewedMemberId();const _ms=getMemberState(curAdm);if(_ms.acts)_ms.acts=_ms.acts.filter(a=>a.id!==id);if(_ms.actDone&&_ms.actDone[id])delete _ms.actDone[id];if(_globalDataOwner===curAdm){S.acts=S.acts.filter(a=>a.id!==id);if(S.actDone&&S.actDone[id])delete S.actDone[id];}save();renderAll();toast('🗑️ 삭제됐어요');}
+function delRwd(id){if(!confirm('이 보상을 삭제할까요?'))return;const curAdm=_admViewChildId||getViewedMemberId();const _ms=getMemberState(curAdm);if(_ms.rwds)_ms.rwds=_ms.rwds.filter(r=>r.id!==id);if(_globalDataOwner===curAdm){S.rwds=S.rwds.filter(r=>r.id!==id);}save();renderAll();toast('🗑️ 삭제됐어요');}
+function toggleRwdClosed(id){const _ms=_getAdmMemberData();const _rwds=(_ms&&_ms.rwds)?_ms.rwds:S.rwds;const r=_rwds.find(x=>x.id===id);if(!r)return;r.closed=!r.closed;if(_globalDataOwner===(_admViewChildId||getViewedMemberId())){const sr=S.rwds.find(x=>x.id===id);if(sr)sr.closed=r.closed;}save();renderAll();toast(r.closed?'⛔ 보상이 종료됐어요':'✅ 보상이 다시 운영돼요');}
 function togSetting(k){if(k==='streak')S.settings.streakBonus=!S.settings.streakBonus;save();renderAdmSettings();toast(S.settings.streakBonus?'✅ 연속 보너스 켜짐':'🔕 꺼짐');}
 function saveSettings(){S.settings.streakBonusPts=parseInt(document.getElementById('bonus-pts-inp').value)||100;save();}
 function togBdaySetting(){S.settings.birthdayBonus=S.settings.birthdayBonus===false?true:!S.settings.birthdayBonus;save();renderAdmSettings();toast(S.settings.birthdayBonus!==false?'🎂 생일 보너스 켜짐':'🔕 생일 보너스 꺼짐');}
@@ -11988,7 +12005,9 @@ function doResetAll(){
 
 // ── ACTIVITY FORM ──────────────────────────────
 function openActForm(id){
-  const a=id?S.acts.find(x=>x.id===id):null;
+  const _admMs=_getAdmMemberData();
+  const _acts=(_admMs&&_admMs.acts)?_admMs.acts:S.acts;
+  const a=id?_acts.find(x=>x.id===id):null;
   document.getElementById('act-form-title').textContent=a?'활동 수정':'새 활동 추가';
   document.getElementById('act-eid').value=id||'';
   document.getElementById('act-e').textContent=a?.emoji||'⭐';
@@ -12084,14 +12103,19 @@ function saveActivity(){
   }
   const actData={emoji,name,desc,pts,maxDay,cycle,days};
   const targetKids=_getFormCheckedChildren('act');
+  const curAdm=_admViewChildId||getViewedMemberId();
+  // 관리자가 보고 있는 자녀의 acts (memberData에서 직접 수정)
+  const _curAdmMs=getMemberState(curAdm);
+  const _curAdmActs=_curAdmMs.acts||(_curAdmMs.acts=JSON.parse(JSON.stringify(S.acts)));
   if(id){
-    // 수정: 현재 S.acts에 반영
-    const a=S.acts.find(x=>x.id===id);if(a)Object.assign(a,actData);
+    // 수정: 현재 관리자 선택 자녀의 acts에 반영
+    const a=_curAdmActs.find(x=>x.id===id);if(a)Object.assign(a,actData);
+    // 글로벌 S.acts에도 반영 (홈 렌더링용, _globalDataOwner와 같은 자녀면)
+    if(_globalDataOwner===curAdm){const sa=S.acts.find(x=>x.id===id);if(sa)Object.assign(sa,actData);}
     // 선택된 다른 자녀에도 동일 수정 적용
     if(targetKids&&targetKids.length>0){
-      const curAdm=_admViewChildId||getViewedMemberId();
       targetKids.forEach(kid=>{
-        if(kid===curAdm)return; // 이미 S.acts에 반영됨
+        if(kid===curAdm)return; // 이미 위에서 반영됨
         const ms=getMemberState(kid);
         if(ms.acts){const ka=ms.acts.find(x=>x.id===id);if(ka)Object.assign(ka,actData);}
       });
@@ -12099,18 +12123,17 @@ function saveActivity(){
   }else{
     const newId='a_'+Date.now();
     const newAct={id:newId,...actData,active:true,showHome:false};
-    // 선택된 모든 자녀에 추가
+    // 관리자 선택 자녀에 추가
+    _curAdmActs.push({...newAct});
+    if(_globalDataOwner===curAdm)S.acts.push({...newAct});
+    // 선택된 다른 자녀에도 추가
     if(targetKids&&targetKids.length>0){
-      const curAdm=_admViewChildId||getViewedMemberId();
       targetKids.forEach(kid=>{
-        if(kid===curAdm){S.acts.push({...newAct});return;}
+        if(kid===curAdm)return;
         const ms=getMemberState(kid);
         if(!ms.acts)ms.acts=[];
         ms.acts.push(JSON.parse(JSON.stringify(newAct)));
       });
-      if(!targetKids.includes(curAdm))S.acts.push({...newAct});
-    }else{
-      S.acts.push(newAct);
     }
   }
   save();renderAll();closeModal('m-act');
@@ -12130,7 +12153,9 @@ function setRwdSale(v){
 }
 
 function openRwdForm(id){
-  const r=id?S.rwds.find(x=>x.id===id):null;
+  const _admMs=_getAdmMemberData();
+  const _rwds=(_admMs&&_admMs.rwds)?_admMs.rwds:S.rwds;
+  const r=id?_rwds.find(x=>x.id===id):null;
   document.getElementById('rwd-form-title').textContent=r?'보상 수정':'새 보상 추가';
   document.getElementById('rwd-eid').value=id||'';
   document.getElementById('rwd-e').textContent=r?.emoji||'🎁';
@@ -12173,11 +12198,15 @@ function saveReward(){
 
   const rwdData={emoji,name,pts,goal:rwdGoal,sale:saleData};
   const targetKids=_getFormCheckedChildren('rwd');
-  if(rwdGoal)S.rwds.forEach(r=>r.goal=false);
+  const curAdm=_admViewChildId||getViewedMemberId();
+  const _curAdmMs=getMemberState(curAdm);
+  const _curAdmRwds=_curAdmMs.rwds||(_curAdmMs.rwds=JSON.parse(JSON.stringify(S.rwds)));
+  if(rwdGoal)_curAdmRwds.forEach(r=>r.goal=false);
   if(id){
-    const r=S.rwds.find(x=>x.id===id);if(r)Object.assign(r,rwdData);
+    const r=_curAdmRwds.find(x=>x.id===id);if(r)Object.assign(r,rwdData);
+    // 현재 글로벌 뷰 소유자면 S에도 반영
+    if(_globalDataOwner===curAdm){const sr=S.rwds.find(x=>x.id===id);if(sr)Object.assign(sr,rwdData);if(rwdGoal)S.rwds.forEach(r=>{if(r.id!==id)r.goal=false;});}
     if(targetKids&&targetKids.length>0){
-      const curAdm=_admViewChildId||getViewedMemberId();
       targetKids.forEach(kid=>{
         if(kid===curAdm)return;
         const ms=getMemberState(kid);
@@ -12190,18 +12219,16 @@ function saveReward(){
   }else{
     const newId='r_'+Date.now();
     const newRwd={id:newId,...rwdData};
+    _curAdmRwds.push({...newRwd});
+    if(_globalDataOwner===curAdm)S.rwds.push({...newRwd});
     if(targetKids&&targetKids.length>0){
-      const curAdm=_admViewChildId||getViewedMemberId();
       targetKids.forEach(kid=>{
-        if(kid===curAdm){S.rwds.push({...newRwd});return;}
+        if(kid===curAdm)return;
         const ms=getMemberState(kid);
         if(!ms.rwds)ms.rwds=[];
         if(rwdGoal)ms.rwds.forEach(r=>r.goal=false);
         ms.rwds.push(JSON.parse(JSON.stringify(newRwd)));
       });
-      if(!targetKids.includes(curAdm))S.rwds.push({...newRwd});
-    }else{
-      S.rwds.push(newRwd);
     }
   }
   save();renderAll();closeModal('m-rwd');
