@@ -314,8 +314,8 @@ body.dark .dtog-in{transform:translateX(20px)}
 .home-top h1{font-size:24px;font-weight:900;color:rgba(255,255,255,.68)}
 /* 자녀 전환기 (양육자 전용) */
 #child-switcher{display:none;align-items:center}
-.child-sw-toggle{display:flex;background:rgba(255,255,255,.2);border-radius:999px;padding:2px;gap:0}
-.child-sw-btn{background:none;border:none;color:rgba(255,255,255,.8);font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;cursor:pointer;white-space:nowrap;transition:background .2s,color .2s;font-family:inherit;line-height:1.4}
+.child-sw-toggle{display:flex;background:rgba(255,255,255,.2);border-radius:999px;padding:1.5px;gap:0}
+.child-sw-btn{background:none;border:none;color:rgba(255,255,255,.8);font-size:11px;font-weight:700;padding:2px 9px;border-radius:999px;cursor:pointer;white-space:nowrap;transition:background .2s,color .2s;font-family:inherit;line-height:1.2}
 .child-sw-btn.on{background:rgba(255,255,255,.95);color:#5B21B6}
 .child-sw-select{background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.35);border-radius:20px;color:#fff;font-size:11px;font-weight:700;padding:3px 20px 3px 8px;font-family:inherit;cursor:pointer;outline:none;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center}
 .child-sw-select option{background:#4B5563;color:#fff}
@@ -13774,14 +13774,23 @@ async function checkUrlParams(){
     const token=params.get('token')||'';
     const targetMid=params.get('mid')||'';
     const isAuto=params.get('auto')==='1';
+    console.log('[invite] params:', {familyId, token:token.slice(0,8)+'...', targetMid, isAuto});
 
     // URL 정리 (params는 이미 읽음)
     window.history.replaceState({_tm:3},'',window.location.pathname);
 
     try{
       const docPath=_ENV==='dev'?`dev_${familyId}`:familyId;
+      console.log('[invite] docPath:', docPath, '_firebaseReady:', _firebaseReady, 'db:', !!db);
       const fDoc=getFamilyDoc(docPath);
+      console.log('[invite] fDoc:', fDoc, 'isRef:', fDoc&&typeof fDoc.path==='string');
+      if(!fDoc || !fDoc.path){
+        console.error('[invite] getFamilyDoc returned invalid ref:', fDoc);
+        toast('❌ Firebase가 준비되지 않았어요. 페이지를 새로고침해주세요.');
+        return;
+      }
       const snap=await getDoc(fDoc);
+      console.log('[invite] snap exists:', snap.exists());
       if(!snap.exists()){toast('❌ 유효하지 않은 초대 링크예요');return;}
 
       const data=snap.data();
@@ -13866,8 +13875,13 @@ async function checkUrlParams(){
       document.getElementById('join-reg-id').value='';
       document.getElementById('join-reg-id').placeholder='아이디 (4자 이상)';
     }catch(e){
-      console.error('Invite link error:',e);
-      toast('❌ 초대 링크 처리에 실패했어요');
+      console.error('[invite] ERROR:', e, e?.message, e?.code, e?.stack);
+      const errMsg = e?.code==='permission-denied' ? '접근 권한이 없습니다' :
+                     e?.code==='not-found' ? '가족 데이터를 찾을 수 없습니다' :
+                     e?.message || '알 수 없는 오류';
+      // 에러 발생 시: 에러 정보를 명확하게 표시하고 재시도 안내
+      toast('❌ 초대 링크 처리 실패: ' + errMsg);
+      console.error('[invite] Full error detail for debugging:', JSON.stringify({code:e?.code,message:e?.message,name:e?.name}));
     }
     return;
   }
@@ -13979,6 +13993,12 @@ function reallyGoTab(tab){
   }else{
     stopMyAvatarMoodLoop();
     stopMyFamilyMoodAnimations();
+  }
+
+  // 관리자 탭 진입 시: 프로필 사진 및 자녀 선택기 갱신
+  if(tab==='adm'){
+    renderAdmMemberPhotos();
+    renderAdmChildSelector();
   }
 
   // 탭별 상단바 색상 변경 (아이폰 사파리)
@@ -15383,16 +15403,33 @@ window._createState = _createState;
   // ── 초대 링크가 있으면 먼저 처리 (checkAuth보다 선행) ──
   const _urlParams = new URLSearchParams(window.location.search);
   const _hasInvite = !!_urlParams.get('invite');
-  if(_hasInvite && _firebaseReady){
-    await checkUrlParams();
-    // checkUrlParams가 join-register 등 auth 화면을 이미 띄웠으면 checkAuth 건너뛰기
-    const joinScreen = document.getElementById('auth-join-register');
-    const autoScreen = document.getElementById('auth-join-select');
-    if((joinScreen && !joinScreen.classList.contains('hidden')) ||
-       (autoScreen && !autoScreen.classList.contains('hidden')) || currentUser){
-      // 초대 처리 완료 — checkAuth 건너뛰기
-      console.log('[mile.ly] Invite link handled, skipping checkAuth');
+  console.log('[boot] invite check:', {_hasInvite, _firebaseReady, search: window.location.search});
+  if(_hasInvite){
+    if(!_firebaseReady){
+      // Firebase 초기화 실패했지만 초대 링크가 있음 — 재시도
+      console.warn('[boot] Firebase not ready for invite link, retrying...');
+      showLoading('초대 링크 처리 중...');
+      await _initFirebase();
+      hideLoading();
+    }
+    if(_firebaseReady){
+      await checkUrlParams();
+      // checkUrlParams가 join-register 등 auth 화면을 이미 띄웠으면 checkAuth 건너뛰기
+      const joinScreen = document.getElementById('auth-join-register');
+      const autoScreen = document.getElementById('auth-join-select');
+      const joinVisible = joinScreen && !joinScreen.classList.contains('hidden');
+      const autoVisible = autoScreen && !autoScreen.classList.contains('hidden');
+      console.log('[boot] after invite:', {joinVisible, autoVisible, currentUser});
+      if(joinVisible || autoVisible || currentUser){
+        // 초대 처리 완료 — checkAuth 건너뛰기
+        console.log('[mile.ly] Invite link handled, skipping checkAuth');
+      } else {
+        console.warn('[boot] Invite flow did not show auth screen — falling back to checkAuth');
+        checkAuth();
+      }
     } else {
+      console.error('[boot] Firebase still not ready after retry — cannot process invite');
+      toast('⚠️ 서버 연결에 실패했어요. 인터넷 연결 후 링크를 다시 눌러주세요.');
       checkAuth();
     }
   } else {
