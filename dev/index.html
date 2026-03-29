@@ -13521,6 +13521,7 @@ function handleRewardAction(action){
   _currentRecvMsg=null; // closeRecvMsg에서 중복 save 방지
   document.getElementById('recv-msg-bg').style.display='none';
   document.getElementById('recv-msg-pop').style.display='none';
+  unlockBodyScroll(); // 팝업 닫을 때 스크롤 잠금 해제 필수
   if(action==='approve'){
     approveRewardRequest(reqId,currentUser);
   }else{
