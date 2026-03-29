@@ -2825,7 +2825,7 @@ button:disabled {
         <div class="toss-slide-content">
           <div class="toss-question">이름을<br>알려주세요</div>
           <div class="toss-desc">앱에서 표시될 이름이에요</div>
-          <input type="text" class="toss-input" id="create-my-name" placeholder="예: 효신, 은혜" maxlength="10" autocomplete="name" inputmode="text">
+          <input type="text" class="toss-input" id="create-my-name" placeholder="예: 효신, 은혜" maxlength="10" autocomplete="name" inputmode="text" lang="ko">
           <div class="auth-error" id="c1-name-error" style="margin-top:10px"></div>
         </div>
         <div class="toss-cta">
@@ -2865,7 +2865,7 @@ button:disabled {
 
           <div class="toss-question">가족 이름을<br>정해주세요</div>
           <div class="toss-desc">우리 가족만의 특별한 이름을 만들어봐요</div>
-          <input type="text" class="toss-input" id="create-family-name" placeholder="예: 태민이네, 곽씨 패밀리" maxlength="20" inputmode="text" oninput="updateFamilyNamePreview(this.value)">
+          <input type="text" class="toss-input" id="create-family-name" placeholder="예: 태민이네, 곽씨 패밀리" maxlength="20" inputmode="text" lang="ko" oninput="updateFamilyNamePreview(this.value)">
           <div class="family-name-preview" id="family-name-preview" style="display:none;margin-top:12px"></div>
           <div class="auth-error" id="create2-error" style="margin-top:10px"></div>
         </div>
@@ -3537,7 +3537,7 @@ button:disabled {
             <div class="adm-row" id="custom-msg-row" style="display:none;flex-direction:column;align-items:stretch;gap:8px">
               <div class="adm-row-l" style="width:100%"><div class="adm-row-nm">직접 메시지 입력</div></div>
               <div style="display:flex;gap:8px">
-                <input class="txt-inp" id="custom-msg-inp" type="text" placeholder="오늘도 화이팅! 💪" maxlength="50">
+                <input class="txt-inp" id="custom-msg-inp" type="text" placeholder="오늘도 화이팅! 💪" maxlength="50" inputmode="text" lang="ko">
                 <button class="btn-sm" onclick="saveCustomMsg()">저장</button>
               </div>
             </div>
@@ -3650,7 +3650,7 @@ button:disabled {
       <div class="adm-sec-lbl">새 구성원 추가</div>
       <div class="adm-card" style="padding:14px">
         <div style="display:flex;flex-direction:column;gap:8px">
-          <input type="text" class="txt-inp" id="new-member-name" placeholder="이름 (최대 10자)" maxlength="10" style="width:100%">
+          <input type="text" class="txt-inp" id="new-member-name" placeholder="이름 (최대 10자)" maxlength="10" style="width:100%" inputmode="text" lang="ko">
           <select id="new-member-role" style="width:100%;padding:10px 12px;border:1.5px solid var(--bdr);border-radius:9px;font-size:14px;font-weight:700;background:var(--bg);color:var(--tx);font-family:inherit;box-sizing:border-box">
             <optgroup label="양육자 (어른)">
               <option value="dad">아빠</option>
@@ -3846,8 +3846,8 @@ button:disabled {
         <label>아이콘</label>
         <div class="ep" onclick="openEP('act')"><span id="act-e">⭐</span><span class="ep-hint">탭해서 선택</span></div>
       </div>
-      <div class="field"><label>활동 이름 *</label><input id="act-name" placeholder="예: 피아노 연습" maxlength="20"></div>
-      <div class="field"><label>설명</label><input id="act-desc" placeholder="예: 30분 이상 연습"></div>
+      <div class="field"><label>활동 이름 *</label><input id="act-name" placeholder="예: 피아노 연습" maxlength="20" inputmode="text" lang="ko"></div>
+      <div class="field"><label>설명</label><input id="act-desc" placeholder="예: 30분 이상 연습" inputmode="text" lang="ko"></div>
       <div class="field"><label>마일리지 (1회당)</label><input id="act-pts" type="number" value="20" min="1" max="999"></div>
       <div class="field">
         <label>하루 최대 수행 횟수</label>
@@ -3904,7 +3904,7 @@ button:disabled {
         <label>아이콘</label>
         <div class="ep" onclick="openEP('rwd')"><span id="rwd-e">🎁</span><span class="ep-hint">탭해서 선택</span></div>
       </div>
-      <div class="field"><label>보상 이름 *</label><input id="rwd-name" placeholder="예: 놀이공원 가기" maxlength="20"></div>
+      <div class="field"><label>보상 이름 *</label><input id="rwd-name" placeholder="예: 놀이공원 가기" maxlength="20" inputmode="text" lang="ko"></div>
       <div class="field"><label>필요 마일리지</label><input id="rwd-pts" type="number" value="500" min="1"></div>
       <div class="field">
         <label>목표 보상 설정</label>
@@ -3931,7 +3931,7 @@ button:disabled {
         </div>
         <div class="field" style="margin-top:8px">
           <label>이벤트 이름 (선택)</label>
-          <input type="text" class="txt-inp" id="rwd-sale-label" placeholder="예: 봄맞이 할인" maxlength="20">
+          <input type="text" class="txt-inp" id="rwd-sale-label" placeholder="예: 봄맞이 할인" maxlength="20" inputmode="text" lang="ko">
         </div>
       </div>
       <div class="field" id="rwd-child-field" style="display:none">
@@ -4081,7 +4081,7 @@ button:disabled {
       <button class="msg-emo-btn" data-emotion="laugh" onclick="selectMsgEmotion(this,'laugh')">😂</button>
     </div>
   </div>
-  <textarea class="msg-input" id="msg-input" placeholder="메시지를 입력하세요..." maxlength="200" rows="3"></textarea>
+  <textarea class="msg-input" id="msg-input" placeholder="메시지를 입력하세요..." maxlength="200" rows="3" lang="ko"></textarea>
   <button class="msg-send-btn" onclick="sendFamilyMsg()">보내기</button>
 </div>
 
@@ -5166,7 +5166,7 @@ function openNodeForm(idx){
   overlay.innerHTML=`<div class="node-form-modal">
     <h3 style="font-size:16px;font-weight:800;margin-bottom:16px;color:var(--tx)">${isSelf?'내 정보 수정':'구성원 등록'}</h3>
     ${roleHtml}
-    <input type="text" id="node-name" placeholder="이름" value="${m.name}" maxlength="10" style="width:100%;padding:10px;border-radius:8px;border:2px solid var(--bdr);background:var(--bg2);font-size:14px;font-weight:600;color:var(--tx);margin-bottom:12px;font-family:inherit;box-sizing:border-box">
+    <input type="text" id="node-name" placeholder="이름" value="${m.name}" maxlength="10" inputmode="text" lang="ko" style="width:100%;padding:10px;border-radius:8px;border:2px solid var(--bdr);background:var(--bg2);font-size:14px;font-weight:600;color:var(--tx);margin-bottom:12px;font-family:inherit;box-sizing:border-box">
     <div id="node-child-fields" style="display:${isChildRole?'block':'none'}">
       <label style="display:block;font-size:13px;font-weight:700;color:var(--tx3);margin-bottom:4px;text-align:left">생년월일</label>
       <input type="date" id="node-birthdate" value="${m.birthDate||''}" placeholder="생년월일" style="width:100%;padding:10px;border-radius:8px;border:2px solid var(--bdr);background:var(--bg2);font-size:13px;font-weight:600;color:var(--tx);margin-bottom:12px;font-family:inherit;box-sizing:border-box;height:42px;line-height:20px;-webkit-appearance:none;appearance:none">
@@ -9892,7 +9892,7 @@ function renderAdmSettings(){
           </select>
         </div>
         <div id="greeting-manual-${userId}" style="display:${gr.mode==='manual'?'block':'none'};padding:0 14px 12px">
-          <input class="txt-inp" id="greeting-custom-${userId}" type="text" placeholder="인사말을 입력하세요" maxlength="50" value="${gr.custom||''}" style="width:100%;box-sizing:border-box;margin-bottom:8px">
+          <input class="txt-inp" id="greeting-custom-${userId}" type="text" placeholder="인사말을 입력하세요" maxlength="50" value="${gr.custom||''}" inputmode="text" lang="ko" style="width:100%;box-sizing:border-box;margin-bottom:8px">
           <button class="btn-sm" onclick="saveGreetingCustom('${userId}')">저장</button>
         </div>
         ${gr.mode==='auto'?`<div style="font-size:13px;color:var(--tx3);padding:0 14px 12px;word-break:keep-all;overflow-wrap:break-word;line-height:1.5">현재: "${getCurrentGreeting(userId)}"</div>`:''}
@@ -10258,7 +10258,7 @@ function openBubbleInput(actId){
   ov.className='bbl-input-overlay';
   ov.innerHTML=`<div class="bbl-input-box">
     <h4><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-3px;margin-right:4px"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>말풍선 메시지</h4>
-    <input id="bbl-msg-inp" type="text" placeholder="짧은 메시지를 남겨봐요" maxlength="15" autocomplete="off">
+    <input id="bbl-msg-inp" type="text" placeholder="짧은 메시지를 남겨봐요" maxlength="15" autocomplete="off" inputmode="text" lang="ko">
     <div class="bbl-char-count"><span id="bbl-char-cnt">0</span>/15</div>
     <div class="bbl-input-btns">
       <button class="bbl-cancel">취소</button>
@@ -10966,7 +10966,7 @@ function editFamilyMember(memberId) {
       <div style="font-size:17px;font-weight:900;color:var(--tx);margin-bottom:20px">구성원 정보 수정</div>
       <div style="margin-bottom:12px">
         <div style="font-size:13px;font-weight:700;color:var(--tx2);margin-bottom:6px">이름</div>
-        <input type="text" id="fem-name" value="${m.name||''}" maxlength="10" placeholder="이름" style="width:100%;padding:10px 12px;border:1.5px solid var(--bdr);border-radius:10px;font-size:15px;font-weight:700;background:var(--bg2);color:var(--tx);font-family:inherit;box-sizing:border-box">
+        <input type="text" id="fem-name" value="${m.name||''}" maxlength="10" placeholder="이름" inputmode="text" lang="ko" style="width:100%;padding:10px 12px;border:1.5px solid var(--bdr);border-radius:10px;font-size:15px;font-weight:700;background:var(--bg2);color:var(--tx);font-family:inherit;box-sizing:border-box">
       </div>
       <div style="margin-bottom:20px">
         <div style="font-size:13px;font-weight:700;color:var(--tx2);margin-bottom:6px">생년월일 <span style="font-size:12px;font-weight:600;color:var(--tx3)">(선택)</span></div>
@@ -11433,7 +11433,7 @@ function openBadgeForm(editId){
     <div style="display:flex;flex-direction:column;gap:12px">
       <div>
         <label style="font-size:13px;font-weight:700;color:var(--tx3)">뱃지 이름</label>
-        <input id="bf-name" class="txt-inp" type="text" placeholder="예: 특별한 날" maxlength="20" value="${existing?.name||''}" style="margin-top:4px;width:100%;box-sizing:border-box" oninput="updateBadgePreview()">
+        <input id="bf-name" class="txt-inp" type="text" placeholder="예: 특별한 날" maxlength="20" value="${existing?.name||''}" inputmode="text" lang="ko" style="margin-top:4px;width:100%;box-sizing:border-box" oninput="updateBadgePreview()">
       </div>
       <div style="display:flex;gap:10px">
         <div style="flex:1">
@@ -11447,7 +11447,7 @@ function openBadgeForm(editId){
       </div>
       <div>
         <label style="font-size:13px;font-weight:700;color:var(--tx3)">설명</label>
-        <input id="bf-desc" class="txt-inp" type="text" placeholder="뱃지 설명" maxlength="50" value="${existing?.desc||''}" style="margin-top:4px;width:100%;box-sizing:border-box">
+        <input id="bf-desc" class="txt-inp" type="text" placeholder="뱃지 설명" maxlength="50" value="${existing?.desc||''}" inputmode="text" lang="ko" style="margin-top:4px;width:100%;box-sizing:border-box">
       </div>
       <div style="display:flex;gap:10px">
         <div style="flex:1">
@@ -11478,7 +11478,7 @@ function openBadgeForm(editId){
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#6366F1" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
           SVG 아이콘 <span id="bf-icon-selected" style="color:#6366F1;font-weight:900">${selIcon?'✓ '+selIcon:''}</span>
         </label>
-        <input id="bf-icon-search" class="txt-inp" type="text" placeholder="아이콘 검색 (star, heart, book...)" style="margin-top:6px;margin-bottom:6px;font-size:13px;width:100%;box-sizing:border-box" oninput="filterBadgeIcons(this.value)">
+        <input id="bf-icon-search" class="txt-inp" type="text" placeholder="아이콘 검색 (star, heart, book...)" inputmode="latin" autocapitalize="none" style="margin-top:6px;margin-bottom:6px;font-size:13px;width:100%;box-sizing:border-box" oninput="filterBadgeIcons(this.value)">
         <div id="badge-icon-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(40px,1fr));gap:4px;max-height:150px;overflow-y:auto;padding:6px;border:1.5px solid var(--bdr);border-radius:10px;background:var(--bg)">${iconGridHTML}</div>
         <input type="hidden" id="bf-icon-val" value="${selIcon}">
         <div style="margin-top:10px">
