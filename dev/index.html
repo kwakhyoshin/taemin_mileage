@@ -206,11 +206,11 @@ body.dark .toss-invite-share-btn{background:rgba(99,102,241,.2);color:#818CF8}
 body.dark .ins-card-1{background:rgba(99,102,241,.09)}
 body.dark .ins-card-2{background:rgba(236,72,153,.08)}
 body.dark .ins-card-3{background:rgba(245,158,11,.08)}
-.ins-illust{width:220px;height:220px;margin-bottom:20px;flex-shrink:0}
+.ins-illust{width:min(260px,65vw);height:min(320px,50vh);margin-bottom:16px;flex-shrink:0;filter:drop-shadow(0 8px 24px rgba(0,0,0,.12))}
 .ins-illust svg{width:100%;height:100%}
-.ins-keyword{font-size:26px;font-weight:900;color:#1E293B;text-align:center;line-height:1.35;letter-spacing:-.5px;margin-bottom:10px}
-.ins-sub{font-size:14px;color:#64748B;text-align:center;font-weight:600;line-height:1.6}
-.ins-evidence{font-size:12px;color:#94A3B8;text-align:center;font-weight:500;margin-top:6px;font-style:italic}
+.ins-keyword{font-size:24px;font-weight:900;color:#1E293B;text-align:center;line-height:1.35;letter-spacing:-.5px;margin-bottom:8px}
+.ins-sub{font-size:13px;color:#64748B;text-align:center;font-weight:600;line-height:1.6}
+.ins-evidence{font-size:11px;color:#94A3B8;text-align:center;font-weight:500;margin-top:5px;font-style:italic}
 body.dark .ins-keyword{color:#F1F5F9}
 body.dark .ins-sub{color:#94A3B8}
 body.dark .ins-evidence{color:#64748B}
@@ -2527,38 +2527,55 @@ button:disabled {
       <!-- Card 1: 매일 작은 활동이 습관이 돼요 -->
       <div class="ins-card ins-card-1">
         <div class="ins-illust">
-          <svg viewBox="0 0 280 280" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <!-- Phone frame -->
-            <rect x="50" y="10" width="180" height="260" rx="28" fill="#fff" stroke="#E2E8F0" stroke-width="2"/>
-            <rect x="50" y="10" width="180" height="42" rx="28" fill="#6366F1"/>
-            <rect x="98" y="26" width="84" height="10" rx="5" fill="#A5B4FC" opacity=".6"/>
-            <!-- Activity row 1: completed (green check) -->
-            <rect x="66" y="66" width="148" height="44" rx="14" fill="#F0FDF4" stroke="#BBF7D0" stroke-width="1.5"/>
-            <circle cx="90" cy="88" r="12" fill="#22C55E"/>
-            <path d="M84 88l4 4 8-8" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-            <rect x="110" y="80" width="72" height="7" rx="3.5" fill="#86EFAC"/>
-            <rect x="110" y="91" width="52" height="5" rx="2.5" fill="#D1FAE5"/>
-            <!-- +10 badge -->
-            <rect x="188" y="76" width="32" height="18" rx="9" fill="#6366F1"/>
-            <text x="204" y="89" fill="#fff" font-size="10" font-weight="900" text-anchor="middle">+10</text>
-            <!-- Activity row 2: completed -->
-            <rect x="66" y="118" width="148" height="44" rx="14" fill="#F0FDF4" stroke="#BBF7D0" stroke-width="1.5"/>
-            <circle cx="90" cy="140" r="12" fill="#22C55E"/>
-            <path d="M84 140l4 4 8-8" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-            <rect x="110" y="132" width="80" height="7" rx="3.5" fill="#86EFAC"/>
-            <rect x="110" y="143" width="58" height="5" rx="2.5" fill="#D1FAE5"/>
-            <rect x="188" y="128" width="32" height="18" rx="9" fill="#6366F1"/>
-            <text x="204" y="141" fill="#fff" font-size="10" font-weight="900" text-anchor="middle">+5</text>
-            <!-- Activity row 3: pending -->
-            <rect x="66" y="170" width="148" height="44" rx="14" fill="#fff" stroke="#E2E8F0" stroke-width="1.5"/>
-            <circle cx="90" cy="192" r="12" fill="none" stroke="#CBD5E1" stroke-width="2"/>
-            <rect x="110" y="184" width="64" height="7" rx="3.5" fill="#E2E8F0"/>
-            <rect x="110" y="195" width="46" height="5" rx="2.5" fill="#F1F5F9"/>
-            <!-- Bottom mileage bar -->
-            <rect x="66" y="228" width="148" height="30" rx="15" fill="#EEF2FF"/>
-            <rect x="66" y="228" width="98" height="30" rx="15" fill="#6366F1"/>
-            <text x="115" y="248" fill="#fff" font-size="11" font-weight="800" text-anchor="middle">505 M</text>
-            <text x="194" y="248" fill="#6366F1" font-size="10" font-weight="700" text-anchor="middle">66%</text>
+          <svg viewBox="0 0 240 360" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Phone shell -->
+            <rect x="16" y="4" width="208" height="352" rx="32" fill="#EEF2F7" stroke="#D1D5DB" stroke-width="1.5"/>
+            <!-- Screen -->
+            <rect x="20" y="8" width="200" height="344" rx="30" fill="#EEF2F7"/>
+            <!-- Header: gradient like real app -->
+            <defs><linearGradient id="h1g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#5457D9"/><stop offset="100%" stop-color="#727BE0"/></linearGradient></defs>
+            <path d="M20 38 Q20 8 50 8 H190 Q220 8 220 38 V100 Q220 100 210 116 Q170 108 120 112 Q70 116 30 108 Q20 100 20 100 Z" fill="url(#h1g)"/>
+            <circle cx="120" cy="72" r="0" fill="#fff" opacity=".08"/>
+            <text x="120" y="42" fill="#fff" font-size="12" font-weight="900" text-anchor="middle" opacity=".9">홈</text>
+            <!-- Mileage hero -->
+            <text x="120" y="72" fill="#fff" font-size="28" font-weight="900" text-anchor="middle">505</text>
+            <text x="120" y="88" fill="#C7D2FE" font-size="10" font-weight="700" text-anchor="middle">마일리지</text>
+            <!-- Section title -->
+            <text x="36" y="134" fill="#0F172A" font-size="11" font-weight="900">오늘의 활동</text>
+            <!-- Activity grid: 2x2 cards like real app -->
+            <!-- Card 1: done -->
+            <rect x="28" y="142" width="88" height="82" rx="14" fill="#F0FDF4" stroke="#BBF7D0" stroke-width="1"/>
+            <text x="72" y="168" fill="#0F172A" font-size="22" text-anchor="middle">📖</text>
+            <text x="72" y="184" fill="#059669" font-size="9" font-weight="800" text-anchor="middle">책 읽기</text>
+            <text x="72" y="198" fill="#059669" font-size="9" font-weight="700" text-anchor="middle">+10M ✓</text>
+            <!-- progress bar done -->
+            <rect x="38" y="206" width="68" height="5" rx="2.5" fill="#BBF7D0"/>
+            <rect x="38" y="206" width="68" height="5" rx="2.5" fill="#22C55E"/>
+            <!-- Card 2: done -->
+            <rect x="124" y="142" width="88" height="82" rx="14" fill="#F0FDF4" stroke="#BBF7D0" stroke-width="1"/>
+            <text x="168" y="168" fill="#0F172A" font-size="22" text-anchor="middle">🏃</text>
+            <text x="168" y="184" fill="#059669" font-size="9" font-weight="800" text-anchor="middle">운동하기</text>
+            <text x="168" y="198" fill="#059669" font-size="9" font-weight="700" text-anchor="middle">+5M ✓</text>
+            <rect x="134" y="206" width="68" height="5" rx="2.5" fill="#BBF7D0"/>
+            <rect x="134" y="206" width="68" height="5" rx="2.5" fill="#22C55E"/>
+            <!-- Card 3: partial (orange) -->
+            <rect x="28" y="232" width="88" height="82" rx="14" fill="#FFF7ED" stroke="#FED7AA" stroke-width="1"/>
+            <text x="72" y="258" fill="#0F172A" font-size="22" text-anchor="middle">🎹</text>
+            <text x="72" y="274" fill="#D97706" font-size="9" font-weight="800" text-anchor="middle">피아노 연습</text>
+            <text x="72" y="288" fill="#D97706" font-size="9" font-weight="700" text-anchor="middle">1/2회</text>
+            <rect x="38" y="296" width="68" height="5" rx="2.5" fill="#FED7AA"/>
+            <rect x="38" y="296" width="34" height="5" rx="2.5" fill="#F59E0B"/>
+            <!-- Card 4: pending -->
+            <rect x="124" y="232" width="88" height="82" rx="14" fill="#fff" stroke="#E2E8F0" stroke-width="1"/>
+            <text x="168" y="258" fill="#0F172A" font-size="22" text-anchor="middle">✏️</text>
+            <text x="168" y="274" fill="#0F172A" font-size="9" font-weight="800" text-anchor="middle">일기 쓰기</text>
+            <text x="168" y="288" fill="#6366F1" font-size="9" font-weight="700" text-anchor="middle">+5M</text>
+            <rect x="134" y="296" width="68" height="5" rx="2.5" fill="#E2E8F0"/>
+            <!-- Bottom nav pill -->
+            <rect x="42" y="326" width="156" height="24" rx="12" fill="#fff" stroke="#E2E8F0" stroke-width="1"/>
+            <circle cx="78" cy="338" r="4" fill="#5457D9"/>
+            <circle cx="120" cy="338" r="4" fill="#CBD5E1"/>
+            <circle cx="162" cy="338" r="4" fill="#CBD5E1"/>
           </svg>
         </div>
         <div class="ins-keyword">매일 작은 활동이<br>습관이 돼요</div>
@@ -2568,28 +2585,48 @@ button:disabled {
       <!-- Card 2: 가족이 함께하면 동기부여가 달라져요 -->
       <div class="ins-card ins-card-2">
         <div class="ins-illust">
-          <svg viewBox="0 0 280 280" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <!-- Phone frame -->
-            <rect x="50" y="10" width="180" height="260" rx="28" fill="#fff" stroke="#E2E8F0" stroke-width="2"/>
-            <rect x="50" y="10" width="180" height="42" rx="28" fill="#EC4899"/>
-            <rect x="88" y="26" width="104" height="10" rx="5" fill="#FBCFE8" opacity=".6"/>
-            <!-- Family message bubble 1 (parent) -->
-            <rect x="66" y="68" width="130" height="50" rx="16" fill="#FCE7F3"/>
-            <circle cx="82" cy="80" r="10" fill="#EC4899"/>
-            <text x="96" y="83" fill="#BE185D" font-size="9" font-weight="700">엄마</text>
-            <text x="78" y="103" fill="#9D174D" font-size="10" font-weight="600">오늘도 잘했어! 최고야 👏</text>
-            <!-- Family message bubble 2 (child) -->
-            <rect x="84" y="126" width="130" height="50" rx="16" fill="#FEF3C7"/>
-            <circle cx="198" cy="138" r="10" fill="#F59E0B"/>
-            <text x="174" y="141" fill="#92400E" font-size="9" font-weight="700">태민</text>
-            <text x="96" y="161" fill="#78350F" font-size="10" font-weight="600">감사해요! 내일도 할게요 💪</text>
-            <!-- Heart reactions floating -->
-            <path d="M224 100 C224 96 228.5 94 228.5 98 C228.5 94 233 96 233 100 C233 106 228.5 109 228.5 109 C228.5 109 224 106 224 100Z" fill="#F472B6" opacity=".7"/>
-            <path d="M60 148 C60 145 63.5 143.5 63.5 146.5 C63.5 143.5 67 145 67 148 C67 153 63.5 155.5 63.5 155.5 C63.5 155.5 60 153 60 148Z" fill="#F472B6" opacity=".5"/>
-            <!-- Badge earned notification -->
-            <rect x="66" y="190" width="148" height="56" rx="18" fill="#FDF2F8" stroke="#FBCFE8" stroke-width="1.5"/>
-            <text x="140" y="212" fill="#BE185D" font-size="11" font-weight="900" text-anchor="middle">🏅 가족 응원왕 뱃지 획득!</text>
-            <text x="140" y="230" fill="#9D174D" font-size="9.5" font-weight="600" text-anchor="middle">가족 메시지 10개 달성</text>
+          <svg viewBox="0 0 240 360" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Phone shell -->
+            <rect x="16" y="4" width="208" height="352" rx="32" fill="#FFF" stroke="#D1D5DB" stroke-width="1.5"/>
+            <rect x="20" y="8" width="200" height="344" rx="30" fill="#FFF8F0"/>
+            <!-- Header -->
+            <defs><linearGradient id="h2g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#EC4899"/><stop offset="100%" stop-color="#F472B6"/></linearGradient></defs>
+            <path d="M20 38 Q20 8 50 8 H190 Q220 8 220 38 V72 Q220 82 210 86 Q170 80 120 82 Q70 84 30 80 Q20 82 20 72 Z" fill="url(#h2g)"/>
+            <text x="120" y="38" fill="#fff" font-size="12" font-weight="900" text-anchor="middle" opacity=".9">우리가족</text>
+            <text x="120" y="60" fill="#fff" font-size="10" font-weight="600" text-anchor="middle" opacity=".8">가족 메시지</text>
+            <!-- Family avatars row -->
+            <circle cx="66" cy="102" r="16" fill="#EC4899"/>
+            <text x="66" y="107" fill="#fff" font-size="9" font-weight="800" text-anchor="middle">엄마</text>
+            <circle cx="120" cy="102" r="16" fill="#6366F1"/>
+            <text x="120" y="107" fill="#fff" font-size="9" font-weight="800" text-anchor="middle">아빠</text>
+            <circle cx="174" cy="102" r="16" fill="#F59E0B"/>
+            <text x="174" y="107" fill="#fff" font-size="9" font-weight="800" text-anchor="middle">태민</text>
+            <!-- Message from 엄마 (left aligned) -->
+            <circle cx="42" cy="140" r="10" fill="#EC4899"/>
+            <text x="42" y="144" fill="#fff" font-size="7" font-weight="800" text-anchor="middle">엄</text>
+            <rect x="56" y="132" width="130" height="38" rx="14" fill="#FCE7F3"/>
+            <text x="66" y="148" fill="#9D174D" font-size="9" font-weight="700">오늘 책읽기 잘했네! 👏</text>
+            <text x="66" y="162" fill="#BE185D" font-size="8" font-weight="600">엄마가 응원할게 💕</text>
+            <!-- Message from 아빠 (left aligned) -->
+            <circle cx="42" cy="190" r="10" fill="#6366F1"/>
+            <text x="42" y="194" fill="#fff" font-size="7" font-weight="800" text-anchor="middle">아</text>
+            <rect x="56" y="182" width="122" height="28" rx="14" fill="#EEF2FF"/>
+            <text x="66" y="200" fill="#312E81" font-size="9" font-weight="700">우리 태민 최고! 화이팅 💪</text>
+            <!-- Message from 태민 (right aligned) -->
+            <rect x="64" y="222" width="132" height="38" rx="14" fill="#FEF3C7"/>
+            <circle cx="204" cy="230" r="10" fill="#F59E0B"/>
+            <text x="204" y="234" fill="#fff" font-size="7" font-weight="800" text-anchor="middle">태</text>
+            <text x="76" y="238" fill="#78350F" font-size="9" font-weight="700">감사합니다! 😊</text>
+            <text x="76" y="252" fill="#92400E" font-size="8" font-weight="600">내일은 운동도 할게요!</text>
+            <!-- Unread badge notification -->
+            <rect x="36" y="274" width="168" height="40" rx="14" fill="#FDF2F8" stroke="#FBCFE8" stroke-width="1"/>
+            <text x="120" y="292" fill="#BE185D" font-size="10" font-weight="900" text-anchor="middle">🏅 가족 응원왕 뱃지 획득!</text>
+            <text x="120" y="306" fill="#9D174D" font-size="8" font-weight="600" text-anchor="middle">가족 메시지 10개 달성</text>
+            <!-- Bottom nav pill -->
+            <rect x="42" y="326" width="156" height="24" rx="12" fill="#fff" stroke="#E2E8F0" stroke-width="1"/>
+            <circle cx="78" cy="338" r="4" fill="#CBD5E1"/>
+            <circle cx="120" cy="338" r="4" fill="#CBD5E1"/>
+            <circle cx="162" cy="338" r="4" fill="#CBD5E1"/>
           </svg>
         </div>
         <div class="ins-keyword">가족이 함께하면<br>동기부여가 달라져요</div>
@@ -2599,37 +2636,49 @@ button:disabled {
       <!-- Card 3: 마일리지로 성취감을 느껴요 -->
       <div class="ins-card ins-card-3">
         <div class="ins-illust">
-          <svg viewBox="0 0 280 280" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <!-- Phone frame -->
-            <rect x="50" y="10" width="180" height="260" rx="28" fill="#fff" stroke="#E2E8F0" stroke-width="2"/>
-            <!-- Status bar (subtle, not oval) -->
-            <rect x="50" y="10" width="180" height="42" rx="28" fill="#FFFBEB"/>
-            <text x="140" y="36" fill="#92400E" font-size="11" font-weight="800" text-anchor="middle">보상</text>
-            <!-- Mileage display -->
-            <rect x="70" y="62" width="140" height="54" rx="18" fill="linear-gradient(#FEF3C7,#FFFBEB)"/>
-            <rect x="70" y="62" width="140" height="54" rx="18" fill="#FEF3C7"/>
-            <text x="140" y="86" fill="#92400E" font-size="26" font-weight="900" text-anchor="middle">505</text>
-            <text x="140" y="104" fill="#B45309" font-size="10" font-weight="700" text-anchor="middle">마일리지 보유 중</text>
-            <!-- Reward card 1: unlocked -->
-            <rect x="66" y="128" width="148" height="50" rx="14" fill="#FFFBEB" stroke="#FDE68A" stroke-width="1.5"/>
-            <rect x="74" y="138" width="30" height="30" rx="10" fill="#FDE68A"/>
-            <text x="89" y="159" fill="#92400E" font-size="16" text-anchor="middle">🎯</text>
-            <text x="114" y="148" fill="#92400E" font-size="11" font-weight="800">게임 30분</text>
-            <text x="114" y="163" fill="#22C55E" font-size="9.5" font-weight="700">교환 가능!</text>
-            <circle cx="200" cy="152" r="11" fill="#22C55E"/>
-            <path d="M195 152l3.5 3.5 7-7" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <svg viewBox="0 0 240 360" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Phone shell -->
+            <rect x="16" y="4" width="208" height="352" rx="32" fill="#fff" stroke="#D1D5DB" stroke-width="1.5"/>
+            <rect x="20" y="8" width="200" height="344" rx="30" fill="#FFFDF7"/>
+            <!-- Header -->
+            <defs><linearGradient id="h3g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#D98E09"/><stop offset="100%" stop-color="#E0A820"/></linearGradient></defs>
+            <path d="M20 38 Q20 8 50 8 H190 Q220 8 220 38 V94 Q220 104 210 108 Q170 100 120 102 Q70 104 30 100 Q20 104 20 94 Z" fill="url(#h3g)"/>
+            <text x="120" y="38" fill="#fff" font-size="12" font-weight="900" text-anchor="middle" opacity=".9">보상</text>
+            <!-- Mileage balance card -->
+            <rect x="36" y="52" width="168" height="50" rx="16" fill="rgba(255,255,255,.2)"/>
+            <text x="120" y="74" fill="#fff" font-size="22" font-weight="900" text-anchor="middle">505</text>
+            <text x="120" y="92" fill="rgba(255,255,255,.8)" font-size="9" font-weight="700" text-anchor="middle">보유 마일리지</text>
+            <!-- Reward grid: 2 columns like actual app -->
+            <text x="36" y="130" fill="#0F172A" font-size="10" font-weight="900">내 보상</text>
+            <!-- Reward card 1: redeemable -->
+            <rect x="28" y="138" width="88" height="104" rx="14" fill="#fff" stroke="#FDE68A" stroke-width="1.5"/>
+            <text x="72" y="172" fill="#0F172A" font-size="28" text-anchor="middle">🎮</text>
+            <text x="72" y="192" fill="#0F172A" font-size="9" font-weight="800" text-anchor="middle">게임 30분</text>
+            <rect x="36" y="200" width="72" height="24" rx="10" fill="#D98E09"/>
+            <text x="72" y="216" fill="#fff" font-size="9" font-weight="800" text-anchor="middle">200M 교환</text>
+            <rect x="36" y="228" width="72" height="5" rx="2.5" fill="#FDE68A"/>
+            <rect x="36" y="228" width="72" height="5" rx="2.5" fill="#22C55E"/>
             <!-- Reward card 2: progress -->
-            <rect x="66" y="186" width="148" height="50" rx="14" fill="#fff" stroke="#E2E8F0" stroke-width="1.5"/>
-            <rect x="74" y="196" width="30" height="30" rx="10" fill="#F1F5F9"/>
-            <text x="89" y="217" fill="#64748B" font-size="16" text-anchor="middle">🍦</text>
-            <text x="114" y="204" fill="#1E293B" font-size="11" font-weight="800">아이스크림</text>
-            <text x="114" y="218" fill="#94A3B8" font-size="9.5" font-weight="600">350 / 500M</text>
-            <rect x="114" y="224" width="86" height="5" rx="2.5" fill="#E2E8F0"/>
-            <rect x="114" y="224" width="60" height="5" rx="2.5" fill="#F59E0B"/>
-            <!-- Sparkle accents -->
-            <path d="M228 24 l2 6 6 2 -6 2 -2 6 -2 -6 -6 -2 6 -2z" fill="#FBBF24" opacity=".5"/>
-            <path d="M56 50 l1.5 4.5 4.5 1.5 -4.5 1.5 -1.5 4.5 -1.5 -4.5 -4.5 -1.5 4.5 -1.5z" fill="#FBBF24" opacity=".4"/>
-            <circle cx="236" cy="60" r="3" fill="#FBBF24" opacity=".35"/>
+            <rect x="124" y="138" width="88" height="104" rx="14" fill="#fff" stroke="#E2E8F0" stroke-width="1"/>
+            <text x="168" y="172" fill="#0F172A" font-size="28" text-anchor="middle">🍦</text>
+            <text x="168" y="192" fill="#0F172A" font-size="9" font-weight="800" text-anchor="middle">아이스크림</text>
+            <rect x="132" y="200" width="72" height="24" rx="10" fill="#E2E8F0"/>
+            <text x="168" y="216" fill="#64748B" font-size="9" font-weight="800" text-anchor="middle">500M 필요</text>
+            <rect x="132" y="228" width="72" height="5" rx="2.5" fill="#E2E8F0"/>
+            <rect x="132" y="228" width="50" height="5" rx="2.5" fill="#F59E0B"/>
+            <!-- Reward card 3 (partial view) -->
+            <rect x="28" y="252" width="88" height="56" rx="14" fill="#fff" stroke="#E2E8F0" stroke-width="1"/>
+            <text x="72" y="280" fill="#0F172A" font-size="28" text-anchor="middle">🎨</text>
+            <text x="72" y="298" fill="#0F172A" font-size="9" font-weight="800" text-anchor="middle">미술 용품</text>
+            <!-- Reward card 4 (partial view) -->
+            <rect x="124" y="252" width="88" height="56" rx="14" fill="#fff" stroke="#E2E8F0" stroke-width="1"/>
+            <text x="168" y="280" fill="#0F172A" font-size="28" text-anchor="middle">⚽</text>
+            <text x="168" y="298" fill="#0F172A" font-size="9" font-weight="800" text-anchor="middle">축구공</text>
+            <!-- Bottom nav pill -->
+            <rect x="42" y="326" width="156" height="24" rx="12" fill="#fff" stroke="#E2E8F0" stroke-width="1"/>
+            <circle cx="78" cy="338" r="4" fill="#CBD5E1"/>
+            <circle cx="120" cy="338" r="4" fill="#D98E09"/>
+            <circle cx="162" cy="338" r="4" fill="#CBD5E1"/>
           </svg>
         </div>
         <div class="ins-keyword">마일리지로<br>성취감을 느껴요</div>
