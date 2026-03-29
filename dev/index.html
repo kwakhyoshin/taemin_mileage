@@ -558,9 +558,8 @@ body.dark .adm-top{background:linear-gradient(180deg,#334155 0%,#475569 80%,#647
 .stat-c{flex:1;background:var(--card);border-radius:var(--rsm);padding:14px;text-align:center;transition:background .25s;box-shadow:0 2px 8px rgba(0,0,0,.04);border:.5px solid var(--bdr)}
 .stat-n{font-size:24px;font-weight:900;color:var(--tx)}
 .stat-l{font-size:14px;color:var(--tx3);font-weight:700;margin-top:4px}
-.adm-tabs{display:flex;gap:6px;margin:14px 16px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none}
-.adm-tabs::-webkit-scrollbar{display:none}
-.adm-tab{flex:0 0 auto;padding:12px 18px;background:var(--card);border-radius:var(--rsm);border:1.5px solid transparent;font-family:inherit;font-size:14px;font-weight:800;color:var(--tx2);cursor:pointer;transition:background .2s,transform .1s;white-space:nowrap;-webkit-tap-highlight-color:rgba(0,0,0,.05);display:flex;align-items:center;justify-content:center;gap:5px}
+.adm-tabs{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:14px 16px}
+.adm-tab{padding:10px 4px;background:var(--card);border-radius:var(--rsm);border:1.5px solid var(--bdr);font-family:inherit;font-size:12px;font-weight:800;color:var(--tx3);cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:rgba(0,0,0,.05);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
 .adm-tab:active{transform:scale(.95)}
 .adm-tab.on{background:var(--tab-lt,var(--or-lt));color:var(--tab-color,var(--or));border-color:var(--tab-color,var(--or))}
 .adm-sec{margin:0 16px 14px}
@@ -1212,10 +1211,10 @@ body.dark .nav-family-btn{background:rgba(99,102,241,.15)}
 body.dark .nav-child-tab{background:#1E293B}
 body.dark .nav-child-tab.active{background:rgba(99,102,241,.18)}
 /* 관리자 자녀 선택바 */
-.adm-child-sel-bar{display:flex;gap:6px;padding:8px 16px 6px;overflow-x:auto;-ms-overflow-style:none;scrollbar-width:none}
+.adm-child-sel-bar{display:flex;gap:6px;padding:6px 0 8px;overflow-x:auto;-ms-overflow-style:none;scrollbar-width:none}
 .adm-child-sel-bar::-webkit-scrollbar{display:none}
-.adm-child-btn{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:22px;border:2px solid var(--bdr,#E2E8F0);background:var(--bg2,#F8FAFC);font-size:14px;font-weight:700;color:var(--tx2,#64748B);cursor:pointer;white-space:nowrap;transition:all .2s;-webkit-tap-highlight-color:transparent;min-height:38px}
-.adm-child-btn.on{border-color:var(--or,#FF6B35);background:rgba(255,107,53,.08);color:var(--or,#FF6B35)}
+.adm-child-btn{display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:18px;border:1.5px solid var(--bdr,#E2E8F0);background:var(--bg2,#F8FAFC);font-size:13px;font-weight:700;color:var(--tx2,#64748B);cursor:pointer;white-space:nowrap;transition:all .2s;-webkit-tap-highlight-color:transparent;min-height:32px}
+.adm-child-btn.on{border-color:var(--tab-color,var(--or,#FF6B35));background:var(--tab-lt,rgba(255,107,53,.08));color:var(--tab-color,var(--or,#FF6B35))}
 .adm-child-btn:active{transform:scale(.95)}
 body.dark .adm-child-btn{background:#1E293B;border-color:#334155}
 body.dark .adm-child-btn.on{background:rgba(255,107,53,.15)}
@@ -1604,7 +1603,7 @@ body.dark .family-popup-avatar{border-color:rgba(255,255,255,.25)}
   .adm-sec{margin:0 24px 16px}
   .adm-card{border-radius:var(--rlg)}
   .adm-tabs{margin:16px 24px;gap:10px}
-  .adm-tab{padding:12px 18px;font-size:14px}
+  .adm-tab{padding:14px 6px;font-size:13px}
   .adm-row{padding:16px 18px}
 
   /* Calendar */
@@ -3377,19 +3376,14 @@ button:disabled {
   </div>
   <div id="dev-user-switch-area" style="margin:0 16px 10px"></div>
   <div class="adm-tabs">
-    <button class="adm-tab on" id="at-0" onclick="admTab(0)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="12" y2="16"/></svg> 활동</button>
-    <button class="adm-tab" id="at-1" onclick="admTab(1)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg> 보상</button>
-    <button class="adm-tab" id="at-2" onclick="admTab(2)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px"><path d="M6 9H4.5a2.5 2.5 0 010-5H6"/><path d="M18 9h1.5a2.5 2.5 0 000-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0012 0V2z"/></svg> 뱃지</button>
-    <button class="adm-tab" id="at-3" onclick="admTab(3)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg> 설정</button>
-    <button class="adm-tab" id="at-4" onclick="admTab(4)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg> 가족</button>
+    <button class="adm-tab on" id="at-0" onclick="admTab(0)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="12" y2="16"/></svg><span>활동</span></button>
+    <button class="adm-tab" id="at-1" onclick="admTab(1)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg><span>보상</span></button>
+    <button class="adm-tab" id="at-2" onclick="admTab(2)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9H4.5a2.5 2.5 0 010-5H6"/><path d="M18 9h1.5a2.5 2.5 0 000-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0012 0V2z"/></svg><span>뱃지</span></button>
+    <button class="adm-tab" id="at-3" onclick="admTab(3)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg><span>설정</span></button>
+    <button class="adm-tab" id="at-4" onclick="admTab(4)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg><span>가족</span></button>
   </div>
   <div id="adm-p0">
-    <div class="stat-row">
-      <div class="stat-c"><div class="stat-n" id="adm-pts">0</div><div class="stat-l">마일리지</div></div>
-      <div class="stat-c"><div class="stat-n" id="adm-done">0</div><div class="stat-l">완료 횟수</div></div>
-      <div class="stat-c"><div class="stat-n" id="adm-streak">0</div><div class="stat-l">연속 달성</div></div>
-    </div>
-    <div class="adm-sec" style="margin-top:14px">
+    <div class="adm-sec" style="margin-top:6px">
       <div class="adm-sec-lbl">마일리지 조정</div>
       <div class="adm-card">
         <div class="adm-row">
@@ -3405,35 +3399,35 @@ button:disabled {
         </div>
       </div>
     </div>
-    <!-- independent 모드 자녀 선택기 (renderAdmChildSelector()로 동적 렌더링) -->
-    <div id="adm-child-selector-0"></div>
     <div class="adm-sec">
       <div class="sec-hdr" style="margin:0 0 7px">
         <div class="adm-sec-lbl" style="margin:0">활동 목록</div>
         <button class="btn-sm" onclick="openActForm(null)">+ 추가</button>
       </div>
+      <!-- independent 모드 자녀 선택기 (활동 섹션 소속) -->
+      <div id="adm-child-selector-0"></div>
       <div class="adm-card" id="adm-act-list"></div>
     </div>
   </div>
   <div id="adm-p1" style="display:none">
-    <!-- independent 모드 자녀 선택기 -->
-    <div id="adm-child-selector-1"></div>
-    <div class="adm-sec">
+    <div class="adm-sec" style="margin-top:6px">
       <div class="sec-hdr" style="margin:0 0 7px">
         <div class="adm-sec-lbl" style="margin:0">보상 목록</div>
         <button class="btn-sm" onclick="openRwdForm(null)">+ 추가</button>
       </div>
+      <!-- independent 모드 자녀 선택기 (보상 섹션 소속) -->
+      <div id="adm-child-selector-1"></div>
       <div class="adm-card" id="adm-rwd-list"></div>
     </div>
   </div>
   <div id="adm-p2" style="display:none">
-    <!-- independent 모드 자녀 선택기 (뱃지) -->
-    <div id="adm-child-selector-2"></div>
-    <div class="adm-sec">
+    <div class="adm-sec" style="margin-top:6px">
       <div class="sec-hdr" style="margin:0 0 7px">
         <div class="adm-sec-lbl" style="margin:0">뱃지 목록 <span id="badge-mgr-child-name" style="font-size:12px;color:var(--tab-color,#6366F1);font-weight:700"></span></div>
         <button class="btn-sm" onclick="openBadgeForm()">+ 새 뱃지</button>
       </div>
+      <!-- independent 모드 자녀 선택기 (뱃지 섹션 소속) -->
+      <div id="adm-child-selector-2"></div>
       <div class="adm-card" style="padding:0">
         <div style="padding:10px 14px 6px;display:flex;gap:5px;flex-wrap:wrap" id="badge-mgr-filter">
           <button class="sel-btn on" data-cat="all" onclick="filterBadgeMgr('all',this)" style="font-size:13px;padding:6px 12px">전체 <span id="badge-mgr-count" style="font-weight:800"></span></button>
@@ -6152,32 +6146,32 @@ const TAB_COLORS2 = {home:'#818CF8', log:'#FB7185', rwd:'#FBBF24', hist:'#A78BFA
 
 /* CHILD THEME COLORS — 자녀 전환 시 홈 탭 색상 변경 (최소 6개, 관리자에서 변경 가능) */
 const CHILD_THEMES = [
-  // 기본 컬러
-  {id:'indigo', name:'인디고',   c1:'#4F46E5',c2:'#6366F1'},
-  {id:'blue',   name:'블루',     c1:'#2563EB',c2:'#3B82F6'},
-  {id:'sky',    name:'스카이',   c1:'#0284C7',c2:'#0EA5E9'},
-  {id:'cyan',   name:'시안',     c1:'#0891B2',c2:'#06B6D4'},
-  {id:'teal',   name:'틸',       c1:'#0D9488',c2:'#14B8A6'},
-  {id:'emerald',name:'에메랄드', c1:'#059669',c2:'#10B981'},
-  {id:'green',  name:'그린',     c1:'#16A34A',c2:'#22C55E'},
-  {id:'lime',   name:'라임',     c1:'#65A30D',c2:'#84CC16'},
-  {id:'yellow', name:'옐로',     c1:'#CA8A04',c2:'#EAB308'},
-  {id:'amber',  name:'앰버',     c1:'#D97706',c2:'#F59E0B'},
-  {id:'orange', name:'오렌지',   c1:'#EA580C',c2:'#F97316'},
-  {id:'red',    name:'레드',     c1:'#DC2626',c2:'#EF4444'},
-  {id:'rose',   name:'로즈',     c1:'#E11D48',c2:'#F43F5E'},
-  {id:'pink',   name:'핑크',     c1:'#DB2777',c2:'#EC4899'},
-  {id:'fuchsia',name:'푸시아',   c1:'#C026D3',c2:'#D946EF'},
-  {id:'purple', name:'퍼플',     c1:'#7C3AED',c2:'#8B5CF6'},
-  {id:'violet', name:'바이올렛', c1:'#6D28D9',c2:'#7C3AED'},
+  // 기본 컬러 (채도 낮춤 — 부드러운 톤)
+  {id:'indigo', name:'인디고',   c1:'#6366B0',c2:'#7C7FC5'},
+  {id:'blue',   name:'블루',     c1:'#4A7DC4',c2:'#6B9BD6'},
+  {id:'sky',    name:'스카이',   c1:'#3A95BE',c2:'#5AB0D0'},
+  {id:'cyan',   name:'시안',     c1:'#3A9AAE',c2:'#58B5C5'},
+  {id:'teal',   name:'틸',       c1:'#3D9E95',c2:'#5CB8AE'},
+  {id:'emerald',name:'에메랄드', c1:'#3D9E7A',c2:'#5CB899'},
+  {id:'green',  name:'그린',     c1:'#49A468',c2:'#66BB80'},
+  {id:'lime',   name:'라임',     c1:'#7BA63E',c2:'#96BF58'},
+  {id:'yellow', name:'옐로',     c1:'#C09530',c2:'#D4AD4A'},
+  {id:'amber',  name:'앰버',     c1:'#C88E38',c2:'#DBA550'},
+  {id:'orange', name:'오렌지',   c1:'#D07040',c2:'#E08858'},
+  {id:'red',    name:'레드',     c1:'#C45050',c2:'#D86868'},
+  {id:'rose',   name:'로즈',     c1:'#C44868',c2:'#D86080'},
+  {id:'pink',   name:'핑크',     c1:'#C45088',c2:'#D868A0'},
+  {id:'fuchsia',name:'푸시아',   c1:'#A84CAE',c2:'#C068C8'},
+  {id:'purple', name:'퍼플',     c1:'#7E5CC0',c2:'#9474D0'},
+  {id:'violet', name:'바이올렛', c1:'#7050B8',c2:'#8668C8'},
   // 특별 컬러
-  {id:'slate',  name:'슬레이트', c1:'#475569',c2:'#64748B'},
-  {id:'stone',  name:'스톤',     c1:'#78716C',c2:'#A8A29E'},
-  {id:'coral',  name:'코랄',     c1:'#F97066',c2:'#FCA5A1'},
-  {id:'mint',   name:'민트',     c1:'#2DD4BF',c2:'#5EEAD4'},
-  {id:'navy',   name:'네이비',   c1:'#1E3A5F',c2:'#2563EB'},
-  {id:'wine',   name:'와인',     c1:'#881337',c2:'#BE123C'},
-  {id:'forest', name:'포레스트', c1:'#166534',c2:'#15803D'},
+  {id:'slate',  name:'슬레이트', c1:'#5A6878',c2:'#748898'},
+  {id:'stone',  name:'스톤',     c1:'#8A8480',c2:'#AAA5A0'},
+  {id:'coral',  name:'코랄',     c1:'#D88880',c2:'#E8A8A0'},
+  {id:'mint',   name:'민트',     c1:'#50C0AE',c2:'#78D8C8'},
+  {id:'navy',   name:'네이비',   c1:'#384D6E',c2:'#4A6D98'},
+  {id:'wine',   name:'와인',     c1:'#8E3850',c2:'#A84868'},
+  {id:'forest', name:'포레스트', c1:'#357050',c2:'#488868'},
 ];
 function themeFromColor(c1){
   // c1 hex → compute c2, shadow, lt, ltDk
@@ -9779,17 +9773,7 @@ function renderHistList(){
 }
 
 function renderAdmStats(){
-  const mode=getFamilyMode();
-  let totalDone=S.totalDone;
-  let streak=getDisplayStreak();
-  // independent 모드: 관리자가 선택한 자녀의 stats 표시
-  if(mode==='independent'){
-    const admId=_admViewChildId||getViewedMemberId();
-    const ms=S.memberData?.[admId];
-    if(ms){totalDone=ms.totalDone||0;streak=ms.streak||0;}
-  }
-  document.getElementById('adm-done').textContent=totalDone;
-  document.getElementById('adm-streak').textContent=streak;
+  // stats row removed — 이 함수는 호환성을 위해 유지 (no-op)
 }
 
 // 관리자 패널 자녀 선택기 렌더링
