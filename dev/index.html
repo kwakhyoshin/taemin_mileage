@@ -6151,14 +6151,32 @@ const TAB_COLORS2 = {home:'#818CF8', log:'#FB7185', rwd:'#FBBF24', hist:'#A78BFA
 
 /* CHILD THEME COLORS — 자녀 전환 시 홈 탭 색상 변경 (최소 6개, 관리자에서 변경 가능) */
 const CHILD_THEMES = [
-  {id:'indigo', name:'인디고', c1:'#4F46E5',c2:'#6366F1'},
-  {id:'emerald',name:'에메랄드',c1:'#059669',c2:'#10B981'},
-  {id:'orange', name:'오렌지', c1:'#EA580C',c2:'#F97316'},
-  {id:'pink',   name:'핑크',   c1:'#DB2777',c2:'#EC4899'},
-  {id:'purple', name:'퍼플',   c1:'#7C3AED',c2:'#8B5CF6'},
-  {id:'teal',   name:'틸',     c1:'#0D9488',c2:'#14B8A6'},
-  {id:'rose',   name:'로즈',   c1:'#E11D48',c2:'#F43F5E'},
-  {id:'sky',    name:'스카이',  c1:'#0284C7',c2:'#0EA5E9'}
+  // 기본 컬러
+  {id:'indigo', name:'인디고',   c1:'#4F46E5',c2:'#6366F1'},
+  {id:'blue',   name:'블루',     c1:'#2563EB',c2:'#3B82F6'},
+  {id:'sky',    name:'스카이',   c1:'#0284C7',c2:'#0EA5E9'},
+  {id:'cyan',   name:'시안',     c1:'#0891B2',c2:'#06B6D4'},
+  {id:'teal',   name:'틸',       c1:'#0D9488',c2:'#14B8A6'},
+  {id:'emerald',name:'에메랄드', c1:'#059669',c2:'#10B981'},
+  {id:'green',  name:'그린',     c1:'#16A34A',c2:'#22C55E'},
+  {id:'lime',   name:'라임',     c1:'#65A30D',c2:'#84CC16'},
+  {id:'yellow', name:'옐로',     c1:'#CA8A04',c2:'#EAB308'},
+  {id:'amber',  name:'앰버',     c1:'#D97706',c2:'#F59E0B'},
+  {id:'orange', name:'오렌지',   c1:'#EA580C',c2:'#F97316'},
+  {id:'red',    name:'레드',     c1:'#DC2626',c2:'#EF4444'},
+  {id:'rose',   name:'로즈',     c1:'#E11D48',c2:'#F43F5E'},
+  {id:'pink',   name:'핑크',     c1:'#DB2777',c2:'#EC4899'},
+  {id:'fuchsia',name:'푸시아',   c1:'#C026D3',c2:'#D946EF'},
+  {id:'purple', name:'퍼플',     c1:'#7C3AED',c2:'#8B5CF6'},
+  {id:'violet', name:'바이올렛', c1:'#6D28D9',c2:'#7C3AED'},
+  // 특별 컬러
+  {id:'slate',  name:'슬레이트', c1:'#475569',c2:'#64748B'},
+  {id:'stone',  name:'스톤',     c1:'#78716C',c2:'#A8A29E'},
+  {id:'coral',  name:'코랄',     c1:'#F97066',c2:'#FCA5A1'},
+  {id:'mint',   name:'민트',     c1:'#2DD4BF',c2:'#5EEAD4'},
+  {id:'navy',   name:'네이비',   c1:'#1E3A5F',c2:'#2563EB'},
+  {id:'wine',   name:'와인',     c1:'#881337',c2:'#BE123C'},
+  {id:'forest', name:'포레스트', c1:'#166534',c2:'#15803D'},
 ];
 function themeFromColor(c1){
   // c1 hex → compute c2, shadow, lt, ltDk
@@ -6226,13 +6244,66 @@ function resetTabColors(){
   TAB_COLORS.rwd='#D98E09';  TAB_COLORS2.rwd='#E0A820';
   TAB_COLORS.hist='#7A4FDD'; TAB_COLORS2.hist='#9578E8';
 }
-function toggleThemePicker(mid){
-  const el=document.getElementById('theme-picker-'+mid);
-  if(!el)return;
-  const isOpen=el.style.display==='flex';
-  // 다른 열린 피커 닫기
-  document.querySelectorAll('[id^="theme-picker-"]').forEach(p=>{p.style.display='none';});
-  if(!isOpen) el.style.display='flex';
+let _themePickerTarget=null;
+function openThemePickerPopup(mid){
+  _themePickerTarget=mid;
+  const m=S.familyMeta?.members?.[mid];
+  const childName=m?.name||'아이';
+  let currentTheme=m?.themeColor||'';
+  if(!currentTheme){
+    const _kids=getChildMembers();
+    const _kidIdx=_kids.findIndex(c=>c.id===mid);
+    const _autoTheme=CHILD_THEMES[(_kidIdx>=0?_kidIdx:0)%CHILD_THEMES.length];
+    if(_autoTheme)currentTheme=_autoTheme.id;
+  }
+
+  // 기존 팝업 제거
+  let existing=document.getElementById('theme-picker-popup');
+  if(existing)existing.remove();
+  let existingBg=document.getElementById('theme-picker-bg');
+  if(existingBg)existingBg.remove();
+
+  // 배경
+  const bg=document.createElement('div');
+  bg.id='theme-picker-bg';
+  bg.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:900;animation:fadeIn .2s';
+  bg.onclick=closeThemePickerPopup;
+  document.body.appendChild(bg);
+
+  // 팝업
+  const pop=document.createElement('div');
+  pop.id='theme-picker-popup';
+  pop.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:901;background:var(--bg);border-radius:20px 20px 0 0;padding:20px 16px calc(env(safe-area-inset-bottom,0px) + 20px);max-height:65vh;overflow-y:auto;animation:slideUp .25s ease-out;-webkit-overflow-scrolling:touch';
+
+  let html=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+    <div style="font-size:17px;font-weight:900;color:var(--tx)">${childName}의 테마 색상</div>
+    <button onclick="closeThemePickerPopup()" style="background:var(--bg2);border:none;border-radius:20px;padding:6px 14px;font-size:13px;font-weight:800;color:var(--tx2);cursor:pointer;font-family:inherit">닫기</button>
+  </div>`;
+  html+=`<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">`;
+  for(const ct of CHILD_THEMES){
+    const sel=currentTheme===ct.id;
+    html+=`<button onclick="pickThemeColor('${ct.id}')" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 4px;border-radius:14px;border:2.5px solid ${sel?ct.c1:'transparent'};background:${sel?'var(--bg2)':'transparent'};cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent">
+      <span style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,${ct.c1},${ct.c2});box-shadow:${sel?'0 2px 8px '+ct.c1+'66':'0 1px 3px rgba(0,0,0,.1)'};border:${sel?'3px solid #fff':'2px solid rgba(255,255,255,.2)'}"></span>
+      <span style="font-size:11px;font-weight:${sel?'800':'600'};color:${sel?ct.c1:'var(--tx2)'};white-space:nowrap">${ct.name}</span>
+    </button>`;
+  }
+  html+=`</div>`;
+  pop.innerHTML=html;
+  document.body.appendChild(pop);
+  lockBodyScroll();
+}
+function closeThemePickerPopup(){
+  const pop=document.getElementById('theme-picker-popup');
+  const bg=document.getElementById('theme-picker-bg');
+  if(pop)pop.remove();
+  if(bg)bg.remove();
+  _themePickerTarget=null;
+  unlockBodyScroll();
+}
+function pickThemeColor(themeId){
+  if(!_themePickerTarget)return;
+  setChildThemeColor(_themePickerTarget,themeId);
+  closeThemePickerPopup();
 }
 function setChildThemeColor(childId,themeId){
   // 관리자가 자녀의 테마 색상을 변경
@@ -6241,7 +6312,6 @@ function setChildThemeColor(childId,themeId){
   save();
   // 현재 보고 있는 자녀면 즉시 적용
   if(getViewedMemberId()===childId)applyChildTheme(childId);
-  // 피커 닫고 UI 새로고침
   renderFamilyManager();
   toast(MEMBERS[childId]?.name+'의 테마 색상이 변경되었어요');
 }
@@ -10933,16 +11003,12 @@ function renderFamilyManager() {
       if(_autoTheme)currentTheme=_autoTheme.id;
     }
     const curThemeObj=CHILD_THEMES.find(ct=>ct.id===currentTheme)||CHILD_THEMES[0];
-    const themeRow=isChild?`<div style="display:flex;align-items:center;gap:6px;margin-top:6px">
-      <button onclick="toggleThemePicker('${mid}')" style="display:flex;align-items:center;gap:6px;padding:4px 10px 4px 4px;border-radius:20px;border:1.5px solid var(--bdr);background:var(--bg2);cursor:pointer;font-family:inherit">
+    const themeRow=isChild?`<div style="margin-top:6px">
+      <button onclick="openThemePickerPopup('${mid}')" style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px 4px 4px;border-radius:20px;border:1.5px solid var(--bdr);background:var(--bg2);cursor:pointer;font-family:inherit">
         <span style="width:20px;height:20px;border-radius:50%;background:${curThemeObj.c1};display:inline-block;flex-shrink:0;border:2px solid rgba(255,255,255,.3)"></span>
         <span style="font-size:12px;font-weight:700;color:var(--tx2)">${curThemeObj.name}</span>
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
       </button>
-      <div id="theme-picker-${mid}" style="display:none;flex-wrap:wrap;gap:6px;align-items:center">${CHILD_THEMES.map(ct=>{
-        const sel=currentTheme===ct.id;
-        return `<button onclick="setChildThemeColor('${mid}','${ct.id}')" style="width:26px;height:26px;border-radius:50%;background:${ct.c1};border:${sel?'2.5px solid var(--tx)':'2px solid transparent'};cursor:pointer;flex-shrink:0;box-shadow:${sel?'0 0 0 2px var(--bg),0 0 0 4px '+ct.c1:'none'};transition:all .15s" title="${ct.name}"></button>`;
-      }).join('')}</div>
     </div>`:'';
 
     return `<div class="adm-row" style="padding:12px 8px">
@@ -15160,7 +15226,7 @@ Object.assign(window, {
   // Global registry functions
   checkGlobalIdExists, registerGlobalId,
   // Child theme functions
-  setChildThemeColor, applyChildTheme, toggleThemePicker,
+  setChildThemeColor, applyChildTheme, openThemePickerPopup, closeThemePickerPopup, pickThemeColor,
 });
 // 모듈 함수를 window에 _m_ 접두사로 등록 (standalone script에서 참조)
 window._m_startCreateFamily = startCreateFamily;
