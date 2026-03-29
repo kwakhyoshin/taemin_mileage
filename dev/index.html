@@ -206,17 +206,31 @@ body.dark .toss-invite-share-btn{background:rgba(99,102,241,.2);color:#818CF8}
 body.dark .ins-card-1{background:rgba(99,102,241,.09)}
 body.dark .ins-card-2{background:rgba(236,72,153,.08)}
 body.dark .ins-card-3{background:rgba(245,158,11,.08)}
-.ins-illust{width:188px;height:188px;margin-bottom:24px;flex-shrink:0}
+.ins-illust{width:220px;height:220px;margin-bottom:20px;flex-shrink:0}
 .ins-illust svg{width:100%;height:100%}
 .ins-keyword{font-size:26px;font-weight:900;color:#1E293B;text-align:center;line-height:1.35;letter-spacing:-.5px;margin-bottom:10px}
-.ins-sub{font-size:15px;color:#64748B;text-align:center;font-weight:500;line-height:1.6}
-.ins-dots{display:flex;justify-content:center;gap:8px;padding:14px 0 6px;flex-shrink:0}
-.ins-dot{width:8px;height:8px;border-radius:50%;background:#E2E8F0;transition:all .28s cubic-bezier(.4,0,.2,1);cursor:pointer}
-.ins-dot.active{width:24px;border-radius:4px;background:#6366F1}
+.ins-sub{font-size:14px;color:#64748B;text-align:center;font-weight:600;line-height:1.6}
+.ins-evidence{font-size:12px;color:#94A3B8;text-align:center;font-weight:500;margin-top:6px;font-style:italic}
 body.dark .ins-keyword{color:#F1F5F9}
 body.dark .ins-sub{color:#94A3B8}
-body.dark .ins-dot{background:#334155}
-body.dark .ins-dot.active{background:#818CF8}
+body.dark .ins-evidence{color:#64748B}
+/* Step indicator circles */
+.ins-steps{display:flex;justify-content:center;align-items:center;gap:24px;padding:0 0 8px;flex-shrink:0}
+.ins-step{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;border:2.5px solid #E2E8F0;color:#CBD5E1;background:transparent;transition:all .4s cubic-bezier(.4,0,.2,1);position:relative}
+.ins-step.active{border-color:#6366F1;color:#fff;background:#6366F1;transform:scale(1.1);box-shadow:0 2px 12px rgba(99,102,241,.35)}
+.ins-step.done{border-color:#6366F1;color:#fff;background:#6366F1}
+.ins-step-line{width:24px;height:2.5px;background:#E2E8F0;border-radius:2px;transition:background .4s}
+.ins-step-line.done{background:#6366F1}
+body.dark .ins-step{border-color:#334155;color:#475569}
+body.dark .ins-step.active{border-color:#818CF8;background:#818CF8;box-shadow:0 2px 12px rgba(129,140,248,.3)}
+body.dark .ins-step.done{border-color:#818CF8;background:#818CF8}
+body.dark .ins-step-line{background:#334155}
+body.dark .ins-step-line.done{background:#818CF8}
+/* Two-button CTA layout */
+.ins-cta-row{display:flex;gap:10px}
+.ins-cta-row .toss-btn{flex:1}
+.ins-cta-row .toss-btn.prev-btn{flex:0 0 auto;width:72px;background:#F1F5F9;color:#64748B}
+body.dark .ins-cta-row .toss-btn.prev-btn{background:#1E293B;color:#94A3B8}
 /* ── ROLE TYPE SELECTION CARDS ── */
 .c1-role-type-grid{display:flex;flex-direction:column;gap:14px;margin:8px 0 16px}
 .c1-role-type-card{padding:20px 18px;background:#F8FAFC;border:2.5px solid #E2E8F0;border-radius:20px;cursor:pointer;transition:all .22s cubic-bezier(.4,0,.2,1);display:flex;align-items:center;gap:16px;position:relative;-webkit-tap-highlight-color:transparent}
@@ -994,7 +1008,7 @@ body.dark .pin-key.ck{background:transparent}
 .auth-screen.hidden{display:none}
 body.auth-active{background:linear-gradient(135deg,#5B4FC4,#A78BFA);overflow:hidden}
 html:has(body.auth-active){background:#5B4FC4!important;overflow:hidden}
-#auth-insight .toss-cta{margin:0 24px;padding-left:0;padding-right:0}
+#auth-insight .toss-cta{margin:0 24px;padding-left:0;padding-right:0;padding-top:8px}
 .auth-card{background:#fff;border-radius:24px;padding:32px 28px;width:100%;max-width:380px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2);margin:auto;flex-shrink:0}
 @media(min-width:768px){.auth-card{max-width:440px;padding:40px 36px}.auth-title{font-size:28px}.auth-sub{font-size:14px}.auth-input{padding:16px 18px;font-size:16px}}
 .auth-logo{font-size:48px;margin-bottom:12px}
@@ -2489,106 +2503,135 @@ button:disabled {
 <!-- AUTH: 과학적 인사이트 (Step 0.5) -->
 <div class="auth-screen hidden toss-style" id="auth-insight">
   <div class="toss-wizard" style="overflow:hidden">
-    <div class="toss-top-bar">
-      <button class="toss-back-btn" onclick="showAuthScreen('welcome')">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
-      </button>
-      <div class="toss-progress-wrap"><div class="toss-progress-fill" style="width:0%"></div></div>
+    <!-- Step indicator (replaces progress bar + back arrow) -->
+    <div style="padding:max(20px,calc(env(safe-area-inset-top,0px) + 16px)) 20px 8px;flex-shrink:0">
+      <div class="ins-steps" id="insSteps">
+        <div class="ins-step active" data-step="0">1</div>
+        <div class="ins-step-line"></div>
+        <div class="ins-step" data-step="1">2</div>
+        <div class="ins-step-line"></div>
+        <div class="ins-step" data-step="2">3</div>
+      </div>
     </div>
     <!-- Swipe cards -->
     <div class="ins-cards-scroll" id="insCardsScroll">
       <!-- Card 1: 매일 작은 활동이 습관이 돼요 -->
       <div class="ins-card ins-card-1">
         <div class="ins-illust">
-          <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="100" cy="100" r="88" fill="#E0E7FF" opacity=".5"/>
-            <!-- Row 1: checked -->
-            <rect x="20" y="46" width="160" height="36" rx="18" fill="white"/>
-            <circle cx="49" cy="64" r="14" fill="#6366F1"/>
-            <path d="M42 64l5 5 10-10" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
-            <rect x="71" y="57" width="78" height="7" rx="3.5" fill="#C7D2FE"/>
-            <rect x="71" y="67" width="56" height="5" rx="2.5" fill="#E0E7FF"/>
-            <!-- Row 2: checked -->
-            <rect x="20" y="90" width="160" height="36" rx="18" fill="white"/>
-            <circle cx="49" cy="108" r="14" fill="#6366F1"/>
-            <path d="M42 108l5 5 10-10" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
-            <rect x="71" y="101" width="84" height="7" rx="3.5" fill="#C7D2FE"/>
-            <rect x="71" y="111" width="62" height="5" rx="2.5" fill="#E0E7FF"/>
-            <!-- Row 3: in progress -->
-            <rect x="20" y="134" width="160" height="36" rx="18" fill="white" opacity=".6"/>
-            <circle cx="49" cy="152" r="14" fill="#E0E7FF" stroke="#C7D2FE" stroke-width="2.5"/>
-            <rect x="71" y="145" width="68" height="7" rx="3.5" fill="#E2E8F0"/>
-            <rect x="71" y="155" width="48" height="5" rx="2.5" fill="#F1F5F9"/>
+          <svg viewBox="0 0 280 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Phone frame -->
+            <rect x="50" y="10" width="180" height="260" rx="28" fill="#fff" stroke="#E2E8F0" stroke-width="2"/>
+            <rect x="50" y="10" width="180" height="42" rx="28" fill="#6366F1"/>
+            <rect x="98" y="26" width="84" height="10" rx="5" fill="#A5B4FC" opacity=".6"/>
+            <!-- Activity row 1: completed (green check) -->
+            <rect x="66" y="66" width="148" height="44" rx="14" fill="#F0FDF4" stroke="#BBF7D0" stroke-width="1.5"/>
+            <circle cx="90" cy="88" r="12" fill="#22C55E"/>
+            <path d="M84 88l4 4 8-8" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="110" y="80" width="72" height="7" rx="3.5" fill="#86EFAC"/>
+            <rect x="110" y="91" width="52" height="5" rx="2.5" fill="#D1FAE5"/>
+            <!-- +10 badge -->
+            <rect x="188" y="76" width="32" height="18" rx="9" fill="#6366F1"/>
+            <text x="204" y="89" fill="#fff" font-size="10" font-weight="900" text-anchor="middle">+10</text>
+            <!-- Activity row 2: completed -->
+            <rect x="66" y="118" width="148" height="44" rx="14" fill="#F0FDF4" stroke="#BBF7D0" stroke-width="1.5"/>
+            <circle cx="90" cy="140" r="12" fill="#22C55E"/>
+            <path d="M84 140l4 4 8-8" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="110" y="132" width="80" height="7" rx="3.5" fill="#86EFAC"/>
+            <rect x="110" y="143" width="58" height="5" rx="2.5" fill="#D1FAE5"/>
+            <rect x="188" y="128" width="32" height="18" rx="9" fill="#6366F1"/>
+            <text x="204" y="141" fill="#fff" font-size="10" font-weight="900" text-anchor="middle">+5</text>
+            <!-- Activity row 3: pending -->
+            <rect x="66" y="170" width="148" height="44" rx="14" fill="#fff" stroke="#E2E8F0" stroke-width="1.5"/>
+            <circle cx="90" cy="192" r="12" fill="none" stroke="#CBD5E1" stroke-width="2"/>
+            <rect x="110" y="184" width="64" height="7" rx="3.5" fill="#E2E8F0"/>
+            <rect x="110" y="195" width="46" height="5" rx="2.5" fill="#F1F5F9"/>
+            <!-- Bottom mileage bar -->
+            <rect x="66" y="228" width="148" height="30" rx="15" fill="#EEF2FF"/>
+            <rect x="66" y="228" width="98" height="30" rx="15" fill="#6366F1"/>
+            <text x="115" y="248" fill="#fff" font-size="11" font-weight="800" text-anchor="middle">505 M</text>
+            <text x="194" y="248" fill="#6366F1" font-size="10" font-weight="700" text-anchor="middle">66%</text>
           </svg>
         </div>
         <div class="ins-keyword">매일 작은 활동이<br>습관이 돼요</div>
-        <div class="ins-sub">66일이면 자연스러운 일상이 됩니다</div>
+        <div class="ins-sub">하루 2분이면 충분해요.<br>66일이면 자동화된 습관이 됩니다.</div>
+        <div class="ins-evidence">— University College London, Phillippa Lally 연구 (2009)</div>
       </div>
       <!-- Card 2: 가족이 함께하면 동기부여가 달라져요 -->
       <div class="ins-card ins-card-2">
         <div class="ins-illust">
-          <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="100" cy="100" r="88" fill="#FCE7F3" opacity=".6"/>
-            <!-- Star goal -->
-            <polygon points="100,26 106,45 127,45 111,57 117,76 100,64 83,76 89,57 73,45 94,45" fill="#F472B6"/>
-            <line x1="100" y1="16" x2="100" y2="10" stroke="#F472B6" stroke-width="3" stroke-linecap="round"/>
-            <line x1="124" y1="22" x2="128" y2="18" stroke="#F472B6" stroke-width="2.5" stroke-linecap="round" opacity=".7"/>
-            <line x1="76" y1="22" x2="72" y2="18" stroke="#F472B6" stroke-width="2.5" stroke-linecap="round" opacity=".7"/>
-            <!-- Ground path -->
-            <path d="M18 160 Q100 144 182 160" stroke="#FBCFE8" stroke-width="3" fill="none" stroke-linecap="round"/>
-            <!-- Adult silhouette -->
-            <circle cx="66" cy="96" r="17" fill="#F472B6"/>
-            <rect x="51" y="113" width="30" height="48" rx="15" fill="#F472B6"/>
-            <!-- Child silhouette -->
-            <circle cx="118" cy="110" r="13" fill="#FCA5A5"/>
-            <rect x="105" y="123" width="26" height="38" rx="13" fill="#FCA5A5"/>
-            <!-- Floating hearts -->
-            <path d="M150 88 C150 85 153.5 83 153.5 86.5 C153.5 83 157 85 157 88 C157 93 153.5 96 153.5 96 C153.5 96 150 93 150 88Z" fill="#F472B6" opacity=".8"/>
-            <path d="M160 66 C160 63.5 163 62 163 64.5 C163 62 166 63.5 166 66 C166 70 163 72.5 163 72.5 C163 72.5 160 70 160 66Z" fill="#F472B6" opacity=".5"/>
+          <svg viewBox="0 0 280 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Phone frame -->
+            <rect x="50" y="10" width="180" height="260" rx="28" fill="#fff" stroke="#E2E8F0" stroke-width="2"/>
+            <rect x="50" y="10" width="180" height="42" rx="28" fill="#EC4899"/>
+            <rect x="88" y="26" width="104" height="10" rx="5" fill="#FBCFE8" opacity=".6"/>
+            <!-- Family message bubble 1 (parent) -->
+            <rect x="66" y="68" width="130" height="50" rx="16" fill="#FCE7F3"/>
+            <circle cx="82" cy="80" r="10" fill="#EC4899"/>
+            <text x="96" y="83" fill="#BE185D" font-size="9" font-weight="700">엄마</text>
+            <text x="78" y="103" fill="#9D174D" font-size="10" font-weight="600">오늘도 잘했어! 최고야 👏</text>
+            <!-- Family message bubble 2 (child) -->
+            <rect x="84" y="126" width="130" height="50" rx="16" fill="#FEF3C7"/>
+            <circle cx="198" cy="138" r="10" fill="#F59E0B"/>
+            <text x="174" y="141" fill="#92400E" font-size="9" font-weight="700">태민</text>
+            <text x="96" y="161" fill="#78350F" font-size="10" font-weight="600">감사해요! 내일도 할게요 💪</text>
+            <!-- Heart reactions floating -->
+            <path d="M224 100 C224 96 228.5 94 228.5 98 C228.5 94 233 96 233 100 C233 106 228.5 109 228.5 109 C228.5 109 224 106 224 100Z" fill="#F472B6" opacity=".7"/>
+            <path d="M60 148 C60 145 63.5 143.5 63.5 146.5 C63.5 143.5 67 145 67 148 C67 153 63.5 155.5 63.5 155.5 C63.5 155.5 60 153 60 148Z" fill="#F472B6" opacity=".5"/>
+            <!-- Badge earned notification -->
+            <rect x="66" y="190" width="148" height="56" rx="18" fill="#FDF2F8" stroke="#FBCFE8" stroke-width="1.5"/>
+            <text x="140" y="212" fill="#BE185D" font-size="11" font-weight="900" text-anchor="middle">🏅 가족 응원왕 뱃지 획득!</text>
+            <text x="140" y="230" fill="#9D174D" font-size="9.5" font-weight="600" text-anchor="middle">가족 메시지 10개 달성</text>
           </svg>
         </div>
         <div class="ins-keyword">가족이 함께하면<br>동기부여가 달라져요</div>
-        <div class="ins-sub">응원과 격려가 습관의 힘이 됩니다</div>
+        <div class="ins-sub">사회적 지지가 있으면 목표 달성률이<br><b style="color:#EC4899;font-size:16px">95%</b> 높아집니다.</div>
+        <div class="ins-evidence">— ASTC (American Society of Training), 책임 파트너 연구</div>
       </div>
       <!-- Card 3: 마일리지로 성취감을 느껴요 -->
       <div class="ins-card ins-card-3">
         <div class="ins-illust">
-          <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="100" cy="100" r="88" fill="#FEF3C7" opacity=".6"/>
-            <!-- Gauge bar background -->
-            <rect x="42" y="36" width="22" height="126" rx="11" fill="#E2E8F0"/>
-            <!-- Gauge fill -->
-            <rect x="42" y="86" width="22" height="76" rx="11" fill="#F59E0B"/>
-            <!-- Gauge top indicator -->
-            <circle cx="53" cy="84" r="14" fill="#F59E0B"/>
-            <!-- Main coin -->
-            <circle cx="120" cy="110" r="52" fill="#FDE68A"/>
-            <circle cx="120" cy="110" r="44" fill="#FCD34D"/>
-            <!-- Star on coin -->
-            <polygon points="120,83 124.5,97 140,97 128,106 132.5,120 120,111 107.5,120 112,106 100,97 115.5,97" fill="#F59E0B"/>
-            <!-- Rising coin 1 -->
-            <circle cx="150" cy="62" r="13" fill="#FCD34D" opacity=".75"/>
-            <polygon points="150,54 153,62 161,62 155,67 157,75 150,70 143,75 145,67 139,62 147,62" fill="#F59E0B" opacity=".75"/>
-            <!-- Rising coin 2 (small) -->
-            <circle cx="158" cy="36" r="8" fill="#FCD34D" opacity=".42"/>
-            <!-- Up arrow -->
-            <path d="M150 52 L150 44 M146 48 L150 44 L154 48" stroke="#F59E0B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity=".85"/>
+          <svg viewBox="0 0 280 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Phone frame -->
+            <rect x="50" y="10" width="180" height="260" rx="28" fill="#fff" stroke="#E2E8F0" stroke-width="2"/>
+            <rect x="50" y="10" width="180" height="42" rx="28" fill="#F59E0B"/>
+            <rect x="98" y="26" width="84" height="10" rx="5" fill="#FDE68A" opacity=".6"/>
+            <!-- Mileage counter -->
+            <text x="140" y="85" fill="#1E293B" font-size="32" font-weight="900" text-anchor="middle">505</text>
+            <text x="140" y="102" fill="#94A3B8" font-size="11" font-weight="700" text-anchor="middle">마일리지</text>
+            <!-- Reward card 1: unlocked -->
+            <rect x="66" y="116" width="148" height="52" rx="16" fill="#FFFBEB" stroke="#FDE68A" stroke-width="1.5"/>
+            <text x="86" y="140" fill="#1E293B" font-size="22">🎮</text>
+            <text x="108" y="138" fill="#92400E" font-size="12" font-weight="800">게임 30분</text>
+            <text x="108" y="152" fill="#B45309" font-size="10" font-weight="600">200M 달성! 교환 가능</text>
+            <circle cx="200" cy="140" r="12" fill="#22C55E"/>
+            <path d="M194 140l4 4 8-8" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- Reward card 2: progress -->
+            <rect x="66" y="176" width="148" height="52" rx="16" fill="#fff" stroke="#E2E8F0" stroke-width="1.5"/>
+            <text x="86" y="200" fill="#1E293B" font-size="22">🍦</text>
+            <text x="108" y="198" fill="#1E293B" font-size="12" font-weight="800">아이스크림</text>
+            <text x="108" y="212" fill="#64748B" font-size="10" font-weight="600">350M / 500M</text>
+            <!-- Progress bar -->
+            <rect x="108" y="218" width="92" height="6" rx="3" fill="#E2E8F0"/>
+            <rect x="108" y="218" width="64" height="6" rx="3" fill="#F59E0B"/>
+            <!-- Celebration sparkles -->
+            <circle cx="68" y="68" r="4" fill="#FBBF24" opacity=".6"/>
+            <circle cx="212" y="54" r="3" fill="#FBBF24" opacity=".5"/>
+            <path d="M220 80 l4 -6 4 6 -6 -4 6 4" stroke="#FBBF24" stroke-width="1.5" stroke-linecap="round" opacity=".7"/>
+            <path d="M58 96 l3 -5 3 5 -5 -3 5 3" stroke="#FBBF24" stroke-width="1.5" stroke-linecap="round" opacity=".6"/>
           </svg>
         </div>
         <div class="ins-keyword">마일리지로<br>성취감을 느껴요</div>
-        <div class="ins-sub">작은 보상이 큰 변화를 만듭니다</div>
+        <div class="ins-sub">즉각적인 보상은 도파민을 자극해<br>습관 형성 속도를 <b style="color:#F59E0B;font-size:16px">2배</b> 높여줍니다.</div>
+        <div class="ins-evidence">— Wolfram Schultz, Cambridge 뇌과학 보상 시스템 연구</div>
       </div>
     </div>
-    <!-- Dot indicators -->
-    <div class="ins-dots" id="insDots">
-      <div class="ins-dot active"></div>
-      <div class="ins-dot"></div>
-      <div class="ins-dot"></div>
-    </div>
-    <!-- CTA -->
+    <!-- CTA (이전/다음 + 건너뛰기) -->
     <div class="toss-cta">
-      <button class="toss-btn" id="insNextBtn" disabled onclick="insNext()">다음</button>
-      <button class="toss-btn ghost" onclick="insSkip()">건너뛰기</button>
+      <div class="ins-cta-row">
+        <button class="toss-btn prev-btn" id="insPrevBtn" onclick="insPrev()" style="display:none">이전</button>
+        <button class="toss-btn" id="insNextBtn" onclick="insNext()">다음</button>
+      </div>
+      <button class="toss-btn ghost" id="insSkipBtn" onclick="insSkip()">건너뛰기</button>
     </div>
   </div>
 </div>
@@ -15263,19 +15306,42 @@ window._createState = _createState;
 (function(){
   var scroll=document.getElementById('insCardsScroll');
   if(!scroll)return;
-  var dots=document.querySelectorAll('#insDots .ins-dot');
-  var btn=document.getElementById('insNextBtn');
+  var steps=document.querySelectorAll('#insSteps .ins-step');
+  var lines=document.querySelectorAll('#insSteps .ins-step-line');
+  var nextBtn=document.getElementById('insNextBtn');
+  var prevBtn=document.getElementById('insPrevBtn');
+  var skipBtn=document.getElementById('insSkipBtn');
   var total=3,cur=0;
+  function updateSteps(){
+    steps.forEach(function(s,i){
+      s.classList.remove('active','done');
+      if(i<cur){s.classList.add('done');s.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 12 10 16 18 8"/></svg>';}
+      else if(i===cur){s.classList.add('active');s.textContent=''+(i+1);}
+      else{s.textContent=''+(i+1);}
+    });
+    lines.forEach(function(l,i){
+      l.classList.toggle('done',i<cur);
+    });
+    // 이전 버튼: 첫 페이지면 숨김
+    prevBtn.style.display=cur>0?'block':'none';
+    // 마지막 페이지면 "시작하기", 아니면 "다음"
+    if(cur>=total-1){
+      nextBtn.textContent='시작하기';
+      skipBtn.style.display='none';
+    }else{
+      nextBtn.textContent='다음';
+      skipBtn.style.display='block';
+    }
+  }
   function update(){
     var w=scroll.clientWidth||1;
     cur=Math.round(scroll.scrollLeft/w);
     cur=Math.max(0,Math.min(total-1,cur));
-    dots.forEach(function(d,i){d.classList.toggle('active',i===cur);});
-    btn.disabled=cur<total-1;
+    updateSteps();
   }
   scroll.addEventListener('scroll',update,{passive:true});
-  dots.forEach(function(d,i){
-    d.addEventListener('click',function(){
+  steps.forEach(function(s,i){
+    s.addEventListener('click',function(){
       scroll.scrollTo({left:i*scroll.clientWidth,behavior:'smooth'});
     });
   });
@@ -15292,7 +15358,12 @@ window._createState = _createState;
     if(cur>=total-1){goCreateFamily();return;}
     scroll.scrollTo({left:(cur+1)*scroll.clientWidth,behavior:'smooth'});
   };
+  window.insPrev=function(){
+    if(cur>0)scroll.scrollTo({left:(cur-1)*scroll.clientWidth,behavior:'smooth'});
+  };
   window.insSkip=function(){goCreateFamily();};
+  // 초기 상태 설정
+  updateSteps();
 })();
 </script>
 </body>
