@@ -3106,7 +3106,7 @@ button:disabled {
   <div id="birthday-banner" style="display:none;margin:0 16px 12px;border-radius:16px;background:linear-gradient(135deg,#FF6B6B,#FF8E53);padding:16px;position:relative;overflow:hidden">
     <div style="position:absolute;top:-20px;right:-10px;font-size:60px;opacity:0.2;pointer-events:none">🎂</div>
     <div style="font-size:18px;font-weight:900;color:#fff;margin-bottom:4px" id="birthday-banner-title"></div>
-    <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,.85)" id="birthday-banner-sub">특별 보너스 100 마일리지가 지급됐어요! 🎁</div>
+    <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,.85)" id="birthday-banner-sub"></div>
   </div>
   <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> 오늘 할 일</div>
   <div class="act-grid" id="home-grid"></div>
@@ -3482,6 +3482,31 @@ button:disabled {
         <div class="adm-row">
           <div class="adm-row-l"><div class="adm-row-nm">보너스 마일리지</div><div class="adm-row-sub">연속 달성 시 지급되는 추가 포인트</div></div>
           <input class="num-inp" id="bonus-pts-inp" type="number" value="100" min="1" onchange="saveSettings()">
+        </div>
+      </div>
+    </div>
+    <!-- ── 생일 이벤트 설정 ── -->
+    <div class="adm-sec">
+      <div class="adm-sec-lbl">🎂 생일 이벤트</div>
+      <div class="adm-card">
+        <div class="adm-row">
+          <div class="adm-row-l"><div class="adm-row-nm">생일 보너스 지급</div><div class="adm-row-sub">아이 생일에 자동으로 마일리지 지급</div></div>
+          <button class="tog" id="tog-bday" onclick="togBdaySetting()"><div class="tog-dot"></div></button>
+        </div>
+        <div class="divider"></div>
+        <div id="bday-settings-detail">
+          <div class="adm-row">
+            <div class="adm-row-l"><div class="adm-row-nm">보너스 마일리지</div><div class="adm-row-sub">생일 당일 지급되는 특별 포인트</div></div>
+            <input class="num-inp" id="bday-pts-inp" type="number" value="100" min="1" onchange="saveBdaySettings()">
+          </div>
+          <div class="divider"></div>
+          <div class="adm-row" style="flex-direction:column;align-items:stretch;gap:8px">
+            <div class="adm-row-l" style="width:100%"><div class="adm-row-nm">축하 메시지</div><div class="adm-row-sub">생일 배너에 표시되는 메시지</div></div>
+            <div style="display:flex;gap:8px">
+              <input class="txt-inp" id="bday-msg-inp" type="text" placeholder="생일 축하해! 오늘은 네 특별한 날이야! 🎂🎉" maxlength="60" inputmode="text" lang="ko" style="flex:1">
+              <button class="btn-sm" onclick="saveBdaySettings()">저장</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -6406,7 +6431,7 @@ function defaultState(){
     moodLog:[],
     badges:{}, // {badgeId: {earnedAt: timestamp, seen: boolean, claimed: boolean}}
     badgeLog:[], // {id, badgeId, badgeName, badgeEmoji, pts, ts}
-    settings:{streakBonus:true,streakBonusPts:100,pinHash:'',msgMode:'auto',customMsg:''},
+    settings:{streakBonus:true,streakBonusPts:100,pinHash:'',msgMode:'auto',customMsg:'',birthdayBonus:true,birthdayBonusPts:100,birthdayMsg:'생일 축하해! 오늘은 네 특별한 날이야! 🎂🎉'},
     actDone:{},
     dark:false,
     greeting:'안녕하세요! 👋', // deprecated, kept for backwards compat
@@ -9871,6 +9896,12 @@ function renderAdmSettings(){
   const ts=document.getElementById('tog-streak');if(ts)ts.classList.toggle('off',!S.settings.streakBonus);
   const td=document.getElementById('tog-dark');if(td)td.classList.toggle('off',!document.body.classList.contains('dark'));
   const bi=document.getElementById('bonus-pts-inp');if(bi)bi.value=S.settings.streakBonusPts||100;
+  // 생일 이벤트 설정
+  const bdayOn=S.settings.birthdayBonus!==false;
+  const tb=document.getElementById('tog-bday');if(tb)tb.classList.toggle('off',!bdayOn);
+  const bdayDetail=document.getElementById('bday-settings-detail');if(bdayDetail)bdayDetail.style.display=bdayOn?'':'none';
+  const bdayPts=document.getElementById('bday-pts-inp');if(bdayPts)bdayPts.value=S.settings.birthdayBonusPts||100;
+  const bdayMsg=document.getElementById('bday-msg-inp');if(bdayMsg&&!bdayMsg.matches(':focus'))bdayMsg.value=S.settings.birthdayMsg||'생일 축하해! 오늘은 네 특별한 날이야! 🎂🎉';
   // 다자녀 모드 섹션 렌더링
   renderAdmModeSection();
   // 자녀 선택기 렌더링
@@ -11123,6 +11154,8 @@ function delRwd(id){if(!confirm('이 보상을 삭제할까요?'))return;S.rwds=
 function toggleRwdClosed(id){const r=S.rwds.find(x=>x.id===id);if(!r)return;r.closed=!r.closed;save();renderAll();toast(r.closed?'⛔ 보상이 종료됐어요':'✅ 보상이 다시 운영돼요');}
 function togSetting(k){if(k==='streak')S.settings.streakBonus=!S.settings.streakBonus;save();renderAdmSettings();toast(S.settings.streakBonus?'✅ 연속 보너스 켜짐':'🔕 꺼짐');}
 function saveSettings(){S.settings.streakBonusPts=parseInt(document.getElementById('bonus-pts-inp').value)||100;save();}
+function togBdaySetting(){S.settings.birthdayBonus=S.settings.birthdayBonus===false?true:!S.settings.birthdayBonus;save();renderAdmSettings();toast(S.settings.birthdayBonus!==false?'🎂 생일 보너스 켜짐':'🔕 생일 보너스 꺼짐');}
+function saveBdaySettings(){S.settings.birthdayBonusPts=parseInt(document.getElementById('bday-pts-inp').value)||100;const msgInp=document.getElementById('bday-msg-inp');S.settings.birthdayMsg=msgInp?msgInp.value.trim()||'생일 축하해! 오늘은 네 특별한 날이야! 🎂🎉':'생일 축하해! 오늘은 네 특별한 날이야! 🎂🎉';save();toast('✅ 생일 이벤트 설정 저장됨');}
 function saveGreetingMode(userId){
   const mode=document.getElementById(`greeting-mode-${userId}`).value;
   if(!S.greetings)S.greetings={};
@@ -14185,6 +14218,9 @@ async function checkBirthdayBonus(){
   const today = todayStr(); // YYYY-MM-DD
   const [,todayMM,todayDD] = today.split('-');
   if(!S.birthdayBonusGiven) S.birthdayBonusGiven={};
+  const bdayEnabled = S.settings.birthdayBonus!==false;
+  const bdayPts = S.settings.birthdayBonusPts||100;
+  const bdayMsg = S.settings.birthdayMsg||'생일 축하해! 오늘은 네 특별한 날이야! 🎂🎉';
   let anyBirthday=false;
   const birthdayNames=[];
 
@@ -14196,13 +14232,14 @@ async function checkBirthdayBonus(){
     if(bMM===todayMM && bDD===todayDD){
       anyBirthday=true;
       birthdayNames.push(m.name||'아이');
+      if(!bdayEnabled) continue; // 보너스 꺼져있으면 마일리지 지급 안함
       const bonusKey=`${mid}_${today}`;
       if(!S.birthdayBonusGiven[bonusKey]){
         // 보너스 지급
         const targetMid = mid;
         const ms = S.memberData?.[targetMid];
-        if(ms) ms.pts = (ms.pts||0)+100;
-        else S.pts = (S.pts||0)+100;
+        if(ms) ms.pts = (ms.pts||0)+bdayPts;
+        else S.pts = (S.pts||0)+bdayPts;
         // 생일 뱃지 부여
         if(!S.badges) S.badges={};
         if(!S.badges['birthday_special']){
@@ -14210,7 +14247,7 @@ async function checkBirthdayBonus(){
         }
         // 로그
         if(!S.log) S.log=[];
-        S.log.unshift({id:'bday_'+Date.now(),emoji:'🎂',name:`${m.name||'아이'} 생일 보너스`,pts:100,ts:Date.now(),user:targetMid,auto:true});
+        S.log.unshift({id:'bday_'+Date.now(),emoji:'🎂',name:`${m.name||'아이'} 생일 보너스`,pts:bdayPts,ts:Date.now(),user:targetMid,auto:true});
         S.birthdayBonusGiven[bonusKey]=true;
         await save();
       }
@@ -14222,11 +14259,14 @@ async function checkBirthdayBonus(){
   if(anyBirthday && birthdayNames.length>0){
     const title=document.getElementById('birthday-banner-title');
     if(title) title.textContent=`🎂 ${birthdayNames.join(', ')}의 생일을 축하해요!`;
+    const sub=document.getElementById('birthday-banner-sub');
+    if(sub) sub.textContent=bdayEnabled?`특별 보너스 ${bdayPts.toLocaleString()} 마일리지가 지급됐어요! 🎁`:bdayMsg;
     banner.style.display='block';
     banner.style.animation='bdayPulse 2s ease infinite';
     birthdayConfetti();
     setTimeout(birthdayConfetti, 1200);
-    toast(`🎉 ${birthdayNames[0]}의 생일! 100 마일리지 보너스 지급!`);
+    if(bdayEnabled) toast(`🎉 ${birthdayNames[0]}의 생일! ${bdayPts.toLocaleString()} 마일리지 보너스 지급!`);
+    else toast(`🎂 ${birthdayNames[0]}의 생일을 축하해요!`);
   } else {
     banner.style.display='none';
   }
@@ -15049,7 +15089,7 @@ Object.assign(window, {
   toggleDark, goTab, admTab, doAct, undoAct, undoRedeem,
   openRedeem, confirmRedeem, closeModal, openModal,
   giveBonus, deductPts, togAct, togActHome, delAct, delRwd,
-  togSetting, saveSettings, saveGreetingMode, saveGreetingCustom,
+  togSetting, saveSettings, togBdaySetting, saveBdaySettings, saveGreetingMode, saveGreetingCustom,
   resetToday, resetAll, backupData, restoreData,
   openActForm, saveActivity, pickCycle, toggleDaysMode, toggleDay,
   openRwdForm, saveReward, setGoalT, setRwdSale, initActDrag, initRwdDrag,
