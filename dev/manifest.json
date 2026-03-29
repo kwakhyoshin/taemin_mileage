@@ -1,6 +1,6 @@
 {
-  "name": "마일리",
-  "short_name": "마일리",
+  "name": "태민이 마일리지",
+  "short_name": "태민이앱",
   "description": "태민이의 활동 마일리지 & 보상 앱",
   "start_url": "./index.html",
   "scope": "./",
