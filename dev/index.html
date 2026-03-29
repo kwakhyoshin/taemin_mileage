@@ -3558,6 +3558,14 @@ button:disabled {
   <div class="my-section-title">앱 설정</div>
   <div class="my-list">
     <div class="my-list-item my-list-item-toggle">
+      <span class="my-list-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></span>
+      <span class="my-list-txt">푸시 알림</span>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span id="push-status-my" style="font-size:12px;font-weight:700;color:var(--tx3)"></span>
+        <button class="tog off" id="push-tog-my" onclick="togglePush()"><div class="tog-dot"></div></button>
+      </div>
+    </div>
+    <div class="my-list-item my-list-item-toggle">
       <span class="my-list-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></span>
       <span class="my-list-txt">다크 모드</span>
       <button class="tog off" id="tog-dark-my" onclick="toggleDark()"><div class="tog-dot"></div></button>
@@ -14320,17 +14328,25 @@ async function unsubscribePush(){
 }
 
 function updatePushUI(){
-  const togBtn=document.getElementById('push-tog');
-  const statusEl=document.getElementById('push-status');
-  if(!togBtn)return;
   const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
   const isStandalone=window.navigator.standalone||window.matchMedia('(display-mode:standalone)').matches;
   const pushSupported=typeof Notification!=='undefined'&&(!isIOS||isStandalone);
   const isOn=!!pushSubscription;
-  togBtn.classList.toggle('off',!isOn);
+  // 관리탭 토글
+  const togBtn=document.getElementById('push-tog');
+  if(togBtn) togBtn.classList.toggle('off',!isOn);
+  const statusEl=document.getElementById('push-status');
   if(statusEl){
     if(!pushSupported) statusEl.textContent='미지원 (홈화면 앱 필요)';
     else statusEl.textContent=isOn?'활성화 (이 기기)':'비활성화';
+  }
+  // 나의 탭 토글
+  const togBtnMy=document.getElementById('push-tog-my');
+  if(togBtnMy) togBtnMy.classList.toggle('off',!isOn);
+  const statusElMy=document.getElementById('push-status-my');
+  if(statusElMy){
+    if(!pushSupported) statusElMy.textContent='미지원';
+    else statusElMy.textContent=isOn?'활성화':'비활성화';
   }
   showPushDebug();
 }
