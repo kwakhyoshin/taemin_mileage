@@ -1109,6 +1109,38 @@ html:has(body.auth-active){background:#5B4FC4!important;overflow:hidden}
 .toss-back-btn:active{background:#F1F5F9}
 .toss-progress-wrap{flex:1;height:3px;background:#E2E8F0;border-radius:2px;overflow:hidden}
 .toss-progress-fill{height:100%;background:#6366F1;border-radius:2px;transition:width .4s cubic-bezier(.4,0,.2,1)}
+/* Registration grouped stepper */
+.reg-stepper-bar{padding:max(12px,calc(env(safe-area-inset-top,0px) + 8px)) 16px 0;flex-shrink:0;position:sticky;top:0;z-index:2;background:inherit}
+.reg-stepper-back{position:absolute;left:8px;top:max(12px,calc(env(safe-area-inset-top,0px) + 8px));width:36px;height:36px;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:50%;color:#64748B;-webkit-tap-highlight-color:transparent;padding:0}
+.reg-stepper-back:active{background:#F1F5F9}
+.reg-stepper{display:flex;align-items:flex-start;justify-content:center;gap:0;padding:4px 28px 0}
+.reg-group{display:flex;flex-direction:column;align-items:center;gap:4px;position:relative;z-index:1}
+.reg-group-circle{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;border:2.5px solid #E2E8F0;color:#CBD5E1;background:#fff;transition:all .35s cubic-bezier(.4,0,.2,1)}
+.reg-group.active .reg-group-circle{border-color:#6366F1;color:#fff;background:#6366F1;transform:scale(1.08);box-shadow:0 2px 10px rgba(99,102,241,.3)}
+.reg-group.done .reg-group-circle{border-color:#6366F1;color:#fff;background:#6366F1}
+.reg-group-label{font-size:10px;font-weight:700;color:#CBD5E1;white-space:nowrap;transition:color .3s;max-width:72px;overflow:hidden;text-overflow:ellipsis;text-align:center}
+.reg-group.active .reg-group-label{color:#6366F1;font-weight:800}
+.reg-group.done .reg-group-label{color:#6366F1}
+.reg-group-line{flex:1;height:2.5px;background:#E2E8F0;min-width:24px;max-width:56px;margin-top:13px;border-radius:2px;transition:background .35s}
+.reg-group-line.done{background:#6366F1}
+.reg-substeps{display:flex;justify-content:center;gap:6px;padding:10px 0 4px}
+.reg-substep{width:7px;height:7px;border-radius:50%;background:#E2E8F0;transition:all .3s}
+.reg-substep.active{background:#6366F1;transform:scale(1.3)}
+.reg-substep.done{background:#A5B4FC}
+/* dark mode */
+body.dark .reg-stepper-back{color:#64748B}
+body.dark .reg-stepper-back:active{background:#1E293B}
+body.dark .reg-group-circle{border-color:#334155;color:#475569;background:#1E293B}
+body.dark .reg-group.active .reg-group-circle{border-color:#818CF8;background:#6366F1}
+body.dark .reg-group.done .reg-group-circle{border-color:#818CF8;background:#6366F1}
+body.dark .reg-group-label{color:#475569}
+body.dark .reg-group.active .reg-group-label{color:#818CF8}
+body.dark .reg-group.done .reg-group-label{color:#818CF8}
+body.dark .reg-group-line{background:#334155}
+body.dark .reg-group-line.done{background:#6366F1}
+body.dark .reg-substep{background:#334155}
+body.dark .reg-substep.active{background:#818CF8}
+body.dark .reg-substep.done{background:#4F46E5}
 .toss-slides-wrap{flex:1;position:relative;overflow:hidden}
 .toss-slide{position:absolute;inset:0;display:flex;flex-direction:column;padding:28px 28px 0;transform:translateX(100%);opacity:0;transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .25s;pointer-events:none;overflow-y:auto;background:inherit}
 .toss-slide.active{transform:translateX(0);opacity:1;pointer-events:auto}
@@ -2700,11 +2732,12 @@ button:disabled {
 <!-- AUTH: 가족 만들기 — 스텝 1: 계정 생성 (Toss 스타일) -->
 <div class="auth-screen hidden toss-style" id="auth-create-1">
   <div class="toss-wizard">
-    <div class="toss-top-bar">
-      <button class="toss-back-btn" onclick="create1Back()" id="c1-back-btn">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+    <div class="reg-stepper-bar" id="reg-stepper-1">
+      <button class="reg-stepper-back" onclick="create1Back()" id="c1-back-btn">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
       </button>
-      <div class="toss-progress-wrap"><div class="toss-progress-fill" id="c1-progress" style="width:5%"></div></div>
+      <div class="reg-stepper" id="regStepperGroups1"></div>
+      <div class="reg-substeps" id="regStepperSubs1"></div>
     </div>
     <div class="toss-slides-wrap" id="c1-wrap">
       <!-- 슬라이드 0: 역할 선택 (양육자/아이) -->
@@ -2747,7 +2780,7 @@ button:disabled {
       <!-- 슬라이드 1: 아이디 -->
       <div class="toss-slide" id="c1-slide-id">
         <div class="toss-slide-content">
-          <div class="auth-steps" id="create-steps-1"></div>
+
           <div class="toss-question">로그인에 사용할<br>아이디를 만들어주세요</div>
           <div class="toss-desc">나중에 이 아이디로 로그인해요</div>
           <div style="position:relative">
@@ -2818,16 +2851,17 @@ button:disabled {
 <!-- AUTH: 가족 만들기 — 스텝 2: 가족 정보 -->
 <div class="auth-screen hidden toss-style" id="auth-create-2">
   <div class="toss-wizard">
-    <div class="toss-top-bar">
-      <button class="toss-back-btn" onclick="showAuthScreen('create-1')">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+    <div class="reg-stepper-bar" id="reg-stepper-2">
+      <button class="reg-stepper-back" onclick="renderRegStepper(1,1,2);showAuthScreen('create-1')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
       </button>
-      <div class="toss-progress-wrap"><div class="toss-progress-fill" style="width:40%"></div></div>
+      <div class="reg-stepper" id="regStepperGroups2"></div>
+      <div class="reg-substeps" id="regStepperSubs2"></div>
     </div>
     <div class="toss-slides-wrap">
       <div class="toss-slide active">
         <div class="toss-slide-content">
-          <div class="auth-steps" id="create-steps-2"></div>
+
           <div class="toss-question">가족 이름을<br>정해주세요</div>
           <div class="toss-desc">우리 가족만의 특별한 이름을 만들어봐요</div>
           <input type="text" class="toss-input" id="create-family-name" placeholder="예: 태민이네, 곽씨 패밀리" maxlength="20" inputmode="text" oninput="updateFamilyNamePreview(this.value)">
@@ -2845,16 +2879,17 @@ button:disabled {
 <!-- AUTH: 가족 만들기 — 스텝 3: 가족 구성원 -->
 <div class="auth-screen hidden toss-style" id="auth-create-3">
   <div class="toss-wizard">
-    <div class="toss-top-bar">
-      <button class="toss-back-btn" onclick="showAuthScreen('create-2')">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+    <div class="reg-stepper-bar" id="reg-stepper-3">
+      <button class="reg-stepper-back" onclick="renderRegStepper(2,0,4);showAuthScreen('create-2')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
       </button>
-      <div class="toss-progress-wrap"><div class="toss-progress-fill" style="width:60%"></div></div>
+      <div class="reg-stepper" id="regStepperGroups3"></div>
+      <div class="reg-substeps" id="regStepperSubs3"></div>
     </div>
     <div class="toss-slides-wrap">
       <div class="toss-slide active">
         <div class="toss-slide-content">
-          <div class="auth-steps" id="create-steps-3"></div>
+
           <div class="toss-question">가족 구성원을<br>등록해주세요</div>
           <div class="toss-desc">양육자와 아이를 추가해요</div>
           <div class="member-counter" id="member-counter" style="margin-bottom:14px">양육자 1명, 아이 0명 / 최대 7명</div>
@@ -2882,16 +2917,17 @@ button:disabled {
 <!-- AUTH: 가족 만들기 — 스텝 4: 관리 모드 선택 -->
 <div class="auth-screen hidden toss-style" id="auth-create-4">
   <div class="toss-wizard">
-    <div class="toss-top-bar">
-      <button class="toss-back-btn" onclick="showAuthScreen('create-3')">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+    <div class="reg-stepper-bar" id="reg-stepper-4">
+      <button class="reg-stepper-back" onclick="renderRegStepper(2,1,4);showAuthScreen('create-3')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
       </button>
-      <div class="toss-progress-wrap"><div class="toss-progress-fill" style="width:80%"></div></div>
+      <div class="reg-stepper" id="regStepperGroups4"></div>
+      <div class="reg-substeps" id="regStepperSubs4"></div>
     </div>
     <div class="toss-slides-wrap">
       <div class="toss-slide active">
         <div class="toss-slide-content">
-          <div class="auth-steps" id="create-steps-4"></div>
+
           <div class="toss-question">마일리지를 어떻게<br>관리할까요?</div>
           <div class="toss-desc">자녀가 여러 명일 때 관리 방식을 선택해요</div>
           <div class="toss-mode-grid" id="create-mode-grid">
@@ -2916,16 +2952,17 @@ button:disabled {
 <!-- AUTH: 가족 만들기 — 스텝 5: 구성원 초대 -->
 <div class="auth-screen hidden toss-style" id="auth-create-5">
   <div class="toss-wizard">
-    <div class="toss-top-bar">
-      <button class="toss-back-btn" onclick="createStep5Back()">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+    <div class="reg-stepper-bar" id="reg-stepper-5">
+      <button class="reg-stepper-back" onclick="createStep5Back()">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
       </button>
-      <div class="toss-progress-wrap"><div class="toss-progress-fill" style="width:95%"></div></div>
+      <div class="reg-stepper" id="regStepperGroups5"></div>
+      <div class="reg-substeps" id="regStepperSubs5"></div>
     </div>
     <div class="toss-slides-wrap">
       <div class="toss-slide active">
         <div class="toss-slide-content">
-          <div class="auth-steps" id="create-steps-5"></div>
+
           <div class="toss-question">가족 구성원을<br>초대해보세요!</div>
           <div class="toss-desc">초대 링크를 공유하면 가족이 앱에 합류할 수 있어요</div>
           <div id="invite-list"></div>
@@ -4579,8 +4616,59 @@ function backSlide(wrapId, fallbackFn) {
   prev.classList.add('active');
 }
 
+// ── 그룹 스텝 인디케이터 ──
+const _regGroups = [
+  { label: '나는 누구인가', steps: 3 },  // role-type, (role), name — child: 2 steps
+  { label: '계정 생성', steps: 2 },       // id, pwd
+  { label: '가족 생성', steps: 4 }        // family name, members, mode, invites
+];
+
+// groupIdx: 0-2, stepIdx: 0-based within group, totalInGroup: total sub-steps in this group
+function renderRegStepper(groupIdx, stepIdx, totalInGroup) {
+  // Render into ALL stepper containers (1-5)
+  for (let n = 1; n <= 5; n++) {
+    const gc = document.getElementById('regStepperGroups' + n);
+    const sc = document.getElementById('regStepperSubs' + n);
+    if (!gc || !sc) continue;
+    // Groups
+    let gh = '';
+    for (let g = 0; g < _regGroups.length; g++) {
+      const cls = g < groupIdx ? 'done' : g === groupIdx ? 'active' : '';
+      const circleContent = g < groupIdx
+        ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+        : '' + (g + 1);
+      gh += '<div class="reg-group ' + cls + '"><div class="reg-group-circle">' + circleContent + '</div><div class="reg-group-label">' + _regGroups[g].label + '</div></div>';
+      if (g < _regGroups.length - 1) {
+        gh += '<div class="reg-group-line' + (g < groupIdx ? ' done' : '') + '"></div>';
+      }
+    }
+    gc.innerHTML = gh;
+    // Sub-steps
+    let sh = '';
+    for (let s = 0; s < totalInGroup; s++) {
+      const cls = s < stepIdx ? 'done' : s === stepIdx ? 'active' : '';
+      sh += '<div class="reg-substep ' + cls + '"></div>';
+    }
+    sc.innerHTML = sh;
+  }
+}
+
 // ── Step 1 서브슬라이드 ──
-function create1Back() { backSlide('c1-wrap', () => showAuthScreen('insight')); }
+function _updateStepperFromC1() {
+  const wrap = document.getElementById('c1-wrap');
+  if (!wrap) return;
+  const active = wrap.querySelector('.toss-slide.active');
+  if (!active) return;
+  const id = active.id;
+  const isCg = _createState.myRoleType === 'caregiver';
+  const g0 = isCg ? 3 : 2;
+  if (id === 'c1-slide-role-type') renderRegStepper(0, 0, g0);
+  else if (id === 'c1-slide-role') renderRegStepper(0, 1, g0);
+  else if (id === 'c1-slide-name') renderRegStepper(0, isCg ? 2 : 1, g0);
+  else if (id === 'c1-slide-id') renderRegStepper(1, 0, 2);
+  else if (id === 'c1-slide-pwd') renderRegStepper(1, 1, 2);
+}
+function create1Back() { backSlide('c1-wrap', () => showAuthScreen('insight')); setTimeout(_updateStepperFromC1, 50); }
 
 function selectRoleType(type) {
   _createState.myRoleType = type;
@@ -4591,27 +4679,24 @@ function selectRoleType(type) {
 }
 
 function c1SlideRoleTypeNext() {
-  // 혹시 버튼이 로딩/비활성 상태로 빠진 경우 초기화
   const _btn = document.querySelector('#c1-slide-role-type .toss-btn');
   if (_btn) { _btn.disabled = false; _btn.textContent = '다음'; }
   const err = document.getElementById('c1-role-type-error');
   if (!_createState.myRoleType) { if (err) err.textContent = '역할을 선택해주세요'; return; }
-  const prog = document.getElementById('c1-progress');
   if (_createState.myRoleType === 'caregiver') {
-    if (prog) prog.style.width = '25%';
+    renderRegStepper(0, 1, 3); // Group 0, step 1 (호칭), 3 total
     toSlide('c1-wrap', 'c1-slide-role');
     renderRoleGrid();
   } else {
-    // 아이: 호칭 선택 건너뜀
     _createState.myRole = 'child';
-    if (prog) prog.style.width = '40%';
+    renderRegStepper(0, 1, 2); // Group 0, step 1 (이름), 2 total for child
     toSlide('c1-wrap', 'c1-slide-name');
     setTimeout(() => document.getElementById('create-my-name').focus(), 380);
   }
 }
 
 async function c1SlideIdNext() {
-  if(_createState.idLocked){ toSlide('c1-wrap','c1-slide-pwd'); setTimeout(()=>document.getElementById('create-user-pwd').focus(),380); return; }
+  if(_createState.idLocked){ renderRegStepper(1,1,2); toSlide('c1-wrap','c1-slide-pwd'); setTimeout(()=>document.getElementById('create-user-pwd').focus(),380); return; }
   const id = document.getElementById('create-user-id').value.trim();
   const err = document.getElementById('c1-id-error');
   const btn = document.querySelector('#c1-slide-id .toss-btn');
@@ -4631,8 +4716,7 @@ async function c1SlideIdNext() {
   if(lockIcon) lockIcon.style.display = 'block';
   const resetBtn = document.getElementById('c1-id-reset-btn');
   if(resetBtn) resetBtn.style.display = 'block';
-  const prog = document.getElementById('c1-progress');
-  if (prog) prog.style.width = '30%';
+  renderRegStepper(1, 1, 2); // Group 1, step 1 (pwd)
   toSlide('c1-wrap', 'c1-slide-pwd');
   setTimeout(() => document.getElementById('create-user-pwd').focus(), 380);
 }
@@ -4658,8 +4742,7 @@ function c1SlidePwdNext() {
   if (pwd.length < 6) { err.textContent = '비밀번호는 6자 이상이어야 해요'; return; }
   if (pwd !== pwd2) { err.textContent = '비밀번호가 일치하지 않아요'; return; }
   _createState.pwdHash = pwd;
-  const prog = document.getElementById('c1-progress');
-  if (prog) prog.style.width = '100%';
+  renderRegStepper(2, 0, 4); // Group 2, step 0 (family name)
   _goToStep2();
 }
 
@@ -4669,24 +4752,21 @@ function c1SlideNameNext() {
   err.textContent = '';
   if (!name) { err.textContent = '이름을 입력해주세요'; return; }
   _createState.myName = name;
-  const prog = document.getElementById('c1-progress');
-  if (prog) prog.style.width = '70%';
+  renderRegStepper(1, 0, 2); // Group 1 (계정 생성), step 0 (id)
   toSlide('c1-wrap', 'c1-slide-id');
   setTimeout(() => document.getElementById('create-user-id').focus(), 380);
 }
 
 function c1SlideRoleFinish() {
   if (!_createState.myRole) _createState.myRole = 'caregiver';
-  const prog = document.getElementById('c1-progress');
-  if (prog) prog.style.width = '50%';
+  renderRegStepper(0, 2, 3); // Group 0, step 2 (이름), 3 total for caregiver
   toSlide('c1-wrap', 'c1-slide-name');
   setTimeout(() => document.getElementById('create-my-name').focus(), 380);
 }
 
 function c1SkipRole() {
   if (!_createState.myRole) _createState.myRole = 'caregiver';
-  const prog = document.getElementById('c1-progress');
-  if (prog) prog.style.width = '50%';
+  renderRegStepper(0, 2, 3); // Group 0, step 2 (이름), 3 total for caregiver
   toSlide('c1-wrap', 'c1-slide-name');
   setTimeout(() => document.getElementById('create-my-name').focus(), 380);
 }
@@ -4759,8 +4839,7 @@ function startCreateFamily(){
   _saveFamilyDone=false; // 새 가입 시작 시 리셋
   // 슬라이드 상태 리셋
   _slideHistory['c1-wrap'] = [];
-  const c1prog = document.getElementById('c1-progress');
-  if(c1prog) c1prog.style.width='5%';
+  renderRegStepper(0, 0, 3); // Group 0 (나는 누구인가), step 0 (역할 선택)
   // 슬라이드 위치 리셋 (새 슬라이드 c1-slide-role-type이 첫 번째)
   ['c1-slide-role-type','c1-slide-id','c1-slide-pwd','c1-slide-name','c1-slide-role'].forEach((id,i)=>{
     const el=document.getElementById(id);
@@ -4915,6 +4994,7 @@ function createStep2Next(){
     _createState.members=[{role:_createState.myRole, name:_createState.myName, birthDate:'', gender:'', isSelf:true}];
   }
 
+  renderRegStepper(2, 1, 4); // Group 2, step 1 (members)
   showAuthScreen('create-3');
   renderFamilyGraph();
   updateAddMemberBtn();
@@ -5159,6 +5239,7 @@ async function createStep3Next(){
 
   // 항상 독립 모드 (통합모드 제거됨)
   _createState.mode='independent';
+  renderRegStepper(2, 3, 4); // Group 2, step 3 (invites)
   await saveFamilyToFirestore();
   showAuthScreen('create-5');
   renderInviteOptions();
@@ -5170,13 +5251,14 @@ function selectMode(mode){
 }
 
 async function createStep4Next(){
-  // 가족을 DB에 저장한 후 초대 화면으로
+  renderRegStepper(2, 3, 4); // Group 2, step 3 (invites)
   await saveFamilyToFirestore();
   showAuthScreen('create-5');
   renderInviteOptions();
 }
 
 function createStep5Back(){
+  renderRegStepper(2, 1, 4); // Group 2, step 1 (members)
   showAuthScreen('create-3');
   renderFamilyGraph();
 }
@@ -14969,6 +15051,7 @@ Object.assign(window, {
   startCreateFamily, createStep1Next, createStep2Next, createStep3Next, createStep4Next, createStep5Next, createFamilyFinish, skipInvites, saveFamilyToFirestore,
   toSlide, backSlide, create1Back, c1SlideIdNext, c1SlidePwdNext, c1SlideNameNext, c1SlideRoleFinish, c1SkipRole,
   selectRoleType, c1SlideRoleTypeNext, resetCreateId, createStep5Back, createStep5Finish,
+  renderRegStepper, _updateStepperFromC1,
   updateFamilyNamePreview, updatePwdStrength,
   jrBack, jrSlideIdNext,
   renderRoleGrid, selectCreateRole, incrementMemberCount, decrementMemberCount,
