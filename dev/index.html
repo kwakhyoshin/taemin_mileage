@@ -2593,36 +2593,39 @@ button:disabled {
           <svg viewBox="0 0 280 280" fill="none" xmlns="http://www.w3.org/2000/svg">
             <!-- Phone frame -->
             <rect x="50" y="10" width="180" height="260" rx="28" fill="#fff" stroke="#E2E8F0" stroke-width="2"/>
-            <rect x="50" y="10" width="180" height="42" rx="28" fill="#F59E0B"/>
-            <rect x="98" y="26" width="84" height="10" rx="5" fill="#FDE68A" opacity=".6"/>
-            <!-- Mileage counter -->
-            <text x="140" y="85" fill="#1E293B" font-size="32" font-weight="900" text-anchor="middle">505</text>
-            <text x="140" y="102" fill="#94A3B8" font-size="11" font-weight="700" text-anchor="middle">마일리지</text>
+            <!-- Status bar (subtle, not oval) -->
+            <rect x="50" y="10" width="180" height="42" rx="28" fill="#FFFBEB"/>
+            <text x="140" y="36" fill="#92400E" font-size="11" font-weight="800" text-anchor="middle">보상</text>
+            <!-- Mileage display -->
+            <rect x="70" y="62" width="140" height="54" rx="18" fill="linear-gradient(#FEF3C7,#FFFBEB)"/>
+            <rect x="70" y="62" width="140" height="54" rx="18" fill="#FEF3C7"/>
+            <text x="140" y="86" fill="#92400E" font-size="26" font-weight="900" text-anchor="middle">505</text>
+            <text x="140" y="104" fill="#B45309" font-size="10" font-weight="700" text-anchor="middle">마일리지 보유 중</text>
             <!-- Reward card 1: unlocked -->
-            <rect x="66" y="116" width="148" height="52" rx="16" fill="#FFFBEB" stroke="#FDE68A" stroke-width="1.5"/>
-            <text x="86" y="140" fill="#1E293B" font-size="22">🎮</text>
-            <text x="108" y="138" fill="#92400E" font-size="12" font-weight="800">게임 30분</text>
-            <text x="108" y="152" fill="#B45309" font-size="10" font-weight="600">200M 달성! 교환 가능</text>
-            <circle cx="200" cy="140" r="12" fill="#22C55E"/>
-            <path d="M194 140l4 4 8-8" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="66" y="128" width="148" height="50" rx="14" fill="#FFFBEB" stroke="#FDE68A" stroke-width="1.5"/>
+            <rect x="74" y="138" width="30" height="30" rx="10" fill="#FDE68A"/>
+            <text x="89" y="159" fill="#92400E" font-size="16" text-anchor="middle">🎯</text>
+            <text x="114" y="148" fill="#92400E" font-size="11" font-weight="800">게임 30분</text>
+            <text x="114" y="163" fill="#22C55E" font-size="9.5" font-weight="700">교환 가능!</text>
+            <circle cx="200" cy="152" r="11" fill="#22C55E"/>
+            <path d="M195 152l3.5 3.5 7-7" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             <!-- Reward card 2: progress -->
-            <rect x="66" y="176" width="148" height="52" rx="16" fill="#fff" stroke="#E2E8F0" stroke-width="1.5"/>
-            <text x="86" y="200" fill="#1E293B" font-size="22">🍦</text>
-            <text x="108" y="198" fill="#1E293B" font-size="12" font-weight="800">아이스크림</text>
-            <text x="108" y="212" fill="#64748B" font-size="10" font-weight="600">350M / 500M</text>
-            <!-- Progress bar -->
-            <rect x="108" y="218" width="92" height="6" rx="3" fill="#E2E8F0"/>
-            <rect x="108" y="218" width="64" height="6" rx="3" fill="#F59E0B"/>
-            <!-- Celebration sparkles -->
-            <circle cx="68" y="68" r="4" fill="#FBBF24" opacity=".6"/>
-            <circle cx="212" y="54" r="3" fill="#FBBF24" opacity=".5"/>
-            <path d="M220 80 l4 -6 4 6 -6 -4 6 4" stroke="#FBBF24" stroke-width="1.5" stroke-linecap="round" opacity=".7"/>
-            <path d="M58 96 l3 -5 3 5 -5 -3 5 3" stroke="#FBBF24" stroke-width="1.5" stroke-linecap="round" opacity=".6"/>
+            <rect x="66" y="186" width="148" height="50" rx="14" fill="#fff" stroke="#E2E8F0" stroke-width="1.5"/>
+            <rect x="74" y="196" width="30" height="30" rx="10" fill="#F1F5F9"/>
+            <text x="89" y="217" fill="#64748B" font-size="16" text-anchor="middle">🍦</text>
+            <text x="114" y="204" fill="#1E293B" font-size="11" font-weight="800">아이스크림</text>
+            <text x="114" y="218" fill="#94A3B8" font-size="9.5" font-weight="600">350 / 500M</text>
+            <rect x="114" y="224" width="86" height="5" rx="2.5" fill="#E2E8F0"/>
+            <rect x="114" y="224" width="60" height="5" rx="2.5" fill="#F59E0B"/>
+            <!-- Sparkle accents -->
+            <path d="M228 24 l2 6 6 2 -6 2 -2 6 -2 -6 -6 -2 6 -2z" fill="#FBBF24" opacity=".5"/>
+            <path d="M56 50 l1.5 4.5 4.5 1.5 -4.5 1.5 -1.5 4.5 -1.5 -4.5 -4.5 -1.5 4.5 -1.5z" fill="#FBBF24" opacity=".4"/>
+            <circle cx="236" cy="60" r="3" fill="#FBBF24" opacity=".35"/>
           </svg>
         </div>
         <div class="ins-keyword">마일리지로<br>성취감을 느껴요</div>
-        <div class="ins-sub">즉각적인 보상은 도파민을 자극해<br>습관 형성 속도를 <b style="color:#F59E0B;font-size:16px">2배</b> 높여줍니다.</div>
-        <div class="ins-evidence">— Wolfram Schultz, Cambridge 뇌과학 보상 시스템 연구</div>
+        <div class="ins-sub">노력이 눈에 보이면 아이는 스스로<br><b style="color:#F59E0B;font-size:16px">"한 번 더"</b>를 선택합니다.</div>
+        <div class="ins-evidence">— Teresa Amabile, Harvard 진전의 원칙 (The Progress Principle)</div>
       </div>
     </div>
     <!-- CTA (이전/다음 + 건너뛰기) -->
@@ -15327,10 +15330,10 @@ window._createState = _createState;
     // 마지막 페이지면 "시작하기", 아니면 "다음"
     if(cur>=total-1){
       nextBtn.textContent='시작하기';
-      skipBtn.style.display='none';
+      skipBtn.style.visibility='hidden';
     }else{
       nextBtn.textContent='다음';
-      skipBtn.style.display='block';
+      skipBtn.style.visibility='visible';
     }
   }
   function update(){
