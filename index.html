@@ -194,16 +194,16 @@ body.dark .toss-invite-share-btn{background:rgba(99,102,241,.2);color:#818CF8}
 .ins-cards-scroll{flex:1;min-height:0;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;overscroll-behavior-x:contain}
 .ins-cards-scroll::-webkit-scrollbar{display:none}
 .ins-card{flex:0 0 100%;width:100%;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 32px 12px;box-sizing:border-box;transition:background .3s}
-.ins-card-1{background:#EEF2FF}
-.ins-card-2{background:#FFF0F6}
-.ins-card-3{background:#FFFBEB}
-body.dark .ins-card-1{background:rgba(99,102,241,.09)}
-body.dark .ins-card-2{background:rgba(236,72,153,.08)}
-body.dark .ins-card-3{background:rgba(245,158,11,.08)}
-.ins-illust{width:188px;height:188px;margin-bottom:24px;flex-shrink:0}
-.ins-illust svg{width:100%;height:100%}
-.ins-keyword{font-size:26px;font-weight:900;color:#1E293B;text-align:center;line-height:1.35;letter-spacing:-.5px;margin-bottom:10px}
-.ins-sub{font-size:15px;color:#64748B;text-align:center;font-weight:500;line-height:1.6}
+.ins-card-1{background:linear-gradient(180deg,#EEF2FF 0%,#E0E7FF 100%)}
+.ins-card-2{background:linear-gradient(180deg,#FFF1F2 0%,#FCE7F3 100%)}
+.ins-card-3{background:linear-gradient(180deg,#FFFBEB 0%,#FEF3C7 100%)}
+body.dark .ins-card-1{background:linear-gradient(180deg,rgba(99,102,241,.12) 0%,rgba(99,102,241,.06) 100%)}
+body.dark .ins-card-2{background:linear-gradient(180deg,rgba(236,72,153,.1) 0%,rgba(236,72,153,.05) 100%)}
+body.dark .ins-card-3{background:linear-gradient(180deg,rgba(245,158,11,.1) 0%,rgba(245,158,11,.05) 100%)}
+.ins-illust{width:220px;height:220px;margin-bottom:28px;flex-shrink:0}
+.ins-illust svg{width:100%;height:100%;filter:drop-shadow(0 8px 24px rgba(0,0,0,.08))}
+.ins-keyword{font-size:27px;font-weight:900;color:#1E293B;text-align:center;line-height:1.35;letter-spacing:-.5px;margin-bottom:12px}
+.ins-sub{font-size:15px;color:#64748B;text-align:center;font-weight:600;line-height:1.6}
 .ins-dots{display:flex;justify-content:center;gap:8px;padding:14px 0 6px;flex-shrink:0}
 .ins-dot{width:8px;height:8px;border-radius:50%;background:#E2E8F0;transition:all .28s cubic-bezier(.4,0,.2,1);cursor:pointer}
 .ins-dot.active{width:24px;border-radius:4px;background:#6366F1}
@@ -1253,7 +1253,7 @@ body.dark .family-popup-avatar{border-color:rgba(255,255,255,.25)}
   .nav-brand{display:flex;align-items:center;gap:7px;padding:12px 12px 18px;border-bottom:1px solid var(--bdr);margin-bottom:8px;white-space:nowrap}
   .nav-brand-ico .nbi-house{fill:rgba(99,102,241,.15);stroke:#6366F1;stroke-width:1.5;stroke-linejoin:round}
   .nav-brand-ico .nbi-door{stroke:#6366F1;stroke-width:1.5;stroke-linecap:round;fill:none}
-  .nav-brand-ico .nbi-star{fill:#FF6B35}
+  .nav-brand-ico .nbi-star{fill:#fbbf24}
   body.dark .nav-brand-ico .nbi-house{fill:rgba(129,140,248,.18);stroke:#818CF8}
   body.dark .nav-brand-ico .nbi-door{stroke:#818CF8}
   .nb-indigo{fill:#6366F1}
@@ -2413,8 +2413,8 @@ button:disabled {
 <!-- AUTH: 로그인 화면 -->
 <div class="auth-screen" id="auth-login">
   <div class="auth-card">
-    <div class="auth-logo"><svg width="64" height="64" viewBox="0 0 200 200"><defs><linearGradient id="lb" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#4F46E5"/><stop offset="100%" stop-color="#7C3AED"/></linearGradient></defs><circle cx="100" cy="100" r="96" fill="url(#lb)"/><path d="M62,150 L62,98 L100,64 L138,98 L138,150 Z" fill="#fff" opacity=".96"/><rect x="87" y="118" width="26" height="32" rx="4" fill="#FF6B35"/><circle cx="100" cy="50" r="8" fill="#FF6B35"/></svg></div>
-    <svg viewBox="0 0 130 36" xmlns="http://www.w3.org/2000/svg" style="height:32px;width:auto;display:block;margin:0 auto 4px" aria-label="mile.ly"><text x="2" y="27" font-family="'Pretendard Variable',system-ui,-apple-system,sans-serif" font-weight="900" font-size="30" letter-spacing="-1"><tspan fill="#6366F1">mile</tspan><tspan fill="#FF6B35">.</tspan><tspan fill="#6366F1">ly</tspan></text></svg>
+    <div class="auth-logo"><svg width="64" height="64" viewBox="0 0 200 200"><defs><linearGradient id="lb" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#312e81"/><stop offset="100%" stop-color="#4338ca"/></linearGradient></defs><rect width="200" height="200" rx="44" fill="url(#lb)"/><text x="100" y="115" text-anchor="middle" font-family="'Nunito','Pretendard Variable',system-ui,sans-serif" font-weight="900" font-size="56" letter-spacing="-1"><tspan fill="#fff">mile</tspan></text><circle cx="127" cy="112" r="5" fill="#fbbf24"/><circle cx="127" cy="112" r="3" fill="#312e81"/><text x="137" y="115" font-family="'Nunito','Pretendard Variable',system-ui,sans-serif" font-weight="900" font-size="56" letter-spacing="-1" fill="#a5b4fc">ly</text></svg></div>
+    <svg viewBox="0 0 130 36" xmlns="http://www.w3.org/2000/svg" style="height:32px;width:auto;display:block;margin:0 auto 4px" aria-label="mile.ly"><text x="2" y="27" font-family="'Nunito','Pretendard Variable',system-ui,-apple-system,sans-serif" font-weight="900" font-size="30" letter-spacing="-1"><tspan fill="#6366F1">mile</tspan></text><circle cx="74" cy="24" r="3.5" fill="#fbbf24"/><circle cx="74" cy="24" r="1.8" fill="#4338ca"/><text x="82" y="27" font-family="'Nunito','Pretendard Variable',system-ui,-apple-system,sans-serif" font-weight="900" font-size="30" letter-spacing="-1" fill="#a5b4fc">ly</text></svg>
     <div class="auth-sub">가족 계정으로 로그인하세요</div>
     <input type="text" class="auth-input" id="login-id" placeholder="아이디" autocomplete="username" inputmode="latin" autocapitalize="none" onkeydown="if(event.key==='Enter')document.getElementById('login-pwd').focus()">
     <div class="pwd-wrap">
@@ -2433,9 +2433,9 @@ button:disabled {
     <div class="ob-welcome-top">
       <div class="ob-logo-wrap ob-fade-1">
         <div class="ob-logo-icon">
-          <svg width="88" height="88" viewBox="0 0 200 200"><defs><linearGradient id="wb2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#4F46E5"/><stop offset="100%" stop-color="#7C3AED"/></linearGradient></defs><circle cx="100" cy="100" r="100" fill="url(#wb2)"/><path d="M62,150 L62,98 L100,64 L138,98 L138,150 Z" fill="#fff" opacity=".96"/><rect x="87" y="118" width="26" height="32" rx="4" fill="#FF6B35"/><circle cx="100" cy="50" r="8" fill="#FF6B35"/></svg>
+          <svg width="88" height="88" viewBox="0 0 200 200"><defs><linearGradient id="wb2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#312e81"/><stop offset="100%" stop-color="#4338ca"/></linearGradient></defs><rect width="200" height="200" rx="44" fill="url(#wb2)"/><text x="100" y="115" text-anchor="middle" font-family="'Nunito','Pretendard Variable',system-ui,sans-serif" font-weight="900" font-size="56" letter-spacing="-1"><tspan fill="#fff">mile</tspan></text><circle cx="127" cy="112" r="5" fill="#fbbf24"/><circle cx="127" cy="112" r="3" fill="#312e81"/><text x="137" y="115" font-family="'Nunito','Pretendard Variable',system-ui,sans-serif" font-weight="900" font-size="56" letter-spacing="-1" fill="#a5b4fc">ly</text><text x="100" y="138" text-anchor="middle" font-family="'Quicksand',system-ui,sans-serif" font-weight="600" font-size="11" fill="#fff" opacity=".4" letter-spacing="2">GROWING FOOTPRINTS</text></svg>
         </div>
-        <svg viewBox="0 0 130 36" xmlns="http://www.w3.org/2000/svg" style="height:36px;width:auto;display:block" aria-label="mile.ly"><text x="2" y="27" font-family="'Pretendard Variable',system-ui,-apple-system,sans-serif" font-weight="900" font-size="30" letter-spacing="-1"><tspan fill="#fff">mile</tspan><tspan fill="#FF6B35">.</tspan><tspan fill="#fff">ly</tspan></text></svg>
+        <svg viewBox="0 0 130 36" xmlns="http://www.w3.org/2000/svg" style="height:36px;width:auto;display:block" aria-label="mile.ly"><text x="2" y="27" font-family="'Nunito','Pretendard Variable',system-ui,-apple-system,sans-serif" font-weight="900" font-size="30" letter-spacing="-1"><tspan fill="#fff">mile</tspan></text><circle cx="74" cy="24" r="3.5" fill="#fbbf24"/><circle cx="74" cy="24" r="1.8" fill="#312e81"/><text x="82" y="27" font-family="'Nunito','Pretendard Variable',system-ui,-apple-system,sans-serif" font-weight="900" font-size="30" letter-spacing="-1" fill="#a5b4fc">ly</text></svg>
       </div>
       <h1 class="ob-headline ob-fade-2">아이의 좋은 습관,<br>가족이 함께 만들어요</h1>
       <p class="ob-sub ob-fade-3">매일 조금씩, 함께라서 가능해요</p>
@@ -2461,25 +2461,47 @@ button:disabled {
       <!-- Card 1: 매일 작은 활동이 습관이 돼요 -->
       <div class="ins-card ins-card-1">
         <div class="ins-illust">
-          <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="100" cy="100" r="88" fill="#E0E7FF" opacity=".5"/>
-            <!-- Row 1: checked -->
-            <rect x="20" y="46" width="160" height="36" rx="18" fill="white"/>
-            <circle cx="49" cy="64" r="14" fill="#6366F1"/>
-            <path d="M42 64l5 5 10-10" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
-            <rect x="71" y="57" width="78" height="7" rx="3.5" fill="#C7D2FE"/>
-            <rect x="71" y="67" width="56" height="5" rx="2.5" fill="#E0E7FF"/>
-            <!-- Row 2: checked -->
-            <rect x="20" y="90" width="160" height="36" rx="18" fill="white"/>
-            <circle cx="49" cy="108" r="14" fill="#6366F1"/>
-            <path d="M42 108l5 5 10-10" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
-            <rect x="71" y="101" width="84" height="7" rx="3.5" fill="#C7D2FE"/>
-            <rect x="71" y="111" width="62" height="5" rx="2.5" fill="#E0E7FF"/>
-            <!-- Row 3: in progress -->
-            <rect x="20" y="134" width="160" height="36" rx="18" fill="white" opacity=".6"/>
-            <circle cx="49" cy="152" r="14" fill="#E0E7FF" stroke="#C7D2FE" stroke-width="2.5"/>
-            <rect x="71" y="145" width="68" height="7" rx="3.5" fill="#E2E8F0"/>
-            <rect x="71" y="155" width="48" height="5" rx="2.5" fill="#F1F5F9"/>
+          <svg viewBox="0 0 240 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="ins1bg" x1="120" y1="0" x2="120" y2="240"><stop offset="0%" stop-color="#EEF2FF"/><stop offset="100%" stop-color="#C7D2FE" stop-opacity=".3"/></linearGradient>
+              <linearGradient id="ins1check" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#6366F1"/><stop offset="100%" stop-color="#4F46E5"/></linearGradient>
+              <filter id="ins1s"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity=".06"/></filter>
+            </defs>
+            <!-- Soft bg circle -->
+            <circle cx="120" cy="120" r="100" fill="url(#ins1bg)" opacity=".5"/>
+            <!-- Calendar card -->
+            <rect x="28" y="30" width="184" height="180" rx="24" fill="white" filter="url(#ins1s)"/>
+            <!-- Header bar -->
+            <rect x="28" y="30" width="184" height="48" rx="24" fill="#6366F1"/>
+            <rect x="28" y="54" width="184" height="24" fill="#6366F1"/>
+            <text x="120" y="62" text-anchor="middle" font-family="system-ui,sans-serif" font-weight="800" font-size="16" fill="white">3월 넷째 주</text>
+            <!-- Day labels -->
+            <text x="52" y="94" text-anchor="middle" font-family="system-ui" font-weight="700" font-size="10" fill="#94A3B8">월</text>
+            <text x="78" y="94" text-anchor="middle" font-family="system-ui" font-weight="700" font-size="10" fill="#94A3B8">화</text>
+            <text x="104" y="94" text-anchor="middle" font-family="system-ui" font-weight="700" font-size="10" fill="#94A3B8">수</text>
+            <text x="130" y="94" text-anchor="middle" font-family="system-ui" font-weight="700" font-size="10" fill="#94A3B8">목</text>
+            <text x="156" y="94" text-anchor="middle" font-family="system-ui" font-weight="700" font-size="10" fill="#94A3B8">금</text>
+            <text x="182" y="94" text-anchor="middle" font-family="system-ui" font-weight="700" font-size="10" fill="#94A3B8">토</text>
+            <!-- Checked days (Mon-Thu) -->
+            <circle cx="52" cy="116" r="16" fill="#EEF2FF"/><circle cx="52" cy="116" r="12" fill="url(#ins1check)"/><path d="M46 116l4 4 8-8" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="78" cy="116" r="16" fill="#EEF2FF"/><circle cx="78" cy="116" r="12" fill="url(#ins1check)"/><path d="M72 116l4 4 8-8" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="104" cy="116" r="16" fill="#EEF2FF"/><circle cx="104" cy="116" r="12" fill="url(#ins1check)"/><path d="M98 116l4 4 8-8" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="130" cy="116" r="16" fill="#EEF2FF"/><circle cx="130" cy="116" r="12" fill="url(#ins1check)"/><path d="M124 116l4 4 8-8" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- Today (Fri) - pulsing -->
+            <circle cx="156" cy="116" r="16" fill="#EEF2FF" stroke="#6366F1" stroke-width="2" stroke-dasharray="3 3"/>
+            <text x="156" y="121" text-anchor="middle" font-family="system-ui" font-weight="800" font-size="14" fill="#6366F1">!</text>
+            <!-- Empty (Sat) -->
+            <circle cx="182" cy="116" r="16" fill="#F8FAFC"/>
+            <!-- Progress bar -->
+            <rect x="44" y="150" width="152" height="10" rx="5" fill="#E2E8F0"/>
+            <rect x="44" y="150" width="102" height="10" rx="5" fill="url(#ins1check)"/>
+            <!-- 66% label -->
+            <text x="44" y="176" font-family="system-ui" font-weight="800" font-size="12" fill="#6366F1">66%</text>
+            <text x="196" y="176" text-anchor="end" font-family="system-ui" font-weight="600" font-size="11" fill="#94A3B8">66일 목표</text>
+            <!-- Floating sparkles -->
+            <circle cx="30" cy="22" r="4" fill="#A5B4FC" opacity=".6"/>
+            <circle cx="210" cy="18" r="3" fill="#C7D2FE" opacity=".5"/>
+            <circle cx="220" cy="50" r="5" fill="#818CF8" opacity=".3"/>
           </svg>
         </div>
         <div class="ins-keyword">매일 작은 활동이<br>습관이 돼요</div>
@@ -2488,24 +2510,33 @@ button:disabled {
       <!-- Card 2: 가족이 함께하면 동기부여가 달라져요 -->
       <div class="ins-card ins-card-2">
         <div class="ins-illust">
-          <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="100" cy="100" r="88" fill="#FCE7F3" opacity=".6"/>
-            <!-- Star goal -->
-            <polygon points="100,26 106,45 127,45 111,57 117,76 100,64 83,76 89,57 73,45 94,45" fill="#F472B6"/>
-            <line x1="100" y1="16" x2="100" y2="10" stroke="#F472B6" stroke-width="3" stroke-linecap="round"/>
-            <line x1="124" y1="22" x2="128" y2="18" stroke="#F472B6" stroke-width="2.5" stroke-linecap="round" opacity=".7"/>
-            <line x1="76" y1="22" x2="72" y2="18" stroke="#F472B6" stroke-width="2.5" stroke-linecap="round" opacity=".7"/>
-            <!-- Ground path -->
-            <path d="M18 160 Q100 144 182 160" stroke="#FBCFE8" stroke-width="3" fill="none" stroke-linecap="round"/>
-            <!-- Adult silhouette -->
-            <circle cx="66" cy="96" r="17" fill="#F472B6"/>
-            <rect x="51" y="113" width="30" height="48" rx="15" fill="#F472B6"/>
-            <!-- Child silhouette -->
-            <circle cx="118" cy="110" r="13" fill="#FCA5A5"/>
-            <rect x="105" y="123" width="26" height="38" rx="13" fill="#FCA5A5"/>
-            <!-- Floating hearts -->
-            <path d="M150 88 C150 85 153.5 83 153.5 86.5 C153.5 83 157 85 157 88 C157 93 153.5 96 153.5 96 C153.5 96 150 93 150 88Z" fill="#F472B6" opacity=".8"/>
-            <path d="M160 66 C160 63.5 163 62 163 64.5 C163 62 166 63.5 166 66 C166 70 163 72.5 163 72.5 C163 72.5 160 70 160 66Z" fill="#F472B6" opacity=".5"/>
+          <svg viewBox="0 0 240 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="ins2bg" x1="120" y1="0" x2="120" y2="240"><stop offset="0%" stop-color="#FDF2F8"/><stop offset="100%" stop-color="#FBCFE8" stop-opacity=".3"/></linearGradient>
+              <linearGradient id="ins2pink" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#EC4899"/><stop offset="100%" stop-color="#DB2777"/></linearGradient>
+              <filter id="ins2s"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity=".06"/></filter>
+            </defs>
+            <circle cx="120" cy="120" r="100" fill="url(#ins2bg)" opacity=".5"/>
+            <!-- Chat card -->
+            <rect x="28" y="30" width="184" height="180" rx="24" fill="white" filter="url(#ins2s)"/>
+            <!-- Header -->
+            <rect x="28" y="30" width="184" height="48" rx="24" fill="#EC4899"/>
+            <rect x="28" y="54" width="184" height="24" fill="#EC4899"/>
+            <text x="120" y="62" text-anchor="middle" font-family="system-ui,sans-serif" font-weight="800" font-size="15" fill="white">우리 가족 응원방</text>
+            <!-- Family member avatars row -->
+            <circle cx="58" cy="96" r="14" fill="#FDE68A"/><text x="58" y="101" text-anchor="middle" font-size="14">👨</text>
+            <circle cx="94" cy="96" r="14" fill="#DBEAFE"/><text x="94" y="101" text-anchor="middle" font-size="14">👩</text>
+            <circle cx="130" cy="96" r="14" fill="#D1FAE5"/><text x="130" y="101" text-anchor="middle" font-size="14">👧</text>
+            <circle cx="166" cy="96" r="14" fill="#FEE2E2"/><text x="166" y="101" text-anchor="middle" font-size="14">👶</text>
+            <!-- Chat bubbles -->
+            <rect x="44" y="118" width="110" height="28" rx="14" fill="#FDF2F8"/>
+            <text x="54" y="136" font-family="system-ui" font-weight="700" font-size="11" fill="#BE185D">오늘도 잘했어! 최고야 👏</text>
+            <rect x="86" y="152" width="110" height="28" rx="14" fill="url(#ins2pink)"/>
+            <text x="96" y="170" font-family="system-ui" font-weight="700" font-size="11" fill="white">고마워요! 내일도 할래 💪</text>
+            <!-- Heart floating -->
+            <path d="M200 40 C200 35 205 32 205 37 C205 32 210 35 210 40 C210 47 205 51 205 51 C205 51 200 47 200 40Z" fill="#F472B6" opacity=".6"/>
+            <circle cx="30" cy="22" r="4" fill="#F9A8D4" opacity=".5"/>
+            <circle cx="218" cy="70" r="3" fill="#FBCFE8" opacity=".6"/>
           </svg>
         </div>
         <div class="ins-keyword">가족이 함께하면<br>동기부여가 달라져요</div>
@@ -2514,26 +2545,35 @@ button:disabled {
       <!-- Card 3: 마일리지로 성취감을 느껴요 -->
       <div class="ins-card ins-card-3">
         <div class="ins-illust">
-          <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="100" cy="100" r="88" fill="#FEF3C7" opacity=".6"/>
-            <!-- Gauge bar background -->
-            <rect x="42" y="36" width="22" height="126" rx="11" fill="#E2E8F0"/>
-            <!-- Gauge fill -->
-            <rect x="42" y="86" width="22" height="76" rx="11" fill="#F59E0B"/>
-            <!-- Gauge top indicator -->
-            <circle cx="53" cy="84" r="14" fill="#F59E0B"/>
-            <!-- Main coin -->
-            <circle cx="120" cy="110" r="52" fill="#FDE68A"/>
-            <circle cx="120" cy="110" r="44" fill="#FCD34D"/>
-            <!-- Star on coin -->
-            <polygon points="120,83 124.5,97 140,97 128,106 132.5,120 120,111 107.5,120 112,106 100,97 115.5,97" fill="#F59E0B"/>
-            <!-- Rising coin 1 -->
-            <circle cx="150" cy="62" r="13" fill="#FCD34D" opacity=".75"/>
-            <polygon points="150,54 153,62 161,62 155,67 157,75 150,70 143,75 145,67 139,62 147,62" fill="#F59E0B" opacity=".75"/>
-            <!-- Rising coin 2 (small) -->
-            <circle cx="158" cy="36" r="8" fill="#FCD34D" opacity=".42"/>
-            <!-- Up arrow -->
-            <path d="M150 52 L150 44 M146 48 L150 44 L154 48" stroke="#F59E0B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity=".85"/>
+          <svg viewBox="0 0 240 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="ins3bg" x1="120" y1="0" x2="120" y2="240"><stop offset="0%" stop-color="#FFFBEB"/><stop offset="100%" stop-color="#FDE68A" stop-opacity=".3"/></linearGradient>
+              <linearGradient id="ins3gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#F59E0B"/><stop offset="100%" stop-color="#D97706"/></linearGradient>
+              <filter id="ins3s"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity=".06"/></filter>
+            </defs>
+            <circle cx="120" cy="120" r="100" fill="url(#ins3bg)" opacity=".5"/>
+            <!-- Reward card -->
+            <rect x="28" y="30" width="184" height="180" rx="24" fill="white" filter="url(#ins3s)"/>
+            <!-- Header -->
+            <rect x="28" y="30" width="184" height="48" rx="24" fill="url(#ins3gold)"/>
+            <rect x="28" y="54" width="184" height="24" fill="#F59E0B"/>
+            <text x="120" y="62" text-anchor="middle" font-family="system-ui,sans-serif" font-weight="800" font-size="15" fill="white">마일리지 리워드</text>
+            <!-- Big coin center -->
+            <circle cx="120" cy="120" r="40" fill="#FDE68A"/>
+            <circle cx="120" cy="120" r="33" fill="#FCD34D"/>
+            <polygon points="120,97 124,108 136,108 127,115 130,126 120,119 110,126 113,115 104,108 116,108" fill="#F59E0B"/>
+            <!-- Point display -->
+            <text x="120" y="164" text-anchor="middle" font-family="system-ui" font-weight="900" font-size="22" fill="#D97706">1,250P</text>
+            <text x="120" y="180" text-anchor="middle" font-family="system-ui" font-weight="600" font-size="11" fill="#94A3B8">이번 달 모은 마일리지</text>
+            <!-- Level badges -->
+            <rect x="44" y="190" width="52" height="16" rx="8" fill="#FEF3C7"/><text x="70" y="201" text-anchor="middle" font-family="system-ui" font-weight="800" font-size="9" fill="#D97706">Lv.3 🏅</text>
+            <rect x="104" y="190" width="52" height="16" rx="8" fill="#EEF2FF"/><text x="130" y="201" text-anchor="middle" font-family="system-ui" font-weight="800" font-size="9" fill="#6366F1">뱃지 5개</text>
+            <rect x="164" y="190" width="42" height="16" rx="8" fill="#DCFCE7"/><text x="185" y="201" text-anchor="middle" font-family="system-ui" font-weight="800" font-size="9" fill="#16A34A">+120</text>
+            <!-- Sparkles -->
+            <circle cx="36" cy="22" r="4" fill="#FCD34D" opacity=".6"/>
+            <circle cx="210" cy="18" r="3" fill="#FDE68A" opacity=".5"/>
+            <polygon points="214,50 216,46 218,50 214,50" fill="#F59E0B" opacity=".4"/>
+            <circle cx="28" cy="60" r="3" fill="#FBBF24" opacity=".4"/>
           </svg>
         </div>
         <div class="ins-keyword">마일리지로<br>성취감을 느껴요</div>
@@ -2572,7 +2612,7 @@ button:disabled {
           <div class="c1-role-type-grid">
             <div class="c1-role-type-card" id="role-type-caregiver" onclick="selectRoleType('caregiver')">
               <div class="c1-role-type-card-icon">
-                <svg width="40" height="40" viewBox="0 0 200 200" fill="none"><circle cx="100" cy="100" r="100" fill="#E0E7FF"/><ellipse cx="100" cy="82" rx="28" ry="28" fill="#6366F1"/><path d="M46,166 C46,136 72,116 100,116 C128,116 154,136 154,166" fill="#4F46E5"/></svg>
+                <svg width="40" height="40" viewBox="0 0 200 200" fill="none"><defs><linearGradient id="caregiver-face" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:#FBBF7A;stop-opacity:1" /><stop offset="100%" style="stop-color:#F59E0B;stop-opacity:1" /></linearGradient><linearGradient id="caregiver-body" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:#6366F1;stop-opacity:1" /><stop offset="100%" style="stop-color:#4F46E5;stop-opacity:1" /></linearGradient></defs><circle cx="100" cy="100" r="100" fill="#E0E7FF"/><circle cx="100" cy="70" r="30" fill="url(#caregiver-face)"/><circle cx="85" cy="60" r="5" fill="#1F2937"/><circle cx="115" cy="60" r="5" fill="#1F2937"/><circle cx="83" cy="58" r="2.5" fill="#fff"/><circle cx="117" cy="58" r="2.5" fill="#fff"/><path d="M88 80 Q100 88 112 80" stroke="#1F2937" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="100" cy="90" r="2.5" fill="#1F2937"/><rect x="60" y="100" width="80" height="70" rx="8" fill="url(#caregiver-body)"/><path d="M60 110 L70 100 L130 100 L140 110" fill="#4338CA"/><circle cx="80" cy="140" r="8" fill="#FCA5A5"/><circle cx="120" cy="140" r="8" fill="#FCA5A5"/></svg>
               </div>
               <div>
                 <div class="c1-role-type-card-title">양육자 (어른)</div>
@@ -2584,7 +2624,7 @@ button:disabled {
             </div>
             <div class="c1-role-type-card" id="role-type-child" onclick="selectRoleType('child')">
               <div class="c1-role-type-card-icon child-icon">
-                <svg width="40" height="40" viewBox="0 0 200 200" fill="none"><circle cx="100" cy="100" r="100" fill="#FEF3C7"/><ellipse cx="100" cy="78" rx="24" ry="24" fill="#F59E0B"/><path d="M52,162 C52,136 74,118 100,118 C126,118 148,136 148,162" fill="#D97706"/></svg>
+                <svg width="40" height="40" viewBox="0 0 200 200" fill="none"><defs><linearGradient id="child-face" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:#FBBF7A;stop-opacity:1" /><stop offset="100%" style="stop-color:#F59E0B;stop-opacity:1" /></linearGradient><linearGradient id="child-hair" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:#F97316;stop-opacity:1" /><stop offset="100%" style="stop-color:#EA580C;stop-opacity:1" /></linearGradient><linearGradient id="child-body" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:#F97316;stop-opacity:1" /><stop offset="100%" style="stop-color:#DC2626;stop-opacity:1" /></linearGradient></defs><circle cx="100" cy="100" r="100" fill="#FEF3C7"/><path d="M60 75 Q60 45 100 40 Q140 45 140 65 Q140 75 130 85 L70 85 Q60 75 60 65" fill="url(#child-hair)"/><circle cx="100" cy="80" r="30" fill="url(#child-face)"/><circle cx="80" cy="65" r="7" fill="#1F2937"/><circle cx="120" cy="65" r="7" fill="#1F2937"/><circle cx="77" cy="62" r="3.5" fill="#fff"/><circle cx="123" cy="62" r="3.5" fill="#fff"/><circle cx="75" cy="65" r="5" fill="#EC4899"/><circle cx="125" cy="65" r="5" fill="#EC4899"/><path d="M86 90 Q100 100 114 90" stroke="#1F2937" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="100" cy="105" r="3" fill="#1F2937"/><rect x="55" y="110" width="90" height="65" rx="8" fill="url(#child-body)"/><path d="M55 125 L65 110 L135 110 L145 125" fill="#991B1B"/><circle cx="75" cy="155" r="8" fill="#FCA5A5"/><circle cx="125" cy="155" r="8" fill="#FCA5A5"/><path d="M70 165 L70 175 M130 165 L130 175" stroke="#DC2626" stroke-width="3" stroke-linecap="round"/></svg>
               </div>
               <div>
                 <div class="c1-role-type-card-title">아이</div>
@@ -3561,15 +3601,16 @@ button:disabled {
   <nav class="bottom-nav">
     <!-- 사이드바 브랜드 (landscape 태블릿/데스크톱에서만 표시) -->
     <div class="nav-brand">
-      <svg class="nav-brand-ico" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path class="nbi-house" d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
-        <path class="nbi-door" d="M9 22V12h6v10"/>
-        <path class="nbi-star" d="M19.5 2.5l.5 1.5 1.5.5-1.5.5-.5 1.5-.5-1.5-1.5-.5 1.5-.5z"/>
+      <svg class="nav-brand-ico" width="24" height="24" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <rect width="200" height="200" rx="44" fill="#4338ca"/>
+        <text x="100" y="120" text-anchor="middle" font-family="'Nunito',system-ui,sans-serif" font-weight="900" font-size="64" fill="#fff" letter-spacing="-2">m</text>
+        <circle cx="145" cy="116" r="7" fill="#fbbf24"/><circle cx="145" cy="116" r="4" fill="#4338ca"/>
       </svg>
-      <svg class="nav-brand-txt" viewBox="0 0 88 22" xmlns="http://www.w3.org/2000/svg" width="88" height="22">
-        <text y="17" font-family="'Pretendard Variable',system-ui,sans-serif" font-weight="900" font-size="19" letter-spacing="-0.5">
-          <tspan class="nb-indigo">mile</tspan><tspan fill="#FF6B35">.</tspan><tspan class="nb-indigo">ly</tspan>
+      <svg class="nav-brand-txt" viewBox="0 0 100 22" xmlns="http://www.w3.org/2000/svg" width="100" height="22">
+        <text y="17" font-family="'Nunito','Pretendard Variable',system-ui,sans-serif" font-weight="900" font-size="19" letter-spacing="-0.5">
+          <tspan class="nb-indigo">mile</tspan><tspan class="nb-indigo" fill="#a5b4fc">ly</tspan>
         </text>
+        <circle cx="62" cy="14.5" r="3" fill="#fbbf24"/><circle cx="62" cy="14.5" r="1.5" fill="#4338ca"/>
       </svg>
     </div>
     <div class="nav-item active" data-tab="home" id="tab-home" onclick="goTab('home')">
@@ -4019,15 +4060,16 @@ Object.entries(EMOJIS).forEach(([cat,arr])=>arr.forEach(e=>FLAT.push({e,cat,kw:E
 const _SVG_PERSON_M='<svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="40" cy="27" r="13"/><path d="M20 70v-7a13 13 0 0 1 13-13h14a13 13 0 0 1 13 13v7"/></svg>';
 const _SVG_PERSON_F='<svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="40" cy="27" r="13"/><path d="M27 21Q26 12 40 10Q54 12 53 21"/><path d="M20 70v-7a13 13 0 0 1 13-13h14a13 13 0 0 1 13 13v7"/></svg>';
 const _SVG_ELDER='<svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="40" cy="27" r="13"/><path d="M29 18Q30 14 35 14" stroke-width="2"/><path d="M51 18Q50 14 45 14" stroke-width="2"/><path d="M20 70v-7a13 13 0 0 1 13-13h14a13 13 0 0 1 13 13v7"/></svg>';
-const _SVG_CHILD_M='<svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="40" cy="27" r="13"/><path d="M31 18L33 12L36 17L38 8L40 16L42 8L44 17L47 12L49 18" stroke-width="2.5"/><path d="M20 70v-7a13 13 0 0 1 13-13h14a13 13 0 0 1 13 13v7"/></svg>';
-const _SVG_CHILD_F='<svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="40" cy="27" r="13"/><path d="M27 21Q27 14 40 14Q53 14 53 21"/><path d="M27 21Q21 18 19 24Q18 31 24 34Q27 35 27 29"/><circle cx="21" cy="28" r="3.5" stroke-width="2"/><path d="M53 21Q59 18 61 24Q62 31 56 34Q53 35 53 29"/><circle cx="59" cy="28" r="3.5" stroke-width="2"/><path d="M20 70v-7a13 13 0 0 1 13-13h14a13 13 0 0 1 13 13v7"/></svg>';
+// Emoji-style role icons - filled colorful designs
+const _SVG_CHILD_M='<svg viewBox="0 0 80 80" fill="none"><defs><linearGradient id="boy-face" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:#FBBF7A;stop-opacity:1" /><stop offset="100%" style="stop-color:#F59E0B;stop-opacity:1" /></linearGradient></defs><circle cx="40" cy="25" r="18" fill="url(#boy-face)"/><circle cx="35" cy="22" r="3" fill="#1F2937"/><circle cx="45" cy="22" r="3" fill="#1F2937"/><circle cx="33" cy="23" r="1.5" fill="#fff"/><circle cx="47" cy="23" r="1.5" fill="#fff"/><path d="M38 30 Q40 32 42 30" stroke="#1F2937" stroke-width="1.5" fill="none" stroke-linecap="round"/><circle cx="40" cy="34" r="1" fill="#1F2937"/><rect x="28" y="42" width="24" height="28" rx="4" fill="#059669"/><path d="M28 46 L32 42 L48 42 L52 46" fill="#047857"/><circle cx="35" cy="60" r="3.5" fill="#DC2626"/><circle cx="45" cy="60" r="3.5" fill="#DC2626"/></svg>';
+const _SVG_CHILD_F='<svg viewBox="0 0 80 80" fill="none"><defs><linearGradient id="girl-face" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:#FBBF7A;stop-opacity:1" /><stop offset="100%" style="stop-color:#F59E0B;stop-opacity:1" /></linearGradient><linearGradient id="girl-hair" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:#F97316;stop-opacity:1" /><stop offset="100%" style="stop-color:#EA580C;stop-opacity:1" /></linearGradient></defs><path d="M28 25 Q28 10 40 8 Q52 10 52 25 Q52 28 50 32 L30 32 Q28 28 28 25" fill="url(#girl-hair)"/><circle cx="40" cy="26" r="17" fill="url(#girl-face)"/><circle cx="34" cy="22" r="2.5" fill="#1F2937"/><circle cx="46" cy="22" r="2.5" fill="#1F2937"/><circle cx="32" cy="22" r="2.5" fill="#EC4899"/><circle cx="48" cy="22" r="2.5" fill="#EC4899"/><circle cx="32" cy="21" r="1" fill="#fff"/><circle cx="48" cy="21" r="1" fill="#fff"/><path d="M38 30 Q40 32 42 30" stroke="#1F2937" stroke-width="1.5" fill="none" stroke-linecap="round"/><circle cx="40" cy="34" r="1" fill="#1F2937"/><rect x="26" y="43" width="28" height="26" rx="3" fill="#F97316"/><path d="M26 47 L28 43 L52 43 L54 47" fill="#DC2626"/><circle cx="34" cy="61" r="3" fill="#FCA5A5"/><circle cx="46" cy="61" r="3" fill="#FCA5A5"/><path d="M32 68 L32 72 M48 68 L48 72" stroke="#DC2626" stroke-width="1.5" stroke-linecap="round"/></svg>';
 // 역할별 차별화 SVG 아이콘
-const _SVG_DAD='<svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="40" cy="27" r="13"/><path d="M28 21Q28 14 40 14Q52 14 52 21" stroke-width="5"/><path d="M20 70v-7a13 13 0 0 1 13-13h14a13 13 0 0 1 13 13v7"/><path d="M36 41L40 46L44 41"/><path d="M38.5 46L37 58L40 62L43 58L41.5 46Z"/></svg>';
-const _SVG_MOM='<svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="40" cy="27" r="13"/><path d="M27 21Q26 10 40 9Q54 10 53 21"/><path d="M27 27Q23 40 24 53Q26 62 30 66"/><path d="M53 27Q57 40 56 53Q54 62 50 66"/><line x1="27" y1="31" x2="27" y2="36" stroke-width="2"/><circle cx="27" cy="38.5" r="2.5" stroke-width="2"/><line x1="53" y1="31" x2="53" y2="36" stroke-width="2"/><circle cx="53" cy="38.5" r="2.5" stroke-width="2"/><path d="M20 70v-7a13 13 0 0 1 13-13h14a13 13 0 0 1 13 13v7"/></svg>';
-const _SVG_GRANDPA='<svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="40" cy="27" r="13"/><path d="M29 18Q30 14 35 14" stroke-width="2"/><path d="M51 18Q50 14 45 14" stroke-width="2"/><circle cx="34" cy="28" r="4.5" stroke-width="2"/><circle cx="46" cy="28" r="4.5" stroke-width="2"/><line x1="38.5" y1="28" x2="41.5" y2="28" stroke-width="1.5"/><line x1="29.5" y1="27" x2="27" y2="26" stroke-width="1.5"/><line x1="50.5" y1="27" x2="53" y2="26" stroke-width="1.5"/><path d="M20 70v-7a13 13 0 0 1 13-13h14a13 13 0 0 1 13 13v7"/></svg>';
-const _SVG_GRANDMA='<svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="40" cy="27" r="13"/><path d="M33 19Q34 13 40 11Q46 13 47 19"/><circle cx="40" cy="11" r="4.5" stroke-width="2"/><path d="M34 42Q40 47 46 42" stroke-width="1.5"/><circle cx="40" cy="47" r="2" stroke-width="1.5"/><path d="M20 70v-7a13 13 0 0 1 13-13h14a13 13 0 0 1 13 13v7"/></svg>';
-const _SVG_GRANDPA_M='<svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="40" cy="27" r="13"/><path d="M29 18Q30 14 35 14" stroke-width="2"/><path d="M51 18Q50 14 45 14" stroke-width="2"/><rect x="28.5" y="23" width="9.5" height="8" rx="1.5" stroke-width="2"/><rect x="42" y="23" width="9.5" height="8" rx="1.5" stroke-width="2"/><line x1="38" y1="27" x2="42" y2="27" stroke-width="1.5"/><line x1="28.5" y1="27" x2="26" y2="26" stroke-width="1.5"/><line x1="51.5" y1="27" x2="54" y2="26" stroke-width="1.5"/><path d="M20 70v-7a13 13 0 0 1 13-13h14a13 13 0 0 1 13 13v7"/></svg>';
-const _SVG_GRANDMA_M='<svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="40" cy="27" r="13"/><path d="M28 23Q26 15 28 11Q31 7 36 7Q40 6 44 7Q49 7 52 11Q54 15 52 23"/><path d="M28 23Q25 30 26 37"/><path d="M52 23Q55 30 54 37"/><path d="M27 17Q26 14 29 13Q32 12 31 15" stroke-width="2"/><path d="M35 9Q34 6 37 7Q40 8 39 11" stroke-width="2"/><path d="M45 9Q46 6 43 7Q40 8 41 11" stroke-width="2"/><path d="M53 17Q54 14 51 13Q48 12 49 15" stroke-width="2"/><path d="M20 70v-7a13 13 0 0 1 13-13h14a13 13 0 0 1 13 13v7"/></svg>';
+const _SVG_DAD='<svg viewBox="0 0 80 80" fill="none"><defs><linearGradient id="dad-face" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:#FBBF7A;stop-opacity:1" /><stop offset="100%" style="stop-color:#F59E0B;stop-opacity:1" /></linearGradient><linearGradient id="dad-body" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:#3B82F6;stop-opacity:1" /><stop offset="100%" style="stop-color:#1D4ED8;stop-opacity:1" /></linearGradient></defs><path d="M32 14 Q32 10 40 9 Q48 10 48 16" fill="#1F2937" stroke="none"/><circle cx="40" cy="26" r="17" fill="url(#dad-face)"/><circle cx="34" cy="22" r="3" fill="#1F2937"/><circle cx="46" cy="22" r="3" fill="#1F2937"/><circle cx="33" cy="21" r="1.5" fill="#fff"/><circle cx="47" cy="21" r="1.5" fill="#fff"/><path d="M38 30 Q40 32 42 30" stroke="#1F2937" stroke-width="1.5" fill="none" stroke-linecap="round"/><circle cx="40" cy="34" r="1.2" fill="#1F2937"/><rect x="26" y="44" width="28" height="26" rx="3" fill="url(#dad-body)"/><path d="M26 48 L28 44 L52 44 L54 48" fill="#1E40AF"/><line x1="32" y1="44" x2="32" y2="72" stroke="#2563EB" stroke-width="2"/><line x1="48" y1="44" x2="48" y2="72" stroke="#2563EB" stroke-width="2"/><circle cx="34" cy="61" r="3.5" fill="#DC2626"/><circle cx="46" cy="61" r="3.5" fill="#DC2626"/></svg>';
+const _SVG_MOM='<svg viewBox="0 0 80 80" fill="none"><defs><linearGradient id="mom-face" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:#FBBF7A;stop-opacity:1" /><stop offset="100%" style="stop-color:#F59E0B;stop-opacity:1" /></linearGradient><linearGradient id="mom-hair" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:#D97706;stop-opacity:1" /><stop offset="100%" style="stop-color:#92400E;stop-opacity:1" /></linearGradient><linearGradient id="mom-body" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:#EC4899;stop-opacity:1" /><stop offset="100%" style="stop-color:#BE185D;stop-opacity:1" /></linearGradient></defs><path d="M28 18 Q28 8 40 6 Q52 8 52 20 Q52 24 50 28 L30 28 Q28 24 28 18" fill="url(#mom-hair)"/><circle cx="40" cy="27" r="17" fill="url(#mom-face)"/><circle cx="34" cy="23" r="2.8" fill="#1F2937"/><circle cx="46" cy="23" r="2.8" fill="#1F2937"/><circle cx="33" cy="22" r="1.5" fill="#fff"/><circle cx="47" cy="22" r="1.5" fill="#fff"/><path d="M38 31 Q40 33 42 31" stroke="#1F2937" stroke-width="1.5" fill="none" stroke-linecap="round"/><circle cx="40" cy="35" r="1.2" fill="#1F2937"/><rect x="26" y="43" width="28" height="28" rx="3" fill="url(#mom-body)"/><path d="M26 47 L28 43 L52 43 L54 47" fill="#9D174D"/><circle cx="34" cy="61" r="3.5" fill="#FCA5A5"/><circle cx="46" cy="61" r="3.5" fill="#FCA5A5"/></svg>';
+const _SVG_GRANDPA='<svg viewBox="0 0 80 80" fill="none"><defs><linearGradient id="grandpa-face" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:#FBBF7A;stop-opacity:1" /><stop offset="100%" style="stop-color:#F59E0B;stop-opacity:1" /></linearGradient><linearGradient id="grandpa-body" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:#D97706;stop-opacity:1" /><stop offset="100%" style="stop-color:#92400E;stop-opacity:1" /></linearGradient></defs><path d="M32 14 Q32 11 36 11 Q40 10 44 11 Q48 11 48 15" fill="#78350F" stroke="none"/><circle cx="40" cy="27" r="17" fill="url(#grandpa-face)"/><circle cx="32" cy="25" r="6" fill="#B7860B" stroke="#8B5CF6" stroke-width="1.5"/><circle cx="48" cy="25" r="6" fill="#B7860B" stroke="#8B5CF6" stroke-width="1.5"/><circle cx="32" cy="25" r="3.5" fill="#FBBF24"/><circle cx="48" cy="25" r="3.5" fill="#FBBF24"/><circle cx="30" cy="24" r="1.5" fill="#1F2937"/><circle cx="50" cy="24" r="1.5" fill="#1F2937"/><circle cx="35" cy="23" r="3" fill="#1F2937"/><circle cx="45" cy="23" r="3" fill="#1F2937"/><circle cx="34" cy="22" r="1.5" fill="#fff"/><circle cx="46" cy="22" r="1.5" fill="#fff"/><path d="M38 31 Q40 33 42 31" stroke="#1F2937" stroke-width="1.5" fill="none" stroke-linecap="round"/><circle cx="40" cy="35" r="1.2" fill="#1F2937"/><rect x="26" y="44" width="28" height="26" rx="3" fill="url(#grandpa-body)"/><path d="M26 48 L28 44 L52 44 L54 48" fill="#78350F"/><circle cx="34" cy="61" r="3.5" fill="#DC2626"/><circle cx="46" cy="61" r="3.5" fill="#DC2626"/></svg>';
+const _SVG_GRANDMA='<svg viewBox="0 0 80 80" fill="none"><defs><linearGradient id="grandma-face" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:#FBBF7A;stop-opacity:1" /><stop offset="100%" style="stop-color:#F59E0B;stop-opacity:1" /></linearGradient><linearGradient id="grandma-hair" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:#D3D3D3;stop-opacity:1" /><stop offset="100%" style="stop-color:#A0AEC0;stop-opacity:1" /></linearGradient><linearGradient id="grandma-body" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:#CA8A04;stop-opacity:1" /><stop offset="100%" style="stop-color:#92400E;stop-opacity:1" /></linearGradient></defs><path d="M28 16 Q28 8 40 6 Q52 8 52 18 Q52 22 50 26 L30 26 Q28 22 28 16" fill="url(#grandma-hair)"/><circle cx="40" cy="27" r="17" fill="url(#grandma-face)"/><path d="M32 15 Q35 12 38 15" fill="url(#grandma-hair)"/><path d="M48 15 Q45 12 42 15" fill="url(#grandma-hair)"/><circle cx="35" cy="24" r="3" fill="#1F2937"/><circle cx="45" cy="24" r="3" fill="#1F2937"/><circle cx="34" cy="23" r="1.5" fill="#fff"/><circle cx="46" cy="23" r="1.5" fill="#fff"/><path d="M38 32 Q40 34 42 32" stroke="#1F2937" stroke-width="1.5" fill="none" stroke-linecap="round"/><circle cx="40" cy="36" r="1.2" fill="#1F2937"/><rect x="26" y="44" width="28" height="26" rx="3" fill="url(#grandma-body)"/><path d="M26 48 L28 44 L52 44 L54 48" fill="#78350F"/><circle cx="34" cy="61" r="3.5" fill="#FBBF24"/><circle cx="46" cy="61" r="3.5" fill="#FBBF24"/></svg>';
+const _SVG_GRANDPA_M='<svg viewBox="0 0 80 80" fill="none"><defs><linearGradient id="grandpa-m-face" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:#FBBF7A;stop-opacity:1" /><stop offset="100%" style="stop-color:#F59E0B;stop-opacity:1" /></linearGradient><linearGradient id="grandpa-m-hair" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:#4C1D95;stop-opacity:1" /><stop offset="100%" style="stop-color:#2E1065;stop-opacity:1" /></linearGradient><linearGradient id="grandpa-m-body" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:#6366F1;stop-opacity:1" /><stop offset="100%" style="stop-color:#4338CA;stop-opacity:1" /></linearGradient></defs><path d="M32 14 Q32 11 36 11 Q40 10 44 11 Q48 11 48 15" fill="url(#grandpa-m-hair)" stroke="none"/><circle cx="40" cy="27" r="17" fill="url(#grandpa-m-face)"/><rect x="31" y="22" width="7" height="8" rx="1" fill="#6366F1" stroke="#4C0080" stroke-width="1.5"/><rect x="42" y="22" width="7" height="8" rx="1" fill="#6366F1" stroke="#4C0080" stroke-width="1.5"/><circle cx="34.5" cy="23" r="1.5" fill="#1F2937"/><circle cx="45.5" cy="23" r="1.5" fill="#1F2937"/><circle cx="34.5" cy="26" r="1.5" fill="#1F2937"/><circle cx="45.5" cy="26" r="1.5" fill="#1F2937"/><circle cx="35" cy="24" r="3" fill="#1F2937"/><circle cx="45" cy="24" r="3" fill="#1F2937"/><circle cx="34" cy="23" r="1.5" fill="#fff"/><circle cx="46" cy="23" r="1.5" fill="#fff"/><path d="M38 31 Q40 33 42 31" stroke="#1F2937" stroke-width="1.5" fill="none" stroke-linecap="round"/><circle cx="40" cy="35" r="1.2" fill="#1F2937"/><rect x="26" y="44" width="28" height="26" rx="3" fill="url(#grandpa-m-body)"/><path d="M26 48 L28 44 L52 44 L54 48" fill="#312E81"/><circle cx="34" cy="61" r="3.5" fill="#FCA5A5"/><circle cx="46" cy="61" r="3.5" fill="#FCA5A5"/></svg>';
+const _SVG_GRANDMA_M='<svg viewBox="0 0 80 80" fill="none"><defs><linearGradient id="grandma-m-face" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:#FBBF7A;stop-opacity:1" /><stop offset="100%" style="stop-color:#F59E0B;stop-opacity:1" /></linearGradient><linearGradient id="grandma-m-hair" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:#DB2777;stop-opacity:1" /><stop offset="100%" style="stop-color:#9D174D;stop-opacity:1" /></linearGradient><linearGradient id="grandma-m-body" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:#DB2777;stop-opacity:1" /><stop offset="100%" style="stop-color:#9D174D;stop-opacity:1" /></linearGradient></defs><path d="M28 15 Q28 8 35 7 Q40 6 45 7 Q52 8 52 18 Q52 22 50 26 L30 26 Q28 22 28 15" fill="url(#grandma-m-hair)"/><path d="M31 15 Q33 13 36 14" fill="url(#grandma-m-hair)"/><path d="M49 15 Q47 13 44 14" fill="url(#grandma-m-hair)"/><circle cx="40" cy="27" r="17" fill="url(#grandma-m-face)"/><circle cx="35" cy="23" r="3" fill="#1F2937"/><circle cx="45" cy="23" r="3" fill="#1F2937"/><circle cx="34" cy="22" r="1.5" fill="#fff"/><circle cx="46" cy="22" r="1.5" fill="#fff"/><path d="M38 32 Q40 34 42 32" stroke="#1F2937" stroke-width="1.5" fill="none" stroke-linecap="round"/><circle cx="40" cy="36" r="1.2" fill="#1F2937"/><rect x="26" y="44" width="28" height="26" rx="3" fill="url(#grandma-m-body)"/><path d="M26 48 L28 44 L52 44 L54 48" fill="#80185D"/><circle cx="34" cy="61" r="3.5" fill="#FCA5A5"/><circle cx="46" cy="61" r="3.5" fill="#FCA5A5"/></svg>';
 
 const ROLE_DEFS = {
   dad:       {label:'아빠',      svg:_SVG_DAD,      type:'caregiver', color:'#DBEAFE', textColor:'#3B82F6'},
