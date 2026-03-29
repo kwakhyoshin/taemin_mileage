@@ -333,8 +333,10 @@ body.dark .dtog-in{transform:translateX(20px)}
 .my-list-arr{stroke:var(--tx3);flex-shrink:0}
 .my-list-item-toggle{cursor:default}
 .my-list-item-toggle:active{background:transparent}
-.theme-btn{flex:1;padding:8px 0;border:none;border-radius:10px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;background:transparent;color:var(--tx3);transition:all .2s}
-.theme-btn.active{background:var(--card);color:var(--tx);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.theme-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 0 8px;border:2px solid transparent;border-radius:12px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;background:transparent;color:var(--tx3);transition:all .2s}
+.theme-btn svg{width:22px;height:22px;opacity:.5;transition:opacity .2s}
+.theme-btn.active{background:var(--card);color:var(--primary,#6366F1);border-color:var(--primary,#6366F1);box-shadow:0 2px 8px rgba(99,102,241,.15)}
+.theme-btn.active svg{opacity:1;stroke:var(--primary,#6366F1)}
 .my-list-item-danger .my-list-ico{background:rgba(239,68,68,.1)}
 .my-list-item-danger .my-list-ico svg{stroke:#EF4444}
 .my-list-item-danger .my-list-txt{color:#EF4444}
@@ -3576,10 +3578,10 @@ button:disabled {
         <span class="my-list-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></span>
         <span class="my-list-txt">화면 모드</span>
       </div>
-      <div id="theme-selector" style="display:flex;gap:6px;background:var(--bg2);border-radius:12px;padding:4px">
-        <button class="theme-btn active" data-theme="system" onclick="setThemePref('system')">시스템</button>
-        <button class="theme-btn" data-theme="light" onclick="setThemePref('light')">라이트</button>
-        <button class="theme-btn" data-theme="dark" onclick="setThemePref('dark')">다크</button>
+      <div id="theme-selector" style="display:flex;gap:8px;padding:4px 0 0">
+        <button class="theme-btn active" data-theme="system" onclick="window._setTheme('system')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>시스템</button>
+        <button class="theme-btn" data-theme="light" onclick="window._setTheme('light')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>라이트</button>
+        <button class="theme-btn" data-theme="dark" onclick="window._setTheme('dark')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>다크</button>
       </div>
     </div>
     <button class="my-list-item" id="my-pwa-install-btn" onclick="showPwaInstallPopup()" style="display:none">
@@ -6425,6 +6427,7 @@ function setThemePref(pref){
   applyThemePref(pref);
   updateThemeUI(pref);
 }
+window._setTheme=setThemePref;
 function applyThemePref(pref){
   if(pref==='system'){
     const sysDark=window.matchMedia('(prefers-color-scheme:dark)').matches;
