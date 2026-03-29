@@ -56,8 +56,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="마일리 [DEV]">
-<meta name="screen-orientation" content="any">
-<meta name="x5-orientation" content="any">
+<meta name="screen-orientation" content="portrait">
+<meta name="x5-orientation" content="portrait">
 <meta name="theme-color" id="theme-color-meta" content="#6366F1">
 <title>[DEV] 마일리 ⭐</title>
 <link rel="manifest" href="manifest.json">
@@ -15634,6 +15634,13 @@ window._createState = _createState;
   window.addEventListener('scroll', updateHeaderCompact, {passive:true});
   window.addEventListener('resize', updateHeaderCompact, {passive:true});
   window.addEventListener('orientationchange', ()=>{setTimeout(updateHeaderCompact,100);});
+
+  // PWA 환경에서 세로 모드 고정 (Screen Orientation API)
+  try{
+    if(screen.orientation&&screen.orientation.lock){
+      screen.orientation.lock('portrait').catch(()=>{});
+    }
+  }catch(_e){}
 
 
   // ============ ONBOARDING OVERLAY ============
