@@ -984,8 +984,8 @@ body.dark .pin-key.ck{background:transparent}
 /* AUTH SCREENS */
 .auth-screen{position:fixed;inset:0;background:linear-gradient(135deg,#5B4FC4,#A78BFA);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;padding-top:max(24px, calc(env(safe-area-inset-top, 0px) + 16px));padding-bottom:max(20px, env(safe-area-inset-bottom, 0px));overflow-y:auto;-webkit-overflow-scrolling:touch}
 .auth-screen.hidden{display:none}
-body.auth-active{background:linear-gradient(135deg,#5B4FC4,#A78BFA)}
-html:has(body.auth-active){background:#5B4FC4!important}
+body.auth-active{background:linear-gradient(135deg,#5B4FC4,#A78BFA);overflow:hidden}
+html:has(body.auth-active){background:#5B4FC4!important;overflow:hidden}
 #auth-insight .toss-cta{margin:0 24px;padding-left:0;padding-right:0}
 .auth-card{background:#fff;border-radius:24px;padding:32px 28px;width:100%;max-width:380px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2);margin:auto;flex-shrink:0}
 @media(min-width:768px){.auth-card{max-width:440px;padding:40px 36px}.auth-title{font-size:28px}.auth-sub{font-size:14px}.auth-input{padding:16px 18px;font-size:16px}}
@@ -4347,34 +4347,30 @@ function showAuthScreen(screen) {
 
 
 // ── 로그인 화면 키보드 대응 ──
+// auth-screen 크기는 그대로 유지 (홈탭 노출 방지)
+// 내부 auth-card의 padding만 조정하여 키보드 위에 위치시킴
 (function(){
   if(!window.visualViewport) return;
-  var authCard=null;
-  var origPaddingBottom=null;
 
   function adjustAuthForKeyboard(){
     var activeAuth=document.querySelector('.auth-screen:not(.hidden)');
     if(!activeAuth) return;
-    
+    var card=activeAuth.querySelector('.auth-card');
+    if(!card) return;
+
     var vvH=window.visualViewport.height;
     var fullH=window.innerHeight;
     var kbH=fullH-vvH;
-    
+
     // 키보드가 올라온 상태 (100px 이상 차이)
     if(kbH>100){
-      // window 스크롤 강제 리셋 (홈탭 노출 방지)
       window.scrollTo(0,0);
-      
-      // auth-screen을 viewport에 맞게 조정
-      activeAuth.style.height=vvH+'px';
-      activeAuth.style.top=window.visualViewport.offsetTop+'px';
-      activeAuth.style.bottom='auto';
-      
+      // auth-screen은 그대로 두고, padding-bottom으로 콘텐츠를 위로 밀기
+      activeAuth.style.paddingBottom=kbH+'px';
+      activeAuth.style.justifyContent='center';
     } else {
       // 키보드 내려감 — 원래대로
-      activeAuth.style.height='';
-      activeAuth.style.top='';
-      activeAuth.style.bottom='';
+      activeAuth.style.paddingBottom='';
     }
   }
 
@@ -4385,8 +4381,7 @@ function showAuthScreen(screen) {
     }
     adjustAuthForKeyboard();
   });
-  
-  // 포커스 시에도 window 스크롤 방지
+
   document.addEventListener('focusin', function(e){
     if(!document.body.classList.contains('auth-active')) return;
     if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT'||e.target.tagName==='TEXTAREA'){
