@@ -3385,6 +3385,9 @@ button:disabled {
   <div id="adm-p0">
     <div class="adm-sec" style="margin-top:6px">
       <div class="adm-sec-lbl">마일리지 조정</div>
+      <!-- independent 모드 자녀 선택기 (마일리지 조정 섹션 소속) -->
+      <div id="adm-child-selector-miles"></div>
+      <div id="adm-miles-target-info" style="display:none;padding:0 2px 8px;font-size:13px;font-weight:700;color:var(--pri)"></div>
       <div class="adm-card">
         <div class="adm-row">
           <div class="adm-row-l"><div class="adm-row-nm">보너스 지급</div><div class="adm-row-sub">특별 보너스 마일리지</div></div>
@@ -9777,7 +9780,7 @@ function renderAdmChildSelector(){
   const mode=getFamilyMode();
   const kids=getChildMemberIds();
   // 자녀가 2명 미만이거나 통합 모드면 선택기 숨김
-  ['adm-child-selector-0','adm-child-selector-1','adm-child-selector-2'].forEach(id=>{
+  ['adm-child-selector-0','adm-child-selector-1','adm-child-selector-2','adm-child-selector-miles'].forEach(id=>{
     const el=document.getElementById(id);
     if(!el)return;
     if(mode!=='independent'||kids.length<2){el.innerHTML='';return;}
@@ -9786,6 +9789,22 @@ function renderAdmChildSelector(){
       ${kids.map(id=>`<button class="adm-child-btn${id===currentAdmId?' on':''}" data-cid="${id}" onclick="admSelectChild('${id}')">${getAvatarHTML(id,22)} <span>${MEMBERS[id]?.name||id}</span></button>`).join('')}
     </div>`;
   });
+  // 마일리지 조정 대상 정보 표시
+  renderMilesTargetInfo();
+}
+function renderMilesTargetInfo(){
+  const el=document.getElementById('adm-miles-target-info');
+  if(!el)return;
+  const mode=getFamilyMode();
+  const kids=getChildMemberIds();
+  if(mode!=='independent'||kids.length<2){el.style.display='none';return;}
+  const targetId=_admViewChildId||getViewedMemberId();
+  if(!targetId){el.style.display='none';return;}
+  const ms=S.memberData?.[targetId];
+  const pts=ms?ms.pts:S.pts;
+  const name=MEMBERS[targetId]?.name||targetId;
+  el.style.display='block';
+  el.innerHTML=`📌 대상: <span style="color:var(--tx1)">${name}</span> · 현재 <span style="color:var(--tx1)">${pts}</span> 마일리지`;
 }
 
 // 관리자 모드 섹션 렌더링
@@ -10603,6 +10622,7 @@ function admSelectChild(childId){
   renderAdmRwdList();
   renderAdmStats();
   renderBadgeMgrList();
+  renderMilesTargetInfo();
   // 관리자 패널 자녀 탭 활성화 표시
   document.querySelectorAll('.adm-child-btn').forEach(b=>b.classList.toggle('on',b.dataset.cid===childId));
 }
@@ -10935,37 +10955,38 @@ window.rejectRewardRequest=rejectRewardRequest;
 function giveBonus(){
   const v=parseInt(document.getElementById('bonus-inp').value)||0;if(v<=0)return;
   const mode=getFamilyMode();
-  // independent 모드: 선택한 자녀에게 지급
-  if(mode==='independent'&&(isCaregiverUser()||_admViewChildId)){
-    const targetId=_admViewChildId||getViewedMemberId();
-    if(targetId){
-      const ms=getMemberState(targetId);
-      ms.pts+=v;
-      ms.log.unshift({id:'l_'+Date.now(),emoji:'⭐',name:`보너스 +${v} 마일리지`,pts:v,ts:Date.now(),actId:null,user:targetId});
-      // 글로벌 데이터 소유자면 S에도 반영
-      if(targetId===_globalDataOwner){S.pts=ms.pts;S.log=ms.log;}
-      save();renderAll();toast(`⭐ ${MEMBERS[targetId]?.name||'자녀'}에게 +${v} 마일리지 지급!`);confetti();flyCoinsToMileage(null,v);
-      return;
-    }
+  // independent 모드: 반드시 선택된 자녀에게만 지급
+  if(mode==='independent'&&isCaregiverUser()){
+    const targetId=_admViewChildId;
+    if(!targetId){toast('⚠️ 대상 자녀를 먼저 선택해주세요');return;}
+    const ms=getMemberState(targetId);
+    ms.pts+=v;
+    ms.log.unshift({id:'l_'+Date.now(),emoji:'⭐',name:`보너스 +${v} 마일리지`,pts:v,ts:Date.now(),actId:null,user:targetId});
+    // 글로벌 데이터 소유자면 S에도 반영
+    if(targetId===_globalDataOwner){S.pts=ms.pts;S.log=ms.log;}
+    save();renderAll();renderMilesTargetInfo();toast(`⭐ ${MEMBERS[targetId]?.name||'자녀'}에게 +${v} 마일리지 지급!`);confetti();flyCoinsToMileage(null,v);
+    return;
   }
   S.pts+=v;S.log.unshift({id:'l_'+Date.now(),emoji:'⭐',name:`보너스 +${v} 마일리지`,pts:v,ts:Date.now(),actId:null,user:currentUser});
   save();renderAll();toast(`⭐ 보너스 +${v} 마일리지 지급!`);confetti();flyCoinsToMileage(null,v);
 }
 function deductPts(){
   const v=parseInt(document.getElementById('deduct-inp').value)||0;if(v<=0)return;
-  if(!confirm(`${v} 마일리지을 차감할까요?`))return;
   const mode=getFamilyMode();
-  if(mode==='independent'&&(isCaregiverUser()||_admViewChildId)){
-    const targetId=_admViewChildId||getViewedMemberId();
-    if(targetId){
-      const ms=getMemberState(targetId);
-      ms.pts=Math.max(0,ms.pts-v);
-      ms.log.unshift({id:'l_'+Date.now(),emoji:'📉',name:`차감 -${v} 마일리지`,pts:-v,ts:Date.now(),actId:null,user:targetId});
-      if(targetId===_globalDataOwner){S.pts=ms.pts;S.log=ms.log;}
-      save();renderAll();toast(`📉 ${v} 마일리지 차감됨`);
-      return;
-    }
+  // independent 모드: 반드시 선택된 자녀에게만 차감
+  if(mode==='independent'&&isCaregiverUser()){
+    const targetId=_admViewChildId;
+    if(!targetId){toast('⚠️ 대상 자녀를 먼저 선택해주세요');return;}
+    const name=MEMBERS[targetId]?.name||'자녀';
+    if(!confirm(`${name}에게서 ${v} 마일리지를 차감할까요?`))return;
+    const ms=getMemberState(targetId);
+    ms.pts=Math.max(0,ms.pts-v);
+    ms.log.unshift({id:'l_'+Date.now(),emoji:'📉',name:`차감 -${v} 마일리지`,pts:-v,ts:Date.now(),actId:null,user:targetId});
+    if(targetId===_globalDataOwner){S.pts=ms.pts;S.log=ms.log;}
+    save();renderAll();renderMilesTargetInfo();toast(`📉 ${name}의 마일리지 ${v} 차감됨`);
+    return;
   }
+  if(!confirm(`${v} 마일리지를 차감할까요?`))return;
   S.pts=Math.max(0,S.pts-v);
   S.log.unshift({id:'l_'+Date.now(),emoji:'📉',name:`차감 -${v} 마일리지`,pts:-v,ts:Date.now(),actId:null,user:currentUser});
   save();renderAll();toast(`📉 ${v} 마일리지 차감됨`);
@@ -15148,7 +15169,6 @@ function saveAvatarCrop() {
   closeModal('m-avatar');
   if(wasFamily)closeFamilyPopup();
   applyUserProfile();
-  renderMemberGrid();
   renderAdmMemberPhotos();
   renderMyTab();
   renderNavUsers();
