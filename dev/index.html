@@ -1123,9 +1123,9 @@ html:has(body.auth-active){background:#5B4FC4!important;overflow:hidden}
 .reg-group.done .reg-group-label{color:#6366F1}
 .reg-group-line{flex:1;height:2.5px;background:#E2E8F0;min-width:24px;max-width:56px;margin-top:13px;border-radius:2px;transition:background .35s}
 .reg-group-line.done{background:#6366F1}
-.reg-substeps{display:flex;justify-content:center;gap:6px;padding:10px 0 4px}
-.reg-substep{width:7px;height:7px;border-radius:50%;background:#E2E8F0;transition:all .3s}
-.reg-substep.active{background:#6366F1;transform:scale(1.3)}
+.reg-substeps{display:flex;justify-content:center;gap:5px;padding:3px 0 0;min-height:10px}
+.reg-substep{width:6px;height:6px;border-radius:50%;background:#E2E8F0;transition:all .3s}
+.reg-substep.active{background:#6366F1;transform:scale(1.25)}
 .reg-substep.done{background:#A5B4FC}
 /* dark mode */
 body.dark .reg-stepper-back{color:#64748B}
@@ -2967,6 +2967,10 @@ button:disabled {
           <div class="toss-question">가족 구성원을<br>초대해보세요!</div>
           <div class="toss-desc">초대 링크를 공유하면 가족이 앱에 합류할 수 있어요</div>
           <div id="invite-list"></div>
+          <div style="margin-top:16px;padding:12px 16px;background:#F0F9FF;border-radius:12px;display:flex;align-items:flex-start;gap:8px">
+            <span style="font-size:16px;flex-shrink:0">💡</span>
+            <span style="font-size:13px;color:#0369A1;font-weight:600;line-height:1.45">지금 초대하지 않아도 괜찮아요!<br><span style="font-weight:500;color:#0C4A6E">나중에 관리자 화면 → 가족 설정에서 언제든 초대할 수 있어요.</span></span>
+          </div>
           <div class="auth-error" id="create5-error" style="margin-top:10px"></div>
         </div>
         <div class="toss-cta">
@@ -4631,31 +4635,33 @@ const _regGroups = [
 
 // groupIdx: 0-2, stepIdx: 0-based within group, totalInGroup: total sub-steps in this group
 function renderRegStepper(groupIdx, stepIdx, totalInGroup) {
-  // Render into ALL stepper containers (1-5)
   for (let n = 1; n <= 5; n++) {
     const gc = document.getElementById('regStepperGroups' + n);
     const sc = document.getElementById('regStepperSubs' + n);
-    if (!gc || !sc) continue;
-    // Groups
+    if (!gc) continue;
+    // Build sub-steps HTML for active group
+    let subsHtml = '';
+    for (let s = 0; s < totalInGroup; s++) {
+      const cls = s < stepIdx ? 'done' : s === stepIdx ? 'active' : '';
+      subsHtml += '<div class="reg-substep ' + cls + '"></div>';
+    }
+    // Groups with sub-steps under active group
     let gh = '';
     for (let g = 0; g < _regGroups.length; g++) {
       const cls = g < groupIdx ? 'done' : g === groupIdx ? 'active' : '';
       const circleContent = g < groupIdx
         ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
         : '' + (g + 1);
-      gh += '<div class="reg-group ' + cls + '"><div class="reg-group-circle">' + circleContent + '</div><div class="reg-group-label">' + _regGroups[g].label + '</div></div>';
+      gh += '<div class="reg-group ' + cls + '"><div class="reg-group-circle">' + circleContent + '</div><div class="reg-group-label">' + _regGroups[g].label + '</div>';
+      if (g === groupIdx) gh += '<div class="reg-substeps">' + subsHtml + '</div>';
+      gh += '</div>';
       if (g < _regGroups.length - 1) {
         gh += '<div class="reg-group-line' + (g < groupIdx ? ' done' : '') + '"></div>';
       }
     }
     gc.innerHTML = gh;
-    // Sub-steps
-    let sh = '';
-    for (let s = 0; s < totalInGroup; s++) {
-      const cls = s < stepIdx ? 'done' : s === stepIdx ? 'active' : '';
-      sh += '<div class="reg-substep ' + cls + '"></div>';
-    }
-    sc.innerHTML = sh;
+    // Hide separate substeps container if exists
+    if (sc) sc.innerHTML = '';
   }
 }
 
