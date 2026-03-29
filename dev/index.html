@@ -3671,18 +3671,7 @@ button:disabled {
         <div style="display:flex;flex-direction:column;gap:8px">
           <input type="text" class="txt-inp" id="new-member-name" placeholder="이름 (최대 10자)" maxlength="10" style="width:100%" inputmode="text" lang="ko">
           <select id="new-member-role" style="width:100%;padding:10px 12px;border:1.5px solid var(--bdr);border-radius:9px;font-size:14px;font-weight:700;background:var(--bg);color:var(--tx);font-family:inherit;box-sizing:border-box">
-            <optgroup label="양육자 (어른)">
-              <option value="dad">아빠</option>
-              <option value="mom">엄마</option>
-              <option value="grandpa">할아버지</option>
-              <option value="grandma">할머니</option>
-              <option value="grandpa_m">외할아버지</option>
-              <option value="grandma_m">외할머니</option>
-              <option value="caregiver">양육자 (호칭 없음)</option>
-            </optgroup>
-            <optgroup label="아이">
-              <option value="child">자녀</option>
-            </optgroup>
+            <!-- 동적으로 renderNewMemberRoleSelect()가 채움 -->
           </select>
           <button class="btn-sm" onclick="addNewFamilyMember()" style="width:100%;padding:11px;font-size:14px">+ 가족 추가</button>
         </div>
@@ -6146,32 +6135,32 @@ const TAB_COLORS2 = {home:'#818CF8', log:'#FB7185', rwd:'#FBBF24', hist:'#A78BFA
 
 /* CHILD THEME COLORS — 자녀 전환 시 홈 탭 색상 변경 (최소 6개, 관리자에서 변경 가능) */
 const CHILD_THEMES = [
-  // 기본 컬러 (채도 낮춤 — 부드러운 톤)
-  {id:'indigo', name:'인디고',   c1:'#6366B0',c2:'#7C7FC5'},
-  {id:'blue',   name:'블루',     c1:'#4A7DC4',c2:'#6B9BD6'},
-  {id:'sky',    name:'스카이',   c1:'#3A95BE',c2:'#5AB0D0'},
-  {id:'cyan',   name:'시안',     c1:'#3A9AAE',c2:'#58B5C5'},
-  {id:'teal',   name:'틸',       c1:'#3D9E95',c2:'#5CB8AE'},
-  {id:'emerald',name:'에메랄드', c1:'#3D9E7A',c2:'#5CB899'},
-  {id:'green',  name:'그린',     c1:'#49A468',c2:'#66BB80'},
-  {id:'lime',   name:'라임',     c1:'#7BA63E',c2:'#96BF58'},
-  {id:'yellow', name:'옐로',     c1:'#C09530',c2:'#D4AD4A'},
-  {id:'amber',  name:'앰버',     c1:'#C88E38',c2:'#DBA550'},
-  {id:'orange', name:'오렌지',   c1:'#D07040',c2:'#E08858'},
-  {id:'red',    name:'레드',     c1:'#C45050',c2:'#D86868'},
-  {id:'rose',   name:'로즈',     c1:'#C44868',c2:'#D86080'},
-  {id:'pink',   name:'핑크',     c1:'#C45088',c2:'#D868A0'},
-  {id:'fuchsia',name:'푸시아',   c1:'#A84CAE',c2:'#C068C8'},
-  {id:'purple', name:'퍼플',     c1:'#7E5CC0',c2:'#9474D0'},
-  {id:'violet', name:'바이올렛', c1:'#7050B8',c2:'#8668C8'},
+  // 기본 컬러 (살짝 부드럽게 조정)
+  {id:'indigo', name:'인디고',   c1:'#5558CC',c2:'#6E72E8'},
+  {id:'blue',   name:'블루',     c1:'#3570D8',c2:'#5090EE'},
+  {id:'sky',    name:'스카이',   c1:'#1A8DBD',c2:'#28A8DE'},
+  {id:'cyan',   name:'시안',     c1:'#1A93A8',c2:'#20B0CA'},
+  {id:'teal',   name:'틸',       c1:'#1D9A90',c2:'#28B8AC'},
+  {id:'emerald',name:'에메랄드', c1:'#189870',c2:'#25B888'},
+  {id:'green',  name:'그린',     c1:'#28A050',c2:'#38C068'},
+  {id:'lime',   name:'라임',     c1:'#6EA020',c2:'#88C028'},
+  {id:'yellow', name:'옐로',     c1:'#C08E10',c2:'#DCA818'},
+  {id:'amber',  name:'앰버',     c1:'#CC8010',c2:'#E89818'},
+  {id:'orange', name:'오렌지',   c1:'#E06018',c2:'#F07828'},
+  {id:'red',    name:'레드',     c1:'#D03030',c2:'#E84848'},
+  {id:'rose',   name:'로즈',     c1:'#D02850',c2:'#E84068'},
+  {id:'pink',   name:'핑크',     c1:'#D03880',c2:'#E85098'},
+  {id:'fuchsia',name:'푸시아',   c1:'#B030C0',c2:'#CC48E0'},
+  {id:'purple', name:'퍼플',     c1:'#7848D8',c2:'#9060E8'},
+  {id:'violet', name:'바이올렛', c1:'#6838C8',c2:'#7E50D8'},
   // 특별 컬러
-  {id:'slate',  name:'슬레이트', c1:'#5A6878',c2:'#748898'},
-  {id:'stone',  name:'스톤',     c1:'#8A8480',c2:'#AAA5A0'},
-  {id:'coral',  name:'코랄',     c1:'#D88880',c2:'#E8A8A0'},
-  {id:'mint',   name:'민트',     c1:'#50C0AE',c2:'#78D8C8'},
-  {id:'navy',   name:'네이비',   c1:'#384D6E',c2:'#4A6D98'},
-  {id:'wine',   name:'와인',     c1:'#8E3850',c2:'#A84868'},
-  {id:'forest', name:'포레스트', c1:'#357050',c2:'#488868'},
+  {id:'slate',  name:'슬레이트', c1:'#506070',c2:'#687888'},
+  {id:'stone',  name:'스톤',     c1:'#807870',c2:'#A09890'},
+  {id:'coral',  name:'코랄',     c1:'#E87868',c2:'#F09888'},
+  {id:'mint',   name:'민트',     c1:'#30CCB8',c2:'#58E0D0'},
+  {id:'navy',   name:'네이비',   c1:'#284060',c2:'#306098'},
+  {id:'wine',   name:'와인',     c1:'#902040',c2:'#B02850'},
+  {id:'forest', name:'포레스트', c1:'#206840',c2:'#288050'},
 ];
 function themeFromColor(c1){
   // c1 hex → compute c2, shadow, lt, ltDk
@@ -11119,11 +11108,47 @@ async function saveFamilyMemberEdit(memberId) {
   toast(`${name}님의 정보가 수정되었어요`);
 }
 
+// 새 구성원 추가 역할 드롭다운 렌더링 (이미 사용중인 역할 비활성화)
+function renderNewMemberRoleSelect(){
+  const sel=document.getElementById('new-member-role');
+  if(!sel)return;
+  const fm=S.familyMeta?.members||{};
+  const usedRoles=Object.values(fm).map(m=>m.displayRole||m.role).filter(Boolean);
+  const caregiverRoles=[
+    {v:'dad',l:'아빠'},{v:'mom',l:'엄마'},{v:'grandpa',l:'할아버지'},
+    {v:'grandma',l:'할머니'},{v:'grandpa_m',l:'외할아버지'},{v:'grandma_m',l:'외할머니'},
+    {v:'caregiver',l:'양육자 (호칭 없음)'}
+  ];
+  let html='<optgroup label="양육자 (어른)">';
+  caregiverRoles.forEach(r=>{
+    // caregiver(호칭 없음)는 중복 허용, 나머지는 이미 사용중이면 disabled
+    const taken=r.v!=='caregiver'&&usedRoles.includes(r.v);
+    html+=`<option value="${r.v}"${taken?' disabled':''}>` +
+      `${r.l}${taken?' (이미 등록됨)':''}</option>`;
+  });
+  html+='</optgroup><optgroup label="아이"><option value="child">자녀</option></optgroup>';
+  sel.innerHTML=html;
+  // 첫 번째 활성 옵션 선택
+  const firstEnabled=sel.querySelector('option:not([disabled])');
+  if(firstEnabled)firstEnabled.selected=true;
+}
+
 async function addNewFamilyMember() {
   const name = document.getElementById('new-member-name').value.trim();
   const role = document.getElementById('new-member-role').value;
   if(!name) { toast('이름을 입력해주세요'); return; }
   if(!S.familyMeta?.members) { toast('가족 정보가 없어요'); return; }
+
+  // 중복 역할 검증 (child와 caregiver 제외한 구체적 역할은 1명만 허용)
+  if(role!=='child'&&role!=='caregiver'){
+    const fm=S.familyMeta.members;
+    const alreadyUsed=Object.values(fm).some(m=>(m.displayRole||m.role)===role);
+    if(alreadyUsed){
+      const rd=ROLE_DEFS[role];
+      toast(`❌ ${rd?.label||role} 역할은 이미 등록되어 있어요`);
+      return;
+    }
+  }
 
   const memberCount = Object.keys(S.familyMeta.members).length;
   if(memberCount >= 7) { toast('최대 7명까지 추가할 수 있어요'); return; }
@@ -11160,6 +11185,7 @@ async function addNewFamilyMember() {
     }
   }
   renderFamilyManager();
+  renderNewMemberRoleSelect(); // 드롭다운 갱신 (추가된 역할 비활성화)
   renderAll();
   document.getElementById('new-member-name').value = '';
   toast(`${name}님이 가족에 추가되었어요`);
@@ -11287,6 +11313,7 @@ window.renderFamilyManager=renderFamilyManager;
 window.toggleFamilyAdmin=toggleFamilyAdmin;
 window.removeFamilyMemberAdmin=removeFamilyMemberAdmin;
 window.addNewFamilyMember=addNewFamilyMember;
+window.renderNewMemberRoleSelect=renderNewMemberRoleSelect;
 window.sendFamilyInvite=sendFamilyInvite;
 window.copyToClipboard=copyToClipboard;
 
@@ -13942,7 +13969,7 @@ function reallyGoTab(tab){
     themeMeta.content=isDark?'#1E293B':(TAB_COLORS[tab]||'#6366F1');
   }
 }
-function admTab(i){[0,1,2,3,4].forEach(j=>{document.getElementById('at-'+j).classList.toggle('on',j===i);document.getElementById('adm-p'+j).style.display=j===i?'block':'none';});if(i===2){renderAdmChildSelector();renderBadgeMgrList();}if(i===3){showCacheInfo();showPushDebug();renderAdmMemberPhotos();}if(i===4)renderFamilyManager();}
+function admTab(i){[0,1,2,3,4].forEach(j=>{document.getElementById('at-'+j).classList.toggle('on',j===i);document.getElementById('adm-p'+j).style.display=j===i?'block':'none';});if(i===2){renderAdmChildSelector();renderBadgeMgrList();}if(i===3){showCacheInfo();showPushDebug();renderAdmMemberPhotos();}if(i===4){renderFamilyManager();renderNewMemberRoleSelect();}}
 function toggleAdvSettings(){
   const body=document.getElementById('adv-settings-body');
   const btn=document.getElementById('adv-settings-btn');
