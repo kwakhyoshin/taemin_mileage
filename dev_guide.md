@@ -776,6 +776,7 @@ git checkout <commit-hash> -- index.html       # 운영기 (긴급 시에만)
 | `f1af6cd` | fix: 카카오 팝업 차단 방지 + 네이버 콜백 에러 처리 강화 | ✅ 개발기 적용 |
 | `c4f08ed` | fix: 소셜연동 바텀시트 닫힘 + 카카오 팝업 차단 수정 | ✅ 개발기 적용 |
 | `cb9d705` | fix: 보상요청 알림이 자기 자신에게도 발송되는 버그 수정 | ✅ 개발기 적용 |
+| `b4dc3aa` | feat: 로그인 화면 Vertical Stack 통합 — 소셜 + ID/PW 한 화면에 | ✅ 개발기 적용 |
 
 #### 상세 변경 내용
 
@@ -803,6 +804,12 @@ git checkout <commit-hash> -- index.html       # 운영기 (긴급 시에만)
 - 문제: 양육자(admin)가 아이 대신 보상 요청 시 자기 자신에게도 알림 발송 → 읽을 수 없는 unread 메시지 잔존
 - 수정: `adminMembers` 생성 시 `mid !== currentUser` 조건 추가 (요청자 본인 항상 제외)
 - 안전장치: `_updateFamilyBtnBadge`에서 `from===to`인 메시지 자동 읽음 처리
+
+**6. 로그인 화면 Vertical Stack 통합 (`b4dc3aa`)**
+- 변경: auth-continue 화면에 소셜 버튼 + ID/PW 폼을 한 화면에 통합 (Vertical Stack 패턴)
+- 구조: 소셜 3종(Google/Kakao/Naver) → "또는 아이디로 로그인" 구분선 → ID/PW 폼 → "또는" → 이메일 인증
+- `doContinueLogin()` 함수 추가 — 기존 `doLogin()`을 필드ID 인자화하여 재사용
+- 참고: Airbnb/Spotify/배달의민족 등 글로벌·한국 앱 UX 리서치 기반
 
 #### 미완료 / 추가 확인 필요
 - 카카오 로그인: Kakao Developer Portal에서 앱 상태가 "개발 중"이면 등록된 테스트 계정만 사용 가능. 실 사용자가 카카오 로그인 실패 시 포탈 설정 확인 필요
