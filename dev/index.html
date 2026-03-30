@@ -1035,7 +1035,7 @@ body.dark .pin-key.ck{background:transparent}
 .auth-screen{position:fixed;inset:0;background:linear-gradient(135deg,#5B4FC4,#A78BFA);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;padding-top:max(24px, calc(env(safe-area-inset-top, 0px) + 16px));padding-bottom:max(20px, env(safe-area-inset-bottom, 0px));overflow-y:auto;-webkit-overflow-scrolling:touch}
 .auth-screen.hidden{display:none;pointer-events:none}
 body.auth-active{background:linear-gradient(135deg,#5B4FC4,#A78BFA);overflow:hidden}
-html:has(body.auth-active){background:#5B4FC4!important;overflow:hidden}
+html:has(body.auth-active){background:#A78BFA!important;overflow:hidden}
 #auth-insight .toss-cta{margin:0 24px;padding-left:0;padding-right:0;padding-top:8px}
 .social-loading-overlay{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#5B4FC4,#A78BFA);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;opacity:0;transition:opacity .3s;pointer-events:none}
 .social-loading-overlay.on{opacity:1;pointer-events:auto}
@@ -2693,12 +2693,8 @@ button:disabled {
       </button>
     </div>
 
-    <div style="margin-top:16px;display:flex;flex-direction:column;gap:10px">
-      <button class="social-btn social-email" onclick="showAuthScreen('email-verify')" style="background:#F3F4F6;color:#374151;border:1px solid #D1D5DB">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#374151" stroke-width="2" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-        <span>이메일로 계속하기</span>
-      </button>
-      <div class="auth-link" onclick="toggleIdPwLogin()" id="toggle-idpw-link" style="margin-top:4px;font-size:13px;color:var(--tx3);cursor:pointer">아이디/비밀번호로 로그인 ▾</div>
+    <div style="margin-top:16px;text-align:center">
+      <div class="auth-link" onclick="toggleIdPwLogin()" id="toggle-idpw-link" style="font-size:13px;color:var(--tx3);cursor:pointer">아이디/비밀번호로 로그인 ▾</div>
     </div>
 
     <!-- ID/PW 인라인 로그인 폼 (접혀있음) -->
@@ -4851,7 +4847,7 @@ const _AUTH_SCREENS = ['auth-login','auth-welcome','auth-onboarding','auth-conti
 
 function showAuthScreen(screen) {
   document.body.classList.add('auth-active');
-  document.documentElement.style.background='#5B4FC4';
+  document.documentElement.style.background='#A78BFA';
   _AUTH_SCREENS.forEach(id=>{
     const el=document.getElementById(id);
     if(el)el.classList.toggle('hidden',id!=='auth-'+screen && id!==screen);
