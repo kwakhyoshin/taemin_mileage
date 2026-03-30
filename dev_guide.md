@@ -778,6 +778,7 @@ git checkout <commit-hash> -- index.html       # 운영기 (긴급 시에만)
 | `cb9d705` | fix: 보상요청 알림이 자기 자신에게도 발송되는 버그 수정 | ✅ 개발기 적용 |
 | `b4dc3aa` | feat: 로그인 화면 Vertical Stack 통합 — 소셜 + ID/PW 한 화면에 | ✅ 개발기 적용 |
 | `a1daf0d` | feat: 첫 화면을 통합 로그인 화면(auth-continue)으로 변경 | ✅ 개발기 적용 |
+| `787ae46` | fix: 네이버 로그인 팝업에서 로그인 화면 깜빡임 방지 | ✅ 개발기 적용 |
 
 #### 상세 변경 내용
 
@@ -816,6 +817,11 @@ git checkout <commit-hash> -- index.html       # 운영기 (긴급 시에만)
 - 웰컴 화면(auth-welcome) 거치지 않고 바로 auth-continue(통합 로그인) 표시
 - auth-continue를 기본 visible, auth-login을 hidden으로 HTML 변경
 - `checkAuth()`에서 모든 경우 `showAuthScreen('continue')`로 통일
+
+**8. 네이버 로그인 팝업 깜빡임 방지 (`787ae46`)**
+- 네이버 OAuth 콜백 시 팝업 안에서 앱 페이지가 리로드 → auth 화면이 잠깐 보이는 문제
+- 초기 스크립트에서 `window.opener` + `access_token` 해시 감지 시 모든 auth 화면 숨기고 "처리 중" 표시
+- 모듈 로드 전에 실행되므로 UI 깜빡임 완전 차단
 
 #### 미완료 / 추가 확인 필요
 - 카카오 로그인: Kakao Developer Portal에서 앱 상태가 "개발 중"이면 등록된 테스트 계정만 사용 가능. 실 사용자가 카카오 로그인 실패 시 포탈 설정 확인 필요
