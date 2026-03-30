@@ -5432,17 +5432,18 @@ async function shareInviteLink(memberName, memberIdx){
   const familyName=S.familyMeta?.familyName||_createState.familyName;
   const rd=ROLE_DEFS[memberData?.displayRole||memberData?.role]||ROLE_DEFS.child;
 
+  const basePath=_ENV==='dev'?'taemin_mileage/dev/':'taemin_mileage/';
   if(hasPreAccount){
     // 시나리오 C: 부모가 미리 계정을 만들어줌 → 자동로그인 토큰 링크
     const acc=_createState.childAccounts[memberIdx];
     tokenEntry.type='auto';
     tokenEntry.autoAccount={id:acc.id, pwdHash:await hashPassword(acc.pwd), v:2, needReset:true};
-    url=`https://kwakhyoshin.github.io/taemin_mileage/dev/?invite=${rawFamilyId}&token=${inviteToken}&auto=1`;
+    url=`https://kwakhyoshin.github.io/${basePath}?invite=${rawFamilyId}&token=${inviteToken}&auto=1`;
     text=`${memberName}님, ${familyName} 가족에 초대합니다! 링크를 눌러 바로 시작하세요.`;
   }else{
     // 시나리오 A/B: 계정 직접 생성 → mid 포함 링크
     tokenEntry.type='invite';
-    url=`https://kwakhyoshin.github.io/taemin_mileage/dev/?invite=${rawFamilyId}&token=${inviteToken}&mid=${targetMid}`;
+    url=`https://kwakhyoshin.github.io/${basePath}?invite=${rawFamilyId}&token=${inviteToken}&mid=${targetMid}`;
     text=`${memberName}님(${rd.label}), ${familyName} 가족에 초대합니다! 링크를 눌러 가입하세요.`;
   }
 
@@ -11338,7 +11339,8 @@ async function sendFamilyInvite(memberId) {
   const rawFamilyId = _familyId.startsWith('dev_') ? _familyId.slice(4) : _familyId;
   const familyName = S.familyMeta?.familyName || '가족';
   const rd = ROLE_DEFS[m.displayRole||m.role] || ROLE_DEFS.child;
-  const url = `https://kwakhyoshin.github.io/taemin_mileage/dev/?invite=${rawFamilyId}&token=${inviteToken}&mid=${memberId}`;
+  const _basePath=_ENV==='dev'?'taemin_mileage/dev/':'taemin_mileage/';
+  const url = `https://kwakhyoshin.github.io/${_basePath}?invite=${rawFamilyId}&token=${inviteToken}&mid=${memberId}`;
   const roleLabel = m.displayRole ? ROLE_DEFS[m.displayRole]?.label||m.displayRole : (m.role==='child'?'아이':'양육자');
   const text = `${m.name}님, ${familyName} 가족에 초대합니다! 아래 링크로 가입하세요.`;
 
