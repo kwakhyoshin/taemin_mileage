@@ -780,6 +780,7 @@ git checkout <commit-hash> -- index.html       # 운영기 (긴급 시에만)
 | `a1daf0d` | feat: 첫 화면을 통합 로그인 화면(auth-continue)으로 변경 | ✅ 개발기 적용 |
 | `787ae46` | fix: 네이버 로그인 팝업에서 로그인 화면 깜빡임 방지 | ✅ 개발기 적용 |
 | `0e27bae` | feat: 온보딩 슬라이드 + 첫 화면/로그아웃 플로우 개선 | ✅ 개발기 적용 |
+| `d46dd82` | fix: 이메일 인증/뒤로가기 시 auth-login→auth-continue + 개발환경 인증코드 표시 | ✅ 개발기 적용 |
 
 #### 상세 변경 내용
 
@@ -835,6 +836,13 @@ git checkout <commit-hash> -- index.html       # 운영기 (긴급 시에만)
 - 초기 스크립트(비모듈)에서 `obNext()`, `skipOnboarding()` 함수 등록 — 모듈 로드 전에도 동작
 - `checkAuth()`에서 `onboarding_done` 유무로 분기: 없으면 `showAuthScreen('welcome')`, 있으면 `showAuthScreen('continue')`
 - 웰컴 화면 "시작하기" → `showAuthScreen('onboarding')`, "이미 계정이 있어요" → `skipOnboarding()`
+
+**10. 이메일 인증 뒤로가기 + 개발환경 인증코드 표시 (`d46dd82`)**
+- 문제1: `showAuthScreen('login')`이 5곳에 남아있어 뒤로가기/에러 시 사용하지 않는 `auth-login` 화면으로 이동
+- 수정: 5곳 모두 `showAuthScreen('continue')`로 변경 (이메일 인증 돌아가기, 초대링크 에러, 소셜연결→기존계정 등)
+- 문제2: 이메일 인증코드가 실제 이메일 발송 없이 콘솔에만 표시 → 사용자가 코드를 알 수 없음
+- 수정: 개발환경(`_ENV==='dev'`)에서는 인증코드를 화면과 토스트에 직접 표시
+- `socialLinkExisting()`의 에러 메시지 필드도 `login-error` → `continue-login-error`로 변경
 
 #### 미완료 / 추가 확인 필요
 - 카카오 로그인: Kakao Developer Portal에서 앱 상태가 "개발 중"이면 등록된 테스트 계정만 사용 가능. 실 사용자가 카카오 로그인 실패 시 포탈 설정 확인 필요
