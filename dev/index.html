@@ -10192,7 +10192,12 @@ function _undoActCore(actId){
   if(idx===-1){toast('취소할 기록이 없어요');return;}
 
   const entry=S.log[idx];
-  S.pts=Math.max(0,S.pts-entry.pts);
+  // 보유 마일리지보다 큰 포인트의 활동은 취소 불가 (음수 마일리지 악용 방지)
+  if(entry.pts > S.pts){
+    toast(`⚠️ 마일리지가 부족해서 취소할 수 없어요 (보유: ${S.pts}, 필요: ${entry.pts})`);
+    return;
+  }
+  S.pts=S.pts-entry.pts;
   S.totalDone=Math.max(0,S.totalDone-1);
   S.log.splice(idx,1);
   unmarkDone(a);
