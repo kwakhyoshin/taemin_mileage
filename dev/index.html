@@ -3371,8 +3371,8 @@ button:disabled {
 </div>
 
 <!-- Badge View Screen -->
-<div class="scr" id="s-badge" style="display:none;position:fixed;inset:0;z-index:200;background:var(--bg);flex-direction:column">
-  <div class="badge-hero" style="flex-shrink:0;z-index:10;background:linear-gradient(135deg,#8B5CF6,#A78BFA);padding:18px 20px 16px;padding-top:calc(18px + env(safe-area-inset-top));border-radius:0 0 var(--rxl) var(--rxl);box-shadow:0 4px 20px rgba(139,92,246,0.3)">
+<div class="scr" id="s-badge" style="display:none;position:fixed;inset:0;z-index:200;background:var(--bg);overflow-y:auto;-webkit-overflow-scrolling:touch">
+  <div class="badge-hero" style="position:sticky;top:0;z-index:10;background:linear-gradient(135deg,#8B5CF6,#A78BFA);padding:18px 20px 16px;padding-top:calc(18px + env(safe-area-inset-top));border-radius:0 0 var(--rxl) var(--rxl);box-shadow:0 4px 20px rgba(139,92,246,0.3)">
     <div style="display:flex;align-items:center;gap:12px">
       <button onclick="closeBadgeView()" style="background:rgba(255,255,255,0.2);border:none;width:44px;height:44px;min-width:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;font-size:18px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);-webkit-tap-highlight-color:transparent;touch-action:manipulation">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15,18 9,12 15,6"/></svg>
@@ -3383,12 +3383,10 @@ button:disabled {
       </div>
     </div>
   </div>
-  <div style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch">
-    <div id="badge-view-grid" style="padding:12px 12px 0"></div>
-    <div style="padding:16px;padding-bottom:120px">
-      <div style="font-size:14px;font-weight:700;color:var(--tx);margin-bottom:10px">뱃지 수령 및 보상 내역</div>
-      <div id="badge-view-history"></div>
-    </div>
+  <div id="badge-view-grid" style="padding:12px 12px 0"></div>
+  <div style="padding:16px;padding-bottom:120px">
+    <div style="font-size:14px;font-weight:700;color:var(--tx);margin-bottom:10px">뱃지 수령 및 보상 내역</div>
+    <div id="badge-view-history"></div>
   </div>
 </div>
 
@@ -8419,7 +8417,7 @@ function renderBadgeHistory(){
 }
 
 function openBadgeView(){
-  document.getElementById('s-badge').style.display='flex';
+  document.getElementById('s-badge').style.display='block';
   renderBadgeViewGrid();
   renderBadgeViewHistory();
 }
