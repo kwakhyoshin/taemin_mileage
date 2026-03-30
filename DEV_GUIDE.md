@@ -2,7 +2,7 @@
 
 > 이 문서는 새 세션에서 실수 없이 개발·테스트·배포할 수 있도록 모든 핵심 정보를 담고 있습니다.
 > **새 세션 시작 시 반드시 이 문서를 먼저 읽을 것.**
-> 최종 업데이트: 2026-03-30 (Google 간편로그인 Phase 1 완료, 소셜 가입 플로우 구현)
+> 최종 업데이트: 2026-03-30 (카카오 로그인 포털 등록 완료, 네이버 미등록)
 
 ---
 
@@ -797,8 +797,8 @@ git checkout <commit-hash> -- index.html       # 운영기 (긴급 시에만)
 |------|-----------|------|
 | 기존 ID/PW | 현행 유지 | ✅ 운영 중 |
 | 구글 간편로그인 | Firebase Auth `signInWithPopup(GoogleAuthProvider)` | ✅ 구현 완료 |
-| 카카오 간편로그인 | Kakao JS SDK → Cloud Functions 커스텀 토큰 | 미구현 |
-| 네이버 간편로그인 | Naver Login SDK → Cloud Functions 커스텀 토큰 | 미구현 |
+| 카카오 간편로그인 | Kakao JS SDK 2.7.4 팝업 (`Kakao.Auth.login`) | ✅ 구현 완료 |
+| 네이버 간편로그인 | Naver Login SDK 2.0 OAuth 팝업 + postMessage | 🔧 코드 완료, 포털 미등록 |
 | 이메일 인증 | Cloud Functions로 6자리 코드 발송 → 검증 | 미구현 |
 
 ### 13.3 Firebase 플랜
@@ -831,11 +831,23 @@ git checkout <commit-hash> -- index.html       # 운영기 (긴급 시에만)
 - `verifyCode`: 코드 검증 → Firebase Custom Token 발급
 - 이메일 인증 UI (이메일 입력 → 코드 입력 → 완료)
 
-**Phase 3: 카카오/네이버 간편로그인** (미구현)
-- 카카오 개발자 앱 등록 → REST API Key 획득
-- 네이버 개발자 앱 등록 → Client ID/Secret 획득
-- Cloud Functions: OAuth 콜백 → 커스텀 토큰 발급
-- 로그인 화면에 카카오/네이버 버튼 추가
+**Phase 3: 카카오/네이버 간편로그인** (카카오 ✅ / 네이버 포털 미등록)
+
+**Phase 3a: 카카오 간편로그인 ✅ 완료 (2026-03-30)**
+- 카카오 개발자 포털 앱 등록 완료 (아래 13.7 참조)
+- Kakao JS SDK 2.7.4 동적 로딩 (`_loadKakaoSDK()`)
+- `_doKakaoLogin()`: `Kakao.Auth.login()` 팝업 → `/v2/user/me` 프로필 조회
+- UID 형식: `kakao_{카카오계정ID}` (예: `kakao_1234567890`)
+- 동의항목: 닉네임(필수), 이메일(비즈앱 필요 → 개인앱에선 미수집)
+- `doSocialLogin('kakao')` → `_handleSocialLoginResult()` 통합 플로우
+- 나의 메뉴 소셜 연동: `_doLinkSocial('kakao')` → Auth Registry 등록
+
+**Phase 3b: 네이버 간편로그인** (코드 완료, 포털 미등록)
+- 네이버 Login SDK 2.0 동적 로딩 (`_loadNaverSDK()`)
+- `_doNaverLogin()`: OAuth 팝업 → `postMessage` 콜백 → 프로필 수신
+- UID 형식: `naver_{네이버ID}`
+- 부트 시 콜백 감지: `window.opener && location.hash.includes('access_token')`
+- **TODO**: 네이버 개발자 포털 앱 등록 → Client ID 발급 → `_NAVER_CLIENT_ID` 업데이트
 
 **Phase 4: 기존 ID 병행 + 초대 플로우 업데이트** (미구현)
 - 기존 `doLogin()` 유지, 새 인증과 병행
@@ -882,3 +894,52 @@ account: {
 | 초대 링크 처리 | ~14083 |
 | HTML 로그인 화면 | ~2543 |
 | HTML 가입 화면 | ~2768~3047 |
+| 카카오/네이버 SDK 설정 | ~6507 |
+| `_loadKakaoSDK()` | ~6517 |
+| `_doKakaoLogin()` | ~6546 |
+| `_loadNaverSDK()` | ~6530 |
+| `_doNaverLogin()` | ~6575 |
+| `doSocialLogin(provider)` | ~6461 |
+| `_handleSocialLoginResult()` | ~6400 |
+| `linkSocialFromMyMenu()` | 나의 메뉴 소셜 연동 바텀시트 |
+| `_doLinkSocial(provider)` | 3사 통합 연동 함수 |
+| `_loginToFamily()` | ~6562 |
+
+### 13.8 카카오 개발자 포털 앱 등록 (2026-03-30)
+
+**앱 정보**
+- 앱 이름: **mile.ly**
+- 앱 ID: **1418261**
+- 회사명: 개인
+- 카테고리: 교육
+- 앱 대표 도메인: `https://kwakhyoshin.github.io`
+- 포털 URL: `https://developers.kakao.com/console/app/1418261`
+
+**키 정보**
+- JavaScript Key: `cc62aab8cd94eb2306350f53bfa75dd4`
+- REST API Key: `bd6311dbabf65b823a5160e3973cb483`
+- Native App Key: `03a5e50215c3c3c8ac80c1047afb39a6`
+
+**설정 상태**
+- 카카오 로그인: **ON** (활성화)
+- JavaScript SDK 도메인: `https://kwakhyoshin.github.io` (dev/prod 모두 커버)
+- 동의항목:
+  - 닉네임 (`profile_nickname`): **필수 동의** ✅
+  - 이메일 (`account_email`): 권한 없음 (비즈앱 전환 필요, 개인앱에서는 수집 불가)
+  - 프로필 사진 (`profile_image`): 사용 안 함
+- 카카오 로그인 리다이렉트 URI: 미설정 (JS SDK 팝업 방식이므로 불필요)
+- OpenID Connect: OFF
+
+**운영기 배포 시 추가 작업**
+- 현재 도메인이 `https://kwakhyoshin.github.io`로 등록되어 있어 dev/prod 모두 동일 도메인이므로 추가 설정 불필요
+- 향후 커스텀 도메인(mile.ly 등) 사용 시: JavaScript SDK 도메인에 새 도메인 추가 필요
+
+### 13.9 네이버 개발자 포털 앱 등록 (미완료)
+
+**TODO:**
+1. `https://developers.naver.com/apps/` 접속 → 애플리케이션 등록
+2. 사용 API: "네이버 로그인" 선택
+3. 서비스 URL: `https://kwakhyoshin.github.io/taemin_mileage/`
+4. Callback URL: `https://kwakhyoshin.github.io/taemin_mileage/dev/` + `https://kwakhyoshin.github.io/taemin_mileage/`
+5. Client ID 발급 후 → `dev/index.html`의 `_NAVER_CLIENT_ID` 변수 업데이트
+6. DEV_GUIDE.md에 앱 정보 기록
