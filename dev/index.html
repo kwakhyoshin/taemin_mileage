@@ -5901,7 +5901,38 @@ async function saveFamilyToFirestore(){
     S=newState;
     _familyId=docPath;
     currentUser=myMemberId;
+
+    // ★ 기존 Firestore 실시간 리스너 해제 (기존 가족 데이터 덮어쓰기 방지)
+    if(_dataListenerUnsub){
+      try{ _dataListenerUnsub(); }catch(_e){}
+      _dataListenerUnsub = null;
+      console.log('[saveFamilyToFirestore] Old listener unsubscribed');
+    }
+
     if(familyDoc) DATA_DOC=familyDoc;
+
+    // ★ 새 가족 문서에 대한 실시간 리스너 설정
+    if(DATA_DOC && onSnapshot){
+      try{
+        _dataListenerUnsub = onSnapshot(DATA_DOC, (snap)=>{
+          if(!snap.exists()) return;
+          if(_isSaving) return;
+          if(Date.now()-_lastSaveTime<2000) return;
+          const _ij=JSON.stringify(snap.data());
+          if(_ij===_lastSavedJSON||_ij===JSON.stringify(S)) return;
+          if(!_hasDirtyLocal){
+            S=Object.assign(defaultState(),snap.data());
+            _lastSavedJSON=_ij;
+            rebuildMembersFromFamily();
+            renderAll();
+            checkNewMessages();
+            renderNavUsers();
+            console.log('🔄 다른 기기에서 데이터가 업데이트됐어요');
+          }
+        });
+        console.log('[saveFamilyToFirestore] New listener on', docPath);
+      }catch(_e){ console.warn('New family listener failed:', _e); }
+    }
 
     localStorage.setItem(_LS_PREFIX+'family_id',docPath);
     localStorage.setItem(_LS_PREFIX+'current_user',myMemberId);
