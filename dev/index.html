@@ -1034,9 +1034,9 @@ body.dark .pin-key.ck{background:transparent}
 /* AUTH SCREENS */
 .auth-screen{position:fixed;inset:0;background:linear-gradient(135deg,#5B4FC4,#A78BFA);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;padding-top:max(24px, calc(env(safe-area-inset-top, 0px) + 16px));padding-bottom:max(20px, env(safe-area-inset-bottom, 0px));overflow-y:auto;-webkit-overflow-scrolling:touch}
 .auth-screen.hidden{display:none;pointer-events:none}
-body.auth-active{background:#5B4FC4;overflow:hidden}
+body.auth-active{background:linear-gradient(135deg,#5B4FC4,#A78BFA);overflow:hidden;max-width:none}
 body.auth-active .nav-container{display:none!important}
-html:has(body.auth-active){background:#5B4FC4!important;overflow:hidden}
+html:has(body.auth-active){background:#A78BFA!important;overflow:hidden}
 #auth-insight .toss-cta{margin:0 24px;padding-left:0;padding-right:0;padding-top:8px}
 /* social-loading-overlay CSS 제거됨 */
 .auth-card{background:#fff;border-radius:24px;padding:32px 28px;width:100%;max-width:380px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2);margin:auto;flex-shrink:0}
@@ -6710,7 +6710,7 @@ function _setupAuthListener(){
     } catch(_authErr) {
       console.error('[onAuthStateChanged] _handleSocialLoginResult error:', _authErr);
       _hideSocialLoading();
-      toast('로그인 처리 중 오류가 발생했어요');
+      toast(_ENV==='dev'?'[E1-onAuth] '+(_authErr.message||_authErr):'로그인 처리 중 오류가 발생했어요');
     }
   });
 }
@@ -7055,7 +7055,7 @@ async function _handleSocialLoginResult(firebaseUser, provider){
           await _loginToFamily(link.familyId, link.memberId, uid, provider, email);
         } catch(_ltfErr) {
           console.error('[Social] _loginToFamily failed:', _ltfErr);
-          toast('로그인 처리 중 오류가 발생했어요. 다시 시도해주세요.');
+          toast(_ENV==='dev'?'[E2-loginFamily] '+(_ltfErr.message||_ltfErr):'로그인 처리 중 오류가 발생했어요. 다시 시도해주세요.');
         }
         _hideSocialLoading();
         return;
@@ -7115,7 +7115,7 @@ async function _handleSocialLoginResult(firebaseUser, provider){
                 _restoreSocialLinkButtons();
               } catch(_loginErr){
                 console.error('[Social] Duplicate login failed:', _loginErr);
-                toast('로그인 처리 중 오류가 발생했어요');
+                toast(_ENV==='dev'?'[E3-dupLogin] '+(_loginErr.message||_loginErr):'로그인 처리 중 오류가 발생했어요');
                 _restoreSocialLinkButtons();
               }
             }
@@ -7180,7 +7180,7 @@ async function _handleSocialLoginResult(firebaseUser, provider){
                 _restoreSocialLinkButtons();
               } catch(_loginErr2){
                 console.error('[Social] Fallback duplicate login failed:', _loginErr2);
-                toast('로그인 처리 중 오류가 발생했어요');
+                toast(_ENV==='dev'?'[E4-fallbackLogin] '+(_loginErr2.message||_loginErr2):'로그인 처리 중 오류가 발생했어요');
                 _restoreSocialLinkButtons();
               }
             }
@@ -7249,7 +7249,7 @@ async function _loginToFamily(familyId, memberId, authUid, provider, email){
     }
   } catch(e){
     console.error('[_loginToFamily] Firestore load error:', e);
-    toast('로그인 처리 중 오류가 발생했어요');
+    toast(_ENV==='dev'?'[E5-fsLoad] '+familyId+': '+(e.message||e):'로그인 처리 중 오류가 발생했어요');
     return;
   }
   // 2단계: 상태 설정 + 화면 렌더 (에러 나도 로그인은 완료 처리)
