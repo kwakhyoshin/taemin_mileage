@@ -2,7 +2,7 @@
 
 > 이 문서는 새 세션에서 실수 없이 개발·테스트·배포할 수 있도록 모든 핵심 정보를 담고 있습니다.
 > **새 세션 시작 시 반드시 이 문서를 먼저 읽을 것.**
-> 최종 업데이트: 2026-03-30 (소셜 로그인 TDZ 수정, 바텀시트/카카오 팝업 수정, 보상요청 알림 자기→자기 버그 수정)
+> 최종 업데이트: 2026-03-30 (온보딩 슬라이드 추가, 첫 화면/로그아웃 플로우 개선, 소셜 로그인 버그 수정 등)
 
 ---
 
@@ -779,6 +779,7 @@ git checkout <commit-hash> -- index.html       # 운영기 (긴급 시에만)
 | `b4dc3aa` | feat: 로그인 화면 Vertical Stack 통합 — 소셜 + ID/PW 한 화면에 | ✅ 개발기 적용 |
 | `a1daf0d` | feat: 첫 화면을 통합 로그인 화면(auth-continue)으로 변경 | ✅ 개발기 적용 |
 | `787ae46` | fix: 네이버 로그인 팝업에서 로그인 화면 깜빡임 방지 | ✅ 개발기 적용 |
+| `0e27bae` | feat: 온보딩 슬라이드 + 첫 화면/로그아웃 플로우 개선 | ✅ 개발기 적용 |
 
 #### 상세 변경 내용
 
@@ -822,6 +823,18 @@ git checkout <commit-hash> -- index.html       # 운영기 (긴급 시에만)
 - 네이버 OAuth 콜백 시 팝업 안에서 앱 페이지가 리로드 → auth 화면이 잠깐 보이는 문제
 - 초기 스크립트에서 `window.opener` + `access_token` 해시 감지 시 모든 auth 화면 숨기고 "처리 중" 표시
 - 모듈 로드 전에 실행되므로 UI 깜빡임 완전 차단
+
+**9. 온보딩 슬라이드 + 첫 화면/로그아웃 플로우 개선 (`0e27bae`)**
+- 첫 방문자: 웰컴 화면(auth-welcome) → 온보딩 슬라이드 3장 → 통합 로그인(auth-continue)
+  - 슬라이드 1: ⭐ 활동하면 마일리지 적립
+  - 슬라이드 2: 🎁 마일리지로 보상 교환
+  - 슬라이드 3: 👨‍👩‍👧 가족이 함께 참여해요
+- 재방문자: `localStorage`에 `onboarding_done` 플래그 → 웰컴/온보딩 건너뛰고 바로 통합 로그인
+- 로그아웃: `showAuthScreen('continue')` — 재방문자이므로 온보딩 다시 보여줄 필요 없음
+- 온보딩 UI: CSS `scroll-snap-type: x mandatory` 스와이프, 점 인디케이터(활성=24px 흰색바), "다음"/"시작하기" 버튼, "건너뛰기" 링크
+- 초기 스크립트(비모듈)에서 `obNext()`, `skipOnboarding()` 함수 등록 — 모듈 로드 전에도 동작
+- `checkAuth()`에서 `onboarding_done` 유무로 분기: 없으면 `showAuthScreen('welcome')`, 있으면 `showAuthScreen('continue')`
+- 웰컴 화면 "시작하기" → `showAuthScreen('onboarding')`, "이미 계정이 있어요" → `skipOnboarding()`
 
 #### 미완료 / 추가 확인 필요
 - 카카오 로그인: Kakao Developer Portal에서 앱 상태가 "개발 중"이면 등록된 테스트 계정만 사용 가능. 실 사용자가 카카오 로그인 실패 시 포탈 설정 확인 필요
