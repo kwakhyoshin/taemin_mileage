@@ -2,7 +2,7 @@
 
 > 이 문서는 새 세션에서 실수 없이 개발·테스트·배포할 수 있도록 모든 핵심 정보를 담고 있습니다.
 > **새 세션 시작 시 반드시 이 문서를 먼저 읽을 것.**
-> 최종 업데이트: 2026-03-30 (온보딩 슬라이드 추가, 첫 화면/로그아웃 플로우 개선, 소셜 로그인 버그 수정 등)
+> 최종 업데이트: 2026-03-30 (카카오 로그인 REST API 재구현, 네이버 안정성 개선, 아이콘 교체 등)
 
 ---
 
@@ -844,7 +844,23 @@ git checkout <commit-hash> -- index.html       # 운영기 (긴급 시에만)
 - 수정: 개발환경(`_ENV==='dev'`)에서는 인증코드를 화면과 토스트에 직접 표시
 - `socialLinkExisting()`의 에러 메시지 필드도 `login-error` → `continue-login-error`로 변경
 
+**11. 로그인 화면 아이콘 교체 (`c98f694`)**
+- auth-continue 상단 아이콘을 단순 SVG → mile.ly 로고 텍스트 포함 앱 아이콘으로 교체
+- 72px 둥근 아이콘 + SVG 텍스트 로고 (mile=검정, .=노랑, ly=보라)
+- 웰컴 화면과 동일한 브랜드 스타일
+
+**12. 카카오 로그인 REST API+팝업 방식 재구현 + 네이버 안정성 개선 (`e851839`)**
+- 원인: Kakao JS SDK v2.7.4에서 `Kakao.Auth.login()` 제거됨 → 기존 코드 동작 불가
+- 수정: REST API Implicit Grant + popup + postMessage 방식으로 전면 재구현
+  - `_KAKAO_REST_KEY` 추가, `_getKakaoCallbackUrl()` 함수 추가
+  - `_doKakaoLogin()`: Kakao OAuth authorize URL을 팝업으로 열고 postMessage 수신
+  - 카카오 콜백 핸들러: access_token으로 `/v2/user/me` API 호출 후 결과를 opener에 전달
+- 카카오/네이버 콜백 구분: state 파라미터에 `kakao_` 접두사 사용 (동일 URL에서 두 provider 구분)
+- Kakao Developer Portal: Redirect URI 등록 완료 (dev + prod)
+- 네이버 로그인 안정성: 팝업 닫힘 감지 시 postMessage 전달을 위한 800ms 유예 기간 추가
+- 소셜 콜백 팝업 깜빡임 방지: state 기반으로 카카오/네이버 정확히 구분
+
 #### 미완료 / 추가 확인 필요
 - 카카오 로그인: Kakao Developer Portal에서 앱 상태가 "개발 중"이면 등록된 테스트 계정만 사용 가능. 실 사용자가 카카오 로그인 실패 시 포탈 설정 확인 필요
-- 소셜 로그인 전체 E2E 테스트: Google ✅, 네이버 ✅, 카카오 ⚠️ (팝업 구조 수정됨, 실기기 테스트 필요)
+- 소셜 로그인 전체 E2E 테스트: Google ✅, 네이버 ✅, 카카오 ⚠️ (REST API 방식 재구현됨, 실기기 테스트 필요)
 - 운영기 배포: 위 수정사항은 개발기에만 적용됨. 운영기 반영 시 sync 스크립트 사용
