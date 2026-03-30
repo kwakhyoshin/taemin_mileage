@@ -892,6 +892,65 @@ account: {
 - **함수**: `toggleIdPwLogin()` — `continue-idpw-section` display 토글
 - **이유**: 소셜 로그인이 주력이므로 화면 간소화
 
+### 12.8 모바일 카카오/네이버 로그인: parent 탭 리로드 시 결과 유실 (2026-03-31)
+- **증상**: 모바일(특히 iOS)에서 카카오/네이버 로그인 팝업이 열리고, 인증은 성공하는데 결과가 parent 탭에 전달되지 않음. parent 탭으로 돌아오면 로그인 화면이 그대로 보임
+- **원인**: 모바일에서 OAuth 팝업(새 탭)으로 전환 시 parent 탭이 메모리에서 해제되거나 bfcache에서 복원됨.
+  - Google은 `social_pending` localStorage 플래그를 설정하여 `onAuthStateChanged`가 처리 → 문제 없음
+  - 카카오/네이버는 Firebase Auth를 사용하지 않으므로 `onAuthStateChanged`가 안 됨 → `social_pending` 플래그도 없었음 → parent 탭 리로드 시 결과 수신 방법 없음
+  - 콜백 탭이 `localStorage.setItem('taemin_v6_kakao_callback_result', ...)` 저장하지만, parent의 `setInterval` 폴링이 페이지 리로드로 사라져서 아무도 읽지 않음
+- **수정**:
+  1. `doSocialLogin()`에서 카카오/네이버 팝업 열기 **전**에 `localStorage.setItem(_LS_PREFIX+'social_pending', 'kakao'/'naver')` 설정
+  2. `checkAuth()`에서 `social_pending`이 'kakao' 또는 'naver'일 때 최대 10초간 500ms 간격으로 localStorage 콜백 결과 폴링
+  3. 결과 발견 시 `_handleSocialLoginResult()` 직접 호출하여 로그인 처리
+  4. 취소/에러 시 `social_pending` 플래그 정리
+- **핵심 원리**: 콜백 탭과 parent 탭 사이의 유일한 통신 수단은 `localStorage` (postMessage는 모바일에서 불가). parent 탭이 리로드되더라도 `social_pending` 플래그가 있으면 localStorage 폴링으로 복구 가능
+- **교훈**: OAuth 팝업 기반 로그인에서 parent↔popup 간 통신은 반드시 `localStorage` 기반으로 해야 하고, parent 탭 리로드 시에도 결과를 수신할 수 있어야 함. `window.opener`, `postMessage`는 모바일에서 불안정
+
+### 12.9 카카오/네이버 콜백 감지: `window.name` 활용 (2026-03-31)
+- **증상**: 모바일에서 `window.opener`가 null → 콜백 탭이 자기가 콜백인지 감지 못함
+- **원인**: `window.open(url, 'kakaoLogin', ...)` → 새 탭 열림 → OAuth 사이트를 거쳐 redirect → `window.opener`는 cross-origin에서 null
+- **수정**: `window.name`은 cross-origin redirect를 거쳐도 보존됨. 콜백 감지 조건을 변경:
+  ```javascript
+  // before: window.opener && ...
+  // after: (window.opener || window.name === 'kakaoLogin') && ...
+  ```
+- **교훈**: `window.name`은 같은 창/탭 내에서 navigtion을 거쳐도 유지되는 몇 안 되는 속성. 모바일 OAuth에서 콜백 탭 식별에 유용
+
+### 12.10 색 단차 (iOS body.auth-active overflow:hidden) (2026-03-31)
+- **증상**: iPhone에서 auth 화면 하단에 색상이 다른 영역이 보임 (보라색 그라데이션인데 하단에 다른 색 띠)
+- **원인**: `body.auth-active{overflow:hidden}`이 iOS에서 레이아웃 충돌 유발. overflow:hidden이 컨텐츠를 위로 밀어올리면서 하단에 빈 공간(색 단차) 발생
+- **잘못된 접근**: gradient 조정, max-width:none, html 배경색 변경 등 → 해결 안 됨
+- **올바른 수정**: `body.auth-active`에서 `overflow:hidden` 제거
+  ```css
+  /* before */ body.auth-active{background:#5B4FC4;overflow:hidden}
+  /* after  */ body.auth-active{background:linear-gradient(135deg,#5B4FC4,#A78BFA)}
+  ```
+- **교훈**: 색 단차 문제 접근 시 색상/gradient를 만지기 전에 `overflow`, `position`, `height` 등 레이아웃 속성을 먼저 의심할 것. iOS Safari는 overflow:hidden에 민감
+
+### 12.11 소셜→기존계정 연동 화면 (socialLinkExisting) UI (2026-03-31)
+- **증상**: 소셜 로그인 후 "기존 계정에 연결"을 누르면 auth-continue 화면이 뜨는데, 소셜 버튼이 보이고 ID/PW 입력란은 접혀 있고, "기존 아이디로 로그인하면 연동된다"는 안내 메시지가 접힌 영역 안에 숨겨져 있음
+- **수정**: `socialLinkExisting()` 함수에서:
+  1. `.social-login-btns` 숨김 (`display:none`)
+  2. `#toggle-idpw-link` 숨김
+  3. `#continue-idpw-section` 펼침 (`display:block`)
+  4. 제목을 "기존 계정에 연결하기"로, 부제를 "기존 아이디와 비밀번호를 입력하세요"로 변경
+  5. 연동 안내 메시지를 primary 색상으로 표시
+  6. `showAuthScreen('continue')` 진입 시 `_socialLinkPendingUser`가 없으면 UI 자동 원복
+- **교훈**: 하나의 auth 화면을 여러 컨텍스트에서 재사용할 때, 각 컨텍스트에 맞게 UI 요소의 가시성을 제어하고, 다른 컨텍스트로 전환 시 반드시 원복해야 함
+
+### 12.12 bfcache와 소셜 로그인 충돌 방지 (2026-03-31)
+- **증상**: 모바일에서 소셜 로그인 팝업 후 parent 탭으로 돌아오면 `pageshow`에서 `location.reload()` 실행 → 소셜 로그인 상태 유실
+- **수정**: `pageshow` 이벤트 핸들러에서 `_socialLoginPending` (in-memory) 또는 `social_pending` (localStorage) 확인 후 reload 건너뜀
+  ```javascript
+  window.addEventListener('pageshow',(e)=>{
+    if(e.persisted){
+      if(_socialLoginPending || localStorage.getItem(_lsp)){ return; } // ← 새로고침 안 함
+      location.reload();
+    }
+  });
+  ```
+- **교훈**: bfcache 새로고침 로직이 있으면, 소셜 로그인 같은 외부 탭 전환 플로우에서 예외 처리 필수
+
 ---
 
 ## 변경 이력 (Change Log)
