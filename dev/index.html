@@ -7026,13 +7026,16 @@ async function _handleSocialLoginResult(firebaseUser, provider){
             });
 
             if(_confirmed){
-              toast('로그인 처리 중...');
-              // 새 uid도 같은 가족/멤버에 auth registry 등록
-              await _registerAuthLink(uid, link.familyId, link.memberId, provider, email);
-              // 기존 가족에 로그인
-              await _loginToFamily(link.familyId, link.memberId, uid, provider, email);
-              // social-link 버튼 원복 (다음 사용 대비)
-              _restoreSocialLinkButtons();
+              try {
+                toast('로그인 처리 중...');
+                await _registerAuthLink(uid, link.familyId, link.memberId, provider, email);
+                await _loginToFamily(link.familyId, link.memberId, uid, provider, email);
+                _restoreSocialLinkButtons();
+              } catch(_loginErr){
+                console.error('[Social] Duplicate login failed:', _loginErr);
+                toast('로그인 처리 중 오류가 발생했어요');
+                _restoreSocialLinkButtons();
+              }
             }
             return;
           }
@@ -7085,14 +7088,19 @@ async function _handleSocialLoginResult(firebaseUser, provider){
             });
 
             if(_confirmed2){
-              toast('로그인 처리 중...');
-              await _registerAuthLink(uid, _fid, _mid, provider, email);
-              // 기존 uid도 registry에 없으면 등록
-              if(_uData.authUid){
-                await _registerAuthLink(_uData.authUid, _fid, _mid, _existingProvider, email);
+              try {
+                toast('로그인 처리 중...');
+                await _registerAuthLink(uid, _fid, _mid, provider, email);
+                if(_uData.authUid){
+                  await _registerAuthLink(_uData.authUid, _fid, _mid, _existingProvider, email);
+                }
+                await _loginToFamily(_fid, _mid, uid, provider, email);
+                _restoreSocialLinkButtons();
+              } catch(_loginErr2){
+                console.error('[Social] Fallback duplicate login failed:', _loginErr2);
+                toast('로그인 처리 중 오류가 발생했어요');
+                _restoreSocialLinkButtons();
               }
-              await _loginToFamily(_fid, _mid, uid, provider, email);
-              _restoreSocialLinkButtons();
             }
             return;
           }
