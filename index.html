@@ -3854,11 +3854,34 @@ button:disabled {
     </button>
   </div>
   <div class="my-list" style="margin-top:8px">
+    <button class="my-list-item" onclick="openChangelog()">
+      <span class="my-list-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
+      <span class="my-list-txt">업데이트 내역</span>
+      <span id="changelog-badge" style="display:none;background:#F43F5E;color:#fff;font-size:10px;font-weight:800;padding:1px 6px;border-radius:10px;margin-left:auto">NEW</span>
+      <svg class="my-list-arr" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
+  </div>
+  <div class="my-list" style="margin-top:8px">
     <button class="my-list-item my-list-item-danger" onclick="logout()">
       <span class="my-list-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span>
       <span class="my-list-txt">로그아웃</span>
       <svg class="my-list-arr" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
     </button>
+  </div>
+</div>
+
+<!-- CHANGELOG / WHAT'S NEW POPUP -->
+<div class="overlay" id="m-changelog" style="z-index:600">
+  <div class="sheet" style="max-height:80vh">
+    <div class="sheet-body" style="padding-bottom:env(safe-area-inset-bottom,0)">
+      <div class="handle"></div>
+      <div class="sheet-title" style="display:flex;align-items:center;gap:8px">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        업데이트 내역
+      </div>
+      <div id="changelog-list" style="padding:8px 0 16px;max-height:60vh;overflow-y:auto;-webkit-overflow-scrolling:touch"></div>
+      <button class="btn-primary" onclick="closeChangelog()" style="width:100%;padding:14px;border-radius:14px;font-size:15px;font-weight:700;border:none;color:#fff;background:var(--ac,#6366F1);cursor:pointer">확인</button>
+    </div>
   </div>
 </div>
 
@@ -12667,6 +12690,125 @@ window.openPfMenu=openPfMenu;
 window.closePfMenu=closePfMenu;
 window.pfMenuAction=pfMenuAction;
 
+// ── CHANGELOG / WHAT'S NEW ──────────────────
+const APP_CHANGELOG=[
+  {
+    ver:'1.4.0', date:'2026-03-30',
+    items:[
+      {type:'new',text:'업데이트 내역 기능 추가 — 버그 수정/신규 기능을 앱에서 바로 확인'},
+      {type:'fix',text:'브라우저에서 상태바 색상이 탭 색상과 일치하지 않던 문제 수정'},
+      {type:'fix',text:'Android PWA 상태바와 제목 사이 미세한 줄 보이는 현상 해결'},
+      {type:'fix',text:'Android 홈 화면 아이콘 모서리가 지저분하게 보이는 문제 수정'},
+      {type:'fix',text:'뱃지 상세 화면에서 뒤로가기 버튼이 안 눌리던 문제 수정'},
+      {type:'fix',text:'PIN 설정 후 하단 메뉴가 사라지는 문제 수정'},
+      {type:'fix',text:'초대 링크 공유 시 [DEV] 태그가 운영기에도 붙던 문제 수정'},
+      {type:'fix',text:'승인 요청 라벨이 줄바꿈되어 보이는 문제 수정'},
+      {type:'new',text:'인사말/스마트 메시지를 시간대별로 대폭 확장 (매 시간 랜덤 변경)'},
+      {type:'fix',text:'미세먼지 수치가 실제보다 높게 표시되던 문제 수정 (AQI 변환)'},
+      {type:'new',text:'URL 공유 시 미리보기 이미지/제목 표시 (Open Graph 지원)'},
+      {type:'new',text:'하단 네비게이션 아이콘 크기 확대'},
+    ]
+  }
+];
+const _CL_LS_KEY=_LS_PREFIX+'changelog_seen';
+function _getSeenVer(){return localStorage.getItem(_CL_LS_KEY)||'';}
+function _setSeenVer(v){localStorage.setItem(_CL_LS_KEY,v);}
+function _hasNewChangelog(){
+  if(!APP_CHANGELOG.length)return false;
+  return APP_CHANGELOG[0].ver!==_getSeenVer();
+}
+function openChangelog(){
+  const el=document.getElementById('m-changelog');
+  if(!el)return;
+  const list=document.getElementById('changelog-list');
+  if(list){
+    list.innerHTML=APP_CHANGELOG.map((release,idx)=>{
+      const dateStr=release.date;
+      const isLatest=idx===0;
+      const items=release.items.map(it=>{
+        const badge=it.type==='new'
+          ?'<span style="flex-shrink:0;display:inline-block;background:#6366F1;color:#fff;font-size:10px;font-weight:800;padding:1px 6px;border-radius:8px;white-space:nowrap;margin-top:3px">신규</span>'
+          :'<span style="flex-shrink:0;display:inline-block;background:#10B981;color:#fff;font-size:10px;font-weight:800;padding:1px 6px;border-radius:8px;white-space:nowrap;margin-top:3px">수정</span>';
+        return `<div style="display:flex;align-items:flex-start;gap:6px;padding:6px 0;font-size:13px;color:var(--tx2);line-height:1.5">${badge}<span>${it.text}</span></div>`;
+      }).join('');
+      const latestTag=isLatest?'<span style="display:inline-block;background:#F43F5E;color:#fff;font-size:9px;font-weight:800;padding:1px 5px;border-radius:6px;margin-left:4px;vertical-align:middle">최신</span>':'';
+      const separator=idx>0?'<div style="border-top:1px solid var(--bd);margin-bottom:16px"></div>':'';
+      return `${separator}<div style="margin-bottom:20px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <span style="font-size:16px;font-weight:800;color:var(--tx)">v${release.ver}</span>${latestTag}
+          <span style="font-size:12px;color:var(--tx3)">${dateStr}</span>
+        </div>
+        ${items}
+      </div>`;
+    }).join('');
+  }
+  el.classList.add('open');
+  if(APP_CHANGELOG.length)_setSeenVer(APP_CHANGELOG[0].ver);
+  _updateChangelogBadge();
+}
+function closeChangelog(){
+  const el=document.getElementById('m-changelog');
+  if(el)el.classList.remove('open');
+}
+function _updateChangelogBadge(){
+  const badge=document.getElementById('changelog-badge');
+  if(badge)badge.style.display=_hasNewChangelog()?'inline-block':'none';
+}
+// 로그인 후 새 업데이트 알림 팝업
+function _showChangelogPopupIfNew(){
+  if(!_hasNewChangelog()||!currentUser)return;
+  const latest=APP_CHANGELOG[0];
+  if(!latest)return;
+  setTimeout(()=>{
+    const newCount=latest.items.filter(i=>i.type==='new').length;
+    const fixCount=latest.items.filter(i=>i.type==='fix').length;
+    let desc=[];
+    if(newCount)desc.push(`신규 기능 ${newCount}건`);
+    if(fixCount)desc.push(`버그 수정 ${fixCount}건`);
+    const msg=`v${latest.ver} 업데이트! ${desc.join(', ')}`;
+    // 풀 배너
+    const banner=document.createElement('div');
+    banner.id='changelog-banner';
+    banner.style.cssText='position:fixed;top:env(safe-area-inset-top,0);left:0;right:0;z-index:9000;padding:12px 16px;display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,#6366F1,#8B5CF6);color:#fff;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,.2);transform:translateY(-100%);transition:transform .4s cubic-bezier(.22,1,.36,1)';
+    banner.innerHTML=`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" style="flex-shrink:0"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <span style="flex:1">${msg}</span>
+      <span style="font-size:12px;opacity:.8;white-space:nowrap">자세히 보기 →</span>`;
+    banner.onclick=function(){
+      banner.remove();
+      var mini=document.getElementById('changelog-mini');
+      if(mini)mini.remove();
+      openChangelog();
+    };
+    document.body.appendChild(banner);
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{banner.style.transform='translateY(0)';}));
+    // 5초 후 미니 FAB로 축소
+    setTimeout(()=>{
+      const b=document.getElementById('changelog-banner');
+      if(!b)return;
+      b.style.transform='translateY(-100%)';
+      setTimeout(()=>{
+        b.remove();
+        const mini=document.createElement('div');
+        mini.id='changelog-mini';
+        mini.style.cssText='position:fixed;top:calc(env(safe-area-inset-top,0) + 8px);right:12px;z-index:9000;width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#6366F1,#8B5CF6);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 16px rgba(99,102,241,.4);transform:scale(0);transition:transform .3s cubic-bezier(.22,1,.36,1)';
+        mini.innerHTML='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
+        const dot=document.createElement('div');
+        dot.style.cssText='position:absolute;top:-2px;right:-2px;width:14px;height:14px;border-radius:50%;background:#F43F5E;border:2px solid #fff;font-size:0';
+        mini.appendChild(dot);
+        mini.onclick=function(){
+          mini.style.transform='scale(0)';
+          setTimeout(()=>mini.remove(),300);
+          openChangelog();
+        };
+        document.body.appendChild(mini);
+        requestAnimationFrame(()=>requestAnimationFrame(()=>{mini.style.transform='scale(1)';}));
+      },400);
+    },5000);
+  },1500);
+}
+window.openChangelog=openChangelog;
+window.closeChangelog=closeChangelog;
+
 // ── MOOD SYSTEM ──────────────────────────────
 const MOOD_DATA={
   happy:{emoji:'😆',particles:['❤️','✨','🌟','💛','⭐','🎉','💫','🌈'],label:'행복해!'},
@@ -14123,6 +14265,47 @@ function openModal(id){document.getElementById(id).classList.add('open');}
 function closeModal(id){document.getElementById(id).classList.remove('open');}
 document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
 
+// ── SHEET HANDLE DRAG TO CLOSE ──────────────
+(function(){
+  document.querySelectorAll('.sheet .handle').forEach(handle=>{
+    const sheet=handle.closest('.sheet');
+    const overlay=handle.closest('.overlay');
+    if(!sheet||!overlay)return;
+    let startY=0,currentY=0,dragging=false;
+    handle.style.cursor='grab';
+    handle.addEventListener('touchstart',function(e){
+      startY=e.touches[0].clientY;currentY=0;dragging=true;
+      sheet.style.transition='none';
+    },{passive:true});
+    handle.addEventListener('touchmove',function(e){
+      if(!dragging)return;
+      currentY=Math.max(0,e.touches[0].clientY-startY);
+      sheet.style.transform='translateY('+currentY+'px)';
+    },{passive:true});
+    handle.addEventListener('touchend',function(){
+      dragging=false;sheet.style.transition='';
+      if(currentY>80){overlay.classList.remove('open');}
+      sheet.style.transform='';
+    });
+    // mouse support
+    handle.addEventListener('mousedown',function(e){
+      startY=e.clientY;currentY=0;dragging=true;
+      sheet.style.transition='none';handle.style.cursor='grabbing';
+    });
+    document.addEventListener('mousemove',function(e){
+      if(!dragging)return;
+      currentY=Math.max(0,e.clientY-startY);
+      sheet.style.transform='translateY('+currentY+'px)';
+    });
+    document.addEventListener('mouseup',function(){
+      if(!dragging)return;
+      dragging=false;sheet.style.transition='';handle.style.cursor='grab';
+      if(currentY>80){overlay.classList.remove('open');}
+      sheet.style.transform='';
+    });
+  });
+})();
+
 // ── SWIPE NAVIGATION ──────────────────────────
 const SWIPE_TABS=['home','log','rwd','hist'];
 let _swipeStartX=0,_swipeStartY=0,_swiping=false,_swipeCurrentTab=null;
@@ -15556,6 +15739,10 @@ window._createState = _createState;
       _btm.content=_bdark?'#1E293B':(TAB_COLORS['home']||'#6366F1');
     }
   }
+
+  // 업데이트 내역 배지 + 알림 배너
+  _updateChangelogBadge();
+  _showChangelogPopupIfNew();
 
   // 날씨/미세먼지 데이터 가져오기
   fetchWeather();
