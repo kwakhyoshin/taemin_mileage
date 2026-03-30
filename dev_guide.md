@@ -777,6 +777,7 @@ git checkout <commit-hash> -- index.html       # 운영기 (긴급 시에만)
 | `c4f08ed` | fix: 소셜연동 바텀시트 닫힘 + 카카오 팝업 차단 수정 | ✅ 개발기 적용 |
 | `cb9d705` | fix: 보상요청 알림이 자기 자신에게도 발송되는 버그 수정 | ✅ 개발기 적용 |
 | `b4dc3aa` | feat: 로그인 화면 Vertical Stack 통합 — 소셜 + ID/PW 한 화면에 | ✅ 개발기 적용 |
+| `a1daf0d` | feat: 첫 화면을 통합 로그인 화면(auth-continue)으로 변경 | ✅ 개발기 적용 |
 
 #### 상세 변경 내용
 
@@ -810,6 +811,11 @@ git checkout <commit-hash> -- index.html       # 운영기 (긴급 시에만)
 - 구조: 소셜 3종(Google/Kakao/Naver) → "또는 아이디로 로그인" 구분선 → ID/PW 폼 → "또는" → 이메일 인증
 - `doContinueLogin()` 함수 추가 — 기존 `doLogin()`을 필드ID 인자화하여 재사용
 - 참고: Airbnb/Spotify/배달의민족 등 글로벌·한국 앱 UX 리서치 기반
+
+**7. 첫 화면을 통합 로그인 화면으로 변경 (`a1daf0d`)**
+- 웰컴 화면(auth-welcome) 거치지 않고 바로 auth-continue(통합 로그인) 표시
+- auth-continue를 기본 visible, auth-login을 hidden으로 HTML 변경
+- `checkAuth()`에서 모든 경우 `showAuthScreen('continue')`로 통일
 
 #### 미완료 / 추가 확인 필요
 - 카카오 로그인: Kakao Developer Portal에서 앱 상태가 "개발 중"이면 등록된 테스트 계정만 사용 가능. 실 사용자가 카카오 로그인 실패 시 포탈 설정 확인 필요
