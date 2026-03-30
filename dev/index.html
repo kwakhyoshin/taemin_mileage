@@ -7827,7 +7827,7 @@ const BADGES = [
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
-if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0331b';}}
+if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0331c';}}
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
@@ -17010,8 +17010,11 @@ window._createState = _createState;
   const _kakaoState = _kakaoQs.get('state') || '';
   if(_kakaoCode && _kakaoState.startsWith('kakao_')){
     console.log('[Kakao Callback] authorization code detected, opener:', !!window.opener, 'name:', window.name);
-    // ★ 모바일에서 window.opener가 null이면 직접 처리 (redirect 모드처럼)
-    const _kakaoShouldDirectProcess = !window.opener && window.name !== 'kakaoLogin';
+    // ★★ 핵심: checkAuth()가 로그인 화면을 표시하지 않도록 즉시 social_pending 설정
+    // (이 코드는 checkAuth보다 먼저 실행됨)
+    try{ localStorage.setItem((_ENV==='dev'?'taemin_dev_':'taemin_')+'social_pending', 'kakao'); }catch(e){}
+    // ★ 모바일에서 window.opener가 null이면 직접 처리 (window.name이 'kakaoLogin'이어도 opener 없으면 postMessage 불가)
+    const _kakaoShouldDirectProcess = !window.opener;
     // ★ 카카오 콜백 결과 전달 헬퍼
     function _deliverKakaoResult(data){
       if(_kakaoShouldDirectProcess && data.uid){
@@ -17025,6 +17028,7 @@ window._createState = _createState;
             await _handleSocialLoginResult(data, 'kakao');
           } catch(e){
             console.error('[Kakao Direct] handleSocialLoginResult error:', e);
+            localStorage.removeItem((_ENV==='dev'?'taemin_dev_':'taemin_')+'social_pending');
             if(_ENV==='dev') toast('[DEV] 카카오 direct 에러: '+(e.message||e), 5000);
             else toast('카카오 로그인 처리 중 오류가 발생했어요');
           }
@@ -17109,7 +17113,8 @@ window._createState = _createState;
   const _isNaverPopup = window.opener || window.name === 'naverLogin';
   const _hasNaverAccessToken = window.location.hash.includes('access_token');
   if(_hasNaverAccessToken && (_isNaverPopup || _isNaverRedirectReturn || !window.opener)){
-    // ★ !window.opener: 모바일에서 팝업이 새 탭으로 열렸을 때 — 자동 감지
+    // ★★ 핵심: checkAuth()가 로그인 화면을 표시하지 않도록 즉시 social_pending 설정
+    try{ localStorage.setItem((_ENV==='dev'?'taemin_dev_':'taemin_')+'social_pending', 'naver'); }catch(e){}
     // ★ redirect 복귀 시: 플래그 정리 + URL 해시 제거
     if(_isNaverRedirectReturn){
       localStorage.removeItem('taemin_v6_naver_redirect');
@@ -17117,24 +17122,25 @@ window._createState = _createState;
     }
 
     // 네이버 콜백 결과를 처리하는 헬퍼
-    // ★ 모바일에서 window.opener가 null이면 redirect처럼 직접 처리
-    const _shouldDirectProcess = _isNaverRedirectReturn || (!window.opener && !_isNaverPopup);
+    // ★ 모바일에서 window.opener가 null이면 직접 처리 (window.name이 'naverLogin'이어도 opener 없으면 postMessage 불가)
+    const _shouldDirectProcess = _isNaverRedirectReturn || !window.opener;
     function _deliverNaverResult(data){
       if(_shouldDirectProcess){
-        // ★ Redirect 모드: 메인 페이지에서 직접 _handleSocialLoginResult 호출
-        console.log('[Naver Redirect] Processing result directly:', data.uid);
-        localStorage.removeItem(_LS_PREFIX+'social_pending');
+        // ★ 직접 처리 모드: _handleSocialLoginResult 호출
+        console.log('[Naver Direct] Processing result directly:', data.uid);
+        // ★ social_pending은 유지! (checkAuth가 로그인 화면 표시 방지)
+        // _handleSocialLoginResult 완료 후 자동 정리됨
         // URL 해시 제거 (깔끔하게)
         history.replaceState(null, '', window.location.pathname + window.location.search);
         // Firebase 초기화 후 로그인 처리
         (async ()=>{
           try {
             if(!_firebaseReady) await _initFirebase();
-            _showSocialLoading('네이버');
             await _handleSocialLoginResult(data, 'naver');
           } catch(e){
-            console.error('[Naver Redirect] handleSocialLoginResult error:', e);
-            if(_ENV==='dev') toast('[DEV] 네이버 redirect 에러: '+(e.message||e), 5000);
+            console.error('[Naver Direct] handleSocialLoginResult error:', e);
+            localStorage.removeItem((_ENV==='dev'?'taemin_dev_':'taemin_')+'social_pending');
+            if(_ENV==='dev') toast('[DEV] 네이버 direct 에러: '+(e.message||e), 5000);
             else toast('네이버 로그인 처리 중 오류가 발생했어요');
           }
         })();
