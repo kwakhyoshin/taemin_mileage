@@ -6803,30 +6803,40 @@ async function _doKakaoLogin(){
 
 async function _doNaverLogin(){
   if(!_NAVER_CLIENT_ID){ toast('네이버 로그인은 준비 중이에요'); return null; }
-  const loaded = await _loadNaverSDK();
-  if(!loaded){ toast('네이버 SDK 로드에 실패했어요'); return null; }
+  // ★ SDK 로드 제거 — 콜백 팝업이 자체적으로 SDK를 로드함
+  // await _loadNaverSDK()를 여기서 하면 모바일에서 사용자 제스처 체인이 끊어져 팝업이 차단됨
   return new Promise((resolve)=>{
-    // 네이버 로그인 팝업 방식
     const state = Math.random().toString(36).substring(2);
     const authUrl = `https://nid.naver.com/oauth2.0/authorize?response_type=token&client_id=${_NAVER_CLIENT_ID}&redirect_uri=${encodeURIComponent(_getNaverCallbackUrl())}&state=${state}`;
     // localStorage fallback 결과 초기화 (이전 세션 잔여값 제거)
     try{ localStorage.removeItem('taemin_v6_naver_callback_result'); }catch(e){}
     const popup = window.open(authUrl, 'naverLogin', 'width=500,height=600,scrollbars=yes');
+
+    // ★ 모바일에서 팝업이 차단된 경우 → 현재 페이지에서 직접 이동 (redirect 방식)
+    if(!popup || typeof popup.closed === 'undefined'){
+      console.warn('[Naver] Popup blocked, using redirect fallback');
+      // social_pending 설정 후 페이지 이동 → 돌아왔을 때 hash에서 결과 처리
+      localStorage.setItem(_LS_PREFIX+'social_pending', 'naver');
+      localStorage.setItem('taemin_v6_naver_redirect', 'true');
+      window.location.href = authUrl;
+      resolve(null); // 페이지가 이동되므로 실제로 실행 안 됨
+      return;
+    }
+
     let resolved = false;
     // postMessage로 결과 수신
     const handler = (e)=>{
       if(e.data && e.data.type === 'naver_login'){
         resolved = true;
         window.removeEventListener('message', handler);
-        resolve(e.data); // {uid, email, displayName, provider}
+        resolve(e.data);
       }
     };
     window.addEventListener('message', handler);
-    // 팝업 닫힘 감지 — postMessage 전달 시간을 위해 1초 유예
+    // 팝업 닫힘 감지 — postMessage 전달 시간을 위해 유예
     const pollTimer = setInterval(()=>{
-      if(!popup || popup.closed){
+      if(popup.closed){
         clearInterval(pollTimer);
-        // 팝업이 닫혀도 postMessage가 도착할 수 있으므로 잠시 대기
         setTimeout(()=>{
           if(!resolved){
             window.removeEventListener('message', handler);
@@ -6847,7 +6857,7 @@ async function _doNaverLogin(){
             console.warn('[Naver] No result received via postMessage or localStorage');
             resolve(null);
           }
-        }, 3000); // 모바일에서 localStorage 쓰기 시간 확보를 위해 3초로 증가
+        }, 3000);
       }
     }, 500);
   });
@@ -6897,15 +6907,16 @@ async function doSocialLogin(provider){
   const _provLabel = provider === 'google' ? 'Google' : provider === 'kakao' ? '카카오' : provider === 'naver' ? '네이버' : provider;
 
   try {
-    if(!_firebaseReady) await _initFirebase();
-
     // ── 카카오 로그인 ──
+    // ★ 카카오/네이버: 팝업을 먼저 열어야 사용자 제스처 체인 보존됨
+    // Firebase init은 팝업 결과 대기 중 또는 이후에 수행
     if(provider === 'kakao'){
       try {
-        const result = await _doKakaoLogin();
+        const result = await _doKakaoLogin(); // ← 사용자 클릭 직후 팝업 열림
         if(!result){ return; } // 사용자 취소
         if(result._error){ toast('카카오 로그인 실패: ' + result._error); return; }
         if(!result.uid){ toast('카카오 로그인 정보를 가져올 수 없었어요'); return; }
+        if(!_firebaseReady) await _initFirebase(); // 팝업 닫힌 후 Firebase 초기화
         _showSocialLoading(_provLabel);
         await _handleSocialLoginResult(result, provider);
       } catch(e){
@@ -6919,9 +6930,13 @@ async function doSocialLogin(provider){
     // ── 네이버 로그인 ──
     if(provider === 'naver'){
       try {
-        const result = await _doNaverLogin();
+        const result = await _doNaverLogin(); // ← 사용자 클릭 직후 팝업 열림 (SDK 로드 없이)
         console.log('[Naver Login] _doNaverLogin result:', result);
         if(!result){
+          // redirect 모드인 경우 null 반환 → 페이지가 이미 이동됨
+          if(localStorage.getItem('taemin_v6_naver_redirect')){
+            return; // redirect 진행 중 — 토스트 불필요
+          }
           toast('네이버 로그인 결과를 받지 못했어요. 다시 시도해주세요.');
           _hideSocialLoading();
           return;
@@ -6931,6 +6946,7 @@ async function doSocialLogin(provider){
           _hideSocialLoading();
           return;
         }
+        if(!_firebaseReady) await _initFirebase(); // 팝업 닫힌 후 Firebase 초기화
         _showSocialLoading(_provLabel);
         await _handleSocialLoginResult(result, provider);
       } catch(e){
@@ -6941,44 +6957,68 @@ async function doSocialLogin(provider){
       return;
     }
 
-    // ── 구글 로그인 ──
+    // ── 구글 로그인 (Firebase 필요) ──
+    if(!_firebaseReady) await _initFirebase();
     if(!fbAuth){ toast('Firebase 초기화 실패'); return; }
 
     const gProvider = new GoogleAuthProvider();
     gProvider.setCustomParameters({ prompt: 'select_account' });
 
-    // social_pending 플래그 설정 → onAuthStateChanged가 감지
+    // social_pending 플래그 설정 → onAuthStateChanged가 감지 (redirect 복귀 시에도 유효)
     localStorage.setItem(_LS_PREFIX+'social_pending', provider);
 
-    try {
-      // 로딩 오버레이를 팝업 열기 전에 표시 → 팝업 닫힌 후 대기시간 체감 감소
-      _showSocialLoading(_provLabel);
-      // signInWithPopup 시도 (모바일 포함)
-      const result = await signInWithPopup(fbAuth, gProvider);
-      if(result && result.user && !_socialAuthHandled){
-        _socialAuthHandled = true;
-        localStorage.setItem(_LS_PREFIX+'social_pending', 'handled');
-        console.log('[Social Login] Popup success:', provider, result.user.uid);
-        await _handleSocialLoginResult(result.user, provider);
-      } else if(_socialAuthHandled){
-        // onAuthStateChanged가 이미 처리 중 — 로딩 오버레이는 그쪽에서 숨김
-        console.log('[Social Login] Already handled by onAuthStateChanged');
-      }
-    } catch(popupErr){
-      // 팝업 실패 → onAuthStateChanged가 잡아줄 수도 있음
-      if(popupErr.code === 'auth/popup-closed-by-user' || popupErr.code === 'auth/cancelled-popup-request'){
-        // 사용자가 팝업 닫음 → pending 해제, 로딩 숨기기
+    // ★ 모바일 감지: 모바일에서는 signInWithRedirect 사용 (storage partitioning 이슈 방지)
+    const _isMobileDevice = /iPhone|iPad|iPod|Android|Mobile/i.test(navigator.userAgent);
+
+    if(_isMobileDevice){
+      // ── 모바일: signInWithRedirect (팝업 대신 페이지 이동) ──
+      console.log('[Social Login] Mobile detected, using signInWithRedirect');
+      try {
+        _showSocialLoading(_provLabel);
+        // 페이지가 Google 인증으로 이동됨 → 인증 후 다시 이 페이지로 돌아옴
+        // 돌아온 후 onAuthStateChanged에서 social_pending 플래그로 로그인 처리
+        await signInWithRedirect(fbAuth, gProvider);
+        return; // 페이지 리디렉트됨 — 여기 이후 실행 안 됨
+      } catch(redirectErr){
+        console.error('[Social Login] Redirect failed:', redirectErr);
         localStorage.removeItem(_LS_PREFIX+'social_pending');
         _hideSocialLoading();
-      } else if(popupErr.code === 'auth/popup-blocked'){
-        // 팝업 차단 → redirect 재시도
-        console.log('[Social Login] Popup blocked, trying redirect...');
-        await signInWithRedirect(fbAuth, gProvider);
-        return; // 페이지 리디렉트됨
-      } else {
-        console.error('[Social Login Error]', popupErr);
-        localStorage.removeItem(_LS_PREFIX+'social_pending');
-        toast('로그인 중 오류가 발생했어요');
+        toast('로그인 중 오류가 발생했어요. 다시 시도해주세요.');
+      }
+    } else {
+      // ── PC: signInWithPopup ──
+      try {
+        _showSocialLoading(_provLabel);
+        const result = await signInWithPopup(fbAuth, gProvider);
+        if(result && result.user && !_socialAuthHandled){
+          _socialAuthHandled = true;
+          localStorage.setItem(_LS_PREFIX+'social_pending', 'handled');
+          console.log('[Social Login] Popup success:', provider, result.user.uid);
+          await _handleSocialLoginResult(result.user, provider);
+        } else if(_socialAuthHandled){
+          console.log('[Social Login] Already handled by onAuthStateChanged');
+        }
+      } catch(popupErr){
+        if(popupErr.code === 'auth/popup-closed-by-user' || popupErr.code === 'auth/cancelled-popup-request'){
+          localStorage.removeItem(_LS_PREFIX+'social_pending');
+          _hideSocialLoading();
+        } else if(popupErr.code === 'auth/popup-blocked'){
+          console.log('[Social Login] Popup blocked, trying redirect...');
+          await signInWithRedirect(fbAuth, gProvider);
+          return;
+        } else {
+          // ★ 기타 에러 (storage partitioning 등) → redirect로 재시도
+          console.warn('[Social Login] Popup error, trying redirect...', popupErr.code, popupErr.message);
+          try {
+            await signInWithRedirect(fbAuth, gProvider);
+            return;
+          } catch(fallbackErr){
+            console.error('[Social Login] Redirect fallback also failed:', fallbackErr);
+            localStorage.removeItem(_LS_PREFIX+'social_pending');
+            _hideSocialLoading();
+            toast('로그인 중 오류가 발생했어요. 다시 시도해주세요.');
+          }
+        }
       }
     }
 
@@ -7504,16 +7544,22 @@ function checkAuth() {
       return false;
     }
     // 아직 대기 중 — onAuthStateChanged가 처리할 때까지 대기
+    // ★ redirect 복귀 시: 로딩 오버레이 표시 (사용자에게 처리 중임을 알림)
     document.body.classList.add('auth-active');
+    const _pendingLabel = _socialPending === 'google' ? 'Google' : _socialPending === 'kakao' ? '카카오' : _socialPending === 'naver' ? '네이버' : '';
+    if(_pendingLabel && typeof _showSocialLoading === 'function'){
+      _showSocialLoading(_pendingLabel);
+    }
     setTimeout(()=>{
       const val = localStorage.getItem(_LS_PREFIX+'social_pending');
       if(val && val !== 'handled'){
-        // 5초 지나도 처리 안 됨 → 폴백
+        // 10초 지나도 처리 안 됨 → 폴백 (redirect 복귀 시간 고려하여 5→10초)
         console.log('[checkAuth] social_pending timeout, showing fallback');
         localStorage.removeItem(_LS_PREFIX+'social_pending');
+        _hideSocialLoading();
         showAuthScreen('continue');
       }
-    }, 5000);
+    }, 10000);
     return false;
   }
 
@@ -17078,16 +17124,55 @@ window._createState = _createState;
     return; // 이 창은 콜백 처리만 하고 종료
   }
 
-  // ── 네이버 OAuth 콜백 감지 (팝업에서 실행되는 경우) ──
+  // ── 네이버 OAuth 콜백 감지 (팝업 또는 redirect 복귀) ──
   // window.opener가 null일 수 있으므로 (모바일) localStorage fallback도 지원
-  if(window.location.hash.includes('access_token') && (window.opener || window.name === 'naverLogin')){
+  // ★ redirect 모드: taemin_v6_naver_redirect 플래그가 있으면 메인 페이지에서 직접 처리
+  const _isNaverRedirectReturn = localStorage.getItem('taemin_v6_naver_redirect') === 'true';
+  const _isNaverPopup = window.opener || window.name === 'naverLogin';
+  if(window.location.hash.includes('access_token') && (_isNaverPopup || _isNaverRedirectReturn)){
+    // ★ redirect 복귀 시: 플래그 정리 + URL 해시 제거
+    if(_isNaverRedirectReturn){
+      localStorage.removeItem('taemin_v6_naver_redirect');
+      console.log('[Naver Redirect] Redirect return detected, processing...');
+    }
+
+    // 네이버 콜백 결과를 처리하는 헬퍼
+    function _deliverNaverResult(data){
+      if(_isNaverRedirectReturn){
+        // ★ Redirect 모드: 메인 페이지에서 직접 _handleSocialLoginResult 호출
+        console.log('[Naver Redirect] Processing result directly:', data.uid);
+        localStorage.removeItem(_LS_PREFIX+'social_pending');
+        // URL 해시 제거 (깔끔하게)
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+        // Firebase 초기화 후 로그인 처리
+        (async ()=>{
+          try {
+            if(!_firebaseReady) await _initFirebase();
+            _showSocialLoading('네이버');
+            await _handleSocialLoginResult(data, 'naver');
+          } catch(e){
+            console.error('[Naver Redirect] handleSocialLoginResult error:', e);
+            _hideSocialLoading();
+            toast('네이버 로그인 처리 중 오류가 발생했어요');
+            showAuthScreen('continue');
+          }
+        })();
+      } else {
+        // 팝업 모드: 기존 방식 (postMessage + localStorage)
+        if(window.opener){
+          try{ window.opener.postMessage(data, '*'); }catch(e){}
+        }
+        try{ localStorage.setItem('taemin_v6_naver_callback_result', JSON.stringify(data)); }catch(e){}
+        setTimeout(()=>window.close(), 300);
+      }
+    }
+
     try{
       const hash = window.location.hash.substring(1);
       const params = new URLSearchParams(hash);
       const accessToken = params.get('access_token');
       if(accessToken){
         console.log('[Naver Callback] access_token detected, loading SDK...');
-        // 네이버 프로필 API 호출 (SDK 사용)
         const script = document.createElement('script');
         script.src = 'https://static.nid.naver.com/js/naveridlogin_js_sdk_2.0.2.js';
         script.onload = ()=>{
@@ -17096,27 +17181,16 @@ window._createState = _createState;
             const naverLogin = new window.naver.LoginWithNaverId({
               clientId: _NAVER_CLIENT_ID || '',
               callbackUrl: window.location.href.split('#')[0].split('?')[0],
-              isPopup: true,
+              isPopup: !_isNaverRedirectReturn,
               callbackHandle: true
             });
             naverLogin.init();
-            // 타임아웃 설정 (10초 후 강제 종료)
             const timeout = setTimeout(()=>{
               console.error('[Naver Callback] getLoginStatus timeout');
-              // 타임아웃 시 access_token 기반 fallback UID 전달
-              const _timeoutData = {
-                type:'naver_login',
-                uid: 'naver_token_'+accessToken.substring(0,16),
-                email: '',
-                displayName: '',
-                provider: 'naver',
-                _fallback: true
-              };
-              if(window.opener){
-                try{ window.opener.postMessage(_timeoutData, '*'); }catch(e){}
-              }
-              try{ localStorage.setItem('taemin_v6_naver_callback_result', JSON.stringify(_timeoutData)); }catch(e){}
-              window.close();
+              _deliverNaverResult({
+                type:'naver_login', uid:'naver_token_'+accessToken.substring(0,16),
+                email:'', displayName:'', provider:'naver', _fallback:true
+              });
             }, 10000);
             naverLogin.getLoginStatus((status)=>{
               clearTimeout(timeout);
@@ -17124,55 +17198,32 @@ window._createState = _createState;
               if(status && naverLogin.user){
                 const uid = naverLogin.user.getId();
                 console.log('[Naver Callback] User ID:', uid);
-                const _naverData = {
-                  type:'naver_login',
-                  uid: 'naver_'+uid,
+                _deliverNaverResult({
+                  type:'naver_login', uid:'naver_'+uid,
                   email: naverLogin.user.getEmail()||'',
                   displayName: naverLogin.user.getName()||naverLogin.user.getNickName()||'',
-                  provider: 'naver',
-                  profileImage: naverLogin.user.getProfileImage()||''
-                };
-                if(window.opener){
-                  try{ window.opener.postMessage(_naverData, '*'); }catch(e){}
-                }
-                // localStorage fallback (모바일에서 window.opener가 null일 때)
-                try{ localStorage.setItem('taemin_v6_naver_callback_result', JSON.stringify(_naverData)); }catch(e){}
+                  provider:'naver', profileImage: naverLogin.user.getProfileImage()||''
+                });
               } else {
                 console.error('[Naver Callback] getLoginStatus failed, status:', status);
-                // Fallback: access_token 해시 기반 UID
-                const _naverFallbackData = {
-                  type:'naver_login',
-                  uid: 'naver_token_'+accessToken.substring(0,16),
-                  email: '',
-                  displayName: '',
-                  provider: 'naver',
-                  _fallback: true
-                };
-                if(window.opener){
-                  try{ window.opener.postMessage(_naverFallbackData, '*'); }catch(e){}
-                }
-                try{ localStorage.setItem('taemin_v6_naver_callback_result', JSON.stringify(_naverFallbackData)); }catch(e){}
+                _deliverNaverResult({
+                  type:'naver_login', uid:'naver_token_'+accessToken.substring(0,16),
+                  email:'', displayName:'', provider:'naver', _fallback:true
+                });
               }
-              setTimeout(()=>window.close(), 300);
             });
           } catch(sdkErr){
             console.error('[Naver Callback] SDK init error:', sdkErr);
-            // SDK 에러 시에도 access_token 기반 fallback
-            const _sdkErrData = {type:'naver_login', uid:'naver_token_'+accessToken.substring(0,16), email:'', displayName:'', provider:'naver', _fallback:true};
-            if(window.opener){ try{ window.opener.postMessage(_sdkErrData, '*'); }catch(e){} }
-            try{ localStorage.setItem('taemin_v6_naver_callback_result', JSON.stringify(_sdkErrData)); }catch(e){}
-            window.close();
+            _deliverNaverResult({type:'naver_login', uid:'naver_token_'+accessToken.substring(0,16), email:'', displayName:'', provider:'naver', _fallback:true});
           }
         };
         script.onerror = ()=>{
           console.error('[Naver Callback] SDK load failed');
-          const _loadErrData = {type:'naver_login', uid:'naver_token_'+accessToken.substring(0,16), email:'', displayName:'', provider:'naver', _fallback:true};
-          if(window.opener){ try{ window.opener.postMessage(_loadErrData, '*'); }catch(e){} }
-          try{ localStorage.setItem('taemin_v6_naver_callback_result', JSON.stringify(_loadErrData)); }catch(e){}
-          window.close();
+          _deliverNaverResult({type:'naver_login', uid:'naver_token_'+accessToken.substring(0,16), email:'', displayName:'', provider:'naver', _fallback:true});
         };
         document.head.appendChild(script);
-        return; // 이 창은 콜백 처리만 하고 종료
+        if(!_isNaverRedirectReturn) return; // 팝업: 이 창은 콜백 처리만 하고 종료
+        // redirect 모드: return하지 않고 앱 초기화 계속 진행 (위의 async에서 로그인 처리)
       }
     }catch(e){ console.error('Naver callback error:', e); }
   }
