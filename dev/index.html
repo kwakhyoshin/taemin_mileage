@@ -249,6 +249,7 @@ body.dark .c1-role-type-card-title{color:#F1F5F9}
 .act-card.done,.act-card.partial,.act-card.exhausted{transition:background .25s,transform .15s}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{background:var(--bg);touch-action:pan-y;overscroll-behavior:none}
+html::after{content:'';position:fixed;top:0;left:0;right:0;height:2px;background:inherit;z-index:9998;pointer-events:none}
 body{touch-action:pan-y;overscroll-behavior:none}
 /* Prevent iOS zoom on input focus */
 input,select,textarea{font-size:16px!important}
@@ -13679,9 +13680,9 @@ function msgListGoBack(){
         if(m.type==='reward_request'&&m.requestId){
           const req=S.rewardRequests?S.rewardRequests.find(r=>r.id===m.requestId):null;
           if(req){
-            if(req.status==='pending')statusTag='<span style="font-size:13px;background:#FCA5A5;color:#7F1D1D;padding:2px 6px;border-radius:6px;font-weight:800;margin-left:4px">승인 대기</span>';
-            else if(req.status==='approved')statusTag='<span style="font-size:13px;background:#86EFAC;color:#14532D;padding:2px 6px;border-radius:6px;font-weight:800;margin-left:4px">승인됨</span>';
-            else if(req.status==='rejected')statusTag='<span style="font-size:13px;background:#D4D4D8;color:#3F3F46;padding:2px 6px;border-radius:6px;font-weight:800;margin-left:4px">거절됨</span>';
+            if(req.status==='pending')statusTag='<span style="font-size:13px;background:#FCA5A5;color:#7F1D1D;padding:2px 6px;border-radius:6px;font-weight:800;margin-left:4px;white-space:nowrap">승인대기</span>';
+            else if(req.status==='approved')statusTag='<span style="font-size:13px;background:#86EFAC;color:#14532D;padding:2px 6px;border-radius:6px;font-weight:800;margin-left:4px;white-space:nowrap">승인됨</span>';
+            else if(req.status==='rejected')statusTag='<span style="font-size:13px;background:#D4D4D8;color:#3F3F46;padding:2px 6px;border-radius:6px;font-weight:800;margin-left:4px;white-space:nowrap">거절됨</span>';
           }
         }
         return `<div class="msglist-item" onclick="readMsgFromList('${fromId}',${msgs.length-1-i})">

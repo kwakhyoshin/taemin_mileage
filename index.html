@@ -13569,9 +13569,9 @@ function openMsgList(fromId,fromFamily){
       if(m.type==='reward_request'&&m.requestId){
         const req=S.rewardRequests?S.rewardRequests.find(r=>r.id===m.requestId):null;
         if(req){
-          if(req.status==='pending')statusTag='<span style="font-size:13px;background:#FCA5A5;color:#7F1D1D;padding:2px 6px;border-radius:6px;font-weight:800;margin-left:4px">승인 대기</span>';
-          else if(req.status==='approved')statusTag='<span style="font-size:13px;background:#86EFAC;color:#14532D;padding:2px 6px;border-radius:6px;font-weight:800;margin-left:4px">승인됨</span>';
-          else if(req.status==='rejected')statusTag='<span style="font-size:13px;background:#D4D4D8;color:#3F3F46;padding:2px 6px;border-radius:6px;font-weight:800;margin-left:4px">거절됨</span>';
+          if(req.status==='pending')statusTag='<span style="font-size:13px;background:#FCA5A5;color:#7F1D1D;padding:2px 6px;border-radius:6px;font-weight:800;margin-left:4px;white-space:nowrap">승인대기</span>';
+          else if(req.status==='approved')statusTag='<span style="font-size:13px;background:#86EFAC;color:#14532D;padding:2px 6px;border-radius:6px;font-weight:800;margin-left:4px;white-space:nowrap">승인됨</span>';
+          else if(req.status==='rejected')statusTag='<span style="font-size:13px;background:#D4D4D8;color:#3F3F46;padding:2px 6px;border-radius:6px;font-weight:800;margin-left:4px;white-space:nowrap">거절됨</span>';
         }
       }
       return `<div class="msglist-item" onclick="readMsgFromList('${fromId}',${msgs.length-1-i})">
@@ -13674,9 +13674,9 @@ function msgListGoBack(){
         if(m.type==='reward_request'&&m.requestId){
           const req=S.rewardRequests?S.rewardRequests.find(r=>r.id===m.requestId):null;
           if(req){
-            if(req.status==='pending')statusTag='<span style="font-size:13px;background:#FCA5A5;color:#7F1D1D;padding:2px 6px;border-radius:6px;font-weight:800;margin-left:4px">승인 대기</span>';
-            else if(req.status==='approved')statusTag='<span style="font-size:13px;background:#86EFAC;color:#14532D;padding:2px 6px;border-radius:6px;font-weight:800;margin-left:4px">승인됨</span>';
-            else if(req.status==='rejected')statusTag='<span style="font-size:13px;background:#D4D4D8;color:#3F3F46;padding:2px 6px;border-radius:6px;font-weight:800;margin-left:4px">거절됨</span>';
+            if(req.status==='pending')statusTag='<span style="font-size:13px;background:#FCA5A5;color:#7F1D1D;padding:2px 6px;border-radius:6px;font-weight:800;margin-left:4px;white-space:nowrap">승인대기</span>';
+            else if(req.status==='approved')statusTag='<span style="font-size:13px;background:#86EFAC;color:#14532D;padding:2px 6px;border-radius:6px;font-weight:800;margin-left:4px;white-space:nowrap">승인됨</span>';
+            else if(req.status==='rejected')statusTag='<span style="font-size:13px;background:#D4D4D8;color:#3F3F46;padding:2px 6px;border-radius:6px;font-weight:800;margin-left:4px;white-space:nowrap">거절됨</span>';
           }
         }
         return `<div class="msglist-item" onclick="readMsgFromList('${fromId}',${msgs.length-1-i})">
