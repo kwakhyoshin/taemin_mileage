@@ -1038,12 +1038,7 @@ body.auth-active{background:#5B4FC4;overflow:hidden}
 body.auth-active .nav-container{display:none!important}
 html:has(body.auth-active){background:#5B4FC4!important;overflow:hidden}
 #auth-insight .toss-cta{margin:0 24px;padding-left:0;padding-right:0;padding-top:8px}
-.social-loading-overlay{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#5B4FC4,#A78BFA);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;opacity:0;transition:opacity .3s;pointer-events:none}
-.social-loading-overlay.on{opacity:1;pointer-events:auto}
-.social-loading-spinner{width:44px;height:44px;border:4px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:sls .8s linear infinite}
-@keyframes sls{to{transform:rotate(360deg)}}
-.social-loading-text{color:#fff;font-size:15px;font-weight:700;text-align:center;line-height:1.6}
-.social-loading-sub{color:rgba(255,255,255,.6);font-size:12px;font-weight:500}
+/* social-loading-overlay CSS 제거됨 */
 .auth-card{background:#fff;border-radius:24px;padding:32px 28px;width:100%;max-width:380px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2);margin:auto;flex-shrink:0}
 @media(min-width:768px){.auth-card{max-width:440px;padding:40px 36px}.auth-title{font-size:28px}.auth-sub{font-size:14px}.auth-input{padding:16px 18px;font-size:16px}}
 .auth-logo{font-size:48px;margin-bottom:12px}
@@ -6863,41 +6858,11 @@ async function _doNaverLogin(){
   });
 }
 
-// ── 소셜 로그인 로딩 오버레이 ──
-let _socialLoadingTimeout = null;
-function _showSocialLoading(providerLabel){
-  let el = document.getElementById('social-loading-overlay');
-  if(!el){
-    el = document.createElement('div');
-    el.id = 'social-loading-overlay';
-    el.className = 'social-loading-overlay';
-    el.innerHTML = `<div class="social-loading-spinner"></div><div class="social-loading-text" id="social-loading-msg">인증 확인 중...</div><div class="social-loading-sub">잠시만 기다려주세요</div>`;
-    document.body.appendChild(el);
-  }
-  const msg = document.getElementById('social-loading-msg');
-  if(msg) msg.textContent = providerLabel ? `${providerLabel} 인증 확인 중...` : '인증 확인 중...';
-  requestAnimationFrame(()=> el.classList.add('on'));
-  // ★ 안전 타임아웃: 15초 후에도 로딩 중이면 자동 해제
-  if(_socialLoadingTimeout) clearTimeout(_socialLoadingTimeout);
-  _socialLoadingTimeout = setTimeout(()=>{
-    const _still = document.getElementById('social-loading-overlay');
-    if(_still && _still.classList.contains('on')){
-      console.warn('[SocialLoading] Safety timeout - auto hiding after 15s');
-      _hideSocialLoading();
-      toast('로그인 처리가 지연되고 있어요. 다시 시도해주세요.');
-      // ★ showAuthScreen('continue') 제거 — 타임아웃 시 현재 화면 유지
-    }
-  }, 15000);
-}
-function _hideSocialLoading(){
-  if(_socialLoadingTimeout){ clearTimeout(_socialLoadingTimeout); _socialLoadingTimeout=null; }
-  const el = document.getElementById('social-loading-overlay');
-  if(el){ el.classList.remove('on'); setTimeout(()=>el.remove(), 300); }
-}
-function _updateSocialLoadingMsg(text){
-  const msg = document.getElementById('social-loading-msg');
-  if(msg) msg.textContent = text;
-}
+// ── 소셜 로그인 로딩 오버레이: 제거됨 (no-op) ──
+// 로딩 오버레이가 소셜 로그인 flow를 방해하는 버그의 원인이었으므로 완전 제거
+function _showSocialLoading(){}
+function _hideSocialLoading(){}
+function _updateSocialLoadingMsg(){}
 
 async function doSocialLogin(provider){
   if(_socialLoginPending) return;
@@ -7544,22 +7509,16 @@ function checkAuth() {
       return false;
     }
     // 아직 대기 중 — onAuthStateChanged가 처리할 때까지 대기
-    // ★ redirect 복귀 시: 로딩 오버레이 표시 (사용자에게 처리 중임을 알림)
     document.body.classList.add('auth-active');
-    const _pendingLabel = _socialPending === 'google' ? 'Google' : _socialPending === 'kakao' ? '카카오' : _socialPending === 'naver' ? '네이버' : '';
-    if(_pendingLabel && typeof _showSocialLoading === 'function'){
-      _showSocialLoading(_pendingLabel);
-    }
+    // ★ 타임아웃: 15초 후에도 처리 안 되면 플래그만 정리 (showAuthScreen 호출 안 함)
     setTimeout(()=>{
       const val = localStorage.getItem(_LS_PREFIX+'social_pending');
       if(val && val !== 'handled'){
-        // 10초 지나도 처리 안 됨 → 폴백 (redirect 복귀 시간 고려하여 5→10초)
-        console.log('[checkAuth] social_pending timeout, showing fallback');
+        console.log('[checkAuth] social_pending timeout, clearing flag only');
         localStorage.removeItem(_LS_PREFIX+'social_pending');
-        _hideSocialLoading();
-        showAuthScreen('continue');
+        // ★ showAuthScreen('continue') 제거 — 이것이 로그인 화면 강제 이동의 원인이었음
       }
-    }, 10000);
+    }, 15000);
     return false;
   }
 
