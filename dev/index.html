@@ -1032,14 +1032,12 @@ body.dark .pin-key.ck{background:transparent}
 @keyframes msgEmojiBounce{0%{transform:scale(0)}50%{transform:scale(1.2)}100%{transform:scale(1)}}
 
 /* AUTH SCREENS */
-.auth-screen{position:fixed;inset:0;background:linear-gradient(135deg,#5B4FC4,#A78BFA);z-index:1000;display:flex;flex-direction:column;align-items:center;padding:20px;padding-top:max(24px, calc(env(safe-area-inset-top, 0px) + 16px));padding-bottom:max(20px, env(safe-area-inset-bottom, 0px));overflow-y:auto;-webkit-overflow-scrolling:touch}
-.auth-screen::before{content:'';flex:1 1 0;min-height:16px}
-.auth-screen::after{content:'';flex:1 1 0;min-height:16px}
+.auth-screen{position:fixed;inset:0;background:linear-gradient(135deg,#5B4FC4,#A78BFA);z-index:1000;display:flex;flex-direction:column;align-items:center;padding:16px;padding-top:max(16px, calc(env(safe-area-inset-top, 0px) + 8px));padding-bottom:max(16px, env(safe-area-inset-bottom, 0px));overflow-y:auto;-webkit-overflow-scrolling:touch}
 .auth-screen.hidden{display:none;pointer-events:none}
 body.auth-active{background:linear-gradient(135deg,#5B4FC4,#A78BFA);overflow:hidden;max-width:none}
 html:has(body.auth-active){background:linear-gradient(135deg,#5B4FC4,#A78BFA)!important;overflow:hidden}
 #auth-insight .toss-cta{margin:0 24px;padding-left:0;padding-right:0;padding-top:8px}
-.auth-card{background:#fff;border-radius:24px;padding:32px 28px;width:100%;max-width:380px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2);margin:0 auto;flex-shrink:0}
+.auth-card{background:#fff;border-radius:24px;padding:32px 28px;width:100%;max-width:380px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2);margin:auto;flex-shrink:0}
 @media(min-width:768px){.auth-card{max-width:440px;padding:40px 36px}.auth-title{font-size:28px}.auth-sub{font-size:14px}.auth-input{padding:16px 18px;font-size:16px}}
 .auth-logo{font-size:48px;margin-bottom:12px}
 .auth-title{font-size:24px;font-weight:900;color:#1E293B;margin-bottom:6px}
@@ -16941,11 +16939,12 @@ window._createState = _createState;
         const uid = 'kakao_' + res.id;
         const email = res.kakao_account?.email || '';
         const displayName = res.kakao_account?.profile?.nickname || '';
-        console.log('[Kakao Callback] User:', uid, displayName);
+        const profileImage = res.kakao_account?.profile?.profile_image_url || res.kakao_account?.profile?.thumbnail_image_url || '';
+        console.log('[Kakao Callback] User:', uid, displayName, profileImage ? '(has photo)' : '(no photo)');
         if(window.opener){
           window.opener.postMessage({
             type:'kakao_login',
-            uid, email, displayName, provider:'kakao'
+            uid, email, displayName, provider:'kakao', profileImage
           }, '*');
         }
         setTimeout(()=>window.close(), 300);
@@ -17014,7 +17013,8 @@ window._createState = _createState;
                     uid: 'naver_'+uid,
                     email: naverLogin.user.getEmail()||'',
                     displayName: naverLogin.user.getName()||naverLogin.user.getNickName()||'',
-                    provider: 'naver'
+                    provider: 'naver',
+                    profileImage: naverLogin.user.getProfileImage()||''
                   }, '*');
                 }
               } else {
