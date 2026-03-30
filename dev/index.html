@@ -2498,6 +2498,23 @@ button:disabled {
 @keyframes tourConfetti{0%{opacity:1;transform:translateY(0) rotate(0deg) scale(1)}100%{opacity:0;transform:translateY(-100px) rotate(540deg) scale(0)}}
 
 </style>
+<script>
+// ★ 12.5 색 단차 방지: <head>에서 CSS 즉시 주입하여 auth-welcome 렌더링 자체를 차단
+(function(){
+  var prefix=(window._ENV==='dev'||window.location.pathname.indexOf('/dev/')!==-1)?'taemin_dev_':'taemin_';
+  if(localStorage.getItem(prefix+'onboarding_done')){
+    var s=document.createElement('style');
+    s.id='early-auth-switch';
+    s.textContent='#auth-welcome,#auth-onboarding{display:none!important}#auth-continue{display:flex!important;pointer-events:auto!important}.nav-container{display:none!important}';
+    document.head.appendChild(s);
+    document.addEventListener('DOMContentLoaded',function(){
+      var ac=document.getElementById('auth-continue');
+      if(ac){ac.classList.remove('hidden');}
+      document.body.classList.add('auth-active');
+    });
+  }
+})();
+</script>
 </head>
 <body data-tab="home" class="auth-active">
 <div class="dev-indicator" id="dev-indicator" style="display:none">DEV</div>
@@ -2653,25 +2670,8 @@ button:disabled {
     window.showAuthScreen('continue');
   };
 
-  // ★ 온보딩 완료 사용자: 초기 렌더링에서 auth-welcome 대신 auth-continue 표시
-  // CSS로 처리하여 DOM 파싱 중 깜빡임 없이 즉시 적용
-  (function(){
-    var prefix=(window._ENV==='dev'||window.location.pathname.indexOf('/dev/')!==-1)?'taemin_dev_':'taemin_';
-    if(localStorage.getItem(prefix+'onboarding_done')){
-      // 스타일 시트 주입: auth-welcome 숨기고 auth-continue 표시
-      // ⚠️ pointer-events:auto 필수! .hidden 클래스의 pointer-events:none을 덮어써야 터치 통과 방지
-      var s=document.createElement('style');
-      s.id='early-auth-switch';
-      s.textContent='#auth-welcome,#auth-onboarding{display:none!important}#auth-continue{display:flex!important;pointer-events:auto!important}.nav-container{display:none!important}';
-      document.head.appendChild(s);
-      // DOM 준비 후 .hidden 클래스 직접 제거 + body.auth-active 설정
-      document.addEventListener('DOMContentLoaded',function(){
-        var ac=document.getElementById('auth-continue');
-        if(ac){ac.classList.remove('hidden');}
-        document.body.classList.add('auth-active');
-      });
-    }
-  })();
+  // ★ early CSS injection은 <head>로 이동됨 (12.5 색 단차 방지)
+  // body 안에서 중복 실행하지 않음
 })();
 </script>
 
