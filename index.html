@@ -3371,7 +3371,7 @@ button:disabled {
 </div>
 
 <!-- Badge View Screen -->
-<div class="scr" id="s-badge" style="display:none;position:fixed;inset:0;z-index:200;background:var(--bg);display:flex;flex-direction:column">
+<div class="scr" id="s-badge" style="display:none;position:fixed;inset:0;z-index:200;background:var(--bg);flex-direction:column">
   <div class="badge-hero" style="flex-shrink:0;z-index:10;background:linear-gradient(135deg,#8B5CF6,#A78BFA);padding:18px 20px 16px;padding-top:calc(18px + env(safe-area-inset-top));border-radius:0 0 var(--rxl) var(--rxl);box-shadow:0 4px 20px rgba(139,92,246,0.3)">
     <div style="display:flex;align-items:center;gap:12px">
       <button onclick="closeBadgeView()" style="background:rgba(255,255,255,0.2);border:none;width:44px;height:44px;min-width:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;font-size:18px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);-webkit-tap-highlight-color:transparent;touch-action:manipulation">
@@ -8419,7 +8419,7 @@ function renderBadgeHistory(){
 }
 
 function openBadgeView(){
-  document.getElementById('s-badge').style.display='block';
+  document.getElementById('s-badge').style.display='flex';
   renderBadgeViewGrid();
   renderBadgeViewHistory();
 }
