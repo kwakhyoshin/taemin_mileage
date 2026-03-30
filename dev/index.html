@@ -2657,17 +2657,26 @@ button:disabled {
 
 <!-- AUTH: 소셜/이메일 인증 후 연결 선택 -->
 <div class="auth-screen hidden" id="auth-social-link">
-  <div class="auth-card">
-    <div class="auth-logo" style="font-size:48px">🎉</div>
-    <h2 class="auth-title" style="font-size:20px;font-weight:800;margin:12px 0 4px">인증 완료!</h2>
-    <div class="auth-sub" id="social-link-info" style="margin-bottom:20px">소셜 계정으로 인증되었어요</div>
+  <div class="auth-card" style="text-align:center">
+    <div style="font-size:48px;margin-bottom:8px">🎉</div>
+    <h2 class="auth-title" style="font-size:20px;font-weight:800;margin:0 0 4px">인증 완료!</h2>
+    <div class="auth-sub" id="social-link-info" style="margin-bottom:24px;color:var(--tx2)">소셜 계정으로 인증되었어요</div>
+    <div id="social-link-profile" style="background:var(--bg2);border-radius:12px;padding:16px;margin-bottom:20px;text-align:left">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div id="social-link-avatar" style="width:44px;height:44px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700">?</div>
+        <div>
+          <div id="social-link-name-display" style="font-weight:700;font-size:15px;color:var(--tx)"></div>
+          <div id="social-link-email-display" style="font-size:13px;color:var(--tx3)"></div>
+        </div>
+      </div>
+    </div>
     <button class="auth-btn" onclick="socialLinkNewFamily()" style="margin-bottom:12px">
-      새 가족 만들기
+      새로 시작하기
     </button>
     <button class="auth-btn secondary" onclick="socialLinkExisting()">
-      기존 가족에 연결하기
+      기존 계정에 연결하기
     </button>
-    <div class="auth-link" onclick="showAuthScreen('login')" style="margin-top:16px">← 로그인으로 돌아가기</div>
+    <div class="auth-link" onclick="showAuthScreen('auth-continue')" style="margin-top:16px">← 다른 방법으로 로그인</div>
   </div>
 </div>
 
@@ -6305,6 +6314,39 @@ function logout() {
 // ── 소셜 로그인 / 이메일 인증 ──────────────────
 let _socialLoginPending = false;
 
+// 모바일 감지
+function _isMobileDevice(){
+  return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+}
+
+// 페이지 로드 시 리디렉트 결과 체크
+async function _checkRedirectResult(){
+  const pendingProvider = localStorage.getItem(_LS_PREFIX+'social_pending');
+  try {
+    const result = await getRedirectResult(fbAuth);
+    if(result && result.user){
+      localStorage.removeItem(_LS_PREFIX+'social_pending');
+      const firebaseUser = result.user;
+      // provider 추정
+      let provider = pendingProvider || 'google';
+      if(firebaseUser.providerData && firebaseUser.providerData[0]){
+        const pid = firebaseUser.providerData[0].providerId;
+        if(pid === 'google.com') provider = 'google';
+        else if(pid === 'facebook.com') provider = 'facebook';
+      }
+      console.log('[Social Redirect Result]', provider, firebaseUser.uid, firebaseUser.email);
+      // 로딩 표시
+      toast('로그인 처리 중...');
+      await _handleSocialLoginResult(firebaseUser, provider);
+    } else {
+      localStorage.removeItem(_LS_PREFIX+'social_pending');
+    }
+  } catch(e){
+    localStorage.removeItem(_LS_PREFIX+'social_pending');
+    console.log('[Redirect Result] No pending redirect or error:', e.code || e.message);
+  }
+}
+
 async function doSocialLogin(provider){
   if(_socialLoginPending) return;
   _socialLoginPending = true;
@@ -6315,20 +6357,27 @@ async function doSocialLogin(provider){
     if(!_firebaseReady) await _initFirebase();
     if(!fbAuth){ if(errEl) errEl.textContent='Firebase 초기화 실패'; return; }
 
-    let result;
-    if(provider === 'google'){
-      const gProvider = new GoogleAuthProvider();
-      gProvider.setCustomParameters({ prompt: 'select_account' });
-      result = await signInWithPopup(fbAuth, gProvider);
-    } else if(provider === 'kakao'){
-      // Phase 3에서 구현 — 임시 안내
+    if(provider === 'kakao'){
       toast('카카오 로그인은 준비 중이에요');
       return;
     } else if(provider === 'naver'){
-      // Phase 3에서 구현 — 임시 안내
       toast('네이버 로그인은 준비 중이에요');
       return;
     }
+
+    const gProvider = new GoogleAuthProvider();
+    gProvider.setCustomParameters({ prompt: 'select_account' });
+
+    if(_isMobileDevice()){
+      // 모바일: redirect 방식 (팝업이 안 되거나 불안정)
+      localStorage.setItem(_LS_PREFIX+'social_pending', provider);
+      await signInWithRedirect(fbAuth, gProvider);
+      // 이 이후 코드는 실행 안 됨 (페이지가 리디렉트됨)
+      return;
+    }
+
+    // 데스크톱: popup 방식
+    const result = await signInWithPopup(fbAuth, gProvider);
 
     if(!result || !result.user){
       if(errEl) errEl.textContent = '로그인에 실패했어요';
@@ -6347,6 +6396,14 @@ async function doSocialLogin(provider){
       // 사용자가 팝업 닫음 — 무시
     } else if(e.code === 'auth/cancelled-popup-request'){
       // 이전 팝업 취소 — 무시
+    } else if(e.code === 'auth/popup-blocked'){
+      // 팝업 차단 → redirect로 재시도
+      console.log('[Social Login] Popup blocked, trying redirect...');
+      const gProvider = new GoogleAuthProvider();
+      gProvider.setCustomParameters({ prompt: 'select_account' });
+      localStorage.setItem(_LS_PREFIX+'social_pending', provider);
+      await signInWithRedirect(fbAuth, gProvider);
+      return;
     } else {
       if(errEl) errEl.textContent = '로그인 중 오류가 발생했어요';
     }
@@ -6385,13 +6442,16 @@ async function _handleSocialLoginResult(firebaseUser, provider){
   // 2) 기존 연결 없음 → 신규 가입 또는 기존 계정 연결 선택
   _pendingSocialUser = { uid, email, displayName, provider };
   showAuthScreen('social-link');
-  // social-link 화면에서 이메일과 이름 미리 채우기
-  const nameEl = document.getElementById('social-link-name');
-  const emailEl = document.getElementById('social-link-email');
+  // social-link 화면에 프로필 정보 표시
+  const providerLabel = provider === 'google' ? 'Google' : provider === 'kakao' ? '카카오' : provider === 'naver' ? '네이버' : provider;
   const infoEl = document.getElementById('social-link-info');
-  if(nameEl && displayName) nameEl.value = displayName;
-  if(emailEl && email) emailEl.value = email;
-  if(infoEl) infoEl.textContent = `${provider === 'google' ? 'Google' : provider} 계정: ${email || displayName}`;
+  if(infoEl) infoEl.textContent = `${providerLabel} 계정으로 인증되었어요`;
+  const nameDisplay = document.getElementById('social-link-name-display');
+  const emailDisplay = document.getElementById('social-link-email-display');
+  const avatarEl = document.getElementById('social-link-avatar');
+  if(nameDisplay) nameDisplay.textContent = displayName || '사용자';
+  if(emailDisplay) emailDisplay.textContent = email || '';
+  if(avatarEl) avatarEl.textContent = (displayName || email || '?').charAt(0).toUpperCase();
 }
 let _pendingSocialUser = null;
 
@@ -6972,7 +7032,7 @@ const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di)_di.style.display='';}
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
-let getAuth, signInWithPopup, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
+let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
 let fbApp, db, fbAuth, LEGACY_DOC, DATA_DOC;
 let _firebaseReady = false;
 let _dataListenerUnsub = null; // onSnapshot 구독 해제 함수
@@ -6984,7 +7044,7 @@ async function _initFirebase(){
     const fbAuthMod = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
     initializeApp = fbAppMod.initializeApp;
     ({getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction} = fbFsMod);
-    ({getAuth, signInWithPopup, signOut: signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken} = fbAuthMod);
+    ({getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut: signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken} = fbAuthMod);
 
     const firebaseConfig = {
       apiKey: "AIzaSyDTS81EBGgiuo564ThxvTTOpR_iAHLb8tg",
@@ -7001,6 +7061,10 @@ async function _initFirebase(){
     DATA_DOC = LEGACY_DOC;
     _firebaseReady = true;
     console.log('[mile.ly] Firebase loaded OK (with Auth)');
+
+    // 소셜 로그인 리디렉트 결과 체크 (모바일에서 signInWithRedirect 사용 시)
+    _checkRedirectResult();
+
     return true;
   } catch(e) {
     console.error('[mile.ly] Firebase load FAILED:', e);
