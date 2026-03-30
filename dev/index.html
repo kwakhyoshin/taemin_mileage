@@ -2656,10 +2656,17 @@ button:disabled {
     var prefix=(window._ENV==='dev'||window.location.pathname.indexOf('/dev/')!==-1)?'taemin_dev_':'taemin_';
     if(localStorage.getItem(prefix+'onboarding_done')){
       // 스타일 시트 주입: auth-welcome 숨기고 auth-continue 표시
+      // ⚠️ pointer-events:auto 필수! .hidden 클래스의 pointer-events:none을 덮어써야 터치 통과 방지
       var s=document.createElement('style');
       s.id='early-auth-switch';
-      s.textContent='#auth-welcome,#auth-onboarding{display:none!important}#auth-continue{display:flex!important}';
+      s.textContent='#auth-welcome,#auth-onboarding{display:none!important}#auth-continue{display:flex!important;pointer-events:auto!important}';
       document.head.appendChild(s);
+      // DOM 준비 후 .hidden 클래스 직접 제거 + body.auth-active 설정
+      document.addEventListener('DOMContentLoaded',function(){
+        var ac=document.getElementById('auth-continue');
+        if(ac){ac.classList.remove('hidden');}
+        document.body.classList.add('auth-active');
+      });
     }
   })();
 })();
