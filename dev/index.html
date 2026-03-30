@@ -3031,43 +3031,6 @@ button:disabled {
       <div class="reg-substeps" id="regStepperSubs1"></div>
     </div>
     <div class="toss-slides-wrap" id="c1-wrap">
-      <!-- 슬라이드 0: 역할 선택 (양육자/아이) -->
-      <div class="toss-slide active" id="c1-slide-role-type">
-        <div class="toss-slide-content">
-          <div class="toss-question">가족에서 어떤<br>역할이세요?</div>
-          <div class="toss-desc">역할에 맞는 방식으로 시작해드릴게요</div>
-          <div class="c1-role-type-grid">
-            <div class="c1-role-type-card" id="role-type-caregiver" onclick="selectRoleType('caregiver')">
-              <div class="c1-role-type-card-icon">
-                <svg width="40" height="40" viewBox="0 0 200 200" fill="none"><circle cx="100" cy="100" r="100" fill="#E0E7FF"/><ellipse cx="100" cy="82" rx="28" ry="28" fill="#6366F1"/><path d="M46,166 C46,136 72,116 100,116 C128,116 154,136 154,166" fill="#4F46E5"/></svg>
-              </div>
-              <div>
-                <div class="c1-role-type-card-title">양육자 (어른)</div>
-                <div class="c1-role-type-card-desc">아이의 습관을 함께<br>만드는 어른이에요</div>
-              </div>
-              <div class="c1-role-type-card-check">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" fill="#6366F1" stroke="none"/><polyline points="7 12 10.5 15.5 17 9" stroke="#fff" stroke-width="2.5"/></svg>
-              </div>
-            </div>
-            <div class="c1-role-type-card" id="role-type-child" onclick="selectRoleType('child')">
-              <div class="c1-role-type-card-icon child-icon">
-                <svg width="40" height="40" viewBox="0 0 200 200" fill="none"><circle cx="100" cy="100" r="100" fill="#FEF3C7"/><ellipse cx="100" cy="78" rx="24" ry="24" fill="#F59E0B"/><path d="M52,162 C52,136 74,118 100,118 C126,118 148,136 148,162" fill="#D97706"/></svg>
-              </div>
-              <div>
-                <div class="c1-role-type-card-title">아이</div>
-                <div class="c1-role-type-card-desc">좋은 습관을 만들며<br>성장해요</div>
-              </div>
-              <div class="c1-role-type-card-check">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#F59E0B"/><polyline points="7 12 10.5 15.5 17 9" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </div>
-            </div>
-          </div>
-          <div class="auth-error" id="c1-role-type-error" style="margin-top:8px"></div>
-        </div>
-        <div class="toss-cta">
-          <button class="toss-btn" onclick="c1SlideRoleTypeNext()">다음</button>
-        </div>
-      </div>
       <!-- 슬라이드 1: 아이디 -->
       <div class="toss-slide" id="c1-slide-id">
         <div class="toss-slide-content">
@@ -3123,7 +3086,7 @@ button:disabled {
         </div>
       </div>
       <!-- 슬라이드 4: 호칭 -->
-      <div class="toss-slide" id="c1-slide-role">
+      <div class="toss-slide active" id="c1-slide-role">
         <div class="toss-slide-content">
           <div class="toss-question" style="font-size:22px;margin-bottom:6px">아이와 어떤 관계인가요?</div>
           <div class="toss-desc" style="margin-bottom:16px">나중에 언제든 바꿀 수 있어요</div>
@@ -5047,11 +5010,9 @@ function _updateStepperFromC1() {
   const active = wrap.querySelector('.toss-slide.active');
   if (!active) return;
   const id = active.id;
-  const isCg = _createState.myRoleType === 'caregiver';
-  const g0 = isCg ? 3 : 2;
-  if (id === 'c1-slide-role-type') renderRegStepper(0, 0, g0);
-  else if (id === 'c1-slide-role') renderRegStepper(0, 1, g0);
-  else if (id === 'c1-slide-name') renderRegStepper(0, isCg ? 2 : 1, g0);
+  // 양육자 고정 (역할 선택 화면 제거됨): 호칭(0) → 이름(1) → ID(group1,0) → PW(group1,1)
+  if (id === 'c1-slide-role') renderRegStepper(0, 0, 3);
+  else if (id === 'c1-slide-name') renderRegStepper(0, 1, 3);
   else if (id === 'c1-slide-id') renderRegStepper(1, 0, 2);
   else if (id === 'c1-slide-pwd') renderRegStepper(1, 1, 2);
 }
@@ -5153,14 +5114,14 @@ function c1SlideNameNext() {
 
 function c1SlideRoleFinish() {
   if (!_createState.myRole) _createState.myRole = 'caregiver';
-  renderRegStepper(0, 2, 3); // Group 0, step 2 (이름), 3 total for caregiver
+  renderRegStepper(0, 1, 3); // Group 0, step 1 (이름)
   toSlide('c1-wrap', 'c1-slide-name');
   setTimeout(() => document.getElementById('create-my-name').focus(), 380);
 }
 
 function c1SkipRole() {
   if (!_createState.myRole) _createState.myRole = 'caregiver';
-  renderRegStepper(0, 2, 3); // Group 0, step 2 (이름), 3 total for caregiver
+  renderRegStepper(0, 1, 3); // Group 0, step 1 (이름)
   toSlide('c1-wrap', 'c1-slide-name');
   setTimeout(() => document.getElementById('create-my-name').focus(), 380);
 }
@@ -5228,7 +5189,7 @@ function startCreateFamily(){
     userId: _savedUserId || '',
     pwdHash: _savedPwdHash || '',
     myName: _savedName || '',
-    myRole:'',myRoleType:'',
+    myRole:'',myRoleType:'caregiver',
     familyName:'',memberCount:3,
     members:[],
     mode:'independent',
@@ -5241,9 +5202,9 @@ function startCreateFamily(){
   _saveFamilyDone=false; // 새 가입 시작 시 리셋
   // 슬라이드 상태 리셋
   _slideHistory['c1-wrap'] = [];
-  renderRegStepper(0, 0, 3); // Group 0 (나는 누구인가), step 0 (역할 선택)
-  // 슬라이드 위치 리셋 (새 슬라이드 c1-slide-role-type이 첫 번째)
-  ['c1-slide-role-type','c1-slide-id','c1-slide-pwd','c1-slide-name','c1-slide-role'].forEach((id,i)=>{
+  renderRegStepper(0, 0, 3); // Group 0 (나는 누구인가), step 0 (호칭 선택)
+  // 슬라이드 위치 리셋 (c1-slide-role이 첫 번째 — 양육자/자녀 선택 화면 제거됨)
+  ['c1-slide-role','c1-slide-id','c1-slide-pwd','c1-slide-name'].forEach((id,i)=>{
     const el=document.getElementById(id);
     if(!el)return;
     el.style.transition='none';
@@ -5253,11 +5214,6 @@ function startCreateFamily(){
     el.style.opacity='';
     el.style.pointerEvents='';
     requestAnimationFrame(()=>{el.style.transition='';});
-  });
-  // 역할 타입 카드 선택 상태 리셋
-  ['role-type-caregiver','role-type-child'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el) el.classList.remove('selected');
   });
   // ID 잠금 UI 리셋
   const _c1Inp=document.getElementById('create-user-id');
@@ -5272,6 +5228,8 @@ function startCreateFamily(){
   }
 
   showAuthScreen('create-1');
+  // 호칭 선택 그리드 렌더 (양육자/자녀 선택 화면 제거로 첫 슬라이드가 호칭 선택)
+  renderRoleGrid();
 }
 
 async function createStep1Next(){
@@ -16917,7 +16875,7 @@ Object.assign(window, {
   showAuthScreen, doLogin, logout, togglePwd,
   startCreateFamily, createStep1Next, createStep2Next, createStep3Next, createStep4Next, createStep5Next, createFamilyFinish, skipInvites, saveFamilyToFirestore,
   toSlide, backSlide, create1Back, c1SlideIdNext, c1SlidePwdNext, c1SlideNameNext, c1SlideRoleFinish, c1SkipRole,
-  selectRoleType, c1SlideRoleTypeNext, resetCreateId, createStep5Back, createStep5Finish,
+  resetCreateId, createStep5Back, createStep5Finish,
   renderRegStepper, _updateStepperFromC1,
   updateFamilyNamePreview, updatePwdStrength,
   jrBack, jrSlideIdNext,
@@ -17809,6 +17767,10 @@ window._createState = _createState;
     if (!currentUser) return;
     const totalDone = S.totalDone || 0;
     if (totalDone > 0) { localStorage.setItem(_LS_PREFIX + "onboarded", "1"); return; }
+    // auth 화면이 아직 보이는 중이면 투어 시작하지 않음 (가입 완료 직후 방지)
+    if (document.body.classList.contains('auth-active')) return;
+    const anyAuthVisible = document.querySelector('.auth-screen:not(.hidden)');
+    if (anyAuthVisible) return;
     // 가이드 투어 시작 (500ms 딜레이로 UI 안정 대기)
     setTimeout(() => startTour(), 500);
   }
