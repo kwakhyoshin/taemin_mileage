@@ -2,7 +2,7 @@
 
 > 이 문서는 새 세션에서 실수 없이 개발·테스트·배포할 수 있도록 모든 핵심 정보를 담고 있습니다.
 > **새 세션 시작 시 반드시 이 문서를 먼저 읽을 것.**
-> 최종 업데이트: 2026-03-30 (초대링크 [DEV] 태그, 승인대기 nowrap, Android 상태바 갭, maskable 아이콘 수정)
+> 최종 업데이트: 2026-03-30 (인사말 확장, 미세먼지 AQI 변환 수정, 브라우저 theme-color, OG 메타태그)
 
 ---
 
@@ -727,6 +727,12 @@ git add index.html && git commit -m "운영기 배포: ..." && git push
 | 35e1989 | 초대링크 [DEV] 태그 제거 + URL _ENV 분기 | dev+prod |
 | 4d5a37b | 승인대기 nowrap + Android 상태바 갭(html::after) | dev+prod |
 | e6ad6e0 | maskable 아이콘 모서리 아티팩트 제거 (full-bleed 코너) | assets |
+| a60530f | 브라우저 theme-color 부팅 초기화 + OG 메타태그 | dev |
+| cf357e3 | 브라우저 theme-color 부팅 초기화 + OG 메타태그 | prod |
+| 4703364 | OG title에 [개발기] 태그 추가 | dev |
+| 3c0b901 | 인사말/스마트메시지 대폭 확장 + 네모 이모지 교체 | dev |
+| 75e629b | 미세먼지 AQI→µg/m³ 변환 버그 수정 | dev |
+| 4cfaf17 | 미세먼지 AQI→µg/m³ 변환 버그 수정 | prod |
 
 ---
 
