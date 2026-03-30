@@ -269,6 +269,9 @@ body.dark .c1-role-type-card-title{color:#F1F5F9}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{background:var(--bg);touch-action:pan-y;overscroll-behavior:none}
 body{touch-action:pan-y;overscroll-behavior:none}
+/* 빠른 스크롤 중 헤더 transition 끄기 — Android 깜빡거림 방지 */
+body.is-scrolling .hero,body.is-scrolling .log-header-sticky,body.is-scrolling .rwd-header-sticky,body.is-scrolling .hist-hero,body.is-scrolling .my-header,body.is-scrolling .adm-top{transition:none!important}
+body.is-scrolling .hero *,body.is-scrolling .log-header-sticky *,body.is-scrolling .rwd-header-sticky *,body.is-scrolling .hist-hero *,body.is-scrolling .my-header *,body.is-scrolling .adm-top *{transition:none!important}
 /* Prevent iOS zoom on input focus */
 input,select,textarea{font-size:16px!important}
 body{font-family:'Pretendard Variable',-apple-system,sans-serif;background:var(--bg);color:var(--tx);max-width:430px;margin:0 auto;min-height:100vh;min-height:100dvh;overflow-x:hidden;transition:background .25s,color .25s}
@@ -17310,6 +17313,13 @@ window._createState = _createState;
   window.addEventListener('scroll', updateHeaderCompact, {passive:true});
   window.addEventListener('resize', updateHeaderCompact, {passive:true});
   window.addEventListener('orientationchange', ()=>{setTimeout(updateHeaderCompact,100);});
+  // 빠른 스크롤 중 transition 비활성화 (Android 깜빡거림 방지)
+  let _scrollTimer=0;
+  window.addEventListener('scroll',function(){
+    if(!document.body.classList.contains('is-scrolling')) document.body.classList.add('is-scrolling');
+    clearTimeout(_scrollTimer);
+    _scrollTimer=setTimeout(function(){ document.body.classList.remove('is-scrolling'); },150);
+  },{passive:true});
 
   // PWA 환경에서 세로 모드 고정 (Screen Orientation API)
   try{
