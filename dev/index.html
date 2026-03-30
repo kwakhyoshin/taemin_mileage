@@ -2488,6 +2488,26 @@ button:disabled {
 <!-- Auth: standalone script (no module dependency) for auth screen navigation -->
 <script>
 (function(){
+  // ★ 네이버 OAuth 콜백 팝업 감지: 로그인 화면 깜빡임 방지
+  // 팝업에서 redirect_uri로 돌아오면 페이지가 다시 로드되는데,
+  // 모듈 로드 전에 auth 화면이 잠깐 보이는 것을 방지
+  if(window.opener && window.location.hash.indexOf('access_token')!==-1){
+    document.documentElement.style.background='linear-gradient(135deg,#5B4FC4,#A78BFA)';
+    document.addEventListener('DOMContentLoaded',function(){
+      // 모든 auth 화면 숨기고 로딩 메시지 표시
+      var screens=document.querySelectorAll('.auth-screen');
+      for(var i=0;i<screens.length;i++) screens[i].classList.add('hidden');
+      document.body.classList.add('auth-active');
+      document.body.style.display='flex';
+      document.body.style.alignItems='center';
+      document.body.style.justifyContent='center';
+      var msg=document.createElement('div');
+      msg.style.cssText='color:#fff;font-size:16px;font-weight:700;text-align:center;padding:20px';
+      msg.textContent='네이버 인증 처리 중...';
+      document.body.appendChild(msg);
+    });
+  }
+
   var AUTH_IDS=['auth-login','auth-welcome','auth-continue','auth-email-verify','auth-social-link','auth-insight','auth-create-1','auth-create-2','auth-create-3','auth-create-4','auth-create-5','auth-create-done','auth-join-select','auth-join-register'];
 
   window._showAuth=function(screen){
