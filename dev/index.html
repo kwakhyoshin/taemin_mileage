@@ -6932,57 +6932,32 @@ async function doSocialLogin(provider){
     // social_pending 플래그 설정 → onAuthStateChanged가 감지 (redirect 복귀 시에도 유효)
     localStorage.setItem(_LS_PREFIX+'social_pending', provider);
 
-    // ★ 모바일 감지: 모바일에서는 signInWithRedirect 사용 (storage partitioning 이슈 방지)
-    const _isMobileDevice = /iPhone|iPad|iPod|Android|Mobile/i.test(navigator.userAgent);
-
-    if(_isMobileDevice){
-      // ── 모바일: signInWithRedirect (팝업 대신 페이지 이동) ──
-      console.log('[Social Login] Mobile detected, using signInWithRedirect');
-      try {
-        _showSocialLoading(_provLabel);
-        // 페이지가 Google 인증으로 이동됨 → 인증 후 다시 이 페이지로 돌아옴
-        // 돌아온 후 onAuthStateChanged에서 social_pending 플래그로 로그인 처리
-        await signInWithRedirect(fbAuth, gProvider);
-        return; // 페이지 리디렉트됨 — 여기 이후 실행 안 됨
-      } catch(redirectErr){
-        console.error('[Social Login] Redirect failed:', redirectErr);
-        localStorage.removeItem(_LS_PREFIX+'social_pending');
-        _hideSocialLoading();
-        toast('로그인 중 오류가 발생했어요. 다시 시도해주세요.');
+    // ── 구글: signInWithPopup (모바일/PC 공통) ──
+    try {
+      const result = await signInWithPopup(fbAuth, gProvider);
+      if(result && result.user && !_socialAuthHandled){
+        _socialAuthHandled = true;
+        localStorage.setItem(_LS_PREFIX+'social_pending', 'handled');
+        console.log('[Social Login] Popup success:', provider, result.user.uid);
+        await _handleSocialLoginResult(result.user, provider);
+      } else if(_socialAuthHandled){
+        console.log('[Social Login] Already handled by onAuthStateChanged');
       }
-    } else {
-      // ── PC: signInWithPopup ──
-      try {
-        _showSocialLoading(_provLabel);
-        const result = await signInWithPopup(fbAuth, gProvider);
-        if(result && result.user && !_socialAuthHandled){
-          _socialAuthHandled = true;
-          localStorage.setItem(_LS_PREFIX+'social_pending', 'handled');
-          console.log('[Social Login] Popup success:', provider, result.user.uid);
-          await _handleSocialLoginResult(result.user, provider);
-        } else if(_socialAuthHandled){
-          console.log('[Social Login] Already handled by onAuthStateChanged');
-        }
-      } catch(popupErr){
-        if(popupErr.code === 'auth/popup-closed-by-user' || popupErr.code === 'auth/cancelled-popup-request'){
-          localStorage.removeItem(_LS_PREFIX+'social_pending');
-          _hideSocialLoading();
-        } else if(popupErr.code === 'auth/popup-blocked'){
-          console.log('[Social Login] Popup blocked, trying redirect...');
-          await signInWithRedirect(fbAuth, gProvider);
-          return;
+    } catch(popupErr){
+      if(popupErr.code === 'auth/popup-closed-by-user' || popupErr.code === 'auth/cancelled-popup-request'){
+        localStorage.removeItem(_LS_PREFIX+'social_pending');
+      } else if(popupErr.code === 'auth/popup-blocked'){
+        // 팝업 차단 → redirect 시도
+        console.log('[Social Login] Popup blocked, trying redirect...');
+        try { await signInWithRedirect(fbAuth, gProvider); return; } catch(e){}
+      } else {
+        // 기타 에러 (storage partitioning 등)
+        console.error('[Social Login Error]', popupErr.code, popupErr.message);
+        localStorage.removeItem(_LS_PREFIX+'social_pending');
+        if(_ENV==='dev'){
+          toast('[DEV] 구글 로그인 에러: ' + (popupErr.code||'') + ' ' + (popupErr.message||''), 5000);
         } else {
-          // ★ 기타 에러 (storage partitioning 등) → redirect로 재시도
-          console.warn('[Social Login] Popup error, trying redirect...', popupErr.code, popupErr.message);
-          try {
-            await signInWithRedirect(fbAuth, gProvider);
-            return;
-          } catch(fallbackErr){
-            console.error('[Social Login] Redirect fallback also failed:', fallbackErr);
-            localStorage.removeItem(_LS_PREFIX+'social_pending');
-            _hideSocialLoading();
-            toast('로그인 중 오류가 발생했어요. 다시 시도해주세요.');
-          }
+          toast('로그인 중 오류가 발생했어요. 다시 시도해주세요.');
         }
       }
     }
@@ -7838,7 +7813,7 @@ const BADGES = [
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
-if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di)_di.style.display='';}
+if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0331a';}}
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
@@ -17111,9 +17086,8 @@ window._createState = _createState;
             await _handleSocialLoginResult(data, 'naver');
           } catch(e){
             console.error('[Naver Redirect] handleSocialLoginResult error:', e);
-            _hideSocialLoading();
-            toast('네이버 로그인 처리 중 오류가 발생했어요');
-            showAuthScreen('continue');
+            if(_ENV==='dev') toast('[DEV] 네이버 redirect 에러: '+(e.message||e), 5000);
+            else toast('네이버 로그인 처리 중 오류가 발생했어요');
           }
         })();
       } else {
