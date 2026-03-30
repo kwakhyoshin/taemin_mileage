@@ -203,6 +203,18 @@ body.dark .toss-invite-share-btn{background:rgba(99,102,241,.2);color:#818CF8}
 .ob-fade-2{animation:obFadeUp .65s cubic-bezier(.4,0,.2,1) .2s both}
 .ob-fade-3{animation:obFadeUp .65s cubic-bezier(.4,0,.2,1) .4s both}
 .ob-fade-4{animation:obFadeUp .65s cubic-bezier(.4,0,.2,1) .6s both}
+/* ── ONBOARDING SLIDES ── */
+.ob-slides-wrap{display:flex;flex-direction:column;height:100%;width:100%;max-width:430px;margin:0 auto;padding:max(56px,calc(env(safe-area-inset-top,0px)+40px)) 0 0;box-sizing:border-box}
+.ob-slides{flex:1;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;overscroll-behavior-x:contain}
+.ob-slides::-webkit-scrollbar{display:none}
+.ob-slide{flex:0 0 100%;width:100%;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 40px;box-sizing:border-box;text-align:center}
+.ob-slide-icon{margin-bottom:32px;animation:obFadeUp .5s ease both}
+.ob-slide-title{font-size:26px;font-weight:900;color:#fff;line-height:1.4;margin-bottom:14px;animation:obFadeUp .5s ease .1s both}
+.ob-slide-desc{font-size:15px;color:rgba(255,255,255,.75);font-weight:500;line-height:1.7;animation:obFadeUp .5s ease .2s both}
+.ob-slides-bottom{flex-shrink:0;padding:24px 28px calc(env(safe-area-inset-bottom, 20px) + 32px);box-sizing:border-box}
+.ob-dots{display:flex;justify-content:center;gap:8px;margin-bottom:20px}
+.ob-dot{width:8px;height:8px;border-radius:4px;background:rgba(255,255,255,.3);transition:all .3s}
+.ob-dot.active{width:24px;background:#fff}
 /* ── INSIGHT SWIPE CARDS ── */
 .ins-cards-scroll{flex:1;min-height:0;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;overscroll-behavior-x:contain}
 .ins-cards-scroll::-webkit-scrollbar{display:none}
@@ -2508,7 +2520,7 @@ button:disabled {
     });
   }
 
-  var AUTH_IDS=['auth-login','auth-welcome','auth-continue','auth-email-verify','auth-social-link','auth-insight','auth-create-1','auth-create-2','auth-create-3','auth-create-4','auth-create-5','auth-create-done','auth-join-select','auth-join-register'];
+  var AUTH_IDS=['auth-login','auth-welcome','auth-onboarding','auth-continue','auth-email-verify','auth-social-link','auth-insight','auth-create-1','auth-create-2','auth-create-3','auth-create-4','auth-create-5','auth-create-done','auth-join-select','auth-join-register'];
 
   window._showAuth=function(screen){
     AUTH_IDS.forEach(function(id){
@@ -2575,6 +2587,52 @@ button:disabled {
   window.doContinueLogin=function(){
     window.doLogin('continue-login-id','continue-login-pwd','continue-login-error');
   };
+
+  // ── 온보딩 슬라이드 제어 ──
+  var _obIdx=0;
+  window.obNext=function(){
+    var slides=document.getElementById('ob-slides');
+    var dots=document.querySelectorAll('#ob-dots .ob-dot');
+    var btn=document.getElementById('ob-next-btn');
+    if(!slides)return;
+    _obIdx++;
+    if(_obIdx>=3){
+      // 마지막 슬라이드 → 온보딩 완료 → 로그인 화면
+      window.skipOnboarding();
+      return;
+    }
+    slides.scrollTo({left:slides.offsetWidth*_obIdx,behavior:'smooth'});
+    for(var i=0;i<dots.length;i++){
+      dots[i].classList.toggle('active',i===_obIdx);
+    }
+    if(_obIdx===2) btn.textContent='시작하기';
+  };
+
+  // 스와이프로 슬라이드 넘길 때 인디케이터 동기화
+  document.addEventListener('DOMContentLoaded',function(){
+    var slides=document.getElementById('ob-slides');
+    if(slides){
+      slides.addEventListener('scroll',function(){
+        var w=slides.offsetWidth;
+        if(w<=0)return;
+        var idx=Math.round(slides.scrollLeft/w);
+        if(idx===_obIdx)return;
+        _obIdx=idx;
+        var dots=document.querySelectorAll('#ob-dots .ob-dot');
+        for(var i=0;i<dots.length;i++) dots[i].classList.toggle('active',i===idx);
+        var btn=document.getElementById('ob-next-btn');
+        if(btn) btn.textContent=idx>=2?'시작하기':'다음';
+      });
+    }
+  });
+
+  // 온보딩 건너뛰기 / 완료
+  window.skipOnboarding=function(){
+    // localStorage prefix 는 모듈 로드 전이므로 직접 판단
+    var prefix=(window._ENV==='dev'||window.location.pathname.indexOf('/dev/')!==-1)?'taemin_dev_':'taemin_';
+    localStorage.setItem(prefix+'onboarding_done','1');
+    window.showAuthScreen('continue');
+  };
 })();
 </script>
 
@@ -2596,7 +2654,7 @@ button:disabled {
 </div>
 
 <!-- AUTH: 계속하기 (소셜 + ID/PW 통합 Vertical Stack) -->
-<div class="auth-screen" id="auth-continue">
+<div class="auth-screen hidden" id="auth-continue">
   <div class="auth-card" style="text-align:center">
     <div class="auth-logo"><svg width="64" height="64" viewBox="0 0 200 200"><defs><linearGradient id="lbc" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#5B4FC4"/><stop offset="100%" stop-color="#A78BFA"/></linearGradient></defs><rect width="200" height="200" rx="64" fill="url(#lbc)"/><path d="M30,130 L100,55 L170,130" stroke="white" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M100,62 L98.1,60.3 C91.4,54.2 87,50.2 87,45.3 C87,41.3 90.1,38.1 94.2,38.1 C96.4,38.1 98.6,39.2 100,40.9 C101.4,39.2 103.6,38.1 105.9,38.1 C109.8,38.1 113,41.3 113,45.3 C113,50.2 108.6,54.2 101.9,60.3 Z" fill="#FBBF24"/></svg></div>
     <h2 style="font-size:22px;font-weight:900;color:var(--tx);margin:12px 0 4px">마일리에 오신 것을 환영해요</h2>
@@ -2670,7 +2728,7 @@ button:disabled {
 </div>
 
 <!-- AUTH: 웰컴 (인디고 그라데이션 풀스크린) -->
-<div class="auth-screen hidden ob-gradient" id="auth-welcome">
+<div class="auth-screen ob-gradient" id="auth-welcome">
   <div class="ob-welcome">
     <div class="ob-welcome-top">
       <div class="ob-logo-wrap ob-fade-1">
@@ -2683,8 +2741,50 @@ button:disabled {
       <p class="ob-sub ob-fade-3">매일 조금씩, 함께라서 가능해요</p>
     </div>
     <div class="ob-welcome-bottom ob-fade-4">
-      <button class="ob-start-btn" onclick="showAuthScreen('auth-continue')">시작하기</button>
-      <div class="ob-link" onclick="showAuthScreen('auth-continue')">이미 계정이 있어요</div>
+      <button class="ob-start-btn" onclick="showAuthScreen('onboarding')">시작하기</button>
+      <div class="ob-link" onclick="skipOnboarding()">이미 계정이 있어요</div>
+    </div>
+  </div>
+</div>
+
+<!-- AUTH: 온보딩 슬라이드 (앱 소개) -->
+<div class="auth-screen hidden ob-gradient" id="auth-onboarding">
+  <div class="ob-slides-wrap">
+    <div class="ob-slides" id="ob-slides">
+      <!-- Slide 1: 마일리지 소개 -->
+      <div class="ob-slide">
+        <div class="ob-slide-icon">
+          <svg width="80" height="80" viewBox="0 0 80 80" fill="none"><circle cx="40" cy="40" r="38" stroke="#FBBF24" stroke-width="4"/><text x="40" y="48" text-anchor="middle" font-size="36" fill="#FBBF24">⭐</text></svg>
+        </div>
+        <h2 class="ob-slide-title">활동하면 마일리지 적립</h2>
+        <p class="ob-slide-desc">양치, 독서, 운동 등 좋은 습관을<br>실천하면 마일리지가 쌓여요</p>
+      </div>
+      <!-- Slide 2: 보상 소개 -->
+      <div class="ob-slide">
+        <div class="ob-slide-icon">
+          <svg width="80" height="80" viewBox="0 0 80 80" fill="none"><circle cx="40" cy="40" r="38" stroke="#A78BFA" stroke-width="4"/><text x="40" y="48" text-anchor="middle" font-size="36" fill="#A78BFA">🎁</text></svg>
+        </div>
+        <h2 class="ob-slide-title">마일리지로 보상 교환</h2>
+        <p class="ob-slide-desc">모은 마일리지로 간식, 놀이시간 등<br>원하는 보상을 받을 수 있어요</p>
+      </div>
+      <!-- Slide 3: 가족 함께 -->
+      <div class="ob-slide">
+        <div class="ob-slide-icon">
+          <svg width="80" height="80" viewBox="0 0 80 80" fill="none"><circle cx="40" cy="40" r="38" stroke="#34D399" stroke-width="4"/><text x="40" y="48" text-anchor="middle" font-size="36" fill="#34D399">👨‍👩‍👧</text></svg>
+        </div>
+        <h2 class="ob-slide-title">가족이 함께 참여해요</h2>
+        <p class="ob-slide-desc">응원 메시지, 뱃지, 리포트로<br>아이의 성장을 함께 지켜봐요</p>
+      </div>
+    </div>
+    <!-- 인디케이터 + 버튼 -->
+    <div class="ob-slides-bottom">
+      <div class="ob-dots" id="ob-dots">
+        <span class="ob-dot active"></span>
+        <span class="ob-dot"></span>
+        <span class="ob-dot"></span>
+      </div>
+      <button class="ob-start-btn" id="ob-next-btn" onclick="obNext()">다음</button>
+      <div class="ob-link" onclick="skipOnboarding()" style="margin-top:12px">건너뛰기</div>
     </div>
   </div>
 </div>
@@ -4765,7 +4865,7 @@ let _joinState = {
 };
 
 // ── AUTH 화면 관리 ──
-const _AUTH_SCREENS = ['auth-login','auth-welcome','auth-continue','auth-email-verify','auth-social-link','auth-insight','auth-create-1','auth-create-2','auth-create-3','auth-create-4','auth-create-5','auth-create-done','auth-join-select','auth-join-register'];
+const _AUTH_SCREENS = ['auth-login','auth-welcome','auth-onboarding','auth-continue','auth-email-verify','auth-social-link','auth-insight','auth-create-1','auth-create-2','auth-create-3','auth-create-4','auth-create-5','auth-create-done','auth-join-select','auth-join-register'];
 
 function showAuthScreen(screen) {
   document.body.classList.add('auth-active');
@@ -6524,9 +6624,19 @@ function logout() {
   if(fbAuth && signOut){
     try{ signOut(fbAuth); }catch(e){ console.warn('Firebase signOut error:', e); }
   }
-  showAuthScreen('login');
-  document.getElementById('login-id').value = '';
-  document.getElementById('login-pwd').value = '';
+  showAuthScreen('continue');
+  // 통합 로그인 폼 초기화
+  const _cId=document.getElementById('continue-login-id');
+  const _cPwd=document.getElementById('continue-login-pwd');
+  const _cErr=document.getElementById('continue-login-error');
+  if(_cId)_cId.value='';
+  if(_cPwd)_cPwd.value='';
+  if(_cErr)_cErr.textContent='';
+  // 레거시 로그인 폼도 초기화
+  const _lId=document.getElementById('login-id');
+  const _lPwd=document.getElementById('login-pwd');
+  if(_lId)_lId.value='';
+  if(_lPwd)_lPwd.value='';
 }
 
 // ── 소셜 로그인 / 이메일 인증 ──────────────────
@@ -7083,16 +7193,20 @@ function checkAuth() {
         // 5초 지나도 처리 안 됨 → 폴백
         console.log('[checkAuth] social_pending timeout, showing fallback');
         localStorage.removeItem(_LS_PREFIX+'social_pending');
-        if(S.familyMeta && S.familyMeta.familyId) showAuthScreen('login');
-        else if(cachedUsers && Object.keys(cachedUsers).length > 0) showAuthScreen('login');
-        else showAuthScreen('continue');
+        showAuthScreen('continue');
       }
     }, 5000);
     return false;
   }
 
-  // 항상 통합 로그인 화면(소셜 + ID/PW)으로 진입
-  showAuthScreen('continue');
+  // 온보딩 완료 여부에 따라 분기
+  // - 최초 방문: 웰컴 → 온보딩 슬라이드 → 통합 로그인
+  // - 재방문/로그아웃: 바로 통합 로그인
+  if(localStorage.getItem(_LS_PREFIX+'onboarding_done')){
+    showAuthScreen('continue');
+  } else {
+    showAuthScreen('welcome');
+  }
   return false;
 }
 
