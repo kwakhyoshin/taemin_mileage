@@ -2,7 +2,7 @@
 
 > 이 문서는 새 세션에서 실수 없이 개발·테스트·배포할 수 있도록 모든 핵심 정보를 담고 있습니다.
 > **새 세션 시작 시 반드시 이 문서를 먼저 읽을 것.**
-> 최종 업데이트: 2026-03-30 (카카오 로그인 포털 등록 완료, 네이버 미등록)
+> 최종 업데이트: 2026-03-30 (카카오/네이버 로그인 포털 등록 완료, 소셜 로그인 3사 구현 완료)
 
 ---
 
@@ -798,7 +798,7 @@ git checkout <commit-hash> -- index.html       # 운영기 (긴급 시에만)
 | 기존 ID/PW | 현행 유지 | ✅ 운영 중 |
 | 구글 간편로그인 | Firebase Auth `signInWithPopup(GoogleAuthProvider)` | ✅ 구현 완료 |
 | 카카오 간편로그인 | Kakao JS SDK 2.7.4 팝업 (`Kakao.Auth.login`) | ✅ 구현 완료 |
-| 네이버 간편로그인 | Naver Login SDK 2.0 OAuth 팝업 + postMessage | 🔧 코드 완료, 포털 미등록 |
+| 네이버 간편로그인 | Naver Login SDK 2.0 OAuth 팝업 + postMessage | ✅ 구현 완료 |
 | 이메일 인증 | Cloud Functions로 6자리 코드 발송 → 검증 | 미구현 |
 
 ### 13.3 Firebase 플랜
@@ -842,12 +842,14 @@ git checkout <commit-hash> -- index.html       # 운영기 (긴급 시에만)
 - `doSocialLogin('kakao')` → `_handleSocialLoginResult()` 통합 플로우
 - 나의 메뉴 소셜 연동: `_doLinkSocial('kakao')` → Auth Registry 등록
 
-**Phase 3b: 네이버 간편로그인** (코드 완료, 포털 미등록)
+**Phase 3b: 네이버 간편로그인 ✅ 완료 (2026-03-30)**
+- 네이버 개발자 포털 앱 등록 완료 (아래 13.9 참조)
 - 네이버 Login SDK 2.0 동적 로딩 (`_loadNaverSDK()`)
 - `_doNaverLogin()`: OAuth 팝업 → `postMessage` 콜백 → 프로필 수신
 - UID 형식: `naver_{네이버ID}`
 - 부트 시 콜백 감지: `window.opener && location.hash.includes('access_token')`
-- **TODO**: 네이버 개발자 포털 앱 등록 → Client ID 발급 → `_NAVER_CLIENT_ID` 업데이트
+- `doSocialLogin('naver')` → `_handleSocialLoginResult()` 통합 플로우
+- 나의 메뉴 소셜 연동: `_doLinkSocial('naver')` → Auth Registry 등록
 
 **Phase 4: 기존 ID 병행 + 초대 플로우 업데이트** (미구현)
 - 기존 `doLogin()` 유지, 새 인증과 병행
@@ -934,12 +936,22 @@ account: {
 - 현재 도메인이 `https://kwakhyoshin.github.io`로 등록되어 있어 dev/prod 모두 동일 도메인이므로 추가 설정 불필요
 - 향후 커스텀 도메인(mile.ly 등) 사용 시: JavaScript SDK 도메인에 새 도메인 추가 필요
 
-### 13.9 네이버 개발자 포털 앱 등록 (미완료)
+### 13.9 네이버 개발자 포털 앱 등록 (2026-03-30)
 
-**TODO:**
-1. `https://developers.naver.com/apps/` 접속 → 애플리케이션 등록
-2. 사용 API: "네이버 로그인" 선택
-3. 서비스 URL: `https://kwakhyoshin.github.io/taemin_mileage/`
-4. Callback URL: `https://kwakhyoshin.github.io/taemin_mileage/dev/` + `https://kwakhyoshin.github.io/taemin_mileage/`
-5. Client ID 발급 후 → `dev/index.html`의 `_NAVER_CLIENT_ID` 변수 업데이트
-6. DEV_GUIDE.md에 앱 정보 기록
+**앱 정보**
+- 앱 이름: **마일리**
+- Client ID: `_fBugrKRKZm45ibQLosP`
+- Client Secret: `s_ddXSvpnG`
+- 개발 상태: 개발 중
+- 포털 URL: `https://developers.naver.com/apps/#/myapps/_fBugrKRKZm45ibQLosP/overview`
+
+**설정 상태**
+- 사용 API: 네이버 로그인
+- 서비스 환경: PC 웹
+- 서비스 URL: `https://kwakhyoshin.github.io/taemin_mileage/`
+- Callback URL: `https://kwakhyoshin.github.io/taemin_mileage/dev/`, `https://kwakhyoshin.github.io/taemin_mileage/`
+
+**운영기 배포 시 추가 작업**
+- 개발 상태가 "개발 중"이면 본인 계정으로만 로그인 테스트 가능
+- 일반 사용자 서비스 시: "네이버 로그인 검수요청" 필요 (로고 이미지 등록 필수)
+- 향후 커스텀 도메인 사용 시: 서비스 URL과 Callback URL 추가 필요
