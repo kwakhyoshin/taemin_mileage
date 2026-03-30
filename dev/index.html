@@ -1037,6 +1037,12 @@ body.dark .pin-key.ck{background:transparent}
 body.auth-active{background:linear-gradient(135deg,#5B4FC4,#A78BFA);overflow:hidden;max-width:none}
 html:has(body.auth-active){background:linear-gradient(135deg,#5B4FC4,#A78BFA)!important;overflow:hidden}
 #auth-insight .toss-cta{margin:0 24px;padding-left:0;padding-right:0;padding-top:8px}
+.social-loading-overlay{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#5B4FC4,#A78BFA);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;opacity:0;transition:opacity .3s;pointer-events:none}
+.social-loading-overlay.on{opacity:1;pointer-events:auto}
+.social-loading-spinner{width:44px;height:44px;border:4px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:sls .8s linear infinite}
+@keyframes sls{to{transform:rotate(360deg)}}
+.social-loading-text{color:#fff;font-size:15px;font-weight:700;text-align:center;line-height:1.6}
+.social-loading-sub{color:rgba(255,255,255,.6);font-size:12px;font-weight:500}
 .auth-card{background:#fff;border-radius:24px;padding:32px 28px;width:100%;max-width:380px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2);margin:auto;flex-shrink:0}
 @media(min-width:768px){.auth-card{max-width:440px;padding:40px 36px}.auth-title{font-size:28px}.auth-sub{font-size:14px}.auth-input{padding:16px 18px;font-size:16px}}
 .auth-logo{font-size:48px;margin-bottom:12px}
@@ -6832,10 +6838,35 @@ async function _doNaverLogin(){
   });
 }
 
+// ── 소셜 로그인 로딩 오버레이 ──
+function _showSocialLoading(providerLabel){
+  let el = document.getElementById('social-loading-overlay');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'social-loading-overlay';
+    el.className = 'social-loading-overlay';
+    el.innerHTML = `<div class="social-loading-spinner"></div><div class="social-loading-text" id="social-loading-msg">인증 확인 중...</div><div class="social-loading-sub">잠시만 기다려주세요</div>`;
+    document.body.appendChild(el);
+  }
+  const msg = document.getElementById('social-loading-msg');
+  if(msg) msg.textContent = providerLabel ? `${providerLabel} 인증 확인 중...` : '인증 확인 중...';
+  requestAnimationFrame(()=> el.classList.add('on'));
+}
+function _hideSocialLoading(){
+  const el = document.getElementById('social-loading-overlay');
+  if(el){ el.classList.remove('on'); setTimeout(()=>el.remove(), 300); }
+}
+function _updateSocialLoadingMsg(text){
+  const msg = document.getElementById('social-loading-msg');
+  if(msg) msg.textContent = text;
+}
+
 async function doSocialLogin(provider){
   if(_socialLoginPending) return;
   _socialLoginPending = true;
   _socialAuthHandled = false; // 새 시도 시 플래그 리셋
+
+  const _provLabel = provider === 'google' ? 'Google' : provider === 'kakao' ? '카카오' : provider === 'naver' ? '네이버' : provider;
 
   try {
     if(!_firebaseReady) await _initFirebase();
@@ -6847,10 +6878,11 @@ async function doSocialLogin(provider){
         if(!result){ return; } // 사용자 취소
         if(result._error){ toast('카카오 로그인 실패: ' + result._error); return; }
         if(!result.uid){ toast('카카오 로그인 정보를 가져올 수 없었어요'); return; }
-        toast('로그인 처리 중...');
+        _showSocialLoading(_provLabel);
         await _handleSocialLoginResult(result, provider);
       } catch(e){
         console.error('[Kakao Login]', e);
+        _hideSocialLoading();
         toast('카카오 로그인 중 오류가 발생했어요');
       }
       return;
@@ -6861,10 +6893,11 @@ async function doSocialLogin(provider){
       try {
         const result = await _doNaverLogin();
         if(!result){ return; }
-        toast('로그인 처리 중...');
+        _showSocialLoading(_provLabel);
         await _handleSocialLoginResult(result, provider);
       } catch(e){
         console.error('[Naver Login]', e);
+        _hideSocialLoading();
         toast('네이버 로그인 중 오류가 발생했어요');
       }
       return;
@@ -6885,6 +6918,7 @@ async function doSocialLogin(provider){
       if(result && result.user && !_socialAuthHandled){
         _socialAuthHandled = true;
         localStorage.setItem(_LS_PREFIX+'social_pending', 'handled');
+        _showSocialLoading(_provLabel);
         console.log('[Social Login] Popup success:', provider, result.user.uid);
         await _handleSocialLoginResult(result.user, provider);
       }
@@ -6908,6 +6942,7 @@ async function doSocialLogin(provider){
   } catch(e) {
     console.error('[Social Login Error]', e);
     localStorage.removeItem(_LS_PREFIX+'social_pending');
+    _hideSocialLoading();
     toast('로그인 중 오류가 발생했어요');
   } finally {
     _socialLoginPending = false;
@@ -6924,6 +6959,9 @@ async function _handleSocialLoginResult(firebaseUser, provider){
   const uid = firebaseUser.uid;
   const email = firebaseUser.email || '';
   const displayName = firebaseUser.displayName || '';
+  const profileImage = firebaseUser.profileImage || firebaseUser.photoURL || '';
+
+  _updateSocialLoadingMsg('계정 정보 확인 중...');
 
   // 1) Auth 레지스트리에서 기존 가족 연결 확인
   const regDoc = _getAuthRegistryDoc();
@@ -6935,7 +6973,9 @@ async function _handleSocialLoginResult(firebaseUser, provider){
         // 기존 연결 있음 → 해당 가족으로 로그인
         const link = regData[uid];
         console.log('[Social] Found existing link:', link);
+        _updateSocialLoadingMsg('로그인 중...');
         await _loginToFamily(link.familyId, link.memberId, uid, provider, email);
+        _hideSocialLoading();
         return;
       }
     }
@@ -6954,7 +6994,8 @@ async function _handleSocialLoginResult(firebaseUser, provider){
             const _thisProvider = provider === 'google' ? 'Google' : provider === 'kakao' ? '카카오' : provider === 'naver' ? '네이버' : provider;
             console.log('[Social] Same email match:', email, 'existing:', otherUid, '→', link.familyId, link.memberId);
 
-            // 확인 다이얼로그 표시
+            // 확인 다이얼로그 표시 (로딩 오버레이 먼저 숨기기)
+            _hideSocialLoading();
             const _confirmed = await new Promise(resolve => {
               // social-link 화면을 이미 가입된 사용자 안내로 재활용
               showAuthScreen('social-link');
@@ -7020,7 +7061,7 @@ async function _handleSocialLoginResult(firebaseUser, provider){
             const _otherProv = _existingProvider === 'google' ? 'Google' : _existingProvider === 'kakao' ? '카카오' : _existingProvider === 'naver' ? '네이버' : _existingProvider;
             const _thisProv = provider === 'google' ? 'Google' : provider === 'kakao' ? '카카오' : provider === 'naver' ? '네이버' : provider;
             console.log('[Social] Fallback email match in family doc:', email, _fid, _mid);
-
+            _hideSocialLoading();
             const _confirmed2 = await new Promise(resolve => {
               showAuthScreen('social-link');
               const avatarEl = document.getElementById('social-link-avatar');
@@ -7061,7 +7102,8 @@ async function _handleSocialLoginResult(firebaseUser, provider){
   }
 
   // 3) 완전 신규 → 가입 또는 기존 계정 연결 선택
-  _pendingSocialUser = { uid, email, displayName, provider };
+  _hideSocialLoading();
+  _pendingSocialUser = { uid, email, displayName, provider, profileImage };
   showAuthScreen('social-link');
   _restoreSocialLinkButtons(); // 버튼 원복
   const providerLabel = provider === 'google' ? 'Google' : provider === 'kakao' ? '카카오' : provider === 'naver' ? '네이버' : provider;
