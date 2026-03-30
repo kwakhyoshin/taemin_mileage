@@ -59,6 +59,13 @@
 <meta name="screen-orientation" content="portrait">
 <meta name="x5-orientation" content="portrait">
 <meta name="theme-color" id="theme-color-meta" content="#6366F1">
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:title" id="og-title" content="마일리 ⭐ 우리 가족 마일리지">
+<meta property="og:description" id="og-desc" content="활동하고 마일리지 모아서 보상 받자! 우리 가족만의 마일리지 앱">
+<meta property="og:image" id="og-image" content="https://kwakhyoshin.github.io/taemin_mileage/dev/og-image.png">
+<meta property="og:url" id="og-url" content="https://kwakhyoshin.github.io/taemin_mileage/dev/">
+<meta property="og:locale" content="ko_KR">
 <title>[DEV] 마일리 ⭐</title>
 <link rel="manifest" href="manifest.json">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/pretendard/1.3.9/variable/pretendardvariable.min.css" rel="stylesheet">
@@ -15532,6 +15539,17 @@ window._createState = _createState;
   cleanExpiredStickers(); // 하루 지난 스티커 자동 삭제
   renderAll();
   checkBirthdayBonus(); // 아이 생일 체크 및 보너스 지급
+
+  // 부팅 시 초기 탭 theme-color 설정 (자동 로그인 시 reallyGoTab이 호출되지 않아 누락되는 문제 해결)
+  if(currentUser && !document.body.getAttribute('data-tab')){
+    document.body.setAttribute('data-tab','home');
+    document.documentElement.style.background=TAB_COLORS['home']||'#6366F1';
+    var _btm=document.getElementById('theme-color-meta');
+    if(_btm){
+      var _bdark=document.body.classList.contains('dark');
+      _btm.content=_bdark?'#1E293B':(TAB_COLORS['home']||'#6366F1');
+    }
+  }
 
   // 날씨/미세먼지 데이터 가져오기
   fetchWeather();
