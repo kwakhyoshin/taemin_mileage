@@ -10825,19 +10825,34 @@ function useReward(invId){
 
   // Create reward request
   if(!S.rewardRequests)S.rewardRequests=[];
+  const _isCaregiver = isCaregiverUser();
+  const _reqChildId = (_isCaregiver && viewingChildId) ? viewingChildId : currentUser;
+
+  // 알림 대상: 양육자가 아이 대신 요청 → 모든 admin(본인 포함)에게 알림
+  //           아이가 직접 요청 → 본인 제외 모든 admin에게 알림
   const adminMembers = [];
   if(S.familyMeta?.members){
     for(const [mid,m] of Object.entries(S.familyMeta.members)){
-      if(mid !== currentUser && (m.isAdmin || m.role !== 'child')) adminMembers.push(mid);
+      if(m.isAdmin || m.role !== 'child'){
+        if(_isCaregiver){
+          // 양육자가 대신 요청: 모든 부모에게 (본인 포함)
+          adminMembers.push(mid);
+        } else {
+          // 아이가 직접 요청: 본인 제외
+          if(mid !== currentUser) adminMembers.push(mid);
+        }
+      }
     }
   }
-  const _reqChildId = (isCaregiverUser() && viewingChildId) ? viewingChildId : currentUser;
+
+  // fromUser: 양육자가 대신하면 아이(forChild)가 요청자
+  const _effectiveFrom = (_isCaregiver && viewingChildId) ? viewingChildId : currentUser;
   S.rewardRequests.push({
     id:item.requestId,
     rwdInvId:invId,
     rwdName:item.rwdName,
     rwdEmoji:item.rwdEmoji,
-    fromUser:currentUser,
+    fromUser:_effectiveFrom,
     forChild:_reqChildId,
     toUsers:adminMembers,
     status:'pending',
@@ -10848,12 +10863,15 @@ function useReward(invId){
 
   // Add family messages for parents
   if(!S.familyMessages)S.familyMessages=[];
-  const requesterName = MEMBERS[currentUser]?.name || currentUser;
+  const _childName = MEMBERS[_reqChildId]?.name || _reqChildId;
+  const _msgText = _isCaregiver
+    ? `🎁 ${_childName}이(가) "${item.rwdName}" 보상 사용을 요청했어요!`
+    : `🎁 ${_childName}이(가) "${item.rwdName}" 보상 사용을 요청했어요!`;
   for(const adminId of adminMembers){
     S.familyMessages.push({
-      from:currentUser,
+      from:_effectiveFrom,
       to:adminId,
-      text:`🎁 ${requesterName}가 "${item.rwdName}" 보상 사용을 요청했어요!`,
+      text:_msgText,
       ts:Date.now(),
       read:false,
       type:'reward_request',
@@ -10867,13 +10885,13 @@ function useReward(invId){
     type:'request',
     rwdName:item.rwdName,
     rwdEmoji:item.rwdEmoji,
-    user:currentUser,
+    user:_effectiveFrom,
     targetUsers:adminMembers,
     ts:Date.now()
   };
   S.pushBroadcast={
     title:'🎁 보상 사용 요청',
-    body:`${requesterName}가 "${item.rwdName}" 사용을 요청했어요!`,
+    body:`${_childName}이(가) "${item.rwdName}" 사용을 요청했어요!`,
     ts:Date.now()
   };
 
@@ -15396,6 +15414,8 @@ window._createState = _createState;
     if(snap.exists()){
       const data = snap.data();
       S = Object.assign(defaultState(), data);
+      _lastSavedJSON = JSON.stringify(S); // Firestore 로드 직후 상태 기록 (불필요한 save 방지)
+      _lastSaveTime = Date.now();
     } else if(_familyId) {
       // 가족 문서가 없어짐 — stale localStorage 정리 후 레거시 doc으로 폴백
       console.warn('[mile.ly] Family doc not found, clearing stale family_id:', _familyId);
