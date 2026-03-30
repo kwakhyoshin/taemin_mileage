@@ -2,7 +2,7 @@
 
 > 이 문서는 새 세션에서 실수 없이 개발·테스트·배포할 수 있도록 모든 핵심 정보를 담고 있습니다.
 > **새 세션 시작 시 반드시 이 문서를 먼저 읽을 것.**
-> 최종 업데이트: 2026-03-30 (투어 오버레이 클릭 차단 수정, PIN 네비 버그 수정, 네비 아이콘 확대)
+> 최종 업데이트: 2026-03-30 (초대링크 [DEV] 태그, 승인대기 nowrap, Android 상태바 갭, maskable 아이콘 수정)
 
 ---
 
@@ -722,9 +722,11 @@ git add index.html && git commit -m "운영기 배포: ..." && git push
 | 561efb3 | **긴급수정**: display 중복 해결 | dev+prod |
 | 39215e8 | 활동 취소 시 마일리지 음수 방지 | dev |
 | 8ff1812 | 뱃지 화면 원래 구조 복원 (sticky 헤더 + overflow-y:auto) | dev |
-| (미커밋) | #tour-content pointer-events:none → 투어 비활성 시 클릭 차단 해소 | dev |
-| (미커밋) | showPin() lockBodyScroll 중복 호출 방지 → PIN 변경 후 네비 사라짐 수정 | dev |
-| (미커밋) | 네비 아이콘 22px→26px 확대, padding 14px→12px (소형폰 오버플로우 방지) | dev |
+| 62c1bb7 | tour-content pointer-events + PIN nav + 네비 아이콘 확대 | dev |
+| 97d43cc | tour-content + PIN nav + 뱃지구조복원 + 네비아이콘 | prod |
+| 35e1989 | 초대링크 [DEV] 태그 제거 + URL _ENV 분기 | dev+prod |
+| 4d5a37b | 승인대기 nowrap + Android 상태바 갭(html::after) | dev+prod |
+| e6ad6e0 | maskable 아이콘 모서리 아티팩트 제거 (full-bleed 코너) | assets |
 
 ---
 
