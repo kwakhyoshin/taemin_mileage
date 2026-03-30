@@ -6898,6 +6898,17 @@ const WEATHER_MSGS={sunny:{icon:'☀️',msg:'날씨가 화창해! 밖에서 놀
 const DUST_GRADES={good:{level:'좋음',color:'#10B981',bgColor:'#D1FAE5',txtColor:'#065F46'},moderate:{level:'보통',color:'#FBBF24',bgColor:'#FEF3C7',txtColor:'#92400E'},bad:{level:'나쁨',color:'#F97316',bgColor:'#FFEDD5',txtColor:'#C2410C',msg:'마스크 쓰고 나가자! 😷'},worst:{level:'매우나쁨',color:'#EF4444',bgColor:'#FEE2E2',txtColor:'#B91C1C',msg:'오늘은 실내에서 놀자! 🏠'}};
 let weatherData={temp:null,condition:'sunny',pm10:null,pm25:null,dustGrade:'good',locationName:'서울'};
 
+// AQI → µg/m³ 변환 (WAQI API는 AQI 지수를 반환하므로 실제 농도로 변환 필요)
+function _aqiToPm25(aqi){
+  const bp=[[0,50,0,12],[51,100,12.1,35.4],[101,150,35.5,55.4],[151,200,55.5,150.4],[201,300,150.5,250.4],[301,500,250.5,500.4]];
+  for(const[al,ah,cl,ch]of bp){if(aqi>=al&&aqi<=ah)return cl+(aqi-al)/(ah-al)*(ch-cl);}
+  return aqi;
+}
+function _aqiToPm10(aqi){
+  const bp=[[0,50,0,54],[51,100,55,154],[101,150,155,254],[151,200,255,354],[201,300,355,424],[301,500,425,604]];
+  for(const[al,ah,cl,ch]of bp){if(aqi>=al&&aqi<=ah)return cl+(aqi-al)/(ah-al)*(ch-cl);}
+  return aqi;
+}
 // PM10, PM2.5 등급 판정
 function getDustGrade(pm10, pm25){
   // 둘 중 더 나쁜 등급 적용
@@ -6964,9 +6975,9 @@ async function fetchWeather(){
       const aqiData=await aqiRes.json();
       if(aqiData.status==='ok'&&aqiData.data&&aqiData.data.iaqi){
         const iaqi=aqiData.data.iaqi;
-        // PM10, PM2.5 값 추출 (AQI 값이 아닌 실제 농도값)
-        weatherData.pm10=iaqi.pm10?.v||null;
-        weatherData.pm25=iaqi.pm25?.v||null;
+        // WAQI iaqi 값은 AQI 지수이므로 µg/m³ 농도값으로 변환
+        weatherData.pm10=iaqi.pm10?.v!=null?Math.round(_aqiToPm10(iaqi.pm10.v)):null;
+        weatherData.pm25=iaqi.pm25?.v!=null?Math.round(_aqiToPm25(iaqi.pm25.v)):null;
         weatherData.dustGrade=getDustGrade(weatherData.pm10, weatherData.pm25);
       }
     }
