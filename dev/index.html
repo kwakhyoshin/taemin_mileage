@@ -6335,15 +6335,31 @@ async function _checkRedirectResult(){
         else if(pid === 'facebook.com') provider = 'facebook';
       }
       console.log('[Social Redirect Result]', provider, firebaseUser.uid, firebaseUser.email);
-      // 로딩 표시
       toast('로그인 처리 중...');
       await _handleSocialLoginResult(firebaseUser, provider);
     } else {
-      localStorage.removeItem(_LS_PREFIX+'social_pending');
+      // 리디렉트 결과 없음 → pending 플래그가 있었으면 폴백 화면 표시
+      if(pendingProvider){
+        localStorage.removeItem(_LS_PREFIX+'social_pending');
+        _showFallbackAuthScreen();
+      }
     }
   } catch(e){
     localStorage.removeItem(_LS_PREFIX+'social_pending');
     console.log('[Redirect Result] No pending redirect or error:', e.code || e.message);
+    // 에러 시에도 폴백 화면 표시
+    if(pendingProvider) _showFallbackAuthScreen();
+  }
+}
+
+// 리디렉트 결과 없을 때 적절한 화면 표시
+function _showFallbackAuthScreen(){
+  if(S.familyMeta && S.familyMeta.familyId){
+    showAuthScreen('login');
+  } else if(cachedUsers && Object.keys(cachedUsers).length > 0){
+    showAuthScreen('login');
+  } else {
+    showAuthScreen('welcome');
   }
 }
 
@@ -6710,6 +6726,13 @@ function checkAuth() {
     hideAllAuth();
     applyUserProfile();
     return true;
+  }
+
+  // 소셜 로그인 리디렉트 대기 중이면 화면 전환 보류
+  if(localStorage.getItem(_LS_PREFIX+'social_pending')){
+    // _checkRedirectResult가 처리할 때까지 로딩 표시
+    document.body.classList.add('auth-active');
+    return false;
   }
 
   // 가족 데이터가 있으면 로그인 화면, 없으면 웰컴 화면
