@@ -856,11 +856,23 @@ git checkout <commit-hash> -- index.html       # 운영기 (긴급 시에만)
   - `_doKakaoLogin()`: Kakao OAuth authorize URL을 팝업으로 열고 postMessage 수신
   - 카카오 콜백 핸들러: access_token으로 `/v2/user/me` API 호출 후 결과를 opener에 전달
 - 카카오/네이버 콜백 구분: state 파라미터에 `kakao_` 접두사 사용 (동일 URL에서 두 provider 구분)
-- Kakao Developer Portal: Redirect URI 등록 완료 (dev + prod)
+- Kakao Developer Portal: Redirect URI 등록 완료 (dev + prod), REST API 키 섹션에도 등록
 - 네이버 로그인 안정성: 팝업 닫힘 감지 시 postMessage 전달을 위한 800ms 유예 기간 추가
 - 소셜 콜백 팝업 깜빡임 방지: state 기반으로 카카오/네이버 정확히 구분
+- ⚠️ 네이버 앱 이름: "mile.ly"가 아닌 **"마일리"**로 등록됨 (네이버 개발자센터에서 '.' 문자 사용 불가)
+
+**13. 카카오 로그인 Authorization Code flow 전환**
+- 원인: 카카오는 `response_type=token` (Implicit Grant)을 지원하지 않음 → KOE006 에러 발생
+- 수정: Authorization Code flow (`response_type=code`)로 전면 전환
+  - `_doKakaoLogin()`: authUrl의 `response_type=token` → `response_type=code`
+  - 카카오 콜백 핸들러: `#access_token` 해시 → `?code=xxx` 쿼리스트링 방식으로 변경
+  - 토큰 교환 추가: 콜백에서 `kauth.kakao.com/oauth/token`에 POST로 code → access_token 교환
+  - 클라이언트 시크릿 사용: 카카오 앱 설정에서 "ON" 상태, `client_secret` 파라미터 포함
+  - 에러 처리: 토큰 교환 실패 시 `_error` 필드를 postMessage로 전달, 메인 창에서 토스트 표시
+- 초기 스크립트 업데이트: 카카오 콜백을 `?code=xxx&state=kakao_*` 쿼리스트링으로 감지 (네이버는 기존 `#access_token` 해시 유지)
+- 흐름: 사용자 → 카카오 인증 → `?code=xxx` 리다이렉트 → 팝업에서 토큰 교환 → `/v2/user/me` API → postMessage → 메인 창 로그인 처리
 
 #### 미완료 / 추가 확인 필요
 - 카카오 로그인: Kakao Developer Portal에서 앱 상태가 "개발 중"이면 등록된 테스트 계정만 사용 가능. 실 사용자가 카카오 로그인 실패 시 포탈 설정 확인 필요
-- 소셜 로그인 전체 E2E 테스트: Google ✅, 네이버 ✅, 카카오 ⚠️ (REST API 방식 재구현됨, 실기기 테스트 필요)
+- 소셜 로그인 전체 E2E 테스트: Google ✅, 네이버 ✅, 카카오 ⚠️ (Authorization Code flow 전환됨, 실기기 테스트 필요)
 - 운영기 배포: 위 수정사항은 개발기에만 적용됨. 운영기 반영 시 sync 스크립트 사용

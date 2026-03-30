@@ -2503,10 +2503,12 @@ button:disabled {
   // ★ 소셜 OAuth 콜백 팝업 감지: 로그인 화면 깜빡임 방지
   // 팝업에서 redirect_uri로 돌아오면 페이지가 다시 로드되는데,
   // 모듈 로드 전에 auth 화면이 잠깐 보이는 것을 방지
-  if(window.opener && window.location.hash.indexOf('access_token')!==-1){
-    var _hashStr = window.location.hash.substring(1);
-    var _stateMatch = _hashStr.match(/state=([^&]*)/);
-    var _isKakaoCallback = _stateMatch && _stateMatch[1].indexOf('kakao_')===0;
+  // 카카오: ?code=xxx&state=kakao_xxx (Authorization Code flow)
+  // 네이버: #access_token=xxx&state=xxx (Implicit Grant flow)
+  var _isNaverCallback = window.opener && window.location.hash.indexOf('access_token')!==-1;
+  var _kakaoQsEarly = window.location.search ? new URLSearchParams(window.location.search) : null;
+  var _isKakaoCallback = window.opener && _kakaoQsEarly && _kakaoQsEarly.get('code') && (_kakaoQsEarly.get('state')||'').indexOf('kakao_')===0;
+  if(_isKakaoCallback || _isNaverCallback){
     var _providerName = _isKakaoCallback ? '카카오' : '네이버';
     document.documentElement.style.background='linear-gradient(135deg,#5B4FC4,#A78BFA)';
     document.addEventListener('DOMContentLoaded',function(){
@@ -6726,10 +6728,10 @@ async function _loadNaverSDK(){
 async function _doKakaoLogin(){
   if(!_KAKAO_REST_KEY){ toast('카카오 로그인 키가 설정되지 않았어요'); return null; }
   return new Promise((resolve)=>{
-    // 카카오 OAuth 팝업 (Implicit Grant: response_type=token)
+    // 카카오 OAuth 팝업 (Authorization Code: response_type=code)
     const state = 'kakao_' + Math.random().toString(36).substring(2);
     const redirectUri = _getKakaoCallbackUrl();
-    const authUrl = `https://kauth.kakao.com/oauth/authorize?response_type=token&client_id=${_KAKAO_REST_KEY}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}`;
+    const authUrl = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${_KAKAO_REST_KEY}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}`;
     const popup = window.open(authUrl, 'kakaoLogin', 'width=500,height=700,scrollbars=yes');
     let resolved = false;
     // postMessage로 결과 수신
@@ -6804,6 +6806,8 @@ async function doSocialLogin(provider){
       try {
         const result = await _doKakaoLogin();
         if(!result){ return; } // 사용자 취소
+        if(result._error){ toast('카카오 로그인 실패: ' + result._error); return; }
+        if(!result.uid){ toast('카카오 로그인 정보를 가져올 수 없었어요'); return; }
         toast('로그인 처리 중...');
         await _handleSocialLoginResult(result, provider);
       } catch(e){
@@ -16716,22 +16720,47 @@ window._createState = _createState;
 
 // ── INIT (Firebase async) ─────────────────────
 (async function(){
-  // ── 카카오 OAuth 콜백 감지 (팝업에서 실행되는 경우) ──
-  // 네이버와 구분: state 파라미터가 'kakao_'로 시작하면 카카오 콜백
-  if(window.opener && window.location.hash.includes('access_token')){
-    const _hash = window.location.hash.substring(1);
-    const _params = new URLSearchParams(_hash);
-    const _stateParam = _params.get('state') || '';
-    const _isKakaoCallback = _stateParam.startsWith('kakao_');
-    const _accessToken = _params.get('access_token');
-    if(_isKakaoCallback && _accessToken){
-      // 카카오 토큰으로 /v2/user/me API 호출
-      console.log('[Kakao Callback] access_token detected');
-      fetch('https://kapi.kakao.com/v2/user/me', {
+  // ── 카카오 OAuth 콜백 감지 (Authorization Code flow) ──
+  // 카카오는 ?code=xxx&state=kakao_xxx 형태로 리다이렉트됨
+  const _kakaoQs = new URLSearchParams(window.location.search);
+  const _kakaoCode = _kakaoQs.get('code');
+  const _kakaoState = _kakaoQs.get('state') || '';
+  if(window.opener && _kakaoCode && _kakaoState.startsWith('kakao_')){
+    console.log('[Kakao Callback] authorization code detected');
+    // Step 1: code → access_token 교환
+    const _kakaoRedirectUri = window.location.href.split('?')[0]; // query string 제거한 redirect_uri
+    const _tokenBody = new URLSearchParams({
+      grant_type: 'authorization_code',
+      client_id: 'bd6311dbabf65b823a5160e3973cb483',
+      redirect_uri: _kakaoRedirectUri,
+      code: _kakaoCode,
+      client_secret: 'phvnOAr7G88IKOa9RCWn2AFD4AuivOk9'
+    });
+    fetch('https://kauth.kakao.com/oauth/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: _tokenBody.toString()
+    })
+    .then(r=>r.json())
+    .then(tokenRes=>{
+      if(tokenRes.error){
+        console.error('[Kakao Callback] Token exchange error:', tokenRes);
+        if(window.opener){
+          window.opener.postMessage({
+            type:'kakao_login',
+            uid:'', email:'', displayName:'', provider:'kakao',
+            _error: tokenRes.error_description || tokenRes.error
+          }, '*');
+        }
+        setTimeout(()=>window.close(), 300);
+        return;
+      }
+      const _accessToken = tokenRes.access_token;
+      console.log('[Kakao Callback] token exchange OK, fetching user info...');
+      // Step 2: access_token으로 사용자 정보 조회
+      return fetch('https://kapi.kakao.com/v2/user/me', {
         headers: { 'Authorization': `Bearer ${_accessToken}` }
-      })
-      .then(r=>r.json())
-      .then(res=>{
+      }).then(r=>r.json()).then(res=>{
         const uid = 'kakao_' + res.id;
         const email = res.kakao_account?.email || '';
         const displayName = res.kakao_account?.profile?.nickname || '';
@@ -16743,21 +16772,20 @@ window._createState = _createState;
           }, '*');
         }
         setTimeout(()=>window.close(), 300);
-      })
-      .catch(err=>{
-        console.error('[Kakao Callback] API error:', err);
-        // Fallback: access_token 기반 UID
-        if(window.opener){
-          window.opener.postMessage({
-            type:'kakao_login',
-            uid: 'kakao_token_'+_accessToken.substring(0,16),
-            email:'', displayName:'', provider:'kakao', _fallback:true
-          }, '*');
-        }
-        setTimeout(()=>window.close(), 300);
       });
-      return; // 이 창은 콜백 처리만 하고 종료
-    }
+    })
+    .catch(err=>{
+      console.error('[Kakao Callback] error:', err);
+      if(window.opener){
+        window.opener.postMessage({
+          type:'kakao_login',
+          uid:'', email:'', displayName:'', provider:'kakao',
+          _error: err.message || 'token exchange failed'
+        }, '*');
+      }
+      setTimeout(()=>window.close(), 300);
+    });
+    return; // 이 창은 콜백 처리만 하고 종료
   }
 
   // ── 네이버 OAuth 콜백 감지 (팝업에서 실행되는 경우) ──
