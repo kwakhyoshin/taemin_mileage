@@ -6716,7 +6716,6 @@ function _setupAuthListener(){
       console.error('[onAuthStateChanged] _handleSocialLoginResult error:', _authErr);
       _hideSocialLoading();
       toast('로그인 처리 중 오류가 발생했어요');
-      showAuthScreen('continue');
     }
   });
 }
@@ -6876,7 +6875,7 @@ function _showSocialLoading(providerLabel){
       console.warn('[SocialLoading] Safety timeout - auto hiding after 15s');
       _hideSocialLoading();
       toast('로그인 처리가 지연되고 있어요. 다시 시도해주세요.');
-      showAuthScreen('continue');
+      // ★ showAuthScreen('continue') 제거 — 타임아웃 시 현재 화면 유지
     }
   }, 15000);
 }
@@ -7185,7 +7184,7 @@ async function _handleSocialLoginResult(firebaseUser, provider){
     } else {
       toast('로그인 처리 중 오류가 발생했어요. 다시 시도해주세요.');
     }
-    showAuthScreen('continue');
+    // ★ showAuthScreen('continue') 제거 — 에러 시 현재 화면 유지 (로그인 화면 강제 이동 방지)
   }
 }
 
