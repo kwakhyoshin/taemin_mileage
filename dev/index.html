@@ -7828,7 +7828,7 @@ const BADGES = [
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
-if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0331d';}}
+if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0331e';}}
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
@@ -17116,45 +17116,40 @@ window._createState = _createState;
       const params = new URLSearchParams(hash);
       const accessToken = params.get('access_token');
       if(accessToken){
-        console.log('[Naver Callback] access_token detected, loading SDK...');
-        const script = document.createElement('script');
-        script.src = 'https://static.nid.naver.com/js/naveridlogin_js_sdk_2.0.2.js';
-        script.onload = ()=>{
-          console.log('[Naver Callback] SDK loaded');
-          try {
-            const naverLogin = new window.naver.LoginWithNaverId({
-              clientId: _NAVER_CLIENT_ID || '',
-              callbackUrl: window.location.href.split('#')[0].split('?')[0],
-              isPopup: !_isNaverRedirectReturn,
-              callbackHandle: true
-            });
-            naverLogin.init();
-            const timeout = setTimeout(()=>{
-              _deliverNaverResult({ type:'naver_login', uid:'naver_token_'+accessToken.substring(0,16), email:'', displayName:'', provider:'naver', _fallback:true });
-            }, 10000);
-            naverLogin.getLoginStatus((status)=>{
-              clearTimeout(timeout);
-              if(status && naverLogin.user){
-                _deliverNaverResult({
-                  type:'naver_login', uid:'naver_'+naverLogin.user.getId(),
-                  email: naverLogin.user.getEmail()||'',
-                  displayName: naverLogin.user.getName()||naverLogin.user.getNickName()||'',
-                  provider:'naver', profileImage: naverLogin.user.getProfileImage()||''
-                });
-              } else {
-                _deliverNaverResult({ type:'naver_login', uid:'naver_token_'+accessToken.substring(0,16), email:'', displayName:'', provider:'naver', _fallback:true });
-              }
-            });
-          } catch(sdkErr){
-            _deliverNaverResult({type:'naver_login', uid:'naver_token_'+accessToken.substring(0,16), email:'', displayName:'', provider:'naver', _fallback:true});
-          }
-        };
-        script.onerror = ()=>{
-          _deliverNaverResult({type:'naver_login', uid:'naver_token_'+accessToken.substring(0,16), email:'', displayName:'', provider:'naver', _fallback:true});
-        };
-        document.head.appendChild(script);
-        if(!_isNaverRedirectReturn) return; // 팝업/새 탭: 콜백 전달만, 앱 초기화 안 함
-        // redirect 모드: return하지 않고 앱 초기화 계속 진행
+        console.log('[Naver Callback] access_token detected');
+        // ★★ 즉시 fallback 결과 저장 (SDK 로딩 기다리지 않음)
+        // 모바일에서 탭이 백그라운드로 가면 SDK가 안 불러질 수 있으므로
+        const _fallbackResult = { type:'naver_login', uid:'naver_token_'+accessToken.substring(0,16), email:'', displayName:'', provider:'naver', _fallback:true };
+        _deliverNaverResult(_fallbackResult);
+        // SDK 로드 후 더 정확한 정보로 업데이트 (선택적)
+        try {
+          const script = document.createElement('script');
+          script.src = 'https://static.nid.naver.com/js/naveridlogin_js_sdk_2.0.2.js';
+          script.onload = ()=>{
+            try {
+              const naverLogin = new window.naver.LoginWithNaverId({
+                clientId: _NAVER_CLIENT_ID || '',
+                callbackUrl: window.location.href.split('#')[0].split('?')[0],
+                isPopup: !_isNaverRedirectReturn,
+                callbackHandle: true
+              });
+              naverLogin.init();
+              naverLogin.getLoginStatus((status)=>{
+                if(status && naverLogin.user){
+                  // ★ 더 정확한 정보로 덮어쓰기
+                  _deliverNaverResult({
+                    type:'naver_login', uid:'naver_'+naverLogin.user.getId(),
+                    email: naverLogin.user.getEmail()||'',
+                    displayName: naverLogin.user.getName()||naverLogin.user.getNickName()||'',
+                    provider:'naver', profileImage: naverLogin.user.getProfileImage()||''
+                  });
+                }
+              });
+            } catch(e){}
+          };
+          document.head.appendChild(script);
+        } catch(e){}
+        if(!_isNaverRedirectReturn) return; // 팝업/새 탭: 콜백 전달만
       }
     }catch(e){ console.error('Naver callback error:', e); }
   }
