@@ -2,7 +2,7 @@
 
 > 이 문서는 새 세션에서 실수 없이 개발·테스트·배포할 수 있도록 모든 핵심 정보를 담고 있습니다.
 > **새 세션 시작 시 반드시 이 문서를 먼저 읽을 것.**
-> 최종 업데이트: 2026-03-30 (카카오 로그인 REST API 재구현, 네이버 안정성 개선, 아이콘 교체 등)
+> 최종 업데이트: 2026-03-30 (인증 화면 UX 트러블슈팅 섹션 추가, DEV_GUIDE.md 통합)
 
 ---
 
@@ -758,6 +758,139 @@ git checkout <commit-hash> -- index.html       # 운영기 (긴급 시에만)
 - 키: `ml_prod_v6_backup` (운영), `ml_v6_backup` (개발)
 - 브라우저 DevTools > Application > Local Storage
 - **절대 삭제 금지** — 유일한 클라이언트 측 복구 수단
+
+---
+
+## 11. 인증 시스템 개편 (2026-03-30~)
+
+### 11.1 인증 방식 (현재 상태)
+- **기존**: 자체 ID/비밀번호 (SHA-512 해시, 글로벌 ID 레지스트리)
+- **신규 (Phase 1 완료)**: Google 간편로그인 (`signInWithPopup` + `onAuthStateChanged`)
+
+| 방식 | 구현 방법 | 상태 |
+|------|-----------|------|
+| 기존 ID/PW | 현행 유지 | ✅ 운영 중 |
+| 구글 간편로그인 | Firebase Auth `signInWithPopup(GoogleAuthProvider)` | ✅ 구현 완료 |
+| 카카오 간편로그인 | REST API Authorization Code flow + 팝업 | ✅ 구현 완료 |
+| 네이버 간편로그인 | Naver Login SDK 2.0 OAuth 팝업 + postMessage + localStorage fallback | ✅ 구현 완료 |
+| 이메일 인증 | Cloud Functions로 6자리 코드 발송 → 검증 | 미구현 |
+
+### 11.2 Firebase 플랜
+- **Blaze(종량제) 플랜 사용 중**
+- Cloud Functions, 외부 네트워크 호출(이메일 발송) 등에 Blaze 필요
+- 실사용량이면 무료 범위 내 (월 125K 호출, 40K GB-초)
+
+### 11.3 기술 스택
+- **Firebase Auth SDK**: `firebase-auth.js` v10.12.0
+- **Firebase Cloud Functions**: Node.js 20, `functions/` 디렉토리
+- **카카오 SDK**: REST API (JS SDK 미사용, `Kakao.Auth.login()` 제거됨)
+- **네이버 SDK**: `https://static.nid.naver.com/js/naveridlogin_js_sdk_2.0.2.js`
+
+### 11.4 Firestore 스키마 변경
+```javascript
+// 기존 ID/PW 사용자 — 변경 없음
+account: { id: string, pwdHash: string, v: 2 }
+
+// 소셜 로그인 사용자
+account: {
+  authProvider: 'google'|'kakao'|'naver',
+  authUid: string,
+  email: string,
+  v: 2
+}
+
+// 글로벌 레지스트리 (families/_auth_registry, families/_dev_auth_registry)
+{
+  [uid]: {
+    familyId: string,
+    memberId: string,
+    provider: 'google'|'kakao'|'naver'|'email',
+    email: string,
+    createdAt: timestamp
+  }
+}
+```
+
+### 11.5 카카오 개발자 포털 앱
+- 앱 이름: **mile.ly**, 앱 ID: **1418261**
+- JavaScript Key: `cc62aab8cd94eb2306350f53bfa75dd4`
+- REST API Key: `bd6311dbabf65b823a5160e3973cb483`
+- 동의항목: 닉네임(필수), 이메일(비즈앱 필요)
+- Authorization Code flow 사용 (`response_type=code`)
+
+### 11.6 네이버 개발자 포털 앱
+- 앱 이름: **마일리** (네이버에서 '.' 문자 불가)
+- Client ID: `_fBugrKRKZm45ibQLosP`
+- Client Secret: `s_ddXSvpnG`
+- 개발 상태: 개발 중 (일반 사용자 서비스 시 검수 필요)
+- Callback URL: `https://kwakhyoshin.github.io/taemin_mileage/dev/`, `.../taemin_mileage/`
+
+---
+
+## 12. 인증 화면 UX 트러블슈팅 (2026-03-30)
+
+> 이 섹션은 인증 화면에서 발생한 까다로운 문제들의 원인과 해결법을 기록한다.
+> 같은 실수를 반복하지 않기 위해 반드시 숙지할 것.
+
+### 12.1 구글 로그인 딜레이 (로딩 표시 시점)
+- **증상**: Google 로그인 버튼 클릭 → 아무 반응 없이 멈춘 것처럼 보임 → 한참 후 팝업
+- **원인**: `_showSocialLoading()` 호출이 `signInWithPopup()` 반환 후에 위치
+- **수정**: `_showSocialLoading(_provLabel)`을 `signInWithPopup()` **호출 전**으로 이동
+- **교훈**: 사용자 피드백(로딩 UI)은 비동기 작업 시작 전에 표시해야 함
+
+### 12.2 네이버 로그인 모바일 미완료 (`window.opener` null)
+- **증상**: 모바일에서 네이버 로그인 팝업 후 아무 일도 안 일어남
+- **원인**: 모바일 브라우저에서 `window.opener`가 null → `postMessage` 전달 불가
+- **수정**: localStorage fallback 구현
+  - 콜백 팝업: `localStorage.setItem('taemin_v6_naver_callback_result', JSON.stringify(data))` 저장
+  - 부모 창: 팝업 닫힘 감지 후 `localStorage.getItem()` 폴링
+- **교훈**: `window.opener`를 100% 신뢰하지 말 것. 특히 모바일에서 OAuth 팝업은 새 탭으로 열려 `opener` 참조가 끊길 수 있음
+
+### 12.3 가입 중 사용자 가이드 투어 발동
+- **증상**: 가입 마지막 단계에서 앱 화면이 아직 안 보이는데 투어 애니메이션이 실행됨
+- **원인**: `renderAll()` → `checkOnboarding()` 호출 → `currentUser` 있고 `totalDone===0` → `startTour()` 실행. 가입 완료 직전에 `currentUser`가 설정되면서 조건 충족
+- **수정**: `checkOnboarding()`에 가드 조건 추가:
+  ```javascript
+  if (document.body.classList.contains('auth-active')) return;
+  const anyAuthVisible = document.querySelector('.auth-screen:not(.hidden)');
+  if (anyAuthVisible) return;
+  ```
+- **교훈**: 투어/가이드는 인증 화면이 완전히 닫힌 후에만 시작해야 함
+
+### 12.4 양육자/자녀 역할 선택 화면 제거
+- **증상**: 자녀로 가입 시 가족 추가 후 다음 버튼 비활성화
+- **결정**: 자녀는 관리자 권한이 없으므로 아이로 가입하는 것 자체를 차단. 역할 선택 화면(c1-slide-role-type) 완전 제거
+- **수정**: `_createState.myRoleType`을 항상 `'caregiver'`로 고정
+
+### 12.5 색 단차 (auth 화면 초기 로드 시 색상 불일치)
+- **증상**: 앱 첫 로드 시 auth-continue 화면 상단에 색 차이가 보임. 로그인→로그아웃 후에는 안 보임
+- **원인**: HTML에서 `auth-welcome`(ob-gradient, 4색 160도 그라데이션, #3B2F8C 시작)이 기본 visible → JS 로드 후 `auth-continue`(2색 135도, #5B4FC4 시작)로 전환. 이 전환 중 깜빡임 발생
+- **수정**: `<head>` 인라인 스크립트에서 `localStorage`의 `onboarding_done` 체크 후 CSS 즉시 주입:
+  ```javascript
+  s.textContent='#auth-welcome,#auth-onboarding{display:none!important}#auth-continue{display:flex!important;pointer-events:auto!important}';
+  ```
+- **교훈**: 인증 화면 전환은 JS 로드 전에 CSS로 처리해야 깜빡임 없음
+
+### 12.6 ⚠️ auth-continue 터치 통과 버그 (홈 화면 조작 가능)
+- **증상**: auth-continue 화면 하단 배경(그라데이션) 영역을 터치하면 뒤에 숨겨진 홈 탭의 활동들이 눌림 (마일리지 올라가는 애니메이션 발생)
+- **원인**: early CSS injection이 `#auth-continue{display:flex!important}`로 화면을 보이게 만들었지만, HTML에 `.hidden` 클래스가 남아있어 `.auth-screen.hidden{pointer-events:none}`이 여전히 적용됨. 결과적으로 auth 화면이 보이지만 터치가 전부 통과
+- **수정**:
+  1. CSS에 `pointer-events:auto!important` 추가
+  2. `DOMContentLoaded`에서 `.hidden` 클래스 제거 + `body.auth-active` 설정
+  ```javascript
+  s.textContent='...#auth-continue{display:flex!important;pointer-events:auto!important}';
+  document.addEventListener('DOMContentLoaded',function(){
+    var ac=document.getElementById('auth-continue');
+    if(ac){ac.classList.remove('hidden');}
+    document.body.classList.add('auth-active');
+  });
+  ```
+- **교훈**: CSS에서 `display` 속성만 override하면 같은 선택자의 다른 속성(`pointer-events`)은 그대로 남는다. early CSS injection 시 해당 클래스의 **모든 부작용**을 고려해야 함. 특히 `.hidden` 클래스에 여러 속성이 있을 때 `display`만 덮어쓰면 위험
+
+### 12.7 ID/PW 로그인 폼 접기
+- **변경**: auth-continue 화면에서 ID/PW 입력 폼을 기본으로 접고, "아이디/비밀번호로 로그인 ▾" 링크 클릭 시 펼침
+- **함수**: `toggleIdPwLogin()` — `continue-idpw-section` display 토글
+- **이유**: 소셜 로그인이 주력이므로 화면 간소화
 
 ---
 
