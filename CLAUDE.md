@@ -10,6 +10,12 @@
 - dev → main/dev 동기화: 반드시 `scripts/sync-dev-to-main.sh` 사용
 - 이 스크립트는 main 루트 index.html의 `_ENV`를 `'prod'`로 보호함
 - **수동으로 main에 push하지 않는다**
+- **git plumbing 명령어(read-tree, write-tree, commit-tree 등)로 main에 커밋 금지**
+
+## 🔴 배포 시 필수 현행화 (매 배포마다 반드시 수행)
+1. **DEV_GUIDE.md 현행화**: 변경사항, 커밋 이력, 코드 줄 수 등 최신 상태로 업데이트
+2. **APP_CHANGELOG 업데이트**: 개발기/운영기 각각의 `APP_CHANGELOG` 배열에 해당 배포의 신규 기능/버그 수정 항목을 추가하여 사용자가 로그인 시 업데이트 내역을 확인할 수 있도록 함
+3. 배포 대상이 운영기인 경우 `_ENV='prod'` 유지 반드시 확인
 
 ## 코드 수정 규칙
 - `index.html` 수정 후 반드시 dev 브랜치에 commit + push
