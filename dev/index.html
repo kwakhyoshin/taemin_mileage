@@ -6892,7 +6892,13 @@ window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change', func
 });
 
 // ── SMART MESSAGE SYSTEM ─────────────────────
-const DAILY_MSGS=['오늘도 멋진 하루 보내자! 💪','화이팅! 넌 할 수 있어! ⭐','좋은 아침이야! 🌅','잘 잤어? 오늘도 파이팅! 💫','오늘도 응원해! 🎯','새로운 하루가 시작됐어! 🌈'];
+const DAILY_MSGS_BY_TIME={
+  morning:['오늘도 멋진 하루 보내자! 💪','화이팅! 넌 할 수 있어! ⭐','좋은 아침이야! ☀️','잘 잤어? 오늘도 파이팅! 💫','오늘도 응원해! 🎯','새로운 하루가 시작됐어! 🌈','상쾌한 아침! 오늘은 뭘 해볼까? 🤩','아침부터 기분 좋은 날이야! 😊','오늘 하루도 신나게! 🎶','일찍 일어난 새가 마일리지를 잡는다! 🐦','좋은 아침! 오늘도 최고가 되자! 🏆','눈 뜨자마자 마일리가 반겨요! 👋'],
+  afternoon:['오후도 힘내자! 💪','점심 맛있게 먹었어? 🍚','오후에도 파이팅! 🔥','슬슬 활동 해볼까? 🎯','오늘 마일리지 모았어? ⭐','반 왔다! 오후도 화이팅! 🙌','좀 쉬었다 다시 달려볼까? 😎','오후의 여유, 즐기고 있어? 🌤️','에너지 충전 완료! 출발! 🚀','오늘 목표까지 얼마나 남았을까? 📊'],
+  evening:['오늘 하루 수고했어! 🌙','저녁 맛있게 먹어! 🍽️','오늘도 열심히 했지? 👏','하루 마무리 잘 하자! ✨','저녁 시간이야, 좀 쉬어! 😌','오늘 뭐 재미있었어? 💬','멋진 하루를 보냈네! 🌟','저녁노을처럼 예쁜 하루였어! 🧡','오늘 한 일 돌아보는 시간! 📝','편안한 저녁 보내! 🍵'],
+  night:['오늘도 수고했어! 잘 자! 💤','내일은 더 멋진 하루가 될 거야! 🌙','푹 자고 내일 만나! 😴','좋은 꿈 꿔! 🌜','오늘 정말 잘했어! 내일 또 만나자! ⭐','꿈나라에서도 마일리지 모으는 거 아니야? 😆','편안한 밤 보내! 🛌','하루의 마지막도 멋지게! 🌠','내일도 좋은 일이 가득할 거야! 🍀','눈 감으면 내일이 금방 와! 😊']
+};
+const DAILY_MSGS=DAILY_MSGS_BY_TIME.morning;
 const WEATHER_MSGS={sunny:{icon:'☀️',msg:'날씨가 화창해! 밖에서 놀기 좋은 날이야 🌳'},cloudy:{icon:'☁️',msg:'구름이 많지만 기분은 맑게! ⛅'},rainy:{icon:'🌧️',msg:'비가 오네! 우산 챙겼어? 🌂'},snowy:{icon:'❄️',msg:'눈이 와요! 따뜻하게 입고 다녀! ⛄'}};
 // 미세먼지 기준: PM10(미세) 0-30좋음, 31-80보통, 81-150나쁨, 151+매우나쁨 / PM2.5(초미세) 0-15좋음, 16-35보통, 36-75나쁨, 76+매우나쁨
 const DUST_GRADES={good:{level:'좋음',color:'#10B981',bgColor:'#D1FAE5',txtColor:'#065F46'},moderate:{level:'보통',color:'#FBBF24',bgColor:'#FEF3C7',txtColor:'#92400E'},bad:{level:'나쁨',color:'#F97316',bgColor:'#FFEDD5',txtColor:'#C2410C',msg:'마스크 쓰고 나가자! 😷'},worst:{level:'매우나쁨',color:'#EF4444',bgColor:'#FEE2E2',txtColor:'#B91C1C',msg:'오늘은 실내에서 놀자! 🏠'}};
@@ -7057,7 +7063,7 @@ function updateSmartMessage(){
   // 미세먼지 나쁨 메시지 우선
   if(weatherData.dustGrade==='bad'||weatherData.dustGrade==='worst'){smartMsg.textContent=dInfo.msg;}
   else if(Math.random()>0.5){smartMsg.textContent=wInfo.msg;}
-  else{smartMsg.textContent=DAILY_MSGS[Math.floor(Math.random()*DAILY_MSGS.length)];}
+  else{const _tp=getTimePeriod();const _dmp=DAILY_MSGS_BY_TIME[_tp]||DAILY_MSGS;smartMsg.textContent=_dmp[Math.floor(Math.random()*_dmp.length)];}
 }
 function saveMsgMode(){const mode=document.getElementById('msg-mode-sel').value;S.settings.msgMode=mode;document.getElementById('custom-msg-row').style.display=mode==='custom'?'flex':'none';save();updateSmartMessage();}
 function saveCustomMsg(){const v=document.getElementById('custom-msg-inp').value.trim();if(!v)return;S.settings.customMsg=v;save();updateSmartMessage();toast('✅ 메시지가 저장됐어요!');}
@@ -7819,25 +7825,25 @@ function showBadgeCelebration(badge){
   },4000);
 }
 
-// Time-aware greeting pools per user
+// Time-aware greeting pools per user (확장: 시간대별 12~15개)
 const TIME_GREETINGS={
   taemin:{
-    morning:['좋은 아침, 태민아! ☀️','태민아, 오늘도 화이팅! 👋','일어났어? 오늘도 멋진 하루! 🌅','태민아, 좋은 아침이야! 💪'],
-    afternoon:['태민아, 오늘 잘하고 있어! 🌟','태민아, 오후도 파이팅! 💪','태민이, 열심히 해볼까? 🎯','태민아, 힘내자! ⭐'],
-    evening:['태민아, 오늘 수고했어! 🌙','태민아, 오늘 하루 어땠어? ✨','태민이, 잘 마무리하자! 🌟','오늘도 멋진 하루였어! 💫'],
-    night:['태민아, 곧 잘 시간이야! 🌜','태민아, 오늘 잘했어! 😴','푹 자고 내일 또 만나! 💤','태민아, 좋은 꿈 꿔! 🌙']
+    morning:['좋은 아침, 태민아! ☀️','태민아, 오늘도 화이팅! 👋','잘 잤어? 오늘도 멋진 하루! 🌤️','태민아, 좋은 아침이야! 💪','일어났구나! 오늘도 신나는 하루! 🎶','태민아, 오늘 뭐 할 거야? 🤔','상쾌한 아침이다! 😊','태민아, 아침밥 먹었어? 🍚','오늘은 좋은 일이 가득할 거야! 🍀','태민아, 눈 떴어? 반가워! 🙌','새로운 하루가 시작됐어! 🌈','태민아, 오늘도 최고야! 🏆'],
+    afternoon:['태민아, 오늘 잘하고 있어! 🌟','태민아, 오후도 파이팅! 💪','태민아, 열심히 해볼까? 🎯','태민아, 힘내자! ⭐','점심 맛있게 먹었어? 🍱','태민아, 오후도 즐겁게! 😄','슬슬 활동 해볼 시간이야! 🚀','태민아, 오늘 기분 어때? 😊','반 왔다! 조금만 더 파이팅! 🙌','태민아, 잠깐 쉬었다 해도 돼! 😌','오후 햇살이 따뜻하네! 🌤️','태민아, 마일리지 모았어? 💰'],
+    evening:['태민아, 오늘 수고했어! 🌙','태민아, 오늘 하루 어땠어? ✨','태민아, 잘 마무리하자! 🌟','오늘도 멋진 하루였어! 💫','저녁 맛있게 먹어! 🍽️','태민아, 오늘 뭐가 재미있었어? 💬','하루 정리할 시간이야! 📝','태민아, 오늘도 열심히 했네! 👏','편안한 저녁 보내! 🧡','태민아, 좀 쉬어도 돼! 😊','오늘 한 일 자랑해봐! 🎉','태민아, 저녁 시간 즐겨! 🎮'],
+    night:['태민아, 곧 잘 시간이야! 🌙','태민아, 오늘 잘했어! 😴','푹 자고 내일 또 만나! 💤','태민아, 좋은 꿈 꿔! 🌜','내일은 더 멋진 하루가 될 거야! ⭐','태민아, 오늘도 수고 많았어! 💙','꿈나라에서 만나자! 😆','이제 쉴 시간! 잘 자! 🛌','태민아, 내일도 기대된다! 🌠','오늘 하루 고생했어! 편히 자! 💤','태민아, 눈 감고 쉬어! 😴','내일 아침에 또 만나! 🍀']
   },
   dad:{
-    morning:['좋은 아침, 효신님! ☀️','오늘 하루도 시작해볼까요! 👋','활기찬 아침이에요! 💪','좋은 아침입니다! 🌅'],
-    afternoon:['오후도 화이팅! 💼','오늘 잘 보내고 계시죠? 🌟','힘내세요! 오후도 파이팅! 💪','좋은 오후예요! ⭐'],
-    evening:['수고하셨습니다! 🌙','오늘 하루 고생하셨어요! ✨','편안한 저녁 보내세요! 🌟','좋은 저녁이에요! 💫'],
-    night:['오늘도 수고하셨어요! 🌜','편안한 밤 되세요! 😴','좋은 꿈 꾸세요! 💤','푹 쉬세요! 🌙']
+    morning:['좋은 아침, 효신님! ☀️','오늘 하루도 시작해볼까요! 👋','활기찬 아침이에요! 💪','좋은 아침입니다! 🌤️','상쾌한 아침이네요! ☕','오늘도 좋은 하루 되세요! 🍀','효신님, 오늘 컨디션 어떠세요? 😊','활력 넘치는 아침! 화이팅! 🔥','새로운 하루가 밝았어요! 🌈','효신님, 아침 커피 한잔 어때요? ☕','오늘도 멋진 하루 만들어봐요! ✨','기분 좋은 아침이에요! 🙌'],
+    afternoon:['오후도 화이팅! 💼','오늘 잘 보내고 계시죠? 🌟','힘내세요! 오후도 파이팅! 💪','좋은 오후예요! ⭐','점심 맛있게 드셨나요? 🍽️','오후도 활기차게! 🚀','효신님, 잠깐 쉬어가셔도 돼요! 😌','반나절 지났어요! 잘하고 계세요! 👍','따뜻한 오후네요! 🌤️','효신님, 오후도 순조롭길! 🙏','슬슬 에너지 충전할 시간! ☕','남은 하루도 화이팅이에요! 💪'],
+    evening:['수고하셨습니다! 🌙','오늘 하루 고생하셨어요! ✨','편안한 저녁 보내세요! 🌟','좋은 저녁이에요! 💫','오늘도 열심히 하셨네요! 👏','효신님, 맛있는 저녁 드세요! 🍽️','저녁 시간 편히 쉬세요! 😊','오늘 하루 어떠셨어요? 💬','하루를 멋지게 마무리하세요! 🧡','효신님, 오늘도 감사한 하루! 🙏','저녁노을 같은 여유를 즐기세요! ✨','수고 많으셨어요! 이제 쉬세요! 😌'],
+    night:['오늘도 수고하셨어요! 🌙','편안한 밤 되세요! 😴','좋은 꿈 꾸세요! 💤','푹 쉬세요! 🌜','효신님, 오늘도 감사했어요! 💙','내일도 좋은 하루가 될 거예요! ⭐','편안한 밤 보내세요! 🛌','하루의 끝, 잘 마무리하세요! 🌠','효신님, 오늘 정말 수고하셨어요! 👏','내일을 위해 충분히 쉬세요! 🍀','좋은 밤이에요! 편히 주무세요! 💤','내일도 함께해요! 😊']
   },
   mom:{
-    morning:['좋은 아침이에요! ☀️','오늘도 행복한 하루! 🌸','활기찬 아침이에요! 💝','좋은 아침! 힘내세요! 🌅'],
-    afternoon:['오후도 화이팅! 💝','즐거운 오후 보내세요! 🌸','오늘 잘 보내고 계시죠? 💪','좋은 오후예요! 🌟'],
-    evening:['수고하셨어요! 🌙','편안한 저녁 되세요! 💝','오늘 하루 고생하셨어요! ✨','좋은 저녁이에요! 🌸'],
-    night:['편안한 밤 되세요! 🌜','오늘도 수고하셨어요! 😴','좋은 꿈 꾸세요! 💤','푹 쉬세요! 🌙']
+    morning:['좋은 아침이에요! ☀️','오늘도 행복한 하루! 🌸','활기찬 아침이에요! 💝','좋은 아침! 힘내세요! 🌤️','상쾌한 아침이네요! ☕','오늘도 좋은 하루 되세요! 🍀','기분 좋은 아침이에요! 😊','오늘도 예쁜 하루 보내세요! 🌷','활기찬 하루가 시작됐어요! 🌈','아침부터 미소가 지어져요! 😄','좋은 에너지로 하루를 시작해요! ✨','따뜻한 아침이에요! 🌼'],
+    afternoon:['오후도 화이팅! 💝','즐거운 오후 보내세요! 🌸','오늘 잘 보내고 계시죠? 💪','좋은 오후예요! 🌟','점심 맛있게 드셨나요? 🍽️','오후도 행복하게! 🌷','잠깐 쉬어가도 괜찮아요! 😌','남은 하루도 응원해요! 💗','따뜻한 오후를 보내세요! 🌤️','오후의 여유를 즐겨보세요! ☕','오늘 하루 잘 보내고 계시네요! 👍','반나절 수고하셨어요! 🌸'],
+    evening:['수고하셨어요! 🌙','편안한 저녁 되세요! 💝','오늘 하루 고생하셨어요! ✨','좋은 저녁이에요! 🌸','오늘도 열심히 하셨네요! 👏','맛있는 저녁 드세요! 🍽️','저녁 시간 편히 쉬세요! 😊','오늘 하루 어떠셨어요? 💬','하루를 예쁘게 마무리하세요! 🌷','고생 많으셨어요! 이제 쉬세요! 😌','저녁 시간이 참 좋아요! 🧡','오늘도 감사한 하루예요! 💗'],
+    night:['편안한 밤 되세요! 🌙','오늘도 수고하셨어요! 😴','좋은 꿈 꾸세요! 💤','푹 쉬세요! 🌜','오늘도 감사한 하루였어요! 💗','내일도 좋은 하루가 될 거예요! ⭐','편안한 밤 보내세요! 🛌','잘 마무리하시고 푹 쉬세요! 🌸','내일도 함께 웃어요! 😊','하루 끝! 편히 주무세요! 💤','좋은 밤 보내세요! 🍀','내일도 행복한 하루가 기다려요! 🌷']
   }
 };
 function getTimePeriod(){
@@ -7847,29 +7853,40 @@ function getTimePeriod(){
   if(h>=17&&h<21)return 'evening';
   return 'night';
 }
-// Generate time-based greeting for any user by name
+// Generate time-based greeting for any user by name (시간대별 12개)
 function _makeGreetingPool(name, isChild){
+  // 이름 호칭: 받침 있으면 '아', 없으면 '야' (간단 판별)
+  const last=name.charAt(name.length-1);
+  const code=last.charCodeAt(0);
+  const hasBatchim=(code>=0xAC00&&code<=0xD7A3)&&((code-0xAC00)%28!==0);
+  const ya=hasBatchim?'아':'야';
   if(isChild){
     return {
-      morning:[`좋은 아침, ${name}아! ☀️`,`${name}아, 오늘도 화이팅! 👋`,`일어났어? 오늘도 멋진 하루! 🌅`,`${name}아, 좋은 아침이야! 💪`],
-      afternoon:[`${name}아, 오늘 잘하고 있어! 🌟`,`${name}아, 오후도 파이팅! 💪`,`${name}아, 열심히 해볼까? 🎯`,`${name}아, 힘내자! ⭐`],
-      evening:[`${name}아, 오늘 수고했어! 🌙`,`${name}아, 오늘 하루 어땠어? ✨`,`${name}아, 잘 마무리하자! 🌟`,`오늘도 멋진 하루였어! 💫`],
-      night:[`${name}아, 곧 잘 시간이야! 🌜`,`${name}아, 오늘 잘했어! 😴`,`푹 자고 내일 또 만나! 💤`,`${name}아, 좋은 꿈 꿔! 🌙`]
+      morning:[`좋은 아침, ${name}${ya}! ☀️`,`${name}${ya}, 오늘도 화이팅! 👋`,`잘 잤어? 오늘도 멋진 하루! 🌤️`,`${name}${ya}, 좋은 아침이야! 💪`,`일어났구나! 오늘도 신나게! 🎶`,`${name}${ya}, 오늘 뭐 할 거야? 🤔`,`상쾌한 아침이다! 😊`,`${name}${ya}, 아침밥 먹었어? 🍚`,`오늘은 좋은 일이 가득할 거야! 🍀`,`${name}${ya}, 반가워! 오늘도 최고! 🏆`,`새로운 하루가 시작됐어! 🌈`,`${name}${ya}, 눈 떴어? 좋은 아침! 🙌`],
+      afternoon:[`${name}${ya}, 오늘 잘하고 있어! 🌟`,`${name}${ya}, 오후도 파이팅! 💪`,`${name}${ya}, 열심히 해볼까? 🎯`,`${name}${ya}, 힘내자! ⭐`,`점심 맛있게 먹었어? 🍱`,`${name}${ya}, 오후도 즐겁게! 😄`,`슬슬 활동 해볼 시간이야! 🚀`,`${name}${ya}, 오늘 기분 어때? 😊`,`반 왔다! 조금만 더 파이팅! 🙌`,`${name}${ya}, 잠깐 쉬었다 해도 돼! 😌`,`오후 햇살이 따뜻하네! 🌤️`,`${name}${ya}, 마일리지 모았어? 💰`],
+      evening:[`${name}${ya}, 오늘 수고했어! 🌙`,`${name}${ya}, 오늘 하루 어땠어? ✨`,`${name}${ya}, 잘 마무리하자! 🌟`,`오늘도 멋진 하루였어! 💫`,`저녁 맛있게 먹어! 🍽️`,`${name}${ya}, 오늘 뭐가 재미있었어? 💬`,`하루 정리할 시간이야! 📝`,`${name}${ya}, 오늘도 열심히 했네! 👏`,`편안한 저녁 보내! 🧡`,`${name}${ya}, 좀 쉬어도 돼! 😊`,`오늘 한 일 자랑해봐! 🎉`,`${name}${ya}, 저녁 시간 즐겨! 🎮`],
+      night:[`${name}${ya}, 곧 잘 시간이야! 🌙`,`${name}${ya}, 오늘 잘했어! 😴`,`푹 자고 내일 또 만나! 💤`,`${name}${ya}, 좋은 꿈 꿔! 🌜`,`내일은 더 멋진 하루가 될 거야! ⭐`,`${name}${ya}, 오늘도 수고 많았어! 💙`,`꿈나라에서 만나자! 😆`,`이제 쉴 시간! 잘 자! 🛌`,`${name}${ya}, 내일도 기대된다! 🌠`,`오늘 하루 고생했어! 편히 자! 💤`,`${name}${ya}, 눈 감고 쉬어! 😴`,`내일 아침에 또 만나! 🍀`]
     };
   }
   return {
-    morning:[`좋은 아침, ${name}님! ☀️`,`오늘 하루도 시작해볼까요! 👋`,`활기찬 아침이에요! 💪`,`좋은 아침입니다! 🌅`],
-    afternoon:[`오후도 화이팅! 💼`,`오늘 잘 보내고 계시죠? 🌟`,`힘내세요! 오후도 파이팅! 💪`,`좋은 오후예요! ⭐`],
-    evening:[`수고하셨습니다! 🌙`,`오늘 하루 고생하셨어요! ✨`,`편안한 저녁 보내세요! 🌟`,`좋은 저녁이에요! 💫`],
-    night:[`오늘도 수고하셨어요! 🌜`,`편안한 밤 되세요! 😴`,`좋은 꿈 꾸세요! 💤`,`푹 쉬세요! 🌙`]
+    morning:[`좋은 아침, ${name}님! ☀️`,`오늘 하루도 시작해볼까요! 👋`,`활기찬 아침이에요! 💪`,`좋은 아침입니다! 🌤️`,`상쾌한 아침이네요! ☕`,`오늘도 좋은 하루 되세요! 🍀`,`${name}님, 오늘 컨디션 어떠세요? 😊`,`활력 넘치는 아침! 화이팅! 🔥`,`새로운 하루가 밝았어요! 🌈`,`기분 좋은 아침이에요! 🙌`,`오늘도 멋진 하루 만들어봐요! ✨`,`따뜻한 아침이에요! 🌼`],
+    afternoon:[`오후도 화이팅! 💼`,`오늘 잘 보내고 계시죠? 🌟`,`힘내세요! 오후도 파이팅! 💪`,`좋은 오후예요! ⭐`,`점심 맛있게 드셨나요? 🍽️`,`오후도 활기차게! 🚀`,`${name}님, 잠깐 쉬어가셔도 돼요! 😌`,`반나절 지났어요! 잘하고 계세요! 👍`,`따뜻한 오후네요! 🌤️`,`슬슬 에너지 충전할 시간! ☕`,`남은 하루도 화이팅이에요! 💪`,`오후의 여유를 즐겨보세요! 😊`],
+    evening:[`수고하셨습니다! 🌙`,`오늘 하루 고생하셨어요! ✨`,`편안한 저녁 보내세요! 🌟`,`좋은 저녁이에요! 💫`,`오늘도 열심히 하셨네요! 👏`,`맛있는 저녁 드세요! 🍽️`,`저녁 시간 편히 쉬세요! 😊`,`오늘 하루 어떠셨어요? 💬`,`하루를 멋지게 마무리하세요! 🧡`,`고생 많으셨어요! 이제 쉬세요! 😌`,`저녁 시간이 참 좋아요! ✨`,`오늘도 감사한 하루예요! 💗`],
+    night:[`오늘도 수고하셨어요! 🌙`,`편안한 밤 되세요! 😴`,`좋은 꿈 꾸세요! 💤`,`푹 쉬세요! 🌜`,`오늘도 감사한 하루였어요! 💗`,`내일도 좋은 하루가 될 거예요! ⭐`,`편안한 밤 보내세요! 🛌`,`잘 마무리하시고 푹 쉬세요! 🌠`,`내일도 함께 웃어요! 😊`,`하루 끝! 편히 주무세요! 💤`,`좋은 밤 보내세요! 🍀`,`내일도 행복한 하루가 기다려요! 🌷`]
   };
 }
 
+// 의사난수 해시: 같은 시간대에도 userId별로 다른 인사말 (매 시간 변경)
+function _greetHash(userId,hour,doy){
+  let h=0;
+  const s=userId+':'+doy+':'+hour;
+  for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0;}
+  return Math.abs(h);
+}
 // Get current greeting for a user
 function getCurrentGreeting(userId){
   const gr=S.greetings?.[userId];
   if(!gr){
-    // No greeting settings — generate dynamically from member name
     const member=MEMBERS[userId];
     const name=member?.name||'';
     if(!name) return S.greeting||'안녕하세요! 👋';
@@ -7877,14 +7894,11 @@ function getCurrentGreeting(userId){
     const period=getTimePeriod();
     const pool=_makeGreetingPool(name,isChild)[period];
     const now=new Date();
-    const slot=Math.floor(now.getHours()/3);
-    const doy=Math.floor((now-new Date(now.getFullYear(),0,0))/86400000);
-    return pool[(doy*8+slot)%pool.length];
+    return pool[_greetHash(userId,now.getHours(),Math.floor((now-new Date(now.getFullYear(),0,0))/86400000))%pool.length];
   }
   if(gr.mode==='manual'){
     return gr.custom||'안녕하세요!';
   }
-  // Auto mode: generate dynamic pool from member name, fall back to static TIME_GREETINGS
   const period=getTimePeriod();
   let pool=(TIME_GREETINGS[userId]&&TIME_GREETINGS[userId][period]);
   if(!pool){
@@ -7895,10 +7909,8 @@ function getCurrentGreeting(userId){
   }
   if(!pool||!pool.length) pool=gr.messages||['안녕하세요!'];
   const now=new Date();
-  const slot=Math.floor(now.getHours()/3);
   const doy=Math.floor((now-new Date(now.getFullYear(),0,0))/86400000);
-  const idx=(doy*8+slot)%pool.length;
-  return pool[idx];
+  return pool[_greetHash(userId,now.getHours(),doy)%pool.length];
 }
 window.getCurrentGreeting=getCurrentGreeting;
 
