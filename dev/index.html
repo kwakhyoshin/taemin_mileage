@@ -3352,7 +3352,7 @@ button:disabled {
 </div>
 
 <!-- HOME -->
-<div class="scr on" id="s-home">
+<div class="scr" id="s-home">
   <div class="home-top">
     <div id="home-top-content">
       <h1 id="greeting-txt">안녕하세요! 👋</h1>
@@ -7205,6 +7205,9 @@ function checkAuth() {
     // 관리자 권한이면 자동으로 adminOK
     if(isCurrentUserAdmin()) adminOK = true;
     hideAllAuth();
+    // s-home 초기 on 클래스가 없으므로 명시적으로 홈 탭 활성화
+    const _homeScr = document.getElementById('s-home');
+    if(_homeScr && !document.querySelector('.scr.on')) _homeScr.classList.add('on');
     applyUserProfile();
     return true;
   }
