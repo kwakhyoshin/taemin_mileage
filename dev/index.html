@@ -4977,6 +4977,13 @@ function c1SlideNameNext() {
   err.textContent = '';
   if (!name) { err.textContent = '이름을 입력해주세요'; return; }
   _createState.myName = name;
+
+  // 소셜 로그인 사용자면 아이디/비밀번호 건너뛰고 바로 가족이름으로
+  if(_createState.socialUser){
+    renderRegStepper(2, 0, 4); // Group 2 (가족 설정), step 0 (family name)
+    _goToStep2();
+    return;
+  }
   renderRegStepper(1, 0, 2); // Group 1 (계정 생성), step 0 (id)
   toSlide('c1-wrap', 'c1-slide-id');
   setTimeout(() => document.getElementById('create-user-id').focus(), 380);
@@ -5051,14 +5058,22 @@ function resetJoinRegId() {
 
 // ── 가족 만들기 흐름 ──
 function startCreateFamily(){
+  const _savedSocial = _createState.socialUser || null;
+  const _savedName = _createState.socialUser ? (_createState.myName || '') : '';
+  const _savedUserId = _createState.socialUser ? _createState.userId : '';
+  const _savedPwdHash = _createState.socialUser ? _createState.pwdHash : '';
   _createState={
-    userId:'',pwdHash:'',myName:'',myRole:'',myRoleType:'',
+    userId: _savedUserId || '',
+    pwdHash: _savedPwdHash || '',
+    myName: _savedName || '',
+    myRole:'',myRoleType:'',
     familyName:'',memberCount:3,
     members:[],
     mode:'independent',
     childAccounts:{},inviteType:'link',
     inviteStatus:{},
-    idLocked:false
+    idLocked:false,
+    socialUser: _savedSocial
   };
   window._createState=_createState;
   _saveFamilyDone=false; // 새 가입 시작 시 리셋
@@ -5087,6 +5102,13 @@ function startCreateFamily(){
   if(_c1Inp){_c1Inp.disabled=false;_c1Inp.value='';}
   const _c1Lock=document.getElementById('c1-id-lock-icon');if(_c1Lock)_c1Lock.style.display='none';
   const _c1Rst=document.getElementById('c1-id-reset-btn');if(_c1Rst)_c1Rst.style.display='none';
+
+  // 소셜 로그인 사용자: 이름 미리 채우기
+  if(_createState.socialUser && _createState.myName){
+    const nameInp = document.getElementById('create-my-name');
+    if(nameInp) nameInp.value = _createState.myName;
+  }
+
   showAuthScreen('create-1');
 }
 
@@ -5624,7 +5646,8 @@ async function saveFamilyToFirestore(){
     const btn=document.querySelector('#auth-create-3 .toss-btn, #auth-create-4 .toss-btn');
     if(btn){btn.disabled=true;btn.textContent='저장 중...';}
 
-    const pwdHash=await hashPassword(_createState.pwdHash);
+    const isSocialUser = !!_createState.socialUser;
+    const pwdHash = isSocialUser ? '__social_auth__' : await hashPassword(_createState.pwdHash);
     const familyId=generateFamilyId();
     const myMemberId=generateMemberId();
 
@@ -5638,7 +5661,9 @@ async function saveFamilyToFirestore(){
       color:myRoleDef.color||'#EEF2FF',
       isAdmin:true,
       type:'caregiver',
-      account:{id:_createState.userId,pwdHash,v:2},
+      account: isSocialUser
+        ? {authProvider:_createState.socialUser.provider||'google', authUid:_createState.socialUser.uid, email:_createState.socialUser.email||'', v:2}
+        : {id:_createState.userId, pwdHash, v:2},
       joinedAt:Date.now()
     };
 
@@ -5690,7 +5715,9 @@ async function saveFamilyToFirestore(){
     const newState=defaultState();
     newState.familyMeta=familyMeta;
     newState.users={};
-    newState.users[myMemberId]={id:_createState.userId,pwdHash,v:2};
+    newState.users[myMemberId] = isSocialUser
+      ? {authProvider:_createState.socialUser.provider||'google', authUid:_createState.socialUser.uid, email:_createState.socialUser.email||'', v:2}
+      : {id:_createState.userId, pwdHash, v:2};
     for(const [idx,acc] of Object.entries(_createState.childAccounts)){
       const cid=memberIds[parseInt(idx)-1];
       if(cid)newState.users[cid]={id:acc.id,pwdHash:await hashPassword(acc.pwd),v:2};
@@ -5701,7 +5728,12 @@ async function saveFamilyToFirestore(){
 
     // 글로벌 ID 레지스트리에 등록 (생성자 ID + 자녀 미리생성 계정)
     try {
-      await registerGlobalId(_createState.userId, docPath, myMemberId);
+      if(isSocialUser){
+        // 소셜 로그인 사용자: auth registry에 UID → familyId/memberId 등록
+        await _registerAuthLink(_createState.socialUser.uid, docPath, myMemberId, _createState.socialUser.provider||'google', _createState.socialUser.email||'');
+      } else {
+        await registerGlobalId(_createState.userId, docPath, myMemberId);
+      }
       // 미리 생성한 자녀 계정도 레지스트리에 등록
       for(const [idx,acc] of Object.entries(_createState.childAccounts||{})){
         const cid=memberIds[parseInt(idx)-1];
@@ -6477,6 +6509,12 @@ async function _loginToFamily(familyId, memberId, authUid, provider, email){
 async function socialLinkNewFamily(){
   if(!_pendingSocialUser) return;
   localStorage.removeItem(_LS_PREFIX+'social_pending'); // 정리
+  // 소셜 로그인 정보를 _createState에 미리 세팅
+  _createState.socialUser = _pendingSocialUser; // {uid, email, displayName, provider}
+  _createState.myName = _pendingSocialUser.displayName || '';
+  // 아이디/비밀번호는 소셜 인증으로 대체 → 가입 위자드에서 건너뜀
+  _createState.userId = '__social__' + _pendingSocialUser.uid; // 내부용 고유 ID
+  _createState.pwdHash = '__social_auth__'; // 비밀번호 불필요 마커
   showAuthScreen('insight');
 }
 
