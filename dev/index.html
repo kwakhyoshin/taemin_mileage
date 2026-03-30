@@ -12728,6 +12728,49 @@ const APP_CHANGELOG=[
       {type:'new',text:'URL 공유 시 미리보기 이미지/제목 표시 (Open Graph 지원)'},
       {type:'new',text:'하단 네비게이션 아이콘 크기 확대'},
     ]
+  },
+  {
+    ver:'1.3.0', date:'2026-03-25',
+    items:[
+      {type:'new',text:'가족 메시지 기능 추가 — 가족끼리 응원 메시지 주고받기'},
+      {type:'new',text:'감정 표현(기분) 기능 — 오늘 내 기분을 이모지로 표현'},
+      {type:'fix',text:'다크 모드에서 일부 텍스트가 안 보이는 문제 수정'},
+      {type:'fix',text:'보상 교환 시 마일리지가 즉시 반영되지 않던 문제 수정'},
+      {type:'new',text:'홈 화면 날씨/미세먼지 정보 표시'},
+      {type:'fix',text:'활동 기록 날짜 정렬이 간헐적으로 틀리는 문제 수정'},
+    ]
+  },
+  {
+    ver:'1.2.0', date:'2026-03-18',
+    items:[
+      {type:'new',text:'뱃지 시스템 추가 — 활동 달성 시 뱃지 획득'},
+      {type:'new',text:'뱃지 상세 보기 및 컬렉션 화면'},
+      {type:'new',text:'PIN 잠금 기능 — 자녀 계정 보호'},
+      {type:'fix',text:'iOS Safari에서 하단 바가 가려지는 문제 수정'},
+      {type:'fix',text:'초대 코드 복사가 일부 기기에서 안 되는 문제 수정'},
+      {type:'new',text:'양육자 승인 요청 알림 기능'},
+    ]
+  },
+  {
+    ver:'1.1.0', date:'2026-03-10',
+    items:[
+      {type:'new',text:'보상 등록/교환 기능 추가'},
+      {type:'new',text:'마일리지 히스토리 그래프 (최근 7일)'},
+      {type:'fix',text:'로그인 후 흰 화면이 간헐적으로 나오는 문제 수정'},
+      {type:'fix',text:'오프라인 상태에서 앱이 멈추는 문제 수정'},
+      {type:'new',text:'가족 초대 링크 생성 기능'},
+    ]
+  },
+  {
+    ver:'1.0.0', date:'2026-03-01',
+    items:[
+      {type:'new',text:'마일리 첫 출시!'},
+      {type:'new',text:'활동 등록 및 마일리지 적립'},
+      {type:'new',text:'자녀/양육자 역할 분리'},
+      {type:'new',text:'다크 모드 지원'},
+      {type:'new',text:'PWA 설치 지원 (홈 화면에 추가)'},
+      {type:'new',text:'Firestore 실시간 동기화'},
+    ]
   }
 ];
 const _CL_LS_KEY=_LS_PREFIX+'changelog_seen';
@@ -12742,17 +12785,20 @@ function openChangelog(){
   if(!el)return;
   const list=document.getElementById('changelog-list');
   if(list){
-    list.innerHTML=APP_CHANGELOG.map(release=>{
+    list.innerHTML=APP_CHANGELOG.map((release,idx)=>{
       const dateStr=release.date;
+      const isLatest=idx===0;
       const items=release.items.map(it=>{
         const badge=it.type==='new'
           ?'<span style="flex-shrink:0;display:inline-block;background:#6366F1;color:#fff;font-size:10px;font-weight:800;padding:1px 6px;border-radius:8px;white-space:nowrap;margin-top:3px">신규</span>'
           :'<span style="flex-shrink:0;display:inline-block;background:#10B981;color:#fff;font-size:10px;font-weight:800;padding:1px 6px;border-radius:8px;white-space:nowrap;margin-top:3px">수정</span>';
         return `<div style="display:flex;align-items:flex-start;gap:6px;padding:6px 0;font-size:13px;color:var(--tx2);line-height:1.5">${badge}<span>${it.text}</span></div>`;
       }).join('');
-      return `<div style="margin-bottom:20px">
+      const latestTag=isLatest?'<span style="display:inline-block;background:#F43F5E;color:#fff;font-size:9px;font-weight:800;padding:1px 5px;border-radius:6px;margin-left:4px;vertical-align:middle">최신</span>':'';
+      const separator=idx>0?'<div style="border-top:1px solid var(--bd);margin-bottom:16px"></div>':'';
+      return `${separator}<div style="margin-bottom:20px">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-          <span style="font-size:16px;font-weight:800;color:var(--tx)">v${release.ver}</span>
+          <span style="font-size:16px;font-weight:800;color:var(--tx)">v${release.ver}</span>${latestTag}
           <span style="font-size:12px;color:var(--tx3)">${dateStr}</span>
         </div>
         ${items}
