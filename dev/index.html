@@ -11724,19 +11724,13 @@ function useReward(invId){
   const _isCaregiver = isCaregiverUser();
   const _reqChildId = (_isCaregiver && viewingChildId) ? viewingChildId : currentUser;
 
-  // 알림 대상: 양육자가 아이 대신 요청 → 모든 admin(본인 포함)에게 알림
-  //           아이가 직접 요청 → 본인 제외 모든 admin에게 알림
+  // 알림 대상: 요청자(currentUser) 본인 제외, 모든 admin에게 알림
+  // (양육자가 대신 요청해도, 자기 자신에게는 알림 불필요)
   const adminMembers = [];
   if(S.familyMeta?.members){
     for(const [mid,m] of Object.entries(S.familyMeta.members)){
-      if(m.isAdmin || m.role !== 'child'){
-        if(_isCaregiver){
-          // 양육자가 대신 요청: 모든 부모에게 (본인 포함)
-          adminMembers.push(mid);
-        } else {
-          // 아이가 직접 요청: 본인 제외
-          if(mid !== currentUser) adminMembers.push(mid);
-        }
+      if((m.isAdmin || m.role !== 'child') && mid !== currentUser){
+        adminMembers.push(mid);
       }
     }
   }
@@ -14087,6 +14081,8 @@ function _updateFamilyBtnBadge(){
   if(!currentUser)return;
   let total=0;
   if(S.familyMessages){
+    // 자기→자기 메시지는 자동 읽음 처리 (보상요청 등에서 발생 가능)
+    S.familyMessages.forEach(m=>{if(m.from===m.to&&!m.read)m.read=true;});
     total=S.familyMessages.filter(m=>m.to===currentUser&&!m.read).length;
   }
   // MY탭 네비게이션 아이템에 뱃지 표시
