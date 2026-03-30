@@ -6729,7 +6729,7 @@ async function _doKakaoLogin(){
     // 카카오 OAuth 팝업 (Implicit Grant: response_type=token)
     const state = 'kakao_' + Math.random().toString(36).substring(2);
     const redirectUri = _getKakaoCallbackUrl();
-    const authUrl = `https://kauth.kakao.com/oauth/authorize?response_type=token&client_id=${_KAKAO_REST_KEY}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=profile_nickname,account_email&state=${state}`;
+    const authUrl = `https://kauth.kakao.com/oauth/authorize?response_type=token&client_id=${_KAKAO_REST_KEY}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}`;
     const popup = window.open(authUrl, 'kakaoLogin', 'width=500,height=700,scrollbars=yes');
     let resolved = false;
     // postMessage로 결과 수신
