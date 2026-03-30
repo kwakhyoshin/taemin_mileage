@@ -6845,9 +6845,10 @@ async function _doNaverLogin(){
                 }
               }
             }catch(e){ console.error('[Naver] localStorage fallback error:', e); }
+            console.warn('[Naver] No result received via postMessage or localStorage');
             resolve(null);
           }
-        }, 1500); // 모바일에서 localStorage 쓰기 시간 확보를 위해 1.5초로 증가
+        }, 3000); // 모바일에서 localStorage 쓰기 시간 확보를 위해 3초로 증가
       }
     }, 500);
   });
@@ -6920,13 +6921,23 @@ async function doSocialLogin(provider){
     if(provider === 'naver'){
       try {
         const result = await _doNaverLogin();
-        if(!result){ return; }
+        console.log('[Naver Login] _doNaverLogin result:', result);
+        if(!result){
+          toast('네이버 로그인 결과를 받지 못했어요. 다시 시도해주세요.');
+          _hideSocialLoading();
+          return;
+        }
+        if(!result.uid){
+          toast('네이버 사용자 정보를 가져올 수 없었어요');
+          _hideSocialLoading();
+          return;
+        }
         _showSocialLoading(_provLabel);
         await _handleSocialLoginResult(result, provider);
       } catch(e){
-        console.error('[Naver Login]', e);
+        console.error('[Naver Login] Error:', e);
         _hideSocialLoading();
-        toast('네이버 로그인 중 오류가 발생했어요');
+        toast('네이버 로그인 중 오류: ' + (e.message||e));
       }
       return;
     }
@@ -7168,7 +7179,12 @@ async function _handleSocialLoginResult(firebaseUser, provider){
     // ★ 어떤 에러든 로딩 오버레이는 반드시 숨김
     console.error('[_handleSocialLoginResult] Unhandled error:', _socialResultErr);
     _hideSocialLoading();
-    toast('로그인 처리 중 오류가 발생했어요. 다시 시도해주세요.');
+    // 개발환경에서는 에러 상세 표시
+    if(_ENV==='dev'){
+      toast('[DEV] 소셜로그인 에러: ' + (_socialResultErr.message||_socialResultErr), 5000);
+    } else {
+      toast('로그인 처리 중 오류가 발생했어요. 다시 시도해주세요.');
+    }
     showAuthScreen('continue');
   }
 }
