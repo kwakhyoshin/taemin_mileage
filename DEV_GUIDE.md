@@ -758,3 +758,102 @@ git checkout <commit-hash> -- index.html       # 운영기 (긴급 시에만)
 - 키: `ml_prod_v6_backup` (운영), `ml_v6_backup` (개발)
 - 브라우저 DevTools > Application > Local Storage
 - **절대 삭제 금지** — 유일한 클라이언트 측 복구 수단
+
+---
+
+## 13. 인증 시스템 개편 계획 (2026-03-30~)
+
+### 13.1 현재 인증 방식
+- 자체 ID/비밀번호 시스템 (Firebase Auth 미사용)
+- `S.users[memberId]`와 `familyMeta.members[].account`에 SHA-512 해시 저장
+- 글로벌 ID 레지스트리: `families/_id_registry` (또는 `_dev_id_registry`)
+- localStorage 기반 세션 관리
+
+### 13.2 새 인증 방식 (병행 운영)
+기존 ID/비밀번호 로그인을 유지하면서 아래 방식을 추가:
+
+| 방식 | 구현 방법 | 비밀번호 |
+|------|-----------|----------|
+| 기존 ID/PW | 현행 유지 | 있음 |
+| 구글 간편로그인 | Firebase Auth `GoogleAuthProvider` | 없음 |
+| 카카오 간편로그인 | Kakao JS SDK → Cloud Functions 커스텀 토큰 | 없음 |
+| 네이버 간편로그인 | Naver Login SDK → Cloud Functions 커스텀 토큰 | 없음 |
+| 이메일 인증 | Cloud Functions로 6자리 코드 발송 → 검증 | 없음 |
+
+### 13.3 Firebase 플랜
+- **Blaze(종량제) 플랜 사용 중** (확인 필요: Firebase Console → 설정 → 사용량 및 결제)
+- Cloud Functions, 외부 네트워크 호출(이메일 발송) 등에 Blaze 필요
+- 실사용량이면 무료 범위 내 (월 125K 호출, 40K GB-초)
+
+### 13.4 기술 스택 추가
+- **Firebase Auth SDK**: `firebase-auth.js` v10.12.0
+- **Firebase Cloud Functions**: Node.js 20, `functions/` 디렉토리
+- **이메일 발송**: Nodemailer + Gmail SMTP (또는 SendGrid)
+- **카카오 SDK**: `https://t1.kakaocdn.net/kakao_js_sdk/2.7.4/kakao.min.js`
+- **네이버 SDK**: `https://static.nid.naver.com/js/naveridlogin_js_sdk_2.0.2.js`
+
+### 13.5 구현 Phase
+
+**Phase 1: Firebase Auth SDK + Google 간편로그인**
+- Firebase Auth SDK import 추가
+- Google Sign-In 버튼 → `signInWithPopup(GoogleAuthProvider)`
+- Firebase Auth UID ↔ familyMeta 연결 (`account.authUid`, `account.authProvider`)
+- 로그인 화면 UI 개편 (간편로그인 버튼 추가)
+
+**Phase 2: Cloud Functions + 이메일 인증**
+- `functions/` 디렉토리 생성, Firebase Functions 초기화
+- `sendVerificationCode`: 6자리 코드 생성 → Firestore 임시 저장 → 이메일 발송
+- `verifyCode`: 코드 검증 → Firebase Custom Token 발급
+- 이메일 인증 UI (이메일 입력 → 코드 입력 → 완료)
+
+**Phase 3: 카카오/네이버 간편로그인**
+- 카카오 개발자 앱 등록 → REST API Key 획득
+- 네이버 개발자 앱 등록 → Client ID/Secret 획득
+- Cloud Functions: OAuth 콜백 → 커스텀 토큰 발급
+- 로그인 화면에 카카오/네이버 버튼 추가
+
+**Phase 4: 기존 ID 병행 + 초대 플로우 업데이트**
+- 기존 `doLogin()` 유지, 새 인증과 병행
+- 초대 링크 수락 화면에 간편로그인 옵션 추가
+- 기존 사용자 ↔ Firebase Auth 계정 연결 마이그레이션
+
+### 13.6 Firestore 스키마 변경
+```javascript
+// familyMeta.members[memberId].account 확장
+account: {
+  id: string,           // 기존 로그인 ID (유지)
+  pwdHash: string,      // 기존 비밀번호 해시 (유지)
+  v: 2,                 // 기존 버전 (유지)
+  // ── 신규 필드 ──
+  authUid: string,      // Firebase Auth UID
+  authProvider: 'google'|'kakao'|'naver'|'email'|null,
+  email: string,        // 인증된 이메일 주소
+  emailVerified: boolean
+}
+
+// 글로벌 레지스트리 확장 (families/_auth_registry)
+{
+  [firebaseAuthUid]: {
+    familyId: string,
+    memberId: string,
+    provider: 'google'|'kakao'|'naver'|'email',
+    email: string,
+    createdAt: timestamp
+  }
+}
+```
+
+### 13.7 주요 코드 위치 (dev/index.html)
+| 영역 | 줄 번호 |
+|------|---------|
+| Firebase Config | ~6546 |
+| 비밀번호 해싱 | ~5643 |
+| 글로벌 ID 레지스트리 | ~5654 |
+| checkAuth() | ~6206 |
+| doLogin() | ~5933 |
+| logout() | ~6192 |
+| 가족 생성 (createStep5Finish) | ~5719 |
+| 초대 토큰 생성 | ~5436 |
+| 초대 링크 처리 | ~14083 |
+| HTML 로그인 화면 | ~2543 |
+| HTML 가입 화면 | ~2768~3047 |
