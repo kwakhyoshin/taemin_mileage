@@ -6072,52 +6072,97 @@ async function doJoinRegister(){
 
 // ── 로그인 (다가족 대응) ──
 // 나의 메뉴에서 소셜 계정 연동하기
-async function linkSocialFromMyMenu(){
+// 나의 메뉴: 소셜 연동 프로바이더 선택 바텀시트
+function linkSocialFromMyMenu(){
   if(!currentUser || !_familyId){ toast('로그인 후 이용해주세요'); return; }
+  const _gSvg='<svg width="20" height="20" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>';
+  const _kSvg='<svg width="20" height="20" viewBox="0 0 24 24"><path d="M12 3C6.48 3 2 6.36 2 10.44c0 2.63 1.74 4.95 4.36 6.27-.14.51-.9 3.28-.93 3.5 0 0-.02.17.09.23.11.07.24.02.24.02.32-.04 3.7-2.44 4.28-2.86.63.09 1.28.13 1.96.13 5.52 0 10-3.36 10-7.44S17.52 3 12 3z" fill="#FEE500"/></svg>';
+  const _nSvg='<svg width="20" height="20" viewBox="0 0 24 24"><rect width="24" height="24" rx="4" fill="#03C75A"/><path d="M14.1 12.32L9.7 6.5H7v11h3.1v-5.82l4.4 5.82H17v-11h-2.9v5.82z" fill="#fff"/></svg>';
+  // 바텀시트 생성
+  const overlay=document.createElement('div');
+  overlay.id='social-link-sheet-overlay';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:9998;opacity:0;transition:opacity .25s';
+  const sheet=document.createElement('div');
+  sheet.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:9999;background:var(--card,#fff);border-radius:20px 20px 0 0;padding:24px 20px max(24px,env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1)';
+  sheet.innerHTML=`
+    <div style="width:36px;height:4px;background:var(--border,#E2E8F0);border-radius:2px;margin:0 auto 18px"></div>
+    <div style="font-size:17px;font-weight:800;color:var(--tx);margin-bottom:16px">소셜 계정 연동하기</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <button onclick="_doLinkSocial('google')" style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--bg2);border:1.5px solid var(--border,#E2E8F0);border-radius:12px;cursor:pointer;font-size:14px;font-weight:600;color:var(--tx);width:100%">
+        ${_gSvg} Google 계정으로 연동
+      </button>
+      <button onclick="_doLinkSocial('kakao')" style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:#FEE500;border:none;border-radius:12px;cursor:pointer;font-size:14px;font-weight:600;color:#191919;width:100%">
+        ${_kSvg} 카카오 계정으로 연동
+      </button>
+      <button onclick="_doLinkSocial('naver')" style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:#03C75A;border:none;border-radius:12px;cursor:pointer;font-size:14px;font-weight:600;color:#fff;width:100%">
+        ${_nSvg} 네이버 아이디로 연동
+      </button>
+    </div>
+    <button onclick="_closeSocialLinkSheet()" style="margin-top:14px;width:100%;padding:12px;background:none;border:none;color:var(--tx3);font-size:14px;cursor:pointer">닫기</button>`;
+  document.body.appendChild(overlay);
+  document.body.appendChild(sheet);
+  overlay.addEventListener('click',_closeSocialLinkSheet);
+  requestAnimationFrame(()=>{overlay.style.opacity='1';sheet.style.transform='translateY(0)';});
+}
+window.linkSocialFromMyMenu = linkSocialFromMyMenu;
+
+function _closeSocialLinkSheet(){
+  const overlay=document.getElementById('social-link-sheet-overlay');
+  const sheets=document.querySelectorAll('[style*="z-index:9999"]');
+  if(overlay){overlay.style.opacity='0';setTimeout(()=>overlay.remove(),300);}
+  sheets.forEach(s=>{s.style.transform='translateY(100%)';setTimeout(()=>s.remove(),300);});
+}
+window._closeSocialLinkSheet=_closeSocialLinkSheet;
+
+async function _doLinkSocial(provider){
+  _closeSocialLinkSheet();
+  if(!currentUser || !_familyId) return;
   try {
     if(!_firebaseReady) await _initFirebase();
-    if(!fbAuth){ toast('Firebase 초기화 실패'); return; }
-    const gProvider = new GoogleAuthProvider();
-    gProvider.setCustomParameters({ prompt: 'select_account' });
-    // social_pending 플래그 세팅 (onAuthStateChanged 방지용 — 여기서는 직접 처리)
-    window._myMenuSocialLink = true;
-    const result = await signInWithPopup(fbAuth, gProvider);
-    window._myMenuSocialLink = false;
-    if(result && result.user){
-      const user = result.user;
-      const uid = user.uid;
-      const email = user.email || '';
-      const provider = 'google';
-      // auth registry 등록
-      await _registerAuthLink(uid, _familyId, currentUser, provider, email);
-      // 계정 데이터에 소셜 정보 추가
-      const acc = S.familyMeta?.members?.[currentUser]?.account;
-      if(acc){
-        acc.authProvider = provider;
-        acc.authUid = uid;
-        acc.email = email;
-      }
-      if(S.users && S.users[currentUser]){
-        S.users[currentUser].authProvider = provider;
-        S.users[currentUser].authUid = uid;
-        S.users[currentUser].email = email;
-      }
-      await save();
-      renderMyTab();
-      toast('✅ Google 계정이 연결되었어요!');
-      console.log('[Social Link MyMenu]', email, '→', _familyId, currentUser);
+    let uid, email, providerName;
+    if(provider === 'google'){
+      if(!fbAuth){ toast('Firebase 초기화 실패'); return; }
+      window._myMenuSocialLink = true;
+      const gProv = new GoogleAuthProvider();
+      gProv.setCustomParameters({ prompt: 'select_account' });
+      const result = await signInWithPopup(fbAuth, gProv);
+      window._myMenuSocialLink = false;
+      if(!result?.user) return;
+      uid = result.user.uid;
+      email = result.user.email || '';
+      providerName = 'Google';
+    } else if(provider === 'kakao'){
+      const result = await _doKakaoLogin();
+      if(!result) return;
+      uid = result.uid;
+      email = result.email || '';
+      providerName = '카카오';
+    } else if(provider === 'naver'){
+      const result = await _doNaverLogin();
+      if(!result) return;
+      uid = result.uid;
+      email = result.email || '';
+      providerName = '네이버';
     }
+    if(!uid) return;
+    // auth registry 등록
+    await _registerAuthLink(uid, _familyId, currentUser, provider, email);
+    // 계정 데이터에 소셜 정보 추가
+    const acc = S.familyMeta?.members?.[currentUser]?.account;
+    if(acc){ acc.authProvider = provider; acc.authUid = uid; acc.email = email; }
+    if(S.users?.[currentUser]){ S.users[currentUser].authProvider = provider; S.users[currentUser].authUid = uid; S.users[currentUser].email = email; }
+    await save();
+    renderMyTab();
+    toast(`✅ ${providerName} 계정이 연결되었어요!`);
+    console.log('[Social Link MyMenu]', provider, email, '→', _familyId, currentUser);
   } catch(e){
     window._myMenuSocialLink = false;
-    if(e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request'){
-      // 사용자가 취소함
-      return;
-    }
+    if(e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request') return;
     console.error('[Social Link MyMenu Error]', e);
     toast('소셜 연동 중 오류가 발생했어요');
   }
 }
-window.linkSocialFromMyMenu = linkSocialFromMyMenu;
+window._doLinkSocial = _doLinkSocial;
 
 // 소셜 계정 연동 처리 (doLogin 성공 후 호출)
 async function _linkSocialAfterLogin(memberId){
@@ -6458,6 +6503,104 @@ function _setupAuthListener(){
   });
 }
 
+// ── 카카오/네이버 SDK 설정 ──
+const _KAKAO_JS_KEY = '80b628dbc17881b27a7e42b12a238032'; // Kakao JavaScript Key
+const _NAVER_CLIENT_ID = ''; // Naver Client ID (미등록)
+const _NAVER_CALLBACK_URL = _ENV==='dev'
+  ? 'https://kwakhyoshin.github.io/taemin_mileage/dev/'
+  : 'https://kwakhyoshin.github.io/taemin_mileage/';
+
+let _kakaoSDKLoaded = false;
+let _naverSDKLoaded = false;
+
+async function _loadKakaoSDK(){
+  if(_kakaoSDKLoaded && window.Kakao) return true;
+  return new Promise((resolve)=>{
+    const s=document.createElement('script');
+    s.src='https://t1.kakaocdn.net/kakao_js_sdk/2.7.4/kakao.min.js';
+    s.onload=()=>{
+      if(window.Kakao && !window.Kakao.isInitialized()){
+        window.Kakao.init(_KAKAO_JS_KEY);
+      }
+      _kakaoSDKLoaded=true;
+      console.log('[mile.ly] Kakao SDK loaded');
+      resolve(true);
+    };
+    s.onerror=()=>{ console.error('Kakao SDK load failed'); resolve(false); };
+    document.head.appendChild(s);
+  });
+}
+
+async function _loadNaverSDK(){
+  if(_naverSDKLoaded && window.naver) return true;
+  return new Promise((resolve)=>{
+    const s=document.createElement('script');
+    s.src='https://static.nid.naver.com/js/naveridlogin_js_sdk_2.0.2.js';
+    s.onload=()=>{ _naverSDKLoaded=true; console.log('[mile.ly] Naver SDK loaded'); resolve(true); };
+    s.onerror=()=>{ console.error('Naver SDK load failed'); resolve(false); };
+    document.head.appendChild(s);
+  });
+}
+
+async function _doKakaoLogin(){
+  if(!_KAKAO_JS_KEY){ toast('카카오 로그인 키가 설정되지 않았어요'); return; }
+  const loaded = await _loadKakaoSDK();
+  if(!loaded){ toast('카카오 SDK 로드에 실패했어요'); return; }
+  return new Promise((resolve, reject)=>{
+    window.Kakao.Auth.login({
+      scope: 'profile_nickname,account_email',
+      success: function(authObj){
+        window.Kakao.API.request({
+          url: '/v2/user/me',
+          success: function(res){
+            const uid = 'kakao_' + res.id;
+            const email = res.kakao_account?.email || '';
+            const displayName = res.kakao_account?.profile?.nickname || '';
+            resolve({ uid, email, displayName, provider:'kakao' });
+          },
+          fail: function(err){ console.error('[Kakao API Error]', err); reject(err); }
+        });
+      },
+      fail: function(err){
+        if(err.error === 'access_denied'){
+          resolve(null); // 사용자 취소
+        } else {
+          console.error('[Kakao Login Error]', err);
+          reject(err);
+        }
+      }
+    });
+  });
+}
+
+async function _doNaverLogin(){
+  if(!_NAVER_CLIENT_ID){ toast('네이버 로그인은 준비 중이에요'); return null; }
+  const loaded = await _loadNaverSDK();
+  if(!loaded){ toast('네이버 SDK 로드에 실패했어요'); return null; }
+  return new Promise((resolve)=>{
+    // 네이버 로그인 팝업 방식
+    const state = Math.random().toString(36).substring(2);
+    const authUrl = `https://nid.naver.com/oauth2.0/authorize?response_type=token&client_id=${_NAVER_CLIENT_ID}&redirect_uri=${encodeURIComponent(_NAVER_CALLBACK_URL)}&state=${state}`;
+    const popup = window.open(authUrl, 'naverLogin', 'width=500,height=600,scrollbars=yes');
+    // postMessage로 결과 수신
+    const handler = (e)=>{
+      if(e.data && e.data.type === 'naver_login'){
+        window.removeEventListener('message', handler);
+        resolve(e.data); // {uid, email, displayName, provider}
+      }
+    };
+    window.addEventListener('message', handler);
+    // 팝업 닫힘 감지
+    const pollTimer = setInterval(()=>{
+      if(!popup || popup.closed){
+        clearInterval(pollTimer);
+        window.removeEventListener('message', handler);
+        resolve(null);
+      }
+    }, 500);
+  });
+}
+
 async function doSocialLogin(provider){
   if(_socialLoginPending) return;
   _socialLoginPending = true;
@@ -6465,15 +6608,37 @@ async function doSocialLogin(provider){
 
   try {
     if(!_firebaseReady) await _initFirebase();
-    if(!fbAuth){ toast('Firebase 초기화 실패'); return; }
 
+    // ── 카카오 로그인 ──
     if(provider === 'kakao'){
-      toast('카카오 로그인은 준비 중이에요');
-      return;
-    } else if(provider === 'naver'){
-      toast('네이버 로그인은 준비 중이에요');
+      try {
+        const result = await _doKakaoLogin();
+        if(!result){ return; } // 사용자 취소
+        toast('로그인 처리 중...');
+        await _handleSocialLoginResult(result, provider);
+      } catch(e){
+        console.error('[Kakao Login]', e);
+        toast('카카오 로그인 중 오류가 발생했어요');
+      }
       return;
     }
+
+    // ── 네이버 로그인 ──
+    if(provider === 'naver'){
+      try {
+        const result = await _doNaverLogin();
+        if(!result){ return; }
+        toast('로그인 처리 중...');
+        await _handleSocialLoginResult(result, provider);
+      } catch(e){
+        console.error('[Naver Login]', e);
+        toast('네이버 로그인 중 오류가 발생했어요');
+      }
+      return;
+    }
+
+    // ── 구글 로그인 ──
+    if(!fbAuth){ toast('Firebase 초기화 실패'); return; }
 
     const gProvider = new GoogleAuthProvider();
     gProvider.setCustomParameters({ prompt: 'select_account' });
@@ -6560,13 +6725,13 @@ async function _handleSocialLoginResult(firebaseUser, provider){
 let _pendingSocialUser = null;
 
 async function _loginToFamily(familyId, memberId, authUid, provider, email){
+  // 1단계: Firestore에서 가족 데이터 로드 (실패 시 에러)
+  let famSnap, famRef, docPath;
   try {
-    // familyId는 auth registry에 저장된 그대로 사용 (이미 dev_ prefix 포함)
-    const docPath = familyId;
-    const famRef = doc(db, 'families', docPath);
-    const famSnap = await getDoc(famRef);
+    docPath = familyId;
+    famRef = doc(db, 'families', docPath);
+    famSnap = await getDoc(famRef);
     if(!famSnap.exists()){
-      // dev_ prefix 없이 재시도 (호환성)
       if(_ENV==='dev' && !familyId.startsWith('dev_')){
         const altPath = 'dev_'+familyId;
         const altRef = doc(db, 'families', altPath);
@@ -6578,35 +6743,36 @@ async function _loginToFamily(familyId, memberId, authUid, provider, email){
       toast('가족 데이터를 찾을 수 없어요');
       return;
     }
-    // 가족 데이터 로드
+  } catch(e){
+    console.error('[_loginToFamily] Firestore load error:', e);
+    toast('로그인 처리 중 오류가 발생했어요');
+    return;
+  }
+  // 2단계: 상태 설정 + 화면 렌더 (에러 나도 로그인은 완료 처리)
+  try {
     S = Object.assign(defaultState(), famSnap.data());
     _familyId = docPath;
     DATA_DOC = famRef;
     currentUser = memberId;
     localStorage.setItem(_LS_PREFIX+'current_user', memberId);
     localStorage.setItem(_LS_PREFIX+'family_id', docPath);
-
     cachedUsers = S.users || {};
     rebuildMembersFromFamily();
-
-    if(!(getFamilyMode()==='independent'&&isCaregiverUser())){
-      syncMemberToGlobal();
-    }
-    postLoginInit();
-    hideAllAuth();
-    applyUserProfile();
-    renderAll();
-    reallyGoTab('home');
-    toast(`${getUserName(memberId)}님 환영해요!`);
-    // Firestore 실시간 리스너 연결
-    try{
-      if(_dataListenerUnsub){try{_dataListenerUnsub();}catch(_e){}}
-      _dataListenerUnsub=onSnapshot(DATA_DOC,(snap)=>{if(!snap.exists())return;if(_isSaving)return;if(Date.now()-_lastSaveTime<2000)return;const _ij=JSON.stringify(snap.data());if(_ij===_lastSavedJSON||_ij===JSON.stringify(S))return;if(!_hasDirtyLocal){S=Object.assign(defaultState(),snap.data());_lastSavedJSON=_ij;rebuildMembersFromFamily();renderAll();checkNewMessages();renderNavUsers();}});
-    }catch(_e){console.warn('Snapshot listener failed:',_e);}
-  } catch(e){
-    console.error('[_loginToFamily Error]', e);
-    toast('로그인 처리 중 오류가 발생했어요');
-  }
+  } catch(e){ console.warn('[_loginToFamily] State setup warning:', e); }
+  try {
+    if(!(getFamilyMode()==='independent'&&isCaregiverUser())) syncMemberToGlobal();
+  } catch(e){ console.warn('[_loginToFamily] syncMemberToGlobal warning:', e); }
+  try { postLoginInit(); } catch(e){ console.warn('[_loginToFamily] postLoginInit warning:', e); }
+  hideAllAuth();
+  try { applyUserProfile(); } catch(e){ console.warn('[_loginToFamily] applyUserProfile warning:', e); }
+  try { renderAll(); } catch(e){ console.warn('[_loginToFamily] renderAll warning:', e); }
+  reallyGoTab('home');
+  toast(`${getUserName(memberId)||'회원'}님 환영해요!`);
+  // 3단계: 리스너 연결 (실패해도 무시)
+  try{
+    if(_dataListenerUnsub){try{_dataListenerUnsub();}catch(_e){}}
+    _dataListenerUnsub=onSnapshot(DATA_DOC,(snap)=>{if(!snap.exists())return;if(_isSaving)return;if(Date.now()-_lastSaveTime<2000)return;const _ij=JSON.stringify(snap.data());if(_ij===_lastSavedJSON||_ij===JSON.stringify(S))return;if(!_hasDirtyLocal){S=Object.assign(defaultState(),snap.data());_lastSavedJSON=_ij;rebuildMembersFromFamily();renderAll();checkNewMessages();renderNavUsers();}});
+  }catch(_e){console.warn('Snapshot listener failed:',_e);}
 }
 
 // 소셜 로그인 후 → 새 가족 만들기
@@ -13242,26 +13408,35 @@ function renderMyTab(){
   const socialArea=document.getElementById('my-social-area');
   if(socialBadge && socialArea){
     const acc=member?.account||S.users?.[currentUser]||{};
-    const _gSvg='<svg width="14" height="14" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>';
+    const _provSvgs={
+      google:'<svg width="SIZE" height="SIZE" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>',
+      kakao:'<svg width="SIZE" height="SIZE" viewBox="0 0 24 24"><path d="M12 3C6.48 3 2 6.36 2 10.44c0 2.63 1.74 4.95 4.36 6.27-.14.51-.9 3.28-.93 3.5 0 0-.02.17.09.23.11.07.24.02.24.02.32-.04 3.7-2.44 4.28-2.86.63.09 1.28.13 1.96.13 5.52 0 10-3.36 10-7.44S17.52 3 12 3z" fill="#3C1E1E"/></svg>',
+      naver:'<svg width="SIZE" height="SIZE" viewBox="0 0 24 24"><rect width="24" height="24" rx="4" fill="#03C75A"/><path d="M14.1 12.32L9.7 6.5H7v11h3.1v-5.82l4.4 5.82H17v-11h-2.9v5.82z" fill="#fff"/></svg>'
+    };
+    const _provNames={google:'Google',kakao:'카카오',naver:'네이버'};
+    const _provColors={google:'#34A853',kakao:'#FEE500',naver:'#03C75A'};
     if(acc.authProvider){
-      // 연동됨: 뱃지 + 상세 영역
-      socialBadge.innerHTML=_gSvg;
+      const p=acc.authProvider;
+      const pSvg14=(_provSvgs[p]||_provSvgs.google).replace(/SIZE/g,'14');
+      const pSvg16=(_provSvgs[p]||_provSvgs.google).replace(/SIZE/g,'16');
+      const pName=_provNames[p]||p;
+      const pColor=_provColors[p]||'#34A853';
+      socialBadge.innerHTML=pSvg14;
       socialBadge.style.display='inline-flex';
       socialArea.style.display='block';
       socialArea.innerHTML=`<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--bg2);border-radius:10px">
-        <span style="display:flex;align-items:center">${_gSvg}</span>
+        <span style="display:flex;align-items:center">${pSvg16}</span>
         <div style="flex:1;min-width:0">
-          <div style="font-size:12px;font-weight:600;color:var(--tx)">Google 연동됨</div>
+          <div style="font-size:12px;font-weight:600;color:var(--tx)">${pName} 연동됨</div>
           ${acc.email?`<div style="font-size:11px;color:var(--tx3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${acc.email}</div>`:''}
         </div>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#34A853" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${pColor}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
       </div>`;
     } else {
-      // 미연동: 연동 버튼
       socialBadge.style.display='none';
       socialArea.style.display='block';
       socialArea.innerHTML=`<button onclick="linkSocialFromMyMenu()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 12px;background:var(--bg2);border:1.5px dashed var(--border,#E2E8F0);border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;color:var(--tx2);transition:all .2s">
-        <span style="display:flex;align-items:center">${_gSvg}</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
         소셜 계정 연동하기
       </button>`;
     }
@@ -16355,6 +16530,43 @@ window._createState = _createState;
 
 // ── INIT (Firebase async) ─────────────────────
 (async function(){
+  // ── 네이버 OAuth 콜백 감지 (팝업에서 실행되는 경우) ──
+  if(window.opener && window.location.hash.includes('access_token')){
+    try{
+      const hash = window.location.hash.substring(1);
+      const params = new URLSearchParams(hash);
+      const accessToken = params.get('access_token');
+      if(accessToken){
+        // 네이버 프로필 API 호출 (SDK 사용)
+        const script = document.createElement('script');
+        script.src = 'https://static.nid.naver.com/js/naveridlogin_js_sdk_2.0.2.js';
+        script.onload = ()=>{
+          const naverLogin = new window.naver.LoginWithNaverId({
+            clientId: typeof _NAVER_CLIENT_ID !== 'undefined' ? _NAVER_CLIENT_ID : '',
+            callbackUrl: window.location.href.split('#')[0],
+            isPopup: true,
+            callbackHandle: true
+          });
+          naverLogin.init();
+          naverLogin.getLoginStatus((status)=>{
+            if(status){
+              window.opener.postMessage({
+                type:'naver_login',
+                uid: 'naver_'+naverLogin.user.getId(),
+                email: naverLogin.user.getEmail()||'',
+                displayName: naverLogin.user.getName()||naverLogin.user.getNickName()||'',
+                provider: 'naver'
+              }, '*');
+            }
+            window.close();
+          });
+        };
+        document.head.appendChild(script);
+        return; // 이 창은 콜백 처리만 하고 종료
+      }
+    }catch(e){ console.error('Naver callback error:', e); }
+  }
+
   const days=['일','월','화','수','목','금','토'],now=new Date();
   document.getElementById('today-str').textContent=`${now.getMonth()+1}월 ${now.getDate()}일 (${days[now.getDay()]})`;
 
