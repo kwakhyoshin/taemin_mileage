@@ -2584,18 +2584,26 @@ button:disabled {
 
   window.doLogin=function(idF,pwdF,errF){
     if(window._moduleLoaded && window._m_doLogin){
-      window._m_doLogin(idF,pwdF,errF);
+      window._m_doLogin(idF,pwdF,errF).catch(function(e){
+        console.error('[doLogin proxy] async error:', e);
+        var err=document.getElementById(errF||'login-error');
+        if(err) err.textContent=window._ENV==='dev'?'[DEV] 로그인 에러: '+(e.message||e):'로그인 중 오류가 발생했어요';
+      });
     } else {
       var err=document.getElementById(errF||'login-error');
       if(err) err.textContent='로딩 중입니다. 잠시만 기다려주세요...';
       window._waitModule('doLogin').then(function(fn){
         if(err) err.textContent='';
-        if(fn) fn(idF,pwdF,errF);
+        if(fn) fn(idF,pwdF,errF).catch(function(e2){
+          console.error('[doLogin proxy] delayed async error:', e2);
+          if(err) err.textContent=window._ENV==='dev'?'[DEV] 로그인 에러: '+(e2.message||e2):'로그인 중 오류가 발생했어요';
+        });
         else { if(err) err.textContent='앱을 로드하지 못했어요. 새로고침해주세요.'; }
       });
     }
   };
   window.doContinueLogin=function(){
+    console.log('[doContinueLogin] called, moduleLoaded:', window._moduleLoaded);
     window.doLogin('continue-login-id','continue-login-pwd','continue-login-error');
   };
 
@@ -4872,6 +4880,21 @@ function showAuthScreen(screen) {
   if(screen==='auth-continue'||screen==='continue'){
     if(!_firebaseReady) _initFirebase().catch(()=>{});
     if(typeof _loadKakaoSDK==='function') _loadKakaoSDK().catch(()=>{});
+    // ★ socialLinkExisting에서 변경한 UI 원복 (일반 진입 시)
+    if(!window._socialLinkPendingUser){
+      const _slBtns = document.querySelector('#auth-continue .social-login-btns');
+      if(_slBtns) _slBtns.style.display = '';
+      const _slToggle = document.getElementById('toggle-idpw-link');
+      if(_slToggle) _slToggle.style.display = '';
+      const _slIdpw = document.getElementById('continue-idpw-section');
+      if(_slIdpw) _slIdpw.style.display = 'none';
+      const _slErr = document.getElementById('continue-login-error');
+      if(_slErr){ _slErr.textContent = ''; _slErr.style.color = ''; }
+      const _slTitle = document.querySelector('#auth-continue .auth-card h2');
+      if(_slTitle) _slTitle.textContent = '마일리에 오신 것을 환영해요';
+      const _slSub = document.querySelector('#auth-continue .auth-card .auth-sub');
+      if(_slSub) _slSub.textContent = '간편하게 시작하세요';
+    }
   }
   // 스텝 인디케이터 업데이트
   const stepNum = screen.match(/create-(\d)/);
@@ -6928,11 +6951,13 @@ async function doSocialLogin(provider){
     // ★ 카카오/네이버: 팝업을 먼저 열어야 사용자 제스처 체인 보존됨
     // Firebase init은 팝업 결과 대기 중 또는 이후에 수행
     if(provider === 'kakao'){
+      // ★ 모바일에서 parent 탭 리로드 시 결과 수신을 위해 social_pending 설정
+      localStorage.setItem(_LS_PREFIX+'social_pending', 'kakao');
       try {
         const result = await _doKakaoLogin(); // ← 사용자 클릭 직후 팝업 열림
-        if(!result){ return; } // 사용자 취소
-        if(result._error){ toast('카카오 로그인 실패: ' + result._error); return; }
-        if(!result.uid){ toast('카카오 로그인 정보를 가져올 수 없었어요'); return; }
+        if(!result){ localStorage.removeItem(_LS_PREFIX+'social_pending'); return; } // 사용자 취소
+        if(result._error){ localStorage.removeItem(_LS_PREFIX+'social_pending'); toast('카카오 로그인 실패: ' + result._error); return; }
+        if(!result.uid){ localStorage.removeItem(_LS_PREFIX+'social_pending'); toast('카카오 로그인 정보를 가져올 수 없었어요'); return; }
         if(!_firebaseReady) await _initFirebase(); // 팝업 닫힌 후 Firebase 초기화
         _showSocialLoading(_provLabel);
         await _handleSocialLoginResult(result, provider);
@@ -6946,6 +6971,8 @@ async function doSocialLogin(provider){
 
     // ── 네이버 로그인 ──
     if(provider === 'naver'){
+      // ★ 모바일에서 parent 탭 리로드 시 결과 수신을 위해 social_pending 설정
+      localStorage.setItem(_LS_PREFIX+'social_pending', 'naver');
       try {
         const result = await _doNaverLogin(); // ← 사용자 클릭 직후 팝업 열림 (SDK 로드 없이)
         console.log('[Naver Login] _doNaverLogin result:', result);
@@ -6954,11 +6981,13 @@ async function doSocialLogin(provider){
           if(localStorage.getItem('taemin_v6_naver_redirect')){
             return; // redirect 진행 중 — 토스트 불필요
           }
+          localStorage.removeItem(_LS_PREFIX+'social_pending');
           toast('네이버 로그인 결과를 받지 못했어요. 다시 시도해주세요.');
           _hideSocialLoading();
           return;
         }
         if(!result.uid){
+          localStorage.removeItem(_LS_PREFIX+'social_pending');
           toast('네이버 사용자 정보를 가져올 수 없었어요');
           _hideSocialLoading();
           return;
@@ -7307,8 +7336,27 @@ async function socialLinkExisting(){
   // _pendingSocialUser를 _socialLinkPendingUser에 보관 (doLogin 성공 후 연동용)
   window._socialLinkPendingUser = _pendingSocialUser;
   showAuthScreen('continue');
+  // ★ 소셜 버튼 숨기고 ID/PW 입력란 펼치기
+  const socialBtns = document.querySelector('#auth-continue .social-login-btns');
+  if(socialBtns) socialBtns.style.display = 'none';
+  const toggleLink = document.getElementById('toggle-idpw-link');
+  if(toggleLink) toggleLink.style.display = 'none';
+  const idpwSection = document.getElementById('continue-idpw-section');
+  if(idpwSection) idpwSection.style.display = 'block';
+  // ★ 연동 안내 메시지를 ID/PW 섹션 위에 표시
+  const provLabel = _pendingSocialUser.provider === 'google' ? 'Google' : _pendingSocialUser.provider === 'kakao' ? '카카오' : _pendingSocialUser.provider === 'naver' ? '네이버' : _pendingSocialUser.provider;
   const errEl = document.getElementById('continue-login-error');
-  if(errEl) errEl.textContent = '기존 아이디로 로그인하면 소셜 계정이 연결돼요';
+  if(errEl){
+    errEl.style.color = 'var(--primary, #6366F1)';
+    errEl.textContent = '기존 아이디로 로그인하면 ' + provLabel + ' 계정이 연결돼요';
+  }
+  // ★ 제목/부제 변경
+  const titleEl = document.querySelector('#auth-continue .auth-card h2');
+  if(titleEl) titleEl.textContent = '기존 계정에 연결하기';
+  const subEl = document.querySelector('#auth-continue .auth-card .auth-sub');
+  if(subEl) subEl.textContent = '기존 아이디와 비밀번호를 입력하세요';
+  // ID 입력란에 포커스
+  setTimeout(()=>{ const idEl = document.getElementById('continue-login-id'); if(idEl) idEl.focus(); }, 300);
 }
 
 // Auth 레지스트리에 UID → familyId/memberId 등록
@@ -7535,7 +7583,39 @@ function checkAuth() {
       // 이미 onAuthStateChanged 또는 popup에서 처리 완료 — 화면 건드리지 않음
       return false;
     }
-    // 아직 대기 중 — onAuthStateChanged가 처리할 때까지 대기
+    // ★ 카카오/네이버: 페이지 리로드 시 localStorage에 저장된 콜백 결과 확인
+    if(_socialPending === 'kakao' || _socialPending === 'naver'){
+      const _storedKey = _socialPending === 'kakao' ? 'taemin_v6_kakao_callback_result' : 'taemin_v6_naver_callback_result';
+      const _tryRecoverSocialResult = async ()=>{
+        // 최대 10초간 500ms 간격으로 localStorage 폴링
+        for(let _ri = 0; _ri < 20; _ri++){
+          try{
+            const stored = localStorage.getItem(_storedKey);
+            if(stored){
+              localStorage.removeItem(_storedKey);
+              const data = JSON.parse(stored);
+              if(data && data.uid){
+                console.log('[checkAuth] Recovered ' + _socialPending + ' result from localStorage:', data.uid);
+                localStorage.setItem(_LS_PREFIX+'social_pending', 'handled');
+                if(!_firebaseReady) await _initFirebase();
+                _showSocialLoading(_socialPending === 'kakao' ? '카카오' : '네이버');
+                await _handleSocialLoginResult(data, _socialPending);
+                return;
+              }
+            }
+          }catch(e){ console.warn('[checkAuth] social result recovery error:', e); }
+          await new Promise(r => setTimeout(r, 500));
+        }
+        // 10초 후에도 결과 없으면 플래그 정리
+        console.log('[checkAuth] ' + _socialPending + ' result not found, clearing');
+        localStorage.removeItem(_LS_PREFIX+'social_pending');
+        showAuthScreen('continue');
+      };
+      document.body.classList.add('auth-active');
+      _tryRecoverSocialResult();
+      return false;
+    }
+    // 구글: onAuthStateChanged가 처리할 때까지 대기
     document.body.classList.add('auth-active');
     // ★ 타임아웃: 15초 후에도 처리 안 되면 플래그만 정리 (showAuthScreen 호출 안 함)
     setTimeout(()=>{
@@ -7543,7 +7623,6 @@ function checkAuth() {
       if(val && val !== 'handled'){
         console.log('[checkAuth] social_pending timeout, clearing flag only');
         localStorage.removeItem(_LS_PREFIX+'social_pending');
-        // ★ showAuthScreen('continue') 제거 — 이것이 로그인 화면 강제 이동의 원인이었음
       }
     }, 15000);
     return false;
@@ -7865,7 +7944,7 @@ const BADGES = [
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
-if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0331g';}}
+if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0331h';}}
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
