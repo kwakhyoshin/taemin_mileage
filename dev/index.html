@@ -2500,10 +2500,14 @@ button:disabled {
 <!-- Auth: standalone script (no module dependency) for auth screen navigation -->
 <script>
 (function(){
-  // ★ 네이버 OAuth 콜백 팝업 감지: 로그인 화면 깜빡임 방지
+  // ★ 소셜 OAuth 콜백 팝업 감지: 로그인 화면 깜빡임 방지
   // 팝업에서 redirect_uri로 돌아오면 페이지가 다시 로드되는데,
   // 모듈 로드 전에 auth 화면이 잠깐 보이는 것을 방지
   if(window.opener && window.location.hash.indexOf('access_token')!==-1){
+    var _hashStr = window.location.hash.substring(1);
+    var _stateMatch = _hashStr.match(/state=([^&]*)/);
+    var _isKakaoCallback = _stateMatch && _stateMatch[1].indexOf('kakao_')===0;
+    var _providerName = _isKakaoCallback ? '카카오' : '네이버';
     document.documentElement.style.background='linear-gradient(135deg,#5B4FC4,#A78BFA)';
     document.addEventListener('DOMContentLoaded',function(){
       // 모든 auth 화면 숨기고 로딩 메시지 표시
@@ -2515,7 +2519,7 @@ button:disabled {
       document.body.style.justifyContent='center';
       var msg=document.createElement('div');
       msg.style.cssText='color:#fff;font-size:16px;font-weight:700;text-align:center;padding:20px';
-      msg.textContent='네이버 인증 처리 중...';
+      msg.textContent=_providerName+' 인증 처리 중...';
       document.body.appendChild(msg);
     });
   }
@@ -6673,9 +6677,15 @@ function _setupAuthListener(){
 
 // ── 카카오/네이버 SDK 설정 ──
 const _KAKAO_JS_KEY = 'cc62aab8cd94eb2306350f53bfa75dd4'; // Kakao JavaScript Key (mile.ly 앱 ID:1418261)
+const _KAKAO_REST_KEY = 'bd6311dbabf65b823a5160e3973cb483'; // Kakao REST API Key
 const _NAVER_CLIENT_ID = '_fBugrKRKZm45ibQLosP'; // Naver Client ID (마일리 앱)
 // _NAVER_CALLBACK_URL은 _ENV 선언(아래쪽) 이후에 사용되므로 함수로 lazy 평가
 function _getNaverCallbackUrl(){
+  return (typeof _ENV!=='undefined' && _ENV==='dev')
+    ? 'https://kwakhyoshin.github.io/taemin_mileage/dev/'
+    : 'https://kwakhyoshin.github.io/taemin_mileage/';
+}
+function _getKakaoCallbackUrl(){
   return (typeof _ENV!=='undefined' && _ENV==='dev')
     ? 'https://kwakhyoshin.github.io/taemin_mileage/dev/'
     : 'https://kwakhyoshin.github.io/taemin_mileage/';
@@ -6714,33 +6724,35 @@ async function _loadNaverSDK(){
 }
 
 async function _doKakaoLogin(){
-  if(!_KAKAO_JS_KEY){ toast('카카오 로그인 키가 설정되지 않았어요'); return; }
-  const loaded = await _loadKakaoSDK();
-  if(!loaded){ toast('카카오 SDK 로드에 실패했어요'); return; }
-  return new Promise((resolve, reject)=>{
-    window.Kakao.Auth.login({
-      scope: 'profile_nickname,account_email',
-      success: function(authObj){
-        window.Kakao.API.request({
-          url: '/v2/user/me',
-          success: function(res){
-            const uid = 'kakao_' + res.id;
-            const email = res.kakao_account?.email || '';
-            const displayName = res.kakao_account?.profile?.nickname || '';
-            resolve({ uid, email, displayName, provider:'kakao' });
-          },
-          fail: function(err){ console.error('[Kakao API Error]', err); reject(err); }
-        });
-      },
-      fail: function(err){
-        if(err.error === 'access_denied'){
-          resolve(null); // 사용자 취소
-        } else {
-          console.error('[Kakao Login Error]', err);
-          reject(err);
-        }
+  if(!_KAKAO_REST_KEY){ toast('카카오 로그인 키가 설정되지 않았어요'); return null; }
+  return new Promise((resolve)=>{
+    // 카카오 OAuth 팝업 (Implicit Grant: response_type=token)
+    const state = 'kakao_' + Math.random().toString(36).substring(2);
+    const redirectUri = _getKakaoCallbackUrl();
+    const authUrl = `https://kauth.kakao.com/oauth/authorize?response_type=token&client_id=${_KAKAO_REST_KEY}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=profile_nickname,account_email&state=${state}`;
+    const popup = window.open(authUrl, 'kakaoLogin', 'width=500,height=700,scrollbars=yes');
+    let resolved = false;
+    // postMessage로 결과 수신
+    const handler = (e)=>{
+      if(e.data && e.data.type === 'kakao_login'){
+        resolved = true;
+        window.removeEventListener('message', handler);
+        resolve(e.data); // {uid, email, displayName, provider}
       }
-    });
+    };
+    window.addEventListener('message', handler);
+    // 팝업 닫힘 감지 — postMessage 전달 시간을 위해 유예
+    const pollTimer = setInterval(()=>{
+      if(!popup || popup.closed){
+        clearInterval(pollTimer);
+        setTimeout(()=>{
+          if(!resolved){
+            window.removeEventListener('message', handler);
+            resolve(null); // 사용자 취소
+          }
+        }, 800);
+      }
+    }, 500);
   });
 }
 
@@ -6753,20 +6765,27 @@ async function _doNaverLogin(){
     const state = Math.random().toString(36).substring(2);
     const authUrl = `https://nid.naver.com/oauth2.0/authorize?response_type=token&client_id=${_NAVER_CLIENT_ID}&redirect_uri=${encodeURIComponent(_getNaverCallbackUrl())}&state=${state}`;
     const popup = window.open(authUrl, 'naverLogin', 'width=500,height=600,scrollbars=yes');
+    let resolved = false;
     // postMessage로 결과 수신
     const handler = (e)=>{
       if(e.data && e.data.type === 'naver_login'){
+        resolved = true;
         window.removeEventListener('message', handler);
         resolve(e.data); // {uid, email, displayName, provider}
       }
     };
     window.addEventListener('message', handler);
-    // 팝업 닫힘 감지
+    // 팝업 닫힘 감지 — postMessage 전달 시간을 위해 1초 유예
     const pollTimer = setInterval(()=>{
       if(!popup || popup.closed){
         clearInterval(pollTimer);
-        window.removeEventListener('message', handler);
-        resolve(null);
+        // 팝업이 닫혀도 postMessage가 도착할 수 있으므로 잠시 대기
+        setTimeout(()=>{
+          if(!resolved){
+            window.removeEventListener('message', handler);
+            resolve(null);
+          }
+        }, 800);
       }
     }, 500);
   });
@@ -16697,6 +16716,50 @@ window._createState = _createState;
 
 // ── INIT (Firebase async) ─────────────────────
 (async function(){
+  // ── 카카오 OAuth 콜백 감지 (팝업에서 실행되는 경우) ──
+  // 네이버와 구분: state 파라미터가 'kakao_'로 시작하면 카카오 콜백
+  if(window.opener && window.location.hash.includes('access_token')){
+    const _hash = window.location.hash.substring(1);
+    const _params = new URLSearchParams(_hash);
+    const _stateParam = _params.get('state') || '';
+    const _isKakaoCallback = _stateParam.startsWith('kakao_');
+    const _accessToken = _params.get('access_token');
+    if(_isKakaoCallback && _accessToken){
+      // 카카오 토큰으로 /v2/user/me API 호출
+      console.log('[Kakao Callback] access_token detected');
+      fetch('https://kapi.kakao.com/v2/user/me', {
+        headers: { 'Authorization': `Bearer ${_accessToken}` }
+      })
+      .then(r=>r.json())
+      .then(res=>{
+        const uid = 'kakao_' + res.id;
+        const email = res.kakao_account?.email || '';
+        const displayName = res.kakao_account?.profile?.nickname || '';
+        console.log('[Kakao Callback] User:', uid, displayName);
+        if(window.opener){
+          window.opener.postMessage({
+            type:'kakao_login',
+            uid, email, displayName, provider:'kakao'
+          }, '*');
+        }
+        setTimeout(()=>window.close(), 300);
+      })
+      .catch(err=>{
+        console.error('[Kakao Callback] API error:', err);
+        // Fallback: access_token 기반 UID
+        if(window.opener){
+          window.opener.postMessage({
+            type:'kakao_login',
+            uid: 'kakao_token_'+_accessToken.substring(0,16),
+            email:'', displayName:'', provider:'kakao', _fallback:true
+          }, '*');
+        }
+        setTimeout(()=>window.close(), 300);
+      });
+      return; // 이 창은 콜백 처리만 하고 종료
+    }
+  }
+
   // ── 네이버 OAuth 콜백 감지 (팝업에서 실행되는 경우) ──
   if(window.opener && window.location.hash.includes('access_token')){
     try{
