@@ -916,16 +916,24 @@ account: {
   ```
 - **교훈**: `window.name`은 같은 창/탭 내에서 navigtion을 거쳐도 유지되는 몇 안 되는 속성. 모바일 OAuth에서 콜백 탭 식별에 유용
 
-### 12.10 색 단차 (iOS body.auth-active overflow:hidden) (2026-03-31)
-- **증상**: iPhone에서 auth 화면 하단에 색상이 다른 영역이 보임 (보라색 그라데이션인데 하단에 다른 색 띠)
-- **원인**: `body.auth-active{overflow:hidden}`이 iOS에서 레이아웃 충돌 유발. overflow:hidden이 컨텐츠를 위로 밀어올리면서 하단에 빈 공간(색 단차) 발생
-- **잘못된 접근**: gradient 조정, max-width:none, html 배경색 변경 등 → 해결 안 됨
-- **올바른 수정**: `body.auth-active`에서 `overflow:hidden` 제거
+### 12.10 색 단차 (하단 색상 불일치) — ⚠️ 반복 발생 주의 (2026-03-31)
+- **증상**: iPhone에서 auth 화면 하단에 색상이 다른 영역이 보임 (보라색 그라데이션인데 하단에 다른 색 띠). 로그인 후엔 사라지고, 로그아웃 후 재표시되는 로그인 화면에선 안 보임
+- **핵심 원인 2가지**:
+  1. `body`의 기본 `max-width:430px`이 body 너비를 제한 → body gradient가 430px만 채움 → html 배경색이 노출
+  2. `html:has(body.auth-active){background:#5B4FC4}` (상단색) ≠ gradient 하단색(`#A78BFA`) → 색 단차 발생
+- **잘못된 접근** (시도 후 실패 확인):
+  - `overflow:hidden` 제거만으로는 해결 안 됨
+  - gradient 방향 변경만으로는 해결 안 됨
+  - early CSS injection을 head로 이동하는 것만으로는 해결 안 됨
+- **올바른 수정** (커밋 `25fe433` 및 `34da991` 참조):
   ```css
-  /* before */ body.auth-active{background:#5B4FC4;overflow:hidden}
-  /* after  */ body.auth-active{background:linear-gradient(135deg,#5B4FC4,#A78BFA)}
+  /* body.auth-active에 max-width:none 추가 */
+  body.auth-active{background:linear-gradient(135deg,#5B4FC4,#A78BFA);overflow:hidden;max-width:none}
+  /* html 배경을 gradient 하단색(#A78BFA)으로 맞춤 */
+  html:has(body.auth-active){background:#A78BFA!important;overflow:hidden}
   ```
-- **교훈**: 색 단차 문제 접근 시 색상/gradient를 만지기 전에 `overflow`, `position`, `height` 등 레이아웃 속성을 먼저 의심할 것. iOS Safari는 overflow:hidden에 민감
+- **왜 첫 로드에서만 발생하는가**: 첫 로드 시 body 안에 앱 전체 컨텐츠(탭, 카드 등)가 있어 body 높이가 viewport를 초과 → body max-width:430px 내에서 gradient가 그려지고 나머지 영역에 html 배경 노출. 로그인 후 로그아웃하면 DOM 상태가 달라져 이 조건이 해소됨
+- **교훈**: 이 수정(`max-width:none` + `html bg #A78BFA`)은 **절대 제거하면 안 됨**. 다른 CSS 수정 시 이 두 값이 유지되는지 반드시 확인할 것
 
 ### 12.11 소셜→기존계정 연동 화면 (socialLinkExisting) UI (2026-03-31)
 - **증상**: 소셜 로그인 후 "기존 계정에 연결"을 누르면 auth-continue 화면이 뜨는데, 소셜 버튼이 보이고 ID/PW 입력란은 접혀 있고, "기존 아이디로 로그인하면 연동된다"는 안내 메시지가 접힌 영역 안에 숨겨져 있음
