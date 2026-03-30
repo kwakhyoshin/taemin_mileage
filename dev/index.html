@@ -6905,7 +6905,24 @@ async function _handleSocialLoginResult(firebaseUser, provider){
     }
   }
 
-  // 2) 기존 연결 없음 → 신규 가입 또는 기존 계정 연결 선택
+  // 2) 기존 연결 없음 → 같은 이메일로 등록된 다른 소셜 계정이 있는지 확인
+  let _existingEmailMatch = null;
+  if(email && regDoc){
+    try {
+      const regSnap2 = await getDoc(regDoc);
+      if(regSnap2.exists()){
+        const regData2 = regSnap2.data();
+        for(const [otherUid, link] of Object.entries(regData2)){
+          if(otherUid !== uid && link.email && link.email.toLowerCase() === email.toLowerCase()){
+            _existingEmailMatch = { ...link, otherUid };
+            break;
+          }
+        }
+      }
+    } catch(e){ console.warn('[Social] Email match check failed:', e); }
+  }
+
+  // 3) 신규 가입 또는 기존 계정 연결 선택
   _pendingSocialUser = { uid, email, displayName, provider };
   showAuthScreen('social-link');
   // social-link 화면에 프로필 정보 표시
@@ -6918,6 +6935,13 @@ async function _handleSocialLoginResult(firebaseUser, provider){
   if(nameDisplay) nameDisplay.textContent = displayName || '사용자';
   if(emailDisplay) emailDisplay.textContent = email || '';
   if(avatarEl) avatarEl.textContent = (displayName || email || '?').charAt(0).toUpperCase();
+
+  // 같은 이메일로 다른 소셜 계정이 이미 등록된 경우 안내
+  if(_existingEmailMatch){
+    const _otherProvider = _existingEmailMatch.provider === 'google' ? 'Google' : _existingEmailMatch.provider === 'kakao' ? '카카오' : _existingEmailMatch.provider === 'naver' ? '네이버' : _existingEmailMatch.provider;
+    const _warnEl = document.getElementById('social-link-info');
+    if(_warnEl) _warnEl.innerHTML = `${providerLabel} 계정으로 인증되었어요<br><span style="color:#F59E0B;font-size:13px;font-weight:600">⚠️ 같은 이메일(${email})로 ${_otherProvider} 계정이 이미 등록되어 있어요.<br>\"기존 계정에 연결하기\"를 선택하면 기존 가족에 연결됩니다.</span>`;
+  }
 }
 let _pendingSocialUser = null;
 
