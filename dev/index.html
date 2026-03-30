@@ -1043,6 +1043,23 @@ html:has(body.auth-active){background:#5B4FC4!important;overflow:hidden}
 .auth-btn.danger{background:#FEE2E2;color:#EF4444}
 .auth-link{font-size:13px;color:#6366F1;font-weight:700;margin-top:16px;cursor:pointer}
 .auth-error{font-size:13px;color:#EF4444;font-weight:600;margin-top:8px;min-height:18px}
+/* 간편 로그인 */
+.auth-divider{display:flex;align-items:center;gap:12px;margin:20px 0 16px;font-size:12px;color:#94A3B8;font-weight:600}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;border-top:1px solid #E2E8F0}
+body.dark .auth-divider{color:#64748B}
+body.dark .auth-divider::before,body.dark .auth-divider::after{border-color:#334155}
+.social-login-btns{display:flex;flex-direction:column;gap:10px}
+.social-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:13px;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:opacity .2s}
+.social-btn:active{opacity:.8}
+.social-btn:disabled{opacity:.5;cursor:not-allowed}
+.social-google{background:#fff;color:#374151;border:1.5px solid #D1D5DB}
+.social-kakao{background:#FEE500;color:#3C1E1E}
+.social-naver{background:#03C75A;color:#fff}
+body.dark .social-google{background:#1E293B;color:#F1F5F9;border-color:#475569}
+body.dark .social-email{background:#334155!important;color:#E2E8F0!important;border-color:#475569!important}
+/* 인증코드 입력 */
+.code-input{caret-color:#6366F1}
+.code-input:focus{border-color:#6366F1;box-shadow:0 0 0 3px rgba(99,102,241,.15)}
 .auth-steps{margin-bottom:20px}
 .auth-steps-label{text-align:center;font-size:13px;font-weight:700;color:#94A3B8;margin-bottom:6px;letter-spacing:.5px}
 .auth-steps-dots{display:flex;justify-content:center;gap:6px}
@@ -2472,7 +2489,7 @@ button:disabled {
 <!-- Auth: standalone script (no module dependency) for auth screen navigation -->
 <script>
 (function(){
-  var AUTH_IDS=['auth-login','auth-welcome','auth-insight','auth-create-1','auth-create-2','auth-create-3','auth-create-4','auth-create-5','auth-create-done','auth-join-select','auth-join-register'];
+  var AUTH_IDS=['auth-login','auth-welcome','auth-email-verify','auth-social-link','auth-insight','auth-create-1','auth-create-2','auth-create-3','auth-create-4','auth-create-5','auth-create-done','auth-join-select','auth-join-register'];
 
   window._showAuth=function(screen){
     AUTH_IDS.forEach(function(id){
@@ -2552,7 +2569,60 @@ button:disabled {
     </div>
     <div class="auth-error" id="login-error"></div>
     <button class="auth-btn" onclick="doLogin()">로그인</button>
+
+    <div class="auth-divider"><span>또는 간편 로그인</span></div>
+
+    <div class="social-login-btns">
+      <button class="social-btn social-google" onclick="doSocialLogin('google')">
+        <svg width="20" height="20" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+        <span>Google로 시작</span>
+      </button>
+      <button class="social-btn social-kakao" onclick="doSocialLogin('kakao')">
+        <svg width="20" height="20" viewBox="0 0 24 24"><path d="M12 3C6.48 3 2 6.36 2 10.44c0 2.62 1.75 4.93 4.38 6.24l-1.12 4.15c-.08.32.27.57.54.39l4.92-3.27c.42.04.84.06 1.28.06 5.52 0 10-3.36 10-7.57C22 6.36 17.52 3 12 3z" fill="#000"/></svg>
+        <span>카카오로 시작</span>
+      </button>
+      <button class="social-btn social-naver" onclick="doSocialLogin('naver')">
+        <svg width="20" height="20" viewBox="0 0 24 24"><path d="M16.27 3H7.73A4.73 4.73 0 003 7.73v8.54A4.73 4.73 0 007.73 21h8.54A4.73 4.73 0 0021 16.27V7.73A4.73 4.73 0 0016.27 3zm-2.8 11.76l-2.97-4.26v4.26H8.25V9.24h2.28l2.97 4.26V9.24h2.25v5.52h-2.28z" fill="#fff"/></svg>
+        <span>네이버로 시작</span>
+      </button>
+    </div>
+    <div class="auth-divider"><span>이메일로 시작</span></div>
+    <button class="social-btn social-email" onclick="showAuthScreen('email-verify')" style="background:#F3F4F6;color:#374151;border:1px solid #D1D5DB">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#374151" stroke-width="2" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      <span>이메일 인증으로 시작</span>
+    </button>
+
     <div class="auth-link" onclick="showAuthScreen('welcome')">처음이신가요? 시작하기</div>
+  </div>
+</div>
+
+<!-- AUTH: 이메일 인증 -->
+<div class="auth-screen hidden" id="auth-email-verify">
+  <div class="auth-card">
+    <div class="auth-logo"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="2" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+    <h2 class="auth-title" style="font-size:20px;font-weight:800;margin:12px 0 4px">이메일 인증</h2>
+    <div class="auth-sub" id="email-verify-sub">이메일 주소를 입력하면 인증코드를 보내드려요</div>
+    <!-- Step 1: 이메일 입력 -->
+    <div id="email-step1">
+      <input type="email" class="auth-input" id="verify-email" placeholder="이메일 주소" autocomplete="email" inputmode="email" onkeydown="if(event.key==='Enter')sendVerificationCode()">
+      <div class="auth-error" id="email-verify-error"></div>
+      <button class="auth-btn" id="send-code-btn" onclick="sendVerificationCode()">인증코드 발송</button>
+    </div>
+    <!-- Step 2: 코드 입력 -->
+    <div id="email-step2" style="display:none">
+      <div style="display:flex;gap:8px;justify-content:center;margin:16px 0">
+        <input type="text" class="auth-input code-input" id="code-1" maxlength="1" inputmode="numeric" pattern="[0-9]" style="width:44px;height:52px;text-align:center;font-size:24px;font-weight:800;padding:0" oninput="_codeAutoNext(this,1)" onkeydown="_codeBackspace(event,1)">
+        <input type="text" class="auth-input code-input" id="code-2" maxlength="1" inputmode="numeric" pattern="[0-9]" style="width:44px;height:52px;text-align:center;font-size:24px;font-weight:800;padding:0" oninput="_codeAutoNext(this,2)" onkeydown="_codeBackspace(event,2)">
+        <input type="text" class="auth-input code-input" id="code-3" maxlength="1" inputmode="numeric" pattern="[0-9]" style="width:44px;height:52px;text-align:center;font-size:24px;font-weight:800;padding:0" oninput="_codeAutoNext(this,3)" onkeydown="_codeBackspace(event,3)">
+        <input type="text" class="auth-input code-input" id="code-4" maxlength="1" inputmode="numeric" pattern="[0-9]" style="width:44px;height:52px;text-align:center;font-size:24px;font-weight:800;padding:0" oninput="_codeAutoNext(this,4)" onkeydown="_codeBackspace(event,4)">
+        <input type="text" class="auth-input code-input" id="code-5" maxlength="1" inputmode="numeric" pattern="[0-9]" style="width:44px;height:52px;text-align:center;font-size:24px;font-weight:800;padding:0" oninput="_codeAutoNext(this,5)" onkeydown="_codeBackspace(event,5)">
+        <input type="text" class="auth-input code-input" id="code-6" maxlength="1" inputmode="numeric" pattern="[0-9]" style="width:44px;height:52px;text-align:center;font-size:24px;font-weight:800;padding:0" oninput="_codeAutoNext(this,6)" onkeydown="_codeBackspace(event,6)">
+      </div>
+      <div class="auth-error" id="code-verify-error"></div>
+      <button class="auth-btn" id="verify-code-btn" onclick="verifyCode()">인증 확인</button>
+      <div class="auth-link" id="resend-link" onclick="sendVerificationCode()" style="margin-top:12px;font-size:13px">인증코드 다시 받기 <span id="resend-timer"></span></div>
+    </div>
+    <div class="auth-link" onclick="showAuthScreen('login')" style="margin-top:16px">← 로그인으로 돌아가기</div>
   </div>
 </div>
 
@@ -2573,6 +2643,22 @@ button:disabled {
       <button class="ob-start-btn" onclick="showAuthScreen('insight')">시작하기</button>
       <div class="ob-link" onclick="showAuthScreen('login')">이미 계정이 있어요</div>
     </div>
+  </div>
+</div>
+
+<!-- AUTH: 소셜/이메일 인증 후 연결 선택 -->
+<div class="auth-screen hidden" id="auth-social-link">
+  <div class="auth-card">
+    <div class="auth-logo" style="font-size:48px">🎉</div>
+    <h2 class="auth-title" style="font-size:20px;font-weight:800;margin:12px 0 4px">인증 완료!</h2>
+    <div class="auth-sub" id="social-link-info" style="margin-bottom:20px">소셜 계정으로 인증되었어요</div>
+    <button class="auth-btn" onclick="socialLinkNewFamily()" style="margin-bottom:12px">
+      새 가족 만들기
+    </button>
+    <button class="auth-btn secondary" onclick="socialLinkExisting()">
+      기존 가족에 연결하기
+    </button>
+    <div class="auth-link" onclick="showAuthScreen('login')" style="margin-top:16px">← 로그인으로 돌아가기</div>
   </div>
 </div>
 
@@ -4622,7 +4708,7 @@ let _joinState = {
 };
 
 // ── AUTH 화면 관리 ──
-const _AUTH_SCREENS = ['auth-login','auth-welcome','auth-insight','auth-create-1','auth-create-2','auth-create-3','auth-create-4','auth-create-5','auth-create-done','auth-join-select','auth-join-register'];
+const _AUTH_SCREENS = ['auth-login','auth-welcome','auth-email-verify','auth-social-link','auth-insight','auth-create-1','auth-create-2','auth-create-3','auth-create-4','auth-create-5','auth-create-done','auth-join-select','auth-join-register'];
 
 function showAuthScreen(screen) {
   document.body.classList.add('auth-active');
@@ -6198,10 +6284,343 @@ function logout() {
   _globalDataOwner = null;
   adminOK = false;
   localStorage.removeItem(_LS_PREFIX+'current_user');
+  // Firebase Auth에서도 로그아웃
+  if(fbAuth && signOut){
+    try{ signOut(fbAuth); }catch(e){ console.warn('Firebase signOut error:', e); }
+  }
   showAuthScreen('login');
   document.getElementById('login-id').value = '';
   document.getElementById('login-pwd').value = '';
 }
+
+// ── 소셜 로그인 / 이메일 인증 ──────────────────
+let _socialLoginPending = false;
+
+async function doSocialLogin(provider){
+  if(_socialLoginPending) return;
+  _socialLoginPending = true;
+  const errEl = document.getElementById('login-error');
+  if(errEl) errEl.textContent = '';
+
+  try {
+    if(!_firebaseReady) await _initFirebase();
+    if(!fbAuth){ if(errEl) errEl.textContent='Firebase 초기화 실패'; return; }
+
+    let result;
+    if(provider === 'google'){
+      const gProvider = new GoogleAuthProvider();
+      gProvider.setCustomParameters({ prompt: 'select_account' });
+      result = await signInWithPopup(fbAuth, gProvider);
+    } else if(provider === 'kakao'){
+      // Phase 3에서 구현 — 임시 안내
+      toast('카카오 로그인은 준비 중이에요');
+      return;
+    } else if(provider === 'naver'){
+      // Phase 3에서 구현 — 임시 안내
+      toast('네이버 로그인은 준비 중이에요');
+      return;
+    }
+
+    if(!result || !result.user){
+      if(errEl) errEl.textContent = '로그인에 실패했어요';
+      return;
+    }
+
+    const firebaseUser = result.user;
+    console.log('[Social Login]', provider, firebaseUser.uid, firebaseUser.email);
+
+    // Auth 레지스트리에서 기존 연결 찾기
+    await _handleSocialLoginResult(firebaseUser, provider);
+
+  } catch(e) {
+    console.error('[Social Login Error]', e);
+    if(e.code === 'auth/popup-closed-by-user'){
+      // 사용자가 팝업 닫음 — 무시
+    } else if(e.code === 'auth/cancelled-popup-request'){
+      // 이전 팝업 취소 — 무시
+    } else {
+      if(errEl) errEl.textContent = '로그인 중 오류가 발생했어요';
+    }
+  } finally {
+    _socialLoginPending = false;
+  }
+}
+
+// Auth 레지스트리: Firebase UID → familyId/memberId 매핑
+function _getAuthRegistryDoc(){
+  if(!db) return null;
+  return doc(db, 'families', _ENV==='dev'?'_dev_auth_registry':'_auth_registry');
+}
+
+async function _handleSocialLoginResult(firebaseUser, provider){
+  const uid = firebaseUser.uid;
+  const email = firebaseUser.email || '';
+  const displayName = firebaseUser.displayName || '';
+
+  // 1) Auth 레지스트리에서 기존 가족 연결 확인
+  const regDoc = _getAuthRegistryDoc();
+  if(regDoc){
+    const regSnap = await getDoc(regDoc);
+    if(regSnap.exists()){
+      const regData = regSnap.data();
+      if(regData[uid]){
+        // 기존 연결 있음 → 해당 가족으로 로그인
+        const link = regData[uid];
+        console.log('[Social] Found existing link:', link);
+        await _loginToFamily(link.familyId, link.memberId, uid, provider, email);
+        return;
+      }
+    }
+  }
+
+  // 2) 기존 연결 없음 → 신규 가입 또는 기존 계정 연결 선택
+  _pendingSocialUser = { uid, email, displayName, provider };
+  showAuthScreen('social-link');
+  // social-link 화면에서 이메일과 이름 미리 채우기
+  const nameEl = document.getElementById('social-link-name');
+  const emailEl = document.getElementById('social-link-email');
+  const infoEl = document.getElementById('social-link-info');
+  if(nameEl && displayName) nameEl.value = displayName;
+  if(emailEl && email) emailEl.value = email;
+  if(infoEl) infoEl.textContent = `${provider === 'google' ? 'Google' : provider} 계정: ${email || displayName}`;
+}
+let _pendingSocialUser = null;
+
+async function _loginToFamily(familyId, memberId, authUid, provider, email){
+  try {
+    const docPath = _ENV==='dev'?`dev_${familyId}`:familyId;
+    const famRef = doc(db, 'families', docPath);
+    const famSnap = await getDoc(famRef);
+    if(!famSnap.exists()){
+      toast('가족 데이터를 찾을 수 없어요');
+      return;
+    }
+    // 가족 데이터 로드
+    S = famSnap.data();
+    S._familyId = familyId;
+    DATA_DOC = famRef;
+    currentUser = memberId;
+    localStorage.setItem(_LS_PREFIX+'current_user', memberId);
+    localStorage.setItem(_LS_PREFIX+'family_id', familyId);
+
+    cachedUsers = S.users || {};
+    rebuildMembersFromFamily();
+
+    if(!(getFamilyMode()==='independent'&&isCaregiverUser())){
+      syncMemberToGlobal();
+    }
+    postLoginInit();
+    hideAllAuth();
+    toast(`${getUserName(memberId)}님 환영해요!`);
+  } catch(e){
+    console.error('[_loginToFamily Error]', e);
+    toast('로그인 처리 중 오류가 발생했어요');
+  }
+}
+
+// 소셜 로그인 후 → 새 가족 만들기
+async function socialLinkNewFamily(){
+  if(!_pendingSocialUser) return;
+  // 웰컴 화면으로 이동하되, 소셜 정보를 유지
+  showAuthScreen('insight');
+}
+
+// 소셜 로그인 후 → 기존 가족에 연결
+async function socialLinkExisting(){
+  if(!_pendingSocialUser) return;
+  showAuthScreen('login');
+  const errEl = document.getElementById('login-error');
+  if(errEl) errEl.textContent = '기존 아이디로 로그인하면 소셜 계정이 연결돼요';
+}
+
+// Auth 레지스트리에 UID → familyId/memberId 등록
+async function _registerAuthLink(uid, familyId, memberId, provider, email){
+  const regDoc = _getAuthRegistryDoc();
+  if(!regDoc) return;
+  try {
+    await runTransaction(db, async(tx)=>{
+      const snap = await tx.get(regDoc);
+      const data = snap.exists() ? snap.data() : {};
+      data[uid] = { familyId, memberId, provider, email: email||'', createdAt: Date.now() };
+      tx.set(regDoc, data);
+    });
+    console.log('[Auth Registry] Registered:', uid, '→', familyId, memberId);
+  } catch(e){
+    console.error('[Auth Registry Error]', e);
+  }
+}
+
+// ── 이메일 인증코드 ──
+let _emailVerifyTimer = null;
+let _pendingVerifyEmail = '';
+
+function _codeAutoNext(input, idx){
+  input.value = input.value.replace(/[^0-9]/g,'');
+  if(input.value && idx < 6){
+    const next = document.getElementById('code-'+(idx+1));
+    if(next) next.focus();
+  }
+  // 6자리 모두 입력 시 자동 인증
+  if(idx === 6 && input.value){
+    const code = [1,2,3,4,5,6].map(i=>document.getElementById('code-'+i).value).join('');
+    if(code.length === 6) verifyCode();
+  }
+}
+function _codeBackspace(e, idx){
+  if(e.key === 'Backspace' && !e.target.value && idx > 1){
+    const prev = document.getElementById('code-'+(idx-1));
+    if(prev){ prev.focus(); prev.value=''; }
+  }
+}
+
+async function sendVerificationCode(){
+  const emailInput = document.getElementById('verify-email');
+  const errEl = document.getElementById('email-verify-error');
+  const btn = document.getElementById('send-code-btn');
+  if(!emailInput || !errEl) return;
+
+  const email = emailInput.value.trim().toLowerCase();
+  if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+    errEl.textContent = '올바른 이메일 주소를 입력해주세요';
+    return;
+  }
+  errEl.textContent = '';
+  if(btn) btn.disabled = true;
+
+  try {
+    // Cloud Functions 호출 (Phase 2에서 구현)
+    // 임시: Firestore에 직접 인증코드 저장 (개발 테스트용)
+    if(!_firebaseReady) await _initFirebase();
+
+    const code = String(Math.floor(100000 + Math.random()*900000));
+    const verifyDoc = doc(db, 'emailVerify', _ENV==='dev'?`dev_${email}`:`${email}`);
+    await setDoc(verifyDoc, {
+      code: code,
+      email: email,
+      createdAt: Date.now(),
+      expiresAt: Date.now() + 5*60*1000, // 5분
+      attempts: 0
+    });
+
+    _pendingVerifyEmail = email;
+    console.log('[DEV] 인증코드:', code, '(개발환경에서만 콘솔에 표시)');
+
+    // Step 2 표시
+    document.getElementById('email-step1').style.display = 'none';
+    document.getElementById('email-step2').style.display = 'block';
+    document.getElementById('email-verify-sub').textContent = `${email}로 인증코드를 보냈어요`;
+    document.getElementById('code-1').focus();
+
+    // 재전송 타이머 (60초)
+    _startResendTimer(60);
+    toast('인증코드가 발송되었어요 (개발: 콘솔 확인)');
+
+  } catch(e){
+    console.error('[Email Verify Error]', e);
+    errEl.textContent = '인증코드 발송에 실패했어요';
+  } finally {
+    if(btn) btn.disabled = false;
+  }
+}
+
+function _startResendTimer(sec){
+  const timerEl = document.getElementById('resend-timer');
+  const linkEl = document.getElementById('resend-link');
+  if(_emailVerifyTimer) clearInterval(_emailVerifyTimer);
+  let remaining = sec;
+  if(linkEl) linkEl.style.pointerEvents = 'none';
+  if(timerEl) timerEl.textContent = `(${remaining}초)`;
+  _emailVerifyTimer = setInterval(()=>{
+    remaining--;
+    if(timerEl) timerEl.textContent = remaining > 0 ? `(${remaining}초)` : '';
+    if(remaining <= 0){
+      clearInterval(_emailVerifyTimer);
+      if(linkEl) linkEl.style.pointerEvents = '';
+    }
+  }, 1000);
+}
+
+async function verifyCode(){
+  const errEl = document.getElementById('code-verify-error');
+  const btn = document.getElementById('verify-code-btn');
+  if(!errEl) return;
+
+  const code = [1,2,3,4,5,6].map(i=>(document.getElementById('code-'+i)||{}).value||'').join('');
+  if(code.length !== 6){
+    errEl.textContent = '6자리 인증코드를 입력해주세요';
+    return;
+  }
+  errEl.textContent = '';
+  if(btn) btn.disabled = true;
+
+  try {
+    if(!_firebaseReady) await _initFirebase();
+
+    const email = _pendingVerifyEmail;
+    const verifyDoc = doc(db, 'emailVerify', _ENV==='dev'?`dev_${email}`:`${email}`);
+    const snap = await getDoc(verifyDoc);
+
+    if(!snap.exists()){
+      errEl.textContent = '인증코드가 만료되었어요. 다시 요청해주세요';
+      return;
+    }
+    const data = snap.data();
+    if(Date.now() > data.expiresAt){
+      errEl.textContent = '인증코드가 만료되었어요. 다시 요청해주세요';
+      return;
+    }
+    if(data.attempts >= 5){
+      errEl.textContent = '시도 횟수를 초과했어요. 다시 요청해주세요';
+      return;
+    }
+    if(data.code !== code){
+      // 시도 횟수 증가
+      await setDoc(verifyDoc, {...data, attempts:(data.attempts||0)+1});
+      errEl.textContent = '인증코드가 일치하지 않아요';
+      return;
+    }
+
+    // 인증 성공!
+    console.log('[Email Verify] Success:', email);
+    toast('이메일 인증 성공!');
+
+    // 인증 데이터 삭제
+    await setDoc(verifyDoc, { verified: true, verifiedAt: Date.now() });
+
+    // Auth 레지스트리에서 이 이메일로 기존 연결 확인
+    _pendingSocialUser = { uid: 'email_'+email.replace(/[^a-z0-9]/gi,'_'), email, displayName: '', provider: 'email' };
+    // 기존 연결 확인
+    const regDoc = _getAuthRegistryDoc();
+    if(regDoc){
+      const regSnap = await getDoc(regDoc);
+      if(regSnap.exists()){
+        const regData = regSnap.data();
+        const uidKey = _pendingSocialUser.uid;
+        if(regData[uidKey]){
+          const link = regData[uidKey];
+          await _loginToFamily(link.familyId, link.memberId, uidKey, 'email', email);
+          return;
+        }
+      }
+    }
+    // 기존 연결 없음 → 연결 화면
+    showAuthScreen('social-link');
+    const infoEl = document.getElementById('social-link-info');
+    if(infoEl) infoEl.textContent = `인증된 이메일: ${email}`;
+
+  } catch(e){
+    console.error('[Verify Code Error]', e);
+    errEl.textContent = '인증 확인 중 오류가 발생했어요';
+  } finally {
+    if(btn) btn.disabled = false;
+  }
+}
+
+window.doSocialLogin = doSocialLogin;
+window.sendVerificationCode = sendVerificationCode;
+window.verifyCode = verifyCode;
+window.socialLinkNewFamily = socialLinkNewFamily;
+window.socialLinkExisting = socialLinkExisting;
 
 function checkAuth() {
   cachedUsers = S.users || {};
@@ -6544,7 +6963,8 @@ const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di)_di.style.display='';}
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
-let fbApp, db, LEGACY_DOC, DATA_DOC;
+let getAuth, signInWithPopup, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
+let fbApp, db, fbAuth, LEGACY_DOC, DATA_DOC;
 let _firebaseReady = false;
 let _dataListenerUnsub = null; // onSnapshot 구독 해제 함수
 
@@ -6552,8 +6972,10 @@ async function _initFirebase(){
   try {
     const fbAppMod = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
     const fbFsMod = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    const fbAuthMod = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
     initializeApp = fbAppMod.initializeApp;
     ({getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction} = fbFsMod);
+    ({getAuth, signInWithPopup, signOut: signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken} = fbAuthMod);
 
     const firebaseConfig = {
       apiKey: "AIzaSyDTS81EBGgiuo564ThxvTTOpR_iAHLb8tg",
@@ -6565,10 +6987,11 @@ async function _initFirebase(){
     };
     fbApp = initializeApp(firebaseConfig);
     db = getFirestore(fbApp);
+    fbAuth = getAuth(fbApp);
     LEGACY_DOC = doc(db, 'users', _ENV==='dev'?'taemin_dev':'taemin');
     DATA_DOC = LEGACY_DOC;
     _firebaseReady = true;
-    console.log('[mile.ly] Firebase loaded OK');
+    console.log('[mile.ly] Firebase loaded OK (with Auth)');
     return true;
   } catch(e) {
     console.error('[mile.ly] Firebase load FAILED:', e);
