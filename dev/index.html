@@ -4740,6 +4740,11 @@ function showAuthScreen(screen) {
     const el=document.getElementById(id);
     if(el)el.classList.toggle('hidden',id!=='auth-'+screen && id!==screen);
   });
+  // 소셜 로그인 화면 진입 시 SDK 미리 로드 (팝업 차단 방지)
+  if(screen==='auth-continue'||screen==='continue'){
+    if(!_firebaseReady) _initFirebase().catch(()=>{});
+    if(typeof _loadKakaoSDK==='function') _loadKakaoSDK().catch(()=>{});
+  }
   // 스텝 인디케이터 업데이트
   const stepNum = screen.match(/create-(\d)/);
   if(stepNum){
@@ -6075,6 +6080,10 @@ async function doJoinRegister(){
 // 나의 메뉴: 소셜 연동 프로바이더 선택 바텀시트
 function linkSocialFromMyMenu(){
   if(!currentUser || !_familyId){ toast('로그인 후 이용해주세요'); return; }
+  // 바텀시트 열릴 때 SDK 미리 로드 (팝업 차단 방지)
+  if(!_firebaseReady) _initFirebase().catch(()=>{});
+  _loadKakaoSDK().catch(()=>{});
+  _loadNaverSDK().catch(()=>{});
   const _gSvg='<svg width="20" height="20" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>';
   const _kSvg='<svg width="20" height="20" viewBox="0 0 24 24"><path d="M12 3C6.48 3 2 6.36 2 10.44c0 2.63 1.74 4.95 4.36 6.27-.14.51-.9 3.28-.93 3.5 0 0-.02.17.09.23.11.07.24.02.24.02.32-.04 3.7-2.44 4.28-2.86.63.09 1.28.13 1.96.13 5.52 0 10-3.36 10-7.44S17.52 3 12 3z" fill="#FEE500"/></svg>';
   const _nSvg='<svg width="20" height="20" viewBox="0 0 24 24"><rect width="24" height="24" rx="4" fill="#03C75A"/><path d="M14.1 12.32L9.7 6.5H7v11h3.1v-5.82l4.4 5.82H17v-11h-2.9v5.82z" fill="#fff"/></svg>';
@@ -16540,29 +16549,75 @@ window._createState = _createState;
       const params = new URLSearchParams(hash);
       const accessToken = params.get('access_token');
       if(accessToken){
+        console.log('[Naver Callback] access_token detected, loading SDK...');
         // 네이버 프로필 API 호출 (SDK 사용)
         const script = document.createElement('script');
         script.src = 'https://static.nid.naver.com/js/naveridlogin_js_sdk_2.0.2.js';
         script.onload = ()=>{
-          const naverLogin = new window.naver.LoginWithNaverId({
-            clientId: typeof _NAVER_CLIENT_ID !== 'undefined' ? _NAVER_CLIENT_ID : '',
-            callbackUrl: window.location.href.split('#')[0],
-            isPopup: true,
-            callbackHandle: true
-          });
-          naverLogin.init();
-          naverLogin.getLoginStatus((status)=>{
-            if(status){
-              window.opener.postMessage({
-                type:'naver_login',
-                uid: 'naver_'+naverLogin.user.getId(),
-                email: naverLogin.user.getEmail()||'',
-                displayName: naverLogin.user.getName()||naverLogin.user.getNickName()||'',
-                provider: 'naver'
-              }, '*');
-            }
+          console.log('[Naver Callback] SDK loaded, initializing...');
+          try {
+            const naverLogin = new window.naver.LoginWithNaverId({
+              clientId: _NAVER_CLIENT_ID || '',
+              callbackUrl: window.location.href.split('#')[0].split('?')[0],
+              isPopup: true,
+              callbackHandle: true
+            });
+            naverLogin.init();
+            // 타임아웃 설정 (10초 후 강제 종료)
+            const timeout = setTimeout(()=>{
+              console.error('[Naver Callback] getLoginStatus timeout');
+              // 타임아웃 시 access_token 기반 fallback UID 전달
+              if(window.opener){
+                window.opener.postMessage({
+                  type:'naver_login',
+                  uid: 'naver_token_'+accessToken.substring(0,16),
+                  email: '',
+                  displayName: '',
+                  provider: 'naver',
+                  _fallback: true
+                }, '*');
+              }
+              window.close();
+            }, 10000);
+            naverLogin.getLoginStatus((status)=>{
+              clearTimeout(timeout);
+              console.log('[Naver Callback] getLoginStatus:', status);
+              if(status && naverLogin.user){
+                const uid = naverLogin.user.getId();
+                console.log('[Naver Callback] User ID:', uid);
+                if(window.opener){
+                  window.opener.postMessage({
+                    type:'naver_login',
+                    uid: 'naver_'+uid,
+                    email: naverLogin.user.getEmail()||'',
+                    displayName: naverLogin.user.getName()||naverLogin.user.getNickName()||'',
+                    provider: 'naver'
+                  }, '*');
+                }
+              } else {
+                console.error('[Naver Callback] getLoginStatus failed, status:', status);
+                // Fallback: access_token 해시 기반 UID
+                if(window.opener){
+                  window.opener.postMessage({
+                    type:'naver_login',
+                    uid: 'naver_token_'+accessToken.substring(0,16),
+                    email: '',
+                    displayName: '',
+                    provider: 'naver',
+                    _fallback: true
+                  }, '*');
+                }
+              }
+              setTimeout(()=>window.close(), 300);
+            });
+          } catch(sdkErr){
+            console.error('[Naver Callback] SDK init error:', sdkErr);
             window.close();
-          });
+          }
+        };
+        script.onerror = ()=>{
+          console.error('[Naver Callback] SDK load failed');
+          window.close();
         };
         document.head.appendChild(script);
         return; // 이 창은 콜백 처리만 하고 종료
