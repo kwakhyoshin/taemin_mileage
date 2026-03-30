@@ -6302,6 +6302,7 @@ function logout() {
   _globalDataOwner = null;
   adminOK = false;
   localStorage.removeItem(_LS_PREFIX+'current_user');
+  localStorage.removeItem(_LS_PREFIX+'social_pending'); // 소셜 로그인 플래그 정리
   // Firebase Auth에서도 로그아웃
   if(fbAuth && signOut){
     try{ signOut(fbAuth); }catch(e){ console.warn('Firebase signOut error:', e); }
@@ -6321,10 +6322,11 @@ function _setupAuthListener(){
   onAuthStateChanged(fbAuth, async (user)=>{
     if(!user) return; // 로그아웃 이벤트 무시
     const pending = localStorage.getItem(_LS_PREFIX+'social_pending');
-    if(!pending) return; // 소셜 로그인 대기 중이 아니면 무시
-    if(_socialAuthHandled) return; // 이미 처리됨
+    if(!pending || pending === 'handled') return; // 대기 중이 아니거나 이미 처리됨
+    if(_socialAuthHandled) return; // 메모리 플래그로도 중복 방지
     _socialAuthHandled = true;
-    localStorage.removeItem(_LS_PREFIX+'social_pending');
+    // 삭제하지 않고 'handled'로 변경 — checkAuth()가 나중에 읽어서 화면 보호
+    localStorage.setItem(_LS_PREFIX+'social_pending', 'handled');
 
     // provider 추정
     let provider = pending || 'google';
@@ -6366,7 +6368,7 @@ async function doSocialLogin(provider){
       const result = await signInWithPopup(fbAuth, gProvider);
       if(result && result.user && !_socialAuthHandled){
         _socialAuthHandled = true;
-        localStorage.removeItem(_LS_PREFIX+'social_pending');
+        localStorage.setItem(_LS_PREFIX+'social_pending', 'handled');
         console.log('[Social Login] Popup success:', provider, result.user.uid);
         await _handleSocialLoginResult(result.user, provider);
       }
@@ -6474,13 +6476,14 @@ async function _loginToFamily(familyId, memberId, authUid, provider, email){
 // 소셜 로그인 후 → 새 가족 만들기
 async function socialLinkNewFamily(){
   if(!_pendingSocialUser) return;
-  // 웰컴 화면으로 이동하되, 소셜 정보를 유지
+  localStorage.removeItem(_LS_PREFIX+'social_pending'); // 정리
   showAuthScreen('insight');
 }
 
 // 소셜 로그인 후 → 기존 가족에 연결
 async function socialLinkExisting(){
   if(!_pendingSocialUser) return;
+  localStorage.removeItem(_LS_PREFIX+'social_pending'); // 정리
   showAuthScreen('login');
   const errEl = document.getElementById('login-error');
   if(errEl) errEl.textContent = '기존 아이디로 로그인하면 소셜 계정이 연결돼요';
@@ -6696,14 +6699,20 @@ function checkAuth() {
     return true;
   }
 
-  // 소셜 로그인 대기 중이면 화면 전환 보류 (onAuthStateChanged가 처리)
+  // 소셜 로그인 대기/처리 중이면 화면 전환 보류
   const _socialPending = localStorage.getItem(_LS_PREFIX+'social_pending');
   if(_socialPending){
-    console.log('[checkAuth] social_pending detected, waiting for onAuthStateChanged...');
+    console.log('[checkAuth] social_pending detected:', _socialPending);
+    if(_socialPending === 'handled'){
+      // 이미 onAuthStateChanged 또는 popup에서 처리 완료 — 화면 건드리지 않음
+      return false;
+    }
+    // 아직 대기 중 — onAuthStateChanged가 처리할 때까지 대기
     document.body.classList.add('auth-active');
-    // 5초 타임아웃: onAuthStateChanged가 못 잡으면 폴백
     setTimeout(()=>{
-      if(localStorage.getItem(_LS_PREFIX+'social_pending')){
+      const val = localStorage.getItem(_LS_PREFIX+'social_pending');
+      if(val && val !== 'handled'){
+        // 5초 지나도 처리 안 됨 → 폴백
         console.log('[checkAuth] social_pending timeout, showing fallback');
         localStorage.removeItem(_LS_PREFIX+'social_pending');
         if(S.familyMeta && S.familyMeta.familyId) showAuthScreen('login');
