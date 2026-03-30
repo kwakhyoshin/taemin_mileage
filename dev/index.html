@@ -2559,7 +2559,7 @@ button:disabled {
 </script>
 
 <!-- AUTH: 로그인 화면 -->
-<div class="auth-screen" id="auth-login">
+<div class="auth-screen hidden" id="auth-login">
   <div class="auth-card">
     <div class="auth-logo"><svg width="64" height="64" viewBox="0 0 200 200"><defs><linearGradient id="lb" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#5B4FC4"/><stop offset="100%" stop-color="#A78BFA"/></linearGradient></defs><rect width="200" height="200" rx="64" fill="url(#lb)"/><path d="M30,130 L100,55 L170,130" stroke="white" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M100,62 L98.1,60.3 C91.4,54.2 87,50.2 87,45.3 C87,41.3 90.1,38.1 94.2,38.1 C96.4,38.1 98.6,39.2 100,40.9 C101.4,39.2 103.6,38.1 105.9,38.1 C109.8,38.1 113,41.3 113,45.3 C113,50.2 108.6,54.2 101.9,60.3 Z" fill="#FBBF24"/></svg></div>
     <svg viewBox="34 248 3020 972" xmlns="http://www.w3.org/2000/svg" style="height:28px;width:auto;display:block;margin:0 auto 4px" aria-label="mile.ly"><g transform="translate(0,1011) scale(1,-1)"><path class="logo-mile" transform="translate(0,0)" d="M142 -9Q100 -9 77.0 14.0Q54 37 54 81V412Q54 455 76.5 478.0Q99 501 141 501Q183 501 205.0 478.0Q227 455 227 412V357L216 406Q237 450 278.5 476.5Q320 503 377 503Q431 503 469.5 477.0Q508 451 525 398H511Q534 447 580.0 475.0Q626 503 682 503Q740 503 777.0 480.5Q814 458 832.5 410.5Q851 363 851 291V81Q851 37 827.5 14.0Q804 -9 761 -9Q719 -9 696.0 14.0Q673 37 673 81V286Q673 329 660.0 348.0Q647 367 617 367Q580 367 560.5 341.0Q541 315 541 267V81Q541 37 518.0 14.0Q495 -9 452 -9Q409 -9 386.0 14.0Q363 37 363 81V286Q363 329 350.0 348.0Q337 367 307 367Q271 367 251.5 341.0Q232 315 232 267V81Q232 -9 142 -9Z" fill="#5B4FC4"/><path class="logo-mile" transform="translate(869,0)" d="M140 -9Q98 -9 75.0 16.0Q52 41 52 88V404Q52 451 75.0 476.0Q98 501 140 501Q183 501 206.5 476.0Q230 451 230 404V88Q230 41 207.0 16.0Q184 -9 140 -9ZM140 572Q93 572 67.5 594.0Q42 616 42 658Q42 699 67.5 721.0Q93 743 140 743Q189 743 214.0 721.0Q239 699 239 658Q239 616 214.0 594.0Q189 572 140 572Z" fill="#5B4FC4"/><path class="logo-mile" transform="translate(1117,0)" d="M239 -11Q143 -11 97.5 40.5Q52 92 52 196V624Q52 668 75.0 691.0Q98 714 140 714Q183 714 206.5 691.0Q230 668 230 624V202Q230 165 244.5 148.0Q259 131 282 131Q289 131 296.5 132.5Q304 134 313 135Q330 135 338.5 122.0Q347 109 347 69Q347 34 333.0 16.5Q319 -1 290 -6Q282 -7 267.0 -9.0Q252 -11 239 -11Z" fill="#5B4FC4"/><path class="logo-mile" transform="translate(1432,0)" d="M320 -11Q230 -11 164.5 20.5Q99 52 64.0 110.0Q29 168 29 247Q29 323 62.5 380.5Q96 438 154.5 470.5Q213 503 288 503Q343 503 388.0 485.5Q433 468 465.0 434.5Q497 401 513.5 354.0Q530 307 530 249Q530 229 519.0 219.5Q508 210 484 210H178V294H400L384 281Q384 318 374.0 341.0Q364 364 344.5 376.0Q325 388 296 388Q265 388 242.5 373.5Q220 359 208.0 331.0Q196 303 196 261V252Q196 181 227.5 150.5Q259 120 325 120Q347 120 375.5 125.5Q404 131 430 141Q456 151 475.0 144.5Q494 138 504.5 122.5Q515 107 516.0 87.5Q517 68 507.0 49.5Q497 31 474 21Q439 5 399.5 -3.0Q360 -11 320 -11Z" fill="#5B4FC4"/><path transform="translate(1954,0)" d="M136 -6Q91 -6 64.5 21.0Q38 48 38 92Q38 135 64.5 161.5Q91 188 136 188Q183 188 208.5 161.5Q234 135 234 92Q234 48 208.5 21.0Q183 -6 136 -6Z" fill="#FBBF24"/><path class="logo-ly" transform="translate(2193,0)" d="M239 -11Q143 -11 97.5 40.5Q52 92 52 196V624Q52 668 75.0 691.0Q98 714 140 714Q183 714 206.5 691.0Q230 668 230 624V202Q230 165 244.5 148.0Q259 131 282 131Q289 131 296.5 132.5Q304 134 313 135Q330 135 338.5 122.0Q347 109 347 69Q347 34 333.0 16.5Q319 -1 290 -6Q282 -7 267.0 -9.0Q252 -11 239 -11Z" fill="#A78BFA"/><path class="logo-ly" transform="translate(2508,0)" d="M195 -189Q164 -189 145.0 -173.0Q126 -157 121.5 -131.0Q117 -105 130 -76L197 69V-3L26 388Q13 418 17.5 444.0Q22 470 44.0 485.5Q66 501 104 501Q136 501 155.5 486.5Q175 472 191 430L291 170H257L363 431Q379 472 399.5 486.5Q420 501 455 501Q485 501 503.0 485.5Q521 470 525.0 444.0Q529 418 516 388L289 -122Q271 -162 249.5 -175.5Q228 -189 195 -189Z" fill="#A78BFA"/></g></svg>
@@ -2576,7 +2576,7 @@ button:disabled {
 </div>
 
 <!-- AUTH: 계속하기 (소셜 + ID/PW 통합 Vertical Stack) -->
-<div class="auth-screen hidden" id="auth-continue">
+<div class="auth-screen" id="auth-continue">
   <div class="auth-card" style="text-align:center">
     <div class="auth-logo"><svg width="64" height="64" viewBox="0 0 200 200"><defs><linearGradient id="lbc" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#5B4FC4"/><stop offset="100%" stop-color="#A78BFA"/></linearGradient></defs><rect width="200" height="200" rx="64" fill="url(#lbc)"/><path d="M30,130 L100,55 L170,130" stroke="white" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M100,62 L98.1,60.3 C91.4,54.2 87,50.2 87,45.3 C87,41.3 90.1,38.1 94.2,38.1 C96.4,38.1 98.6,39.2 100,40.9 C101.4,39.2 103.6,38.1 105.9,38.1 C109.8,38.1 113,41.3 113,45.3 C113,50.2 108.6,54.2 101.9,60.3 Z" fill="#FBBF24"/></svg></div>
     <h2 style="font-size:22px;font-weight:900;color:var(--tx);margin:12px 0 4px">마일리에 오신 것을 환영해요</h2>
@@ -3157,7 +3157,7 @@ button:disabled {
     <div class="auth-sub">초대받은 가족의 구성원을 선택해주세요</div>
     <div class="member-grid" id="join-member-grid"></div>
     <div class="auth-error" id="join-select-error"></div>
-    <button class="auth-btn secondary" onclick="showAuthScreen('welcome')">돌아가기</button>
+    <button class="auth-btn secondary" onclick="showAuthScreen('continue')">돌아가기</button>
   </div>
 </div>
 
@@ -7065,21 +7065,14 @@ function checkAuth() {
         localStorage.removeItem(_LS_PREFIX+'social_pending');
         if(S.familyMeta && S.familyMeta.familyId) showAuthScreen('login');
         else if(cachedUsers && Object.keys(cachedUsers).length > 0) showAuthScreen('login');
-        else showAuthScreen('welcome');
+        else showAuthScreen('continue');
       }
     }, 5000);
     return false;
   }
 
-  // 가족 데이터가 있으면 로그인 화면, 없으면 웰컴 화면
-  if (S.familyMeta && S.familyMeta.familyId) {
-    showAuthScreen('login');
-  } else if (Object.keys(cachedUsers).length > 0) {
-    // 레거시: 기존 데이터가 있을때
-    showAuthScreen('login');
-  } else {
-    showAuthScreen('welcome');
-  }
+  // 항상 통합 로그인 화면(소셜 + ID/PW)으로 진입
+  showAuthScreen('continue');
   return false;
 }
 
