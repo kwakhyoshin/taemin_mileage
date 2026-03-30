@@ -2654,7 +2654,7 @@ button:disabled {
       // ⚠️ pointer-events:auto 필수! .hidden 클래스의 pointer-events:none을 덮어써야 터치 통과 방지
       var s=document.createElement('style');
       s.id='early-auth-switch';
-      s.textContent='#auth-welcome,#auth-onboarding{display:none!important}#auth-continue{display:flex!important;pointer-events:auto!important}';
+      s.textContent='#auth-welcome,#auth-onboarding{display:none!important}#auth-continue{display:flex!important;pointer-events:auto!important}.nav-container{display:none!important}';
       document.head.appendChild(s);
       // DOM 준비 후 .hidden 클래스 직접 제거 + body.auth-active 설정
       document.addEventListener('DOMContentLoaded',function(){
