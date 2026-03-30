@@ -7828,7 +7828,7 @@ const BADGES = [
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
-if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0331e';}}
+if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0331f';}}
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
@@ -16187,9 +16187,15 @@ document.addEventListener('visibilitychange',()=>{
     checkDayChange();
   }
 });
-// bfcache 복원 시 항상 최신 버전으로 새로고침
+// bfcache 복원 시 — 소셜 로그인 진행 중이면 리로드 금지
 window.addEventListener('pageshow',(e)=>{
   if(e.persisted){
+    // ★ 소셜 로그인 중이면 리로드하면 안 됨 (로그인 상태 날아감)
+    const _lsp = (_ENV==='dev'?'taemin_dev_':'taemin_')+'social_pending';
+    if(_socialLoginPending || localStorage.getItem(_lsp)){
+      console.log('📱 bfcache 복원 - 소셜 로그인 중이라 새로고침 건너뜀');
+      return;
+    }
     console.log('📱 bfcache 복원 감지 - 새로고침');
     location.reload();
     return;
@@ -17011,22 +17017,17 @@ window._createState = _createState;
   const _kakaoState = _kakaoQs.get('state') || '';
   if(_kakaoCode && _kakaoState.startsWith('kakao_')){
     console.log('[Kakao Callback] code detected, opener:', !!window.opener, 'name:', window.name);
-    // ★ 콜백 결과 전달: postMessage(가능하면) + localStorage(항상) + 안내 메시지
+    // ★★ 즉시 콜백 안내 화면 표시 (로그인 페이지 HTML이 보이지 않도록)
+    document.title = '카카오 인증 중...';
+    document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:linear-gradient(135deg,#5B4FC4,#A78BFA);color:#fff;font-family:-apple-system,sans-serif;text-align:center;padding:20px"><div><p style="font-size:20px;font-weight:700;margin-bottom:8px" id="_cb_msg">⏳ 카카오 인증 처리 중...</p><p style="font-size:14px;opacity:0.9">잠시만 기다려주세요</p></div></div>';
     function _deliverKakaoResult(data){
-      // 1) postMessage (opener가 있으면)
       if(window.opener){ try{ window.opener.postMessage(data, '*'); }catch(e){} }
-      // 2) localStorage (항상 — 부모 탭이 polling으로 읽어감)
       try{ localStorage.setItem('taemin_v6_kakao_callback_result', JSON.stringify(data)); }catch(e){}
-      // 3) 탭 닫기 시도 + 안내 메시지
-      setTimeout(()=>{
-        try{ window.close(); }catch(e){}
-        setTimeout(()=>{
-          if(!window.closed){
-            document.title = '인증 완료';
-            document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:linear-gradient(135deg,#5B4FC4,#A78BFA);color:#fff;font-family:-apple-system,sans-serif;text-align:center;padding:20px"><div><p style="font-size:20px;font-weight:700;margin-bottom:8px">✅ 카카오 인증 완료</p><p style="font-size:14px;opacity:0.9">이전 탭으로 돌아가주세요</p></div></div>';
-          }
-        }, 500);
-      }, 300);
+      // 안내 메시지 업데이트 + 탭 닫기 시도
+      const _msgEl = document.getElementById('_cb_msg');
+      if(_msgEl) _msgEl.textContent = '✅ 카카오 인증 완료';
+      document.title = '인증 완료';
+      try{ window.close(); }catch(e){}
     }
     // token exchange
     const _kakaoRedirectUri = window.location.href.split('?')[0];
@@ -17080,10 +17081,14 @@ window._createState = _createState;
       console.log('[Naver Redirect] Redirect return detected');
     }
 
-    // ★ 콜백 결과 전달: postMessage(가능하면) + localStorage(항상) + 안내 메시지
+    // ★★ 즉시 콜백 안내 화면 표시 (redirect 모드 제외)
+    if(!_isNaverRedirectReturn){
+      document.title = '네이버 인증 중...';
+      document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:linear-gradient(135deg,#5B4FC4,#A78BFA);color:#fff;font-family:-apple-system,sans-serif;text-align:center;padding:20px"><div><p style="font-size:20px;font-weight:700;margin-bottom:8px" id="_cb_msg">⏳ 네이버 인증 처리 중...</p><p style="font-size:14px;opacity:0.9">잠시만 기다려주세요</p></div></div>';
+    }
     function _deliverNaverResult(data){
       if(_isNaverRedirectReturn){
-        // ★ Redirect 모드 (팝업 차단됨): 현재 페이지에서 직접 처리
+        // Redirect 모드: 현재 페이지에서 직접 처리
         console.log('[Naver Redirect] Direct processing:', data.uid);
         history.replaceState(null, '', window.location.pathname + window.location.search);
         (async ()=>{
@@ -17100,15 +17105,10 @@ window._createState = _createState;
       // 팝업/새 탭 모드: postMessage + localStorage + 닫기
       if(window.opener){ try{ window.opener.postMessage(data, '*'); }catch(e){} }
       try{ localStorage.setItem('taemin_v6_naver_callback_result', JSON.stringify(data)); }catch(e){}
-      setTimeout(()=>{
-        try{ window.close(); }catch(e){}
-        setTimeout(()=>{
-          if(!window.closed){
-            document.title = '인증 완료';
-            document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:linear-gradient(135deg,#5B4FC4,#A78BFA);color:#fff;font-family:-apple-system,sans-serif;text-align:center;padding:20px"><div><p style="font-size:20px;font-weight:700;margin-bottom:8px">✅ 네이버 인증 완료</p><p style="font-size:14px;opacity:0.9">이전 탭으로 돌아가주세요</p></div></div>';
-          }
-        }, 500);
-      }, 300);
+      const _msgEl = document.getElementById('_cb_msg');
+      if(_msgEl) _msgEl.textContent = '✅ 네이버 인증 완료';
+      document.title = '인증 완료';
+      try{ window.close(); }catch(e){}
     }
 
     try{
