@@ -6710,7 +6710,14 @@ function _setupAuthListener(){
     }
     console.log('[onAuthStateChanged] Social login detected:', provider, user.uid, user.email);
     toast('로그인 처리 중...');
-    await _handleSocialLoginResult(user, provider);
+    try {
+      await _handleSocialLoginResult(user, provider);
+    } catch(_authErr) {
+      console.error('[onAuthStateChanged] _handleSocialLoginResult error:', _authErr);
+      _hideSocialLoading();
+      toast('로그인 처리 중 오류가 발생했어요');
+      showAuthScreen('continue');
+    }
   });
 }
 
@@ -6847,6 +6854,7 @@ async function _doNaverLogin(){
 }
 
 // ── 소셜 로그인 로딩 오버레이 ──
+let _socialLoadingTimeout = null;
 function _showSocialLoading(providerLabel){
   let el = document.getElementById('social-loading-overlay');
   if(!el){
@@ -6859,8 +6867,20 @@ function _showSocialLoading(providerLabel){
   const msg = document.getElementById('social-loading-msg');
   if(msg) msg.textContent = providerLabel ? `${providerLabel} 인증 확인 중...` : '인증 확인 중...';
   requestAnimationFrame(()=> el.classList.add('on'));
+  // ★ 안전 타임아웃: 15초 후에도 로딩 중이면 자동 해제
+  if(_socialLoadingTimeout) clearTimeout(_socialLoadingTimeout);
+  _socialLoadingTimeout = setTimeout(()=>{
+    const _still = document.getElementById('social-loading-overlay');
+    if(_still && _still.classList.contains('on')){
+      console.warn('[SocialLoading] Safety timeout - auto hiding after 15s');
+      _hideSocialLoading();
+      toast('로그인 처리가 지연되고 있어요. 다시 시도해주세요.');
+      showAuthScreen('continue');
+    }
+  }, 15000);
 }
 function _hideSocialLoading(){
+  if(_socialLoadingTimeout){ clearTimeout(_socialLoadingTimeout); _socialLoadingTimeout=null; }
   const el = document.getElementById('social-loading-overlay');
   if(el){ el.classList.remove('on'); setTimeout(()=>el.remove(), 300); }
 }
@@ -6930,6 +6950,9 @@ async function doSocialLogin(provider){
         localStorage.setItem(_LS_PREFIX+'social_pending', 'handled');
         console.log('[Social Login] Popup success:', provider, result.user.uid);
         await _handleSocialLoginResult(result.user, provider);
+      } else if(_socialAuthHandled){
+        // onAuthStateChanged가 이미 처리 중 — 로딩 오버레이는 그쪽에서 숨김
+        console.log('[Social Login] Already handled by onAuthStateChanged');
       }
     } catch(popupErr){
       // 팝업 실패 → onAuthStateChanged가 잡아줄 수도 있음
@@ -6971,9 +6994,11 @@ async function _handleSocialLoginResult(firebaseUser, provider){
   const displayName = firebaseUser.displayName || '';
   const profileImage = firebaseUser.profileImage || firebaseUser.photoURL || '';
 
+  console.log('[_handleSocialLoginResult] Start:', provider, uid, email);
   _updateSocialLoadingMsg('계정 정보 확인 중...');
 
   // 1) Auth 레지스트리에서 기존 가족 연결 확인
+  try {
   const regDoc = _getAuthRegistryDoc();
   if(regDoc){
     const regSnap = await getDoc(regDoc);
@@ -6984,7 +7009,12 @@ async function _handleSocialLoginResult(firebaseUser, provider){
         const link = regData[uid];
         console.log('[Social] Found existing link:', link);
         _updateSocialLoadingMsg('로그인 중...');
-        await _loginToFamily(link.familyId, link.memberId, uid, provider, email);
+        try {
+          await _loginToFamily(link.familyId, link.memberId, uid, provider, email);
+        } catch(_ltfErr) {
+          console.error('[Social] _loginToFamily failed:', _ltfErr);
+          toast('로그인 처리 중 오류가 발생했어요. 다시 시도해주세요.');
+        }
         _hideSocialLoading();
         return;
       }
@@ -7133,6 +7163,14 @@ async function _handleSocialLoginResult(firebaseUser, provider){
   if(nameDisplay) nameDisplay.textContent = displayName || '사용자';
   if(emailDisplay) emailDisplay.textContent = email || '';
   if(avatarEl) avatarEl.textContent = (displayName || email || '?').charAt(0).toUpperCase();
+
+  } catch(_socialResultErr) {
+    // ★ 어떤 에러든 로딩 오버레이는 반드시 숨김
+    console.error('[_handleSocialLoginResult] Unhandled error:', _socialResultErr);
+    _hideSocialLoading();
+    toast('로그인 처리 중 오류가 발생했어요. 다시 시도해주세요.');
+    showAuthScreen('continue');
+  }
 }
 
 // social-link 화면의 원래 버튼을 복원하는 헬퍼
@@ -7189,11 +7227,12 @@ async function _loginToFamily(familyId, memberId, authUid, provider, email){
     if(!(getFamilyMode()==='independent'&&isCaregiverUser())) syncMemberToGlobal();
   } catch(e){ console.warn('[_loginToFamily] syncMemberToGlobal warning:', e); }
   try { postLoginInit(); } catch(e){ console.warn('[_loginToFamily] postLoginInit warning:', e); }
-  hideAllAuth();
+  try { hideAllAuth(); } catch(e){ console.warn('[_loginToFamily] hideAllAuth warning:', e); }
   try { applyUserProfile(); } catch(e){ console.warn('[_loginToFamily] applyUserProfile warning:', e); }
   try { renderAll(); } catch(e){ console.warn('[_loginToFamily] renderAll warning:', e); }
-  reallyGoTab('home');
+  try { reallyGoTab('home'); } catch(e){ console.warn('[_loginToFamily] reallyGoTab warning:', e); }
   toast(`${getUserName(memberId)||'회원'}님 환영해요!`);
+  console.log('[_loginToFamily] Complete:', familyId, memberId);
   // 3단계: 리스너 연결 (실패해도 무시)
   try{
     if(_dataListenerUnsub){try{_dataListenerUnsub();}catch(_e){}}
