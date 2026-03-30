@@ -15520,9 +15520,29 @@ window._createState = _createState;
       // 3. Incoming data is identical to current state
       // 4. We have unsaved local changes (prevent overwriting local edits during debounce window)
       if(_isSaving) return;
-      if(Date.now() - _lastSaveTime < 2000) return; // cooldown: ignore echoes within 2s of save
       if(incomingJSON === _lastSavedJSON) return;
       if(incomingJSON === JSON.stringify(S)) return;
+      // 쿨다운 중이라도 새 메시지/보상요청이 있으면 머지 (알림 누락 방지)
+      if(Date.now() - _lastSaveTime < 2000){
+        try{
+          const _cd=snap.data();
+          let _cdChanged=false;
+          // 새 familyMessages 머지
+          if(_cd.familyMessages&&S.familyMessages&&_cd.familyMessages.length>S.familyMessages.length){
+            const _newM=_cd.familyMessages.slice(S.familyMessages.length);
+            _newM.forEach(m=>{S.familyMessages.push(m);});
+            _cdChanged=true;
+          }
+          // 새 rewardRequests 머지
+          if(_cd.rewardRequests&&S.rewardRequests&&_cd.rewardRequests.length>S.rewardRequests.length){
+            const _newR=_cd.rewardRequests.slice(S.rewardRequests.length);
+            _newR.forEach(r=>{S.rewardRequests.push(r);});
+            _cdChanged=true;
+          }
+          if(_cdChanged){renderNavUsers();checkNewMessages();}
+        }catch(e){}
+        return;
+      }
       if(_hasDirtyLocal){
         // 로컬 변경이 있는데 외부 변경이 들어옴 — 로컬 변경을 유지하되 외부 데이터의 다른 필드만 머지
         try{
@@ -15598,6 +15618,56 @@ window._createState = _createState;
             S.familyMeta=incoming.familyMeta;
             rebuildMembersFromFamily();
             renderAll();
+          }
+          // Merge rewardRequests (보상 사용 요청 — 다른 가족이 요청/승인/거절)
+          if(incoming.rewardRequests&&Array.isArray(incoming.rewardRequests)){
+            let rrChanged=false;
+            if(!S.rewardRequests)S.rewardRequests=[];
+            // 새 요청 추가
+            if(incoming.rewardRequests.length>S.rewardRequests.length){
+              const newReqs=incoming.rewardRequests.slice(S.rewardRequests.length);
+              newReqs.forEach(r=>{S.rewardRequests.push(r);});
+              rrChanged=true;
+            }
+            // 상태 변경 머지 (pending→approved/rejected)
+            incoming.rewardRequests.forEach((ir,i)=>{
+              if(S.rewardRequests[i]&&ir.status!==S.rewardRequests[i].status){
+                S.rewardRequests[i].status=ir.status;
+                if(ir.approvedBy)S.rewardRequests[i].approvedBy=ir.approvedBy;
+                if(ir.approvedAt)S.rewardRequests[i].approvedAt=ir.approvedAt;
+                rrChanged=true;
+              }
+            });
+            if(rrChanged)renderAll();
+          }
+          // Merge rewardInventory (보상 인벤토리 상태 변경)
+          if(incoming.rewardInventory&&Array.isArray(incoming.rewardInventory)){
+            if(!S.rewardInventory)S.rewardInventory=[];
+            let riChanged=false;
+            // 새 아이템 추가
+            if(incoming.rewardInventory.length>S.rewardInventory.length){
+              const newItems=incoming.rewardInventory.slice(S.rewardInventory.length);
+              newItems.forEach(item=>{S.rewardInventory.push(item);});
+              riChanged=true;
+            }
+            // 상태 변경 머지
+            incoming.rewardInventory.forEach((ii,i)=>{
+              if(S.rewardInventory[i]&&ii.status!==S.rewardInventory[i].status){
+                S.rewardInventory[i].status=ii.status;
+                if(ii.approvedBy)S.rewardInventory[i].approvedBy=ii.approvedBy;
+                if(ii.approvedAt)S.rewardInventory[i].approvedAt=ii.approvedAt;
+                if(ii.requestId)S.rewardInventory[i].requestId=ii.requestId;
+                riChanged=true;
+              }
+            });
+            if(riChanged)renderAll();
+          }
+          // Merge rewardNotify (보상 알림 트리거)
+          if(incoming.rewardNotify&&incoming.rewardNotify.ts){
+            const localTs=S.rewardNotify?.ts||0;
+            if(incoming.rewardNotify.ts>localTs){
+              S.rewardNotify=incoming.rewardNotify;
+            }
           }
         }catch(e){}
         console.log('🛡️ 로컬 변경 보호: 외부 변경 일부만 머지');
