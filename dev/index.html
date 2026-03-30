@@ -984,8 +984,8 @@ body.dark .pin-key.ck{background:transparent}
 /* AUTH SCREENS */
 .auth-screen{position:fixed;inset:0;background:linear-gradient(135deg,#6366F1,#818CF8);z-index:1000;display:flex;flex-direction:column;align-items:center;padding:20px;padding-top:max(24px, calc(env(safe-area-inset-top, 0px) + 16px));padding-bottom:max(20px, env(safe-area-inset-bottom, 0px));overflow-y:auto;-webkit-overflow-scrolling:touch}
 .auth-screen.hidden{display:none}
-body.auth-active{background:linear-gradient(135deg,#6366F1,#8B5CF6)}
-html:has(body.auth-active){background:#6366F1!important}
+body.auth-active{background:linear-gradient(160deg,#3730A3 0%,#4F46E5 40%,#6366F1 70%,#7C3AED 100%);overflow:hidden;max-width:none}
+html:has(body.auth-active){background:#3730A3!important;overflow:hidden}
 #auth-insight .toss-cta{margin:0 24px;padding-left:0;padding-right:0}
 .auth-card{background:#fff;border-radius:24px;padding:32px 28px;width:100%;max-width:380px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2);margin:auto;flex-shrink:0}
 @media(min-width:768px){.auth-card{max-width:440px;padding:40px 36px}.auth-title{font-size:28px}.auth-sub{font-size:14px}.auth-input{padding:16px 18px;font-size:16px}}
