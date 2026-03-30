@@ -6092,6 +6092,7 @@ function linkSocialFromMyMenu(){
   overlay.id='social-link-sheet-overlay';
   overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:9998;opacity:0;transition:opacity .25s';
   const sheet=document.createElement('div');
+  sheet.id='social-link-sheet';
   sheet.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:9999;background:var(--card,#fff);border-radius:20px 20px 0 0;padding:24px 20px max(24px,env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1)';
   sheet.innerHTML=`
     <div style="width:36px;height:4px;background:var(--border,#E2E8F0);border-radius:2px;margin:0 auto 18px"></div>
@@ -6117,19 +6118,32 @@ window.linkSocialFromMyMenu = linkSocialFromMyMenu;
 
 function _closeSocialLinkSheet(){
   const overlay=document.getElementById('social-link-sheet-overlay');
-  const sheets=document.querySelectorAll('[style*="z-index:9999"]');
+  const sheet=document.getElementById('social-link-sheet');
   if(overlay){overlay.style.opacity='0';setTimeout(()=>overlay.remove(),300);}
-  sheets.forEach(s=>{s.style.transform='translateY(100%)';setTimeout(()=>s.remove(),300);});
+  if(sheet){sheet.style.transform='translateY(100%)';setTimeout(()=>sheet.remove(),300);}
 }
 window._closeSocialLinkSheet=_closeSocialLinkSheet;
 
 async function _doLinkSocial(provider){
-  _closeSocialLinkSheet();
   if(!currentUser || !_familyId) return;
+  // ★ 카카오/네이버: 사용자 클릭 직후 즉시 팝업 열기 (async gap 최소화)
+  // 바텀시트는 팝업이 열린 후에 닫기 (사용자 제스처 체인 보존)
+  let loginResult = null;
   try {
-    if(!_firebaseReady) await _initFirebase();
-    let uid, email, providerName;
-    if(provider === 'google'){
+    if(provider === 'kakao'){
+      // 카카오: SDK 이미 로드됨 (프리로드) → 즉시 팝업
+      loginResult = await _doKakaoLogin();
+      _closeSocialLinkSheet();
+      if(!loginResult) return;
+    } else if(provider === 'naver'){
+      // 네이버: 즉시 팝업 열기
+      loginResult = await _doNaverLogin();
+      _closeSocialLinkSheet();
+      if(!loginResult) return;
+    } else if(provider === 'google'){
+      // 구글: Firebase signInWithPopup 사용
+      _closeSocialLinkSheet();
+      if(!_firebaseReady) await _initFirebase();
       if(!fbAuth){ toast('Firebase 초기화 실패'); return; }
       window._myMenuSocialLink = true;
       const gProv = new GoogleAuthProvider();
@@ -6137,23 +6151,14 @@ async function _doLinkSocial(provider){
       const result = await signInWithPopup(fbAuth, gProv);
       window._myMenuSocialLink = false;
       if(!result?.user) return;
-      uid = result.user.uid;
-      email = result.user.email || '';
-      providerName = 'Google';
-    } else if(provider === 'kakao'){
-      const result = await _doKakaoLogin();
-      if(!result) return;
-      uid = result.uid;
-      email = result.email || '';
-      providerName = '카카오';
-    } else if(provider === 'naver'){
-      const result = await _doNaverLogin();
-      if(!result) return;
-      uid = result.uid;
-      email = result.email || '';
-      providerName = '네이버';
+      loginResult = { uid: result.user.uid, email: result.user.email || '', provider: 'google' };
     }
-    if(!uid) return;
+    if(!loginResult || !loginResult.uid) return;
+    const uid = loginResult.uid;
+    const email = loginResult.email || '';
+    const providerName = provider === 'google' ? 'Google' : provider === 'kakao' ? '카카오' : '네이버';
+    // Firebase 초기화 확인 (카카오/네이버는 여기서)
+    if(!_firebaseReady) await _initFirebase();
     // auth registry 등록
     await _registerAuthLink(uid, _familyId, currentUser, provider, email);
     // 계정 데이터에 소셜 정보 추가
@@ -6165,6 +6170,7 @@ async function _doLinkSocial(provider){
     toast(`✅ ${providerName} 계정이 연결되었어요!`);
     console.log('[Social Link MyMenu]', provider, email, '→', _familyId, currentUser);
   } catch(e){
+    _closeSocialLinkSheet();
     window._myMenuSocialLink = false;
     if(e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request') return;
     console.error('[Social Link MyMenu Error]', e);
