@@ -2,7 +2,7 @@
 
 > 이 문서는 새 세션에서 실수 없이 개발·테스트·배포할 수 있도록 모든 핵심 정보를 담고 있습니다.
 > **새 세션 시작 시 반드시 이 문서를 먼저 읽을 것.**
-> 최종 업데이트: 2026-03-30 (인사말 확장, 미세먼지 AQI 변환 수정, 브라우저 theme-color, OG 메타태그)
+> 최종 업데이트: 2026-03-30 (Google 간편로그인 Phase 1 완료, 소셜 가입 플로우 구현)
 
 ---
 
@@ -422,30 +422,56 @@ save() 호출
 | 화면 ID | 용도 |
 |---------|------|
 | auth-welcome | 최초 진입 웰컴 |
+| auth-continue | 간편로그인 통합 진입점 (Google/카카오/네이버/이메일) |
+| auth-social-link | 소셜 인증 완료 후 (새로 시작 / 기존 연결 선택) |
 | auth-insight | 소개 캐러셀 (3슬라이드) |
 | auth-login | 로그인 (ID/PW) |
-| auth-create-1~5 | 가족 생성 5단계 |
+| auth-create-1~5 | 가족 생성 5단계 (소셜 사용자: ID/PW 단계 건너뜀) |
 | auth-create-done | 가족 생성 완료 |
 | auth-join-select | 가입 멤버 선택 |
 | auth-join-register | 가입 등록 |
 
 #### 5.8.2 인증 플로우
 ```
-앱 로드 → checkAuth()
+앱 로드 → _initFirebase() → _setupAuthListener() → checkAuth()
+  ├── social_pending='handled' → return (소셜 로그인 처리 중)
+  ├── social_pending 있음 → 5초 타임아웃 대기 후 로그인 화면
   ├── savedUser 있고 유효 → 자동 로그인 → postLoginInit() → renderAll()
   ├── familyMeta 있음 → 로그인 화면 표시
   └── 데이터 없음 → 웰컴 화면 표시
+
+소셜 로그인 플로우:
+  auth-continue → doSocialLogin('google') → signInWithPopup
+  → onAuthStateChanged 리스너 감지 → _handleSocialLoginResult()
+  → auth registry 확인 → 기존 사용자면 자동 로그인
+  → 신규 사용자면 auth-social-link 화면 표시
+  → "새로 시작하기" → socialLinkNewFamily() → _createState에 소셜 정보 세팅
+  → insight → create-1 (역할→이름, ID/PW 건너뜀) → create-2 (가족이름) → ...
 ```
 
 #### 5.8.3 핵심 함수
 - `checkAuth()` — 세션 복원 또는 로그인 화면 표시
 - `doLogin()` — ID/PW 검증 (SHA-512 해시)
+- `doSocialLogin(provider)` — Google 간편로그인 (signInWithPopup)
+- `_setupAuthListener()` — onAuthStateChanged로 소셜 로그인 결과 수신
+- `_handleSocialLoginResult(user, provider)` — 소셜 인증 후 처리 (auth registry 확인)
+- `socialLinkNewFamily()` — 소셜 사용자 신규 가입 시작 (ID/PW 건너뛰기)
+- `saveFamilyToFirestore()` — 가족 생성 저장 (소셜 사용자: authProvider/authUid/email)
+- `_registerAuthLink(uid, familyId, memberId, provider, email)` — Auth Registry 등록
 - `postLoginInit()` — 로그인 후 자녀 뷰 설정
 - `logout()` — 세션 해제
 - `hideAllAuth()` — 모든 인증 화면 숨김
 - `showAuthScreen(screen)` — 특정 인증 화면 표시
 
-#### 5.8.4 비밀번호 보안
+#### 5.8.4 소셜 로그인 기술 메모
+- **모바일 이슈**: `signInWithPopup` Promise 결과가 새 탭으로 전환 시 소실됨
+- **해결**: `onAuthStateChanged` 리스너 + `social_pending` localStorage 플래그
+- **플래그 값**: `'google'`(진행중), `'handled'`(처리완료), 없음(일반)
+- **race condition 방지**: `_socialAuthHandled` 변수로 중복 처리 방지
+- **소셜 사용자 account 구조**: `{authProvider:'google', authUid:uid, email:email, v:2}` (pwdHash 없음)
+- **검색어**: `doSocialLogin`, `_handleSocialLoginResult`, `social_pending`, `socialLinkNewFamily`
+
+#### 5.8.5 비밀번호 보안
 - SHA-512 해싱 (v2) 또는 레거시 해시
 - `hashPassword(pwd)` — 솔트 포함 해싱
 - `migratePinIfNeeded()` — PIN 해시 마이그레이션
@@ -761,24 +787,19 @@ git checkout <commit-hash> -- index.html       # 운영기 (긴급 시에만)
 
 ---
 
-## 13. 인증 시스템 개편 계획 (2026-03-30~)
+## 13. 인증 시스템 개편 (2026-03-30~)
 
-### 13.1 현재 인증 방식
-- 자체 ID/비밀번호 시스템 (Firebase Auth 미사용)
-- `S.users[memberId]`와 `familyMeta.members[].account`에 SHA-512 해시 저장
-- 글로벌 ID 레지스트리: `families/_id_registry` (또는 `_dev_id_registry`)
-- localStorage 기반 세션 관리
+### 13.1 인증 방식 (현재 상태)
+- **기존**: 자체 ID/비밀번호 (SHA-512 해시, 글로벌 ID 레지스트리)
+- **신규 (Phase 1 완료)**: Google 간편로그인 (`signInWithPopup` + `onAuthStateChanged`)
 
-### 13.2 새 인증 방식 (병행 운영)
-기존 ID/비밀번호 로그인을 유지하면서 아래 방식을 추가:
-
-| 방식 | 구현 방법 | 비밀번호 |
-|------|-----------|----------|
-| 기존 ID/PW | 현행 유지 | 있음 |
-| 구글 간편로그인 | Firebase Auth `GoogleAuthProvider` | 없음 |
-| 카카오 간편로그인 | Kakao JS SDK → Cloud Functions 커스텀 토큰 | 없음 |
-| 네이버 간편로그인 | Naver Login SDK → Cloud Functions 커스텀 토큰 | 없음 |
-| 이메일 인증 | Cloud Functions로 6자리 코드 발송 → 검증 | 없음 |
+| 방식 | 구현 방법 | 상태 |
+|------|-----------|------|
+| 기존 ID/PW | 현행 유지 | ✅ 운영 중 |
+| 구글 간편로그인 | Firebase Auth `signInWithPopup(GoogleAuthProvider)` | ✅ 구현 완료 |
+| 카카오 간편로그인 | Kakao JS SDK → Cloud Functions 커스텀 토큰 | 미구현 |
+| 네이버 간편로그인 | Naver Login SDK → Cloud Functions 커스텀 토큰 | 미구현 |
+| 이메일 인증 | Cloud Functions로 6자리 코드 발송 → 검증 | 미구현 |
 
 ### 13.3 Firebase 플랜
 - **Blaze(종량제) 플랜 사용 중** (확인 필요: Firebase Console → 설정 → 사용량 및 결제)
@@ -794,42 +815,46 @@ git checkout <commit-hash> -- index.html       # 운영기 (긴급 시에만)
 
 ### 13.5 구현 Phase
 
-**Phase 1: Firebase Auth SDK + Google 간편로그인**
-- Firebase Auth SDK import 추가
-- Google Sign-In 버튼 → `signInWithPopup(GoogleAuthProvider)`
-- Firebase Auth UID ↔ familyMeta 연결 (`account.authUid`, `account.authProvider`)
-- 로그인 화면 UI 개편 (간편로그인 버튼 추가)
+**Phase 1: Firebase Auth SDK + Google 간편로그인 ✅ 완료 (2026-03-30)**
+- Firebase Auth SDK import (`firebase-auth.js` v10.12.0)
+- Firebase Console: Google provider 활성화, `kwakhyoshin.github.io` 도메인 추가
+- `signInWithPopup(GoogleAuthProvider)` + `onAuthStateChanged` 리스너 (모바일 대응)
+- `social_pending` localStorage 플래그로 `checkAuth()`와 race condition 방지
+- Auth 화면: welcome → auth-continue → social-link → create wizard
+- 소셜 로그인 가입 시: ID/비밀번호 생성 단계 건너뛰기, Google 이름 자동 입력
+- `saveFamilyToFirestore()`에서 소셜 사용자 계정 정보 저장 (`authProvider`, `authUid`, `email`)
+- Auth Registry: `families/_dev_auth_registry`에 UID → familyId/memberId 자동 등록
 
-**Phase 2: Cloud Functions + 이메일 인증**
+**Phase 2: Cloud Functions + 이메일 인증** (미구현)
 - `functions/` 디렉토리 생성, Firebase Functions 초기화
 - `sendVerificationCode`: 6자리 코드 생성 → Firestore 임시 저장 → 이메일 발송
 - `verifyCode`: 코드 검증 → Firebase Custom Token 발급
 - 이메일 인증 UI (이메일 입력 → 코드 입력 → 완료)
 
-**Phase 3: 카카오/네이버 간편로그인**
+**Phase 3: 카카오/네이버 간편로그인** (미구현)
 - 카카오 개발자 앱 등록 → REST API Key 획득
 - 네이버 개발자 앱 등록 → Client ID/Secret 획득
 - Cloud Functions: OAuth 콜백 → 커스텀 토큰 발급
 - 로그인 화면에 카카오/네이버 버튼 추가
 
-**Phase 4: 기존 ID 병행 + 초대 플로우 업데이트**
+**Phase 4: 기존 ID 병행 + 초대 플로우 업데이트** (미구현)
 - 기존 `doLogin()` 유지, 새 인증과 병행
 - 초대 링크 수락 화면에 간편로그인 옵션 추가
 - 기존 사용자 ↔ Firebase Auth 계정 연결 마이그레이션
 
 ### 13.6 Firestore 스키마 변경
 ```javascript
-// familyMeta.members[memberId].account 확장
+// 기존 ID/PW 사용자 — 변경 없음
+account: { id: string, pwdHash: string, v: 2 }
+
+// 소셜 로그인 사용자 (Phase 1 구현)
 account: {
-  id: string,           // 기존 로그인 ID (유지)
-  pwdHash: string,      // 기존 비밀번호 해시 (유지)
-  v: 2,                 // 기존 버전 (유지)
-  // ── 신규 필드 ──
-  authUid: string,      // Firebase Auth UID
-  authProvider: 'google'|'kakao'|'naver'|'email'|null,
-  email: string,        // 인증된 이메일 주소
-  emailVerified: boolean
+  authProvider: 'google',     // 인증 제공자
+  authUid: string,            // Firebase Auth UID
+  email: string,              // Google 이메일
+  v: 2
 }
+// S.users[memberId]도 동일한 구조
 
 // 글로벌 레지스트리 확장 (families/_auth_registry)
 {
