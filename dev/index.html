@@ -2723,7 +2723,7 @@ button:disabled {
       <button class="auth-btn" id="verify-code-btn" onclick="verifyCode()">인증 확인</button>
       <div class="auth-link" id="resend-link" onclick="sendVerificationCode()" style="margin-top:12px;font-size:13px">인증코드 다시 받기 <span id="resend-timer"></span></div>
     </div>
-    <div class="auth-link" onclick="showAuthScreen('login')" style="margin-top:16px">← 로그인으로 돌아가기</div>
+    <div class="auth-link" onclick="showAuthScreen('continue')" style="margin-top:16px">← 로그인으로 돌아가기</div>
   </div>
 </div>
 
@@ -6122,8 +6122,8 @@ function joinRegGoBack(){
     // 구성원 선택에서 왔으면 선택 화면으로
     showAuthScreen('join-select');
   } else {
-    // 초대 링크에서 바로 왔으면 로그인 화면으로
-    showAuthScreen('login');
+    // 초대 링크에서 바로 왔으면 통합 로그인 화면으로
+    showAuthScreen('continue');
   }
 }
 
@@ -6962,8 +6962,8 @@ async function socialLinkExisting(){
   localStorage.removeItem(_LS_PREFIX+'social_pending'); // 정리
   // _pendingSocialUser를 _socialLinkPendingUser에 보관 (doLogin 성공 후 연동용)
   window._socialLinkPendingUser = _pendingSocialUser;
-  showAuthScreen('login');
-  const errEl = document.getElementById('login-error');
+  showAuthScreen('continue');
+  const errEl = document.getElementById('continue-login-error');
   if(errEl) errEl.textContent = '기존 아이디로 로그인하면 소셜 계정이 연결돼요';
 }
 
@@ -7042,12 +7042,15 @@ async function sendVerificationCode(){
     // Step 2 표시
     document.getElementById('email-step1').style.display = 'none';
     document.getElementById('email-step2').style.display = 'block';
-    document.getElementById('email-verify-sub').textContent = `${email}로 인증코드를 보냈어요`;
+    const subMsg = _ENV==='dev'
+      ? `${email}로 인증코드를 보냈어요\n(개발모드 인증코드: ${code})`
+      : `${email}로 인증코드를 보냈어요`;
+    document.getElementById('email-verify-sub').textContent = subMsg;
     document.getElementById('code-1').focus();
 
     // 재전송 타이머 (60초)
     _startResendTimer(60);
-    toast('인증코드가 발송되었어요 (개발: 콘솔 확인)');
+    toast(_ENV==='dev' ? `인증코드: ${code}` : '인증코드가 발송되었어요');
 
   } catch(e){
     console.error('[Email Verify Error]', e);
@@ -15131,13 +15134,13 @@ async function checkUrlParams(){
 
       if(!validToken){
         toast('❌ 만료되거나 유효하지 않은 초대 링크예요');
-        showAuthScreen('login');
+        showAuthScreen('continue');
         return;
       }
 
       const mid=validToken.memberId;
       const member=fm[mid];
-      if(!member){toast('❌ 구성원 정보를 찾을 수 없어요');showAuthScreen('login');return;}
+      if(!member){toast('❌ 구성원 정보를 찾을 수 없어요');showAuthScreen('continue');return;}
 
       const rd=ROLE_DEFS[member.displayRole||member.role]||ROLE_DEFS.child;
       const familyName=S.familyMeta?.familyName||'가족';
