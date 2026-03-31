@@ -49,13 +49,13 @@ main 브랜치
 └── dev_guide.md        ← 공식 개발 가이드
 ```
 
-### 작업 절차
+### 개발기 작업 절차 (feature 브랜치)
 ```bash
 # 1. 최신 main에서 feature 브랜치 생성
 git checkout main && git pull origin main
 git checkout -b feature/기능명
 
-# 2. 코드 수정 (dev/index.html)
+# 2. 코드 수정 (dev/index.html만)
 #    ... 수정 작업 ...
 
 # 3. 커밋 & 푸시
@@ -71,6 +71,49 @@ gh pr merge --merge
 git checkout main && git pull
 git branch -d feature/기능명
 ```
+
+### 운영기 배포 절차 (release 브랜치)
+사용자가 운영 반영을 요청한 경우에만 진행한다.
+```bash
+# 1. 최신 main에서 release 브랜치 생성
+git checkout main && git pull origin main
+git checkout -b release/v날짜
+
+# 2. dev/index.html 내용을 루트 index.html에 반영
+#    - dev/index.html → index.html로 복사
+#    - _ENV='dev' → _ENV='prod' 변경
+#    - 반드시 diff로 변경 내용 사용자에게 보여주고 승인받기
+
+# 3. 커밋 & 푸시
+git add index.html
+git commit -m "release: 운영 반영 설명"
+git push origin release/v날짜
+
+# 4. PR 생성 → diff 확인
+gh pr create --title "release: 운영 반영" --body "변경 내용"
+
+# 5. 통시테스트 (release 브랜치의 GitHub Pages로 검증)
+#    - 사용자가 운영기 동작 확인
+#    - 문제 발견 시 release 브랜치에서 수정 후 재테스트
+
+# 6. 통시테스트 통과 → main에 merge
+gh pr merge --merge
+git checkout main && git pull
+
+# 7. main 배포 후 최종 테스트
+#    - 사용자가 실제 운영 URL에서 최종 확인
+#    - 문제 시 git revert로 롤백
+
+# 8. release 브랜치 삭제
+git branch -d release/v날짜
+git push origin --delete release/v날짜
+```
+
+### 운영기 배포 시 주의사항
+- `_ENV='prod'` 유지 반드시 확인 (가장 중요)
+- dev/index.html과 index.html의 diff를 사용자에게 보여주고 **승인 후** merge
+- 통시테스트 없이 main merge 금지
+- 문제 발생 시 즉시 `git revert`로 롤백
 
 ### main 직접 커밋 허용 범위
 다음 파일들만 main에 직접 커밋 허용 (코드 변경 아님):
