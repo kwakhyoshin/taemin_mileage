@@ -1460,8 +1460,86 @@ account: {
 - `.log-inf`: `overflow:visible` 명시 추가
 - `bubbleDangle` 애니메이션의 rotate + translateY로 인한 아바타 클리핑 방지
 
+### 2026-04-01 세션 (9차) — 역할선택 UX + 성별 SVG + 도장 개선 + 말풍선 근본 수정
+
+#### 커밋 목록
+- PR #32: 역할 미선택 시 다음 버튼 비활성화 + 성별 SVG 아이콘 + 네이버 아이콘 확대 + 도장 애니메이션 개선 (DEV v0401p)
+- PR #33: 활동기록 탭 말풍선 잘림 근본 수정 — stickerHTML을 .log-inf 밖 .log-item 직접 자식으로 이동 (DEV v0401q)
+- PR #34: 도장 사라짐 수정 시도 1 — setTimeout 지연 (실패, PR #36으로 대체)
+- PR #35: 남자 성별 SVG 아이콘 수정 — user-x → ♂ Mars 심볼 (DEV v0401s)
+- PR #36: 도장 사라짐 근본 수정 — _actAnimating 글로벌 가드로 renderAll() 차단 (DEV v0401t)
+- PR #37: 도장 애니메이션 개선 — big/blurry→small/sharp slam 효과 (DEV v0401u)
+- PR #38: 완료된 활동에 정적 도장 추가 — renderAll 후에도 유지되는 정적 SVG 도장 (DEV v0401v)
+- PR #39: 도장 위치 우측 정렬 (DEV v0401w)
+
+#### PR #32: 역할 선택 UX + 성별 SVG + 도장 개선
+- **역할 선택**: 미선택 시 에러 메시지 대신 다음 버튼 `disabled` + `opacity:.4` + `pointer-events:none`
+  - `selectCreateRole()`에서 버튼 활성화
+  - `.auth-error` margin-bottom:100px → margin-top:8px (이너스크롤 원인 제거)
+- **성별 SVG 아이콘**: 이모지(♂️/♀️) 대신 SVG 아이콘 사용 (프로젝트 지침: 활동/보상 목록 외 이모지 금지)
+  - 남자: Mars 심볼 (원+대각선 화살표), 여자: Venus 심볼 (원+십자가)
+- **네이버 아이콘**: width 20→24로 확대
+- **완료 도장**: stampSlam 애니메이션 scale(3.5)→scale(1) + blur(3px)→blur(0) slam 효과
+
+#### PR #33: 말풍선 잘림 근본 수정
+- **근본 원인**: `.log-inf`가 `flex:1;min-width:0`으로 `.log-right`과 폭을 경쟁 → 내부 `.log-sticker-area`가 잘림
+- **해결**: `stickerHTML`을 `.log-inf` 내부에서 `.log-item` 직접 자식으로 이동 + `flex-wrap:wrap`으로 전체 폭 사용
+
+#### PR #36: _actAnimating 가드
+- **근본 원인**: `save()` → Firestore `onSnapshot` → `renderAll()` 체인이 도장 애니메이션 중에 발동 → DOM 재구성으로 도장 사라짐
+- **해결**: `let _actAnimating = false;` 글로벌 플래그
+  - 완료 애니메이션 시작 시 `_actAnimating = true`
+  - `renderAll()` 진입 시 `if(_actAnimating){_actAnimating='pending';return;}`
+  - 애니메이션 종료 후 `_actAnimating=false; renderAll();`
+
+#### PR #38: 정적 도장 (renderAll 내구성)
+- 홈 카드: `.card-done-stamp` (56px, right:8px, rotate(-15deg), opacity:.75)
+- 활동기록: `.log-done-stamp` (38px, .log-inf 내부 right:0, rotate(-15deg), opacity:.7)
+- `renderAll()` 재호출해도 도장이 유지됨 (render 템플릿에 포함)
+
+### 2026-04-01 세션 (10차) — 도장 위치 + 초대 소셜 로그인 + 멤버 이름 표시
+
+#### 커밋 목록
+- PR #40: 활동기록 탭 도장 위치를 아이템 중앙으로, 크기 축소 (DEV v0401x)
+- PR #41: 초대 가입 플로우에 소셜 로그인(Google/카카오/네이버) 추가 (DEV v0401y)
+- PR #42: 스티커/말풍선 상세에서 멤버 이름 표시 수정 (DEV v0401z)
+- PR #43: 활동기록 탭 정적 도장 위치를 right:130px로 수정 (DEV v0401z2)
+- PR #44: 초대 가입 소셜 로그인 버튼 클릭 불가 수정 — 전역 스코프 노출 (DEV v0401z3)
+- PR #45: 초대 가입 시 안내 메시지 표시 + 직접 링크 진입 시 방법 선택 화면 시작 (DEV v0401z4)
+- PR #46: 활동기록 도장 위치 근본 수정 — .log-inf 안으로 이동 (DEV v0401z5)
+
+#### PR #41: 초대 가입 소셜 로그인
+- `auth-join-register`에 방법 선택 슬라이드(`jr-slide-method`) 추가
+  - Google / 카카오 / 네이버 소셜 로그인 버튼
+  - "또는" 구분선 + "아이디/비밀번호로 가입" 버튼
+  - 네이버: `_showNaverPendingNotice()` 팝업 (심사 대기 중)
+- `doJoinSocialLogin(provider)` 함수:
+  - 소셜 인증(Firebase popup) → 멤버 계정 연결 → auth registry 등록 → 토큰 소비 → 로그인 완료
+  - 이미 다른 가족에 연결된 UID 감지 시 거부
+  - 프로필 사진 자동 저장 (`S.photos[mid]`)
+- `jrGoToIdPw()`: 방법 선택 → ID/PW 슬라이드 전환
+- 프로그레스 바: 3단계(0% → 33% → 66%)
+
+#### PR #42: getUserDisplayName() 수정
+- **문제**: 스티커/말풍선 상세에서 보낸 사람이 `m_mnex55xy_alyc` 같은 원시 멤버 ID로 표시
+- **원인**: `S.users[userId]`에 `name` 필드가 없고 `S.familyMeta.members`를 확인하지 않음
+- **수정**: `S.familyMeta.members`를 우선 조회 (항상 name 보유) → S.users → 하드코딩 폴백 순서
+
+#### PR #44: 전역 스코프 노출 누락
+- **문제**: `doJoinSocialLogin`, `jrGoToIdPw` 함수를 `<script type="module">` 전역 노출 목록에 추가하지 않아 onclick 호출 불가
+- **교훈**: module 스코프에서 정의한 함수는 반드시 전역 할당 목록(파일 하단)에 추가해야 인라인 onclick에서 호출 가능
+
+#### PR #46: 도장 위치 근본 수정
+- **문제**: `display:flex` 컨테이너(`.log-item`)에서 `position:absolute` 자식의 containing block이 모바일 Safari에서 불안정 → 모든 도장이 한 곳에 겹침
+- **해결**: 도장을 `.log-inf`(텍스트 영역) 안으로 이동
+  - `.log-inf`에 `position:relative` 추가
+  - 정적 도장(`_stampHTML`): `.log-inf` 마지막 자식으로 렌더링
+  - 애니메이션 도장: `_logItem.querySelector('.log-inf')` 에 appendChild
+  - CSS `right:0`으로 텍스트 영역 오른쪽 끝 배치
+
 #### 미완료 / 추가 확인 필요
 - 운영기 미적용 — 운영기 반영 시 release 브랜치 → PR → merge 절차 사용
 - 회원 탈퇴 후 Firebase Authentication 계정 자체 삭제는 미구현 (signOut만 수행). 필요 시 Firebase Admin SDK 또는 Cloud Function으로 처리 가능
 - 네이버 로그인 검수 재제출 필요 (서비스 소개 문서 + 로그인 플로우 스크린샷)
 - 카카오 개발자 콘솔에서 닉네임 동의항목 활성화 필요
+- 초대 가입 소셜 로그인: 네이버 심사 완료 후 실제 네이버 가입 플로우 테스트 필요
