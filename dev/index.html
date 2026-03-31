@@ -6266,7 +6266,7 @@ function linkSocialFromMyMenu(){
       <button onclick="_doLinkSocial('kakao')" style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:#FEE500;border:none;border-radius:12px;cursor:pointer;font-size:14px;font-weight:600;color:#191919;width:100%">
         ${_kSvg} 카카오 계정으로 연동
       </button>
-      <button onclick="_doLinkSocial('naver')" style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:#03C75A;border:none;border-radius:12px;cursor:pointer;font-size:14px;font-weight:600;color:#fff;width:100%">
+      <button onclick="_showNaverPendingNotice();_closeSocialLinkSheet()" style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:#03C75A;border:none;border-radius:12px;cursor:pointer;font-size:14px;font-weight:600;color:#fff;width:100%">
         ${_nSvg} 네이버 아이디로 연동
       </button>
     </div>
@@ -6748,6 +6748,25 @@ function postLoginInit(){
 }
 
 // ── 회원 탈퇴 ──────────────────────────────────
+function _showNaverPendingNotice(){
+  _socialLoginPending=false;
+  const overlay=document.createElement('div');
+  overlay.id='naver-pending-overlay';
+  overlay.style.cssText='position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .25s';
+  overlay.innerHTML=`<div style="background:#fff;border-radius:24px;padding:32px 24px 24px;max-width:320px;width:88%;box-shadow:0 24px 64px rgba(0,0,0,.2);text-align:center;transform:scale(.92);transition:transform .3s cubic-bezier(.175,.885,.32,1.275)">
+    <div style="width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#03C75A 0%,#00B843 100%);display:flex;align-items:center;justify-content:center;margin:0 auto 18px;box-shadow:0 8px 24px rgba(3,199,90,.25)">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15l-1-1v-4l1-1h2l1 1v4l-1 1h-2zm0-8l-1-1V7l1-1h2l1 1v1l-1 1h-2z" fill="white"/></svg>
+    </div>
+    <div style="font-size:17px;font-weight:800;color:#1E293B;margin-bottom:10px">네이버 로그인 준비 중</div>
+    <div style="font-size:13.5px;color:#64748B;line-height:1.65;margin-bottom:6px">네이버 로그인은 현재 <b style="color:#03C75A">개발 심사 중</b>이에요.</div>
+    <div style="font-size:12.5px;color:#94A3B8;line-height:1.6;margin-bottom:24px">승인이 완료되면 바로 사용할 수 있어요.<br>조금만 기다려주세요!</div>
+    <button onclick="this.closest('#naver-pending-overlay').style.opacity='0';setTimeout(()=>document.getElementById('naver-pending-overlay')?.remove(),250)" style="width:100%;padding:14px;background:linear-gradient(135deg,#03C75A 0%,#00B843 100%);color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 16px rgba(3,199,90,.25)">확인</button>
+  </div>`;
+  document.body.appendChild(overlay);
+  requestAnimationFrame(()=>{overlay.style.opacity='1';overlay.querySelector('div>div').style.transform='scale(1)';});
+}
+window._showNaverPendingNotice=_showNaverPendingNotice;
+
 function _showWithdrawModal(title, body, confirmText, onConfirm){
   const overlay=document.createElement('div');
   overlay.id='withdraw-modal-overlay';
@@ -7255,8 +7274,10 @@ async function doSocialLogin(provider){
       return;
     }
 
-    // ── 네이버 로그인 ──
+    // ── 네이버 로그인 (심사 대기 중) ──
     if(provider === 'naver'){
+      _showNaverPendingNotice();
+      return;
       // ★ 모바일에서 parent 탭 리로드 시 결과 수신을 위해 social_pending 설정
       localStorage.setItem(_LS_PREFIX+'social_pending', 'naver');
       try {
@@ -8265,7 +8286,7 @@ const BADGES = [
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
-if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401l';}}
+if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401m';}}
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
