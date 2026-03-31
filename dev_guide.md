@@ -1037,11 +1037,11 @@ account: {
 
 ## 변경 이력 (Change Log)
 
-### 2026-04-01 세션 — 소셜 로그인/연동 최적화
+### 2026-04-01 세션 — 소셜 로그인/연동 최적화 + 관리자 메뉴 재구성
 
 **적용 범위: 개발기 (main/dev/index.html)**
 
-#### 커밋 목록 (PR #15~#19)
+#### 커밋 목록 (PR #15~#20)
 | PR | 설명 | 상태 |
 |----|------|------|
 | #15 | fix: 첫 화면 시작하기(welcome) 표시 복원 | ✅ merged |
@@ -1049,6 +1049,7 @@ account: {
 | #17 | fix: 소셜 연동 해제 후 재연동 시 선택화면 표시 (auth registry 삭제) | ✅ merged |
 | #18 | fix: 구글 소셜 로그인 속도 개선 (Promise.all 병렬 처리) | ✅ merged |
 | #19 | fix: 소셜 연동 로그인 즉시 반영 (10초 지연 해결) | ✅ merged |
+| #20 | feat: 관리자 메뉴 재구성 + 구글 프로필 사진 + getUserName 수정 | ✅ merged |
 
 #### 상세 변경 내용
 
@@ -1071,6 +1072,29 @@ account: {
 **PR #19: 소셜 연동 즉시 반영 (DEV v0401c)**
 - 문제: `_linkSocialAfterLogin()`이 fire-and-forget으로 별도 `save()` 실행, `doLogin()`의 `save()`와 경쟁 → 나의 메뉴에서 10초 뒤에야 연동 표시
 - 수정: `_applySocialLinkToMemory(memberId)`를 `doLogin()` 3개 분기에서 `save()` 전에 호출하여 소셜 데이터가 로그인 save()에 포함되도록 변경. auth registry 쓰기는 non-blocking background 처리
+
+**PR #20: 관리자 메뉴 재구성 + 구글 프로필 사진 + getUserName 수정 (DEV v0401d)**
+
+*관리자 메뉴 탭 순서 변경:*
+- 기존: 활동(0) → 보상(1) → 뱃지(2) → 설정(3) → 가족(4)
+- 변경: 활동(0) → 보상(1) → 뱃지(2) → 가족(3) → 설정(4)
+- adm-p3/adm-p4 패널 ID 교체, admTab() 함수 업데이트
+
+*설정 탭 항목 재배치:*
+- **활동 탭으로 이동**: 7일 연속 달성 보너스 토글 + 보너스 마일리지 입력
+- **가족 탭으로 이동**: 생일 이벤트 설정 (토글+마일리지+축하메시지), 가족 프로필 사진 관리
+- **설정 탭에서 제거**: 표시 설정(다크모드), 알림 설정(푸시알림), 계정(로그아웃) — 모두 나의 메뉴에 중복
+- **고급설정 accordion 제거**: 스마트 메시지, 인사말, 알림테스트, 백업/복원, PIN, 데이터관리, 캐시, 앱정보를 설정 탭에서 직접 표시
+
+*구글 프로필 사진 연동:*
+- `_applySocialLinkToMemory()`: `su.profileImage`가 있으면 `S.photos[memberId]`에 저장
+- `_loginToFamily()`: 6번째 파라미터 `profileImage` 추가, Firestore 저장 시 포함
+- `_handleSocialLoginResult()`의 3개 `_loginToFamily()` 호출에 `profileImage` 전달
+
+*버그 수정:*
+- `_loginToFamily()` line ~7381: `getUserName(memberId)` → `MEMBERS[memberId]?.name` (함수 미정의 에러)
+- 증상: 소셜 로그인 후 `[E2-loginFamily] Can't find variable: getUserName` 토스트 표시
+- 원인: `getUserName`이라는 함수가 어디에도 정의되지 않음
 
 ### 2026-03-30 세션 — 소셜 로그인 버그 수정 + 알림 뱃지 수정
 
