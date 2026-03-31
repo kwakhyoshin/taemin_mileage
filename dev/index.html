@@ -1204,7 +1204,7 @@ body.dark .reg-substep.done{background:#4F46E5}
 .toss-role-grid .role-card.selected{border-color:var(--rc,#6366F1);background:var(--rb,#EEF2FF);box-shadow:0 2px 12px rgba(99,102,241,.15)}
 .toss-role-grid .role-icon{width:56px;height:56px;margin:0 auto 2px;border-radius:50%;overflow:hidden}
 .toss-role-grid .role-name{font-size:13px;font-weight:800;color:#1E293B}
-.toss-role-grid+.auth-error{margin-bottom:100px}
+.toss-role-grid+.auth-error{margin-top:8px}
 .toss-add-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;width:100%;box-sizing:border-box}
 .toss-add-btn{padding:12px 8px;border-radius:12px;border:2px dashed;cursor:pointer;font-family:inherit;font-size:13px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:4px;transition:all .2s;-webkit-tap-highlight-color:transparent;background:none;width:100%;box-sizing:border-box;min-width:0}
 .toss-add-btn-caregiver{background:#EEF2FF;border-color:#C7D2FE;color:#6366F1}
@@ -1837,19 +1837,13 @@ body.dark .bubble-speech-log{background:rgba(255,255,255,.12);color:rgba(255,255
 /* Activity completion flip animation */
 @keyframes actFlip{0%{transform:perspective(800px) rotateY(0deg) scale(1)}40%{transform:perspective(800px) rotateY(180deg) scale(1.05)}70%{transform:perspective(800px) rotateY(360deg) scale(1.08)}100%{transform:perspective(800px) rotateY(360deg) scale(1)}}
 @keyframes actFlipGlow{0%{box-shadow:0 2px 8px rgba(0,0,0,.04)}40%{box-shadow:0 8px 32px rgba(16,185,129,.4)}70%{box-shadow:0 12px 40px rgba(16,185,129,.5)}100%{box-shadow:0 4px 16px rgba(16,185,129,.12)}}
-@keyframes actCheckPop{0%{transform:scale(0) rotate(-45deg);opacity:0}50%{transform:scale(1.3) rotate(10deg);opacity:1}100%{transform:scale(1) rotate(0deg);opacity:1}}
-@keyframes stampSlam{0%{transform:scale(3) rotate(-25deg);opacity:0}40%{transform:scale(1.1) rotate(-12deg);opacity:.85}60%{transform:scale(.95) rotate(-18deg);opacity:.8}100%{transform:scale(1) rotate(-15deg);opacity:.75}}
+@keyframes stampSlam{0%{transform:translateY(-40px) scale(2.5) rotate(-25deg);opacity:0}30%{transform:translateY(4px) scale(1.05) rotate(-14deg);opacity:.9}50%{transform:translateY(-2px) scale(.97) rotate(-16deg);opacity:.85}70%{transform:translateY(1px) scale(1.01) rotate(-15deg);opacity:.8}100%{transform:translateY(0) scale(1) rotate(-15deg);opacity:.78}}
 .act-card.act-completing{animation:actFlip .8s cubic-bezier(.25,.46,.45,.94) forwards,actFlipGlow .8s ease forwards;transform-style:preserve-3d;z-index:10}
-.act-card.act-completing .act-check-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:2;pointer-events:none}
-.act-card.act-completing .act-check-overlay .act-check-icon{animation:actCheckPop .4s cubic-bezier(.34,1.56,.64,1) forwards;animation-delay:.4s;opacity:0;font-size:42px;filter:drop-shadow(0 2px 8px rgba(16,185,129,.5))}
-.completion-stamp{position:absolute;bottom:6px;right:6px;width:52px;height:52px;opacity:0;pointer-events:none;z-index:1;animation:stampSlam .5s cubic-bezier(.22,1,.36,1) forwards;animation-delay:.35s;filter:drop-shadow(0 2px 6px rgba(16,185,129,.4))}
+.completion-stamp{position:absolute;top:50%;left:50%;width:64px;height:64px;margin:-32px 0 0 -32px;opacity:0;pointer-events:none;z-index:8;animation:stampSlam .45s cubic-bezier(.22,1,.36,1) forwards;animation-delay:.65s;filter:drop-shadow(0 3px 8px rgba(16,185,129,.5))}
 /* Log item completion animation */
 @keyframes logItemFlash{0%{background:transparent}30%{background:rgba(16,185,129,.2)}100%{background:transparent}}
-@keyframes logCheckPop{0%{transform:scale(0);opacity:0}50%{transform:scale(1.3);opacity:1}100%{transform:scale(1);opacity:1}}
 .log-item.log-completing{animation:logItemFlash .8s ease forwards;position:relative}
-.log-item.log-completing .log-check-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:2;pointer-events:none}
-.log-item.log-completing .log-check-overlay .log-check-icon{animation:logCheckPop .4s cubic-bezier(.34,1.56,.64,1) forwards;animation-delay:.2s;opacity:0;font-size:36px;filter:drop-shadow(0 2px 8px rgba(16,185,129,.5))}
-.log-completion-stamp{position:absolute;top:50%;right:80px;width:44px;height:44px;transform:translateY(-50%);opacity:0;pointer-events:none;z-index:1;animation:stampSlam .5s cubic-bezier(.22,1,.36,1) forwards;animation-delay:.2s;filter:drop-shadow(0 2px 6px rgba(16,185,129,.4))}
+.log-completion-stamp{position:absolute;top:50%;left:50%;width:52px;height:52px;margin:-26px 0 0 -26px;opacity:0;pointer-events:none;z-index:8;animation:stampSlam .45s cubic-bezier(.22,1,.36,1) forwards;animation-delay:.35s;filter:drop-shadow(0 3px 8px rgba(16,185,129,.5))}
 
 /* Member count stepper */
 .member-count-stepper{display:flex;align-items:center;justify-content:center;gap:16px;margin:16px 0;padding:16px;background:var(--bg2);border-radius:12px}
@@ -2714,7 +2708,7 @@ requestAnimationFrame(function(){
         <span>카카오로 계속하기</span>
       </button>
       <button class="social-btn social-naver" onclick="doSocialLogin('naver')">
-        <svg width="20" height="20" viewBox="0 0 24 24"><path d="M16.27 3H7.73A4.73 4.73 0 003 7.73v8.54A4.73 4.73 0 007.73 21h8.54A4.73 4.73 0 0021 16.27V7.73A4.73 4.73 0 0016.27 3zm-2.8 11.76l-2.97-4.26v4.26H8.25V9.24h2.28l2.97 4.26V9.24h2.25v5.52h-2.28z" fill="#fff"/></svg>
+        <svg width="24" height="24" viewBox="0 0 24 24"><path d="M16.27 3H7.73A4.73 4.73 0 003 7.73v8.54A4.73 4.73 0 007.73 21h8.54A4.73 4.73 0 0021 16.27V7.73A4.73 4.73 0 0016.27 3zm-2.8 11.76l-2.97-4.26v4.26H8.25V9.24h2.28l2.97 4.26V9.24h2.25v5.52h-2.28z" fill="#fff"/></svg>
         <span>네이버로 계속하기</span>
       </button>
     </div>
@@ -3114,10 +3108,9 @@ requestAnimationFrame(function(){
           <div class="toss-question" style="font-size:22px;margin-bottom:6px">아이와 어떤 관계인가요?</div>
           <div class="toss-desc" style="margin-bottom:16px">나중에 언제든 바꿀 수 있어요</div>
           <div class="toss-role-grid" id="create-role-grid"></div>
-          <div class="auth-error" id="c1-role-error" style="margin-top:10px"></div>
         </div>
         <div class="toss-cta">
-          <button class="toss-btn" onclick="c1SlideRoleFinish()">다음</button>
+          <button class="toss-btn" id="c1-role-next-btn" onclick="c1SlideRoleFinish()" disabled style="opacity:.4;pointer-events:none">다음</button>
           <button class="toss-btn ghost" onclick="c1SkipRole()">건너뛰기</button>
         </div>
       </div>
@@ -5116,12 +5109,7 @@ function c1SlideNameNext() {
 }
 
 function c1SlideRoleFinish() {
-  const err = document.getElementById('c1-role-error');
-  if (!_createState.myRole) {
-    if (err) err.textContent = '아이와의 관계를 선택해주세요';
-    return;
-  }
-  if (err) err.textContent = '';
+  if (!_createState.myRole) return;
   renderRegStepper(0, 1, 3); // Group 0, step 1 (이름)
   toSlide('c1-wrap', 'c1-slide-name');
   setTimeout(() => document.getElementById('create-my-name').focus(), 380);
@@ -5223,6 +5211,9 @@ function startCreateFamily(){
     el.style.pointerEvents='';
     requestAnimationFrame(()=>{el.style.transition='';});
   });
+  // 역할 선택 다음 버튼 리셋 (비활성화)
+  const _roleBtn=document.getElementById('c1-role-next-btn');
+  if(_roleBtn){_roleBtn.disabled=true;_roleBtn.style.opacity='.4';_roleBtn.style.pointerEvents='none';}
   // ID 잠금 UI 리셋
   const _c1Inp=document.getElementById('create-user-id');
   if(_c1Inp){_c1Inp.disabled=false;_c1Inp.value='';}
@@ -5342,8 +5333,8 @@ function renderRoleGrid(){
 
 function selectCreateRole(role){
   _createState.myRole=role;
-  const err=document.getElementById('c1-role-error');
-  if(err) err.textContent='';
+  const btn=document.getElementById('c1-role-next-btn');
+  if(btn){btn.disabled=false;btn.style.opacity='';btn.style.pointerEvents='';}
   renderRoleGrid();
 }
 
@@ -5538,8 +5529,8 @@ function openNodeForm(idx){
       <label style="display:block;font-size:13px;font-weight:700;color:var(--tx3);margin-bottom:4px;text-align:left">성별</label>
       <input type="hidden" id="node-gender" value="${m.gender||''}">
       <div style="display:flex;gap:8px;margin-bottom:12px">
-        <button type="button" id="node-gender-m" onclick="document.getElementById('node-gender').value='M';this.style.background='#6366F1';this.style.color='#fff';this.style.borderColor='#6366F1';document.getElementById('node-gender-f').style.background='var(--bg2)';document.getElementById('node-gender-f').style.color='var(--tx)';document.getElementById('node-gender-f').style.borderColor='var(--bdr)'" style="flex:1;padding:10px;border-radius:8px;border:2px solid ${m.gender==='M'?'#6366F1':'var(--bdr)'};background:${m.gender==='M'?'#6366F1':'var(--bg2)'};font-size:14px;font-weight:700;color:${m.gender==='M'?'#fff':'var(--tx)'};cursor:pointer;font-family:inherit;transition:all .2s">👦 남자</button>
-        <button type="button" id="node-gender-f" onclick="document.getElementById('node-gender').value='F';this.style.background='#EC4899';this.style.color='#fff';this.style.borderColor='#EC4899';document.getElementById('node-gender-m').style.background='var(--bg2)';document.getElementById('node-gender-m').style.color='var(--tx)';document.getElementById('node-gender-m').style.borderColor='var(--bdr)'" style="flex:1;padding:10px;border-radius:8px;border:2px solid ${m.gender==='F'?'#EC4899':'var(--bdr)'};background:${m.gender==='F'?'#EC4899':'var(--bg2)'};font-size:14px;font-weight:700;color:${m.gender==='F'?'#fff':'var(--tx)'};cursor:pointer;font-family:inherit;transition:all .2s">👧 여자</button>
+        <button type="button" id="node-gender-m" onclick="document.getElementById('node-gender').value='M';this.style.background='#6366F1';this.style.color='#fff';this.style.borderColor='#6366F1';document.getElementById('node-gender-f').style.background='var(--bg2)';document.getElementById('node-gender-f').style.color='var(--tx)';document.getElementById('node-gender-f').style.borderColor='var(--bdr)'" style="flex:1;padding:10px;border-radius:8px;border:2px solid ${m.gender==='M'?'#6366F1':'var(--bdr)'};background:${m.gender==='M'?'#6366F1':'var(--bg2)'};font-size:14px;font-weight:700;color:${m.gender==='M'?'#fff':'var(--tx)'};cursor:pointer;font-family:inherit;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="8" r="5"/><path d="M15 3l6 6M21 3l-6 6"/><path d="M2 21v-2a7 7 0 0 1 7-7h2"/></svg> 남자</button>
+        <button type="button" id="node-gender-f" onclick="document.getElementById('node-gender').value='F';this.style.background='#EC4899';this.style.color='#fff';this.style.borderColor='#EC4899';document.getElementById('node-gender-m').style.background='var(--bg2)';document.getElementById('node-gender-m').style.color='var(--tx)';document.getElementById('node-gender-m').style.borderColor='var(--bdr)'" style="flex:1;padding:10px;border-radius:8px;border:2px solid ${m.gender==='F'?'#EC4899':'var(--bdr)'};background:${m.gender==='F'?'#EC4899':'var(--bg2)'};font-size:14px;font-weight:700;color:${m.gender==='F'?'#fff':'var(--tx)'};cursor:pointer;font-family:inherit;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M12 13v8"/><path d="M9 18h6"/></svg> 여자</button>
       </div>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px">
@@ -8290,7 +8281,7 @@ const BADGES = [
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
-if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401o';}}
+if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401p';}}
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
@@ -11946,15 +11937,14 @@ function _doActCore(id){
   const _logItem=_curTab==='log'?document.querySelector(`.log-item[data-actid="${id}"]`):null;
 
   const _stampSVG='<svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="29" stroke="#10B981" stroke-width="3.5" stroke-dasharray="5 2.5" opacity=".9"/><circle cx="32" cy="32" r="21" stroke="#10B981" stroke-width="2.5" opacity=".65"/><text x="32" y="30" text-anchor="middle" font-size="14" font-weight="900" fill="#10B981" font-family="Noto Sans KR,sans-serif">완료</text><text x="32" y="43" text-anchor="middle" font-size="9" font-weight="800" fill="#10B981" font-family="sans-serif" letter-spacing="2" opacity=".7">DONE</text></svg>';
+  // 도장은 최종 완료(무제한 활동 또는 maxDay 도달)일 때만 표시
+  const _doneCount=countDone(a);
+  const _showStamp=(a.maxDay===0)||(a.maxDay>0&&_doneCount>=a.maxDay);
   if(_actCard){
-    const _chk=document.createElement('div');
-    _chk.className='act-check-overlay';
-    _chk.innerHTML='<div class="act-check-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><polyline points="20 6 9 17 4 12"/></svg></div>';
-    _actCard.appendChild(_chk);
-    const _stamp=document.createElement('div');
+    if(_showStamp){const _stamp=document.createElement('div');
     _stamp.className='completion-stamp';
     _stamp.innerHTML=_stampSVG;
-    _actCard.appendChild(_stamp);
+    _actCard.appendChild(_stamp);}
     _actCard.classList.add('act-completing');
     toast(`${a.emoji} ${a.name} +${a.pts} 마일리지${sm}`);
     flyCoinsToMileage(_actCard, a.pts+bonus);
@@ -11965,14 +11955,10 @@ function _doActCore(id){
       setTimeout(()=>checkBadges(),300);
     });
   } else if(_logItem){
-    const _chk2=document.createElement('div');
-    _chk2.className='log-check-overlay';
-    _chk2.innerHTML='<div class="log-check-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><polyline points="20 6 9 17 4 12"/></svg></div>';
-    _logItem.appendChild(_chk2);
-    const _stamp2=document.createElement('div');
+    if(_showStamp){const _stamp2=document.createElement('div');
     _stamp2.className='log-completion-stamp';
     _stamp2.innerHTML=_stampSVG;
-    _logItem.appendChild(_stamp2);
+    _logItem.appendChild(_stamp2);}
     _logItem.classList.add('log-completing');
     toast(`${a.emoji} ${a.name} +${a.pts} 마일리지${sm}`);
     flyCoinsToMileage(_logItem, a.pts+bonus);
@@ -14513,11 +14499,12 @@ window.pfMenuAction=pfMenuAction;
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
   {
-    ver:'1.6.5', date:'2026-04-01',
+    ver:'1.6.6', date:'2026-04-01',
     items:[
-      {type:'new',text:'활동 완료 시 완료 도장 애니메이션 추가'},
-      {type:'fix',text:'활동기록 탭 말풍선 오른쪽 잘림 현상 수정'},
-      {type:'fix',text:'말풍선 애니메이션 시 사용자 아이콘 윗부분 잘림 수정'},
+      {type:'improve',text:'활동 완료 도장 — 카드 회전 후 위에서 찍히는 애니메이션으로 개선'},
+      {type:'improve',text:'역할 선택 UX — 미선택 시 다음 버튼 비활성화 (스크롤 제거)'},
+      {type:'improve',text:'성별 선택 버튼 이모지를 SVG 아이콘으로 교체'},
+      {type:'fix',text:'네이버 로그인 버튼 아이콘 크기 조정'},
     ]
   },
   {
