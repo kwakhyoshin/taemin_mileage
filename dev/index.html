@@ -2498,19 +2498,14 @@ button:disabled {
 
 </style>
 <script>
-// ★ 12.5 색 단차 방지: <head>에서 CSS 즉시 주입하여 auth-welcome 렌더링 자체를 차단
+// ★ 12.5 early auth switch: onboarding 완료 사용자는 바로 로그인 화면 표시 (깜빡임 방지)
 (function(){
   var prefix=(window._ENV==='dev'||window.location.pathname.indexOf('/dev/')!==-1)?'taemin_dev_':'taemin_';
   if(localStorage.getItem(prefix+'onboarding_done')){
     var s=document.createElement('style');
     s.id='early-auth-switch';
-    s.textContent='#auth-welcome,#auth-onboarding{display:none!important}#auth-continue{display:flex!important;pointer-events:auto!important}.nav-container{display:none!important}';
+    s.textContent='#auth-welcome,#auth-onboarding{display:none!important}#auth-continue{display:flex!important;pointer-events:auto!important}';
     document.head.appendChild(s);
-    document.addEventListener('DOMContentLoaded',function(){
-      var ac=document.getElementById('auth-continue');
-      if(ac){ac.classList.remove('hidden');}
-      document.body.classList.add('auth-active');
-    });
   }
 })();
 </script>
@@ -7938,7 +7933,7 @@ const BADGES = [
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
-if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0331o';}}
+if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0331p';}}
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
