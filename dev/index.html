@@ -2138,6 +2138,7 @@ body.dark {
   }
 }
 
+@keyframes wdspin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 @keyframes spin {
   from {
     transform: rotate(0deg);
@@ -6731,6 +6732,48 @@ function postLoginInit(){
 }
 
 // ── 회원 탈퇴 ──────────────────────────────────
+function _showWithdrawModal(title, body, confirmText, onConfirm){
+  const overlay=document.createElement('div');
+  overlay.id='withdraw-modal-overlay';
+  overlay.style.cssText='position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s';
+  overlay.innerHTML=`<div style="background:#fff;border-radius:20px;padding:28px 24px;max-width:340px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.2);text-align:center">
+    <div style="font-size:15px;font-weight:800;color:#1E293B;margin-bottom:12px">${title}</div>
+    <div style="font-size:13px;color:#64748B;line-height:1.6;margin-bottom:24px;white-space:pre-line">${body}</div>
+    <div style="display:flex;gap:10px">
+      <button id="withdraw-cancel-btn" style="flex:1;padding:13px;border:1.5px solid #E2E8F0;background:#fff;border-radius:12px;font-size:14px;font-weight:700;color:#64748B;cursor:pointer;font-family:inherit">취소</button>
+      <button id="withdraw-confirm-btn" style="flex:1;padding:13px;border:none;background:#EF4444;border-radius:12px;font-size:14px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit">${confirmText}</button>
+    </div></div>`;
+  document.body.appendChild(overlay);
+  requestAnimationFrame(()=>overlay.style.opacity='1');
+  document.getElementById('withdraw-cancel-btn').onclick=()=>{overlay.style.opacity='0';setTimeout(()=>overlay.remove(),200);};
+  document.getElementById('withdraw-confirm-btn').onclick=()=>{
+    // 로딩 상태로 전환
+    const card=overlay.querySelector('div>div');
+    if(card) card.innerHTML=`<div style="padding:32px 0;text-align:center">
+      <div style="width:48px;height:48px;border:3px solid #E2E8F0;border-top-color:#6366F1;border-radius:50%;margin:0 auto 20px;animation:wdspin .8s linear infinite"></div>
+      <div style="font-size:14px;font-weight:700;color:#1E293B;margin-bottom:6px">탈퇴 처리 중...</div>
+      <div style="font-size:12px;color:#94A3B8">잠시만 기다려주세요</div></div>`;
+    onConfirm(overlay);
+  };
+}
+function _showFarewellScreen(name, overlay){
+  const farewell = [
+    `${name}님, 함께한 시간이\n소중한 추억이 되었길 바라요.`,
+    `작은 발걸음이 모여 큰 성장이 되듯,\n${name}님의 앞날도 늘 빛나길 응원해요.`,
+    `mile.ly에서의 경험이\n${name}님 가족에게 작은 씨앗이 되었다면\n그것만으로 충분해요.`,
+    `언제든 다시 오고 싶을 때,\nmile.ly는 이 자리에서 기다릴게요.`,
+    `${name}님 가족의 매일이\n마일리지처럼 차곡차곡 쌓여가길.`
+  ];
+  const msg = farewell[Math.floor(Math.random()*farewell.length)];
+  const card=overlay.querySelector('div>div');
+  if(card) card.innerHTML=`<div style="padding:28px 8px;text-align:center">
+    <div style="font-size:36px;margin-bottom:16px">👋</div>
+    <div style="font-size:15px;font-weight:800;color:#1E293B;margin-bottom:14px;line-height:1.6;white-space:pre-line">${msg}</div>
+    <div style="font-size:12px;color:#94A3B8;margin-bottom:24px">탈퇴가 완료되었습니다</div>
+    <button onclick="this.closest('#withdraw-modal-overlay').style.opacity='0';setTimeout(()=>document.getElementById('withdraw-modal-overlay')?.remove(),200)" style="padding:13px 40px;background:#6366F1;color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">안녕히 가세요</button>
+  </div>`;
+}
+
 async function withdrawAccount(){
   if(!currentUser){ toast('로그인 상태가 아니에요'); return; }
   const fm = S.familyMeta?.members || {};
@@ -6748,36 +6791,39 @@ async function withdrawAccount(){
 
   // ── Case 1: 유일한 관리자 + 다른 양육자 있음 → 권한 양도 제안 ──
   if(isAdmin && otherAdmins.length === 0 && otherCaregivers.length > 0){
-    const otherNames = otherCaregivers.map(mid => fm[mid].name || mid).join(', ');
     const transferTo = otherCaregivers[0];
     const transferName = fm[transferTo].name || transferTo;
-    const msg = `${myName}님은 현재 유일한 관리자입니다.\n\n탈퇴 시 관리자 권한이 "${transferName}"님에게 자동으로 양도됩니다.\n\n정말로 탈퇴하시겠습니까?\n\n⚠️ 탈퇴 후에는 ${myName}님의 모든 계정 정보가 삭제됩니다.`;
-    if(!confirm(msg)) return;
-    // 관리자 권한 양도
-    S.familyMeta.members[transferTo].isAdmin = true;
-    console.log('[Withdraw] Admin transferred to:', transferName);
-    await _executeWithdrawal(currentUser, [currentUser]);
+    _showWithdrawModal('관리자 권한 양도',
+      `${myName}님은 유일한 관리자입니다.\n\n탈퇴 시 관리자 권한이 "${transferName}"님에게\n자동으로 양도됩니다.\n\n${myName}님의 모든 계정 정보가 삭제됩니다.`,
+      '양도 후 탈퇴', async(overlay)=>{
+        S.familyMeta.members[transferTo].isAdmin = true;
+        console.log('[Withdraw] Admin transferred to:', transferName);
+        await _executeWithdrawal(currentUser, [currentUser], myName, overlay);
+      });
     return;
   }
 
   // ── Case 2: 유일한 양육자 (다른 양육자 없음) → 자녀 전부 삭제 경고 ──
   if(isCaregiver && otherCaregivers.length === 0){
     const childNames = children.map(mid => fm[mid].name || mid).join(', ');
-    let msg = `${myName}님은 유일한 양육자입니다.\n\n탈퇴 시 자녀 계정(${childNames || '없음'})도 함께 삭제됩니다.\n\n⚠️ 이 작업은 되돌릴 수 없습니다.\n\n정말로 탈퇴하시겠습니까?`;
-    if(!confirm(msg)) return;
-    // 본인 + 모든 자녀 삭제
-    const toDelete = [currentUser, ...children];
-    await _executeWithdrawal(currentUser, toDelete);
+    _showWithdrawModal('가족 데이터 삭제 경고',
+      `${myName}님은 유일한 양육자입니다.\n\n탈퇴 시 자녀 계정(${childNames || '없음'})도\n함께 삭제됩니다.\n\n이 작업은 되돌릴 수 없습니다.`,
+      '전체 삭제 후 탈퇴', async(overlay)=>{
+        const toDelete = [currentUser, ...children];
+        await _executeWithdrawal(currentUser, toDelete, myName, overlay);
+      });
     return;
   }
 
   // ── Case 3: 자녀 또는 관리자가 아닌 양육자 → 본인만 탈퇴 ──
-  const msg = `${myName}님의 계정을 탈퇴하시겠습니까?\n\n⚠️ ${myName}님의 모든 활동 기록, 마일리지, 뱃지, 보상 등이 삭제됩니다.\n\n이 작업은 되돌릴 수 없습니다.`;
-  if(!confirm(msg)) return;
-  await _executeWithdrawal(currentUser, [currentUser]);
+  _showWithdrawModal('회원 탈퇴',
+    `${myName}님의 계정을 탈퇴하시겠습니까?\n\n활동 기록, 마일리지, 뱃지, 보상 등\n모든 정보가 삭제됩니다.\n\n이 작업은 되돌릴 수 없습니다.`,
+    '탈퇴하기', async(overlay)=>{
+      await _executeWithdrawal(currentUser, [currentUser], myName, overlay);
+    });
 }
 
-async function _executeWithdrawal(initiator, memberIdsToDelete){
+async function _executeWithdrawal(initiator, memberIdsToDelete, memberName, overlay){
   const fm = S.familyMeta?.members || {};
   console.log('[Withdraw] Deleting members:', memberIdsToDelete);
   try {
@@ -6850,18 +6896,33 @@ async function _executeWithdrawal(initiator, memberIdsToDelete){
       try{ await signOut(fbAuth); }catch(e){ console.warn('[Withdraw] Firebase signOut:', e); }
     }
 
-    // 12. 상태 초기화 → 로그인 화면으로
+    // 12. 상태 초기화
     viewingChildId = null;
     currentUser = null;
     _admViewChildId = null;
     _globalDataOwner = null;
     adminOK = false;
-    toast('회원 탈퇴가 완료되었습니다');
+
+    // 13. 이별 인사 화면 표시
+    if(overlay) _showFarewellScreen(memberName||'회원', overlay);
+    else toast('회원 탈퇴가 완료되었습니다');
+
+    // 14. 이별 인사 닫힌 후 로그인 화면 표시를 위한 준비
     const _obDone = localStorage.getItem(_LS_PREFIX+'onboarding_done');
-    showAuthScreen(_obDone ? 'continue' : 'welcome');
+    // overlay 닫기 이벤트에서 auth 화면 전환
+    const _waitForClose = setInterval(()=>{
+      if(!document.getElementById('withdraw-modal-overlay')){
+        clearInterval(_waitForClose);
+        showAuthScreen(_obDone ? 'continue' : 'welcome');
+      }
+    }, 300);
+    // 안전장치: 10초 후 강제 전환
+    setTimeout(()=>{ clearInterval(_waitForClose); if(!currentUser) showAuthScreen(_obDone?'continue':'welcome'); }, 10000);
+
     console.log('[Withdraw] Completed. Deleted:', memberIdsToDelete.join(', '));
   } catch(e){
     console.error('[Withdraw] Error:', e);
+    if(overlay) overlay.remove();
     toast('탈퇴 처리 중 오류가 발생했어요: ' + (e.message||e));
   }
 }
@@ -8176,7 +8237,7 @@ const BADGES = [
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
-if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401h';}}
+if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401i';}}
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
@@ -14390,8 +14451,9 @@ window.pfMenuAction=pfMenuAction;
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
   {
-    ver:'1.6.2', date:'2026-04-01',
+    ver:'1.6.3', date:'2026-04-01',
     items:[
+      {type:'improve',text:'회원 탈퇴 UX 개선 — 커스텀 확인 모달, 로딩 애니메이션, 이별 인사'},
       {type:'fix',text:'소셜 신규가입 후 홈탭 전환, 가이드 투어, 프로필 사진 미적용 수정'},
       {type:'fix',text:'소셜 계정 교체 시 이전 연동 정보가 남는 버그 수정'},
       {type:'new',text:'회원 탈퇴 기능 — 나의 메뉴에서 계정 삭제 가능'},
