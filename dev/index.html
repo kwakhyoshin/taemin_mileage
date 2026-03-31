@@ -1035,7 +1035,7 @@ body.dark .pin-key.ck{background:transparent}
 .auth-screen{position:fixed;inset:0;background:linear-gradient(135deg,#5B4FC4,#A78BFA);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;padding-top:max(24px, calc(env(safe-area-inset-top, 0px) + 16px));padding-bottom:max(20px, env(safe-area-inset-bottom, 0px));overflow-y:auto;-webkit-overflow-scrolling:touch}
 .auth-screen.hidden{display:none;pointer-events:none}
 body.auth-active{background:linear-gradient(135deg,#5B4FC4,#A78BFA);overflow:hidden}
-html:has(body.auth-active){background:#5B4FC4!important;overflow:hidden}
+html:has(body.auth-active){background:linear-gradient(135deg,#5B4FC4,#A78BFA)!important;overflow:hidden;min-height:100%}
 #auth-insight .toss-cta{margin:0 24px;padding-left:0;padding-right:0;padding-top:8px}
 /* social-loading-overlay CSS 제거됨 */
 .auth-card{background:#fff;border-radius:24px;padding:32px 28px;width:100%;max-width:380px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2);margin:auto;flex-shrink:0}
@@ -2717,36 +2717,7 @@ button:disabled {
       <button class="auth-btn" onclick="doContinueLogin()" style="margin-top:4px">로그인</button>
     </div>
   </div>
-  <!-- ★ 진단 오버레이 (단차 디버그용, 나중에 제거) -->
-  <div id="gap-diag" style="position:fixed;bottom:0;left:0;right:0;background:rgba(0,0,0,.7);color:#0f0;font:bold 11px/1.4 monospace;padding:8px;z-index:9999;text-align:left;pointer-events:none"></div>
 </div>
-
-<script>
-// ★ 단차 진단 (임시)
-(function(){
-  function diag(){
-    var el=document.querySelector('#auth-continue:not(.hidden)') || document.querySelector('.auth-screen:not(.hidden)');
-    if(!el) return;
-    var r=el.getBoundingClientRect();
-    var vv=window.visualViewport;
-    var d=document.getElementById('gap-diag');
-    if(!d) return;
-    d.innerHTML=[
-      'screen: '+screen.width+'×'+screen.height,
-      'innerH: '+window.innerHeight+' | dvh: '+CSS.supports('height','100dvh'),
-      'vv: '+(vv?vv.width+'×'+vv.height+' off:'+vv.offsetTop:'N/A'),
-      'authRect: t='+r.top.toFixed(0)+' b='+r.bottom.toFixed(0)+' h='+r.height.toFixed(0),
-      'bodyH: '+document.body.offsetHeight+' htmlH: '+document.documentElement.offsetHeight,
-      'gap: '+(window.innerHeight-r.bottom).toFixed(0)+'px below auth',
-      'SAI-bottom: '+getComputedStyle(document.documentElement).getPropertyValue('--safe-area-bottom'),
-      'computedPB: '+getComputedStyle(el).paddingBottom
-    ].join('<br>');
-  }
-  setTimeout(diag,500);
-  setTimeout(diag,2000);
-  if(window.visualViewport) window.visualViewport.addEventListener('resize',diag);
-})();
-</script>
 
 <!-- AUTH: 이메일 인증 -->
 <div class="auth-screen hidden" id="auth-email-verify">
@@ -7945,7 +7916,7 @@ const BADGES = [
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
-if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0331t';}}
+if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0331u';}}
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
