@@ -4873,8 +4873,8 @@ function showAuthScreen(screen) {
     const el=document.getElementById(id);
     if(el)el.classList.toggle('hidden',id!=='auth-'+screen && id!==screen);
   });
-  // 소셜 로그인 화면 진입 시 SDK 미리 로드 (팝업 차단 방지)
-  if(screen==='auth-continue'||screen==='continue'){
+  // 소셜 로그인 SDK 미리 로드 (Firebase, 카카오) — welcome/continue 모두에서 시작
+  if(screen==='auth-welcome'||screen==='welcome'||screen==='auth-continue'||screen==='continue'){
     if(!_firebaseReady) _initFirebase().catch(()=>{});
     if(typeof _loadKakaoSDK==='function') _loadKakaoSDK().catch(()=>{});
     // ★ socialLinkExisting에서 변경한 UI 원복 (일반 진입 시)
@@ -7126,16 +7126,22 @@ async function _handleSocialLoginResult(firebaseUser, provider){
   console.log('[_handleSocialLoginResult] Start:', provider, uid, email);
   _updateSocialLoadingMsg('계정 정보 확인 중...');
 
-  // 1) Auth 레지스트리에서 기존 가족 연결 확인
+  // 1) Auth 레지스트리 + 가족 문서를 병렬 읽기 (성능 최적화)
   try {
   const regDoc = _getAuthRegistryDoc();
+  let _regData = null; // ★ 레지스트리 데이터 캐시 (중복 읽기 방지)
+  let _cachedFamilyData = null; // ★ 가족 문서 캐시 (Step 2b에서 재사용)
   if(regDoc){
-    const regSnap = await getDoc(regDoc);
+    // ★ 레지스트리와 가족 문서를 동시에 읽기 (네트워크 대기시간 절반)
+    const _famPrefix = _ENV === 'dev' ? 'dev_' : '';
+    const _famDocRef = doc(db, 'families', _famPrefix + 'taemin');
+    const [regSnap, _famSnap] = await Promise.all([getDoc(regDoc), getDoc(_famDocRef)]);
+    if(_famSnap.exists()) _cachedFamilyData = { id: _famPrefix + 'taemin', data: _famSnap.data() };
     if(regSnap.exists()){
-      const regData = regSnap.data();
-      if(regData[uid]){
+      _regData = regSnap.data();
+      if(_regData[uid]){
         // 기존 연결 있음 → 해당 가족으로 로그인
-        const link = regData[uid];
+        const link = _regData[uid];
         console.log('[Social] Found existing link:', link);
         _updateSocialLoadingMsg('로그인 중...');
         try {
@@ -7151,11 +7157,10 @@ async function _handleSocialLoginResult(firebaseUser, provider){
   }
 
   // 2) 기존 연결 없음 → 같은 이메일로 등록된 다른 소셜 계정이 있는지 확인
-  if(email && regDoc){
+  // ★ Step 1에서 읽은 _regData를 재사용 (중복 Firestore 읽기 제거)
+  if(email && _regData){
     try {
-      const regSnap2 = await getDoc(regDoc);
-      if(regSnap2.exists()){
-        const regData2 = regSnap2.data();
+        const regData2 = _regData;
         for(const [otherUid, link] of Object.entries(regData2)){
           if(otherUid !== uid && link.email && link.email.toLowerCase() === email.toLowerCase()){
             // ★ 같은 이메일 = 같은 사용자 → 기존 가족에 자동 연결
@@ -7209,22 +7214,17 @@ async function _handleSocialLoginResult(firebaseUser, provider){
             return;
           }
         }
-      }
     } catch(e){ console.warn('[Social] Email match check failed:', e); }
   }
 
   // 2b) auth registry에 이메일 매치 없으면, 가족 문서에서 직접 검색 (fallback)
+  // ★ Step 1에서 병렬로 읽어둔 _cachedFamilyData를 재사용 (추가 Firestore 읽기 없음)
   if(email){
     try {
-      const _famPrefix = _ENV === 'dev' ? 'dev_' : '';
-      // Firestore에서 families 컬렉션의 모든 문서를 검색하기엔 무겁지만,
-      // 이미 알려진 가족 문서(taemin_dev 등)에서 직접 확인
-      const _knownFamilies = [_famPrefix + 'taemin'];
-      for(const _fid of _knownFamilies){
-        const _fDoc = doc(db, 'families', _fid);
-        const _fSnap = await getDoc(_fDoc);
-        if(!_fSnap.exists()) continue;
-        const _fData = _fSnap.data();
+      const _knownFamilyDatas = _cachedFamilyData ? [_cachedFamilyData] : [];
+      for(const _famEntry of _knownFamilyDatas){
+        const _fid = _famEntry.id;
+        const _fData = _famEntry.data;
         // users에서 이메일 매치 검색
         const _fUsers = _fData.users || {};
         for(const [_mid, _uData] of Object.entries(_fUsers)){
@@ -7997,7 +7997,7 @@ const BADGES = [
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
-if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401a';}}
+if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401b';}}
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
