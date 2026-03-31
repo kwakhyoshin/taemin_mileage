@@ -4066,6 +4066,10 @@ requestAnimationFrame(function(){
       <span class="my-list-txt">로그아웃</span>
       <svg class="my-list-arr" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
     </button>
+    <button class="my-list-item" onclick="withdrawAccount()" style="color:#9CA3AF;margin-top:4px">
+      <span class="my-list-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4-4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="18" y1="8" x2="23" y2="13"/><line x1="23" y1="8" x2="18" y2="13"/></svg></span>
+      <span class="my-list-txt" style="font-size:13px">회원 탈퇴</span>
+    </button>
   </div>
 </div>
 
@@ -6705,6 +6709,142 @@ function postLoginInit(){
   _admViewChildId = getChildMemberIds()[0] || null;
 }
 
+// ── 회원 탈퇴 ──────────────────────────────────
+async function withdrawAccount(){
+  if(!currentUser){ toast('로그인 상태가 아니에요'); return; }
+  const fm = S.familyMeta?.members || {};
+  const me = fm[currentUser];
+  if(!me){ toast('사용자 정보를 찾을 수 없어요'); return; }
+
+  const isCaregiver = me.type === 'caregiver' || me.type === 'parent';
+  const isAdmin = !!me.isAdmin;
+  const myName = me.name || MEMBERS[currentUser]?.name || currentUser;
+
+  // 다른 양육자/관리자 찾기
+  const otherCaregivers = Object.keys(fm).filter(mid => mid !== currentUser && (fm[mid].type === 'caregiver' || fm[mid].type === 'parent'));
+  const otherAdmins = otherCaregivers.filter(mid => !!fm[mid].isAdmin);
+  const children = Object.keys(fm).filter(mid => fm[mid].type === 'child' || fm[mid].role === 'child');
+
+  // ── Case 1: 유일한 관리자 + 다른 양육자 있음 → 권한 양도 제안 ──
+  if(isAdmin && otherAdmins.length === 0 && otherCaregivers.length > 0){
+    const otherNames = otherCaregivers.map(mid => fm[mid].name || mid).join(', ');
+    const transferTo = otherCaregivers[0];
+    const transferName = fm[transferTo].name || transferTo;
+    const msg = `${myName}님은 현재 유일한 관리자입니다.\n\n탈퇴 시 관리자 권한이 "${transferName}"님에게 자동으로 양도됩니다.\n\n정말로 탈퇴하시겠습니까?\n\n⚠️ 탈퇴 후에는 ${myName}님의 모든 계정 정보가 삭제됩니다.`;
+    if(!confirm(msg)) return;
+    // 관리자 권한 양도
+    S.familyMeta.members[transferTo].isAdmin = true;
+    console.log('[Withdraw] Admin transferred to:', transferName);
+    await _executeWithdrawal(currentUser, [currentUser]);
+    return;
+  }
+
+  // ── Case 2: 유일한 양육자 (다른 양육자 없음) → 자녀 전부 삭제 경고 ──
+  if(isCaregiver && otherCaregivers.length === 0){
+    const childNames = children.map(mid => fm[mid].name || mid).join(', ');
+    let msg = `${myName}님은 유일한 양육자입니다.\n\n탈퇴 시 자녀 계정(${childNames || '없음'})도 함께 삭제됩니다.\n\n⚠️ 이 작업은 되돌릴 수 없습니다.\n\n정말로 탈퇴하시겠습니까?`;
+    if(!confirm(msg)) return;
+    // 본인 + 모든 자녀 삭제
+    const toDelete = [currentUser, ...children];
+    await _executeWithdrawal(currentUser, toDelete);
+    return;
+  }
+
+  // ── Case 3: 자녀 또는 관리자가 아닌 양육자 → 본인만 탈퇴 ──
+  const msg = `${myName}님의 계정을 탈퇴하시겠습니까?\n\n⚠️ ${myName}님의 모든 활동 기록, 마일리지, 뱃지, 보상 등이 삭제됩니다.\n\n이 작업은 되돌릴 수 없습니다.`;
+  if(!confirm(msg)) return;
+  await _executeWithdrawal(currentUser, [currentUser]);
+}
+
+async function _executeWithdrawal(initiator, memberIdsToDelete){
+  const fm = S.familyMeta?.members || {};
+  console.log('[Withdraw] Deleting members:', memberIdsToDelete);
+  try {
+    // 1. Auth Registry에서 삭제 (소셜 연동 해제)
+    const regDoc = _getAuthRegistryDoc();
+    if(regDoc && db){
+      try {
+        const regSnap = await getDoc(regDoc);
+        if(regSnap.exists()){
+          const regData = regSnap.data();
+          let changed = false;
+          for(const uid of Object.keys(regData)){
+            if(memberIdsToDelete.includes(regData[uid].memberId)){
+              delete regData[uid];
+              changed = true;
+              console.log('[Withdraw] Removed auth registry entry:', uid);
+            }
+          }
+          if(changed) await setDoc(regDoc, regData);
+        }
+      } catch(e){ console.warn('[Withdraw] Auth registry cleanup failed:', e); }
+    }
+
+    // 2. familyMeta에서 멤버 삭제
+    for(const mid of memberIdsToDelete){
+      if(S.familyMeta?.members?.[mid]) delete S.familyMeta.members[mid];
+    }
+
+    // 3. S.users에서 삭제
+    for(const mid of memberIdsToDelete){
+      if(S.users?.[mid]) delete S.users[mid];
+    }
+
+    // 4. S.memberData에서 삭제
+    for(const mid of memberIdsToDelete){
+      if(S.memberData?.[mid]) delete S.memberData[mid];
+    }
+
+    // 5. S.photos에서 삭제
+    for(const mid of memberIdsToDelete){
+      if(S.photos?.[mid]) delete S.photos[mid];
+    }
+
+    // 6. 활동 로그에서 해당 사용자 기록 제거 (선택적 — 가족 기록은 남김)
+    // → 가족 전체 log에서는 삭제하지 않음 (히스토리 보존)
+
+    // 7. 가족 메시지에서 해당 사용자 관련 메시지 제거
+    if(S.familyMessages && Array.isArray(S.familyMessages)){
+      S.familyMessages = S.familyMessages.filter(m =>
+        !memberIdsToDelete.includes(m.from) && !memberIdsToDelete.includes(m.to)
+      );
+    }
+
+    // 8. 보상 요청에서 해당 사용자 관련 항목 제거
+    if(S.rewardRequests && Array.isArray(S.rewardRequests)){
+      S.rewardRequests = S.rewardRequests.filter(r =>
+        !memberIdsToDelete.includes(r.user) && !memberIdsToDelete.includes(r.fromUser)
+      );
+    }
+
+    // 9. Firestore에 저장
+    await save();
+
+    // 10. localStorage 정리
+    localStorage.removeItem(_LS_PREFIX+'current_user');
+    localStorage.removeItem(_LS_PREFIX+'social_pending');
+
+    // 11. Firebase Auth 로그아웃
+    if(fbAuth && signOut){
+      try{ await signOut(fbAuth); }catch(e){ console.warn('[Withdraw] Firebase signOut:', e); }
+    }
+
+    // 12. 상태 초기화 → 로그인 화면으로
+    viewingChildId = null;
+    currentUser = null;
+    _admViewChildId = null;
+    _globalDataOwner = null;
+    adminOK = false;
+    toast('회원 탈퇴가 완료되었습니다');
+    const _obDone = localStorage.getItem(_LS_PREFIX+'onboarding_done');
+    showAuthScreen(_obDone ? 'continue' : 'welcome');
+    console.log('[Withdraw] Completed. Deleted:', memberIdsToDelete.join(', '));
+  } catch(e){
+    console.error('[Withdraw] Error:', e);
+    toast('탈퇴 처리 중 오류가 발생했어요: ' + (e.message||e));
+  }
+}
+
 function logout() {
   if (!confirm('로그아웃 하시겠어요?')) return;
   viewingChildId=null;
@@ -7980,7 +8120,7 @@ const BADGES = [
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
-if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401e';}}
+if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401f';}}
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
@@ -14194,6 +14334,12 @@ window.pfMenuAction=pfMenuAction;
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
   {
+    ver:'1.6.0', date:'2026-04-01',
+    items:[
+      {type:'new',text:'회원 탈퇴 기능 — 나의 메뉴에서 계정 삭제 가능'},
+    ]
+  },
+  {
     ver:'1.5.0', date:'2026-04-01',
     items:[
       {type:'new',text:'구글 소셜 로그인 시 프로필 사진 자동 연동'},
@@ -17132,7 +17278,7 @@ Object.assign(window, {
   calPrev, calNext, selectCalDay,
   admTab, switchDash,
   // Auth functions (multi-family)
-  showAuthScreen, doLogin, logout, togglePwd,
+  showAuthScreen, doLogin, logout, withdrawAccount, togglePwd,
   startCreateFamily, createStep1Next, createStep2Next, createStep3Next, createStep4Next, createStep5Next, createFamilyFinish, skipInvites, saveFamilyToFirestore,
   toSlide, backSlide, create1Back, c1SlideIdNext, c1SlidePwdNext, c1SlideNameNext, c1SlideRoleFinish, c1SkipRole,
   resetCreateId, createStep5Back, createStep5Finish,
