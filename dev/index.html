@@ -5906,10 +5906,25 @@ async function saveFamilyToFirestore(){
 
 // ── 완료 화면에서 시작하기 (이미 DB에 저장됨, 로그인만 처리) ──
 async function createFamilyFinish(){
+  // ★ 소셜 가입 시 프로필 사진 저장
+  if(_createState.socialUser){
+    const _profileImg = _createState.socialUser.profileImage || _createState.socialUser.photoURL || '';
+    if(_profileImg && currentUser){
+      if(!S.photos) S.photos={};
+      S.photos[currentUser] = _profileImg;
+      console.log('[createFamilyFinish] Social profile photo saved:', _profileImg.substring(0,60));
+    }
+  }
   hideAllAuth();
+  postLoginInit();
   applyUserProfile();
   renderAll();
+  reallyGoTab('home');
   toast(`🎉 ${_createState.familyName} 가족이 만들어졌어요!`);
+  // ★ 소셜 가입 시 프로필 사진 포함하여 Firestore 저장
+  if(_createState.socialUser && S.photos?.[currentUser]){
+    try{ await save(); }catch(_e){ console.warn('[createFamilyFinish] save warning:', _e); }
+  }
   // PWA 설치 유도 (브라우저 환경일 때)
   if(!_pwaInstalled)setTimeout(showPwaInstallPopup,1500);
 }
@@ -8161,7 +8176,7 @@ const BADGES = [
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
-if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401g';}}
+if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401h';}}
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
@@ -14375,8 +14390,9 @@ window.pfMenuAction=pfMenuAction;
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
   {
-    ver:'1.6.1', date:'2026-04-01',
+    ver:'1.6.2', date:'2026-04-01',
     items:[
+      {type:'fix',text:'소셜 신규가입 후 홈탭 전환, 가이드 투어, 프로필 사진 미적용 수정'},
       {type:'fix',text:'소셜 계정 교체 시 이전 연동 정보가 남는 버그 수정'},
       {type:'new',text:'회원 탈퇴 기능 — 나의 메뉴에서 계정 삭제 가능'},
     ]
