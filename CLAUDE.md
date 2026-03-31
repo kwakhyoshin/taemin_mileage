@@ -55,6 +55,9 @@
 6. **sync 스크립트(`scripts/sync-dev-to-main.sh`) 사용 금지** — 이 스크립트는 dev/ 폴더 전체를 복사하므로 에셋 롤백 위험이 있음
 7. 대신 수동으로: `git checkout main` → `git show dev:dev/index.html > dev/index.html` → `git add dev/index.html` → `git commit` → `git push`
 
+## 🔴 배포 시 필수 사항 (매 배포마다 반드시 수행)
+- **배포 후 사용자에게 버전 정보 알려주기**: 개발기 좌측 상단 DEV 버전 값 (예: `DEV v0331k`)을 반드시 메시지로 전달
+
 ## 🔴 배포 시 필수 현행화 (매 배포마다 반드시 수행)
 1. **`dev_guide.md` 현행화**: 변경사항, 커밋 이력, 트러블슈팅 등 최신 상태로 업데이트
 2. **APP_CHANGELOG 업데이트**: 개발기/운영기 각각의 `APP_CHANGELOG` 배열에 해당 배포의 신규 기능/버그 수정 항목을 추가
