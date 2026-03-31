@@ -2,7 +2,7 @@
 
 > 이 문서는 새 세션에서 실수 없이 개발·테스트·배포할 수 있도록 모든 핵심 정보를 담고 있습니다.
 > **새 세션 시작 시 반드시 이 문서를 먼저 읽을 것.**
-> 최종 업데이트: 2026-03-31 (iOS PWA viewport 단차 해결, 개발기 가족데이터 복구)
+> 최종 업데이트: 2026-03-31 (소셜 연동 해제 기능, 시작페이지 복원, iOS PWA viewport 단차 해결, 개발기 가족데이터 복구)
 
 ---
 
@@ -1001,6 +1001,30 @@ account: {
   2. `familyMeta: null`은 `defaultState()`가 Firestore에 저장된 흔적 — 사고 2와 동일 패턴
   3. 복구 시 `families/{id}`와 `users/{id}` 양쪽 모두 업데이트 필요
 
+### 12.14 소셜 계정 연동 해제 기능 (2026-03-31)
+- **기능**: 나의 메뉴에서 연동된 소셜 계정을 해제할 수 있는 버튼 추가
+- **핵심 로직** (`unlinkSocial()` 함수, `linkSocialFromMyMenu()` 바로 뒤에 위치):
+  - `acc.id && acc.pwdHash` 확인 → ID/PW 계정이 있는 경우에만 해제 허용
+  - 소셜 전용 가입자(id/pwdHash 없음)는 해제 불가 — 로그인 수단이 사라지므로
+  - 삭제 대상 필드: `authProvider`, `authUid`, `email` (두 곳 모두)
+    - `S.familyMeta.members[currentUser].account`
+    - `S.users[currentUser]`
+  - `save()` 후 `renderMyMenu()` 호출로 UI 즉시 반영
+- **UI**: 연동된 소셜이 있고 ID/PW 계정도 있으면 → 체크마크 대신 "해제" 버튼 표시
+  - 소셜만 있으면 → 기존 체크마크 아이콘 유지 (해제 불가)
+- **관련 코드 위치**:
+  - `unlinkSocial()` — `linkSocialFromMyMenu()` 뒤 (라인 ~6290)
+  - 나의 메뉴 소셜 표시 — `renderMyTab()` 내부 (라인 ~14037)
+
+### 12.15 로그인 첫 화면 구성 (2026-03-31)
+- **현재**: `auth-welcome` (시작페이지)이 기본 표시 화면 (hidden 없음)
+- **이전**: `auth-continue` (소셜+ID/PW 통합)가 기본이었으나 시작페이지로 복원
+- **흐름**:
+  - 시작페이지 → "시작하기" → `auth-onboarding` (슬라이드 3장) → `auth-continue`
+  - 시작페이지 → "이미 계정이 있어요" → `auth-continue` (skipOnboarding)
+- **HTML 구조**: `auth-welcome`에는 `ob-gradient` 클래스 → 인디고 그라데이션 배경
+- **⚠️ 주의**: `auth-welcome`이 기본 화면이므로 `<html style="background:#5B4FC4">`와 조합해도 iOS PWA 단차 없음 (ob-gradient가 position:fixed로 전체 화면 덮음)
+
 ---
 
 ## 변경 이력 (Change Log)
@@ -1117,4 +1141,41 @@ account: {
 #### 미완료 / 추가 확인 필요
 - 카카오 로그인: Kakao Developer Portal에서 앱 상태가 "개발 중"이면 등록된 테스트 계정만 사용 가능. 실 사용자가 카카오 로그인 실패 시 포탈 설정 확인 필요
 - 소셜 로그인 전체 E2E 테스트: Google ✅, 네이버 ✅, 카카오 ⚠️ (Authorization Code flow 전환됨, 실기기 테스트 필요)
-- 운영기 배포: 위 수정사항은 개발기에만 적용됨. 운영기 반영 시 sync 스크립트 사용
+- 운영기 배포: 위 수정사항은 개발기에만 적용됨. 운영기 반영 시 release 브랜치 → PR → merge 절차 사용
+
+### 2026-03-31 세션 (2차) — 소셜 연동 해제 + 시작페이지 복원
+
+**적용 범위: 개발기 (main/dev/index.html)**
+
+#### 커밋 목록
+| 커밋 | PR | 설명 | 상태 |
+|------|-----|------|------|
+| `38e4e65` | #13 | feat: 소셜 계정 연동 해제 기능 추가 | ✅ merged |
+| `0831ed1` | #14 | feat: 로그인 첫 화면을 시작페이지로 복원 | ✅ merged |
+
+#### 상세 변경 내용
+
+**1. 소셜 계정 연동 해제 기능 (PR #13, DEV v0331z)**
+- `unlinkSocial()` 함수 추가 (`linkSocialFromMyMenu()` 바로 뒤)
+- 나의 메뉴 소셜 표시 영역에 "해제" 버튼 추가
+- **조건**: ID/PW 계정이 있는 사용자만 해제 가능 (`acc.id && acc.pwdHash` 확인)
+  - 소셜 전용 가입자는 해제 불가 (로그인 수단 보호)
+  - 소셜 전용 가입자에게는 기존 체크마크 아이콘 유지
+- 해제 시 삭제되는 필드: `authProvider`, `authUid`, `email`
+  - `S.familyMeta.members[currentUser].account`에서 삭제
+  - `S.users[currentUser]`에서 삭제
+- confirm 다이얼로그로 사용자 확인 후 처리
+- 해제 후 `save()` + `renderMyMenu()` 호출로 UI 즉시 반영
+- APP_CHANGELOG v1.4.1 추가
+
+**2. 로그인 첫 화면 시작페이지 복원 (PR #14, DEV v0331z2)**
+- `auth-continue` (소셜+ID/PW 통합 로그인)에 `hidden` 추가
+- `auth-welcome` (시작페이지 — "아이의 좋은 습관, 가족이 함께 만들어요")에서 `hidden` 제거
+- iOS PWA 하단 단차 방지 rAF 로직 유지 (CLAUDE.md 절대 변경 금지 코드)
+- 앱 흐름: 시작페이지 → "시작하기" → 온보딩 슬라이드 → 로그인 화면
+  - 또는: 시작페이지 → "이미 계정이 있어요" → 로그인 화면
+
+**3. Firestore 소셜 데이터 확인**
+- 운영기(`users/taemin`), 개발기(`families/taemin_dev`) 모두 확인
+- 모든 멤버(dad, mom, taemin)에 소셜 연동 데이터 없음 (이미 깨끗한 상태)
+- REST API 삭제 작업 불필요
