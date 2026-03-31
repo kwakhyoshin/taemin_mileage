@@ -3861,6 +3861,19 @@ requestAnimationFrame(function(){
         </div>
       </div>
     </div>
+    <!-- ── 회원 탈퇴 ── -->
+    <div class="adm-sec">
+      <div class="adm-sec-lbl" style="color:#9CA3AF">계정</div>
+      <div class="adm-card">
+        <div class="adm-row">
+          <div class="adm-row-l">
+            <div class="adm-row-nm" style="color:#9CA3AF"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4-4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="18" y1="8" x2="23" y2="13"/><line x1="23" y1="8" x2="18" y2="13"/></svg> 회원 탈퇴</div>
+            <div class="adm-row-sub">계정과 관련 데이터를 영구 삭제합니다</div>
+          </div>
+          <button class="btn-sm rd" onclick="withdrawAccount()">탈퇴</button>
+        </div>
+      </div>
+    </div>
     <div style="height:16px"></div>
   </div>
   <div id="adm-p3" style="display:none">
@@ -4066,10 +4079,6 @@ requestAnimationFrame(function(){
       <span class="my-list-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span>
       <span class="my-list-txt">로그아웃</span>
       <svg class="my-list-arr" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
-    </button>
-    <button class="my-list-item" onclick="withdrawAccount()" style="color:#9CA3AF;margin-top:4px">
-      <span class="my-list-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4-4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="18" y1="8" x2="23" y2="13"/><line x1="23" y1="8" x2="18" y2="13"/></svg></span>
-      <span class="my-list-txt" style="font-size:13px">회원 탈퇴</span>
     </button>
   </div>
 </div>
@@ -8237,7 +8246,7 @@ const BADGES = [
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
-if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401i';}}
+if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401j';}}
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
