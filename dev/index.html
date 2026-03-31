@@ -6303,6 +6303,29 @@ async function unlinkSocial(){
   const pName=provNames[acc.authProvider]||acc.authProvider;
   if(!confirm(`${pName} 연동을 해제할까요?\n해제하면 소셜 계정으로 로그인할 수 없어요.\nID/비밀번호로만 로그인 가능합니다.`)) return;
   try{
+    // ★ auth 레지스트리에서 해당 소셜 uid 삭제 (가장 중요!)
+    const _unlinkAuthUid = acc.authUid || S.users?.[currentUser]?.authUid;
+    if(_unlinkAuthUid && typeof _getAuthRegistryDoc==='function' && typeof runTransaction==='function'){
+      try{
+        const regDoc=_getAuthRegistryDoc();
+        if(regDoc){
+          await runTransaction(db, async(tx)=>{
+            const snap=await tx.get(regDoc);
+            if(snap.exists()){
+              const data=snap.data();
+              if(data[_unlinkAuthUid]){
+                delete data[_unlinkAuthUid];
+                tx.set(regDoc, data);
+                console.log('[unlinkSocial] Removed from auth registry:', _unlinkAuthUid);
+              }
+            }
+          });
+        }
+      }catch(_regErr){
+        console.warn('[unlinkSocial] Auth registry cleanup failed:', _regErr);
+        // 레지스트리 삭제 실패해도 계속 진행 (로컬 데이터는 삭제)
+      }
+    }
     // familyMeta.members에서 소셜 필드 삭제
     if(S.familyMeta?.members?.[currentUser]?.account){
       delete S.familyMeta.members[currentUser].account.authProvider;
@@ -7974,7 +7997,7 @@ const BADGES = [
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
-if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0331z4';}}
+if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401a';}}
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
