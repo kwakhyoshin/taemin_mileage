@@ -8281,7 +8281,7 @@ const BADGES = [
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
-if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401q';}}
+if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401r';}}
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
@@ -11948,11 +11948,12 @@ function _doActCore(id){
     _actCard.classList.add('act-completing');
     toast(`${a.emoji} ${a.name} +${a.pts} 마일리지${sm}`);
     flyCoinsToMileage(_actCard, a.pts+bonus);
+    // 도장 표시 시 renderAll을 도장 애니메이션 완료까지 지연 (delay .65s + dur .45s = 1.1s + 여유)
+    const _renderDelay=_showStamp?1300:0;
     _actCard.addEventListener('animationend',function _h(ev){
       if(ev.animationName!=='actFlip')return;
       _actCard.removeEventListener('animationend',_h);
-      renderAll();
-      setTimeout(()=>checkBadges(),300);
+      setTimeout(()=>{renderAll();setTimeout(()=>checkBadges(),300);},_renderDelay);
     });
   } else if(_logItem){
     if(_showStamp){const _stamp2=document.createElement('div');
@@ -11962,11 +11963,11 @@ function _doActCore(id){
     _logItem.classList.add('log-completing');
     toast(`${a.emoji} ${a.name} +${a.pts} 마일리지${sm}`);
     flyCoinsToMileage(_logItem, a.pts+bonus);
+    const _renderDelay2=_showStamp?900:0;
     _logItem.addEventListener('animationend',function _h2(ev){
       if(ev.animationName!=='logItemFlash')return;
       _logItem.removeEventListener('animationend',_h2);
-      renderAll();
-      setTimeout(()=>checkBadges(),300);
+      setTimeout(()=>{renderAll();setTimeout(()=>checkBadges(),300);},_renderDelay2);
     });
   } else {
     renderAll();
