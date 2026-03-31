@@ -6,6 +6,18 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="googlebot" content="noindex, nofollow">
 <script>
+// ── iOS PWA viewport-fit=cover 콜드스타트 버그 수정 ──
+// iOS는 PWA 첫 실행 시 viewport-fit=cover를 제대로 적용하지 않아
+// viewport가 safe area를 포함하지 않는 문제가 있음.
+// viewport meta를 제거했다 다시 넣으면 iOS가 재계산함.
+(function(){
+  if(window.navigator.standalone){
+    var vp=document.querySelector('meta[name="viewport"]');
+    if(vp){var c=vp.content;vp.content='';setTimeout(function(){vp.content=c;},0);}
+  }
+})();
+</script>
+<script>
 // ── 브라우저 뒤로/앞으로 완전 차단 (최상단 즉시 실행) ──
 (function(){
   // 1. 히스토리 트랩 (10단계 깊이)
@@ -7916,7 +7928,7 @@ const BADGES = [
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
-if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0331v';}}
+if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0331w';}}
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
