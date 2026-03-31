@@ -2,7 +2,7 @@
 
 > 이 문서는 새 세션에서 실수 없이 개발·테스트·배포할 수 있도록 모든 핵심 정보를 담고 있습니다.
 > **새 세션 시작 시 반드시 이 문서를 먼저 읽을 것.**
-> 최종 업데이트: 2026-03-30 (인증 화면 UX 트러블슈팅 섹션 추가, DEV_GUIDE.md 통합)
+> 최종 업데이트: 2026-03-31 (iOS PWA viewport 단차 해결, 개발기 가족데이터 복구)
 
 ---
 
@@ -975,6 +975,31 @@ account: {
   });
   ```
 - **교훈**: bfcache 새로고침 로직이 있으면, 소셜 로그인 같은 외부 탭 전환 플로우에서 예외 처리 필수
+
+### 12.13 개발기 가족데이터 손상 복구 (2026-03-31)
+- **증상**: nonmarking, beh125 등 기존 계정으로 개발기 로그인 시 "가족 데이터가 손상되었어요" 에러
+- **원인**: `families/taemin_dev` 문서의 `familyMeta`가 `null`, `users`가 빈 맵 `{}`
+  - 코드에서 `if(!familyData.familyMeta)` 체크에 걸림 (라인 ~6463)
+  - 글로벌 레지스트리 `_dev_id_registry`에는 nonmarking→taemin_dev, beh125→taemin_dev 정상 매핑 존재
+  - 가족 문서 자체는 존재하나 핵심 필드(familyMeta, users)가 비어있음
+- **진단 방법**: Firestore REST API로 직접 확인
+  ```bash
+  # 레지스트리 확인
+  curl -s "https://firestore.googleapis.com/v1/projects/taemin-mileage/databases/(default)/documents/families/_dev_id_registry?key=AIzaSyDTS81EBGgiuo564ThxvTTOpR_iAHLb8tg"
+  # 가족 문서 확인
+  curl -s "https://firestore.googleapis.com/v1/projects/taemin-mileage/databases/(default)/documents/families/taemin_dev?key=AIzaSyDTS81EBGgiuo564ThxvTTOpR_iAHLb8tg"
+  ```
+- **복구**: 운영기(`users/taemin`) 데이터에서 `familyMeta`와 `users` 필드를 추출하여 개발기 양쪽 문서에 PATCH
+  ```bash
+  # 운영기 데이터 추출 후 개발기에 복원
+  curl -X PATCH "...families/taemin_dev?key=...&updateMask.fieldPaths=familyMeta&updateMask.fieldPaths=users" -d @patch_data.json
+  curl -X PATCH "...users/taemin_dev?key=...&updateMask.fieldPaths=familyMeta&updateMask.fieldPaths=users" -d @patch_data.json
+  ```
+- **복원 결과**: familyMeta.members에 dad(효신/nonmarking), mom(으네/beh125), taemin(태민/abo.taemin) 정상 복원
+- **교훈**:
+  1. 개발기 Firestore 데이터도 정기적으로 백업해야 함
+  2. `familyMeta: null`은 `defaultState()`가 Firestore에 저장된 흔적 — 사고 2와 동일 패턴
+  3. 복구 시 `families/{id}`와 `users/{id}` 양쪽 모두 업데이트 필요
 
 ---
 
