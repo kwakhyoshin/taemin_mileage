@@ -1037,6 +1037,41 @@ account: {
 
 ## 변경 이력 (Change Log)
 
+### 2026-04-01 세션 — 소셜 로그인/연동 최적화
+
+**적용 범위: 개발기 (main/dev/index.html)**
+
+#### 커밋 목록 (PR #15~#19)
+| PR | 설명 | 상태 |
+|----|------|------|
+| #15 | fix: 첫 화면 시작하기(welcome) 표시 복원 | ✅ merged |
+| #16 | fix: 로그인 후 상단 색상 간격 (safe-area CSS 범위 제한) | ✅ merged |
+| #17 | fix: 소셜 연동 해제 후 재연동 시 선택화면 표시 (auth registry 삭제) | ✅ merged |
+| #18 | fix: 구글 소셜 로그인 속도 개선 (Promise.all 병렬 처리) | ✅ merged |
+| #19 | fix: 소셜 연동 로그인 즉시 반영 (10초 지연 해결) | ✅ merged |
+
+#### 상세 변경 내용
+
+**PR #15: 시작하기 화면 복원**
+- 문제: `checkAuth()`와 `logout()`이 항상 `showAuthScreen('continue')`를 호출하여 welcome 화면이 표시되지 않음
+- 수정: `localStorage.getItem('onboarding_done')` 체크하여 첫 방문 시 welcome, 재방문 시 continue 표시
+
+**PR #16: 로그인 후 상단 색상 간격**
+- 문제: `html{min-height;padding:safe-area}` CSS가 전역 적용되어 로그인 후에도 상단 패딩 잔존
+- 수정: `html:has(body.auth-active)` 셀렉터로 범위 제한하여 인증 화면에서만 적용
+
+**PR #17: 소셜 연동 해제 후 재연동 버그**
+- 문제: `unlinkSocial()`이 auth registry(`_dev_auth_registry`)에서 매핑을 삭제하지 않음 → 재연동 시 `_handleSocialLoginResult()`가 registry에서 기존 매핑 발견 → 선택 없이 자동 로그인
+- 수정: `unlinkSocial()`에서 `runTransaction`으로 auth registry 삭제 추가. 소셜 데이터 3곳(familyMeta, S.users, auth registry) 모두 일관 삭제
+
+**PR #18: 소셜 로그인 속도 개선**
+- 문제: `_handleSocialLoginResult()`에서 Firestore 3회 순차 읽기 (registry → family doc → 중복 family doc)
+- 수정: `Promise.all`로 registry + family doc 병렬 읽기, 결과 캐싱(`_regData`, `_cachedFamilyData`), Firebase SDK preload를 welcome 화면에서도 시작
+
+**PR #19: 소셜 연동 즉시 반영 (DEV v0401c)**
+- 문제: `_linkSocialAfterLogin()`이 fire-and-forget으로 별도 `save()` 실행, `doLogin()`의 `save()`와 경쟁 → 나의 메뉴에서 10초 뒤에야 연동 표시
+- 수정: `_applySocialLinkToMemory(memberId)`를 `doLogin()` 3개 분기에서 `save()` 전에 호출하여 소셜 데이터가 로그인 save()에 포함되도록 변경. auth registry 쓰기는 non-blocking background 처리
+
 ### 2026-03-30 세션 — 소셜 로그인 버그 수정 + 알림 뱃지 수정
 
 **적용 범위: 개발기 (main/dev/index.html)**
