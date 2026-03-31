@@ -6292,12 +6292,21 @@ function selectJoinMember(memberId){
   if(!m)return;
   const rd=ROLE_DEFS[m.role]||ROLE_DEFS.child;
   const _avatarHTML=`<div style="width:56px;height:56px;border-radius:50%;background:${rd.color||'#F1F5F9'};border:3px solid ${rd.textColor||'#6366F1'};display:flex;align-items:center;justify-content:center;margin:0 auto"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="${rd.textColor||'#6366F1'}" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg></div>`;
-  const _memberTitle=`${m.name}(${rd.label||(m.role==='child'?'아이':'양육자')}) 계정 만들기`;
+  const _roleLabel=rd.label||(m.role==='child'?'자녀':'양육자');
+  const _memberTitle=`${m.name}(${_roleLabel}) 계정 만들기`;
+  // 초대 안내 메시지 생성
+  const _familyName=S.familyMeta?.familyName||'가족';
+  const _inviterMid=_joinState.inviterName?'':(_joinState.token?((S.familyMeta?.inviteTokens||[]).find(t=>t.token===_joinState.token)||{}).createdBy||S.familyMeta?.createdBy:'')|| S.familyMeta?.createdBy||'';
+  const _inviterName=_joinState.inviterName||(S.familyMeta?.members?.[_inviterMid]?.name)||'';
+  const _inviteDesc=_inviterName
+    ?`${_inviterName}님이 ${_roleLabel}(으)로 초대하여 ${_familyName} 가족 구성원으로 회원가입이 진행됩니다.`
+    :`${_familyName} 가족의 ${_roleLabel}(으)로 회원가입이 진행됩니다.`;
   // 방법 선택 슬라이드(슬라이드 0)에 정보 표시
   const mAvatar=document.getElementById('jr-method-avatar');if(mAvatar)mAvatar.innerHTML=_avatarHTML;
   const mTitle=document.getElementById('jr-method-title');if(mTitle)mTitle.textContent=_memberTitle;
+  const mDesc=document.querySelector('#jr-slide-method .toss-desc');if(mDesc)mDesc.textContent=_inviteDesc;
   const mBadge=document.getElementById('jr-method-family-badge');
-  if(mBadge && S.familyMeta?.familyName){mBadge.textContent=`🏠 ${S.familyMeta.familyName} 가족`;mBadge.style.display='block';}
+  if(mBadge && S.familyMeta?.familyName){mBadge.textContent=`🏠 ${_familyName} 가족`;mBadge.style.display='block';}
   // ID 슬라이드에도 동일 정보
   const idAvatar=document.getElementById('join-reg-avatar');if(idAvatar)idAvatar.innerHTML=_avatarHTML;
   const idTitle=document.getElementById('join-reg-title');if(idTitle)idTitle.textContent='아이디를 정해주세요';
@@ -8452,7 +8461,7 @@ const BADGES = [
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
-if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401z3';}}
+if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401z4';}}
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
@@ -16191,12 +16200,16 @@ async function checkUrlParams(){
       _joinState.selectedMemberId=mid;
       _joinState.fromSelect=false;
       _joinState.isReset=false;
+      // 초대자 정보 저장
+      const _inviterMid=validToken.createdBy||S.familyMeta?.createdBy||'';
+      const _inviterMember=fm[_inviterMid];
+      _joinState.inviterName=_inviterMember?.name||'';
+      _joinState.familyName=familyName;
+      _joinState.memberName=member.name;
+      _joinState.memberRole=rd.label||(member.role==='child'?'자녀':'양육자');
 
-      showAuthScreen('join-register');
-      const badge=document.getElementById('join-reg-family-badge');
-      if(badge){badge.textContent=`🏠 ${familyName} 가족`;badge.style.display='block';}
-      document.getElementById('join-reg-avatar').innerHTML=`<div style="width:56px;height:56px;border-radius:50%;background:${rd.color||'#F1F5F9'};border:3px solid ${rd.textColor||'#6366F1'};display:flex;align-items:center;justify-content:center;margin:0 auto"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="${rd.textColor||'#6366F1'}" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg></div>`;
-      document.getElementById('join-reg-title').textContent=`${member.name}(${rd.label}) 계정 만들기`;
+      // selectJoinMember()를 호출하여 방법 선택 슬라이드까지 설정
+      selectJoinMember(mid);
       document.getElementById('join-reg-id').value='';
       document.getElementById('join-reg-id').placeholder='아이디 (4자 이상)';
     }catch(e){
