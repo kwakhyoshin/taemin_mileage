@@ -8452,7 +8452,7 @@ const BADGES = [
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
-if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401z2';}}
+if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401z3';}}
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
@@ -17654,7 +17654,7 @@ Object.assign(window, {
   resetCreateId, createStep5Back, createStep5Finish,
   renderRegStepper, _updateStepperFromC1,
   updateFamilyNamePreview, updatePwdStrength,
-  jrBack, jrSlideIdNext,
+  jrBack, jrSlideIdNext, jrGoToIdPw, doJoinSocialLogin,
   renderRoleGrid, selectCreateRole, incrementMemberCount, decrementMemberCount,
   renderFamilyGraph, openNodeForm, saveNodeForm, closeNodeForm, checkGraphComplete, addFamilyMember, addCaregiverMember, addChildMember, removeFamilyMember, updateAddMemberBtn,
   selectMode,
