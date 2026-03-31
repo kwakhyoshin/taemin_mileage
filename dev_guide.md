@@ -1537,6 +1537,39 @@ account: {
   - 애니메이션 도장: `_logItem.querySelector('.log-inf')` 에 appendChild
   - CSS `right:0`으로 텍스트 영역 오른쪽 끝 배치
 
+### 12.17 레거시 ID/PW 계정에서 초대 링크 작동하지 않는 문제 (2026-04-01, PR #48)
+
+- **증상**: ID/PW로 가입한 계정(nonmarking)에서 관리자 페이지 → 가족 추가 → 초대 링크 공유 시, 수신자가 링크를 열면 가입 화면이 아닌 초기 시작 화면(welcome)이 표시됨. 소셜 로그인으로 가입한 계정에서는 정상 동작.
+- **원인**: ID/PW로 가입한 레거시 계정은 데이터가 `users/taemin_dev` (LEGACY_DOC)에 저장되며 `_familyId`가 `null`. `sendFamilyInvite()`에서:
+  1. `_familyId`가 null → `rawFamilyId = _familyId.startsWith('dev_')` 에서 TypeError 발생하거나 빈값
+  2. URL의 `?invite=` 파라미터가 빈값 → 수신자 측에서 `params.get('invite')`가 falsy → invite 처리 스킵 → `checkAuth()` → welcome 화면
+  3. 설령 토큰이 저장되어도 `users/taemin_dev`에 저장되는데, 수신자는 `families/dev_XXXX`에서 찾으려 함 → 데이터 불일치
+- **소셜 계정은 왜 동작했나**: 소셜 로그인 계정은 `saveFamilyToFirestore()`에서 `families/dev_XXXX` 컬렉션에 데이터를 저장하고 `_familyId`를 정상 설정함
+- **수정**:
+  1. `sendFamilyInvite()` 시작 시 `_familyId`가 null이면 자동으로 `families/` 컬렉션에 마이그레이션
+  2. 마이그레이션: 새 familyId 생성 → `setDoc(families/dev_XXX, S)` → `_familyId` / `DATA_DOC` / localStorage 갱신
+  3. `_familyId` null 방어 코드 추가 (`shareInviteLink`, `sendFamilyInvite` 양쪽)
+  4. `tokenEntry`에 `createdBy` 필드 추가 (초대자 이름 표시용)
+- **교훈**:
+  1. 레거시 데이터 경로(`users/taemin_dev`)와 새 경로(`families/dev_XXX`)가 공존하는 상황에서 항상 `_familyId` null 체크 필요
+  2. 초대 링크 같은 cross-device 기능은 데이터 저장 경로가 일치해야 함
+  3. ID/PW 계정과 소셜 계정의 데이터 경로가 다를 수 있다는 점을 테스트 시 항상 고려
+
+### 2026-04-01 세션 (10차) — 초대 화면 가족배지 → 로고 교체 + 레거시 초대 버그 수정
+
+| 커밋 | PR | 설명 | 상태 |
+|------|-----|------|------|
+| `a4b7ae7` | #47 | feat: 초대 가입 화면 가족배지 → mile.ly 로고 교체 + "가족 가족" 중복 수정 | ✅ merged |
+| `48a8913` | #48 | fix: 레거시 ID/PW 계정에서 초대 링크가 작동하지 않는 문제 수정 | ✅ merged |
+
+**주요 변경:**
+1. 초대 가입 화면의 `🏠 곽효신네 가족 가족` 배지를 mile.ly SVG 브랜드 로고로 교체 (#47)
+2. familyName이 이미 "가족"으로 끝나는 경우 중복 방지 처리 (#47)
+3. 레거시 ID/PW 계정의 `_familyId` null 문제로 초대 링크가 작동하지 않던 버그 수정 (#48)
+4. 초대 토큰에 `createdBy` 필드 추가 (#48)
+
+**APP_CHANGELOG:** v1.6.8 추가항목 — 초대 화면 로고 교체, "가족" 중복 수정, 레거시 계정 초대 링크 수정
+
 #### 미완료 / 추가 확인 필요
 - 운영기 미적용 — 운영기 반영 시 release 브랜치 → PR → merge 절차 사용
 - 회원 탈퇴 후 Firebase Authentication 계정 자체 삭제는 미구현 (signOut만 수행). 필요 시 Firebase Admin SDK 또는 Cloud Function으로 처리 가능
