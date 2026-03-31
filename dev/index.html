@@ -6722,7 +6722,9 @@ function logout() {
   if(fbAuth && signOut){
     try{ signOut(fbAuth); }catch(e){ console.warn('Firebase signOut error:', e); }
   }
-  showAuthScreen('continue');
+  // 온보딩 미완료 시 시작페이지, 완료 시 통합 로그인
+  const _obDoneLogout = localStorage.getItem(_LS_PREFIX+'onboarding_done');
+  showAuthScreen(_obDoneLogout ? 'continue' : 'welcome');
   // 통합 로그인 폼 초기화
   const _cId=document.getElementById('continue-login-id');
   const _cPwd=document.getElementById('continue-login-pwd');
@@ -7662,8 +7664,9 @@ function checkAuth() {
     return false;
   }
 
-  // 항상 통합 로그인 화면부터 표시 (온보딩은 가입 플로우에서 진행)
-  showAuthScreen('continue');
+  // 온보딩 미완료 시 시작페이지(welcome), 완료 시 통합 로그인(continue) 표시
+  const _obDone = localStorage.getItem(_LS_PREFIX+'onboarding_done');
+  showAuthScreen(_obDone ? 'continue' : 'welcome');
   return false;
 }
 
@@ -7972,7 +7975,7 @@ const BADGES = [
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
-if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0331z2';}}
+if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0331z3';}}
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
