@@ -6413,32 +6413,40 @@ async function _doLinkSocial(provider){
 window._doLinkSocial = _doLinkSocial;
 
 // 소셜 계정 연동 처리 (doLogin 성공 후 호출)
-async function _linkSocialAfterLogin(memberId){
+// ★ 소셜 연동 데이터를 메모리에 즉시 반영 (save() 전에 호출)
+// 로그인 성공 시 doLogin에서 save() 직전에 호출하여 한 번의 save()로 모든 데이터 저장
+function _applySocialLinkToMemory(memberId){
   const su = window._socialLinkPendingUser;
   if(!su) return;
   window._socialLinkPendingUser = null;
-  try {
-    // 1) auth registry에 등록 (UID → familyId/memberId)
-    await _registerAuthLink(su.uid, _familyId, memberId, su.provider||'google', su.email||'');
-    // 2) 계정 데이터에 소셜 정보 추가
-    const acc = S.familyMeta?.members?.[memberId]?.account;
-    if(acc){
-      acc.authProvider = su.provider||'google';
-      acc.authUid = su.uid;
-      acc.email = su.email||'';
-    }
-    if(S.users && S.users[memberId]){
-      S.users[memberId].authProvider = su.provider||'google';
-      S.users[memberId].authUid = su.uid;
-      S.users[memberId].email = su.email||'';
-    }
-    await save();
-    toast('✅ 소셜 계정이 연결되었어요!');
-    console.log('[Social Link] Linked', su.email, '→', _familyId, memberId);
-  } catch(e){
-    console.error('[Social Link Error]', e);
-    toast('소셜 연동 중 오류가 발생했어요');
+  // 계정 데이터에 소셜 정보 즉시 추가 (메모리)
+  const acc = S.familyMeta?.members?.[memberId]?.account;
+  if(acc){
+    acc.authProvider = su.provider||'google';
+    acc.authUid = su.uid;
+    acc.email = su.email||'';
   }
+  if(S.users && S.users[memberId]){
+    S.users[memberId].authProvider = su.provider||'google';
+    S.users[memberId].authUid = su.uid;
+    S.users[memberId].email = su.email||'';
+  }
+  console.log('[Social Link] Applied to memory:', su.provider, su.email, '→', memberId);
+  // auth registry는 비동기로 별도 처리 (UI 차단 없음)
+  _registerAuthLink(su.uid, _familyId, memberId, su.provider||'google', su.email||'')
+    .then(()=>console.log('[Social Link] Registry updated'))
+    .catch(e=>console.warn('[Social Link] Registry update failed:', e));
+  return su; // 연동 정보 반환 (토스트용)
+}
+
+// 레거시 호환: 기존 _linkSocialAfterLogin은 더 이상 save()하지 않음
+async function _linkSocialAfterLogin(memberId){
+  const su = window._socialLinkPendingUser;
+  if(!su) return;
+  // ★ 새 방식: 이미 doLogin에서 처리됨. 혹시 호출되면 메모리 반영만
+  _applySocialLinkToMemory(memberId);
+  await save();
+  toast('✅ 소셜 계정이 연결되었어요!');
 }
 
 async function doLogin(idField, pwdField, errField){
@@ -6464,10 +6472,13 @@ async function doLogin(idField, pwdField, errField){
       const matched=(u.v===2&&u.id===id&&u.pwdHash===pwdHashSalted)||
                     (!u.v&&u.id===id&&u.pwdHash===pwdHashLegacy);
       if(matched){
-        if(!u.v){u.pwdHash=pwdHashSalted;u.v=2;S.users[memberId]=u;save();}
+        const socialLinked = _applySocialLinkToMemory(memberId);
+        const needsMigration = !u.v;
+        if(needsMigration){u.pwdHash=pwdHashSalted;u.v=2;S.users[memberId]=u;}
+        if(needsMigration || socialLinked) save();
         currentUser=memberId;
         localStorage.setItem(_LS_PREFIX+'current_user',memberId);
-        syncMemberToGlobal(); // Load member data for this user
+        syncMemberToGlobal();
         postLoginInit();
         rebuildMembersFromFamily();
         hideAllAuth();
@@ -6475,7 +6486,7 @@ async function doLogin(idField, pwdField, errField){
         renderAll();
         reallyGoTab('home');
         toast(`${MEMBERS[memberId]?.name||'회원'}님, 환영해요! 🎉`);
-        _linkSocialAfterLogin(memberId);
+        if(socialLinked) toast('✅ 소셜 계정이 연결되었어요!');
         return;
       }
     }
@@ -6492,10 +6503,11 @@ async function doLogin(idField, pwdField, errField){
         if(!S.users)S.users={};
         S.users[mid]={id:acc.id,pwdHash:pwdHashSalted,v:2};
         if(!acc.v){acc.pwdHash=pwdHashSalted;acc.v=2;}
+        const socialLinked = _applySocialLinkToMemory(mid);
         save();
         currentUser=mid;
         localStorage.setItem(_LS_PREFIX+'current_user',mid);
-        syncMemberToGlobal(); // Load member data for this user
+        syncMemberToGlobal();
         postLoginInit();
         rebuildMembersFromFamily();
         hideAllAuth();
@@ -6503,7 +6515,7 @@ async function doLogin(idField, pwdField, errField){
         renderAll();
         reallyGoTab('home');
         toast(`${fm[mid].name||'회원'}님, 환영해요! 🎉`);
-        _linkSocialAfterLogin(mid);
+        if(socialLinked) toast('✅ 소셜 계정이 연결되었어요!');
         return;
       }
     }
@@ -6540,13 +6552,14 @@ async function doLogin(idField, pwdField, errField){
                 localStorage.setItem(_LS_PREFIX+'family_id', otherFamilyPath);
                 if (!S.users) S.users = {};
                 S.users[otherMid] = {id, pwdHash: pwdHashSalted, v: 2};
+                const socialLinked = _applySocialLinkToMemory(otherMid);
                 await save();
                 // 리스너를 새 DATA_DOC으로 재연결
                 if(_dataListenerUnsub){try{_dataListenerUnsub();}catch(_e){}}
                 try{_dataListenerUnsub=onSnapshot(DATA_DOC,(snap)=>{if(!snap.exists())return;if(_isSaving)return;if(Date.now()-_lastSaveTime<2000)return;const _ij=JSON.stringify(snap.data());if(_ij===_lastSavedJSON||_ij===JSON.stringify(S))return;if(!_hasDirtyLocal){S=Object.assign(defaultState(),snap.data());_lastSavedJSON=_ij;rebuildMembersFromFamily();renderAll();checkNewMessages();renderNavUsers();}});}catch(_e){}
                 currentUser = otherMid;
                 localStorage.setItem(_LS_PREFIX+'current_user', otherMid);
-                syncMemberToGlobal(); // Load member data for this user
+                syncMemberToGlobal();
                 postLoginInit();
                 rebuildMembersFromFamily();
                 hideAllAuth();
@@ -6554,7 +6567,7 @@ async function doLogin(idField, pwdField, errField){
                 renderAll();
                 reallyGoTab('home');
                 toast(`${MEMBERS[otherMid]?.name||'회원'}님, 환영해요! 🎉`);
-                _linkSocialAfterLogin(otherMid);
+                if(socialLinked) toast('✅ 소셜 계정이 연결되었어요!');
                 return;
               }
             }
@@ -7997,7 +8010,7 @@ const BADGES = [
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
-if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401b';}}
+if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401c';}}
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
@@ -14210,6 +14223,15 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {
+    ver:'1.4.2', date:'2026-04-01',
+    items:[
+      {type:'fix',text:'소셜 로그인 속도 개선 — 구글 인증 Firestore 병렬 처리'},
+      {type:'fix',text:'소셜 연동 후 즉시 반영 — 나의 메뉴에서 바로 연동 상태 확인 가능'},
+      {type:'fix',text:'소셜 연동 해제 후 재연동 시 선택 화면 정상 표시'},
+      {type:'fix',text:'로그인 후 상단 색상 간격 문제 해결'}
+    ]
+  },
   {
     ver:'1.4.1', date:'2026-03-31',
     items:[
