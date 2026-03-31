@@ -6298,7 +6298,7 @@ async function unlinkSocial(){
     await save();
     toast('소셜 연동이 해제되었어요');
     // 나의 메뉴 UI 새로고침
-    if(typeof renderMyMenu==='function') renderMyMenu();
+    if(typeof renderMyTab==='function') renderMyTab();
   }catch(e){
     console.error('unlinkSocial error:',e);
     toast('연동 해제에 실패했어요');
