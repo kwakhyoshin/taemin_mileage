@@ -5862,10 +5862,12 @@ async function shareInviteLink(memberName, memberIdx){
   const tokenEntry={
     token:inviteToken,
     memberId:targetMid,
+    createdBy:currentUser||'',
     createdAt:Date.now(),
     expiresAt:Date.now()+7*24*60*60*1000
   };
 
+  if(!_familyId){toast('⚠️ 가족 정보를 찾을 수 없어요');return;}
   const rawFamilyId=_familyId.startsWith('dev_')?_familyId.slice(4):_familyId;
   let url;
   let text;
@@ -8460,7 +8462,7 @@ const BADGES = [
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
-if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401z6';}}
+if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401z7';}}
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
@@ -13291,6 +13293,35 @@ async function sendFamilyInvite(memberId) {
   const m = S.familyMeta?.members?.[memberId];
   if(!m) return;
 
+  // ── 레거시 계정 자동 마이그레이션: _familyId가 없으면 families/ 컬렉션으로 이동 ──
+  if(!_familyId && _firebaseReady && db){
+    const newFamilyId=Math.random().toString(36).slice(2)+Date.now().toString(36);
+    const docPath=_ENV==='dev'?`dev_${newFamilyId}`:newFamilyId;
+    const familyDoc=getFamilyDoc(docPath);
+    if(familyDoc && familyDoc.path){
+      try{
+        // familyMeta.familyId도 갱신
+        if(S.familyMeta) S.familyMeta.familyId=docPath;
+        await setDoc(familyDoc, S);
+        _familyId=docPath;
+        DATA_DOC=familyDoc;
+        localStorage.setItem(_LS_PREFIX+'family_id',docPath);
+        _lastSavedJSON=JSON.stringify(S);
+        _lastSaveTime=Date.now();
+        console.log('[sendFamilyInvite] Legacy → families/ migration OK:', docPath);
+      }catch(e){
+        console.error('[sendFamilyInvite] Legacy migration failed:', e);
+        toast('⚠️ 초대 기능을 위한 데이터 이전에 실패했어요. 다시 시도해주세요.');
+        return;
+      }
+    }
+  }
+
+  if(!_familyId){
+    toast('⚠️ 가족 정보를 찾을 수 없어요. 페이지를 새로고침 후 다시 시도해주세요.');
+    return;
+  }
+
   // Generate invite token
   const inviteToken = Math.random().toString(36).slice(2) + Date.now().toString(36);
   if(!S.familyMeta.inviteTokens) S.familyMeta.inviteTokens = [];
@@ -13299,16 +13330,15 @@ async function sendFamilyInvite(memberId) {
     token: inviteToken,
     memberId: memberId,
     createdAt: Date.now(),
+    createdBy: currentUser||'',
     expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7일 후 만료
     type: 'invite'
   };
   S.familyMeta.inviteTokens.push(tokenEntry);
 
   // ⚠️ 초대 토큰은 반드시 families 컬렉션에 즉시 저장해야 함
-  // debounced save()는 DATA_DOC이 LEGACY_DOC을 가리킬 수 있어서
-  // 받는 측에서 families/dev_XXXX를 읽을 때 토큰을 찾지 못할 수 있음
-  const targetDoc = _familyId ? getFamilyDoc(_familyId) : DATA_DOC;
-  console.log('[sendFamilyInvite] saving token to:', targetDoc?.path || 'DATA_DOC', '_familyId:', _familyId);
+  const targetDoc = getFamilyDoc(_familyId);
+  console.log('[sendFamilyInvite] saving token to:', targetDoc?.path || 'unknown', '_familyId:', _familyId);
   try {
     await setDoc(targetDoc, S);
     _lastSavedJSON = JSON.stringify(S);
@@ -14691,6 +14721,7 @@ const APP_CHANGELOG=[
       {type:'improve',text:'메시지 버블 잘림 해결 (레이아웃 구조 변경)'},
       {type:'improve',text:'초대 가입 화면 가족배지를 mile.ly 브랜드 로고로 교체'},
       {type:'fix',text:'초대 가입 안내문 "가족 가족" 중복 표시 수정'},
+      {type:'fix',text:'ID/PW 계정(레거시)에서 초대 링크가 작동하지 않던 문제 수정'},
     ]
   },
   {
