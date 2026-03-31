@@ -506,7 +506,7 @@ body.dark .theme-pick.active .theme-pick-radio{border-color:#818CF8;background:#
 .log-item.partial .log-ico{background:var(--yw-lt)}
 /* Progress ring on log icon */
 .log-prog-ring{position:absolute;inset:0;border-radius:13px;background:conic-gradient(var(--gn) var(--prog,0%), transparent 0%);opacity:.35;pointer-events:none}
-.log-inf{flex:1;min-width:0;overflow:visible}
+.log-inf{flex:1;min-width:0;overflow:visible;position:relative}
 .log-nm{font-size:15px;font-weight:800;color:var(--tx)}
 .log-ds{font-size:13px;color:var(--tx2);margin-top:2px;font-weight:600}
 .log-meta{display:flex;align-items:center;gap:7px;margin-top:4px;flex-wrap:wrap}
@@ -1843,8 +1843,8 @@ body.dark .bubble-speech-log{background:rgba(255,255,255,.12);color:rgba(255,255
 /* Log item completion animation */
 @keyframes logItemFlash{0%{background:transparent}30%{background:rgba(16,185,129,.2)}100%{background:transparent}}
 .log-item.log-completing{animation:logItemFlash .8s ease forwards;position:relative}
-.log-completion-stamp{position:absolute;top:50%;right:130px;width:46px;height:46px;margin-top:-23px;opacity:0;pointer-events:none;z-index:8;animation:stampSlam .6s cubic-bezier(.16,1,.3,1) forwards;animation-delay:.3s;filter:drop-shadow(0 3px 8px rgba(16,185,129,.5))}
-.log-done-stamp{position:absolute;top:50%;right:130px;width:38px;height:38px;margin-top:-19px;opacity:.7;pointer-events:none;z-index:3;transform:rotate(-15deg);filter:drop-shadow(0 2px 4px rgba(16,185,129,.3))}
+.log-completion-stamp{position:absolute;top:50%;right:0;width:46px;height:46px;margin-top:-23px;opacity:0;pointer-events:none;z-index:8;animation:stampSlam .6s cubic-bezier(.16,1,.3,1) forwards;animation-delay:.3s;filter:drop-shadow(0 3px 8px rgba(16,185,129,.5))}
+.log-done-stamp{position:absolute;top:50%;right:0;width:38px;height:38px;margin-top:-19px;opacity:.7;pointer-events:none;z-index:3;transform:rotate(-15deg);filter:drop-shadow(0 2px 4px rgba(16,185,129,.3))}
 .card-done-stamp{position:absolute;top:45%;right:8px;width:56px;height:56px;margin-top:-28px;opacity:.75;pointer-events:none;z-index:3;transform:rotate(-15deg);filter:drop-shadow(0 2px 6px rgba(16,185,129,.35))}
 
 /* Member count stepper */
@@ -8461,7 +8461,7 @@ const BADGES = [
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
-if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401z4';}}
+if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401z5';}}
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
@@ -10077,12 +10077,12 @@ function renderLogList(){
           ${countLabel?`<span class="chip c-yw">${countLabel}</span>`:''}
           ${timer?`<span class="log-timer"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-1px;margin-right:2px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${timer}</span>`:''}
         </div>
+        ${_stampHTML}
       </div>
       <div class="log-right">
         <span class="log-badge">+${a.pts} 마일리지</span>
         ${done>0?`<button class="undo-btn" onclick="event.stopPropagation();undoAct('${a.id}')">취소↩</button>`:''}
       </div>
-      ${_stampHTML}
       ${stickerHTML}
     </div>`;
   }).join('');
@@ -12144,7 +12144,8 @@ function _doActCore(id){
     if(_showStamp){const _stamp2=document.createElement('div');
     _stamp2.className='log-completion-stamp';
     _stamp2.innerHTML=_stampSVG;
-    _logItem.appendChild(_stamp2);}
+    const _logInf2=_logItem.querySelector('.log-inf');
+    (_logInf2||_logItem).appendChild(_stamp2);}
     _logItem.classList.add('log-completing');
     toast(`${a.emoji} ${a.name} +${a.pts} 마일리지${sm}`);
     flyCoinsToMileage(_logItem, a.pts+bonus);
