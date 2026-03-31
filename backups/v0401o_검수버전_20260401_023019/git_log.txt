@@ -1,0 +1,20 @@
+bb97a20 docs: dev_guide.md PR #25~#31 변경사항 문서화
+759819f Merge pull request #31 from kwakhyoshin/feature/completion-stamp-bubble-fixes
+d5ba72d feat: 활동 완료 도장 추가 + 말풍선 잘림 버그 수정
+81aaec8 Merge pull request #30 from kwakhyoshin/feature/gender-toggle-buttons
+500df87 feat: 자녀 성별 선택 UI를 셀렉트박스에서 토글 버튼으로 변경
+11b5ba2 Merge pull request #29 from kwakhyoshin/feature/naver-pending-notice
+5f8adad feat: 네이버 로그인 심사 대기 안내 팝업 추가
+c4f0645 Merge pull request #28 from kwakhyoshin/feature/fix-role-validation
+257681e fix: 가입 시 호칭 미선택으로 다음 단계 넘어가는 버그 수정
+e5da1be Merge pull request #27 from kwakhyoshin/feature/fix-withdrawal-cleanup
+96998da fix: 회원 탈퇴 후 이전 가족 데이터 잔존 + 가이드 투어 미실행 수정
+a503123 Merge pull request #26 from kwakhyoshin/feature/move-withdraw-to-admin
+864c281 refactor: 회원 탈퇴 버튼을 나의메뉴 → 관리자 설정 탭으로 이동
+daf3f53 Merge pull request #25 from kwakhyoshin/feature/withdraw-ux-improve
+97e005d improve: 회원 탈퇴 UX 개선 — 커스텀 모달, 로딩 애니메이션, 이별 인사
+dc6c3a9 docs: PR #23~#24 변경 이력 추가
+6419235 Merge pull request #24 from kwakhyoshin/feature/fix-social-signup-flow
+90b8cdb fix: 소셜 신규가입 후 홈탭 미전환 + 가이드 투어 미표시 + 프로필 사진 미저장
+1f90f7b docs: PR #23 변경 이력 추가 — 소셜 registry 잔존 버그 수정
+3461b74 Merge pull request #23 from kwakhyoshin/feature/fix-social-registry-cleanup
