@@ -5112,7 +5112,12 @@ function c1SlideNameNext() {
 }
 
 function c1SlideRoleFinish() {
-  if (!_createState.myRole) _createState.myRole = 'caregiver';
+  const err = document.getElementById('c1-role-error');
+  if (!_createState.myRole) {
+    if (err) err.textContent = '아이와의 관계를 선택해주세요';
+    return;
+  }
+  if (err) err.textContent = '';
   renderRegStepper(0, 1, 3); // Group 0, step 1 (이름)
   toSlide('c1-wrap', 'c1-slide-name');
   setTimeout(() => document.getElementById('create-my-name').focus(), 380);
@@ -5333,6 +5338,8 @@ function renderRoleGrid(){
 
 function selectCreateRole(role){
   _createState.myRole=role;
+  const err=document.getElementById('c1-role-error');
+  if(err) err.textContent='';
   renderRoleGrid();
 }
 
@@ -8258,7 +8265,7 @@ const BADGES = [
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
-if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401k';}}
+if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401l';}}
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
