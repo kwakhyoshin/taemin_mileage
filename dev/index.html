@@ -7,13 +7,14 @@
 <meta name="googlebot" content="noindex, nofollow">
 <script>
 // ── iOS PWA viewport-fit=cover 콜드스타트 버그 수정 ──
-// iOS는 PWA 첫 실행 시 viewport-fit=cover를 제대로 적용하지 않아
-// viewport가 safe area를 포함하지 않는 문제가 있음.
-// viewport meta를 제거했다 다시 넣으면 iOS가 재계산함.
+// iOS PWA는 콜드스타트 시 viewport-fit=cover를 제대로 적용하지 않아
+// viewport가 safe area를 포함하지 않음 (812px vs 874px).
+// OAuth redirect(페이지 리로드) 후에는 정상 동작하므로,
+// 첫 실행 시 한 번만 강제 reload하여 해결.
 (function(){
-  if(window.navigator.standalone){
-    var vp=document.querySelector('meta[name="viewport"]');
-    if(vp){var c=vp.content;vp.content='';setTimeout(function(){vp.content=c;},0);}
+  if(window.navigator.standalone && !sessionStorage.getItem('_vp_reload')){
+    sessionStorage.setItem('_vp_reload','1');
+    location.reload();
   }
 })();
 </script>
@@ -7928,7 +7929,7 @@ const BADGES = [
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
-if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0331w';}}
+if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0331x';}}
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
