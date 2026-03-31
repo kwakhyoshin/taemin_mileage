@@ -6286,6 +6286,47 @@ function linkSocialFromMyMenu(){
 }
 window.linkSocialFromMyMenu = linkSocialFromMyMenu;
 
+// 소셜 계정 연동 해제 (ID/PW 계정인 경우에만 가능)
+async function unlinkSocial(){
+  if(!currentUser || !_familyId) return;
+  const member=S.familyMeta?.members?.[currentUser];
+  const acc=member?.account||{};
+  // 안전 체크: ID/PW 계정이 있는 경우에만 해제 가능
+  if(!acc.id || !acc.pwdHash){
+    toast('소셜 계정으로만 가입한 경우 연동 해제가 불가해요');
+    return;
+  }
+  if(!acc.authProvider){
+    toast('연동된 소셜 계정이 없어요');
+    return;
+  }
+  const provNames={google:'Google',kakao:'카카오',naver:'네이버'};
+  const pName=provNames[acc.authProvider]||acc.authProvider;
+  if(!confirm(`${pName} 연동을 해제할까요?\n해제하면 소셜 계정으로 로그인할 수 없어요.\nID/비밀번호로만 로그인 가능합니다.`)) return;
+  try{
+    // familyMeta.members에서 소셜 필드 삭제
+    if(S.familyMeta?.members?.[currentUser]?.account){
+      delete S.familyMeta.members[currentUser].account.authProvider;
+      delete S.familyMeta.members[currentUser].account.authUid;
+      delete S.familyMeta.members[currentUser].account.email;
+    }
+    // S.users에서 소셜 필드 삭제
+    if(S.users?.[currentUser]){
+      delete S.users[currentUser].authProvider;
+      delete S.users[currentUser].authUid;
+      delete S.users[currentUser].email;
+    }
+    await save();
+    toast('소셜 연동이 해제되었어요');
+    // 나의 메뉴 UI 새로고침
+    if(typeof renderMyMenu==='function') renderMyMenu();
+  }catch(e){
+    console.error('unlinkSocial error:',e);
+    toast('연동 해제에 실패했어요');
+  }
+}
+window.unlinkSocial = unlinkSocial;
+
 function _closeSocialLinkSheet(){
   const overlay=document.getElementById('social-link-sheet-overlay');
   const sheet=document.getElementById('social-link-sheet');
@@ -7931,7 +7972,7 @@ const BADGES = [
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
-if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0331y';}}
+if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0331z';}}
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
@@ -13996,6 +14037,8 @@ function renderMyTab(){
       const pSvg16=(_provSvgs[p]||_provSvgs.google).replace(/SIZE/g,'16');
       const pName=_provNames[p]||p;
       const pColor=_provColors[p]||'#34A853';
+      // ID/PW 계정이 있는 경우에만 연동 해제 버튼 표시 (소셜 전용 가입자는 해제 불가)
+      const canUnlink=!!(acc.id && acc.pwdHash);
       socialBadge.innerHTML=pSvg14;
       socialBadge.style.display='inline-flex';
       socialArea.style.display='block';
@@ -14005,7 +14048,7 @@ function renderMyTab(){
           <div style="font-size:12px;font-weight:600;color:var(--tx)">${pName} 연동됨</div>
           ${acc.email?`<div style="font-size:11px;color:var(--tx3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${acc.email}</div>`:acc.authUid?`<div style="font-size:11px;color:var(--tx3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">ID: ${acc.authUid.length>20?acc.authUid.substring(0,20)+'…':acc.authUid}</div>`:''}
         </div>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${pColor}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+        ${canUnlink?`<button onclick="unlinkSocial()" style="padding:4px 10px;background:none;border:1.5px solid var(--border,#E2E8F0);border-radius:8px;font-size:11px;font-weight:600;color:var(--tx3);cursor:pointer;white-space:nowrap">해제</button>`:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${pColor}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>`}
       </div>`;
     } else {
       socialBadge.style.display='none';
@@ -14142,6 +14185,13 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {
+    ver:'1.4.1', date:'2026-03-31',
+    items:[
+      {type:'new',text:'소셜 계정 연동 해제 기능 — 나의 메뉴에서 연동된 소셜 계정 해제 가능 (ID/PW 계정만)'},
+      {type:'fix',text:'iOS PWA 로그인 화면 하단 검정 영역 완전 해결'}
+    ]
+  },
   {
     ver:'1.4.0', date:'2026-03-30',
     items:[
