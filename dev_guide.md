@@ -1310,6 +1310,35 @@ account: {
 
 **APP_CHANGELOG:** v1.6.0 — 회원 탈퇴 기능 추가
 
+### 2026-04-01 세션 (3차) — 소셜 계정 교체 시 auth registry 잔존 버그 수정
+
+**적용 범위: 개발기 (main/dev/index.html)**
+
+#### 커밋 목록
+| 커밋 | PR | 설명 | 상태 |
+|------|-----|------|------|
+| `2401515` | #23 | fix: 소셜 계정 교체 시 이전 auth registry 잔존 버그 수정 | ✅ merged |
+
+#### 문제 시나리오
+1. 카카오 연동 (nonmarking@gmail.com) → registry에 `kakao_uid` 등록
+2. 구글 로그인 (같은 이메일) → 이메일 매치로 계정 통합 → registry에 `google_uid` 추가, **`kakao_uid`는 잔존**
+3. 구글 연동 해제 → `google_uid`만 registry에서 삭제
+4. 다시 구글 로그인 → 잔존 `kakao_uid`의 이메일과 매치 → 의도치 않은 계정 통합 반복
+
+#### 수정 내용
+
+**1. 이메일 매치 계정 통합 시 이전 UID 삭제 (DEV v0401g)**
+- Step 2 (registry 이메일 매치): `runTransaction`으로 이전 `otherUid` 삭제 + 새 `uid` 등록을 원자적으로 수행
+- Step 2b (가족문서 fallback 매치): 동일하게 `_uData.authUid` (이전 UID) 삭제 + 새 UID 등록
+- fallback: transaction 실패 시 기존 `_registerAuthLink()`로 fallback
+
+**2. unlinkSocial() 전체 registry 정리**
+- 기존: `acc.authUid` 하나만 삭제 → 이전 provider의 UID 잔존
+- 수정: `memberId + familyId`가 일치하는 **모든** registry 항목을 스캔하여 삭제
+- 이로써 소셜 연동 해제 시 해당 멤버의 모든 소셜 흔적이 완전히 정리됨
+
+**APP_CHANGELOG:** v1.6.1 — 소셜 계정 교체 시 이전 연동 정보가 남는 버그 수정
+
 #### 미완료 / 추가 확인 필요
 - 운영기 미적용 — 운영기 반영 시 release 브랜치 → PR → merge 절차 사용
 - 회원 탈퇴 후 Firebase Authentication 계정 자체 삭제는 미구현 (signOut만 수행). 필요 시 Firebase Admin SDK 또는 Cloud Function으로 처리 가능
