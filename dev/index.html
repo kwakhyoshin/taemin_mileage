@@ -8452,7 +8452,7 @@ const BADGES = [
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
-if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401y';}}
+if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401z';}}
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
@@ -12556,14 +12556,17 @@ function deleteSticker(stkId){
 
 function getUserDisplayName(userId){
   if(!userId)return '알 수 없음';
-  // Check S.users first, but only use if name is actually set
+  // 1) familyMeta.members에서 이름 조회 (가장 정확한 소스)
+  const fm=S.familyMeta?.members?.[userId];
+  if(fm&&fm.name) return fm.name;
+  // 2) S.users에서 이름 조회 (레거시 호환)
   if(S.users&&S.users[userId]){
     const u=S.users[userId];
     const name=u.name||null;
     const emoji=u.emoji||null;
     if(name) return emoji?emoji+' '+name:name;
   }
-  // Fallback to hardcoded names
+  // 3) 하드코딩 폴백 (레거시)
   if(userId==='taemin')return '🧒 태민';
   if(userId==='dad')return '👨 아빠';
   if(userId==='mom')return '👩 엄마';
