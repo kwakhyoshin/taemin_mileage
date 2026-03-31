@@ -2,7 +2,7 @@
 
 > 이 문서는 새 세션에서 실수 없이 개발·테스트·배포할 수 있도록 모든 핵심 정보를 담고 있습니다.
 > **새 세션 시작 시 반드시 이 문서를 먼저 읽을 것.**
-> 최종 업데이트: 2026-03-31 (소셜 연동 해제 기능, 시작페이지 복원, iOS PWA viewport 단차 해결, 개발기 가족데이터 복구)
+> 최종 업데이트: 2026-04-01 (소셜 연동 해제 auth 레지스트리 수정, 로그인 후 상단 색단차 수정, 시작페이지 복원)
 
 ---
 
@@ -1025,6 +1025,14 @@ account: {
 - **HTML 구조**: `auth-welcome`에는 `ob-gradient` 클래스 → 인디고 그라데이션 배경
 - **⚠️ 주의**: `auth-welcome`이 기본 화면이므로 `<html style="background:#5B4FC4">`와 조합해도 iOS PWA 단차 없음 (ob-gradient가 position:fixed로 전체 화면 덮음)
 
+### 12.16 소셜 연동 해제 시 auth 레지스트리 삭제 누락 (2026-04-01)
+- **증상**: 소셜 연동 해제 후 같은 소셜 계정으로 다시 로그인하면, 선택 화면(신규 가입/기존 계정 연동) 없이 자동으로 이전 계정에 연결됨
+- **원인**: `unlinkSocial()`이 `familyMeta.members`와 `S.users`에서만 필드를 삭제하고, auth 레지스트리(`_dev_auth_registry` / `_auth_registry`)의 uid→family 매핑을 삭제하지 않음
+  - `_handleSocialLoginResult()`는 레지스트리를 먼저 확인하므로 매핑이 남아있으면 자동 로그인
+- **수정**: `unlinkSocial()`에 `_getAuthRegistryDoc()` + `runTransaction`으로 레지스트리에서 해당 uid 삭제 추가
+- **데이터 정리**: `_dev_auth_registry` 전체 초기화, `families/taemin_dev`의 dad 소셜 필드 수동 삭제
+- **교훈**: 소셜 연동 데이터는 3곳에 저장된다 — ① familyMeta.members[id].account ② S.users[id] ③ auth 레지스트리. 삭제 시 3곳 모두 처리해야 함
+
 ---
 
 ## 변경 이력 (Change Log)
@@ -1152,6 +1160,9 @@ account: {
 |------|-----|------|------|
 | `38e4e65` | #13 | feat: 소셜 계정 연동 해제 기능 추가 | ✅ merged |
 | `0831ed1` | #14 | feat: 로그인 첫 화면을 시작페이지로 복원 | ✅ merged |
+| `dc25cc3` | #15 | fix: 시작페이지가 표시되지 않던 문제 수정 (checkAuth/logout 분기) | ✅ merged |
+| `e2281db` | #16 | fix: 로그인 후 상단 색단차 수정 (html safe-area CSS 조건 제한) | ✅ merged |
+| `55309fe` | #17 | fix: 소셜 연동 해제 시 auth 레지스트리 삭제 누락 수정 | ✅ merged |
 
 #### 상세 변경 내용
 
