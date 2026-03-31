@@ -2691,7 +2691,7 @@ requestAnimationFrame(function(){
 </div>
 
 <!-- AUTH: 계속하기 (소셜 + ID/PW 통합 Vertical Stack) -->
-<div class="auth-screen" id="auth-continue">
+<div class="auth-screen hidden" id="auth-continue">
   <div class="auth-card" style="text-align:center">
     <div class="auth-logo" style="display:flex;flex-direction:column;align-items:center;gap:8px">
       <div style="width:72px;height:72px;border-radius:22px;overflow:hidden;box-shadow:0 8px 24px rgba(91,79,196,.25)"><svg width="72" height="72" viewBox="0 0 200 200"><defs><linearGradient id="lbc" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#5B4FC4"/><stop offset="100%" stop-color="#A78BFA"/></linearGradient></defs><rect width="200" height="200" rx="47" fill="url(#lbc)"/><path d="M30,130 L100,55 L170,130" stroke="white" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M100,62 L98.1,60.3 C91.4,54.2 87,50.2 87,45.3 C87,41.3 90.1,38.1 94.2,38.1 C96.4,38.1 98.6,39.2 100,40.9 C101.4,39.2 103.6,38.1 105.9,38.1 C109.8,38.1 113,41.3 113,45.3 C113,50.2 108.6,54.2 101.9,60.3 Z" fill="#FBBF24"/></svg></div>
@@ -2765,7 +2765,7 @@ requestAnimationFrame(function(){
 </div>
 
 <!-- AUTH: 웰컴 (인디고 그라데이션 풀스크린) -->
-<div class="auth-screen hidden ob-gradient" id="auth-welcome">
+<div class="auth-screen ob-gradient" id="auth-welcome">
   <div class="ob-welcome">
     <div class="ob-welcome-top">
       <div class="ob-logo-wrap ob-fade-1">
@@ -7972,7 +7972,7 @@ const BADGES = [
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
-if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0331z';}}
+if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0331z2';}}
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
