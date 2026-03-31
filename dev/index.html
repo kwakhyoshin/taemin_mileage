@@ -446,6 +446,16 @@ body.dark .theme-pick.active .theme-pick-radio{border-color:#818CF8;background:#
 .act-card .count-badge{font-size:13px;font-weight:800;color:var(--gn2);margin-top:3px}
 .act-card .timer{font-size:13px;font-weight:700;color:var(--tx3);margin-top:3px}
 
+/* Long-press gauge overlay */
+.lp-gauge{position:absolute;inset:0;border-radius:var(--rsm);overflow:hidden;pointer-events:none;z-index:5;opacity:0;transition:opacity .15s}
+.lp-gauge.active{opacity:1}
+.lp-gauge-fill{position:absolute;top:0;left:0;bottom:0;width:0;background:var(--lp-gauge-color,rgba(99,102,241,.18));transition:none}
+.lp-gauge.active .lp-gauge-fill{width:100%;transition:width 1s linear}
+.lp-gauge-hint{position:absolute;top:50%;right:10px;transform:translateY(-50%);font-size:11px;font-weight:800;color:var(--lp-gauge-text,rgba(99,102,241,.7));opacity:0;transition:opacity .2s .15s;white-space:nowrap}
+.lp-gauge.active .lp-gauge-hint{opacity:1}
+/* Disable :active scale when gauge is filling */
+.act-card:has(.lp-gauge.active):active{transform:none}
+
 /* LOG HEADER STICKY */
 .log-header-sticky{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,var(--tab-color,#6366F1) 0%,var(--tab-color2,#818CF8) 80%,color-mix(in srgb,var(--tab-color2,#818CF8) 80%,#fff) 100%);padding:18px 22px 18px;padding-top:calc(18px + env(safe-area-inset-top));margin:0 0 16px;border-radius:0 0 38px 38px;box-shadow:0 8px 32px var(--tab-shadow,rgba(99,102,241,0.35));overflow:hidden}
 .log-header-sticky::before{content:'';position:absolute;top:-40px;right:-20px;width:160px;height:160px;background:radial-gradient(circle,rgba(255,255,255,.1) 0%,transparent 70%);border-radius:50%;pointer-events:none}
@@ -8462,7 +8472,7 @@ const BADGES = [
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
-if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401z7';}}
+if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401z8';}}
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
@@ -10003,7 +10013,10 @@ function renderHomeGrid(){
     const cls=st.cls?' '+st.cls:'';
     const stickerHTML=renderStickersFor(a.id);
     const _cardDone=st.exhausted||(a.maxDay===0&&countDone(a)>0);
-    return `<div class="act-card${cls}" data-actid="${a.id}" style="${st.exhausted?'cursor:default;':''}">
+    const _gaugeColor=st.cls==='done'||st.cls==='exhausted'?'rgba(16,185,129,.18)':st.cls==='partial'?'rgba(245,158,11,.18)':'rgba(99,102,241,.18)';
+    const _gaugeText=st.cls==='done'||st.cls==='exhausted'?'rgba(16,185,129,.7)':st.cls==='partial'?'rgba(245,158,11,.7)':'rgba(99,102,241,.7)';
+    return `<div class="act-card${cls}" data-actid="${a.id}" style="${st.exhausted?'cursor:default;':''}--lp-gauge-color:${_gaugeColor};--lp-gauge-text:${_gaugeText}">
+      <div class="lp-gauge"><div class="lp-gauge-fill"></div><div class="lp-gauge-hint">꾹 누르기</div></div>
       ${stickerHTML}
       <div class="e">${a.emoji}</div>
       <div class="n">${a.name}</div>
@@ -10014,15 +10027,23 @@ function renderHomeGrid(){
       ${_cardDone?'<div class="card-done-stamp"><svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="29" stroke="#10B981" stroke-width="3.5" stroke-dasharray="5 2.5" opacity=".9"/><circle cx="32" cy="32" r="21" stroke="#10B981" stroke-width="2.5" opacity=".65"/><text x="32" y="30" text-anchor="middle" font-size="14" font-weight="900" fill="#10B981" font-family="Noto Sans KR,sans-serif">완료</text><text x="32" y="43" text-anchor="middle" font-size="9" font-weight="800" fill="#10B981" font-family="sans-serif" letter-spacing="2" opacity=".7">DONE</text></svg></div>':''}
     </div>`;
   }).join('');
-  // Attach long-press + tap handlers
+  // Attach long-press gauge + tap handlers
   g.querySelectorAll('.act-card[data-actid]').forEach(card=>{
     const actId=card.dataset.actid;
     const a=S.acts.find(x=>x.id===actId);
     const exhausted=a&&getCardState(a).exhausted;
     let lpTimer=null, didLongPress=false;
+    const gauge=card.querySelector('.lp-gauge');
+    const gaugeFill=gauge?.querySelector('.lp-gauge-fill');
     const isStickerArea=(e)=>e.target&&e.target.closest('[data-stkid]');
-    const startLP=(e)=>{if(isStickerArea(e))return;didLongPress=false;lpTimer=setTimeout(()=>{didLongPress=true;showLongPressChoice(actId,card);},500);};
-    const cancelLP=()=>{clearTimeout(lpTimer);};
+    const startLP=(e)=>{
+      if(isStickerArea(e))return;didLongPress=false;
+      // 게이지 애니메이션 시작
+      if(gauge&&gaugeFill){gaugeFill.style.transition='none';gaugeFill.style.width='0';gauge.offsetHeight;gauge.classList.add('active');gaugeFill.style.transition='width 1s linear';gaugeFill.style.width='100%';}
+      lpTimer=setTimeout(()=>{didLongPress=true;cancelGauge();if(navigator.vibrate)navigator.vibrate(30);showLongPressChoice(actId,card);},1000);
+    };
+    const cancelGauge=()=>{if(gauge){gauge.classList.remove('active');if(gaugeFill){gaugeFill.style.transition='none';gaugeFill.style.width='0';}}};
+    const cancelLP=()=>{clearTimeout(lpTimer);cancelGauge();};
     card.addEventListener('touchstart',startLP,{passive:true});
     card.addEventListener('touchmove',cancelLP,{passive:true});
     card.addEventListener('touchend',cancelLP);
@@ -10068,7 +10089,9 @@ function renderLogList(){
     const stickerHTML=renderStickersForLog(a.id);
     const _isDone=exhausted||(max===0&&done>0);
     const _stampHTML=_isDone?'<div class="log-done-stamp"><svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="29" stroke="#10B981" stroke-width="3.5" stroke-dasharray="5 2.5" opacity=".9"/><circle cx="32" cy="32" r="21" stroke="#10B981" stroke-width="2.5" opacity=".65"/><text x="32" y="30" text-anchor="middle" font-size="14" font-weight="900" fill="#10B981" font-family="Noto Sans KR,sans-serif">완료</text><text x="32" y="43" text-anchor="middle" font-size="9" font-weight="800" fill="#10B981" font-family="sans-serif" letter-spacing="2" opacity=".7">DONE</text></svg></div>':'';
-    return `<div class="log-item${cls}" data-actid="${a.id}" style="${exhausted?'cursor:default':''}position:relative;overflow:visible;">
+    const _lgColor=exhausted?'rgba(16,185,129,.12)':cls.includes('partial')?'rgba(245,158,11,.12)':'rgba(99,102,241,.12)';
+    return `<div class="log-item${cls}" data-actid="${a.id}" style="${exhausted?'cursor:default;':''}position:relative;overflow:visible;--lp-gauge-color:${_lgColor}">
+      <div class="lp-gauge" style="border-radius:0"><div class="lp-gauge-fill"></div></div>
       <div class="log-ico" style="${pct>0?'--prog:'+pct+'%;':''}">${a.emoji}${pct>0&&pct<100?'<div class="log-prog-ring"></div>':''}</div>
       <div class="log-inf">
         <div class="log-nm">${a.name}</div>
@@ -10087,16 +10110,23 @@ function renderLogList(){
       ${stickerHTML}
     </div>`;
   }).join('');
-  // Attach long-press + tap handlers for log items
+  // Attach long-press gauge + tap handlers for log items
   el.querySelectorAll('.log-item[data-actid]').forEach(item=>{
     const actId=item.dataset.actid;
     const a=S.acts.find(x=>x.id===actId);
     const exhausted=a&&getCardState(a).exhausted;
     let lpTimer=null, didLongPress=false;
+    const gauge=item.querySelector('.lp-gauge');
+    const gaugeFill=gauge?.querySelector('.lp-gauge-fill');
     const isUndoBtn=(e)=>{const t=e.target;return t&&(t.classList.contains('undo-btn')||t.closest('.undo-btn'));};
     const isStickerArea=(e)=>e.target&&e.target.closest('[data-stkid]');
-    const startLP=(e)=>{if(isUndoBtn(e)||isStickerArea(e))return;didLongPress=false;lpTimer=setTimeout(()=>{didLongPress=true;showLongPressChoice(actId,item);},500);};
-    const cancelLP=()=>{clearTimeout(lpTimer);};
+    const startLP=(e)=>{
+      if(isUndoBtn(e)||isStickerArea(e))return;didLongPress=false;
+      if(gauge&&gaugeFill){gaugeFill.style.transition='none';gaugeFill.style.width='0';gauge.offsetHeight;gauge.classList.add('active');gaugeFill.style.transition='width 1s linear';gaugeFill.style.width='100%';}
+      lpTimer=setTimeout(()=>{didLongPress=true;cancelGauge();if(navigator.vibrate)navigator.vibrate(30);showLongPressChoice(actId,item);},1000);
+    };
+    const cancelGauge=()=>{if(gauge){gauge.classList.remove('active');if(gaugeFill){gaugeFill.style.transition='none';gaugeFill.style.width='0';}}};
+    const cancelLP=()=>{clearTimeout(lpTimer);cancelGauge();};
     item.addEventListener('touchstart',startLP,{passive:true});
     item.addEventListener('touchmove',cancelLP,{passive:true});
     item.addEventListener('touchend',cancelLP);
@@ -12361,8 +12391,7 @@ function startBubbleMarquees(container){
 
 let _lpOverlay=null;
 function showLongPressChoice(actId,cardEl){
-  // Haptic feedback if available
-  if(navigator.vibrate)navigator.vibrate(30);
+  // Haptic feedback moved to gauge completion handler (caller)
   closeLPOverlay();
   const ov=document.createElement('div');
   ov.className='lp-overlay';
@@ -14722,6 +14751,7 @@ const APP_CHANGELOG=[
       {type:'improve',text:'초대 가입 화면 가족배지를 mile.ly 브랜드 로고로 교체'},
       {type:'fix',text:'초대 가입 안내문 "가족 가족" 중복 표시 수정'},
       {type:'fix',text:'ID/PW 계정(레거시)에서 초대 링크가 작동하지 않던 문제 수정'},
+      {type:'new',text:'활동카드 꾹 누르기 게이지 — 길게 누르면 색이 채워지며 스티커/말풍선 팝업'},
     ]
   },
   {
