@@ -496,7 +496,7 @@ body.dark .theme-pick.active .theme-pick-radio{border-color:#818CF8;background:#
 
 /* LOG LIST */
 .log-wrap{background:var(--card);border-radius:var(--r);margin:12px 16px 16px;overflow:hidden;transition:background .25s;box-shadow:0 2px 8px rgba(0,0,0,.04);border:.5px solid var(--bdr)}
-.log-item{display:flex;align-items:center;gap:14px;padding:15px 18px;border-bottom:.5px solid var(--bdr);-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:manipulation}
+.log-item{display:flex;align-items:center;gap:14px;padding:15px 18px;border-bottom:.5px solid var(--bdr);-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:manipulation;flex-wrap:wrap}
 .log-item:last-child{border-bottom:none}
 .log-item.done{background:var(--gn-lt);border-left:4px solid var(--gn)}
 .log-item.partial{background:var(--yw-lt);border-left:4px solid var(--yw)}
@@ -1784,7 +1784,7 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
 body.dark .bubble-speech{background:rgba(255,255,255,.12);color:rgba(255,255,255,.85);border:1px solid rgba(255,255,255,.1);box-shadow:0 1px 4px rgba(0,0,0,.2)}
 .bubble-speech .bbl-text{display:inline-block;white-space:nowrap}
 /* Log list bubble: avatar + dot + speech inline */
-.log-sticker-area{display:flex;flex-wrap:nowrap;gap:4px;margin-top:6px;align-items:center;overflow-x:auto;overflow-y:visible;-webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none;padding:4px 0}
+.log-sticker-area{display:flex;flex-wrap:nowrap;gap:4px;margin-top:2px;align-items:center;overflow-x:auto;overflow-y:visible;-webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none;padding:4px 0;width:100%;flex-basis:100%}
 .log-sticker-area::-webkit-scrollbar{display:none}
 .bubble-group-log{display:inline-flex;align-items:center;gap:0;cursor:pointer;animation:bubbleDangle 3s ease-in-out infinite;transform-origin:top center;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;flex-shrink:0}
 .bubble-group-log:active{transform:scale(1.05)!important}
@@ -8281,7 +8281,7 @@ const BADGES = [
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
-if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401p';}}
+if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401q';}}
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
@@ -9891,12 +9891,12 @@ function renderLogList(){
           ${countLabel?`<span class="chip c-yw">${countLabel}</span>`:''}
           ${timer?`<span class="log-timer"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-1px;margin-right:2px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${timer}</span>`:''}
         </div>
-        ${stickerHTML}
       </div>
       <div class="log-right">
         <span class="log-badge">+${a.pts} 마일리지</span>
         ${done>0?`<button class="undo-btn" onclick="event.stopPropagation();undoAct('${a.id}')">취소↩</button>`:''}
       </div>
+      ${stickerHTML}
     </div>`;
   }).join('');
   // Attach long-press + tap handlers for log items
