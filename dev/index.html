@@ -506,7 +506,7 @@ body.dark .theme-pick.active .theme-pick-radio{border-color:#818CF8;background:#
 .log-item.partial .log-ico{background:var(--yw-lt)}
 /* Progress ring on log icon */
 .log-prog-ring{position:absolute;inset:0;border-radius:13px;background:conic-gradient(var(--gn) var(--prog,0%), transparent 0%);opacity:.35;pointer-events:none}
-.log-inf{flex:1;min-width:0}
+.log-inf{flex:1;min-width:0;overflow:visible}
 .log-nm{font-size:15px;font-weight:800;color:var(--tx)}
 .log-ds{font-size:13px;color:var(--tx2);margin-top:2px;font-weight:600}
 .log-meta{display:flex;align-items:center;gap:7px;margin-top:4px;flex-wrap:wrap}
@@ -1784,7 +1784,8 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
 body.dark .bubble-speech{background:rgba(255,255,255,.12);color:rgba(255,255,255,.85);border:1px solid rgba(255,255,255,.1);box-shadow:0 1px 4px rgba(0,0,0,.2)}
 .bubble-speech .bbl-text{display:inline-block;white-space:nowrap}
 /* Log list bubble: avatar + dot + speech inline */
-.log-sticker-area{display:flex;flex-wrap:nowrap;gap:4px;margin-top:6px;align-items:center;overflow:hidden}
+.log-sticker-area{display:flex;flex-wrap:nowrap;gap:4px;margin-top:6px;align-items:center;overflow-x:auto;overflow-y:visible;-webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none;padding:4px 0}
+.log-sticker-area::-webkit-scrollbar{display:none}
 .bubble-group-log{display:inline-flex;align-items:center;gap:0;cursor:pointer;animation:bubbleDangle 3s ease-in-out infinite;transform-origin:top center;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;flex-shrink:0}
 .bubble-group-log:active{transform:scale(1.05)!important}
 .bubble-avatar-log{flex-shrink:0}
@@ -1837,15 +1838,18 @@ body.dark .bubble-speech-log{background:rgba(255,255,255,.12);color:rgba(255,255
 @keyframes actFlip{0%{transform:perspective(800px) rotateY(0deg) scale(1)}40%{transform:perspective(800px) rotateY(180deg) scale(1.05)}70%{transform:perspective(800px) rotateY(360deg) scale(1.08)}100%{transform:perspective(800px) rotateY(360deg) scale(1)}}
 @keyframes actFlipGlow{0%{box-shadow:0 2px 8px rgba(0,0,0,.04)}40%{box-shadow:0 8px 32px rgba(16,185,129,.4)}70%{box-shadow:0 12px 40px rgba(16,185,129,.5)}100%{box-shadow:0 4px 16px rgba(16,185,129,.12)}}
 @keyframes actCheckPop{0%{transform:scale(0) rotate(-45deg);opacity:0}50%{transform:scale(1.3) rotate(10deg);opacity:1}100%{transform:scale(1) rotate(0deg);opacity:1}}
+@keyframes stampSlam{0%{transform:scale(3) rotate(-25deg);opacity:0}40%{transform:scale(1.1) rotate(-12deg);opacity:.85}60%{transform:scale(.95) rotate(-18deg);opacity:.8}100%{transform:scale(1) rotate(-15deg);opacity:.75}}
 .act-card.act-completing{animation:actFlip .8s cubic-bezier(.25,.46,.45,.94) forwards,actFlipGlow .8s ease forwards;transform-style:preserve-3d;z-index:10}
 .act-card.act-completing .act-check-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:2;pointer-events:none}
 .act-card.act-completing .act-check-overlay .act-check-icon{animation:actCheckPop .4s cubic-bezier(.34,1.56,.64,1) forwards;animation-delay:.4s;opacity:0;font-size:42px;filter:drop-shadow(0 2px 8px rgba(16,185,129,.5))}
+.completion-stamp{position:absolute;bottom:6px;right:6px;width:52px;height:52px;opacity:0;pointer-events:none;z-index:1;animation:stampSlam .5s cubic-bezier(.22,1,.36,1) forwards;animation-delay:.35s;filter:drop-shadow(0 2px 6px rgba(16,185,129,.4))}
 /* Log item completion animation */
 @keyframes logItemFlash{0%{background:transparent}30%{background:rgba(16,185,129,.2)}100%{background:transparent}}
 @keyframes logCheckPop{0%{transform:scale(0);opacity:0}50%{transform:scale(1.3);opacity:1}100%{transform:scale(1);opacity:1}}
 .log-item.log-completing{animation:logItemFlash .8s ease forwards;position:relative}
 .log-item.log-completing .log-check-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:2;pointer-events:none}
 .log-item.log-completing .log-check-overlay .log-check-icon{animation:logCheckPop .4s cubic-bezier(.34,1.56,.64,1) forwards;animation-delay:.2s;opacity:0;font-size:36px;filter:drop-shadow(0 2px 8px rgba(16,185,129,.5))}
+.log-completion-stamp{position:absolute;top:50%;right:80px;width:44px;height:44px;transform:translateY(-50%);opacity:0;pointer-events:none;z-index:1;animation:stampSlam .5s cubic-bezier(.22,1,.36,1) forwards;animation-delay:.2s;filter:drop-shadow(0 2px 6px rgba(16,185,129,.4))}
 
 /* Member count stepper */
 .member-count-stepper{display:flex;align-items:center;justify-content:center;gap:16px;margin:16px 0;padding:16px;background:var(--bg2);border-radius:12px}
@@ -8286,7 +8290,7 @@ const BADGES = [
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
-if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401n';}}
+if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401o';}}
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
@@ -11941,11 +11945,16 @@ function _doActCore(id){
   const _actCard=_curTab==='home'?document.querySelector(`.act-card[data-actid="${id}"]`):null;
   const _logItem=_curTab==='log'?document.querySelector(`.log-item[data-actid="${id}"]`):null;
 
+  const _stampSVG='<svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="29" stroke="#10B981" stroke-width="3.5" stroke-dasharray="5 2.5" opacity=".9"/><circle cx="32" cy="32" r="21" stroke="#10B981" stroke-width="2.5" opacity=".65"/><text x="32" y="30" text-anchor="middle" font-size="14" font-weight="900" fill="#10B981" font-family="Noto Sans KR,sans-serif">완료</text><text x="32" y="43" text-anchor="middle" font-size="9" font-weight="800" fill="#10B981" font-family="sans-serif" letter-spacing="2" opacity=".7">DONE</text></svg>';
   if(_actCard){
     const _chk=document.createElement('div');
     _chk.className='act-check-overlay';
     _chk.innerHTML='<div class="act-check-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><polyline points="20 6 9 17 4 12"/></svg></div>';
     _actCard.appendChild(_chk);
+    const _stamp=document.createElement('div');
+    _stamp.className='completion-stamp';
+    _stamp.innerHTML=_stampSVG;
+    _actCard.appendChild(_stamp);
     _actCard.classList.add('act-completing');
     toast(`${a.emoji} ${a.name} +${a.pts} 마일리지${sm}`);
     flyCoinsToMileage(_actCard, a.pts+bonus);
@@ -11960,6 +11969,10 @@ function _doActCore(id){
     _chk2.className='log-check-overlay';
     _chk2.innerHTML='<div class="log-check-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><polyline points="20 6 9 17 4 12"/></svg></div>';
     _logItem.appendChild(_chk2);
+    const _stamp2=document.createElement('div');
+    _stamp2.className='log-completion-stamp';
+    _stamp2.innerHTML=_stampSVG;
+    _logItem.appendChild(_stamp2);
     _logItem.classList.add('log-completing');
     toast(`${a.emoji} ${a.name} +${a.pts} 마일리지${sm}`);
     flyCoinsToMileage(_logItem, a.pts+bonus);
@@ -14499,6 +14512,14 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {
+    ver:'1.6.5', date:'2026-04-01',
+    items:[
+      {type:'new',text:'활동 완료 시 완료 도장 애니메이션 추가'},
+      {type:'fix',text:'활동기록 탭 말풍선 오른쪽 잘림 현상 수정'},
+      {type:'fix',text:'말풍선 애니메이션 시 사용자 아이콘 윗부분 잘림 수정'},
+    ]
+  },
   {
     ver:'1.6.4', date:'2026-04-01',
     items:[
