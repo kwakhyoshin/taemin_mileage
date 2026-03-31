@@ -7098,7 +7098,7 @@ async function _handleSocialLoginResult(firebaseUser, provider){
   const displayName = firebaseUser.displayName || '';
   const profileImage = firebaseUser.profileImage || firebaseUser.photoURL || '';
 
-  console.log('[_handleSocialLoginResult] Start:', provider, uid, email);
+  console.log('[_handleSocialLoginResult] Start:', provider, uid, email, 'photo:', profileImage ? profileImage.substring(0,60)+'...' : '(none)');
   _updateSocialLoadingMsg('계정 정보 확인 중...');
 
   // 1) Auth 레지스트리 + 가족 문서를 병렬 읽기 (성능 최적화)
@@ -7328,7 +7328,7 @@ async function _loginToFamily(familyId, memberId, authUid, provider, email, prof
       if(_acc){ _acc.authProvider = provider; _acc.authUid = authUid; if(email) _acc.email = email; }
       if(S.users?.[memberId]){ S.users[memberId].authProvider = provider; S.users[memberId].authUid = authUid; if(email) S.users[memberId].email = email; }
       // 소셜 프로필 사진 저장
-      if(profileImage){ if(!S.photos) S.photos={}; S.photos[memberId]=profileImage; }
+      if(profileImage){ if(!S.photos) S.photos={}; S.photos[memberId]=profileImage; console.log('[_loginToFamily] Photo saved for', memberId, ':', profileImage.substring(0,60)); }
       try{ await setDoc(DATA_DOC, S); }catch(_se){ console.warn('[_loginToFamily] account update save warning:', _se); }
     }
     cachedUsers = S.users || {};
