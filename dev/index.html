@@ -1032,11 +1032,11 @@ body.dark .pin-key.ck{background:transparent}
 @keyframes msgEmojiBounce{0%{transform:scale(0)}50%{transform:scale(1.2)}100%{transform:scale(1)}}
 
 /* AUTH SCREENS */
-.auth-screen{position:fixed;top:0;left:0;right:0;bottom:-100px;background:linear-gradient(135deg,#5B4FC4,#A78BFA);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;padding-top:max(24px, calc(env(safe-area-inset-top, 0px) + 16px));padding-bottom:calc(100px + max(20px, env(safe-area-inset-bottom, 0px)));overflow-y:auto;-webkit-overflow-scrolling:touch;box-sizing:border-box}
+.auth-screen{position:fixed;inset:0;background:linear-gradient(135deg,#5B4FC4,#A78BFA);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;padding-top:max(24px, calc(env(safe-area-inset-top, 0px) + 16px));padding-bottom:max(20px, env(safe-area-inset-bottom, 0px));overflow-y:auto;-webkit-overflow-scrolling:touch}
 .auth-screen.hidden{display:none;pointer-events:none}
 body.auth-active{background:linear-gradient(135deg,#5B4FC4,#A78BFA);overflow:hidden;max-width:none}
 body.auth-active .nav-container{display:none!important}
-html:has(body.auth-active){background:#5B4FC4!important;overflow:hidden}
+html:has(body.auth-active){background:#A78BFA!important;overflow:hidden}
 #auth-insight .toss-cta{margin:0 24px;padding-left:0;padding-right:0;padding-top:8px}
 /* social-loading-overlay CSS 제거됨 */
 .auth-card{background:#fff;border-radius:24px;padding:32px 28px;width:100%;max-width:380px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2);margin:auto;flex-shrink:0}
@@ -4915,9 +4915,9 @@ function showAuthScreen(screen) {
 }
 
 
-// ── 로그인 화면 키보드 대응 ──
-// auth-screen 크기는 그대로 유지 (홈탭 노출 방지)
-// 내부 auth-card의 padding만 조정하여 키보드 위에 위치시킴
+// ── 로그인 화면 키보드 대응 (단차 원인 테스트를 위해 임시 비활성화) ──
+// TODO: 단차 테스트 후 복원 필요
+/*
 (function(){
   if(!window.visualViewport) return;
 
@@ -4931,14 +4931,11 @@ function showAuthScreen(screen) {
     var fullH=window.innerHeight;
     var kbH=fullH-vvH;
 
-    // 키보드가 올라온 상태 (100px 이상 차이)
     if(kbH>100){
       window.scrollTo(0,0);
-      // auth-screen은 그대로 두고, padding-bottom으로 콘텐츠를 위로 밀기
       activeAuth.style.paddingBottom=kbH+'px';
       activeAuth.style.justifyContent='center';
     } else {
-      // 키보드 내려감 — 원래대로
       activeAuth.style.paddingBottom='';
     }
   }
@@ -4959,6 +4956,7 @@ function showAuthScreen(screen) {
     }
   });
 })();
+*/
 
 // ── Toss 스타일 슬라이드 전환 ──
 const _slideHistory = {};
@@ -7944,7 +7942,7 @@ const BADGES = [
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
-if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0331m';}}
+if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0331n';}}
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
