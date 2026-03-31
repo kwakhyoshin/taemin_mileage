@@ -24,6 +24,35 @@
   2. **feature 브랜치에서 작업 → PR로 diff 확인 → merge** 절차가 이런 사고를 방지한다
   3. 아이콘/에셋 등 바이너리 파일 변경은 PR diff에서 반드시 확인
 
+### 사고 4: iOS PWA 하단 검정 영역 — 10회 이상 실패 후 해결 (2026-03-31)
+- **증상**: iPhone PWA 콜드스타트 시 로그인 화면 하단에 ~62px 검정 영역 발생. 로그인→로그아웃 하면 사라지고 컨텐츠가 아래로 내려감 (viewport 812px→874px 확장)
+- **근본 원인**: `<body class="auth-active">`의 `overflow:hidden`이 iOS PWA 콜드스타트 시 viewport-fit=cover의 safe area 확장을 막음
+- **실패한 시도들** (10+ 버전):
+  1. html 배경색을 gradient 하단색으로 변경 → 검정이 보라색으로만 변경, 영역 자체 미해결
+  2. html 배경을 동일 gradient로 변경 → 여전히 검정 (CSS가 viewport 밖을 그리지 못함)
+  3. html 인라인 style background → 여전히 검정
+  4. viewport meta 태그 제거/재삽입 → 효과 없음
+  5. location.reload() 강제 리로드 → 효과 없음
+  6. 색으로 채우는 모든 접근 → 사용자가 명확히 거부 ("영역 자체를 없애야 함")
+- **올바른 해결 (v0331y)**:
+  ```html
+  <!-- body에서 auth-active 제거 -->
+  <body data-tab="home">
+  ```
+  ```javascript
+  // 2프레임 후 auth-active 추가 — iOS가 먼저 full viewport 계산하도록
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){
+      document.body.classList.add('auth-active');
+    });
+  });
+  ```
+  ```css
+  /* html에 safe-area 포함 min-height */
+  html{min-height:calc(100% + env(safe-area-inset-top));padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+  ```
+- **교훈**: iOS PWA에서 `overflow:hidden`은 viewport 확장을 막는다. body가 먼저 `overflow:hidden` 없이 렌더링되어야 iOS가 safe area를 포함한 full viewport를 계산함
+
 ---
 
 ## 📄 공식 문서
@@ -140,6 +169,26 @@ git push origin --delete release/v날짜
 - 문서에 기록된 해결법이 있으면 그것을 **그대로** 따를 것. 임의로 다른 접근법을 시도하지 말 것
 - 문서에 없는 새로운 문제인 경우에만 자체 분석 진행
 - **해결 후에는 반드시 `dev_guide.md`에 증상·원인·수정·교훈을 기록**
+
+## 🔴 절대 변경 금지 코드 (건드리면 iOS PWA 단차 재발)
+다음 코드는 iOS PWA 하단 검정 영역 버그를 해결한 핵심 코드다. **절대 변경/제거하지 말 것.**
+사고 4에서 10회 이상 실패 끝에 찾은 해결책이므로, 다른 접근으로 "개선"하려 하지 말 것.
+
+1. **`<body>` 태그에 `auth-active` 클래스 직접 넣지 않는다**
+   ```html
+   <!-- ✅ 올바름 -->  <body data-tab="home">
+   <!-- ❌ 금지 -->    <body data-tab="home" class="auth-active">
+   ```
+2. **body 직후 `requestAnimationFrame` 2중 호출로 auth-active 추가하는 스크립트 유지**
+   ```javascript
+   requestAnimationFrame(function(){
+     requestAnimationFrame(function(){
+       document.body.classList.add('auth-active');
+     });
+   });
+   ```
+3. **CSS `html{min-height:calc(100% + env(safe-area-inset-top));padding:env(safe-area-inset-top)...}` 유지**
+4. **위 3개 중 하나라도 변경하면 iPhone에서 하단 62px 검정 영역이 재발한다**
 
 ## 🔴 코드 수정 안전 규칙
 - 수정 후 Playwright로 세로모드(390x844) 스크린샷 검증 권장

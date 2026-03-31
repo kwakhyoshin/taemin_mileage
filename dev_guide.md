@@ -916,24 +916,41 @@ account: {
   ```
 - **교훈**: `window.name`은 같은 창/탭 내에서 navigtion을 거쳐도 유지되는 몇 안 되는 속성. 모바일 OAuth에서 콜백 탭 식별에 유용
 
-### 12.10 색 단차 (하단 색상 불일치) — ⚠️ 반복 발생 주의 (2026-03-31)
-- **증상**: iPhone에서 auth 화면 하단에 색상이 다른 영역이 보임 (보라색 그라데이션인데 하단에 다른 색 띠). 로그인 후엔 사라지고, 로그아웃 후 재표시되는 로그인 화면에선 안 보임
-- **핵심 원인 2가지**:
-  1. `body`의 기본 `max-width:430px`이 body 너비를 제한 → body gradient가 430px만 채움 → html 배경색이 노출
-  2. `html:has(body.auth-active){background:#5B4FC4}` (상단색) ≠ gradient 하단색(`#A78BFA`) → 색 단차 발생
-- **잘못된 접근** (시도 후 실패 확인):
-  - `overflow:hidden` 제거만으로는 해결 안 됨
-  - gradient 방향 변경만으로는 해결 안 됨
-  - early CSS injection을 head로 이동하는 것만으로는 해결 안 됨
-- **올바른 수정** (커밋 `25fe433` 및 `34da991` 참조):
-  ```css
-  /* body.auth-active에 max-width:none 추가 */
-  body.auth-active{background:linear-gradient(135deg,#5B4FC4,#A78BFA);overflow:hidden;max-width:none}
-  /* html 배경을 gradient 하단색(#A78BFA)으로 맞춤 */
-  html:has(body.auth-active){background:#A78BFA!important;overflow:hidden}
+### 12.10 iOS PWA 하단 검정 영역 (62px 단차) — 🔴 최종 해결 (v0331y, 2026-03-31)
+- **증상**: iPhone PWA 콜드스타트 시 로그인 화면 하단에 ~62px 검정 영역 발생.
+  로그인→로그아웃 하면 검정 영역이 **사라지고** 컨텐츠가 아래로 내려감 (viewport 812px→874px 확장).
+  62px = safe-area-inset-top(28px) + safe-area-inset-bottom(34px)
+- **근본 원인**: `<body class="auth-active">`의 `overflow:hidden`이 iOS PWA 콜드스타트 시 `viewport-fit=cover`의 safe area 확장을 차단.
+  body에 `overflow:hidden`이 있으면 iOS WebKit이 스크롤 가능한 콘텐츠가 없다고 판단하여 viewport를 safe area 밖으로 확장하지 않음.
+  로그인 후 `auth-active`가 제거되면 `overflow:hidden`이 풀리고 iOS가 viewport를 전체 화면으로 확장.
+  이후 로그아웃으로 `auth-active`가 다시 붙어도 viewport는 이미 확장된 상태 유지.
+- **실패한 시도들 (v0331o ~ v0331x, 10+ 버전)**:
+  1. html 배경색 gradient 하단색으로 변경 → 검정이 색만 바뀜, 영역 미해결
+  2. html 배경을 동일 gradient로 변경 → CSS가 viewport 밖을 그리지 못함
+  3. html 인라인 style background → 동일하게 실패
+  4. viewport meta 태그 제거/재삽입 (JS) → 효과 없음
+  5. `location.reload()` 강제 리로드 → 효과 없음 (reload ≠ OAuth navigation)
+  6. 색으로 채우는 모든 접근 → "영역 자체를 없앨 생각을 해야 한다" (사용자 피드백)
+- **올바른 해결 (v0331y, PR #12)**:
+  ```html
+  <!-- 1. body에서 auth-active 제거 -->
+  <body data-tab="home">
   ```
-- **왜 첫 로드에서만 발생하는가**: 첫 로드 시 body 안에 앱 전체 컨텐츠(탭, 카드 등)가 있어 body 높이가 viewport를 초과 → body max-width:430px 내에서 gradient가 그려지고 나머지 영역에 html 배경 노출. 로그인 후 로그아웃하면 DOM 상태가 달라져 이 조건이 해소됨
-- **교훈**: 이 수정(`max-width:none` + `html bg #A78BFA`)은 **절대 제거하면 안 됨**. 다른 CSS 수정 시 이 두 값이 유지되는지 반드시 확인할 것
+  ```javascript
+  // 2. 2프레임 후 auth-active 추가 — iOS가 먼저 full viewport 계산하도록
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){
+      document.body.classList.add('auth-active');
+    });
+  });
+  ```
+  ```css
+  /* 3. html에 safe-area 포함 min-height (iOS PWA 모범 사례) */
+  html{min-height:calc(100% + env(safe-area-inset-top));padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+  ```
+- **왜 이것이 작동하는가**: body가 `overflow:hidden` 없이 먼저 렌더링되면, iOS가 스크롤 가능한 문서로 인식하고 viewport를 safe area 포함 전체 화면(874px)으로 확장함. 2프레임 후 `auth-active`(overflow:hidden)를 추가해도 viewport는 이미 확장된 상태 유지.
+- **🔴 절대 변경 금지**: 위 3가지 코드 중 하나라도 변경하면 iPhone에서 62px 검정 영역이 재발한다. CLAUDE.md의 "절대 변경 금지 코드" 섹션 참조.
+- **교훈**: iOS PWA에서 `overflow:hidden`은 viewport 확장을 막는다. `viewport-fit=cover` 관련 문제는 CSS 색상 변경이 아니라 **viewport 자체의 크기 문제**로 접근해야 한다.
 
 ### 12.11 소셜→기존계정 연동 화면 (socialLinkExisting) UI (2026-03-31)
 - **증상**: 소셜 로그인 후 "기존 계정에 연결"을 누르면 auth-continue 화면이 뜨는데, 소셜 버튼이 보이고 ID/PW 입력란은 접혀 있고, "기존 아이디로 로그인하면 연동된다"는 안내 메시지가 접힌 영역 안에 숨겨져 있음
