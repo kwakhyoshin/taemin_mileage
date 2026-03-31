@@ -6987,11 +6987,14 @@ async function doSocialLogin(provider){
       // ★ 모바일에서 parent 탭 리로드 시 결과 수신을 위해 social_pending 설정
       localStorage.setItem(_LS_PREFIX+'social_pending', 'kakao');
       try {
-        const result = await _doKakaoLogin(); // ← 사용자 클릭 직후 팝업 열림
+        // ★ 팝업과 Firebase 초기화를 병렬 실행 (팝업 대기 중 Firebase SDK 로드)
+        const _kakaoLoginPromise = _doKakaoLogin(); // ← 사용자 클릭 직후 팝업 열림
+        if(!_firebaseReady) _initFirebase().catch(()=>{}); // 팝업 대기 중 백그라운드 로드
+        const result = await _kakaoLoginPromise;
         if(!result){ localStorage.removeItem(_LS_PREFIX+'social_pending'); return; } // 사용자 취소
         if(result._error){ localStorage.removeItem(_LS_PREFIX+'social_pending'); toast('카카오 로그인 실패: ' + result._error); return; }
         if(!result.uid){ localStorage.removeItem(_LS_PREFIX+'social_pending'); toast('카카오 로그인 정보를 가져올 수 없었어요'); return; }
-        if(!_firebaseReady) await _initFirebase(); // 팝업 닫힌 후 Firebase 초기화
+        if(!_firebaseReady) await _initFirebase(); // 혹시 아직 안 끝났으면 대기
         _showSocialLoading(_provLabel);
         await _handleSocialLoginResult(result, provider);
       } catch(e){
@@ -7007,7 +7010,10 @@ async function doSocialLogin(provider){
       // ★ 모바일에서 parent 탭 리로드 시 결과 수신을 위해 social_pending 설정
       localStorage.setItem(_LS_PREFIX+'social_pending', 'naver');
       try {
-        const result = await _doNaverLogin(); // ← 사용자 클릭 직후 팝업 열림 (SDK 로드 없이)
+        // ★ 팝업과 Firebase 초기화를 병렬 실행
+        const _naverLoginPromise = _doNaverLogin(); // ← 사용자 클릭 직후 팝업 열림 (SDK 로드 없이)
+        if(!_firebaseReady) _initFirebase().catch(()=>{});
+        const result = await _naverLoginPromise;
         console.log('[Naver Login] _doNaverLogin result:', result);
         if(!result){
           // redirect 모드인 경우 null 반환 → 페이지가 이미 이동됨
@@ -7974,7 +7980,7 @@ const BADGES = [
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
-if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401d';}}
+if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401e';}}
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
