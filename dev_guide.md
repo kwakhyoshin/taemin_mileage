@@ -1339,6 +1339,27 @@ account: {
 
 **APP_CHANGELOG:** v1.6.1 — 소셜 계정 교체 시 이전 연동 정보가 남는 버그 수정
 
+### 2026-04-01 세션 (4차) — 소셜 신규가입 후 홈탭/가이드/프로필사진 미적용
+
+**적용 범위: 개발기 (main/dev/index.html)**
+
+#### 커밋 목록
+| 커밋 | PR | 설명 | 상태 |
+|------|-----|------|------|
+| `90b8cdb` | #24 | fix: 소셜 신규가입 후 홈탭/가이드/프로필사진 미적용 수정 | ✅ merged |
+
+#### 문제
+소셜 계정으로 최초 신규가입 시: 홈탭 대신 나의메뉴 표시, 가이드 투어 미실행, 구글 프로필 사진 미저장
+
+#### 원인
+`createFamilyFinish()`에서 `_loginToFamily()`와 달리 `postLoginInit()`, `reallyGoTab('home')` 호출 누락.
+소셜 프로필 사진을 `S.photos`에 저장하는 로직 없음.
+
+#### 수정
+`createFamilyFinish()`에 추가: `postLoginInit()`, `reallyGoTab('home')`, 소셜 프로필 사진 저장 + `save()`
+
+**APP_CHANGELOG:** v1.6.2
+
 #### 미완료 / 추가 확인 필요
 - 운영기 미적용 — 운영기 반영 시 release 브랜치 → PR → merge 절차 사용
 - 회원 탈퇴 후 Firebase Authentication 계정 자체 삭제는 미구현 (signOut만 수행). 필요 시 Firebase Admin SDK 또는 Cloud Function으로 처리 가능
