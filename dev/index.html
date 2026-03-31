@@ -8281,7 +8281,7 @@ const BADGES = [
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
-if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401s';}}
+if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401t';}}
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
@@ -8395,6 +8395,7 @@ let _pendingSave = false;   // another save was requested while one was in-fligh
 let _hasDirtyLocal = false; // true when local changes haven't been saved to Firestore yet
 let _lastSavedJSON = '';    // tracks what we last wrote → prevents echo loop
 let _lastSaveTime = 0;      // timestamp of last save completion — cooldown for echo
+let _actAnimating = false;  // true during activity completion animation — blocks renderAll
 
 // ── PER-MEMBER DATA ISOLATION HELPERS ──────────────────────────────
 // Retrieves or creates the per-member state for the given member (default: currentUser)
@@ -9699,6 +9700,7 @@ window.getCurrentGreeting=getCurrentGreeting;
 
 // ── RENDER ────────────────────────────────────
 function renderAll(){
+  if(_actAnimating){_actAnimating='pending';return;}
   renderHero();renderHomeGrid();renderRecent();
   renderLogList();renderRewardGrid();renderRewardInventory();renderRewardHistory();
   renderDashboard();renderHistStats();renderHistList();renderCalendar();
@@ -11940,6 +11942,9 @@ function _doActCore(id){
   // 도장은 최종 완료(무제한 활동 또는 maxDay 도달)일 때만 표시
   const _doneCount=countDone(a);
   const _showStamp=(a.maxDay===0)||(a.maxDay>0&&_doneCount>=a.maxDay);
+  // 애니메이션 중 renderAll 차단
+  _actAnimating=true;
+  const _unlockAndRender=()=>{_actAnimating=false;renderAll();setTimeout(()=>checkBadges(),300);};
   if(_actCard){
     if(_showStamp){const _stamp=document.createElement('div');
     _stamp.className='completion-stamp';
@@ -11948,13 +11953,8 @@ function _doActCore(id){
     _actCard.classList.add('act-completing');
     toast(`${a.emoji} ${a.name} +${a.pts} 마일리지${sm}`);
     flyCoinsToMileage(_actCard, a.pts+bonus);
-    // 도장 표시 시 renderAll을 도장 애니메이션 완료까지 지연 (delay .65s + dur .45s = 1.1s + 여유)
-    const _renderDelay=_showStamp?1300:0;
-    _actCard.addEventListener('animationend',function _h(ev){
-      if(ev.animationName!=='actFlip')return;
-      _actCard.removeEventListener('animationend',_h);
-      setTimeout(()=>{renderAll();setTimeout(()=>checkBadges(),300);},_renderDelay);
-    });
+    // 도장: delay(.65s)+dur(.45s)=1.1s, 카드회전: 0.8s → 총 1.5s 후 renderAll
+    setTimeout(_unlockAndRender, _showStamp?1500:850);
   } else if(_logItem){
     if(_showStamp){const _stamp2=document.createElement('div');
     _stamp2.className='log-completion-stamp';
@@ -11963,12 +11963,7 @@ function _doActCore(id){
     _logItem.classList.add('log-completing');
     toast(`${a.emoji} ${a.name} +${a.pts} 마일리지${sm}`);
     flyCoinsToMileage(_logItem, a.pts+bonus);
-    const _renderDelay2=_showStamp?900:0;
-    _logItem.addEventListener('animationend',function _h2(ev){
-      if(ev.animationName!=='logItemFlash')return;
-      _logItem.removeEventListener('animationend',_h2);
-      setTimeout(()=>{renderAll();setTimeout(()=>checkBadges(),300);},_renderDelay2);
-    });
+    setTimeout(_unlockAndRender, _showStamp?1200:850);
   } else {
     renderAll();
     toast(`${a.emoji} ${a.name} +${a.pts} 마일리지${sm}`);
