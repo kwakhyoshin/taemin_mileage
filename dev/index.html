@@ -3287,15 +3287,43 @@ requestAnimationFrame(function(){
       <button class="toss-back-btn" onclick="jrBack()" id="jr-back-btn">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
       </button>
-      <div class="toss-progress-wrap"><div class="toss-progress-fill" id="jr-progress" style="width:20%"></div></div>
+      <div class="toss-progress-wrap"><div class="toss-progress-fill" id="jr-progress" style="width:0%"></div></div>
     </div>
     <div class="toss-slides-wrap" id="jr-wrap">
+      <!-- 슬라이드 0: 가입 방법 선택 (소셜 / ID·PW) -->
+      <div class="toss-slide active" id="jr-slide-method">
+        <div class="toss-slide-content">
+          <div id="jr-method-family-badge" style="display:none;margin-bottom:16px" class="toss-family-badge"></div>
+          <div id="jr-method-avatar" style="margin-bottom:16px;text-align:center"></div>
+          <div class="toss-question" id="jr-method-title">계정을 만들어볼게요!</div>
+          <div class="toss-desc">간편하게 가입할 방법을 선택해주세요</div>
+          <div class="social-login-btns" style="margin-top:20px">
+            <button class="social-btn social-google" onclick="doJoinSocialLogin('google')">
+              <svg width="20" height="20" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+              <span>Google로 가입</span>
+            </button>
+            <button class="social-btn social-kakao" onclick="doJoinSocialLogin('kakao')">
+              <svg width="20" height="20" viewBox="0 0 24 24"><path d="M12 3C6.48 3 2 6.36 2 10.44c0 2.62 1.75 4.93 4.38 6.24l-1.12 4.15c-.08.32.27.57.54.39l4.92-3.27c.42.04.84.06 1.28.06 5.52 0 10-3.36 10-7.57C22 6.36 17.52 3 12 3z" fill="#000"/></svg>
+              <span>카카오로 가입</span>
+            </button>
+            <button class="social-btn social-naver" onclick="doJoinSocialLogin('naver')">
+              <svg width="24" height="24" viewBox="0 0 24 24"><path d="M16.27 3H7.73A4.73 4.73 0 003 7.73v8.54A4.73 4.73 0 007.73 21h8.54A4.73 4.73 0 0021 16.27V7.73A4.73 4.73 0 0016.27 3zm-2.8 11.76l-2.97-4.26v4.26H8.25V9.24h2.28l2.97 4.26V9.24h2.25v5.52h-2.28z" fill="#fff"/></svg>
+              <span>네이버로 가입</span>
+            </button>
+          </div>
+          <div style="margin-top:20px;text-align:center">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px"><div style="flex:1;height:1px;background:var(--bdr)"></div><span style="font-size:12px;color:var(--tx3);font-weight:600">또는</span><div style="flex:1;height:1px;background:var(--bdr)"></div></div>
+            <button class="toss-btn" style="background:var(--bg2);color:var(--tx);font-size:15px" onclick="jrGoToIdPw()">아이디/비밀번호로 가입</button>
+          </div>
+          <div class="auth-error" id="jr-method-error" style="margin-top:10px"></div>
+        </div>
+      </div>
       <!-- 슬라이드 1: 아이디 -->
-      <div class="toss-slide active" id="jr-slide-id">
+      <div class="toss-slide" id="jr-slide-id">
         <div class="toss-slide-content">
           <div id="join-reg-family-badge" style="display:none;margin-bottom:16px" class="toss-family-badge"></div>
           <div id="join-reg-avatar" style="margin-bottom:16px;text-align:center"></div>
-          <div class="toss-question" id="join-reg-title">계정을 만들어볼게요!<br>아이디를 정해주세요</div>
+          <div class="toss-question" id="join-reg-title">아이디를 정해주세요</div>
           <div class="toss-desc">가족에 합류하기 위한 아이디예요</div>
           <div style="position:relative">
             <input type="text" class="toss-input" id="join-reg-id" placeholder="아이디 (4자 이상)" autocomplete="username" inputmode="latin" autocapitalize="none" style="padding-right:44px">
@@ -5160,7 +5188,7 @@ async function jrSlideIdNext() {
   const resetBtn = document.getElementById('jr-id-reset-btn');
   if(resetBtn) resetBtn.style.display = 'block';
   const prog = document.getElementById('jr-progress');
-  if (prog) prog.style.width = '60%';
+  if (prog) prog.style.width = '66%';
   toSlide('jr-wrap', 'jr-slide-pwd');
   setTimeout(() => document.getElementById('join-reg-pwd').focus(), 380);
 }
@@ -5175,6 +5203,138 @@ function resetJoinRegId() {
   if(resetBtn) resetBtn.style.display = 'none';
   const err = document.getElementById('jr-id-error');
   if(err) err.textContent = '';
+}
+
+// 방법 선택 → ID/PW 슬라이드로 이동
+function jrGoToIdPw(){
+  const prog=document.getElementById('jr-progress');if(prog)prog.style.width='33%';
+  toSlide('jr-wrap','jr-slide-id');
+  setTimeout(()=>{const inp=document.getElementById('join-reg-id');if(inp)inp.focus();},380);
+}
+
+// ── 초대 합류: 소셜 로그인 가입 ──
+async function doJoinSocialLogin(provider){
+  if(_socialLoginPending) return;
+  const mid=_joinState?.selectedMemberId;
+  if(!mid){toast('구성원을 먼저 선택해주세요');return;}
+  const errEl=document.getElementById('jr-method-error');
+  if(errEl)errEl.textContent='';
+
+  // 네이버: 심사 대기 중
+  if(provider==='naver'){_showNaverPendingNotice();return;}
+
+  _socialLoginPending=true;
+  const _provLabel=provider==='google'?'Google':provider==='kakao'?'카카오':provider;
+
+  try {
+    let firebaseUser=null;
+
+    if(provider==='kakao'){
+      localStorage.setItem(_LS_PREFIX+'social_pending','kakao');
+      const _kakaoPromise=_doKakaoLogin();
+      if(!_firebaseReady) _initFirebase().catch(()=>{});
+      const result=await _kakaoPromise;
+      if(!result){localStorage.removeItem(_LS_PREFIX+'social_pending');return;}
+      if(result._error){localStorage.removeItem(_LS_PREFIX+'social_pending');toast('카카오 로그인 실패: '+result._error);return;}
+      if(!result.uid){localStorage.removeItem(_LS_PREFIX+'social_pending');toast('카카오 로그인 정보를 가져올 수 없었어요');return;}
+      if(!_firebaseReady) await _initFirebase();
+      firebaseUser=result;
+    } else if(provider==='google'){
+      if(!_firebaseReady) await _initFirebase();
+      if(!fbAuth){toast('Firebase 초기화 실패');return;}
+      const gProv=new GoogleAuthProvider();
+      gProv.setCustomParameters({prompt:'select_account'});
+      localStorage.setItem(_LS_PREFIX+'social_pending',provider);
+      try {
+        const result=await signInWithPopup(fbAuth,gProv);
+        if(result&&result.user) firebaseUser=result.user;
+      } catch(popupErr){
+        if(popupErr.code==='auth/popup-closed-by-user'||popupErr.code==='auth/cancelled-popup-request'){
+          localStorage.removeItem(_LS_PREFIX+'social_pending');return;
+        }
+        throw popupErr;
+      }
+    }
+
+    if(!firebaseUser||!firebaseUser.uid){
+      localStorage.removeItem(_LS_PREFIX+'social_pending');
+      toast('로그인 정보를 가져올 수 없었어요');
+      return;
+    }
+
+    _showSocialLoading(_provLabel);
+    _updateSocialLoadingMsg('가족에 합류하는 중...');
+
+    const uid=firebaseUser.uid;
+    const email=firebaseUser.email||'';
+    const displayName=firebaseUser.displayName||'';
+    const profileImage=firebaseUser.profileImage||firebaseUser.photoURL||'';
+
+    // 이미 다른 가족에 연결된 UID인지 확인
+    const regDoc=_getAuthRegistryDoc();
+    if(regDoc){
+      const regSnap=await getDoc(regDoc);
+      if(regSnap.exists()&&regSnap.data()[uid]){
+        const existLink=regSnap.data()[uid];
+        _hideSocialLoading();
+        toast('이 소셜 계정은 이미 다른 가족에 연결되어 있어요. 다른 계정을 사용해주세요.');
+        localStorage.removeItem(_LS_PREFIX+'social_pending');
+        return;
+      }
+    }
+
+    // 멤버 계정 정보 업데이트 (소셜 인증)
+    if(!S.familyMeta.members[mid]){_hideSocialLoading();toast('구성원 정보를 찾을 수 없어요');return;}
+    S.familyMeta.members[mid].account={authProvider:provider,authUid:uid,email,v:2};
+    const _joinRole=S.familyMeta.members[mid].type||S.familyMeta.members[mid].role;
+    if(_joinRole==='caregiver'||_joinRole==='parent') S.familyMeta.members[mid].isAdmin=true;
+    if(!S.users)S.users={};
+    S.users[mid]={authProvider:provider,authUid:uid,email,v:2};
+
+    // 프로필 사진 저장
+    if(profileImage){
+      if(!S.photos)S.photos={};
+      S.photos[mid]=profileImage;
+    }
+
+    // 토큰 소비 처리
+    if(_joinState.token){
+      S.familyMeta.inviteTokens=(S.familyMeta.inviteTokens||[]).filter(t=>t.token!==_joinState.token);
+    }
+
+    await save();
+
+    // Auth 레지스트리에 UID → familyId/memberId 매핑 등록
+    try {
+      await _registerAuthLink(uid,_familyId,mid,provider,email);
+    } catch(regErr){
+      console.error('Auth registry write failed (non-blocking):',regErr);
+    }
+
+    localStorage.setItem(_LS_PREFIX+'social_pending','handled');
+    currentUser=mid;
+    localStorage.setItem(_LS_PREFIX+'current_user',mid);
+    syncMemberToGlobal();
+    postLoginInit();
+    rebuildMembersFromFamily();
+    _hideSocialLoading();
+    hideAllAuth();
+    applyUserProfile();
+    renderAll();
+
+    const memberName=S.familyMeta.members[mid]?.name||'';
+    toast(`🎉 ${memberName}, 가입 완료! 환영해요!`);
+    if(!_pwaInstalled)setTimeout(showPwaInstallPopup,1500);
+
+  } catch(e){
+    console.error('[Join Social Login Error]',e);
+    _hideSocialLoading();
+    localStorage.removeItem(_LS_PREFIX+'social_pending');
+    if(errEl)errEl.textContent='소셜 로그인 중 오류가 발생했어요';
+    toast('소셜 로그인 중 오류: '+(e.message||e));
+  } finally {
+    _socialLoginPending=false;
+  }
 }
 
 // ── 가족 만들기 흐름 ──
@@ -6131,14 +6291,23 @@ function selectJoinMember(memberId){
   const m=fm[memberId];
   if(!m)return;
   const rd=ROLE_DEFS[m.role]||ROLE_DEFS.child;
-  document.getElementById('join-reg-avatar').innerHTML=`<div style="width:56px;height:56px;border-radius:50%;background:${rd.color||'#F1F5F9'};border:3px solid ${rd.textColor||'#6366F1'};display:flex;align-items:center;justify-content:center;margin:0 auto"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="${rd.textColor||'#6366F1'}" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg></div>`;
-  document.getElementById('join-reg-title').textContent=`${m.name}(${rd.label||(m.role==='child'?'아이':'양육자')}) 계정 만들기`;
-  // 가족 이름 배지 표시
-  const badge=document.getElementById('join-reg-family-badge');
-  if(badge && S.familyMeta?.familyName){
-    badge.textContent=`🏠 ${S.familyMeta.familyName} 가족`;
-    badge.style.display='block';
-  }
+  const _avatarHTML=`<div style="width:56px;height:56px;border-radius:50%;background:${rd.color||'#F1F5F9'};border:3px solid ${rd.textColor||'#6366F1'};display:flex;align-items:center;justify-content:center;margin:0 auto"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="${rd.textColor||'#6366F1'}" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg></div>`;
+  const _memberTitle=`${m.name}(${rd.label||(m.role==='child'?'아이':'양육자')}) 계정 만들기`;
+  // 방법 선택 슬라이드(슬라이드 0)에 정보 표시
+  const mAvatar=document.getElementById('jr-method-avatar');if(mAvatar)mAvatar.innerHTML=_avatarHTML;
+  const mTitle=document.getElementById('jr-method-title');if(mTitle)mTitle.textContent=_memberTitle;
+  const mBadge=document.getElementById('jr-method-family-badge');
+  if(mBadge && S.familyMeta?.familyName){mBadge.textContent=`🏠 ${S.familyMeta.familyName} 가족`;mBadge.style.display='block';}
+  // ID 슬라이드에도 동일 정보
+  const idAvatar=document.getElementById('join-reg-avatar');if(idAvatar)idAvatar.innerHTML=_avatarHTML;
+  const idTitle=document.getElementById('join-reg-title');if(idTitle)idTitle.textContent='아이디를 정해주세요';
+  const idBadge=document.getElementById('join-reg-family-badge');
+  if(idBadge && S.familyMeta?.familyName){idBadge.textContent=`🏠 ${S.familyMeta.familyName} 가족`;idBadge.style.display='block';}
+  // 슬라이드를 방법 선택(첫 슬라이드)으로 리셋
+  _slideHistory['jr-wrap']=[];
+  const jrWrap=document.getElementById('jr-wrap');
+  if(jrWrap){jrWrap.querySelectorAll('.toss-slide').forEach(s=>s.classList.remove('active'));const ms=document.getElementById('jr-slide-method');if(ms)ms.classList.add('active');}
+  const prog=document.getElementById('jr-progress');if(prog)prog.style.width='0%';
   showAuthScreen('join-register');
 }
 
@@ -8283,7 +8452,7 @@ const BADGES = [
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
-if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401x';}}
+if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401y';}}
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
@@ -14501,6 +14670,15 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {
+    ver:'1.6.8', date:'2026-04-01',
+    items:[
+      {type:'new',text:'초대 가입 시 소셜 로그인(Google/카카오/네이버) 지원'},
+      {type:'improve',text:'활동기록 탭 완료 도장 위치를 아이템 중앙으로 이동, 크기 축소'},
+      {type:'improve',text:'완료 도장을 홈/활동기록 탭 정적 렌더링으로 전환 (사라짐 해결)'},
+      {type:'improve',text:'메시지 버블 잘림 해결 (레이아웃 구조 변경)'},
+    ]
+  },
   {
     ver:'1.6.6', date:'2026-04-01',
     items:[
