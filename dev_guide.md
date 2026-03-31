@@ -1249,3 +1249,69 @@ account: {
 - 운영기(`users/taemin`), 개발기(`families/taemin_dev`) 모두 확인
 - 모든 멤버(dad, mom, taemin)에 소셜 연동 데이터 없음 (이미 깨끗한 상태)
 - REST API 삭제 작업 불필요
+
+### 2026-04-01 세션 (2차) — 카카오/네이버 로그인 속도 개선 + 회원 탈퇴 기능
+
+**적용 범위: 개발기 (main/dev/index.html)**
+
+#### 커밋 목록
+| 커밋 | PR | 설명 | 상태 |
+|------|-----|------|------|
+| `6b62ef9` | #21 | perf: 카카오/네이버 로그인 속도 개선 — Firebase 병렬 초기화 | ✅ merged |
+| `437cfa3` | #22 | feat: 회원 탈퇴 기능 추가 | ✅ merged |
+
+#### 상세 변경 내용
+
+**1. 카카오/네이버 로그인 속도 개선 (PR #21, DEV v0401e)**
+- 카카오/네이버 팝업이 열려있는 동안 Firebase SDK를 백그라운드에서 병렬 로드
+- 기존: 팝업 완료 → Firebase SDK 로드 시작 → 초기화 대기 → 로그인 처리 (직렬)
+- 수정: 팝업 open과 동시에 `_ensureFirebase()` 호출 → 팝업 닫힌 후 Firebase 이미 준비됨 (병렬)
+- 팝업 닫힌 후 Firebase 초기화 대기 시간이 사실상 0으로 감소
+
+**2. 회원 탈퇴 기능 (PR #22, DEV v0401f)**
+
+**UI:**
+- 나의 메뉴 > 로그아웃 버튼 아래에 "회원 탈퇴" 버튼 추가 (회색, 13px)
+- SVG 아이콘: 사람 + X 표시 (user-x 스타일)
+
+**비즈니스 로직 — `withdrawAccount()` 함수:**
+3가지 시나리오를 분기 처리:
+
+| 시나리오 | 조건 | 동작 |
+|---------|------|------|
+| Case 1: 유일한 관리자 + 다른 양육자 있음 | `isAdmin && otherAdmins===0 && otherCaregivers>0` | 다른 양육자 목록 표시 → 관리자 권한 양도 대상 선택 → 양도 후 본인만 탈퇴 |
+| Case 2: 유일한 양육자 | `isCaregiver && otherCaregivers===0` | 자녀 계정도 함께 삭제된다고 안내 → 확인 시 본인 + 모든 자녀 삭제 |
+| Case 3: 자녀 또는 일반 양육자 | 그 외 | 본인만 탈퇴 |
+
+**삭제 실행 — `_executeWithdrawal(initiator, memberIdsToDelete)` 함수:**
+삭제 대상 데이터:
+1. **Auth Registry** (`_dev_auth_registry` / `_auth_registry`): 삭제 대상 멤버의 UID 매핑 제거
+2. **S.familyMeta.members**: 멤버 객체 삭제
+3. **S.users**: 사용자 계정 정보 삭제
+4. **S.memberData**: 멤버별 활동 데이터 삭제
+5. **S.photos**: 멤버별 프로필 사진 삭제
+6. **S.familyMessages**: 삭제 대상이 from 또는 to인 메시지 필터링
+7. **S.rewardRequests**: 삭제 대상이 user 또는 fromUser인 요청 필터링
+8. **Firestore 저장**: `save()` 호출로 변경사항 영구 반영
+9. **localStorage 정리**: `taemin_v6_lastUser` 삭제
+10. **Firebase Auth**: `signOut()` 호출
+11. **앱 상태 초기화**: 로그인 화면으로 전환
+
+**보존되는 데이터:**
+- `S.familyMeta` 자체 (가족 이름, 생성일 등)
+- 다른 멤버의 모든 데이터
+- `S.log` (전체 활동 로그)
+- `S.rewards`, `S.badges` (공유 보상/뱃지 시스템)
+
+**안전장치:**
+- confirm 다이얼로그로 사용자 최종 확인
+- Case 1에서 관리자 양도 후 탈퇴 (관리자 부재 방지)
+- Case 2에서 자녀 삭제 경고 명시
+
+**APP_CHANGELOG:** v1.6.0 — 회원 탈퇴 기능 추가
+
+#### 미완료 / 추가 확인 필요
+- 운영기 미적용 — 운영기 반영 시 release 브랜치 → PR → merge 절차 사용
+- 회원 탈퇴 후 Firebase Authentication 계정 자체 삭제는 미구현 (signOut만 수행). 필요 시 Firebase Admin SDK 또는 Cloud Function으로 처리 가능
+- 네이버 로그인 검수 재제출 필요 (서비스 소개 문서 + 로그인 플로우 스크린샷)
+- 카카오 개발자 콘솔에서 닉네임 동의항목 활성화 필요
