@@ -5532,11 +5532,11 @@ function openNodeForm(idx){
       <label style="display:block;font-size:13px;font-weight:700;color:var(--tx3);margin-bottom:4px;text-align:left">생년월일</label>
       <input type="date" id="node-birthdate" value="${m.birthDate||''}" placeholder="생년월일" style="width:100%;padding:10px;border-radius:8px;border:2px solid var(--bdr);background:var(--bg2);font-size:13px;font-weight:600;color:var(--tx);margin-bottom:12px;font-family:inherit;box-sizing:border-box;height:42px;line-height:20px;-webkit-appearance:none;appearance:none">
       <label style="display:block;font-size:13px;font-weight:700;color:var(--tx3);margin-bottom:4px;text-align:left">성별</label>
-      <select id="node-gender" style="width:100%;padding:10px;border-radius:8px;border:2px solid var(--bdr);background:var(--bg2);font-size:14px;font-weight:600;color:var(--tx);margin-bottom:12px;font-family:inherit;box-sizing:border-box">
-        <option value="" ${!m.gender?'selected':''}>성별 (선택)</option>
-        <option value="M" ${m.gender==='M'?'selected':''}>남자</option>
-        <option value="F" ${m.gender==='F'?'selected':''}>여자</option>
-      </select>
+      <input type="hidden" id="node-gender" value="${m.gender||''}">
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <button type="button" id="node-gender-m" onclick="document.getElementById('node-gender').value='M';this.style.background='#6366F1';this.style.color='#fff';this.style.borderColor='#6366F1';document.getElementById('node-gender-f').style.background='var(--bg2)';document.getElementById('node-gender-f').style.color='var(--tx)';document.getElementById('node-gender-f').style.borderColor='var(--bdr)'" style="flex:1;padding:10px;border-radius:8px;border:2px solid ${m.gender==='M'?'#6366F1':'var(--bdr)'};background:${m.gender==='M'?'#6366F1':'var(--bg2)'};font-size:14px;font-weight:700;color:${m.gender==='M'?'#fff':'var(--tx)'};cursor:pointer;font-family:inherit;transition:all .2s">👦 남자</button>
+        <button type="button" id="node-gender-f" onclick="document.getElementById('node-gender').value='F';this.style.background='#EC4899';this.style.color='#fff';this.style.borderColor='#EC4899';document.getElementById('node-gender-m').style.background='var(--bg2)';document.getElementById('node-gender-m').style.color='var(--tx)';document.getElementById('node-gender-m').style.borderColor='var(--bdr)'" style="flex:1;padding:10px;border-radius:8px;border:2px solid ${m.gender==='F'?'#EC4899':'var(--bdr)'};background:${m.gender==='F'?'#EC4899':'var(--bg2)'};font-size:14px;font-weight:700;color:${m.gender==='F'?'#fff':'var(--tx)'};cursor:pointer;font-family:inherit;transition:all .2s">👧 여자</button>
+      </div>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px">
       <button onclick="saveNodeForm()" style="flex:1;padding:12px;background:#6366F1;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit">저장</button>
@@ -8286,7 +8286,7 @@ const BADGES = [
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
-if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401m';}}
+if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401n';}}
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
@@ -14499,6 +14499,15 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {
+    ver:'1.6.4', date:'2026-04-01',
+    items:[
+      {type:'improve',text:'자녀 성별 선택 UI 개선 — 셀렉트박스를 토글 버튼으로 변경'},
+      {type:'improve',text:'네이버 로그인 심사 대기 안내 팝업 추가'},
+      {type:'fix',text:'회원가입 시 역할 미선택으로 넘어가는 버그 수정'},
+      {type:'fix',text:'회원 탈퇴 후 이전 가족 데이터 잔존 및 가이드 투어 미실행 수정'},
+    ]
+  },
   {
     ver:'1.6.3', date:'2026-04-01',
     items:[
