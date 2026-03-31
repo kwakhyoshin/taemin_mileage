@@ -7635,14 +7635,8 @@ function checkAuth() {
     return false;
   }
 
-  // 온보딩 완료 여부에 따라 분기
-  // - 최초 방문: 웰컴 → 온보딩 슬라이드 → 통합 로그인
-  // - 재방문/로그아웃: 바로 통합 로그인
-  if(localStorage.getItem(_LS_PREFIX+'onboarding_done')){
-    showAuthScreen('continue');
-  } else {
-    showAuthScreen('welcome');
-  }
+  // 항상 통합 로그인 화면부터 표시 (온보딩은 가입 플로우에서 진행)
+  showAuthScreen('continue');
   return false;
 }
 
@@ -7951,7 +7945,7 @@ const BADGES = [
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
-if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0331s';}}
+if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0331t';}}
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
