@@ -1360,6 +1360,106 @@ account: {
 
 **APP_CHANGELOG:** v1.6.2
 
+### 2026-04-01 세션 (5차) — 회원 탈퇴 UX 개선 + 관리자 설정 이동
+
+**적용 범위: 개발기 (main/dev/index.html)**
+
+#### 커밋 목록
+| 커밋 | PR | 설명 | 상태 |
+|------|-----|------|------|
+| — | #25 | improve: 회원 탈퇴 UX 개선 — 커스텀 모달, 로딩, 이별 인사 | ✅ merged |
+| — | #26 | refactor: 회원 탈퇴 버튼을 관리자 설정 탭으로 이동 | ✅ merged |
+
+#### PR #25: 회원 탈퇴 UX 개선 (DEV v0401h)
+- `_showWithdrawModal()`: 기존 `confirm()` 대신 커스텀 오버레이 모달 (블러 배경, 카드 디자인, 취소/확인 버튼)
+- `_showFarewellScreen()`: 탈퇴 완료 후 5개의 랜덤 이별 메시지 표시 (👋 이모지, 그라디언트 배경)
+- 로딩 애니메이션: 탈퇴 처리 중 스피너 표시
+- 3가지 케이스 모두 `_showWithdrawModal`을 사용하도록 통합
+
+#### PR #26: 회원 탈퇴 버튼 관리자 설정 이동 (DEV v0401i)
+- 나의메뉴(로그아웃 버튼 아래)에서 제거
+- 관리자 페이지 설정 탭(`adm-p4`)의 "계정" 섹션 아래에 배치
+
+### 2026-04-01 세션 (6차) — 회원 탈퇴 후 잔존 데이터/가이드 투어 버그 수정
+
+**적용 범위: 개발기 (main/dev/index.html)**
+
+#### 커밋 목록
+| 커밋 | PR | 설명 | 상태 |
+|------|-----|------|------|
+| — | #27 | fix: 회원 탈퇴 후 이전 가족 데이터 잔존 + 가이드 투어 미실행 | ✅ merged |
+
+#### 문제
+1. 회원 탈퇴 → 신규 가입 시 이전 가족 데이터(토큰 메시지 등)가 떠오름
+2. 신규 가입 후 가이드 투어 애니메이션 미실행
+
+#### 원인
+1. `_executeWithdrawal()`에서 Firestore `onSnapshot` 리스너(`_dataListenerUnsub`)를 해제하지 않아, 리스너가 이전 가족 문서 변경을 감지하고 `S`에 다시 덮어씀
+2. localStorage `onboarded` 플래그가 탈퇴 시 삭제되지 않아, `checkOnboarding()` → `isOnboarded()` → true → 가이드 투어 스킵
+
+#### 수정
+`_executeWithdrawal()`에 추가:
+- Firestore 리스너 해제: `_dataListenerUnsub()` 호출 + null 설정
+- localStorage 확장 정리: `family_id`, `onboarded`, `tour_done`, `changelog_seen` 삭제
+- 상태 초기화: `DATA_DOC = null`
+
+### 2026-04-01 세션 (7차) — 역할 미선택 버그 + 네이버 심사 안내 + 성별 토글
+
+**적용 범위: 개발기 (main/dev/index.html)**
+
+#### 커밋 목록
+| 커밋 | PR | 설명 | 상태 |
+|------|-----|------|------|
+| — | #28 | fix: 회원가입 시 역할 미선택으로 넘어가는 버그 수정 | ✅ merged |
+| — | #29 | feat: 네이버 로그인 심사 대기 안내 팝업 | ✅ merged |
+| `500df87` | #30 | feat: 자녀 성별 선택 토글 버튼 UI | ✅ merged |
+
+#### PR #28: 역할 선택 검증 (DEV v0401j)
+- 기존: `c1SlideRoleFinish()`에서 `_createState.myRole` 미선택 시 기본값 `'caregiver'` 자동 할당
+- 수정: 미선택 시 에러 메시지 "아이와의 관계를 선택해주세요" 표시 + return (진행 차단)
+- 에러 표시 요소: `<p id="c1-role-error">` (빨간색)
+
+#### PR #29: 네이버 로그인 심사 대기 안내 (DEV v0401l)
+- `_showNaverPendingNotice()`: 초록 그라디언트 네이버 아이콘 + spring 팝업 애니메이션
+- "개발 심사 중" 제목 + "서비스 검토 후 사용 가능합니다" 안내 문구
+- `doSocialLogin('naver')` 진입 시 실제 로그인 대신 안내 팝업 표시
+- 소셜 연동 바텀시트의 네이버 버튼도 동일하게 안내 팝업으로 리다이렉트
+
+#### PR #30: 자녀 성별 토글 버튼 (DEV v0401n)
+- 기존: `<select>` 드롭다운 (남자/여자/미선택)
+- 수정: 두 개의 토글 버튼 (👦 남자 / 👧 여자)
+- 남자: 인디고(#6366F1), 여자: 핑크(#EC4899) 색상 구분
+- `<input type="hidden" id="node-gender">`로 기존 `saveNodeForm()` 저장 로직 호환 유지
+
+### 2026-04-01 세션 (8차) — 활동 완료 도장 + 말풍선 버그 수정
+
+**적용 범위: 개발기 (main/dev/index.html)**
+
+#### 커밋 목록
+| 커밋 | PR | 설명 | 상태 |
+|------|-----|------|------|
+| `d5ba72d` | #31 | feat: 활동 완료 도장 + 말풍선 잘림 수정 | ✅ merged |
+
+#### PR #31: 활동 완료 도장 + 말풍선 잘림 수정 (DEV v0401o)
+
+**1. 활동 완료 시 완료 도장 애니메이션**
+- 보상 목표의 `.goal-tag` 도장과 동일한 SVG 스타일 (이중 원형 점선 + 텍스트)
+- 색상: 초록(#10B981), 텍스트: "완료" + "DONE"
+- `stampSlam` 애니메이션: scale(3)에서 축소하며 쾅 찍히는 효과
+- 홈 카드: `.completion-stamp` (52px, 우하단, z-index:1)
+- 활동기록: `.log-completion-stamp` (44px, 우측, z-index:1)
+- 말풍선(z-index:6)보다 아래 레이어 → 말풍선이 도장에 가려지지 않음
+
+**2. 활동기록 탭 말풍선 오른쪽 잘림 수정**
+- `.log-sticker-area`: `overflow:hidden` → `overflow-x:auto; overflow-y:visible`
+- 스크롤바 숨김 처리 (`scrollbar-width:none`, `::-webkit-scrollbar{display:none}`)
+- 긴 텍스트의 말풍선이 잘리지 않고 가로 스크롤 가능
+
+**3. 말풍선 애니메이션 시 아바타 아이콘 윗부분 잘림 수정**
+- `.log-sticker-area`: `padding:2px 0` → `padding:4px 0` (상하 여백 확보)
+- `.log-inf`: `overflow:visible` 명시 추가
+- `bubbleDangle` 애니메이션의 rotate + translateY로 인한 아바타 클리핑 방지
+
 #### 미완료 / 추가 확인 필요
 - 운영기 미적용 — 운영기 반영 시 release 브랜치 → PR → merge 절차 사용
 - 회원 탈퇴 후 Firebase Authentication 계정 자체 삭제는 미구현 (signOut만 수행). 필요 시 Firebase Admin SDK 또는 Cloud Function으로 처리 가능
