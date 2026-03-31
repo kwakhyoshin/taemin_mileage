@@ -6264,9 +6264,9 @@ async function unlinkSocial(){
   const pName=provNames[acc.authProvider]||acc.authProvider;
   if(!confirm(`${pName} 연동을 해제할까요?\n해제하면 소셜 계정으로 로그인할 수 없어요.\nID/비밀번호로만 로그인 가능합니다.`)) return;
   try{
-    // ★ auth 레지스트리에서 해당 소셜 uid 삭제 (가장 중요!)
-    const _unlinkAuthUid = acc.authUid || S.users?.[currentUser]?.authUid;
-    if(_unlinkAuthUid && typeof _getAuthRegistryDoc==='function' && typeof runTransaction==='function'){
+    // ★ auth 레지스트리에서 해당 멤버를 가리키는 모든 항목 삭제
+    // (이전 소셜 provider의 UID가 잔존하는 버그 방지)
+    if(typeof _getAuthRegistryDoc==='function' && typeof runTransaction==='function'){
       try{
         const regDoc=_getAuthRegistryDoc();
         if(regDoc){
@@ -6274,10 +6274,16 @@ async function unlinkSocial(){
             const snap=await tx.get(regDoc);
             if(snap.exists()){
               const data=snap.data();
-              if(data[_unlinkAuthUid]){
-                delete data[_unlinkAuthUid];
+              let _removed=[];
+              for(const [_uid, _link] of Object.entries(data)){
+                if(_link.memberId===currentUser && _link.familyId===_familyId){
+                  delete data[_uid];
+                  _removed.push(_uid);
+                }
+              }
+              if(_removed.length>0){
                 tx.set(regDoc, data);
-                console.log('[unlinkSocial] Removed from auth registry:', _unlinkAuthUid);
+                console.log('[unlinkSocial] Removed from auth registry:', _removed);
               }
             }
           });
@@ -7323,7 +7329,22 @@ async function _handleSocialLoginResult(firebaseUser, provider){
             if(_confirmed){
               try {
                 toast('로그인 처리 중...');
-                await _registerAuthLink(uid, link.familyId, link.memberId, provider, email);
+                // ★ 이전 소셜 UID를 registry에서 삭제 (provider 교체 시 잔존 방지)
+                try{
+                  await runTransaction(db, async(tx)=>{
+                    const _rSnap=await tx.get(regDoc);
+                    if(_rSnap.exists()){
+                      const _rData=_rSnap.data();
+                      delete _rData[otherUid];
+                      _rData[uid]={familyId:link.familyId, memberId:link.memberId, provider, email:email||'', createdAt:Date.now()};
+                      tx.set(regDoc, _rData);
+                    }
+                  });
+                  console.log('[Social] Registry: removed old uid', otherUid, ', added new uid', uid);
+                }catch(_regSwapErr){
+                  console.warn('[Social] Registry swap failed, fallback to registerAuthLink:', _regSwapErr);
+                  await _registerAuthLink(uid, link.familyId, link.memberId, provider, email);
+                }
                 await _loginToFamily(link.familyId, link.memberId, uid, provider, email, profileImage);
                 _restoreSocialLinkButtons();
               } catch(_loginErr){
@@ -7380,9 +7401,29 @@ async function _handleSocialLoginResult(firebaseUser, provider){
             if(_confirmed2){
               try {
                 toast('로그인 처리 중...');
-                await _registerAuthLink(uid, _fid, _mid, provider, email);
-                if(_uData.authUid){
-                  await _registerAuthLink(_uData.authUid, _fid, _mid, _existingProvider, email);
+                // ★ 이전 소셜 UID를 registry에서 삭제하고 새 UID만 등록
+                const _oldAuthUid = _uData.authUid;
+                if(_oldAuthUid && _oldAuthUid !== uid){
+                  try{
+                    const _regDoc2 = _getAuthRegistryDoc();
+                    if(_regDoc2){
+                      await runTransaction(db, async(tx)=>{
+                        const _rSnap=await tx.get(_regDoc2);
+                        if(_rSnap.exists()){
+                          const _rData=_rSnap.data();
+                          delete _rData[_oldAuthUid];
+                          _rData[uid]={familyId:_fid, memberId:_mid, provider, email:email||'', createdAt:Date.now()};
+                          tx.set(_regDoc2, _rData);
+                        }
+                      });
+                      console.log('[Social] Fallback registry: removed old uid', _oldAuthUid, ', added new uid', uid);
+                    }
+                  }catch(_regSwapErr2){
+                    console.warn('[Social] Fallback registry swap failed:', _regSwapErr2);
+                    await _registerAuthLink(uid, _fid, _mid, provider, email);
+                  }
+                } else {
+                  await _registerAuthLink(uid, _fid, _mid, provider, email);
                 }
                 await _loginToFamily(_fid, _mid, uid, provider, email, profileImage);
                 _restoreSocialLinkButtons();
@@ -8120,7 +8161,7 @@ const BADGES = [
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
-if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401f';}}
+if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401g';}}
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
@@ -14334,8 +14375,9 @@ window.pfMenuAction=pfMenuAction;
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
   {
-    ver:'1.6.0', date:'2026-04-01',
+    ver:'1.6.1', date:'2026-04-01',
     items:[
+      {type:'fix',text:'소셜 계정 교체 시 이전 연동 정보가 남는 버그 수정'},
       {type:'new',text:'회원 탈퇴 기능 — 나의 메뉴에서 계정 삭제 가능'},
     ]
   },
