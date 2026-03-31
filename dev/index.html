@@ -6,19 +6,6 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="googlebot" content="noindex, nofollow">
 <script>
-// ── iOS PWA viewport-fit=cover 콜드스타트 버그 수정 ──
-// iOS PWA는 콜드스타트 시 viewport-fit=cover를 제대로 적용하지 않아
-// viewport가 safe area를 포함하지 않음 (812px vs 874px).
-// OAuth redirect(페이지 리로드) 후에는 정상 동작하므로,
-// 첫 실행 시 한 번만 강제 reload하여 해결.
-(function(){
-  if(window.navigator.standalone && !sessionStorage.getItem('_vp_reload')){
-    sessionStorage.setItem('_vp_reload','1');
-    location.reload();
-  }
-})();
-</script>
-<script>
 // ── 브라우저 뒤로/앞으로 완전 차단 (최상단 즉시 실행) ──
 (function(){
   // 1. 히스토리 트랩 (10단계 깊이)
@@ -1048,7 +1035,8 @@ body.dark .pin-key.ck{background:transparent}
 .auth-screen{position:fixed;inset:0;background:linear-gradient(135deg,#5B4FC4,#A78BFA);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;padding-top:max(24px, calc(env(safe-area-inset-top, 0px) + 16px));padding-bottom:max(20px, env(safe-area-inset-bottom, 0px));overflow-y:auto;-webkit-overflow-scrolling:touch}
 .auth-screen.hidden{display:none;pointer-events:none}
 body.auth-active{background:linear-gradient(135deg,#5B4FC4,#A78BFA);overflow:hidden}
-html:has(body.auth-active){background:linear-gradient(135deg,#5B4FC4,#A78BFA)!important;overflow:hidden;min-height:100%}
+html{min-height:calc(100% + env(safe-area-inset-top));padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+html:has(body.auth-active){background:linear-gradient(135deg,#5B4FC4,#A78BFA)!important;overflow:hidden}
 #auth-insight .toss-cta{margin:0 24px;padding-left:0;padding-right:0;padding-top:8px}
 /* social-loading-overlay CSS 제거됨 */
 .auth-card{background:#fff;border-radius:24px;padding:32px 28px;width:100%;max-width:380px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2);margin:auto;flex-shrink:0}
@@ -2512,8 +2500,22 @@ button:disabled {
 </style>
 <!-- early CSS injection 제거: auth-continue가 HTML에서 바로 visible -->
 </head>
-<body data-tab="home" class="auth-active">
+<body data-tab="home">
 <div class="dev-indicator" id="dev-indicator" style="display:none">DEV</div>
+<script>
+// ── iOS PWA viewport 단차 수정 ──
+// iOS PWA 콜드스타트 시 body에 overflow:hidden(auth-active)이 있으면
+// viewport가 safe area를 포함하지 않음 (812px vs 874px).
+// 로그인 후 auth-active가 제거되면 iOS가 viewport를 확장하고,
+// 이후 로그아웃해도 유지됨.
+// 해결: body를 overflow:hidden 없이 먼저 렌더링하여 iOS가 full viewport를
+// 계산하게 한 뒤, requestAnimationFrame 후 auth-active 추가.
+requestAnimationFrame(function(){
+  requestAnimationFrame(function(){
+    document.body.classList.add('auth-active');
+  });
+});
+</script>
 
 <!-- Auth: standalone script (no module dependency) for auth screen navigation -->
 <script>
@@ -7929,7 +7931,7 @@ const BADGES = [
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
-if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0331x';}}
+if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0331y';}}
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
