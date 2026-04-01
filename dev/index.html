@@ -18005,23 +18005,17 @@ window._createState = _createState;
     document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;color:#666">인증 처리 중...</div>';
     // Step 1: code → access_token 교환
     const _kakaoRedirectUri = window.location.href.split('?')[0]; // query string 제거한 redirect_uri
-    const _tokenBody = new URLSearchParams({
-      grant_type: 'authorization_code',
-      client_id: 'bd6311dbabf65b823a5160e3973cb483',
-      redirect_uri: _kakaoRedirectUri,
-      code: _kakaoCode,
-      client_secret: 'phvnOAr7G88IKOa9RCWn2AFD4AuivOk9'
-    });
+    // ── S-02: client_secret은 Cloudflare Worker 프록시에서 처리 ──
     // 결과 전달 헬퍼: postMessage + localStorage fallback
     function _deliverKakaoResult(data){
       if(window.opener){ try{ window.opener.postMessage(data, '*'); }catch(e){} }
       try{ localStorage.setItem('taemin_v6_kakao_callback_result', JSON.stringify(data)); }catch(e){}
       setTimeout(()=>{ try{window.close();}catch(e){} }, 300);
     }
-    fetch('https://kauth.kakao.com/oauth/token', {
+    fetch('https://kakao-token-proxy.nonmarking.workers.dev', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: _tokenBody.toString()
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code: _kakaoCode, redirect_uri: _kakaoRedirectUri })
     })
     .then(r=>r.json())
     .then(tokenRes=>{
