@@ -13067,11 +13067,7 @@ function useReward(invId){
     targetUsers:adminMembers,
     ts:Date.now()
   };
-  S.pushBroadcast={
-    title:'🎁 보상 사용 요청',
-    body:`${_childName}이(가) "${item.rwdName}" 사용을 요청했어요!`,
-    ts:Date.now()
-  };
+  // pushBroadcast 제거 — rewardNotify가 정확한 대상(adminMembers)에게만 발송
 
   // 이력 기록
   if(!S.rewardLog)S.rewardLog=[];
@@ -13126,7 +13122,7 @@ function approveRewardRequest(reqId,approver){
     requestId:reqId
   });
 
-  // Trigger push notification
+  // Trigger push notification to requester (child)
   S.rewardNotify={
     type:'approved',
     rwdName:req.rwdName,
@@ -13134,11 +13130,7 @@ function approveRewardRequest(reqId,approver){
     targetUsers:[req.fromUser],
     ts:Date.now()
   };
-  S.pushBroadcast={
-    title:'✅ 보상 사용 승인',
-    body:`"${req.rwdName}" 사용이 승인됐어요!`,
-    ts:Date.now()
-  };
+  // pushBroadcast 제거 — rewardNotify가 정확한 대상(req.fromUser)에게만 발송
 
   // 이력 기록
   if(!S.rewardLog)S.rewardLog=[];
@@ -13177,7 +13169,7 @@ function rejectRewardRequest(reqId,rejector){
     requestId:reqId
   });
 
-  // Trigger push notification
+  // Trigger push notification to requester (child)
   S.rewardNotify={
     type:'rejected',
     rwdName:req.rwdName,
@@ -13185,11 +13177,7 @@ function rejectRewardRequest(reqId,rejector){
     targetUsers:[req.fromUser],
     ts:Date.now()
   };
-  S.pushBroadcast={
-    title:'❌ 보상 사용 거절',
-    body:`"${req.rwdName}" 사용이 거절됐어요.`,
-    ts:Date.now()
-  };
+  // pushBroadcast 제거 — rewardNotify가 정확한 대상(req.fromUser)에게만 발송
 
   // 이력 기록
   if(!S.rewardLog)S.rewardLog=[];
