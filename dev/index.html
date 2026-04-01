@@ -276,7 +276,7 @@ body.is-scrolling .hero *,body.is-scrolling .log-header-sticky *,body.is-scrolli
 input,select,textarea{font-size:16px!important}
 body{font-family:'Pretendard Variable',-apple-system,sans-serif;background:var(--bg);color:var(--tx);max-width:430px;margin:0 auto;min-height:100vh;min-height:100dvh;overflow-x:hidden;transition:background .25s,color .25s}
 html.popup-open,body.popup-open{overflow:hidden!important;height:100%!important}
-body.popup-open .nav-container{opacity:0;pointer-events:none;transition:opacity .15s}
+/* 팝업 열려도 네비게이션은 항상 표시 */
 @media(min-width:768px){body{max-width:100%;margin:0}}
 @media(min-width:1024px){body{margin:0}}
 
@@ -6779,7 +6779,7 @@ async function doLogin(idField, pwdField, errField){
                 await save();
                 // 리스너를 새 DATA_DOC으로 재연결
                 if(_dataListenerUnsub){try{_dataListenerUnsub();}catch(_e){}}
-                try{_dataListenerUnsub=onSnapshot(DATA_DOC,(snap)=>{if(!snap.exists())return;if(_isSaving)return;if(Date.now()-_lastSaveTime<2000)return;const _ij=JSON.stringify(snap.data());if(_ij===_lastSavedJSON||_ij===JSON.stringify(S))return;if(!_hasDirtyLocal){S=Object.assign(defaultState(),snap.data());_lastSavedJSON=_ij;rebuildMembersFromFamily();renderAll();checkNewMessages();renderNavUsers();}});}catch(_e){}
+                try{_dataListenerUnsub=onSnapshot(DATA_DOC,(snap)=>{if(!snap.exists())return;if(_isSaving)return;if(Date.now()-_lastSaveTime<2000)return;const _ij=JSON.stringify(snap.data());if(_ij===_lastSavedJSON||_ij===JSON.stringify(S))return;if(!_hasDirtyLocal){S=Object.assign(defaultState(),snap.data());_lastSavedJSON=_ij;rebuildMembersFromFamily();renderAll();checkNewMessages();renderNavUsers();}else{const _sd=snap.data();if(_sd.familyMessages&&JSON.stringify(_sd.familyMessages)!==JSON.stringify(S.familyMessages)){S.familyMessages=_sd.familyMessages;checkNewMessages();_updateFamilyBtnBadge();}}});}catch(_e){}
                 currentUser = otherMid;
                 localStorage.setItem(_LS_PREFIX+'current_user', otherMid);
                 syncMemberToGlobal();
@@ -7880,7 +7880,7 @@ async function _loginToFamily(familyId, memberId, authUid, provider, email, prof
   // 3단계: 리스너 연결 (실패해도 무시)
   try{
     if(_dataListenerUnsub){try{_dataListenerUnsub();}catch(_e){}}
-    _dataListenerUnsub=onSnapshot(DATA_DOC,(snap)=>{if(!snap.exists())return;if(_isSaving)return;if(Date.now()-_lastSaveTime<2000)return;const _ij=JSON.stringify(snap.data());if(_ij===_lastSavedJSON||_ij===JSON.stringify(S))return;if(!_hasDirtyLocal){S=Object.assign(defaultState(),snap.data());_lastSavedJSON=_ij;rebuildMembersFromFamily();renderAll();checkNewMessages();renderNavUsers();}});
+    _dataListenerUnsub=onSnapshot(DATA_DOC,(snap)=>{if(!snap.exists())return;if(_isSaving)return;if(Date.now()-_lastSaveTime<2000)return;const _ij=JSON.stringify(snap.data());if(_ij===_lastSavedJSON||_ij===JSON.stringify(S))return;if(!_hasDirtyLocal){S=Object.assign(defaultState(),snap.data());_lastSavedJSON=_ij;rebuildMembersFromFamily();renderAll();checkNewMessages();renderNavUsers();}else{const _sd=snap.data();if(_sd.familyMessages&&JSON.stringify(_sd.familyMessages)!==JSON.stringify(S.familyMessages)){S.familyMessages=_sd.familyMessages;checkNewMessages();_updateFamilyBtnBadge();}}});
   }catch(_e){console.warn('Snapshot listener failed:',_e);}
 }
 
@@ -8507,7 +8507,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0401b';
+const _APP_VERSION = 'v0401c';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -14897,6 +14897,16 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {
+    ver:'1.7.0', date:'2026-04-01',
+    items:[
+      {type:'fix',text:'푸시 알림 중복 발송 수정 (2~4회 → 1회)'},
+      {type:'fix',text:'보상 승인/거절 알림이 자녀에게 안 가던 문제 수정'},
+      {type:'fix',text:'유저 전환 시 푸시 디바이스 자동 갱신 (올바른 유저로 알림 수신)'},
+      {type:'fix',text:'메시지 수신 팝업에서 네비게이션 바 사라지는 문제 수정'},
+      {type:'fix',text:'메시지 수신 시 알림 뱃지 즉시 갱신 (앱 재시작 불필요)'},
+    ]
+  },
   {
     ver:'1.6.9', date:'2026-04-01',
     items:[
