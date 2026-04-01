@@ -81,8 +81,8 @@
 <meta property="og:locale" content="ko_KR">
 <title>마일리 ⭐</title>
 <link rel="manifest" href="manifest.json">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/pretendard/1.3.9/variable/pretendardvariable.min.css" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha512/0.8.0/sha512.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/pretendard/1.3.9/variable/pretendardvariable.min.css" rel="stylesheet" integrity="sha384-yqKFGH41xd+sz1PaxoEvdj+a7LqaPbyFdg8zvbt/xI0GAhsT1IzjVmoIZ43ruZDp" crossorigin="anonymous">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha512/0.8.0/sha512.min.js" integrity="sha384-LCOb1NbOdhbqH86Q6h6yjiYjfwqCQPMg0Zopm98a/iC2iQpQUnS2AvkaYA7SCtvw" crossorigin="anonymous"></script>
 <style>
 :root {
   --or:#6366F1;--or-lt:#EEF2FF;--or-md:#C7D2FE;
@@ -5869,7 +5869,7 @@ function renderInviteOptions(){
 function generateChildAccount(idx){
   const m=_createState.members[idx];
   const autoId=m.name.toLowerCase().replace(/\s+/g,'_');
-  const autoPwd=Math.random().toString(36).slice(2,8).toUpperCase();
+  const autoPwd=generateSecureRandom(4).toUpperCase();
   _createState.childAccounts[idx]={id:autoId,pwd:autoPwd};
 }
 
@@ -5897,7 +5897,7 @@ async function shareInviteLink(memberName, memberIdx){
   const hasPreAccount=!!_createState.childAccounts[memberIdx]; // 부모가 미리 계정 생성했는지
 
   // 초대 토큰 생성
-  const inviteToken=Math.random().toString(36).slice(2)+Date.now().toString(36);
+  const inviteToken=generateSecureRandom(16)+Date.now().toString(36);
   if(!S.familyMeta.inviteTokens)S.familyMeta.inviteTokens=[];
 
   const tokenEntry={
@@ -6051,7 +6051,7 @@ async function saveFamilyToFirestore(){
     }
 
     if(familyDoc) await setDoc(familyDoc,newState);
-    else { localStorage.setItem(_LS_PREFIX+'v6_backup', JSON.stringify(newState)); console.warn('Firebase offline — saved to localStorage'); }
+    else { localStorage.setItem(_LS_PREFIX+'v6_backup', sanitizeForBackup(newState)); console.warn('Firebase offline — saved to localStorage'); }
 
     // 글로벌 ID 레지스트리에 등록 (생성자 ID + 자녀 미리생성 계정)
     try {
@@ -6463,7 +6463,7 @@ async function linkSocialFromMyMenu(){
   // 레거시 계정(familyId 없음) → families/ 컬렉션으로 자동 마이그레이션
   if(!_familyId && _firebaseReady && db){
     try{
-      const newFamilyId=Math.random().toString(36).slice(2)+Date.now().toString(36);
+      const newFamilyId=generateSecureRandom(12)+Date.now().toString(36);
       const docPath=_ENV==='dev'?`dev_${newFamilyId}`:newFamilyId;
       const familyDoc=getFamilyDoc(docPath);
       if(familyDoc && familyDoc.path){
@@ -8043,7 +8043,7 @@ async function sendVerificationCode(){
     // 임시: Firestore에 직접 인증코드 저장 (개발 테스트용)
     if(!_firebaseReady) await _initFirebase();
 
-    const code = String(Math.floor(100000 + Math.random()*900000));
+    const code = String(100000 + (crypto.getRandomValues(new Uint32Array(1))[0] % 900000));
     const verifyDoc = doc(db, 'emailVerify', _ENV==='dev'?`dev_${email}`:`${email}`);
     await setDoc(verifyDoc, {
       code: code,
@@ -8885,6 +8885,17 @@ function escapeHtml(str) {
   if (!str || typeof str !== 'string') return '';
   return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
 }
+// ── S-14: localStorage 백업에서 민감 데이터 제외 ──
+function sanitizeForBackup(state) {
+  const s = JSON.parse(JSON.stringify(state)); // deep clone
+  // 사용자 해시(비밀번호) 제거
+  if(s.users){for(const uid in s.users){if(s.users[uid].hash)s.users[uid].hash='[REDACTED]';}}
+  // 초대 토큰 제거
+  if(s.familyMeta&&s.familyMeta.invites){for(const k in s.familyMeta.invites){const inv=s.familyMeta.invites[k];if(inv.token)inv.token='[REDACTED]';if(inv.autoAccount){delete inv.autoAccount;}}}
+  // 푸시 디바이스 토큰 제거
+  if(s.pushDevices){for(const did in s.pushDevices){if(s.pushDevices[did].token)s.pushDevices[did].token='[REDACTED]';}}
+  return JSON.stringify(s);
+}
 // ── S-11: 암호학적 안전 난수 생성 (OAuth state 등) ──
 function generateSecureRandom(len=32) {
   const a=new Uint8Array(len);
@@ -8919,13 +8930,13 @@ function save(){
       _lastSavedJSON = json; // remember what we just wrote
       _hasDirtyLocal = false; // 저장 완료
       _lastSaveTime = Date.now(); // cooldown start
-      localStorage.setItem(_LS_PREFIX+'v6_backup', json);
+      localStorage.setItem(_LS_PREFIX+'v6_backup', sanitizeForBackup(S));
       // Cloud Functions가 아직 users/taemin만 감시하므로, families에 마이그레이션된 경우
       // push 트리거 필드(pushBroadcast, rewardNotify, moodNotify, pushDevices)를 LEGACY_DOC에도 동기화
       _syncPushToLegacy();
     }catch(e){
       console.warn('Firebase save failed', e);
-      localStorage.setItem(_LS_PREFIX+'v6_backup', JSON.stringify(S));
+      localStorage.setItem(_LS_PREFIX+'v6_backup', sanitizeForBackup(S));
     } finally {
       _isSaving = false;
       // If another save was requested while we were writing, do it now
@@ -10228,8 +10239,8 @@ function renderHomeGrid(){
     return `<div class="act-card${cls}" data-actid="${a.id}" style="${st.exhausted?'cursor:default;':''}--lp-gauge-color:${_gaugeColor};--lp-gauge-text:${_gaugeText}">
       <div class="lp-gauge"><div class="lp-gauge-fill"></div><div class="lp-gauge-hint">꾹 누르기</div></div>
       ${stickerHTML}
-      <div class="e">${a.emoji}</div>
-      <div class="n">${a.name}</div>
+      <div class="e">${escapeHtml(a.emoji)}</div>
+      <div class="n">${escapeHtml(a.name)}</div>
       <div class="p">+${a.pts} 마일리지</div>
       ${a.maxDay>0?`<div class="count-badge">${st.label||'0/'+a.maxDay}</div>`:''}
       ${timer?`<div class="timer"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-1px;margin-right:2px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${timer}</div>`:''}
@@ -10307,10 +10318,10 @@ function renderLogList(){
     return `<div class="log-item${cls}${_isCaregiver?' has-today-toggle':''}" data-actid="${a.id}" style="${exhausted?'cursor:default;':''}position:relative;overflow:visible;--lp-gauge-color:${_lgColor}">
       ${_todayToggleHTML}
       <div class="lp-gauge" style="border-radius:0"><div class="lp-gauge-fill"></div></div>
-      <div class="log-ico" style="${pct>0?'--prog:'+pct+'%;':''}">${a.emoji}${pct>0&&pct<100?'<div class="log-prog-ring"></div>':''}</div>
+      <div class="log-ico" style="${pct>0?'--prog:'+pct+'%;':''}">${escapeHtml(a.emoji)}${pct>0&&pct<100?'<div class="log-prog-ring"></div>':''}</div>
       <div class="log-inf">
-        <div class="log-nm">${a.name}</div>
-        <div class="log-ds">${a.desc}</div>
+        <div class="log-nm">${escapeHtml(a.name)}</div>
+        <div class="log-ds">${escapeHtml(a.desc)}</div>
         <div class="log-meta">
           <span class="chip ${cc}">${cycleLabel}</span>
           ${countLabel?`<span class="chip c-yw">${countLabel}</span>`:''}
@@ -10660,7 +10671,7 @@ function renderBadgeHistory(){
     var ptsColor=isRevoke?'var(--rd)':'var(--gn2)';
     var ptsSign=isRevoke?'-':'+';
     var typeLabel=isRevoke?'회수':'획득';
-    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--bdr)"><span style="font-size:20px">'+l.badgeEmoji+'</span><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--tx)">'+l.badgeName+'</div><div style="font-size:13px;color:var(--tx3)">'+timeStr+'</div></div><div style="text-align:right"><div style="font-size:13px;font-weight:800;color:'+ptsColor+'">'+ptsSign+l.pts.toLocaleString()+' M</div><div style="font-size:13px;color:'+ptsColor+';font-weight:700">'+typeLabel+'</div></div></div>';
+    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--bdr)"><span style="font-size:20px">'+escapeHtml(l.badgeEmoji)+'</span><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--tx)">'+escapeHtml(l.badgeName)+'</div><div style="font-size:13px;color:var(--tx3)">'+timeStr+'</div></div><div style="text-align:right"><div style="font-size:13px;font-weight:800;color:'+ptsColor+'">'+ptsSign+l.pts.toLocaleString()+' M</div><div style="font-size:13px;color:'+ptsColor+';font-weight:700">'+typeLabel+'</div></div></div>';
   }).join('')+'</div>';
 }
 
@@ -10806,9 +10817,9 @@ function renderBadgeViewHistory(){
     if(ev.type==='earned'){
       const statusTxt=ev.claimed?'보너스 수령완료':'보너스 미수령';
       const statusColor=ev.claimed?'var(--tx3)':'#F59E0B';
-      return '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--bdr)"><span style="font-size:20px">'+ev.emoji+'</span><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--tx)">'+ev.name+' <span style="font-size:13px;color:#8B5CF6;font-weight:800">획득!</span></div><div style="font-size:13px;color:var(--tx3)">'+timeStr+'</div></div><div style="text-align:right"><div style="font-size:13px;font-weight:700;color:'+statusColor+'">'+statusTxt+'</div><div style="font-size:13px;color:var(--tx3)">+'+ev.bonus+' M</div></div></div>';
+      return '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--bdr)"><span style="font-size:20px">'+escapeHtml(ev.emoji)+'</span><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--tx)">'+escapeHtml(ev.name)+' <span style="font-size:13px;color:#8B5CF6;font-weight:800">획득!</span></div><div style="font-size:13px;color:var(--tx3)">'+timeStr+'</div></div><div style="text-align:right"><div style="font-size:13px;font-weight:700;color:'+statusColor+'">'+statusTxt+'</div><div style="font-size:13px;color:var(--tx3)">+'+ev.bonus+' M</div></div></div>';
     } else {
-      return '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--bdr)"><span style="font-size:20px">🎁</span><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--tx)">'+ev.name+' <span style="font-size:13px;color:var(--gn2);font-weight:800">보상수령</span></div><div style="font-size:13px;color:var(--tx3)">'+timeStr+'</div></div><div style="text-align:right"><div style="font-size:13px;font-weight:800;color:var(--gn2)">+'+ev.pts.toLocaleString()+' M</div></div></div>';
+      return '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--bdr)"><span style="font-size:20px">🎁</span><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--tx)">'+escapeHtml(ev.name)+' <span style="font-size:13px;color:var(--gn2);font-weight:800">보상수령</span></div><div style="font-size:13px;color:var(--tx3)">'+timeStr+'</div></div><div style="text-align:right"><div style="font-size:13px;font-weight:800;color:var(--gn2)">+'+ev.pts.toLocaleString()+' M</div></div></div>';
     }
   }).join('')+'</div>';
 }
@@ -10828,7 +10839,7 @@ function renderRewardGrid(){
 
     if(r.closed){
       return `<div class="rwd-card closed">
-        <div class="rwd-e">${r.emoji}</div><div class="rwd-nm">${r.name}</div>
+        <div class="rwd-e">${escapeHtml(r.emoji)}</div><div class="rwd-nm">${escapeHtml(r.name)}</div>
         <div class="cost-tag">${r.pts.toLocaleString()} 마일리지</div><br>
         <button class="rwd-btn locked" disabled>종료된 보상</button>
         <div class="closed-label">종료됨</div>
@@ -10837,8 +10848,8 @@ function renderRewardGrid(){
 
     return `<div class="rwd-card${r.goal?' goal':''}${sale?' on-sale':''}" data-rwdid="${r.id}">
       ${r.goal?'<div class="goal-tag"><svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="29" stroke="#EF4444" stroke-width="3.5" stroke-dasharray="5 2.5" opacity=".9"/><circle cx="32" cy="32" r="21" stroke="#EF4444" stroke-width="2.5" opacity=".65"/><text x="32" y="30" text-anchor="middle" font-size="15" font-weight="900" fill="#EF4444" font-family="Noto Sans KR,sans-serif">목표</text><text x="32" y="43" text-anchor="middle" font-size="9" font-weight="800" fill="#EF4444" font-family="sans-serif" letter-spacing="2" opacity=".7">GOAL</text></svg></div>':''}
-      ${sale?`<div class="sale-ribbon">${sale.label||'할인 이벤트'}</div>`:''}
-      <div class="rwd-e">${r.emoji}</div><div class="rwd-nm">${r.name}</div>
+      ${sale?`<div class="sale-ribbon">${escapeHtml(sale.label||'할인 이벤트')}</div>`:''}
+      <div class="rwd-e">${escapeHtml(r.emoji)}</div><div class="rwd-nm">${escapeHtml(r.name)}</div>
       ${sale?`
         <div class="sale-price-wrap">
           <span class="sale-original">${r.pts.toLocaleString()} 마일리지</span>
@@ -10953,9 +10964,9 @@ function renderRewardInventory(){
 
     return `<div class="rwd-inv-card">
       <div class="rwd-inv-header">
-        <span style="font-size:24px">${group.rwdEmoji}</span>
+        <span style="font-size:24px">${escapeHtml(group.rwdEmoji)}</span>
         <div style="flex:1">
-          <div class="rwd-inv-name">${group.rwdName}</div>
+          <div class="rwd-inv-name">${escapeHtml(group.rwdName)}</div>
           <div class="rwd-inv-count">${owned.length}개 보유중</div>
         </div>
       </div>
@@ -11004,10 +11015,10 @@ function renderRewardHistory(){
     const h=d.getHours(),m=String(d.getMinutes()).padStart(2,'0'),ap=h>=12?'오후':'오전',h12=h>12?h-12:h===0?12:h;
     const timeStr=(d.getMonth()+1)+'/'+d.getDate()+' '+ap+' '+h12+':'+m;
     const ti=typeInfo[l.type]||typeInfo.use;
-    const nameWithType=ti.icon+' '+l.name+' '+ti.label;
-    const byInfo=l.by?'<div style="font-size:13px;color:var(--tx3)">by '+l.by+'</div>':'';
+    const nameWithType=ti.icon+' '+escapeHtml(l.name)+' '+ti.label;
+    const byInfo=l.by?'<div style="font-size:13px;color:var(--tx3)">by '+escapeHtml(l.by)+'</div>':'';
     const ptsHtml=l.pts>0?'<div style="font-size:13px;font-weight:800;color:'+ti.color+'">'+ti.sign+l.pts.toLocaleString()+' M</div>':'';
-    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--bdr)"><span style="font-size:20px">'+l.emoji+'</span><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--tx)">'+nameWithType+'</div><div style="font-size:13px;color:var(--tx3)">'+timeStr+'</div></div><div style="text-align:right">'+ptsHtml+'<div style="font-size:13px;color:'+ti.color+';font-weight:700">'+ti.label+'</div>'+byInfo+'</div></div>';
+    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--bdr)"><span style="font-size:20px">'+escapeHtml(l.emoji)+'</span><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--tx)">'+nameWithType+'</div><div style="font-size:13px;color:var(--tx3)">'+timeStr+'</div></div><div style="text-align:right">'+ptsHtml+'<div style="font-size:13px;color:'+ti.color+';font-weight:700">'+ti.label+'</div>'+byInfo+'</div></div>';
   }).join('')+'</div>';
 }
 
@@ -11283,8 +11294,8 @@ function renderCalDetail(dateStr){
       const ap=h>=12?'오후':'오전';
       const h12=h>12?h-12:h===0?12:h;
       return `<div class="hist-item">
-        <div class="hist-ico" style="background:var(--gn-lt)">${l.emoji}</div>
-        <div style="flex:1"><div class="hist-nm">${l.name}</div><div class="hist-tm">${ap} ${h12}:${min}</div></div>
+        <div class="hist-ico" style="background:var(--gn-lt)">${escapeHtml(l.emoji)}</div>
+        <div style="flex:1"><div class="hist-nm">${escapeHtml(l.name)}</div><div class="hist-tm">${ap} ${h12}:${min}</div></div>
         <div class="hist-pts">+${l.pts} M</div>
       </div>`;
     }).join('');
@@ -11529,9 +11540,9 @@ function renderDashTop3(){
   el.innerHTML='<div style="padding:4px 14px">'+sorted.map((item,i)=>`
     <div class="top3-item">
       <div class="top3-rank r${i+1}">${rankLabels[i]||i+1}</div>
-      <div class="top3-emoji">${item.emoji}</div>
+      <div class="top3-emoji">${escapeHtml(item.emoji)}</div>
       <div class="top3-info">
-        <div class="top3-name">${item.name}</div>
+        <div class="top3-name">${escapeHtml(item.name)}</div>
         <div class="top3-sub">${item.count}회 · ${item.pts.toLocaleString()} 마일리지</div>
         <div class="top3-bar-bg"><div class="top3-bar" style="width:${Math.round(item.count/maxCount*100)}%;background:${barColors[i]||'#818CF8'}"></div></div>
       </div>
@@ -11681,10 +11692,10 @@ function renderInsightMVP(){
     return;
   }
   const top=sorted[0];
-  const top3html=sorted.slice(0,3).map((a,i)=>`<div style="display:flex;align-items:center;gap:8px;padding:4px 0;${i>0?'opacity:.7':''}"><span style="font-size:13px;font-weight:900;color:var(--tab-color,var(--or));width:16px">${i+1}</span><span style="font-size:16px">${a.emoji}</span><span style="flex:1;font-size:13px;font-weight:700;color:var(--tx)">${a.name}</span><span style="font-size:13px;font-weight:900;color:var(--tx2)">${a.totalPts.toLocaleString()} 마일리지 (${a.count}회)</span></div>`).join('');
+  const top3html=sorted.slice(0,3).map((a,i)=>`<div style="display:flex;align-items:center;gap:8px;padding:4px 0;${i>0?'opacity:.7':''}"><span style="font-size:13px;font-weight:900;color:var(--tab-color,var(--or));width:16px">${i+1}</span><span style="font-size:16px">${escapeHtml(a.emoji)}</span><span style="flex:1;font-size:13px;font-weight:700;color:var(--tx)">${escapeHtml(a.name)}</span><span style="font-size:13px;font-weight:900;color:var(--tx2)">${a.totalPts.toLocaleString()} 마일리지 (${a.count}회)</span></div>`).join('');
   el.innerHTML=`<div class="mvp-row" style="margin-bottom:10px">
-      <div class="mvp-emoji">${top.emoji}</div>
-      <div class="mvp-info"><div class="mvp-name">${top.name}</div><div class="mvp-detail">${top.count}회 수행 · 1회 평균 ${Math.round(top.totalPts/top.count)} 마일리지</div></div>
+      <div class="mvp-emoji">${escapeHtml(top.emoji)}</div>
+      <div class="mvp-info"><div class="mvp-name">${escapeHtml(top.name)}</div><div class="mvp-detail">${top.count}회 수행 · 1회 평균 ${Math.round(top.totalPts/top.count)} 마일리지</div></div>
       <div class="mvp-pts">${top.totalPts.toLocaleString()}<span style="font-size:13px;font-weight:700;color:var(--tx3)"> 마일리지</span></div>
     </div>
     <div style="border-top:1px solid var(--bdr);padding-top:8px">${top3html}</div>`;
@@ -11804,7 +11815,7 @@ function renderInsightRewardUsed(){
   const maxCnt=sorted[0].count;
   const listHtml=sorted.slice(0,5).map((r,i)=>{
     const pct=Math.round(r.count/maxCnt*100);
-    return `<div class="rwd-rank-item"><div class="rwd-rank-num">${i+1}</div><span class="rwd-rank-emoji">${r.emoji}</span><div style="flex:1;min-width:0"><div class="rwd-rank-name">${r.name}</div><div class="rwd-rank-bar"><div class="rwd-rank-fill" style="width:${pct}%;background:linear-gradient(90deg,#22C55E,#4ADE80)"></div></div></div><div class="rwd-rank-cnt">${r.count}회<br><span style="font-size:13px;color:var(--tx3)">${r.totalPts.toLocaleString()} 마일리지</span></div></div>`;
+    return `<div class="rwd-rank-item"><div class="rwd-rank-num">${i+1}</div><span class="rwd-rank-emoji">${escapeHtml(r.emoji)}</span><div style="flex:1;min-width:0"><div class="rwd-rank-name">${escapeHtml(r.name)}</div><div class="rwd-rank-bar"><div class="rwd-rank-fill" style="width:${pct}%;background:linear-gradient(90deg,#22C55E,#4ADE80)"></div></div></div><div class="rwd-rank-cnt">${r.count}회<br><span style="font-size:13px;color:var(--tx3)">${r.totalPts.toLocaleString()} 마일리지</span></div></div>`;
   }).join('');
   el.innerHTML=`<div class="rwd-rank-list">${listHtml}</div>`;
 }
@@ -12151,9 +12162,9 @@ function renderAdmActList(){
     return `
     <div class="manage-item" style="padding:10px 14px">
       <div class="drag-handle"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="4" y1="8" x2="20" y2="8"/><line x1="4" y1="16" x2="20" y2="16"/></svg></div>
-      <div class="m-emoji">${a.emoji}</div>
+      <div class="m-emoji">${escapeHtml(a.emoji)}</div>
       <div class="m-info" style="flex:1;min-width:0">
-        <div class="m-nm" style="font-size:15px">${a.name}</div>
+        <div class="m-nm" style="font-size:15px">${escapeHtml(a.name)}</div>
         <div style="display:flex;gap:4px;margin-top:4px;flex-wrap:wrap">
           <span class="adm-pill">${a.pts}M · ${a.maxDay===0?'무제한':a.maxDay+'회/'+CYCLE_LABEL[a.cycle]}</span>
           <span class="adm-pill adm-pill-tap${isDone?' adm-pill-on':''}" onclick="togActDone('${a.id}')">${isDone?'✓ 완료':'미완료'}</span>
@@ -12284,9 +12295,9 @@ function renderAdmRwdList(){
     return `
     <div class="manage-item" style="padding:10px 14px">
       <div class="drag-handle"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="4" y1="8" x2="20" y2="8"/><line x1="4" y1="16" x2="20" y2="16"/></svg></div>
-      <div class="m-emoji">${r.emoji}</div>
+      <div class="m-emoji">${escapeHtml(r.emoji)}</div>
       <div class="m-info" style="flex:1;min-width:0">
-        <div class="m-nm" style="font-size:15px">${r.name}${r.goal?' 🎯':''}</div>
+        <div class="m-nm" style="font-size:15px">${escapeHtml(r.name)}${r.goal?' 🎯':''}</div>
         <div style="display:flex;gap:4px;margin-top:4px;flex-wrap:wrap">
           <span class="adm-pill">${r.pts.toLocaleString()}M</span>
           <span class="adm-pill adm-pill-tap${r.closed?' adm-pill-rd':' adm-pill-gn'}" onclick="toggleRwdClosed('${r.id}')">${r.closed?'종료':'운영중'}</span>
@@ -13476,7 +13487,7 @@ async function addNewFamilyMember() {
   const memberRole = role === 'child' ? 'child' : 'caregiver';
   const memberDisplayRole = (role !== 'child' && role !== 'caregiver') ? role : '';
   const rd = ROLE_DEFS[memberDisplayRole || memberRole] || ROLE_DEFS.child;
-  const newId = 'mid_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+  const newId = 'mid_' + Date.now() + '_' + generateSecureRandom(4);
   // sortOrder: 기존 멤버 중 최대값+1 로 부여 → 순서 고정
   const existingOrders=Object.values(S.familyMeta.members).map(m=>m.sortOrder||0);
   const nextOrder=(existingOrders.length>0?Math.max(...existingOrders):0)+1;
@@ -13519,7 +13530,7 @@ async function sendFamilyInvite(memberId) {
   console.log('[sendFamilyInvite] START — _familyId:', _familyId, '_firebaseReady:', _firebaseReady, 'db:', !!db);
   if(!_familyId && _firebaseReady && db){
     console.log('[sendFamilyInvite] 🔄 Legacy migration starting...');
-    const newFamilyId=Math.random().toString(36).slice(2)+Date.now().toString(36);
+    const newFamilyId=generateSecureRandom(12)+Date.now().toString(36);
     const docPath=_ENV==='dev'?`dev_${newFamilyId}`:newFamilyId;
     const familyDoc=getFamilyDoc(docPath);
     if(familyDoc && familyDoc.path){
@@ -13554,7 +13565,7 @@ async function sendFamilyInvite(memberId) {
   }
 
   // Generate invite token
-  const inviteToken = Math.random().toString(36).slice(2) + Date.now().toString(36);
+  const inviteToken = generateSecureRandom(16) + Date.now().toString(36);
   if(!S.familyMeta.inviteTokens) S.familyMeta.inviteTokens = [];
 
   const tokenEntry = {
@@ -13574,7 +13585,7 @@ async function sendFamilyInvite(memberId) {
     await setDoc(targetDoc, S);
     _lastSavedJSON = JSON.stringify(S);
     _lastSaveTime = Date.now();
-    localStorage.setItem(_LS_PREFIX+'v6_backup', JSON.stringify(S));
+    localStorage.setItem(_LS_PREFIX+'v6_backup', sanitizeForBackup(S));
     console.log('[sendFamilyInvite] token saved OK');
   } catch(e) {
     console.error('[sendFamilyInvite] ❌ token save FAILED:', e?.code, e?.message, e);
@@ -14716,7 +14727,21 @@ async function handlePin(){
 function updDots(state){document.querySelectorAll('.pin-dot').forEach((d,i)=>{d.classList.toggle('on',state==='normal'&&i<pBuf.length);d.classList.toggle('err',state==='err');});}
 
 // 관리자 세션: 자동 잠금 제거됨 (PIN은 크리티컬 액션에서만 사용)
-function startAdminSession(){}
+// ── S-15: 관리자 세션 자동 잠금 (10분 타임아웃) ──
+let _admSessionTimer=null;
+function startAdminSession(){
+  clearTimeout(_admSessionTimer);
+  _admSessionTimer=setTimeout(()=>{
+    adminOK=false;
+    if(document.querySelector('.tab-btn.on')?.dataset?.tab==='adm'){
+      goTab('home');
+      toast('🔒 관리자 세션이 만료됐어요. 다시 PIN을 입력해주세요.');
+    }
+  }, 10*60*1000); // 10분
+}
+function refreshAdminSession(){if(adminOK&&_admSessionTimer){clearTimeout(_admSessionTimer);startAdminSession();}}
+// 관리자 탭에서 터치/클릭 시 세션 갱신
+document.addEventListener('click',()=>{if(adminOK)refreshAdminSession();},{passive:true});
 function lockAdmin(){goTab('home');}
 
 // PIN pad: event delegation on container — touchstart for instant response
