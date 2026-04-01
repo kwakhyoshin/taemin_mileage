@@ -20,9 +20,11 @@ const os = require('os');
 // ── 설정 ──────────────────────────────────────────────────
 const PROJECT_ID = 'taemin-mileage';
 
-// Firebase CLI OAuth 클라이언트 (firebase-tools 15.x 기준)
-const CLIENT_ID = '563584335869-fgrhgmd47bqnekij5i8b5pr03ho849e6.apps.googleusercontent.com';
-const CLIENT_SECRET = 'j9iVZfS8kkCEFUPaAeJV0sAi';
+// Firebase CLI OAuth 클라이언트 — 환경변수에서 읽기 (S-08 보안 조치)
+// 실행 전: export FIREBASE_CLIENT_ID="..." FIREBASE_CLIENT_SECRET="..."
+// 또는 firebase-tools 내장 값을 자동으로 읽음 (아래 getFirebaseClientCredentials 참조)
+const CLIENT_ID = process.env.FIREBASE_CLIENT_ID || getFirebaseClientId();
+const CLIENT_SECRET = process.env.FIREBASE_CLIENT_SECRET || getFirebaseClientSecret();
 
 // 마이그레이션 타겟
 const DEV_FAMILY_ID = 'dev_kwak_family';
@@ -33,6 +35,20 @@ const MEMBER_DEFS = {
   dad:    { name: '아빠', role: 'caregiver', displayRole: '아빠', color: '#EEF2FF', isAdmin: true,  type: 'caregiver' },
   mom:    { name: '엄마', role: 'caregiver', displayRole: '엄마', color: '#FDF2F8', isAdmin: false, type: 'caregiver' },
 };
+
+// ── Firebase CLI 클라이언트 자격증명 자동 탐색 ────────────
+// firebase-tools의 공개 클라이언트 ID/Secret은 npm 패키지 내부에 있음
+// 환경변수가 없으면 로컬 firebase-tools 설치에서 읽기 시도
+function getFirebaseClientId() {
+  try { return require('firebase-tools/lib/api').clientId; } catch(e) {}
+  try { return require('firebase-tools').cli?.clientId; } catch(e) {}
+  throw new Error('FIREBASE_CLIENT_ID 환경변수를 설정하거나 firebase-tools를 전역 설치하세요.\n  export FIREBASE_CLIENT_ID="your-client-id"');
+}
+function getFirebaseClientSecret() {
+  try { return require('firebase-tools/lib/api').clientSecret; } catch(e) {}
+  try { return require('firebase-tools').cli?.clientSecret; } catch(e) {}
+  throw new Error('FIREBASE_CLIENT_SECRET 환경변수를 설정하거나 firebase-tools를 전역 설치하세요.\n  export FIREBASE_CLIENT_SECRET="your-client-secret"');
+}
 
 // ── Firebase CLI refresh_token 읽기 ──────────────────────
 function getRefreshToken() {
