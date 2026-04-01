@@ -450,7 +450,7 @@ body.dark .theme-pick.active .theme-pick-radio{border-color:#818CF8;background:#
 .lp-gauge{position:absolute;inset:0;border-radius:var(--rsm);overflow:hidden;pointer-events:none;z-index:5;opacity:0;transition:opacity .15s}
 .lp-gauge.active{opacity:1}
 .lp-gauge-fill{position:absolute;top:0;left:0;bottom:0;width:0;background:var(--lp-gauge-color,rgba(99,102,241,.18));transition:none}
-.lp-gauge.active .lp-gauge-fill{width:100%;transition:width 1s linear}
+.lp-gauge.active .lp-gauge-fill{width:100%;transition:width .4s linear}
 .lp-gauge-hint{position:absolute;top:50%;right:10px;transform:translateY(-50%);font-size:11px;font-weight:800;color:var(--lp-gauge-text,rgba(99,102,241,.7));opacity:0;transition:opacity .2s .15s;white-space:nowrap}
 .lp-gauge.active .lp-gauge-hint{opacity:1}
 /* Disable :active scale when gauge is filling */
@@ -532,6 +532,12 @@ body.dark .theme-pick.active .theme-pick-radio{border-color:#818CF8;background:#
 .log-item.done .log-badge{background:var(--gn);color:#fff}
 .undo-btn{background:var(--rd-lt);color:var(--rd);font-size:13px;font-weight:800;padding:4px 10px;border-radius:20px;border:none;cursor:pointer;font-family:inherit;white-space:nowrap}
 .log-timer{font-size:13px;color:var(--tx3);font-weight:700;white-space:nowrap}
+.today-task-toggle{position:absolute;left:0;top:0;bottom:0;width:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:6;opacity:.45;transition:opacity .2s}
+.today-task-toggle.on{opacity:1}
+.today-task-toggle svg{width:16px;height:16px}
+.today-task-toggle:not(.on) svg{color:var(--tx4,#aaa)}
+.today-task-toggle.on svg{color:var(--pr)}
+.log-item.has-today-toggle{padding-left:30px}
 
 /* REWARD */
 .rwd-bal{display:flex;align-items:center;justify-content:space-between;background:var(--card);border-radius:var(--r);margin:8px 16px 14px;padding:18px;transition:background .25s;box-shadow:0 2px 8px rgba(0,0,0,.04);border:.5px solid var(--bdr)}
@@ -8383,86 +8389,86 @@ const DRWDS = [
 
 // ── BADGES (뱃지/업적) ──────────────────────────────────
 const BADGES = [
-  // 📚 공부 (Study) - 8 badges
+  // 📚 공부 (Study) - 8 badges (난이도 상향 v0401)
   {id:'study_first',emoji:'📖',name:'첫 공부 시작',desc:'시작이 반이야! 첫 공부를 해냈어',category:'공부',hidden:false,bonus:5,label:'1st',check:S=>countStudyTotal()>=1},
-  {id:'study_5',emoji:'🌱',name:'공부 습관 씨앗',desc:'작은 노력이 모여 큰 힘이 돼',category:'공부',hidden:false,bonus:10,label:'×5',check:S=>countStudyTotal()>=5},
-  {id:'study_15',emoji:'📝',name:'꾸준한 학습자',desc:'꾸준함이 천재를 이겨!',category:'공부',hidden:false,bonus:15,label:'×15',check:S=>countStudyTotal()>=15},
-  {id:'study_30',emoji:'🎓',name:'공부의 달인',desc:'30번의 노력, 정말 대단해!',category:'공부',hidden:false,bonus:20,label:'×30',check:S=>countStudyTotal()>=30},
-  {id:'study_50',emoji:'👑',name:'공부왕',desc:'50번! 노력은 절대 배신하지 않아',category:'공부',hidden:false,bonus:30,label:'×50',check:S=>countStudyTotal()>=50},
-  {id:'study_streak3',emoji:'🔥',name:'공부 연속 3일',desc:'3일 연속 공부! 습관이 되고 있어',category:'공부',hidden:false,bonus:10,label:'3Days',check:S=>getStudyStreak()>=3},
-  {id:'study_streak7',emoji:'💎',name:'공부 연속 7일',desc:'일주일 내내! 대단한 끈기야',category:'공부',hidden:false,bonus:20,label:'7Days',check:S=>getStudyStreak()>=7},
+  {id:'study_5',emoji:'🌱',name:'공부 습관 씨앗',desc:'작은 노력이 모여 큰 힘이 돼',category:'공부',hidden:false,bonus:10,label:'×10',check:S=>countStudyTotal()>=10},
+  {id:'study_15',emoji:'📝',name:'꾸준한 학습자',desc:'꾸준함이 천재를 이겨!',category:'공부',hidden:false,bonus:15,label:'×25',check:S=>countStudyTotal()>=25},
+  {id:'study_30',emoji:'🎓',name:'공부의 달인',desc:'50번의 노력, 정말 대단해!',category:'공부',hidden:false,bonus:20,label:'×50',check:S=>countStudyTotal()>=50},
+  {id:'study_50',emoji:'👑',name:'공부왕',desc:'100번! 노력은 절대 배신하지 않아',category:'공부',hidden:false,bonus:30,label:'×100',check:S=>countStudyTotal()>=100},
+  {id:'study_streak3',emoji:'🔥',name:'공부 연속 5일',desc:'5일 연속 공부! 습관이 되고 있어',category:'공부',hidden:false,bonus:10,label:'5Days',check:S=>getStudyStreak()>=5},
+  {id:'study_streak7',emoji:'💎',name:'공부 연속 10일',desc:'10일 내내! 대단한 끈기야',category:'공부',hidden:false,bonus:20,label:'10Days',check:S=>getStudyStreak()>=10},
   {id:'study_weekend',emoji:'🌟',name:'주말에도 공부',desc:'쉬는 날에도 노력하는 모습, 멋져!',category:'공부',hidden:false,bonus:10,label:'Weekend',check:S=>hasWeekendStudy()},
 
-  // ⭐ 꾸준함 (Consistency) - 6 badges
-  {id:'streak_3',emoji:'⭐',name:'3일 연속 출석',desc:'꾸준함의 시작!',category:'꾸준함',hidden:false,bonus:5,label:'3Days',check:S=>(S.streak||0)>=3||(S.longest||0)>=3},
-  {id:'streak_7',emoji:'🌈',name:'7일 연속 출석',desc:'일주일 연속! 대단해!',category:'꾸준함',hidden:false,bonus:10,label:'7Days',check:S=>(S.streak||0)>=7||(S.longest||0)>=7},
-  {id:'streak_14',emoji:'🏅',name:'14일 연속 출석',desc:'2주 연속이라니!',category:'꾸준함',hidden:false,bonus:15,label:'14Days',check:S=>(S.streak||0)>=14||(S.longest||0)>=14},
+  // ⭐ 꾸준함 (Consistency) - 6 badges (난이도 상향 v0401)
+  {id:'streak_3',emoji:'⭐',name:'5일 연속 출석',desc:'꾸준함의 시작!',category:'꾸준함',hidden:false,bonus:5,label:'5Days',check:S=>(S.streak||0)>=5||(S.longest||0)>=5},
+  {id:'streak_7',emoji:'🌈',name:'10일 연속 출석',desc:'10일 연속! 대단해!',category:'꾸준함',hidden:false,bonus:10,label:'10Days',check:S=>(S.streak||0)>=10||(S.longest||0)>=10},
+  {id:'streak_14',emoji:'🏅',name:'21일 연속 출석',desc:'3주 연속이라니!',category:'꾸준함',hidden:false,bonus:15,label:'21Days',check:S=>(S.streak||0)>=21||(S.longest||0)>=21},
   {id:'streak_30',emoji:'🏆',name:'30일 연속 출석',desc:'한 달 내내! 진정한 챔피언',category:'꾸준함',hidden:false,bonus:25,label:'30Days',check:S=>(S.streak||0)>=30||(S.longest||0)>=30},
-  {id:'morning_7',emoji:'🌅',name:'아침형 인간',desc:'아침 활동을 7번이나!',category:'꾸준함',hidden:false,bonus:10,label:'AM',check:S=>countMorningActivities()>=7},
+  {id:'morning_7',emoji:'🌅',name:'아침형 인간',desc:'아침 활동을 15번이나!',category:'꾸준함',hidden:false,bonus:10,label:'AM',check:S=>countMorningActivities()>=15},
   {id:'total_100',emoji:'💯',name:'100번째 활동',desc:'100번의 작은 노력이 모였어!',category:'꾸준함',hidden:false,bonus:20,label:'100',check:S=>(S.totalDone||0)>=100},
 
-  // 💪 도전 (Challenge) - 5 badges
+  // 💪 도전 (Challenge) - 5 badges (난이도 상향 v0401)
   {id:'daily_5',emoji:'✋',name:'하루 5개 클리어',desc:'오늘 정말 열심히 했어!',category:'도전',hidden:false,bonus:5,label:'×5',check:S=>getMaxDailyActivities()>=5},
   {id:'daily_10',emoji:'🔟',name:'하루 10개 클리어',desc:'놀라운 하루!',category:'도전',hidden:false,bonus:15,label:'×10',check:S=>getMaxDailyActivities()>=10},
   {id:'health_combo',emoji:'💚',name:'건강 지킴이',desc:'운동+영양제+양치 한 번에!',category:'도전',hidden:false,bonus:10,label:'Health',check:S=>hasHealthCombo()},
-  {id:'patience_5',emoji:'😌',name:'짜증 참기 달인',desc:'감정을 다스리는 힘이 자랐어',category:'도전',hidden:false,bonus:10,label:'Zen',check:S=>countActivityByName('짜증 안내기')>=5},
-  {id:'happy_school_7',emoji:'😄',name:'즐거운 등교 달인',desc:'기분좋게 학교가기, 벌써 7번!',category:'도전',hidden:false,bonus:10,label:'Happy',check:S=>countActivityByName('기분좋게 학교')>=7},
+  {id:'patience_5',emoji:'😌',name:'짜증 참기 달인',desc:'감정을 다스리는 힘이 자랐어',category:'도전',hidden:false,bonus:10,label:'Zen',check:S=>countActivityByName('짜증 안내기')>=10},
+  {id:'happy_school_7',emoji:'😄',name:'즐거운 등교 달인',desc:'기분좋게 학교가기, 벌써 14번!',category:'도전',hidden:false,bonus:10,label:'Happy',check:S=>countActivityByName('기분좋게 학교')>=14},
 
   // 🌱 성장 (Growth) - 5 badges
   {id:'first_activity',emoji:'👣',name:'첫 걸음',desc:'모든 여행은 첫 걸음부터!',category:'성장',hidden:false,bonus:5,label:'1st',check:S=>(S.totalDone||0)>=1},
   {id:'first_reward',emoji:'🎁',name:'첫 보상 교환',desc:'노력의 결실을 맛봤어!',category:'성장',hidden:false,bonus:5,label:'Gift',check:S=>(S.rewardLog||[]).some(r=>r.type==='exchange')},
   {id:'pts_1000',emoji:'🚀',name:'1000 마일리지 돌파',desc:'차곡차곡 모은 보람!',category:'성장',hidden:false,bonus:15,label:'1K',check:S=>getTotalEarned()>=1000},
   {id:'pts_3000',emoji:'💰',name:'3000 마일리지 돌파',desc:'꾸준한 노력의 증거!',category:'성장',hidden:false,bonus:25,label:'3K',check:S=>getTotalEarned()>=3000},
-  {id:'mood_7',emoji:'🎭',name:'기분 나누기 달인',desc:'감정을 표현하는 건 용기야',category:'성장',hidden:false,bonus:10,label:'Mood',check:S=>(S.moodLog||[]).length>=7},
+  {id:'mood_7',emoji:'🎭',name:'기분 나누기 달인',desc:'감정을 표현하는 건 용기야',category:'성장',hidden:false,bonus:10,label:'Mood',check:S=>countOwnMoodLogs()>=15},
 
   // 🏆 히든 (Hidden) - 2 badges
   {id:'perfect_day',emoji:'✨',name:'올 클리어',desc:'하루 모든 활동 완료! 완벽한 하루',category:'히든',hidden:true,bonus:20,label:'Perfect',check:S=>hasPerfectDay()},
   {id:'early_study',emoji:'🦉',name:'새벽 학습자',desc:'아침 8시 전에 공부하다니!',category:'히든',hidden:true,bonus:15,label:'Early',check:S=>hasEarlyStudy()},
 
   // 📚 공부 추가
-  {id:'study_100',emoji:'🏅',name:'공부 100회',desc:'100번 공부! 이제 공부가 습관이야',category:'공부',hidden:false,bonus:30,label:'×100',check:S=>countStudyTotal()>=100},
-  {id:'study_streak14',emoji:'💫',name:'공부 연속 14일',desc:'2주 내내 공부하다니 대단해!',category:'공부',hidden:false,bonus:25,label:'14Days',check:S=>getStudyStreak()>=14},
+  {id:'study_100',emoji:'🏅',name:'공부 150회',desc:'150번 공부! 이제 공부가 습관이야',category:'공부',hidden:false,bonus:30,label:'×150',check:S=>countStudyTotal()>=150},
+  {id:'study_streak14',emoji:'💫',name:'공부 연속 21일',desc:'3주 내내 공부하다니 대단해!',category:'공부',hidden:false,bonus:25,label:'21Days',check:S=>getStudyStreak()>=21},
 
-  // ⭐ 꾸준함 추가
+  // ⭐ 꾸준함 추가 (난이도 상향 v0401)
   {id:'streak_60',emoji:'🌊',name:'60일 연속 출석',desc:'두 달 연속이라니! 놀라워!',category:'꾸준함',hidden:false,bonus:30,label:'60Days',check:S=>(S.streak||0)>=60||(S.longest||0)>=60},
   {id:'streak_100',emoji:'💎',name:'100일 연속 출석',desc:'100일 연속! 전설이 되었어!',category:'꾸준함',hidden:false,bonus:30,label:'100',check:S=>(S.streak||0)>=100||(S.longest||0)>=100},
   {id:'total_50',emoji:'🎯',name:'50번째 활동',desc:'50번의 노력이 모였어!',category:'꾸준함',hidden:false,bonus:10,label:'50',check:S=>(S.totalDone||0)>=50},
   {id:'total_200',emoji:'🌟',name:'200번째 활동',desc:'200번! 꾸준함의 결정체!',category:'꾸준함',hidden:false,bonus:25,label:'200',check:S=>(S.totalDone||0)>=200},
   {id:'total_500',emoji:'👑',name:'500번째 활동',desc:'500번! 마일리지 마스터야!',category:'꾸준함',hidden:false,bonus:30,label:'500',check:S=>(S.totalDone||0)>=500},
 
-  // 💪 도전 추가
-  {id:'daily_all',emoji:'🎯',name:'올 클리어 5회',desc:'모든 활동 완료한 날이 5번!',category:'도전',hidden:false,bonus:15,label:'All×5',check:S=>countPerfectDays()>=5},
-  {id:'daily_all_10',emoji:'🏆',name:'올 클리어 10회',desc:'완벽한 하루가 10번이나!',category:'도전',hidden:false,bonus:25,label:'All×10',check:S=>countPerfectDays()>=10},
-  {id:'weekend_warrior',emoji:'⚔️',name:'주말 전사',desc:'주말에도 3가지 이상 활동!',category:'도전',hidden:false,bonus:10,label:'Wknd',check:S=>hasWeekendWarrior()},
+  // 💪 도전 추가 (난이도 상향 v0401)
+  {id:'daily_all',emoji:'🎯',name:'올 클리어 7회',desc:'모든 활동 완료한 날이 7번!',category:'도전',hidden:false,bonus:15,label:'All×7',check:S=>countPerfectDays()>=7},
+  {id:'daily_all_10',emoji:'🏆',name:'올 클리어 15회',desc:'완벽한 하루가 15번이나!',category:'도전',hidden:false,bonus:25,label:'All×15',check:S=>countPerfectDays()>=15},
+  {id:'weekend_warrior',emoji:'⚔️',name:'주말 전사',desc:'주말에도 5가지 이상 활동!',category:'도전',hidden:false,bonus:10,label:'Wknd',check:S=>hasWeekendWarrior()},
   {id:'night_owl',emoji:'🦉',name:'밤의 부엉이',desc:'저녁 9시 이후에도 활동하다니!',category:'도전',hidden:false,bonus:10,label:'Night',check:S=>hasNightActivity()},
   {id:'multi_task',emoji:'🎪',name:'멀티 태스커',desc:'하루에 7종류 이상 활동!',category:'도전',hidden:false,bonus:15,label:'Multi',check:S=>getMaxDailyVariety()>=7},
 
   // 🌱 성장 추가
   {id:'pts_5000',emoji:'💎',name:'5000 마일리지 돌파',desc:'5000 마일리지! 대단한 성취!',category:'성장',hidden:false,bonus:30,label:'5K',check:S=>getTotalEarned()>=5000},
   {id:'pts_10000',emoji:'🌈',name:'10000 마일리지 돌파',desc:'만 마일리지! 전설적인 기록!',category:'성장',hidden:false,bonus:30,label:'10K',check:S=>getTotalEarned()>=10000},
-  {id:'reward_3',emoji:'🛒',name:'보상 3회 교환',desc:'벌써 3번이나 보상을 받았어!',category:'성장',hidden:false,bonus:10,label:'×3',check:S=>(S.rewardLog||[]).filter(r=>r.type==='exchange').length>=3},
-  {id:'reward_10',emoji:'🎉',name:'보상 10회 교환',desc:'10번 교환! 노력의 결실!',category:'성장',hidden:false,bonus:20,label:'×10',check:S=>(S.rewardLog||[]).filter(r=>r.type==='exchange').length>=10},
-  {id:'mood_30',emoji:'📔',name:'감정 일기 30회',desc:'30번이나 기분을 기록했어!',category:'성장',hidden:false,bonus:15,label:'×30',check:S=>(S.moodLog||[]).length>=30},
+  {id:'reward_3',emoji:'🛒',name:'보상 5회 교환',desc:'벌써 5번이나 보상을 받았어!',category:'성장',hidden:false,bonus:10,label:'×5',check:S=>(S.rewardLog||[]).filter(r=>r.type==='exchange').length>=5},
+  {id:'reward_10',emoji:'🎉',name:'보상 15회 교환',desc:'15번 교환! 노력의 결실!',category:'성장',hidden:false,bonus:20,label:'×15',check:S=>(S.rewardLog||[]).filter(r=>r.type==='exchange').length>=15},
+  {id:'mood_30',emoji:'📔',name:'감정 일기 50회',desc:'50번이나 기분을 기록했어!',category:'성장',hidden:false,bonus:15,label:'×50',check:S=>countOwnMoodLogs()>=50},
 
-  // 🏡 생활습관 (NEW category)
-  {id:'brush_30',emoji:'🦷',name:'양치 달인',desc:'양치질을 30번이나! 치아가 반짝!',category:'생활습관',hidden:false,bonus:10,label:'×30',icon:'tooth',check:S=>countActivityByName('양치질')>=30},
-  {id:'vitamin_20',emoji:'💊',name:'영양 챙기기',desc:'영양제를 20번이나 챙겨먹었어!',category:'생활습관',hidden:false,bonus:10,label:'×20',icon:'vitamin',check:S=>countActivityByName('영양제')>=20},
-  {id:'fold_15',emoji:'🛏️',name:'이불 정리왕',desc:'이불 개기를 15번! 깔끔해!',category:'생활습관',hidden:false,bonus:10,label:'×15',icon:'bed',check:S=>countActivityByName('이불')>=15},
-  {id:'wash_20',emoji:'🧼',name:'세수 습관',desc:'세수하기 20번! 깨끗한 얼굴!',category:'생활습관',hidden:false,bonus:10,label:'×20',icon:'soap',check:S=>countActivityByName('세수')>=20},
-  {id:'lotion_15',emoji:'🧴',name:'피부 관리사',desc:'로션 바르기 15번! 촉촉한 피부!',category:'생활습관',hidden:false,bonus:10,label:'×15',icon:'lotion',check:S=>countActivityByName('로션')>=15},
-  {id:'all_morning',emoji:'☀️',name:'완벽한 아침',desc:'양치+세수+영양제 한번에 3회!',category:'생활습관',hidden:false,bonus:15,label:'AM',icon:'sun',check:S=>countMorningCombo()>=3},
+  // 🏡 생활습관 (NEW category, 난이도 상향 v0401)
+  {id:'brush_30',emoji:'🦷',name:'양치 달인',desc:'양치질을 50번이나! 치아가 반짝!',category:'생활습관',hidden:false,bonus:10,label:'×50',icon:'tooth',check:S=>countActivityByName('양치질')>=50},
+  {id:'vitamin_20',emoji:'💊',name:'영양 챙기기',desc:'영양제를 30번이나 챙겨먹었어!',category:'생활습관',hidden:false,bonus:10,label:'×30',icon:'vitamin',check:S=>countActivityByName('영양제')>=30},
+  {id:'fold_15',emoji:'🛏️',name:'이불 정리왕',desc:'이불 개기를 25번! 깔끔해!',category:'생활습관',hidden:false,bonus:10,label:'×25',icon:'bed',check:S=>countActivityByName('이불')>=25},
+  {id:'wash_20',emoji:'🧼',name:'세수 습관',desc:'세수하기 30번! 깨끗한 얼굴!',category:'생활습관',hidden:false,bonus:10,label:'×30',icon:'soap',check:S=>countActivityByName('세수')>=30},
+  {id:'lotion_15',emoji:'🧴',name:'피부 관리사',desc:'로션 바르기 25번! 촉촉한 피부!',category:'생활습관',hidden:false,bonus:10,label:'×25',icon:'lotion',check:S=>countActivityByName('로션')>=25},
+  {id:'all_morning',emoji:'☀️',name:'완벽한 아침',desc:'양치+세수+영양제 한번에 5회!',category:'생활습관',hidden:false,bonus:15,label:'AM',icon:'sun',check:S=>countMorningCombo()>=5},
 
-  // 😊 감정 (NEW category)
-  {id:'mood_happy_5',emoji:'😊',name:'행복 전도사',desc:'행복한 기분을 5번이나 기록했어!',category:'감정',hidden:false,bonus:10,label:'Happy',icon:'smile',check:S=>countMoodType('happy')>=5},
-  {id:'mood_all_types',emoji:'🌈',name:'감정 무지개',desc:'모든 종류의 감정을 경험했어!',category:'감정',hidden:false,bonus:15,label:'Rainbow',icon:'rainbow',check:S=>countUniqueMoods()>=5},
-  {id:'msg_send_5',emoji:'💌',name:'편지왕',desc:'가족에게 메시지를 5번 보냈어!',category:'감정',hidden:false,bonus:10,label:'×5',icon:'mail',check:S=>countSentMessages()>=5},
-  {id:'msg_send_20',emoji:'📮',name:'소통의 달인',desc:'20번이나 메시지를 주고받았어!',category:'감정',hidden:false,bonus:15,label:'×20',icon:'chat',check:S=>countSentMessages()>=20},
+  // 😊 감정 (NEW category, 부모 행위 귀속 버그 수정 v0401)
+  {id:'mood_happy_5',emoji:'😊',name:'행복 전도사',desc:'행복한 기분을 10번이나 기록했어!',category:'감정',hidden:false,bonus:10,label:'Happy',icon:'smile',check:S=>countOwnMoodType('happy')>=10},
+  {id:'mood_all_types',emoji:'🌈',name:'감정 무지개',desc:'모든 종류의 감정을 경험했어!',category:'감정',hidden:false,bonus:15,label:'Rainbow',icon:'rainbow',check:S=>countOwnUniqueMoods()>=5},
+  {id:'msg_send_5',emoji:'💌',name:'편지왕',desc:'가족에게 메시지를 10번 보냈어!',category:'감정',hidden:false,bonus:10,label:'×10',icon:'mail',check:S=>countOwnSentMessages()>=10},
+  {id:'msg_send_20',emoji:'📮',name:'소통의 달인',desc:'30번이나 메시지를 보냈어!',category:'감정',hidden:false,bonus:15,label:'×30',icon:'chat',check:S=>countOwnSentMessages()>=30},
 
-  // 💰 마일리지 (NEW category)
+  // 💰 마일리지 (NEW category, 난이도 상향 v0401)
   {id:'save_500',emoji:'🐷',name:'저금통',desc:'500 마일리지를 모아놨어! 알뜰해!',category:'마일리지',hidden:false,bonus:10,label:'500',icon:'coin',check:S=>(S.pts||0)>=500},
   {id:'save_2000',emoji:'🏦',name:'마일리지 부자',desc:'2000 마일리지 보유! 대단해!',category:'마일리지',hidden:false,bonus:20,label:'2K',icon:'bag',check:S=>(S.pts||0)>=2000},
-  {id:'badge_10',emoji:'🎖️',name:'뱃지 수집가',desc:'뱃지를 10개나 모았어!',category:'마일리지',hidden:false,bonus:15,label:'×10',icon:'ribbon',check:S=>Object.keys(S.badges||{}).length>=10},
-  {id:'badge_25',emoji:'🏅',name:'뱃지 마스터',desc:'뱃지를 25개나! 거의 다 모았어!',category:'마일리지',hidden:false,bonus:25,label:'×25',icon:'medal',check:S=>Object.keys(S.badges||{}).length>=25},
+  {id:'badge_10',emoji:'🎖️',name:'뱃지 수집가',desc:'뱃지를 15개나 모았어!',category:'마일리지',hidden:false,bonus:15,label:'×15',icon:'ribbon',check:S=>Object.keys(S.badges||{}).length>=15},
+  {id:'badge_25',emoji:'🏅',name:'뱃지 마스터',desc:'뱃지를 30개나! 거의 다 모았어!',category:'마일리지',hidden:false,bonus:25,label:'×30',icon:'medal',check:S=>Object.keys(S.badges||{}).length>=30},
 
   // 🏆 히든 추가
   {id:'midnight_study',emoji:'🌙',name:'자정의 학자',desc:'자정 넘어서 공부하다니!',category:'히든',hidden:true,bonus:15,label:'12AM',check:S=>hasMidnightStudy()},
@@ -8473,7 +8479,7 @@ const BADGES = [
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
-if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401za';}}
+if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401zb';}}
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
@@ -9274,7 +9280,7 @@ function hasWeekendWarrior(){
       weekendLogs[ds].add(l.actId||l.name);
     }
   });
-  return Object.values(weekendLogs).some(s=>s.size>=3);
+  return Object.values(weekendLogs).some(s=>s.size>=5);
 }
 
 function hasNightActivity(){
@@ -9325,6 +9331,32 @@ function countUniqueMoods(){
 function countSentMessages(){
   if(!S.familyMessages)return 0;
   return S.familyMessages.filter(m=>m.from==='taemin').length;
+}
+
+// ── 멤버별 뱃지 체크 헬퍼 (부모 행위 귀속 버그 수정 v0401) ──
+// 현재 보고있는 멤버(_globalDataOwner)의 moodLog만 카운트
+function countOwnMoodLogs(){
+  const mid=_globalDataOwner||viewingChildId||currentUser;
+  // S.moodLog는 syncMemberToGlobal로 현재 멤버의 것이 로드됨
+  // 하지만 user 필드가 있으면 해당 멤버의 것만 카운트
+  const logs=S.moodLog||[];
+  return logs.filter(m=>!m.user||m.user===mid).length;
+}
+function countOwnMoodType(type){
+  const mid=_globalDataOwner||viewingChildId||currentUser;
+  return (S.moodLog||[]).filter(m=>m.mood===type&&(!m.user||m.user===mid)).length;
+}
+function countOwnUniqueMoods(){
+  const mid=_globalDataOwner||viewingChildId||currentUser;
+  const types=new Set();
+  (S.moodLog||[]).forEach(m=>{if(m.mood&&(!m.user||m.user===mid))types.add(m.mood);});
+  return types.size;
+}
+// 현재 보고있는 멤버가 보낸 메시지만 카운트 (familyMessages는 공유 데이터)
+function countOwnSentMessages(){
+  if(!S.familyMessages)return 0;
+  const mid=_globalDataOwner||viewingChildId||currentUser;
+  return S.familyMessages.filter(m=>m.from===mid).length;
 }
 
 function hasMidnightStudy(){
@@ -10018,6 +10050,7 @@ function renderHomeGrid(){
     const _gaugeText=st.cls==='done'||st.cls==='exhausted'?'rgba(16,185,129,.7)':st.cls==='partial'?'rgba(245,158,11,.7)':'rgba(99,102,241,.7)';
     return `<div class="act-card${cls}" data-actid="${a.id}" style="${st.exhausted?'cursor:default;':''}--lp-gauge-color:${_gaugeColor};--lp-gauge-text:${_gaugeText}">
       <div class="lp-gauge"><div class="lp-gauge-fill"></div><div class="lp-gauge-hint">꾹 누르기</div></div>
+      ${a.todayTask?'<div style="position:absolute;top:4px;right:6px;font-size:10px;z-index:4;opacity:.7">📌</div>':''}
       ${stickerHTML}
       <div class="e">${a.emoji}</div>
       <div class="n">${a.name}</div>
@@ -10040,8 +10073,8 @@ function renderHomeGrid(){
     const startLP=(e)=>{
       if(isStickerArea(e))return;didLongPress=false;
       // 게이지 애니메이션 시작
-      if(gauge&&gaugeFill){gaugeFill.style.transition='none';gaugeFill.style.width='0';gauge.offsetHeight;gauge.classList.add('active');gaugeFill.style.transition='width 1s linear';gaugeFill.style.width='100%';}
-      lpTimer=setTimeout(()=>{didLongPress=true;cancelGauge();if(navigator.vibrate)navigator.vibrate(30);showLongPressChoice(actId,card);},1000);
+      if(gauge&&gaugeFill){gaugeFill.style.transition='none';gaugeFill.style.width='0';gauge.offsetHeight;gauge.classList.add('active');gaugeFill.style.transition='width .4s linear';gaugeFill.style.width='100%';}
+      lpTimer=setTimeout(()=>{didLongPress=true;cancelGauge();if(navigator.vibrate)navigator.vibrate(30);showLongPressChoice(actId,card);},400);
     };
     const cancelGauge=()=>{if(gauge){gauge.classList.remove('active');if(gaugeFill){gaugeFill.style.transition='none';gaugeFill.style.width='0';}}};
     const cancelLP=()=>{clearTimeout(lpTimer);cancelGauge();};
@@ -10091,7 +10124,11 @@ function renderLogList(){
     const _isDone=exhausted||(max===0&&done>0);
     const _stampHTML=_isDone?'<div class="log-done-stamp"><svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="29" stroke="#10B981" stroke-width="3.5" stroke-dasharray="5 2.5" opacity=".9"/><circle cx="32" cy="32" r="21" stroke="#10B981" stroke-width="2.5" opacity=".65"/><text x="32" y="30" text-anchor="middle" font-size="14" font-weight="900" fill="#10B981" font-family="Noto Sans KR,sans-serif">완료</text><text x="32" y="43" text-anchor="middle" font-size="9" font-weight="800" fill="#10B981" font-family="sans-serif" letter-spacing="2" opacity=".7">DONE</text></svg></div>':'';
     const _lgColor=exhausted?'rgba(16,185,129,.12)':cls.includes('partial')?'rgba(245,158,11,.12)':'rgba(99,102,241,.12)';
-    return `<div class="log-item${cls}" data-actid="${a.id}" style="${exhausted?'cursor:default;':''}position:relative;overflow:visible;--lp-gauge-color:${_lgColor}">
+    const _isCaregiver=isCaregiverUser();
+    const _isTodayTask=!!a.todayTask;
+    const _todayToggleHTML=_isCaregiver?`<div class="today-task-toggle${_isTodayTask?' on':''}" data-toggle-actid="${a.id}" title="오늘할일 ${_isTodayTask?'해제':'지정'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">${_isTodayTask?'<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>':'<circle cx="12" cy="12" r="10"/>'}</svg></div>`:'';
+    return `<div class="log-item${cls}${_isCaregiver?' has-today-toggle':''}" data-actid="${a.id}" style="${exhausted?'cursor:default;':''}position:relative;overflow:visible;--lp-gauge-color:${_lgColor}">
+      ${_todayToggleHTML}
       <div class="lp-gauge" style="border-radius:0"><div class="lp-gauge-fill"></div></div>
       <div class="log-ico" style="${pct>0?'--prog:'+pct+'%;':''}">${a.emoji}${pct>0&&pct<100?'<div class="log-prog-ring"></div>':''}</div>
       <div class="log-inf">
@@ -10123,8 +10160,8 @@ function renderLogList(){
     const isStickerArea=(e)=>e.target&&e.target.closest('[data-stkid]');
     const startLP=(e)=>{
       if(isUndoBtn(e)||isStickerArea(e))return;didLongPress=false;
-      if(gauge&&gaugeFill){gaugeFill.style.transition='none';gaugeFill.style.width='0';gauge.offsetHeight;gauge.classList.add('active');gaugeFill.style.transition='width 1s linear';gaugeFill.style.width='100%';}
-      lpTimer=setTimeout(()=>{didLongPress=true;cancelGauge();if(navigator.vibrate)navigator.vibrate(30);showLongPressChoice(actId,item);},1000);
+      if(gauge&&gaugeFill){gaugeFill.style.transition='none';gaugeFill.style.width='0';gauge.offsetHeight;gauge.classList.add('active');gaugeFill.style.transition='width .4s linear';gaugeFill.style.width='100%';}
+      lpTimer=setTimeout(()=>{didLongPress=true;cancelGauge();if(navigator.vibrate)navigator.vibrate(30);showLongPressChoice(actId,item);},400);
     };
     const cancelGauge=()=>{if(gauge){gauge.classList.remove('active');if(gaugeFill){gaugeFill.style.transition='none';gaugeFill.style.width='0';}}};
     const cancelLP=()=>{clearTimeout(lpTimer);cancelGauge();};
@@ -10137,10 +10174,20 @@ function renderLogList(){
     item.addEventListener('mouseup',cancelLP);
     // click only fires on genuine taps (NOT after scroll)
     item.addEventListener('click',(e)=>{
+      // 오늘할일 토글 클릭
+      if(e.target.closest('[data-toggle-actid]')){e.stopPropagation();return;}
       if(e.target.closest('[data-stkid]'))return;
       if(isUndoBtn(e))return; // let undo button's own onclick handle it
       if(didLongPress){didLongPress=false;e.preventDefault();return;}
       if(!exhausted&&a)doAct(actId);
+    });
+  });
+  // 오늘할일 토글 핸들러 (부모 전용, v0401)
+  el.querySelectorAll('.today-task-toggle[data-toggle-actid]').forEach(tog=>{
+    tog.addEventListener('click',(e)=>{
+      e.stopPropagation();
+      const aid=tog.dataset.toggleActid;
+      toggleTodayTask(aid);
     });
   });
   // Attach sticker/bubble tap handlers
@@ -13449,6 +13496,25 @@ function togActDone(id){
     toast(`✅ "${a.name}" 오늘 완료 처리됨 (마일리지 변동 없음)`);
   }
 }
+// 오늘할일 토글 (부모 전용, v0401)
+function toggleTodayTask(actId){
+  if(!isCaregiverUser())return;
+  const a=S.acts.find(x=>x.id===actId);
+  if(!a)return;
+  a.todayTask=!a.todayTask;
+  // memberData에도 반영
+  const vid=_globalDataOwner||viewingChildId||currentUser;
+  if(S.memberData&&S.memberData[vid]){
+    const ma=S.memberData[vid].acts?.find(x=>x.id===actId);
+    if(ma)ma.todayTask=a.todayTask;
+  }
+  save();
+  renderLogList();
+  renderHomeGrid();
+  toast(a.todayTask?`📌 "${a.name}" 오늘할일로 지정했어요`:`📌 "${a.name}" 오늘할일에서 해제했어요`);
+}
+window.toggleTodayTask=toggleTodayTask;
+
 function togAct(id){const _ms=_getAdmMemberData();const _acts=(_ms&&_ms.acts)?_ms.acts:S.acts;const a=_acts.find(x=>x.id===id);if(a){a.active=!a.active;if(_globalDataOwner===(_admViewChildId||getViewedMemberId())){const sa=S.acts.find(x=>x.id===id);if(sa)sa.active=a.active;}save();renderAdmActList();renderLogList();renderHomeGrid();}}
 function togActHome(id){const _ms=_getAdmMemberData();const _acts=(_ms&&_ms.acts)?_ms.acts:S.acts;const a=_acts.find(x=>x.id===id);if(a){a.showHome=!a.showHome;if(_globalDataOwner===(_admViewChildId||getViewedMemberId())){const sa=S.acts.find(x=>x.id===id);if(sa)sa.showHome=a.showHome;}save();renderAdmActList();renderHomeGrid();toast(a.showHome?`🏠 "${a.name}" 홈에 표시됩니다`:`➖ "${a.name}" 홈에서 제거됩니다`);}}
 function delAct(id){if(!confirm('이 활동을 삭제할까요?'))return;const curAdm=_admViewChildId||getViewedMemberId();const _ms=getMemberState(curAdm);if(_ms.acts)_ms.acts=_ms.acts.filter(a=>a.id!==id);if(_ms.actDone&&_ms.actDone[id])delete _ms.actDone[id];if(_globalDataOwner===curAdm){S.acts=S.acts.filter(a=>a.id!==id);if(S.actDone&&S.actDone[id])delete S.actDone[id];}save();renderAll();toast('🗑️ 삭제됐어요');}
@@ -14753,6 +14819,15 @@ window.pfMenuAction=pfMenuAction;
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
   {
+    ver:'1.6.9', date:'2026-04-01',
+    items:[
+      {type:'improve',text:'꾹 누르기 게이지 시간 1초→0.4초로 단축 (더 빠른 반응)'},
+      {type:'improve',text:'뱃지 획득 난이도 전체 상향 (공부, 꾸준함, 도전, 생활습관 등)'},
+      {type:'fix',text:'부모 행위(기분표현, 메시지)가 자녀 뱃지로 인정되던 버그 수정'},
+      {type:'new',text:'부모 전용: 활동기록 탭에서 오늘할일 체크 기능 (📌 표시)'},
+    ]
+  },
+  {
     ver:'1.6.8', date:'2026-04-01',
     items:[
       {type:'new',text:'초대 가입 시 소셜 로그인(Google/카카오/네이버) 지원'},
@@ -15050,10 +15125,22 @@ function selectMood(mood){
   if(currentUser){
     if(!S.moods)S.moods={};
     S.moods[currentUser]={mood:mood,date:new Date().toISOString().slice(0,10),ts:Date.now()};
-    // moodLog history
-    if(!S.moodLog)S.moodLog=[];
-    S.moodLog.unshift({mood:mood,emoji:m.emoji,label:m.label,ts:Date.now(),user:currentUser});
-    if(S.moodLog.length>500)S.moodLog=S.moodLog.slice(0,500);
+    // moodLog history — 부모가 자녀를 보고 있을 때에도 자신의 memberData에 기록 (v0401 bugfix)
+    const moodEntry={mood:mood,emoji:m.emoji,label:m.label,ts:Date.now(),user:currentUser};
+    const isParentViewingChild=isCaregiverUser()&&_globalDataOwner&&_globalDataOwner!==currentUser;
+    if(isParentViewingChild&&S.memberData){
+      // 부모 자신의 memberData.moodLog에 기록 (현재 S.moodLog는 자녀의 것)
+      if(!S.memberData[currentUser])getMemberState(currentUser);
+      const parentMs=S.memberData[currentUser];
+      if(!parentMs.moodLog)parentMs.moodLog=[];
+      parentMs.moodLog.unshift(moodEntry);
+      if(parentMs.moodLog.length>500)parentMs.moodLog=parentMs.moodLog.slice(0,500);
+    }else{
+      // 본인 데이터가 로드된 상태 — 글로벌 S.moodLog에 기록
+      if(!S.moodLog)S.moodLog=[];
+      S.moodLog.unshift(moodEntry);
+      if(S.moodLog.length>500)S.moodLog=S.moodLog.slice(0,500);
+    }
     // moodNotify triggers Cloud Function to push to other users
     S.moodNotify={user:currentUser,mood:mood,emoji:m.emoji,label:m.label,ts:Date.now()};
     save();
