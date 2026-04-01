@@ -5,10 +5,15 @@ const webpush = require("web-push");
 admin.initializeApp();
 const db = admin.firestore();
 
+// VAPID Private Key는 Firebase Functions 환경변수에서 로드
+// 설정: firebase functions:secrets:set VAPID_PRIVATE_KEY
+const { defineSecret } = require("firebase-functions/params");
+const vapidPrivateKey = defineSecret("VAPID_PRIVATE_KEY");
+
 webpush.setVapidDetails(
   "mailto:nonmarking@gmail.com",
   "BMqfqNW-_vInMwqdq3H01AKHBepukX3-Lk1RX8ZkZ97jlixIOS7hIZDRJ0gwNy00hARwc2XilfOHnx9WBlcNJfI",
-  "N6--Fo1_AniJRygwzF57hbNaapW26ntk30PnT1LOK1I"
+  vapidPrivateKey.value()
 );
 
 const NAMES = { taemin: "태민이", dad: "아빠", mom: "엄마" };
