@@ -435,16 +435,14 @@ body.dark .theme-pick.active .theme-pick-radio{border-color:#818CF8;background:#
 .streak-popup{background:var(--card);border-radius:24px;padding:28px 24px;width:min(320px,calc(100vw - 48px));box-shadow:var(--shadow-lg);text-align:center;transform:scale(.9);transition:transform .2s}
 .streak-popup-overlay.show .streak-popup{transform:scale(1)}
 /* ── 마일리 인사말 (hero 안) ── */
-.mily-greeting-hero{display:flex;align-items:center;gap:10px;margin-top:10px;background:rgba(255,255,255,.12);border-radius:14px;padding:10px 12px 10px 6px;backdrop-filter:blur(4px);transition:opacity .3s}
-.mily-char{width:48px;height:48px;flex-shrink:0}
+.mily-greeting-hero{display:flex;align-items:center;gap:8px;margin-top:10px;background:rgba(255,255,255,.08);border-radius:24px;padding:8px 14px 8px 6px;transition:opacity .3s}
+.mily-char{width:44px;height:44px;flex-shrink:0}
 .mily-char svg{width:100%;height:100%}
-.mily-msg-hero{flex:1;min-width:0;background:rgba(255,255,255,.15);border-radius:12px;padding:8px 11px;position:relative;font-size:13px;font-weight:600;color:#fff;line-height:1.45}
-.mily-msg-hero::before{content:'';position:absolute;left:-6px;top:50%;transform:translateY(-50%);border:6px solid transparent;border-right-color:rgba(255,255,255,.15)}
-.mily-msg-hero .mily-hint{font-size:11px;color:rgba(255,255,255,.65);margin-top:2px;font-weight:500}
-.mily-greeting-hero.celebrate .mily-msg-hero{background:rgba(255,255,255,.22)}
-.mily-greeting-hero.celebrate .mily-msg-hero::before{border-right-color:rgba(255,255,255,.22)}
-@keyframes milySlideIn{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:translateY(0)}}
-.mily-greeting-hero{animation:milySlideIn .4s ease}
+.mily-msg-hero{flex:1;min-width:0;font-size:13px;font-weight:600;color:rgba(255,255,255,.92);line-height:1.5}
+.mily-msg-hero .mily-hint{font-size:11px;color:rgba(255,255,255,.55);margin-top:1px;font-weight:500;display:flex;align-items:center;gap:4px}
+.mily-msg-hero .mily-hint svg{width:11px;height:11px;flex-shrink:0}
+@keyframes milySlideIn{0%{opacity:0;transform:translateY(6px)}100%{opacity:1;transform:translateY(0)}}
+.mily-greeting-hero{animation:milySlideIn .35s ease}
 /* 마일리 캐릭터 애니메이션 */
 @keyframes milyBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
 @keyframes milyWaveArm{0%,70%,100%{transform:rotate(0deg)}10%,30%,50%{transform:rotate(-35deg)}20%,40%,60%{transform:rotate(-15deg)}}
@@ -8622,7 +8620,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0402c';
+const _APP_VERSION = 'v0402d';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -10402,114 +10400,94 @@ function renderMilyGreeting(){
   const msgEl=document.getElementById('mily-msg');
   if(!el||!charEl||!msgEl)return;
 
+  // SVG 아이콘
+  const _ic={
+    sun:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>',
+    cloud:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg>',
+    moon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>',
+    fire:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 01-7 7 7 7 0 01-7-7c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg>',
+    gift:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg>',
+    trophy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9H4.5a2.5 2.5 0 010-5H6"/><path d="M18 9h1.5a2.5 2.5 0 000-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20 17 22"/><path d="M18 2H6v7a6 6 0 0012 0V2z"/></svg>',
+    star:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+    heart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>',
+    zap:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
+    target:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
+    check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+    rocket:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 00-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 012-3.95A12.88 12.88 0 0122 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 01-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>',
+    clap:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 6V2"/><path d="M8.5 7.5L5.75 4.75"/><path d="M15.5 7.5l2.75-2.75"/><path d="M5 12H2"/><path d="M22 12h-3"/><path d="M7 16l-3 3"/><path d="M17 16l3 3"/><circle cx="12" cy="14" r="4"/></svg>',
+  };
+
   const{done,total,remaining}=getTodayMissionProgress();
   const streak=getDisplayStreak();
   const h=new Date().getHours();
   const allDone=remaining===0&&total>0;
 
-  // 마지막 접속일 체크 (오래 안 왔는지)
+  // 마지막 접속일 체크
   const lastLog=S.log&&S.log.length>0?S.log[S.log.length-1]:null;
   const lastDate=lastLog?new Date(lastLog.ts):null;
   const daysSinceLastVisit=lastDate?Math.floor((Date.now()-lastDate.getTime())/(1000*60*60*24)):0;
 
-  // 상황 판단
-  let state,charCfg,msg,hint;
+  let state,charCfg,msg,hintIcon,hint;
 
-  if(total===0){
-    // 할일이 없으면 숨김
-    el.style.display='none';return;
-  }
+  if(total===0){el.style.display='none';return;}
 
-  const streakBonusEnabled=S.settings?.streakBonus!==false;
   const bonusPts=S.settings?.streakBonusPts||100;
 
   if(allDone&&streak>0&&streak%7===0){
-    // 7일 보너스 달성!
     state='gift';
     charCfg={face:{eyeStyle:'surprised',mouthStyle:'o'},bodyAnim:'tada',armStyle:'rest',effects:['sparkle']};
-    msg=`🎁 ${streak}일 연속 달성! +${bonusPts}M 보너스!`;
-    hint='대단해! 마일리도 깜짝 놀랐어!';
+    msg=`${streak}일 연속 달성! +${bonusPts}M 보너스!`;
+    hintIcon=_ic.gift;hint='마일리도 깜짝 놀랐어!';
   }else if(allDone){
-    // 올클리어
     state='celebrate';
-    const msgs=[
-      '오늘 전부 해냈어! 정말 대단해! 🎊','완벽한 하루! 마일리가 자랑스러워! 🌟',
-      '올클리어! 너무 멋있어! ✨','오늘의 영웅! 다 해냈구나! 🏆'
-    ];
+    const msgs=['오늘 전부 해냈어! 정말 대단해!','완벽한 하루! 마일리가 자랑스러워!','올클리어! 너무 멋있어!','오늘의 영웅! 다 해냈구나!'];
     charCfg={face:{eyeStyle:'happy',mouthStyle:'open',cheekGlow:true},bodyAnim:'jump',armStyle:'up',effects:['stars']};
     msg=msgs[Math.floor(Date.now()/60000)%msgs.length];
-    hint=streak>1?`${streak}일 연속 달성 중! 내일도 이어가자!`:'내일도 이어가면 연속기록 시작!';
+    hintIcon=_ic.trophy;hint=streak>1?`${streak}일 연속 달성 중!`:'내일도 이어가자!';
   }else if(daysSinceLastVisit>=3){
-    // 오래 안 왔을 때
     state='miss';
     charCfg={face:{eyeStyle:'sleepy',mouthStyle:'sleepy'},bodyAnim:'sleepy',armStyle:'rest',effects:['zzz']};
-    msg=`오랜만이야! 보고 싶었어~ 🥺`;
-    hint='오늘부터 다시 시작해볼까?';
+    msg='오랜만이야! 보고 싶었어~';
+    hintIcon=_ic.heart;hint='오늘부터 다시 시작해볼까?';
   }else if(streak===0&&done===0){
-    // 연속 끊기고 아직 시작 안 함
     state='fighting';
     charCfg={face:{eyeStyle:'normal',mouthStyle:'grin',cheekGlow:true},bodyAnim:'tada',armStyle:'cheer',effects:['sparkle']};
-    msg='괜찮아! 오늘부터 새로 시작! 💪';
-    hint='1일차부터 다시 파이팅!';
+    msg='괜찮아! 오늘부터 새로 시작!';
+    hintIcon=_ic.zap;hint='1일차부터 다시 파이팅!';
   }else if(done===0){
-    // 시작 전 — 시간대별 인사
     state='hello';
     charCfg={face:{eyeStyle:'normal',mouthStyle:'open',cheekGlow:true},bodyAnim:'nod',armStyle:'wave'};
-    if(h<12){msg='좋은 아침! ☀️ 오늘도 화이팅하자!';hint=`오늘 할일 ${total}개 준비됐어!`;}
-    else if(h<18){msg='좋은 오후! 🌤️ 할일 시작해볼까?';hint=`${total}개 해야 할 일이 기다리고 있어!`;}
-    else{msg='좋은 저녁! 🌙 아직 할일이 남았어~';hint=`${total}개 중에 아직 하나도 안 했어!`;}
+    if(h<12){msg='좋은 아침! 오늘도 화이팅하자!';hintIcon=_ic.sun;}
+    else if(h<18){msg='좋은 오후! 할일 시작해볼까?';hintIcon=_ic.cloud;}
+    else{msg='좋은 저녁! 아직 할일이 남았어~';hintIcon=_ic.moon;}
+    hint=`오늘 할일 ${total}개`;
   }else if(remaining===1){
-    // 마지막 1개!
     state='almost';
     charCfg={face:{eyeStyle:'happy',mouthStyle:'grin',cheekGlow:true},bodyAnim:'bounce',armStyle:'cheer',effects:['sparkle']};
-    msg='마지막 1개만 더! 거의 다 왔어! 🔥';
-    hint=`${streak+1}일 연속 달성까지 한 걸음!`;
+    msg='마지막 1개만 더! 거의 다 왔어!';
+    hintIcon=_ic.fire;hint=`${streak+1}일 연속까지 한 걸음!`;
   }else if(remaining<=Math.ceil(total/2)){
-    // 절반 이상 완료
     state='cheer';
-    const msgs=[
-      `벌써 ${done}개나 했어! 잘하고 있어! 👏`,
-      `${done}개 완료! ${remaining}개만 더! 🙌`,
-      `대단해! 반 넘었어! 이 기세로! 💫`
-    ];
+    const msgs=[`벌써 ${done}개나 했어! 잘하고 있어!`,`${done}개 완료! ${remaining}개만 더!`,`대단해! 반 넘었어! 이 기세로!`];
     charCfg={face:{eyeStyle:'happy',mouthStyle:'grin',cheekGlow:true},bodyAnim:'bounce',armStyle:'cheer',effects:['sparkle']};
     msg=msgs[done%msgs.length];
-    hint=`오늘 할일 ${done}/${total} 완료`;
+    hintIcon=_ic.target;hint=`${done}/${total} 완료`;
   }else{
-    // 시작은 했지만 아직 초반
     state='encourage';
-    const msgs=[
-      `좋아! ${done}개 했어! 계속 가자! 🚀`,
-      `잘 시작했어! 계속 하면 돼! 👍`,
-      `${done}개 완료! 하나씩 하다보면 금방이야! ⭐`
-    ];
+    const msgs=[`좋아! ${done}개 했어! 계속 가자!`,`잘 시작했어! 계속 하면 돼!`,`${done}개 완료! 하나씩 하다보면 금방이야!`];
     charCfg={face:{eyeStyle:'normal',mouthStyle:'smile',cheekGlow:true},bodyAnim:'bounce',armStyle:'wave'};
     msg=msgs[done%msgs.length];
-    hint=`${remaining}개 남았어, 할 수 있어!`;
+    hintIcon=_ic.star;hint=`${remaining}개 남았어, 할 수 있어!`;
   }
 
-  // 상태 변경 시에만 DOM 업데이트 (불필요한 리렌더 방지)
   const stateKey=state+'-'+done+'-'+total;
   if(stateKey===_milyLastState)return;
   _milyLastState=stateKey;
 
   el.style.display='flex';
-  el.className='mily-greeting-hero'+(state==='celebrate'||state==='gift'?' celebrate':'');
+  el.className='mily-greeting-hero';
   charEl.innerHTML=_milySVG(charCfg);
-
-  // 진행 도트 생성
-  let dotsHtml='';
-  if(total>0){
-    const {acts}=getTodayMissionProgress();
-    let dots='';
-    for(let i=0;i<total;i++){
-      const a=acts[i];
-      const isDone=a.maxDay>0?countDone(a)>=a.maxDay:countDone(a)>0;
-      dots+=`<div class="mission-dot ${isDone?'done':''}"></div>`;
-    }
-    dotsHtml=`<div class="mission-dots" style="margin-top:6px">${dots}</div>`;
-  }
-  msgEl.innerHTML=`${msg}${hint?`<div class="mily-hint">${hint}</div>`:''}${dotsHtml}`;
+  msgEl.innerHTML=`${msg}${hint?`<div class="mily-hint">${hintIcon||''}${hint}</div>`:''}`;
 }
 
 // ── streak pill 클릭 → 설명 팝업 ──────────────────────────
@@ -15402,6 +15380,14 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {
+    ver:'1.8.3 (v0402d)', date:'2026-04-02',
+    items:[
+      {type:'fix',text:'마일리 인사말 디자인 개선 — 박스 제거, 깔끔한 레이아웃'},
+      {type:'fix',text:'이모지를 SVG 아이콘으로 전면 교체'},
+      {type:'fix',text:'오늘 할일 진행 게이지바 제거'},
+    ]
+  },
   {
     ver:'1.8.2 (v0402c)', date:'2026-04-02',
     items:[
