@@ -8465,8 +8465,8 @@ const BADGES = [
   {id:'msg_send_20',emoji:'📮',name:'소통의 달인',desc:'30번이나 메시지를 보냈어!',category:'감정',hidden:false,bonus:15,label:'×30',icon:'chat',check:S=>countOwnSentMessages()>=30},
 
   // 💰 마일리지 (NEW category, 난이도 상향 v0401)
-  {id:'save_500',emoji:'🐷',name:'저금통',desc:'500 마일리지를 모아놨어! 알뜰해!',category:'마일리지',hidden:false,bonus:10,label:'500',icon:'coin',check:S=>(S.pts||0)>=500},
-  {id:'save_2000',emoji:'🏦',name:'마일리지 부자',desc:'2000 마일리지 보유! 대단해!',category:'마일리지',hidden:false,bonus:20,label:'2K',icon:'bag',check:S=>(S.pts||0)>=2000},
+  {id:'save_500',emoji:'🐷',name:'저금통',desc:'누적 500 마일리지 달성!',category:'마일리지',hidden:false,bonus:10,label:'500',icon:'coin',check:S=>getTotalEarned()>=500},
+  {id:'save_2000',emoji:'🏦',name:'마일리지 부자',desc:'누적 2000 마일리지 달성!',category:'마일리지',hidden:false,bonus:20,label:'2K',icon:'bag',check:S=>getTotalEarned()>=2000},
   {id:'badge_10',emoji:'🎖️',name:'뱃지 수집가',desc:'뱃지를 15개나 모았어!',category:'마일리지',hidden:false,bonus:15,label:'×15',icon:'ribbon',check:S=>Object.keys(S.badges||{}).length>=15},
   {id:'badge_25',emoji:'🏅',name:'뱃지 마스터',desc:'뱃지를 30개나! 거의 다 모았어!',category:'마일리지',hidden:false,bonus:25,label:'×30',icon:'medal',check:S=>Object.keys(S.badges||{}).length>=30},
 
@@ -8479,7 +8479,7 @@ const BADGES = [
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
-if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401zd';}}
+if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401ze';}}
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
@@ -10071,18 +10071,17 @@ function renderHomeGrid(){
     const isStickerArea=(e)=>e.target&&e.target.closest('[data-stkid]');
     const startLP=(e)=>{
       if(isStickerArea(e))return;didLongPress=false;
-      // 텍스트 선택/컨텍스트 메뉴 방지 (v0401 fix)
-      e.preventDefault();
       // 게이지 애니메이션 시작
       if(gauge&&gaugeFill){gaugeFill.style.transition='none';gaugeFill.style.width='0';gauge.offsetHeight;gauge.classList.add('active');gaugeFill.style.transition='width .4s linear';gaugeFill.style.width='100%';}
       lpTimer=setTimeout(()=>{didLongPress=true;cancelGauge();if(navigator.vibrate)navigator.vibrate(30);showLongPressChoice(actId,card);},400);
     };
     const cancelGauge=()=>{if(gauge){gauge.classList.remove('active');if(gaugeFill){gaugeFill.style.transition='none';gaugeFill.style.width='0';}}};
     const cancelLP=()=>{clearTimeout(lpTimer);cancelGauge();};
-    card.addEventListener('touchstart',startLP,{passive:false});
+    card.addEventListener('touchstart',startLP,{passive:true});
     card.addEventListener('touchmove',cancelLP,{passive:true});
     card.addEventListener('touchend',cancelLP);
     card.addEventListener('touchcancel',cancelLP);
+    card.addEventListener('contextmenu',(e)=>e.preventDefault()); // 꾹 누르기 컨텍스트 메뉴 방지
     card.addEventListener('mousedown',startLP);
     card.addEventListener('mouseleave',cancelLP);
     card.addEventListener('mouseup',cancelLP);
@@ -10161,16 +10160,16 @@ function renderLogList(){
     const isStickerArea=(e)=>e.target&&e.target.closest('[data-stkid]');
     const startLP=(e)=>{
       if(isUndoBtn(e)||isStickerArea(e))return;didLongPress=false;
-      e.preventDefault(); // 텍스트 선택/컨텍스트 메뉴 방지
       if(gauge&&gaugeFill){gaugeFill.style.transition='none';gaugeFill.style.width='0';gauge.offsetHeight;gauge.classList.add('active');gaugeFill.style.transition='width .4s linear';gaugeFill.style.width='100%';}
       lpTimer=setTimeout(()=>{didLongPress=true;cancelGauge();if(navigator.vibrate)navigator.vibrate(30);showLongPressChoice(actId,item);},400);
     };
     const cancelGauge=()=>{if(gauge){gauge.classList.remove('active');if(gaugeFill){gaugeFill.style.transition='none';gaugeFill.style.width='0';}}};
     const cancelLP=()=>{clearTimeout(lpTimer);cancelGauge();};
-    item.addEventListener('touchstart',startLP,{passive:false});
+    item.addEventListener('touchstart',startLP,{passive:true});
     item.addEventListener('touchmove',cancelLP,{passive:true});
     item.addEventListener('touchend',cancelLP);
     item.addEventListener('touchcancel',cancelLP);
+    item.addEventListener('contextmenu',(e)=>e.preventDefault()); // 꾹 누르기 컨텍스트 메뉴 방지
     item.addEventListener('mousedown',startLP);
     item.addEventListener('mouseleave',cancelLP);
     item.addEventListener('mouseup',cancelLP);
@@ -10689,14 +10688,14 @@ function attachRwdLongPress(){
     card.addEventListener('touchstart',(e)=>{
       didLongPress=false;didMove=false;
       startY=e.touches[0].clientY;
-      e.preventDefault(); // 텍스트 선택/컨텍스트 메뉴 방지
       lpTimer=setTimeout(()=>{didLongPress=true;showRwdGoalChoice(rwdId,card);},500);
-    },{passive:false});
+    },{passive:true});
     card.addEventListener('touchmove',(e)=>{
       if(Math.abs(e.touches[0].clientY-startY)>8){didMove=true;clearTimeout(lpTimer);}
     },{passive:true});
     card.addEventListener('touchend',()=>{clearTimeout(lpTimer);});
     card.addEventListener('touchcancel',()=>{clearTimeout(lpTimer);});
+    card.addEventListener('contextmenu',(e)=>e.preventDefault()); // 꾹 누르기 컨텍스트 메뉴 방지
     card.addEventListener('mousedown',(e)=>{didLongPress=false;lpTimer=setTimeout(()=>{didLongPress=true;showRwdGoalChoice(rwdId,card);},500);});
     card.addEventListener('mouseleave',()=>{clearTimeout(lpTimer);});
     card.addEventListener('mouseup',()=>{clearTimeout(lpTimer);});
@@ -14830,7 +14829,8 @@ const APP_CHANGELOG=[
       {type:'improve',text:'뱃지 획득 난이도 전체 상향 (공부, 꾸준함, 도전, 생활습관 등)'},
       {type:'fix',text:'부모 행위(기분표현, 메시지)가 자녀 뱃지로 인정되던 버그 수정'},
       {type:'new',text:'부모 전용: 활동기록 탭에서 홈표시 토글 (관리자 홈표시와 동일)'},
-      {type:'fix',text:'꾹 누르기 시 브라우저 텍스트 선택/컨텍스트 메뉴 방지'},
+      {type:'fix',text:'꾹 누르기 시 브라우저 컨텍스트 메뉴 방지 (스크롤 정상 동작)'},
+      {type:'fix',text:'마일리지 뱃지(저금통, 부자)를 누적 마일리지 기준으로 변경'},
     ]
   },
   {
