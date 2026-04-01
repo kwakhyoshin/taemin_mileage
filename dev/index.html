@@ -8127,6 +8127,7 @@ function checkAuth() {
 
   if (savedUser && cachedUsers[savedUser]) {
     currentUser = savedUser;
+    _syncPushDeviceUser(); // 앱 시작 시 푸시 디바이스 유저 갱신
     // 양육자(caregiver)는 postLoginInit에서 자녀 데이터를 로드하므로 여기서 parent sync 생략
     // (parent의 memberData에 마지막 자녀의 stale 데이터가 오염되는 것을 방지)
     if(!(getFamilyMode()==='independent'&&isCaregiverUser())){
@@ -17499,6 +17500,18 @@ async function unsubscribePush(){
   }
 }
 
+// 유저 전환 시 이 기기의 pushDevice user 필드를 현재 유저로 갱신
+function _syncPushDeviceUser(){
+  if(!pushSubscription || !currentUser) return;
+  const deviceId = localStorage.getItem(_LS_PREFIX+'device_id');
+  if(!deviceId || !S.pushDevices || !S.pushDevices[deviceId]) return;
+  if(S.pushDevices[deviceId].user === currentUser) return; // 이미 맞음
+  console.log('[Push] 디바이스 유저 갱신:', S.pushDevices[deviceId].user, '→', currentUser);
+  S.pushDevices[deviceId].user = currentUser;
+  S.pushDevices[deviceId].updatedAt = Date.now();
+  save();
+}
+
 function updatePushUI(){
   const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
   const isStandalone=window.navigator.standalone||window.matchMedia('(display-mode:standalone)').matches;
@@ -17604,6 +17617,7 @@ function devSwitchUser(userId){
   if(userId===currentUser)return;
   currentUser=userId;
   localStorage.setItem(_LS_PREFIX+'current_user',userId);
+  _syncPushDeviceUser(); // 푸시 디바이스 유저 갱신
   postLoginInit();
   applyUserProfile();
   renderAll();
