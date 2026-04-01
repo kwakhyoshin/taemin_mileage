@@ -1711,7 +1711,7 @@ account: {
 
 ---
 
-### 2026-04-01 세션 12차 — 푸시 알림 중복 수정 + 보안 강화 + 알림 안내 UX
+### 2026-04-01 세션 12차 — 푸시 알림 중복 수정 + 보안 강화 + 알림 안내 UX + 보상 알림 대상 필터링 + 스크롤 잠금 수정
 
 **적용 범위: 개발기 + 운영기 (v0401d)**
 
@@ -1769,6 +1769,34 @@ account: {
 | #78 | fix: 아이폰 PWA 메시지 뱃지 미표시 수정 | ✅ 운영 적용 |
 | #79 | feat: 알림 꺼짐 안내 기능 3종 | ✅ 운영 적용 |
 | #80 | fix: 온보딩 후 알림 안내 자동 전환 + 배너 safe-area | ✅ 운영 적용 |
+| #81 | release: v0401d 운영 반영 — 알림 안내 UX + 아이폰 뱃지 수정 | ✅ 운영 적용 |
+| #82 | fix: 보상 요청 알림이 다른 자녀에게도 가는 버그 수정 (긴급) | ✅ 운영 적용 |
+| #83 | fix: 메시지 연속 수신 시 스크롤 잠금 해제 안 되는 버그 수정 | ✅ 운영 적용 |
+| #84 | fix: 보상 요청 알림 — 자녀 admin도 제외 (양육자에게만 발송) | ✅ 운영 적용 |
+
+**6. 보상 사용 요청 알림 대상 필터링 수정 (긴급)**
+- **증상**: 보상 사용 요청 시 다른 자녀에게도 승인 요청 메시지와 푸시 알림이 전달됨
+- **1차 수정 (PR #82)**: `useReward()`의 adminMembers 필터가 `m.isAdmin || m.role !== 'child'` — `role`이 undefined인 자녀도 통과. `m.isAdmin`만으로 변경
+- **2차 수정 (PR #84)**: 자녀에게도 `isAdmin: true`가 설정된 경우가 있어 여전히 알림 수신. `type === 'child' || role === 'child'`인 멤버를 명시적으로 제외하도록 변경
+- **최종 코드**:
+  ```javascript
+  const adminMembers = [];
+  if(S.familyMeta?.members){
+    for(const [mid,m] of Object.entries(S.familyMeta.members)){
+      const isChild = m.type === 'child' || m.role === 'child';
+      if(m.isAdmin && !isChild && mid !== currentUser){
+        adminMembers.push(mid);
+      }
+    }
+  }
+  ```
+- **교훈**: `familyMeta.members`의 `isAdmin`, `type`, `role` 필드가 독립적으로 설정되므로 `isAdmin`만으로 양육자를 판별하면 안 됨. 반드시 `type`/`role`이 'child'가 아닌지 추가 확인 필요
+
+**7. 메시지 연속 수신 시 스크롤 잠금 버그 수정**
+- **증상**: 메시지 팝업이 떠 있는 상태에서 새 메시지가 또 수신되면, 팝업 닫은 후에도 탭 내 스크롤이 불가능
+- **원인**: `showReceivedMsg()`가 호출될 때마다 `lockBodyScroll()` 실행 → 카운터 2 이상 증가, `closeRecvMsg()`는 1만 감소
+- **수정**: 팝업이 이미 열려 있으면(`recv-msg-bg.style.display === 'block'`) `lockBodyScroll()` 호출 스킵
+- **PR**: #83
 
 #### 트러블슈팅 기록
 
@@ -1784,3 +1812,25 @@ account: {
 - 원인: 아이폰에서 부모로 최초 로그인 → 유저 전환 시 `pushDevices[deviceId].user`가 부모로 유지
 - Cloud Functions `sendToDevices()`에서 `targetUsers.includes(device.user)` 필터링 → 자녀 대상 알림 미발송
 - 해결: `_syncPushDeviceUser()` 자동 호출 (devSwitchUser, checkAuth)
+
+**보상 요청 알림 다른 자녀 수신 (2회 수정)**:
+1. 1차 발견: 개발기에서 보상 테스트 → 다른 자녀에게 승인 요청 메시지 + 푸시 알림 수신
+2. 원인: `useReward()`의 adminMembers 필터 조건이 `m.isAdmin || m.role !== 'child'` — `||` 연산자로 인해 role이 undefined인 모든 멤버가 통과
+3. 1차 수정 (PR #82): `m.isAdmin`만으로 변경 → 운영 적용
+4. 2차 발견: 자녀 중 `isAdmin: true`가 설정된 경우가 있어 여전히 자녀에게 알림 수신됨 + 푸시까지 발송
+5. 2차 수정 (PR #84): `const isChild = m.type === 'child' || m.role === 'child'` 추가, `m.isAdmin && !isChild` 조건으로 양육자만 필터링
+6. 교훈: familyMeta.members의 필드(`isAdmin`, `type`, `role`)는 독립적으로 관리됨. 양육자 판별 시 반드시 child 여부를 별도 확인해야 함
+
+**메시지 연속 수신 시 스크롤 잠금 버그**:
+- 증상: 승인/거절 메시지를 2번 수신하는 동안 아무 조작도 안 했더니, 메시지 확인 후 탭 스크롤 불가
+- 원인: `lockBodyScroll()`이 counter 기반(0→1→2), `unlockBodyScroll()`은 1만 감소(2→1), counter > 0이면 스크롤 잠금 유지
+- 해결: `showReceivedMsg()`에서 팝업이 이미 표시 중이면 `lockBodyScroll()` 호출 생략
+- 교훈: counter 기반 lock/unlock 패턴에서는 동일 컨텍스트의 중복 lock 호출을 반드시 방어해야 함
+
+**아이폰 PWA 뱃지 미표시 (visibilitychange)**:
+- 증상: 아이패드에서는 메시지 뱃지가 바로 표시되나, 아이폰에서는 표시 안 됨
+- 원인: `visibilitychange` 핸들러가 `checkDayChange()`만 호출하고 뱃지 갱신 로직 없음
+- 해결 3가지:
+  1. `visibilitychange`에 `checkNewMessages()` + `_updateFamilyBtnBadge()` 추가
+  2. Service Worker에서 push 수신 시 `PUSH_RECEIVED` postMessage → 앱에서 1초 후 뱃지 갱신
+  3. onSnapshot의 `_hasDirtyLocal` else 분기에 familyMessages 뱃지 갱신 통일
