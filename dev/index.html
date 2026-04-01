@@ -8472,7 +8472,7 @@ const BADGES = [
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
-if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401z8';}}
+if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401z9';}}
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
@@ -13323,7 +13323,9 @@ async function sendFamilyInvite(memberId) {
   if(!m) return;
 
   // ── 레거시 계정 자동 마이그레이션: _familyId가 없으면 families/ 컬렉션으로 이동 ──
+  console.log('[sendFamilyInvite] START — _familyId:', _familyId, '_firebaseReady:', _firebaseReady, 'db:', !!db);
   if(!_familyId && _firebaseReady && db){
+    console.log('[sendFamilyInvite] 🔄 Legacy migration starting...');
     const newFamilyId=Math.random().toString(36).slice(2)+Date.now().toString(36);
     const docPath=_ENV==='dev'?`dev_${newFamilyId}`:newFamilyId;
     const familyDoc=getFamilyDoc(docPath);
@@ -13337,13 +13339,18 @@ async function sendFamilyInvite(memberId) {
         localStorage.setItem(_LS_PREFIX+'family_id',docPath);
         _lastSavedJSON=JSON.stringify(S);
         _lastSaveTime=Date.now();
-        console.log('[sendFamilyInvite] Legacy → families/ migration OK:', docPath);
+        console.log('[sendFamilyInvite] ✅ Legacy → families/ migration OK:', docPath);
+        toast('✅ 데이터 이전 완료: '+docPath.slice(0,12)+'...');
       }catch(e){
-        console.error('[sendFamilyInvite] Legacy migration failed:', e);
-        toast('⚠️ 초대 기능을 위한 데이터 이전에 실패했어요. 다시 시도해주세요.');
+        console.error('[sendFamilyInvite] ❌ Legacy migration FAILED:', e?.code, e?.message, e);
+        toast('⚠️ 초대 기능을 위한 데이터 이전에 실패했어요: '+(e?.code||e?.message||'알 수 없는 오류'));
         return;
       }
+    } else {
+      console.error('[sendFamilyInvite] ❌ getFamilyDoc returned invalid:', familyDoc);
     }
+  } else if(_familyId) {
+    console.log('[sendFamilyInvite] ℹ️ Already migrated, _familyId:', _familyId);
   }
 
   if(!_familyId){
@@ -13375,7 +13382,8 @@ async function sendFamilyInvite(memberId) {
     localStorage.setItem(_LS_PREFIX+'v6_backup', JSON.stringify(S));
     console.log('[sendFamilyInvite] token saved OK');
   } catch(e) {
-    console.error('[sendFamilyInvite] save failed:', e);
+    console.error('[sendFamilyInvite] ❌ token save FAILED:', e?.code, e?.message, e);
+    toast('⚠️ 토큰 저장 실패: '+(e?.code||e?.message||''));
     // fallback: debounced save
     save();
   }
@@ -13385,6 +13393,11 @@ async function sendFamilyInvite(memberId) {
   const rd = ROLE_DEFS[m.displayRole||m.role] || ROLE_DEFS.child;
   const _basePath=_ENV==='dev'?'taemin_mileage/dev/':'taemin_mileage/';
   const url = `https://kwakhyoshin.github.io/${_basePath}?invite=${rawFamilyId}&token=${inviteToken}&mid=${memberId}`;
+  console.log('[sendFamilyInvite] ✅ URL generated:', url);
+  console.log('[sendFamilyInvite] _familyId:', _familyId, 'rawFamilyId:', rawFamilyId, 'memberId:', memberId);
+  console.log('[sendFamilyInvite] tokenCount:', S.familyMeta?.inviteTokens?.length, 'memberCount:', Object.keys(S.familyMeta?.members||{}).length);
+  // 🔍 디버그: URL을 토스트로도 표시 (릴리즈 전 제거)
+  toast('🔗 초대URL: ...invite=' + rawFamilyId + '&token=' + inviteToken.slice(0,8) + '...', 8000);
   const roleLabel = m.displayRole ? ROLE_DEFS[m.displayRole]?.label||m.displayRole : (m.role==='child'?'아이':'양육자');
   const text = `${m.name}님, ${familyName} 가족에 초대합니다! 아래 링크로 가입하세요.`;
 
@@ -16188,9 +16201,14 @@ async function checkUrlParams(){
       }
       const snap=await getDoc(fDoc);
       console.log('[invite] snap exists:', snap.exists());
-      if(!snap.exists()){toast('❌ 유효하지 않은 초대 링크예요');return;}
+      if(!snap.exists()){
+        console.error('[invite] ❌ families doc NOT FOUND:', docPath);
+        toast('❌ 유효하지 않은 초대 링크예요 (문서없음: '+docPath+')');
+        return;
+      }
 
       const data=snap.data();
+      console.log('[invite] data loaded, tokenCount:', data?.familyMeta?.inviteTokens?.length||0, 'memberCount:', Object.keys(data?.familyMeta?.members||{}).length);
       S=Object.assign(defaultState(),data);
       _familyId=docPath;
       DATA_DOC=fDoc;
@@ -16199,10 +16217,12 @@ async function checkUrlParams(){
 
       const fm=S.familyMeta?.members||{};
       const tokens=S.familyMeta?.inviteTokens||[];
+      console.log('[invite] looking for token:', token.slice(0,8)+'...', 'in', tokens.length, 'tokens');
       const validToken=tokens.find(t=>t.token===token&&(!t.expiresAt||t.expiresAt>Date.now()));
 
       if(!validToken){
-        toast('❌ 만료되거나 유효하지 않은 초대 링크예요');
+        console.error('[invite] ❌ token NOT found or expired. tokens:', tokens.map(t=>({token:t.token.slice(0,8),exp:t.expiresAt,type:t.type})));
+        toast('❌ 만료되거나 유효하지 않은 초대 링크예요 (토큰불일치)');
         showAuthScreen('continue');
         return;
       }
