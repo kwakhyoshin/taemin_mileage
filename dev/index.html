@@ -7322,7 +7322,9 @@ async function _doKakaoLogin(){
   if(!_KAKAO_REST_KEY){ toast('카카오 로그인 키가 설정되지 않았어요'); return null; }
   return new Promise((resolve)=>{
     // 카카오 OAuth 팝업 (Authorization Code: response_type=code)
-    const state = 'kakao_' + Math.random().toString(36).substring(2);
+    // S-11: 암호학적 안전 state + sessionStorage 저장
+    const state = 'kakao_' + generateSecureRandom(16);
+    try{ sessionStorage.setItem('oauth_state_kakao', state); }catch(e){}
     const redirectUri = _getKakaoCallbackUrl();
     const authUrl = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${_KAKAO_REST_KEY}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}`;
     const popup = window.open(authUrl, 'kakaoLogin', 'width=500,height=700,scrollbars=yes');
@@ -7391,7 +7393,9 @@ async function _doNaverLogin(){
   // ★ SDK 로드 제거 — 콜백 팝업이 자체적으로 SDK를 로드함
   // await _loadNaverSDK()를 여기서 하면 모바일에서 사용자 제스처 체인이 끊어져 팝업이 차단됨
   return new Promise((resolve)=>{
-    const state = Math.random().toString(36).substring(2);
+    // S-11: 암호학적 안전 state + sessionStorage 저장
+    const state = 'naver_' + generateSecureRandom(16);
+    try{ sessionStorage.setItem('oauth_state_naver', state); }catch(e){}
     const authUrl = `https://nid.naver.com/oauth2.0/authorize?response_type=token&client_id=${_NAVER_CLIENT_ID}&redirect_uri=${encodeURIComponent(_getNaverCallbackUrl())}&state=${state}`;
     // localStorage fallback 결과 초기화 (이전 세션 잔여값 제거)
     try{ localStorage.removeItem('taemin_v6_naver_callback_result'); }catch(e){}
@@ -8843,6 +8847,12 @@ function sanitizeNumber(val, min = 0, max = 99999) {
 function escapeHtml(str) {
   if (!str || typeof str !== 'string') return '';
   return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+}
+// ── S-11: 암호학적 안전 난수 생성 (OAuth state 등) ──
+function generateSecureRandom(len=32) {
+  const a=new Uint8Array(len);
+  crypto.getRandomValues(a);
+  return Array.from(a,b=>b.toString(16).padStart(2,'0')).join('');
 }
 
 // Robust debounced save with in-flight guard
@@ -18117,6 +18127,16 @@ window._createState = _createState;
   const _kakaoState = _kakaoQs.get('state') || '';
   // ★ 모바일에서 window.opener는 null일 수 있음 → window.name으로도 감지
   const _isKakaoCallback = _kakaoCode && _kakaoState.startsWith('kakao_') && (window.opener || window.name === 'kakaoLogin');
+  // S-11: state 검증 — 팝업 콜백에서만 (opener가 있을 때)
+  if(_isKakaoCallback && window.opener){
+    try{
+      const _savedState = window.opener.sessionStorage.getItem('oauth_state_kakao');
+      if(_savedState && _savedState !== _kakaoState){
+        console.warn('[Kakao Callback] state mismatch — possible CSRF. expected:', _savedState, 'got:', _kakaoState);
+      }
+      window.opener.sessionStorage.removeItem('oauth_state_kakao');
+    }catch(e){ /* cross-origin일 수 있음 — 무시 */ }
+  }
   if(_isKakaoCallback){
     console.log('[Kakao Callback] authorization code detected, opener:', !!window.opener, 'name:', window.name);
     // 콜백 탭에서는 앱 초기화 불필요 — 즉시 body 교체
@@ -18224,6 +18244,26 @@ window._createState = _createState;
       const hash = window.location.hash.substring(1);
       const params = new URLSearchParams(hash);
       const accessToken = params.get('access_token');
+      // S-11: 네이버 state 검증
+      const _naverReturnedState = params.get('state') || '';
+      if(_isNaverPopup && window.opener){
+        try{
+          const _savedNaverState = window.opener.sessionStorage.getItem('oauth_state_naver');
+          if(_savedNaverState && _savedNaverState !== _naverReturnedState){
+            console.warn('[Naver Callback] state mismatch — possible CSRF. expected:', _savedNaverState, 'got:', _naverReturnedState);
+          }
+          window.opener.sessionStorage.removeItem('oauth_state_naver');
+        }catch(e){ /* cross-origin — 무시 */ }
+      }
+      if(_isNaverRedirectReturn){
+        try{
+          const _savedNaverState = sessionStorage.getItem('oauth_state_naver');
+          if(_savedNaverState && _savedNaverState !== _naverReturnedState){
+            console.warn('[Naver Redirect] state mismatch — possible CSRF');
+          }
+          sessionStorage.removeItem('oauth_state_naver');
+        }catch(e){}
+      }
       if(accessToken){
         console.log('[Naver Callback] access_token detected, storing fallback immediately + loading SDK...');
         // ★ SDK 로드 전에 즉시 localStorage에 fallback 결과 저장 (모바일에서 SDK 로딩이 중단될 수 있음)
