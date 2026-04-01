@@ -276,7 +276,7 @@ body.is-scrolling .hero *,body.is-scrolling .log-header-sticky *,body.is-scrolli
 input,select,textarea{font-size:16px!important}
 body{font-family:'Pretendard Variable',-apple-system,sans-serif;background:var(--bg);color:var(--tx);max-width:430px;margin:0 auto;min-height:100vh;min-height:100dvh;overflow-x:hidden;transition:background .25s,color .25s}
 html.popup-open,body.popup-open{overflow:hidden!important;height:100%!important}
-body.popup-open .nav-container{opacity:0;pointer-events:none;transition:opacity .15s}
+/* 팝업 열려도 네비게이션은 항상 표시 */
 @media(min-width:768px){body{max-width:100%;margin:0}}
 @media(min-width:1024px){body{margin:0}}
 
@@ -506,7 +506,7 @@ body.dark .theme-pick.active .theme-pick-radio{border-color:#818CF8;background:#
 
 /* LOG LIST */
 .log-wrap{background:var(--card);border-radius:var(--r);margin:12px 16px 16px;overflow:hidden;transition:background .25s;box-shadow:0 2px 8px rgba(0,0,0,.04);border:.5px solid var(--bdr)}
-.log-item{display:flex;align-items:center;gap:14px;padding:15px 18px;border-bottom:.5px solid var(--bdr);-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:manipulation;flex-wrap:wrap}
+.log-item{display:flex;align-items:center;gap:14px;padding:15px 18px;border-bottom:1px solid color-mix(in srgb,var(--tx) 8%,transparent);-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:manipulation;flex-wrap:wrap}
 .log-item:last-child{border-bottom:none}
 .log-item.done{background:var(--gn-lt);border-left:4px solid var(--gn)}
 .log-item.partial{background:var(--yw-lt);border-left:4px solid var(--yw)}
@@ -6779,7 +6779,7 @@ async function doLogin(idField, pwdField, errField){
                 await save();
                 // 리스너를 새 DATA_DOC으로 재연결
                 if(_dataListenerUnsub){try{_dataListenerUnsub();}catch(_e){}}
-                try{_dataListenerUnsub=onSnapshot(DATA_DOC,(snap)=>{if(!snap.exists())return;if(_isSaving)return;if(Date.now()-_lastSaveTime<2000)return;const _ij=JSON.stringify(snap.data());if(_ij===_lastSavedJSON||_ij===JSON.stringify(S))return;if(!_hasDirtyLocal){S=Object.assign(defaultState(),snap.data());_lastSavedJSON=_ij;rebuildMembersFromFamily();renderAll();checkNewMessages();renderNavUsers();}});}catch(_e){}
+                try{_dataListenerUnsub=onSnapshot(DATA_DOC,(snap)=>{if(!snap.exists())return;if(_isSaving)return;if(Date.now()-_lastSaveTime<2000)return;const _ij=JSON.stringify(snap.data());if(_ij===_lastSavedJSON||_ij===JSON.stringify(S))return;if(!_hasDirtyLocal){S=Object.assign(defaultState(),snap.data());_lastSavedJSON=_ij;rebuildMembersFromFamily();renderAll();checkNewMessages();renderNavUsers();}else{const _sd=snap.data();if(_sd.familyMessages&&JSON.stringify(_sd.familyMessages)!==JSON.stringify(S.familyMessages)){S.familyMessages=_sd.familyMessages;checkNewMessages();_updateFamilyBtnBadge();}}});}catch(_e){}
                 currentUser = otherMid;
                 localStorage.setItem(_LS_PREFIX+'current_user', otherMid);
                 syncMemberToGlobal();
@@ -7318,8 +7318,9 @@ async function _doKakaoLogin(){
     let resolved = false;
     // localStorage fallback 결과 초기화
     try{ localStorage.removeItem('taemin_v6_kakao_callback_result'); }catch(e){}
-    // postMessage로 결과 수신
+    // postMessage로 결과 수신 (origin 검증 포함)
     const handler = (e)=>{
+      if(e.origin !== 'https://kwakhyoshin.github.io') return; // S-04: origin 검증
       if(e.data && e.data.type === 'kakao_login'){
         resolved = true;
         window.removeEventListener('message', handler);
@@ -7397,8 +7398,9 @@ async function _doNaverLogin(){
     }
 
     let resolved = false;
-    // postMessage로 결과 수신
+    // postMessage로 결과 수신 (origin 검증 포함)
     const handler = (e)=>{
+      if(e.origin !== 'https://kwakhyoshin.github.io') return; // S-04: origin 검증
       if(e.data && e.data.type === 'naver_login'){
         resolved = true;
         window.removeEventListener('message', handler);
@@ -7878,7 +7880,7 @@ async function _loginToFamily(familyId, memberId, authUid, provider, email, prof
   // 3단계: 리스너 연결 (실패해도 무시)
   try{
     if(_dataListenerUnsub){try{_dataListenerUnsub();}catch(_e){}}
-    _dataListenerUnsub=onSnapshot(DATA_DOC,(snap)=>{if(!snap.exists())return;if(_isSaving)return;if(Date.now()-_lastSaveTime<2000)return;const _ij=JSON.stringify(snap.data());if(_ij===_lastSavedJSON||_ij===JSON.stringify(S))return;if(!_hasDirtyLocal){S=Object.assign(defaultState(),snap.data());_lastSavedJSON=_ij;rebuildMembersFromFamily();renderAll();checkNewMessages();renderNavUsers();}});
+    _dataListenerUnsub=onSnapshot(DATA_DOC,(snap)=>{if(!snap.exists())return;if(_isSaving)return;if(Date.now()-_lastSaveTime<2000)return;const _ij=JSON.stringify(snap.data());if(_ij===_lastSavedJSON||_ij===JSON.stringify(S))return;if(!_hasDirtyLocal){S=Object.assign(defaultState(),snap.data());_lastSavedJSON=_ij;rebuildMembersFromFamily();renderAll();checkNewMessages();renderNavUsers();}else{const _sd=snap.data();if(_sd.familyMessages&&JSON.stringify(_sd.familyMessages)!==JSON.stringify(S.familyMessages)){S.familyMessages=_sd.familyMessages;checkNewMessages();_updateFamilyBtnBadge();}}});
   }catch(_e){console.warn('Snapshot listener failed:',_e);}
 }
 
@@ -8125,6 +8127,7 @@ function checkAuth() {
 
   if (savedUser && cachedUsers[savedUser]) {
     currentUser = savedUser;
+    _syncPushDeviceUser(); // 앱 시작 시 푸시 디바이스 유저 갱신
     // 양육자(caregiver)는 postLoginInit에서 자녀 데이터를 로드하므로 여기서 parent sync 생략
     // (parent의 memberData에 마지막 자녀의 stale 데이터가 오염되는 것을 방지)
     if(!(getFamilyMode()==='independent'&&isCaregiverUser())){
@@ -8504,7 +8507,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'prod'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0401ac';
+const _APP_VERSION = 'v0401c';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -8808,6 +8811,17 @@ function syncGlobalToMember(targetId) {
   ms.rewardRequests = JSON.parse(JSON.stringify(S.rewardRequests||[]));
 }
 
+// ── S-09: 입력값 검증 유틸리티 ──
+function sanitizeInput(str, maxLen = 200) {
+  if (!str || typeof str !== 'string') return '';
+  return str.trim().slice(0, maxLen);
+}
+function sanitizeNumber(val, min = 0, max = 99999) {
+  const n = parseInt(val, 10);
+  if (isNaN(n)) return 0;
+  return Math.max(min, Math.min(max, n));
+}
+
 // Robust debounced save with in-flight guard
 function save(){
   // independent 모드에서 양육자가 자녀 데이터를 보고 있으면 해당 자녀에게 저장
@@ -8850,23 +8864,21 @@ function save(){
   }, 400);
 }
 
-// Cloud Functions가 users/taemin(LEGACY_DOC)만 감시하므로,
-// families/로 마이그레이션된 경우 push 트리거 필드를 레거시 문서에 동기화
+// Cloud Functions가 families/{familyId}도 감시하므로,
+// 레거시 문서에는 pushDevices만 동기화 (트리거 필드는 제외하여 중복 발송 방지)
 let _lastPushSyncJSON = '';
 function _syncPushToLegacy(){
   if(!_familyId || !LEGACY_DOC || !LEGACY_DOC.path) return; // 마이그레이션 안 된 상태면 불필요
   if(DATA_DOC === LEGACY_DOC) return; // 아직 레거시 문서 사용 중이면 불필요
+  // pushDevices만 동기화 — pushBroadcast, rewardNotify, moodNotify, familyMessages는
+  // families/{familyId} Cloud Functions가 처리하므로 레거시 문서에 sync하면 중복 발송됨
   const pushFields = {};
-  if(S.pushBroadcast) pushFields.pushBroadcast = S.pushBroadcast;
-  if(S.rewardNotify) pushFields.rewardNotify = S.rewardNotify;
-  if(S.moodNotify) pushFields.moodNotify = S.moodNotify;
   if(S.pushDevices) pushFields.pushDevices = S.pushDevices;
-  if(S.familyMessages) pushFields.familyMessages = S.familyMessages;
   const sig = JSON.stringify(pushFields);
   if(sig === _lastPushSyncJSON) return; // 변경 없으면 skip
   _lastPushSyncJSON = sig;
   setDoc(LEGACY_DOC, pushFields, {merge:true})
-    .then(()=>console.log('[_syncPushToLegacy] OK'))
+    .then(()=>console.log('[_syncPushToLegacy] pushDevices OK'))
     .catch(e=>console.warn('[_syncPushToLegacy]', e));
 }
 
@@ -13047,20 +13059,8 @@ function useReward(invId){
     });
   }
 
-  // Trigger push notification to parents (pushBroadcast as reliable fallback)
-  S.rewardNotify={
-    type:'request',
-    rwdName:item.rwdName,
-    rwdEmoji:item.rwdEmoji,
-    user:_effectiveFrom,
-    targetUsers:adminMembers,
-    ts:Date.now()
-  };
-  S.pushBroadcast={
-    title:'🎁 보상 사용 요청',
-    body:`${_childName}이(가) "${item.rwdName}" 사용을 요청했어요!`,
-    ts:Date.now()
-  };
+  // Push 알림은 onFamilyMessage Cloud Function이 familyMessages 변경을 감지하여 발송
+  // rewardNotify 제거 — familyMessages와 중복 트리거 방지
 
   // 이력 기록
   if(!S.rewardLog)S.rewardLog=[];
@@ -13115,19 +13115,8 @@ function approveRewardRequest(reqId,approver){
     requestId:reqId
   });
 
-  // Trigger push notification
-  S.rewardNotify={
-    type:'approved',
-    rwdName:req.rwdName,
-    user:req.fromUser,
-    targetUsers:[req.fromUser],
-    ts:Date.now()
-  };
-  S.pushBroadcast={
-    title:'✅ 보상 사용 승인',
-    body:`"${req.rwdName}" 사용이 승인됐어요!`,
-    ts:Date.now()
-  };
+  // Push 알림은 onFamilyMessage Cloud Function이 familyMessages 변경을 감지하여 발송
+  // rewardNotify 제거 — familyMessages와 중복 트리거 방지
 
   // 이력 기록
   if(!S.rewardLog)S.rewardLog=[];
@@ -13166,19 +13155,8 @@ function rejectRewardRequest(reqId,rejector){
     requestId:reqId
   });
 
-  // Trigger push notification
-  S.rewardNotify={
-    type:'rejected',
-    rwdName:req.rwdName,
-    user:req.fromUser,
-    targetUsers:[req.fromUser],
-    ts:Date.now()
-  };
-  S.pushBroadcast={
-    title:'❌ 보상 사용 거절',
-    body:`"${req.rwdName}" 사용이 거절됐어요.`,
-    ts:Date.now()
-  };
+  // Push 알림은 onFamilyMessage Cloud Function이 familyMessages 변경을 감지하여 발송
+  // rewardNotify 제거 — familyMessages와 중복 트리거 방지
 
   // 이력 기록
   if(!S.rewardLog)S.rewardLog=[];
@@ -14920,6 +14898,16 @@ window.pfMenuAction=pfMenuAction;
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
   {
+    ver:'1.7.0', date:'2026-04-01',
+    items:[
+      {type:'fix',text:'푸시 알림 중복 발송 수정 (2~4회 → 1회)'},
+      {type:'fix',text:'보상 승인/거절 알림이 자녀에게 안 가던 문제 수정'},
+      {type:'fix',text:'유저 전환 시 푸시 디바이스 자동 갱신 (올바른 유저로 알림 수신)'},
+      {type:'fix',text:'메시지 수신 팝업에서 네비게이션 바 사라지는 문제 수정'},
+      {type:'fix',text:'메시지 수신 시 알림 뱃지 즉시 갱신 (앱 재시작 불필요)'},
+    ]
+  },
+  {
     ver:'1.6.9', date:'2026-04-01',
     items:[
       {type:'improve',text:'꾹 누르기 게이지 시간 1초→0.4초로 단축 (더 빠른 반응)'},
@@ -15833,7 +15821,7 @@ function closeMsgPop(){
 window.closeMsgPop=closeMsgPop;
 
 function sendFamilyMsg(){
-  const text=document.getElementById('msg-input').value.trim();
+  const text=sanitizeInput(document.getElementById('msg-input').value, 500);
   if(!text){toast('메시지를 입력해주세요');return;}
   if(!currentUser){toast('먼저 로그인해주세요');return;}
   if(!msgTargetUser)return;
@@ -15862,14 +15850,8 @@ function sendFamilyMsg(){
   const sentMsg=S.familyMessages[S.familyMessages.length-1];
   const toName=(MEMBERS[msgTargetUser]?.name)||'가족';  // closeMsgPop 전에 캡처!
   const fromName=(MEMBERS[currentUser]?.name)||'가족';
-  // Push 알림 트리거 (Cloud Functions 경유)
-  if(!isSelfMessage){
-    S.pushBroadcast={
-      title:`💌 ${fromName}의 메시지`,
-      body:text.length>50?text.slice(0,50)+'…':text,
-      ts:Date.now()
-    };
-  }
+  // Push 알림은 onFamilyMessage Cloud Function이 familyMessages 변경을 감지하여 발송
+  // pushBroadcast 제거 — onFamilyMessage와 onBroadcastPush가 동시 트리거되어 중복 알림 발생 방지
   save();
   closeMsgPop();  // 여기서 msgTargetUser=null이 됨
   if(isSelfMessage){
@@ -17528,6 +17510,18 @@ async function unsubscribePush(){
   }
 }
 
+// 유저 전환 시 이 기기의 pushDevice user 필드를 현재 유저로 갱신
+function _syncPushDeviceUser(){
+  if(!pushSubscription || !currentUser) return;
+  const deviceId = localStorage.getItem(_LS_PREFIX+'device_id');
+  if(!deviceId || !S.pushDevices || !S.pushDevices[deviceId]) return;
+  if(S.pushDevices[deviceId].user === currentUser) return; // 이미 맞음
+  console.log('[Push] 디바이스 유저 갱신:', S.pushDevices[deviceId].user, '→', currentUser);
+  S.pushDevices[deviceId].user = currentUser;
+  S.pushDevices[deviceId].updatedAt = Date.now();
+  save();
+}
+
 function updatePushUI(){
   const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
   const isStandalone=window.navigator.standalone||window.matchMedia('(display-mode:standalone)').matches;
@@ -17633,6 +17627,7 @@ function devSwitchUser(userId){
   if(userId===currentUser)return;
   currentUser=userId;
   localStorage.setItem(_LS_PREFIX+'current_user',userId);
+  _syncPushDeviceUser(); // 푸시 디바이스 유저 갱신
   postLoginInit();
   applyUserProfile();
   renderAll();
@@ -17892,7 +17887,8 @@ window.cancelAvatarEditor=cancelAvatarEditor;
 function sanitizePhotoUrl(url){
   if(!url||typeof url!=='string')return '';
   // data:image/* 또는 https:// 만 허용
-  if(/^data:image\/(png|jpeg|jpg|gif|webp|svg\+xml);base64,/.test(url))return url;
+  // S-05: svg+xml 제거 (SVG 기반 XSS 방지)
+  if(/^data:image\/(png|jpeg|jpg|gif|webp);base64,/.test(url))return url;
   if(/^https:\/\//.test(url)){
     // HTML 특수문자 이스케이프
     return url.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -18005,23 +18001,17 @@ window._createState = _createState;
     document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;color:#666">인증 처리 중...</div>';
     // Step 1: code → access_token 교환
     const _kakaoRedirectUri = window.location.href.split('?')[0]; // query string 제거한 redirect_uri
-    const _tokenBody = new URLSearchParams({
-      grant_type: 'authorization_code',
-      client_id: 'bd6311dbabf65b823a5160e3973cb483',
-      redirect_uri: _kakaoRedirectUri,
-      code: _kakaoCode,
-      client_secret: 'phvnOAr7G88IKOa9RCWn2AFD4AuivOk9'
-    });
+    // ── S-02: client_secret은 Cloudflare Worker 프록시에서 처리 ──
     // 결과 전달 헬퍼: postMessage + localStorage fallback
     function _deliverKakaoResult(data){
-      if(window.opener){ try{ window.opener.postMessage(data, '*'); }catch(e){} }
+      if(window.opener){ try{ window.opener.postMessage(data, 'https://kwakhyoshin.github.io'); }catch(e){} }
       try{ localStorage.setItem('taemin_v6_kakao_callback_result', JSON.stringify(data)); }catch(e){}
       setTimeout(()=>{ try{window.close();}catch(e){} }, 300);
     }
-    fetch('https://kauth.kakao.com/oauth/token', {
+    fetch('https://kakao-token-proxy.nonmarking.workers.dev', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: _tokenBody.toString()
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code: _kakaoCode, redirect_uri: _kakaoRedirectUri })
     })
     .then(r=>r.json())
     .then(tokenRes=>{
@@ -18101,7 +18091,7 @@ window._createState = _createState;
       } else {
         // 팝업 모드: 기존 방식 (postMessage + localStorage)
         if(window.opener){
-          try{ window.opener.postMessage(data, '*'); }catch(e){}
+          try{ window.opener.postMessage(data, 'https://kwakhyoshin.github.io'); }catch(e){}
         }
         try{ localStorage.setItem('taemin_v6_naver_callback_result', JSON.stringify(data)); }catch(e){}
         setTimeout(()=>window.close(), 300);
