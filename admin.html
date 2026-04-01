@@ -401,11 +401,25 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// ── Admin credentials ──
+// ── Admin credentials (S-07: 해시/실명을 Firestore에서 로드) ──
 const ADMIN_SALT = 'taemin_sysadmin_v1_';
-const ADMIN_ACCOUNTS = {
-  'nonmarking': { pwdHash: 'ca15f3d66b1188096f7a57c663e676e28935911710ab8370681d9556be1e242db664b42c39ea7f397c9397e6b5ee5a9be14d0d433652083d46807d9491075010', name: '곽효신' }
-};
+let ADMIN_ACCOUNTS = {}; // Firestore에서 로드
+
+async function loadAdminAccounts() {
+  try {
+    const snap = await getDoc(doc(db, '_system', 'admin_accounts'));
+    if (snap.exists()) {
+      ADMIN_ACCOUNTS = snap.data().accounts || {};
+    } else {
+      // Firestore에 아직 관리자 문서가 없으면 안내
+      console.warn('[admin] Firestore _system/admin_accounts 문서가 없습니다. Firebase Console에서 생성하세요.');
+    }
+  } catch(e) {
+    console.error('[admin] 관리자 계정 로드 실패:', e);
+  }
+}
+// 페이지 로드 시 자동 실행
+loadAdminAccounts();
 
 async function hashPwd(pwd) {
   const salted = ADMIN_SALT + pwd;
@@ -417,6 +431,12 @@ async function hashPwd(pwd) {
     if (typeof sha512 === 'function') return sha512(salted);
     throw new Error('SHA-512 not available');
   }
+}
+
+// ── HTML 이스케이프 (S-06: XSS 방지) ──
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
 let _loggedIn = false;
@@ -460,6 +480,13 @@ window.doAdminLogin = async function() {
   const err = document.getElementById('login-error');
 
   if (!id || !pwd) { err.textContent = '아이디와 비밀번호를 입력해주세요'; return; }
+
+  // 계정 데이터가 아직 로드되지 않았으면 다시 시도
+  if (!Object.keys(ADMIN_ACCOUNTS).length) {
+    err.textContent = '관리자 정보 로딩 중... 잠시 후 다시 시도해주세요';
+    await loadAdminAccounts();
+    return;
+  }
 
   const account = ADMIN_ACCOUNTS[id];
   if (!account) { err.textContent = '등록되지 않은 관리자입니다'; return; }
@@ -684,14 +711,14 @@ function renderFamilyCard(f) {
   return `<div class="family-card" onclick="openFamilyDetail('${f.id}')">
     <div class="family-card-head">
       <div>
-        <div class="family-card-name">${fm.familyName || f.id} ${f._isLegacy ? '<span class="badge-pill badge-inactive">레거시</span>' : ''}</div>
+        <div class="family-card-name">${escapeHtml(fm.familyName || f.id)} ${f._isLegacy ? '<span class="badge-pill badge-inactive">레거시</span>' : ''}</div>
         <div class="family-card-meta">구성원 ${memberCount}명 · 가입 ${registeredCount}명 · 모드: ${fm.mode === 'unified' ? '통합' : '독립'} · 생성: ${created}</div>
       </div>
       <div style="font-size:12px;color:#94A3B8;font-weight:600">${f.id}</div>
     </div>
     <div class="family-card-members">
       ${Object.values(members).slice(0, 7).map((m, i) =>
-        `<div class="family-card-avatar" style="background:${colors[i % colors.length]}" title="${m.name}">${(m.name || '?')[0]}</div>`
+        `<div class="family-card-avatar" style="background:${colors[i % colors.length]}" title="${escapeHtml(m.name)}">${escapeHtml((m.name || '?')[0])}</div>`
       ).join('')}
     </div>
   </div>`;
@@ -749,19 +776,19 @@ window.openFamilyDetail = function(familyId) {
         <svg viewBox="0 0 24 24" fill="none" stroke="${m.type === 'child' ? '#059669' : '#3B82F6'}" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg>
       </div>
       <div class="member-row-info">
-        <div class="member-row-name">${m.name || '-'} <span class="badge-pill ${roleBadge}">${ROLE_LABELS[m.role] || m.role}</span>${adminBadge}</div>
+        <div class="member-row-name">${escapeHtml(m.name || '-')} <span class="badge-pill ${roleBadge}">${ROLE_LABELS[m.role] || m.role}</span>${adminBadge}</div>
         <div class="member-row-role">${accountStatus} · 로그인ID: ${loginIdDisplay}${birthInfo}${genderInfo}</div>
       </div>
       <div class="member-row-actions">
-        <button class="btn-sm btn-primary" onclick="resetMemberPassword('${familyId}','${mid}','${m.name}')">비밀번호 재설정</button>
-        <button class="btn-sm btn-primary" onclick="toggleAdmin('${familyId}','${mid}',${!m.isAdmin})">${m.isAdmin ? '관리자 해제' : '관리자 부여'}</button>
-        <button class="btn-sm btn-danger" onclick="deleteMember('${familyId}','${mid}','${m.name}')">삭제</button>
+        <button class="btn-sm btn-primary" onclick="resetMemberPassword('${escapeHtml(familyId)}','${escapeHtml(mid)}','${escapeHtml(m.name)}')">비밀번호 재설정</button>
+        <button class="btn-sm btn-primary" onclick="toggleAdmin('${escapeHtml(familyId)}','${escapeHtml(mid)}',${!m.isAdmin})">${m.isAdmin ? '관리자 해제' : '관리자 부여'}</button>
+        <button class="btn-sm btn-danger" onclick="deleteMember('${escapeHtml(familyId)}','${escapeHtml(mid)}','${escapeHtml(m.name)}')">삭제</button>
       </div>
     </div>`;
   }).join('');
 
   document.getElementById('family-detail-content').innerHTML = `
-    <h2>${fm.familyName || f.id}</h2>
+    <h2>${escapeHtml(fm.familyName || f.id)}</h2>
     <div class="subtitle">ID: ${f.id} · 모드: ${fm.mode === 'unified' ? '통합 관리' : '독립 관리'} · 생성: ${fm.createdAt ? new Date(fm.createdAt).toLocaleString('ko-KR') : '-'}</div>
     <div class="stat-row">
       <div class="stat-card"><div class="stat-label">마일리지</div><div class="stat-value">${f.pts || 0}</div></div>
@@ -981,7 +1008,7 @@ function renderMembersTable() {
     <tbody>${rows.map(r => `<tr>
       <td style="font-weight:800">${r.name}</td>
       <td><span class="badge-pill ${r.type === 'child' ? 'badge-child' : 'badge-parent'}">${r.role}</span></td>
-      <td style="color:#64748B">${r.familyName}</td>
+      <td style="color:#64748B">${escapeHtml(r.familyName)}</td>
       <td style="color:#6366F1;font-weight:700">${r.loginId || '<span style="color:#CBD5E1">-</span>'}</td>
       <td>${r.isAdmin ? '<span class="badge-pill badge-admin">관리자</span>' : '-'}</td>
       <td>${r.hasAccount ? '<span style="color:#10B981;font-weight:700">가입완료</span>' : '<span style="color:#CBD5E1">미가입</span>'}</td>
