@@ -13058,16 +13058,8 @@ function useReward(invId){
     });
   }
 
-  // Trigger push notification to parents (pushBroadcast as reliable fallback)
-  S.rewardNotify={
-    type:'request',
-    rwdName:item.rwdName,
-    rwdEmoji:item.rwdEmoji,
-    user:_effectiveFrom,
-    targetUsers:adminMembers,
-    ts:Date.now()
-  };
-  // pushBroadcast 제거 — rewardNotify가 정확한 대상(adminMembers)에게만 발송
+  // Push 알림은 onFamilyMessage Cloud Function이 familyMessages 변경을 감지하여 발송
+  // rewardNotify 제거 — familyMessages와 중복 트리거 방지
 
   // 이력 기록
   if(!S.rewardLog)S.rewardLog=[];
@@ -13122,15 +13114,8 @@ function approveRewardRequest(reqId,approver){
     requestId:reqId
   });
 
-  // Trigger push notification to requester (child)
-  S.rewardNotify={
-    type:'approved',
-    rwdName:req.rwdName,
-    user:req.fromUser,
-    targetUsers:[req.fromUser],
-    ts:Date.now()
-  };
-  // pushBroadcast 제거 — rewardNotify가 정확한 대상(req.fromUser)에게만 발송
+  // Push 알림은 onFamilyMessage Cloud Function이 familyMessages 변경을 감지하여 발송
+  // rewardNotify 제거 — familyMessages와 중복 트리거 방지
 
   // 이력 기록
   if(!S.rewardLog)S.rewardLog=[];
@@ -13169,15 +13154,8 @@ function rejectRewardRequest(reqId,rejector){
     requestId:reqId
   });
 
-  // Trigger push notification to requester (child)
-  S.rewardNotify={
-    type:'rejected',
-    rwdName:req.rwdName,
-    user:req.fromUser,
-    targetUsers:[req.fromUser],
-    ts:Date.now()
-  };
-  // pushBroadcast 제거 — rewardNotify가 정확한 대상(req.fromUser)에게만 발송
+  // Push 알림은 onFamilyMessage Cloud Function이 familyMessages 변경을 감지하여 발송
+  // rewardNotify 제거 — familyMessages와 중복 트리거 방지
 
   // 이력 기록
   if(!S.rewardLog)S.rewardLog=[];
