@@ -10,11 +10,16 @@ const db = admin.firestore();
 const { defineSecret } = require("firebase-functions/params");
 const vapidPrivateKey = defineSecret("VAPID_PRIVATE_KEY");
 
-webpush.setVapidDetails(
-  "mailto:nonmarking@gmail.com",
-  "BMqfqNW-_vInMwqdq3H01AKHBepukX3-Lk1RX8ZkZ97jlixIOS7hIZDRJ0gwNy00hARwc2XilfOHnx9WBlcNJfI",
-  vapidPrivateKey.value()
-);
+const VAPID_PUBLIC = "BMqfqNW-_vInMwqdq3H01AKHBepukX3-Lk1RX8ZkZ97jlixIOS7hIZDRJ0gwNy00hARwc2XilfOHnx9WBlcNJfI";
+
+// VAPID 설정은 함수 핸들러 내부에서만 호출 가능 (defineSecret은 런타임에서만 .value() 사용 가능)
+let vapidConfigured = false;
+function ensureVapid() {
+  if (!vapidConfigured) {
+    webpush.setVapidDetails("mailto:nonmarking@gmail.com", VAPID_PUBLIC, vapidPrivateKey.value());
+    vapidConfigured = true;
+  }
+}
 
 const NAMES = { taemin: "태민이", dad: "아빠", mom: "엄마" };
 
@@ -45,7 +50,8 @@ function sendToDevices(devices, targetUsers, payload, docPath) {
 // ── 운영 (users/taemin) ──────────────────────────────────────────────────────
 
 // 1) 가족 메시지 → 수신자에게 푸시
-exports.onFamilyMessage = onDocumentUpdated("users/taemin", async (event) => {
+exports.onFamilyMessage = onDocumentUpdated({ document: "users/taemin", secrets: [vapidPrivateKey] }, async (event) => {
+  ensureVapid();
   const before = event.data.before.data();
   const after = event.data.after.data();
   const oldMsgs = before.familyMessages || [];
@@ -76,7 +82,8 @@ exports.onFamilyMessage = onDocumentUpdated("users/taemin", async (event) => {
 });
 
 // 2) 기분 업데이트 → 다른 가족에게 푸시
-exports.onMoodUpdate = onDocumentUpdated("users/taemin", async (event) => {
+exports.onMoodUpdate = onDocumentUpdated({ document: "users/taemin", secrets: [vapidPrivateKey] }, async (event) => {
+  ensureVapid();
   const before = event.data.before.data();
   const after = event.data.after.data();
 
@@ -104,7 +111,8 @@ exports.onMoodUpdate = onDocumentUpdated("users/taemin", async (event) => {
 });
 
 // 3) 전체 알림 (관리자용)
-exports.onBroadcastPush = onDocumentUpdated("users/taemin", async (event) => {
+exports.onBroadcastPush = onDocumentUpdated({ document: "users/taemin", secrets: [vapidPrivateKey] }, async (event) => {
+  ensureVapid();
   const before = event.data.before.data();
   const after = event.data.after.data();
   if (!after.pushBroadcast ||
@@ -127,7 +135,8 @@ exports.onBroadcastPush = onDocumentUpdated("users/taemin", async (event) => {
 });
 
 // 4) 보상 요청/승인/거절 알림
-exports.onRewardRequest = onDocumentUpdated("users/taemin", async (event) => {
+exports.onRewardRequest = onDocumentUpdated({ document: "users/taemin", secrets: [vapidPrivateKey] }, async (event) => {
+  ensureVapid();
   const before = event.data.before.data();
   const after = event.data.after.data();
 
@@ -170,7 +179,8 @@ exports.onRewardRequest = onDocumentUpdated("users/taemin", async (event) => {
 // ── 개발기 (users/taemin_dev) ─────────────────────────────────────────────────
 
 // 1-dev) 가족 메시지 → 수신자에게 푸시
-exports.onFamilyMessageDev = onDocumentUpdated("users/taemin_dev", async (event) => {
+exports.onFamilyMessageDev = onDocumentUpdated({ document: "users/taemin_dev", secrets: [vapidPrivateKey] }, async (event) => {
+  ensureVapid();
   const before = event.data.before.data();
   const after = event.data.after.data();
   const oldMsgs = before.familyMessages || [];
@@ -201,7 +211,8 @@ exports.onFamilyMessageDev = onDocumentUpdated("users/taemin_dev", async (event)
 });
 
 // 2-dev) 기분 업데이트 → 다른 가족에게 푸시
-exports.onMoodUpdateDev = onDocumentUpdated("users/taemin_dev", async (event) => {
+exports.onMoodUpdateDev = onDocumentUpdated({ document: "users/taemin_dev", secrets: [vapidPrivateKey] }, async (event) => {
+  ensureVapid();
   const before = event.data.before.data();
   const after = event.data.after.data();
 
@@ -229,7 +240,8 @@ exports.onMoodUpdateDev = onDocumentUpdated("users/taemin_dev", async (event) =>
 });
 
 // 3-dev) 전체 알림 (관리자용)
-exports.onBroadcastPushDev = onDocumentUpdated("users/taemin_dev", async (event) => {
+exports.onBroadcastPushDev = onDocumentUpdated({ document: "users/taemin_dev", secrets: [vapidPrivateKey] }, async (event) => {
+  ensureVapid();
   const before = event.data.before.data();
   const after = event.data.after.data();
   if (!after.pushBroadcast ||
@@ -252,7 +264,8 @@ exports.onBroadcastPushDev = onDocumentUpdated("users/taemin_dev", async (event)
 });
 
 // 4-dev) 보상 요청/승인/거절 알림
-exports.onRewardRequestDev = onDocumentUpdated("users/taemin_dev", async (event) => {
+exports.onRewardRequestDev = onDocumentUpdated({ document: "users/taemin_dev", secrets: [vapidPrivateKey] }, async (event) => {
+  ensureVapid();
   const before = event.data.before.data();
   const after = event.data.after.data();
 
