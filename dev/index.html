@@ -8863,23 +8863,21 @@ function save(){
   }, 400);
 }
 
-// Cloud Functions가 users/taemin(LEGACY_DOC)만 감시하므로,
-// families/로 마이그레이션된 경우 push 트리거 필드를 레거시 문서에 동기화
+// Cloud Functions가 families/{familyId}도 감시하므로,
+// 레거시 문서에는 pushDevices만 동기화 (트리거 필드는 제외하여 중복 발송 방지)
 let _lastPushSyncJSON = '';
 function _syncPushToLegacy(){
   if(!_familyId || !LEGACY_DOC || !LEGACY_DOC.path) return; // 마이그레이션 안 된 상태면 불필요
   if(DATA_DOC === LEGACY_DOC) return; // 아직 레거시 문서 사용 중이면 불필요
+  // pushDevices만 동기화 — pushBroadcast, rewardNotify, moodNotify, familyMessages는
+  // families/{familyId} Cloud Functions가 처리하므로 레거시 문서에 sync하면 중복 발송됨
   const pushFields = {};
-  if(S.pushBroadcast) pushFields.pushBroadcast = S.pushBroadcast;
-  if(S.rewardNotify) pushFields.rewardNotify = S.rewardNotify;
-  if(S.moodNotify) pushFields.moodNotify = S.moodNotify;
   if(S.pushDevices) pushFields.pushDevices = S.pushDevices;
-  if(S.familyMessages) pushFields.familyMessages = S.familyMessages;
   const sig = JSON.stringify(pushFields);
   if(sig === _lastPushSyncJSON) return; // 변경 없으면 skip
   _lastPushSyncJSON = sig;
   setDoc(LEGACY_DOC, pushFields, {merge:true})
-    .then(()=>console.log('[_syncPushToLegacy] OK'))
+    .then(()=>console.log('[_syncPushToLegacy] pushDevices OK'))
     .catch(e=>console.warn('[_syncPushToLegacy]', e));
 }
 
