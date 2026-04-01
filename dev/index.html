@@ -6433,8 +6433,31 @@ async function doJoinRegister(){
 // ── 로그인 (다가족 대응) ──
 // 나의 메뉴에서 소셜 계정 연동하기
 // 나의 메뉴: 소셜 연동 프로바이더 선택 바텀시트
-function linkSocialFromMyMenu(){
-  if(!currentUser || !_familyId){ toast('로그인 후 이용해주세요'); return; }
+async function linkSocialFromMyMenu(){
+  if(!currentUser){ toast('로그인 후 이용해주세요'); return; }
+  // 레거시 계정(familyId 없음) → families/ 컬렉션으로 자동 마이그레이션
+  if(!_familyId && _firebaseReady && db){
+    try{
+      const newFamilyId=Math.random().toString(36).slice(2)+Date.now().toString(36);
+      const docPath=_ENV==='dev'?`dev_${newFamilyId}`:newFamilyId;
+      const familyDoc=getFamilyDoc(docPath);
+      if(familyDoc && familyDoc.path){
+        if(S.familyMeta) S.familyMeta.familyId=docPath;
+        await setDoc(familyDoc, S);
+        _familyId=docPath;
+        DATA_DOC=familyDoc;
+        localStorage.setItem(_LS_PREFIX+'family_id',docPath);
+        _lastSavedJSON=JSON.stringify(S);
+        _lastSaveTime=Date.now();
+        console.log('[linkSocialFromMyMenu] ✅ Legacy → families/ migration OK:', docPath);
+      }
+    }catch(e){
+      console.error('[linkSocialFromMyMenu] Legacy migration failed:', e);
+      toast('⚠️ 데이터 이전에 실패했어요. 다시 시도해주세요.');
+      return;
+    }
+  }
+  if(!_familyId){ toast('⚠️ 가족 정보를 찾을 수 없어요. 페이지를 새로고침해주세요.'); return; }
   // 바텀시트 열릴 때 SDK 미리 로드 (팝업 차단 방지)
   if(!_firebaseReady) _initFirebase().catch(()=>{});
   _loadKakaoSDK().catch(()=>{});
