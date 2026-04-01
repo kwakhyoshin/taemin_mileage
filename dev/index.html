@@ -5501,7 +5501,7 @@ function updateFamilyNamePreview(val){
   if(!prev)return;
   if(val.trim()){
     prev.style.display='block';
-    prev.innerHTML='🏠 <b>'+val.trim()+'</b> 으로 가족 홈이 표시돼요';
+    prev.innerHTML='🏠 <b>'+escapeHtml(val.trim())+'</b> 으로 가족 홈이 표시돼요';
   }else{
     prev.style.display='none';
   }
@@ -5579,7 +5579,7 @@ function renderFamilyGraph(){
           <span style="font-size:18px;font-weight:900;color:${rd.textColor||'#6366F1'}">나</span>
         </div>
         <div style="flex:1;min-width:0">
-          <div style="font-size:15px;font-weight:800;color:#1E293B">${m.name||'내 이름'}</div>
+          <div style="font-size:15px;font-weight:800;color:#1E293B">${escapeHtml(m.name||'내 이름')}</div>
           <div style="font-size:13px;font-weight:600;color:${rd.textColor||'#6366F1'};margin-top:2px">${rd.label||'역할'}</div>
         </div>
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
@@ -5591,7 +5591,7 @@ function renderFamilyGraph(){
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="${rd.textColor||'#64748B'}" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg>
           </div>
           <div style="flex:1;min-width:0">
-            <div style="font-size:14px;font-weight:800;color:#1E293B">${m.name}</div>
+            <div style="font-size:14px;font-weight:800;color:#1E293B">${escapeHtml(m.name)}</div>
             <div style="font-size:13px;font-weight:600;color:${rd.textColor||'#64748B'};margin-top:2px">${rd.label||''}</div>
           </div>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
@@ -5837,12 +5837,12 @@ function renderInviteOptions(){
       <div class="invite-card-left">
         <div style="width:36px;height:36px;border-radius:50%;background:${rd.color||'#F1F5F9'};display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${rd.textColor||'#64748B'}" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg></div>
         <div>
-          <div class="invite-card-name" style="display:flex;align-items:center;gap:6px">${m.name} ${statusBadge}</div>
+          <div class="invite-card-name" style="display:flex;align-items:center;gap:6px">${escapeHtml(m.name)} ${statusBadge}</div>
           <div class="invite-card-role">${rd.label||(m.role==='child'?'아이':'양육자')}</div>
         </div>
       </div>
       <div class="invite-card-actions">
-        <button class="share-btn" onclick="shareInviteLink('${m.name}',${idx})">
+        <button class="share-btn" onclick="shareInviteLink('${escapeHtml(m.name)}',${idx})">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/>
           </svg> 초대 링크
@@ -5948,7 +5948,7 @@ function renderDoneScreen(){
   document.getElementById('create-done-family-name').textContent=_createState.familyName;
   document.getElementById('create-done-member-count').textContent=_createState.members.length;
 
-  const links=Object.entries(_createState.childAccounts).map(([idx,acc])=>`${_createState.members[parseInt(idx)].name}: ${acc.id}`).join(', ');
+  const links=Object.entries(_createState.childAccounts).map(([idx,acc])=>`${escapeHtml(_createState.members[parseInt(idx)].name)}: ${escapeHtml(acc.id)}`).join(', ');
   document.getElementById('create-done-links').innerHTML=links?`<div>생성된 계정: ${links}</div>`:'';
 }
 
@@ -7664,7 +7664,7 @@ async function _handleSocialLoginResult(firebaseUser, provider){
               if(avatarEl) avatarEl.textContent = (displayName || email || '?').charAt(0).toUpperCase();
               if(nameDisplay) nameDisplay.textContent = displayName || '사용자';
               if(emailDisplay) emailDisplay.textContent = email;
-              if(infoEl) infoEl.innerHTML = `이미 가입된 사용자입니다.<br><span style="font-size:13px;color:var(--tx2);font-weight:600">${_otherProvider} 계정(${email})으로 등록된 계정이 있어요.<br>${_thisProvider}로도 같은 계정에 연결합니다.</span>`;
+              if(infoEl) infoEl.innerHTML = `이미 가입된 사용자입니다.<br><span style="font-size:13px;color:var(--tx2);font-weight:600">${escapeHtml(_otherProvider)} 계정(${escapeHtml(email)})으로 등록된 계정이 있어요.<br>${escapeHtml(_thisProvider)}로도 같은 계정에 연결합니다.</span>`;
 
               // 버튼 교체: "확인" 하나만 표시
               const btnArea = document.querySelector('#auth-social-link .auth-card');
@@ -7742,7 +7742,7 @@ async function _handleSocialLoginResult(firebaseUser, provider){
               if(avatarEl) avatarEl.textContent = (displayName || email || '?').charAt(0).toUpperCase();
               if(nameDisplay) nameDisplay.textContent = displayName || '사용자';
               if(emailDisplay) emailDisplay.textContent = email;
-              if(infoEl) infoEl.innerHTML = `이미 가입된 사용자입니다.<br><span style="font-size:13px;color:var(--tx2);font-weight:600">${_otherProv} 계정(${email})으로 등록된 계정이 있어요.<br>${_thisProv}로도 같은 계정에 연결합니다.</span>`;
+              if(infoEl) infoEl.innerHTML = `이미 가입된 사용자입니다.<br><span style="font-size:13px;color:var(--tx2);font-weight:600">${escapeHtml(_otherProv)} 계정(${escapeHtml(email)})으로 등록된 계정이 있어요.<br>${escapeHtml(_thisProv)}로도 같은 계정에 연결합니다.</span>`;
               const btnArea = document.querySelector('#auth-social-link .auth-card');
               if(btnArea){
                 btnArea.querySelectorAll('.auth-btn, .auth-link').forEach(b => b.style.display = 'none');
@@ -8838,6 +8838,11 @@ function sanitizeNumber(val, min = 0, max = 99999) {
   const n = parseInt(val, 10);
   if (isNaN(n)) return 0;
   return Math.max(min, Math.min(max, n));
+}
+// ── S-10: XSS 방지 — HTML 이스케이프 ──
+function escapeHtml(str) {
+  if (!str || typeof str !== 'string') return '';
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
 }
 
 // Robust debounced save with in-flight guard
@@ -12040,7 +12045,7 @@ function renderAdmChildSelector(){
     if(mode!=='independent'||kids.length<2){el.innerHTML='';return;}
     const currentAdmId=_admViewChildId||getViewedMemberId();
     el.innerHTML=`<div class="adm-child-sel-bar">
-      ${kids.map(id=>`<button class="adm-child-btn${id===currentAdmId?' on':''}" data-cid="${id}" onclick="admSelectChild('${id}')">${getAvatarHTML(id,22)} <span>${MEMBERS[id]?.name||id}</span></button>`).join('')}
+      ${kids.map(id=>`<button class="adm-child-btn${id===currentAdmId?' on':''}" data-cid="${id}" onclick="admSelectChild('${id}')">${getAvatarHTML(id,22)} <span>${escapeHtml(MEMBERS[id]?.name||id)}</span></button>`).join('')}
     </div>`;
   });
   // 마일리지 조정 대상 정보 표시
@@ -12058,7 +12063,7 @@ function renderMilesTargetInfo(){
   const pts=ms?ms.pts:S.pts;
   const name=MEMBERS[targetId]?.name||targetId;
   el.style.display='block';
-  el.innerHTML=`📌 대상: <span style="color:var(--tx1)">${name}</span> · 현재 <span style="color:var(--tx1)">${pts}</span> 마일리지`;
+  el.innerHTML=`📌 대상: <span style="color:var(--tx1)">${escapeHtml(name)}</span> · 현재 <span style="color:var(--tx1)">${escapeHtml(String(pts))}</span> 마일리지`;
 }
 
 // 관리자 모드 섹션 렌더링
@@ -12268,7 +12273,7 @@ function renderAdmSettings(){
     Object.entries(MEMBERS).forEach(([userId,member])=>{
       const gr=S.greetings?.[userId]||{mode:'auto',messages:[],custom:'',currentIdx:0};
       html+=`<div class="adm-card" style="margin-bottom:12px">
-        <div style="font-size:15px;font-weight:800;color:var(--tx);padding:14px 14px 0">${member.name}</div>
+        <div style="font-size:15px;font-weight:800;color:var(--tx);padding:14px 14px 0">${escapeHtml(member.name)}</div>
         <div class="adm-row" style="flex-wrap:nowrap">
           <div class="adm-row-l" style="flex-shrink:0"><div class="adm-row-nm">모드</div></div>
           <select id="greeting-mode-${userId}" onchange="saveGreetingMode('${userId}')" style="padding:8px 12px;border:1.5px solid var(--bdr);border-radius:9px;font-size:14px;font-weight:700;background:var(--bg);color:var(--tx);font-family:inherit;flex-shrink:0">
@@ -13272,7 +13277,7 @@ function renderFamilyManager() {
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${rd.textColor||'#64748B'}" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg>
         </div>
         <div style="flex:1">
-          <div style="font-size:14px;font-weight:800;color:var(--tx)">${m.name||'-'} ${isMe?'<span style="font-size:13px;color:var(--or);font-weight:700">(나)</span>':''}</div>
+          <div style="font-size:14px;font-weight:800;color:var(--tx)">${escapeHtml(m.name||'-')} ${isMe?'<span style="font-size:13px;color:var(--or);font-weight:700">(나)</span>':''}</div>
           <div style="font-size:13px;color:var(--tx3);font-weight:600">${ROLE_LABELS[m.displayRole||m.role]||m.displayRole||m.role} · ${hasAccount?'가입완료':'미가입'} ${isAdmin?'· 관리자':''}</div>
           ${themeRow}
         </div>
@@ -13295,7 +13300,7 @@ function renderFamilyManager() {
       const rd = ROLE_DEFS[m.displayRole||m.role] || ROLE_DEFS.child;
       return `<div class="adm-row" style="padding:12px 8px">
         <div class="adm-row-l">
-          <div style="font-size:13px;font-weight:800;color:var(--tx)">${m.name} <span style="font-size:13px;color:${rd.textColor||'var(--tx3)'};font-weight:600">(${rd.label||m.role})</span></div>
+          <div style="font-size:13px;font-weight:800;color:var(--tx)">${escapeHtml(m.name)} <span style="font-size:13px;color:${rd.textColor||'var(--tx3)'};font-weight:600">(${escapeHtml(rd.label||m.role)})</span></div>
           <div style="font-size:13px;color:var(--tx3);font-weight:600">아직 가입하지 않음</div>
         </div>
         <button class="btn-sm" onclick="sendFamilyInvite('${mid}')" style="display:flex;align-items:center;gap:4px">
@@ -16056,7 +16061,7 @@ function openSentMsgList(){
       const toName=MEMBERS[m.to]?.name||'가족';
       return `<div class="msglist-item">
         <div class="msglist-item-dot read"></div>
-        <div class="msglist-item-text"><span style="font-size:13px;color:var(--tab-color);font-weight:800;margin-right:4px">→${toName}</span>${m.text}</div>
+        <div class="msglist-item-text"><span style="font-size:13px;color:var(--tab-color);font-weight:800;margin-right:4px">→${escapeHtml(toName)}</span>${escapeHtml(m.text)}</div>
         <div class="msglist-item-time">${timeStr}</div>
       </div>`;
     }).join('');
@@ -16108,13 +16113,13 @@ function openMsgList(fromId,fromFamily){
       }
       return `<div class="msglist-item" onclick="readMsgFromList('${fromId}',${msgs.length-1-i})">
         <div class="msglist-item-dot${m.read?' read':''}"></div>
-        <div class="msglist-item-text">${m.text}${statusTag}</div>
+        <div class="msglist-item-text">${escapeHtml(m.text)}${statusTag}</div>
         <div class="msglist-item-time">${timeStr}</div>
       </div>`;
     }).join('');
   }
   const footer=document.getElementById('msglist-footer');
-  footer.innerHTML=`<button class="msg-send-btn" onclick="closeMsgList();openMsgPop('${_userFmTarget||fromId}',${_familyFlowActive})">💌 새 메시지 보내기</button>`;
+  footer.innerHTML=`<button class="msg-send-btn" onclick="closeMsgList();openMsgPop('${escapeHtml(_userFmTarget||fromId)}',${_familyFlowActive})">💌 새 메시지 보내기</button>`;
   footer.style.display='block';
   if(!_familyFlowActive) document.getElementById('msglist-bg').style.display='block';
   document.getElementById('msglist-pop').style.display='flex';
@@ -16172,8 +16177,8 @@ function readMsgFromList(fromId,msgIdx){
 
   detail.innerHTML=`
     ${emotionEmoji?`<div class="msglist-detail-emoji">${emotionEmoji}</div>`:''}
-    <div class="msglist-detail-text">${m.text}</div>
-    <div class="msglist-detail-time">${(MEMBERS[fromId]?.name||'가족')} · ${timeStr}</div>
+    <div class="msglist-detail-text">${escapeHtml(m.text)}</div>
+    <div class="msglist-detail-time">${escapeHtml(MEMBERS[fromId]?.name||'가족')} · ${timeStr}</div>
     ${actionsHTML}
   `;
   detail.style.display='flex';
@@ -16213,7 +16218,7 @@ function msgListGoBack(){
         }
         return `<div class="msglist-item" onclick="readMsgFromList('${fromId}',${msgs.length-1-i})">
           <div class="msglist-item-dot${m.read?' read':''}"></div>
-          <div class="msglist-item-text">${m.text}${statusTag}</div>
+          <div class="msglist-item-text">${escapeHtml(m.text)}${statusTag}</div>
           <div class="msglist-item-time">${timeStr}</div>
         </div>`;
       }).join('');
