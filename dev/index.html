@@ -532,10 +532,10 @@ body.dark .theme-pick.active .theme-pick-radio{border-color:#818CF8;background:#
 .log-item.done .log-badge{background:var(--gn);color:#fff}
 .undo-btn{background:var(--rd-lt);color:var(--rd);font-size:13px;font-weight:800;padding:4px 10px;border-radius:20px;border:none;cursor:pointer;font-family:inherit;white-space:nowrap}
 .log-timer{font-size:13px;color:var(--tx3);font-weight:700;white-space:nowrap}
-.today-task-toggle{position:absolute;left:0;top:0;bottom:0;width:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:6;opacity:.35;transition:opacity .2s}
-.today-task-toggle.on{opacity:.85}
-.today-task-toggle svg{width:15px;height:15px}
-.today-task-toggle:not(.on) svg{color:var(--tx4,#bbb)}
+.today-task-toggle{position:absolute;left:0;top:0;bottom:0;width:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:6;opacity:.45;transition:opacity .2s}
+.today-task-toggle.on{opacity:1}
+.today-task-toggle svg{width:16px;height:16px}
+.today-task-toggle:not(.on) svg{color:var(--tx4,#aaa)}
 .today-task-toggle.on svg{color:var(--pr)}
 .log-item.has-today-toggle{padding-left:30px}
 
@@ -8479,7 +8479,7 @@ const BADGES = [
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
-if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401zf';}}
+if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401zg';}}
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
@@ -10126,7 +10126,7 @@ function renderLogList(){
     const _lgColor=exhausted?'rgba(16,185,129,.12)':cls.includes('partial')?'rgba(245,158,11,.12)':'rgba(99,102,241,.12)';
     const _isCaregiver=isCaregiverUser();
     const _isShowHome=!!a.showHome;
-    const _todayToggleHTML=_isCaregiver?`<div class="today-task-toggle${_isShowHome?' on':''}" data-toggle-actid="${a.id}" title="홈표시 ${_isShowHome?'해제':'설정'}"><svg viewBox="0 0 24 24" fill="${_isShowHome?'currentColor':'none'}" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/>${_isShowHome?'':'<polyline points="9 21 9 14 15 14 15 21" stroke="currentColor" stroke-width="1.5" fill="none"/>'}</svg></div>`:'';
+    const _todayToggleHTML=_isCaregiver?`<div class="today-task-toggle${_isShowHome?' on':''}" data-toggle-actid="${a.id}" title="홈표시 ${_isShowHome?'해제':'설정'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">${_isShowHome?'<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>':'<circle cx="12" cy="12" r="10"/>'}</svg></div>`:'';
     return `<div class="log-item${cls}${_isCaregiver?' has-today-toggle':''}" data-actid="${a.id}" style="${exhausted?'cursor:default;':''}position:relative;overflow:visible;--lp-gauge-color:${_lgColor}">
       ${_todayToggleHTML}
       <div class="lp-gauge" style="border-radius:0"><div class="lp-gauge-fill"></div></div>
