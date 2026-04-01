@@ -4124,6 +4124,7 @@ requestAnimationFrame(function(){
       <svg class="my-list-arr" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
     </button>
   </div>
+  <div id="my-app-version" style="text-align:center;font-size:11px;color:var(--tx3);opacity:.5;padding:18px 0 32px;font-weight:500;letter-spacing:.5px"></div>
 </div>
 
 <!-- CHANGELOG / WHAT'S NEW POPUP -->
@@ -8503,8 +8504,26 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'prod'; // 'prod' = 운영, 'dev' = 개발
+const _APP_VERSION = 'v0401ac';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
-if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401ac';}}
+if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
+
+// ── 환경별 메타태그 자동 세팅 ──
+(function(){
+  if(_ENV==='dev'){
+    document.title='[DEV] 마일리 ⭐';
+    const m=s=>{const e=document.querySelector(s);return e};
+    const og=(id,v)=>{const e=document.getElementById(id);if(e)e.setAttribute('content',v)};
+    const amt=document.querySelector('meta[name="apple-mobile-web-app-title"]');
+    if(amt)amt.setAttribute('content','마일리 [DEV]');
+    og('og-title','[개발기] 마일리 ⭐ 우리 가족 마일리지');
+    og('og-image','https://kwakhyoshin.github.io/taemin_mileage/dev/og-image.png');
+    og('og-url','https://kwakhyoshin.github.io/taemin_mileage/dev/');
+  }
+  // 나의메뉴 버전 표시
+  const vi=document.getElementById('my-app-version');
+  if(vi) vi.textContent=(_ENV==='dev'?'DEV ':'')+ _APP_VERSION;
+})();
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
