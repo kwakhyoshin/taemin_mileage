@@ -2646,7 +2646,7 @@ requestAnimationFrame(function(){
     var btn=document.getElementById('ob-next-btn');
     if(!slides)return;
     _obIdx++;
-    if(_obIdx>=3){
+    if(_obIdx>=4){
       // 마지막 슬라이드 → 온보딩 완료 → 로그인 화면
       window.skipOnboarding();
       return;
@@ -2655,7 +2655,7 @@ requestAnimationFrame(function(){
     for(var i=0;i<dots.length;i++){
       dots[i].classList.toggle('active',i===_obIdx);
     }
-    if(_obIdx===2) btn.textContent='시작하기';
+    if(_obIdx===3) btn.textContent='시작하기';
   };
 
   // 스와이프로 슬라이드 넘길 때 인디케이터 동기화
@@ -2671,7 +2671,7 @@ requestAnimationFrame(function(){
         var dots=document.querySelectorAll('#ob-dots .ob-dot');
         for(var i=0;i<dots.length;i++) dots[i].classList.toggle('active',i===idx);
         var btn=document.getElementById('ob-next-btn');
-        if(btn) btn.textContent=idx>=2?'시작하기':'다음';
+        if(btn) btn.textContent=idx>=3?'시작하기':'다음';
       });
     }
   });
@@ -2681,6 +2681,8 @@ requestAnimationFrame(function(){
     // localStorage prefix 는 모듈 로드 전이므로 직접 판단
     var prefix=(window._ENV==='dev'||window.location.pathname.indexOf('/dev/')!==-1)?'taemin_dev_':'taemin_';
     localStorage.setItem(prefix+'onboarding_done','1');
+    // 온보딩을 끝까지 봤으면 로그인 후 알림 설정 안내 플래그
+    if(_obIdx>=3) localStorage.setItem(prefix+'show_push_guide','1');
     window.showAuthScreen('continue');
   };
 
@@ -2828,11 +2830,20 @@ requestAnimationFrame(function(){
         <h2 class="ob-slide-title">가족이 함께 참여해요</h2>
         <p class="ob-slide-desc">응원 메시지, 뱃지, 리포트로<br>아이의 성장을 함께 지켜봐요</p>
       </div>
+      <!-- Slide 4: 알림 설정 안내 -->
+      <div class="ob-slide">
+        <div class="ob-slide-icon">
+          <svg width="80" height="80" viewBox="0 0 80 80" fill="none"><circle cx="40" cy="40" r="38" stroke="#60A5FA" stroke-width="4"/><text x="40" y="48" text-anchor="middle" font-size="36" fill="#60A5FA">🔔</text></svg>
+        </div>
+        <h2 class="ob-slide-title">알림을 켜주세요</h2>
+        <p class="ob-slide-desc">로그인 후 <b>나의 메뉴</b>에서<br>알림을 켜면 가족의 메시지와<br>보상 소식을 바로 받을 수 있어요</p>
+      </div>
     </div>
     <!-- 인디케이터 + 버튼 -->
     <div class="ob-slides-bottom">
       <div class="ob-dots" id="ob-dots">
         <span class="ob-dot active"></span>
+        <span class="ob-dot"></span>
         <span class="ob-dot"></span>
         <span class="ob-dot"></span>
       </div>
@@ -6075,7 +6086,7 @@ async function saveFamilyToFirestore(){
             checkNewMessages();
             renderNavUsers();
             console.log('🔄 다른 기기에서 데이터가 업데이트됐어요');
-          }
+          }else{const _sd=snap.data();if(_sd.familyMessages&&JSON.stringify(_sd.familyMessages)!==JSON.stringify(S.familyMessages)){S.familyMessages=_sd.familyMessages;checkNewMessages();_updateFamilyBtnBadge();}}
         });
         console.log('[saveFamilyToFirestore] New listener on', docPath);
       }catch(_e){ console.warn('New family listener failed:', _e); }
@@ -7877,6 +7888,11 @@ async function _loginToFamily(familyId, memberId, authUid, provider, email, prof
   try { reallyGoTab('home'); } catch(e){ console.warn('[_loginToFamily] reallyGoTab warning:', e); }
   toast(`${MEMBERS[memberId]?.name||'회원'}님 환영해요!`);
   console.log('[_loginToFamily] Complete:', familyId, memberId);
+  // 온보딩 완료 후 알림 안내 또는 알림 꺼짐 배너
+  setTimeout(()=>{
+    if(typeof _checkOnboardingPushGuide==='function') _checkOnboardingPushGuide();
+    else if(typeof _showPushOffBanner==='function') _showPushOffBanner();
+  }, 3000);
   // 3단계: 리스너 연결 (실패해도 무시)
   try{
     if(_dataListenerUnsub){try{_dataListenerUnsub();}catch(_e){}}
@@ -8141,6 +8157,8 @@ function checkAuth() {
     const _homeScr = document.getElementById('s-home');
     if(_homeScr && !document.querySelector('.scr.on')) _homeScr.classList.add('on');
     applyUserProfile();
+    // 온보딩 완료 후 알림 안내 (나의 메뉴 이동 + 토글 포커싱)
+    setTimeout(()=>{ if(typeof _checkOnboardingPushGuide==='function') _checkOnboardingPushGuide(); }, 3000);
     return true;
   }
 
@@ -8507,7 +8525,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'prod'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0401c';
+const _APP_VERSION = 'v0401d';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -14898,6 +14916,15 @@ window.pfMenuAction=pfMenuAction;
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
   {
+    ver:'1.7.1 (v0401d)', date:'2026-04-01',
+    items:[
+      {type:'new',text:'알림 켜기 안내: 온보딩 → 나의 메뉴 자동 이동 + 포커싱'},
+      {type:'new',text:'메시지 보내기 시 알림 꺼짐 안내 팝업'},
+      {type:'new',text:'로그인 후 알림 꺼짐 상단 배너 (탭하여 켜기)'},
+      {type:'fix',text:'아이폰 PWA 메시지 뱃지 미표시 수정'},
+    ]
+  },
+  {
     ver:'1.7.0 (v0401c)', date:'2026-04-01',
     items:[
       {type:'fix',text:'푸시 알림 중복 발송 수정 (2~4회 → 1회)'},
@@ -15860,6 +15887,13 @@ function sendFamilyMsg(){
     setTimeout(()=>showReceivedMsg(currentUser,sentText,sentEmotion,sentMsg),300);
   }else{
     toast(`💌 ${toName}에게 메시지를 보냈어요!`);
+    // 발신자 알림이 꺼져 있으면 1회 안내
+    if(!pushSubscription && !window._pushOffMsgWarned){
+      window._pushOffMsgWarned=true;
+      setTimeout(()=>{
+        _showPushOffGuide('메시지를 보냈지만, 알림이 꺼져 있어서\n상대방의 답장을 받지 못할 수 있어요.');
+      },800);
+    }
   }
 }
 window.sendFamilyMsg=sendFamilyMsg;
@@ -16332,6 +16366,12 @@ window.playEmotionAnimation=playEmotionAnimation;
 // Listen for SW notification click messages
 if('serviceWorker' in navigator){
   navigator.serviceWorker.addEventListener('message',(event)=>{
+    if(event.data&&event.data.type==='PUSH_RECEIVED'){
+      // SW에서 push 수신 시 뱃지 즉시 갱신 (아이폰 onSnapshot 지연 보완)
+      console.log('[SW→App] PUSH_RECEIVED - 뱃지 갱신');
+      setTimeout(()=>{ try{ checkNewMessages(); _updateFamilyBtnBadge(); }catch(e){} }, 1000);
+      return;
+    }
     if(event.data&&event.data.type==='NOTIFICATION_CLICK'){
       const d=event.data.data;
       if(d.type==='family_msg'&&d.from&&d.msgText){
@@ -17147,8 +17187,10 @@ scheduleMiddnightCheck();
 // ── APP RESUME: iOS PWA에서 백그라운드 복귀 시 날짜 변경 감지 ──
 document.addEventListener('visibilitychange',()=>{
   if(document.visibilityState==='visible'){
-    console.log('📱 앱 복귀 감지 - 날짜 체크');
+    console.log('📱 앱 복귀 감지 - 날짜 체크 + 뱃지 갱신');
     checkDayChange();
+    // 아이폰 PWA에서 백그라운드 복귀 시 onSnapshot 지연으로 뱃지가 안 뜨는 문제 보완
+    try{ checkNewMessages(); _updateFamilyBtnBadge(); }catch(e){}
   }
 });
 // bfcache 복원 시 항상 최신 버전으로 새로고침
@@ -17545,6 +17587,79 @@ function updatePushUI(){
   }
   showPushDebug();
 }
+
+// ── 온보딩 완료 후 알림 설정 안내 (나의 메뉴 이동 + 포커싱 + 가이드) ──
+function _checkOnboardingPushGuide(){
+  const guideKey=_LS_PREFIX+'show_push_guide';
+  if(!localStorage.getItem(guideKey)){ _showPushOffBanner(); return; }
+  localStorage.removeItem(guideKey);
+  // 나의 메뉴로 이동
+  reallyGoTab('my');
+  // 알림 토글로 스크롤 + 하이라이트 + 설명 팝업
+  setTimeout(()=>{
+    const tog=document.getElementById('push-tog-my');
+    if(tog){
+      tog.scrollIntoView({behavior:'smooth',block:'center'});
+      // 하이라이트 효과
+      tog.style.transition='box-shadow .3s';
+      tog.style.boxShadow='0 0 0 4px rgba(99,102,241,.4)';
+      setTimeout(()=>{tog.style.boxShadow='';},3000);
+    }
+    // 설명 팝업
+    _showPushOffGuide('가족의 메시지와 보상 소식을\n바로 받으려면 알림을 켜주세요!');
+  },600);
+}
+
+// ── 알림 꺼짐 안내 팝업 (메시지 보내기, 보상 등에서 호출) ──
+function _showPushOffGuide(msg){
+  const ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s';
+  ov.innerHTML=`<div style="background:#fff;border-radius:20px;padding:28px 22px 20px;max-width:300px;width:85%;box-shadow:0 20px 48px rgba(0,0,0,.18);text-align:center;transform:scale(.93);transition:transform .25s cubic-bezier(.175,.885,.32,1.275)">
+    <div style="font-size:36px;margin-bottom:12px">🔔</div>
+    <div style="font-size:15px;font-weight:700;color:#1E293B;margin-bottom:8px">알림이 꺼져 있어요</div>
+    <div style="font-size:13px;color:#64748B;line-height:1.65;margin-bottom:20px;white-space:pre-line">${msg}</div>
+    <div style="display:flex;gap:8px">
+      <button onclick="this.closest('div[style*=fixed]').style.opacity='0';setTimeout(()=>this.closest('div[style*=fixed]').remove(),200)" style="flex:1;padding:12px;background:#F1F5F9;color:#475569;border:none;border-radius:12px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit">닫기</button>
+      <button onclick="this.closest('div[style*=fixed]').style.opacity='0';setTimeout(()=>this.closest('div[style*=fixed]').remove(),200);reallyGoTab('my');setTimeout(()=>{const el=document.getElementById('push-tog-my');if(el)el.scrollIntoView({behavior:'smooth',block:'center'})},300)" style="flex:1;padding:12px;background:linear-gradient(135deg,#6366F1,#818CF8);color:#fff;border:none;border-radius:12px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit">알림 켜기</button>
+    </div>
+  </div>`;
+  document.body.appendChild(ov);
+  requestAnimationFrame(()=>{ov.style.opacity='1';ov.querySelector('div>div').style.transform='scale(1)';});
+}
+
+// ── 로그인 후 알림 꺼짐 배너 ──
+function _showPushOffBanner(){
+  // 이미 표시했거나, 알림 지원 안 하거나, 이미 켜져있으면 skip
+  if(window._pushBannerShown) return;
+  if(pushSubscription) return;
+  const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isStandalone=window.navigator.standalone||window.matchMedia('(display-mode:standalone)').matches;
+  if(typeof Notification==='undefined'||(isIOS&&!isStandalone)) return;
+  window._pushBannerShown=true;
+  // 세션당 1회만 (localStorage)
+  const bannerKey=_LS_PREFIX+'push_banner_dismissed';
+  if(localStorage.getItem(bannerKey)) return;
+  const banner=document.createElement('div');
+  banner.id='push-off-banner';
+  banner.style.cssText='position:fixed;top:env(safe-area-inset-top,0px);left:50%;transform:translateX(-50%);max-width:430px;width:100%;z-index:9000;padding:10px 16px;display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,#EEF2FF,#E0E7FF);border-bottom:1px solid #C7D2FE;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.08);opacity:0;transition:opacity .3s,transform .3s';
+  banner.innerHTML=`<span style="font-size:20px">🔔</span><div style="flex:1;font-size:13px;color:#3730A3;font-weight:600;line-height:1.4">알림이 꺼져 있어요 — 탭해서 켜기</div><button id="push-banner-close" style="background:none;border:none;color:#6366F1;font-size:18px;cursor:pointer;padding:4px">✕</button>`;
+  document.body.appendChild(banner);
+  requestAnimationFrame(()=>{banner.style.opacity='1';});
+  banner.addEventListener('click',(e)=>{
+    if(e.target.id==='push-banner-close'){
+      localStorage.setItem(bannerKey,'1');
+      banner.style.opacity='0';setTimeout(()=>banner.remove(),300);
+      return;
+    }
+    localStorage.setItem(bannerKey,'1');
+    banner.style.opacity='0';setTimeout(()=>banner.remove(),300);
+    reallyGoTab('my');
+    setTimeout(()=>{const el=document.getElementById('push-tog-my');if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},300);
+  });
+  // 15초 후 자동 사라짐
+  setTimeout(()=>{if(document.getElementById('push-off-banner')){localStorage.setItem(bannerKey,'1');banner.style.opacity='0';setTimeout(()=>banner.remove(),300);}},15000);
+}
+
 async function showPushDebug(){
   const el=document.getElementById('push-debug');
   if(!el)return;
