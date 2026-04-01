@@ -434,18 +434,17 @@ body.dark .theme-pick.active .theme-pick-radio{border-color:#818CF8;background:#
 .streak-popup-overlay.show{opacity:1;pointer-events:auto}
 .streak-popup{background:var(--card);border-radius:24px;padding:28px 24px;width:min(320px,calc(100vw - 48px));box-shadow:var(--shadow-lg);text-align:center;transform:scale(.9);transition:transform .2s}
 .streak-popup-overlay.show .streak-popup{transform:scale(1)}
-/* ── 마일리 인사말 ── */
-.mily-greeting{display:flex;align-items:center;gap:10px;margin:0 16px;margin-top:-12px;position:relative;z-index:2;background:var(--card);border-radius:18px;padding:10px 14px 10px 6px;box-shadow:0 4px 16px rgba(99,102,241,.1);transition:opacity .3s}
-body.dark .mily-greeting{box-shadow:0 4px 16px rgba(0,0,0,.2)}
-.mily-char{width:52px;height:52px;flex-shrink:0}
+/* ── 마일리 인사말 (hero 안) ── */
+.mily-greeting-hero{display:flex;align-items:center;gap:10px;margin-top:10px;background:rgba(255,255,255,.12);border-radius:14px;padding:10px 12px 10px 6px;backdrop-filter:blur(4px);transition:opacity .3s}
+.mily-char{width:48px;height:48px;flex-shrink:0}
 .mily-char svg{width:100%;height:100%}
-.mily-msg{flex:1;min-width:0;background:var(--tab-lt,rgba(99,102,241,.08));border-radius:14px;padding:9px 12px;position:relative;font-size:13px;font-weight:600;color:var(--tx);line-height:1.45}
-.mily-msg::before{content:'';position:absolute;left:-6px;top:50%;transform:translateY(-50%);border:6px solid transparent;border-right-color:var(--tab-lt,rgba(99,102,241,.08))}
-.mily-msg .mily-hint{font-size:11px;color:var(--tx2);margin-top:2px;font-weight:500}
-.mily-greeting.celebrate .mily-msg{background:linear-gradient(135deg,rgba(250,204,21,.12),rgba(251,146,60,.1))}
-.mily-greeting.celebrate .mily-msg::before{border-right-color:rgba(250,204,21,.12)}
+.mily-msg-hero{flex:1;min-width:0;background:rgba(255,255,255,.15);border-radius:12px;padding:8px 11px;position:relative;font-size:13px;font-weight:600;color:#fff;line-height:1.45}
+.mily-msg-hero::before{content:'';position:absolute;left:-6px;top:50%;transform:translateY(-50%);border:6px solid transparent;border-right-color:rgba(255,255,255,.15)}
+.mily-msg-hero .mily-hint{font-size:11px;color:rgba(255,255,255,.65);margin-top:2px;font-weight:500}
+.mily-greeting-hero.celebrate .mily-msg-hero{background:rgba(255,255,255,.22)}
+.mily-greeting-hero.celebrate .mily-msg-hero::before{border-right-color:rgba(255,255,255,.22)}
 @keyframes milySlideIn{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:translateY(0)}}
-.mily-greeting{animation:milySlideIn .4s ease}
+.mily-greeting-hero{animation:milySlideIn .4s ease}
 /* 마일리 캐릭터 애니메이션 */
 @keyframes milyBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
 @keyframes milyWaveArm{0%,70%,100%{transform:rotate(0deg)}10%,30%,50%{transform:rotate(-35deg)}20%,40%,60%{transform:rotate(-15deg)}}
@@ -470,7 +469,7 @@ body.dark .mily-greeting{box-shadow:0 4px 16px rgba(0,0,0,.2)}
 .hero.compact .hero-goal{max-height:0;margin-top:0;opacity:0}
 .hero.compact .streak-pill{top:calc(12px + env(safe-area-inset-top));padding:4px 10px;font-size:13px}
 .hero.compact .prog-track{margin-top:10px}
-.hero.compact #mission-bar{display:none!important}
+.hero.compact .mily-greeting-hero{display:none!important}
 .hero.compact .prog-row{margin-top:3px;font-size:13px}
 /* compact 상태 마일리지 숫자 래퍼 보장 */
 .hero.compact .hero-pts-wrap{display:flex!important;align-items:flex-end!important;gap:6px!important;opacity:1!important}
@@ -3489,15 +3488,11 @@ requestAnimationFrame(function(){
     <div class="hero-goal" id="hero-goal"></div>
     <div class="prog-track"><div class="prog-fill" id="hero-bar" style="width:0%"></div></div>
     <div class="prog-row"><span>0</span><span id="hero-bar-lbl"></span></div>
-    <!-- 오늘 할일 진행 바 -->
-    <div id="mission-bar" style="margin-top:10px;background:rgba(255,255,255,.12);border-radius:14px;padding:10px 14px;backdrop-filter:blur(4px);display:none">
-      <div id="mission-bar-inner"></div>
+    <!-- 마일리 인사말 (hero 안) -->
+    <div id="mily-greeting" class="mily-greeting-hero" style="display:none">
+      <div class="mily-char" id="mily-char"></div>
+      <div class="mily-msg-hero" id="mily-msg"></div>
     </div>
-  </div>
-  <!-- 마일리 인사말 -->
-  <div class="mily-greeting" id="mily-greeting" style="display:none">
-    <div class="mily-char" id="mily-char"></div>
-    <div class="mily-msg" id="mily-msg"></div>
   </div>
   <!-- 생일 축하 배너 (동적 표시) -->
   <div id="birthday-banner" style="display:none;margin:0 16px 12px;border-radius:16px;background:linear-gradient(135deg,#FF6B6B,#FF8E53);padding:16px;position:relative;overflow:hidden">
@@ -8627,7 +8622,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0402b';
+const _APP_VERSION = 'v0402c';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -10270,8 +10265,6 @@ function renderHero(){
       admPtsEl.textContent=S.pts.toLocaleString();
     }
   }
-  // 미션 바 렌더링
-  renderMissionBar();
   // 마일리 인사말 렌더링
   renderMilyGreeting();
 }
@@ -10287,84 +10280,6 @@ function getTodayMissionProgress(){
     return countDone(a)>0; // 횟수제한 없는 활동은 1회 이상이면 완료
   }).length;
   return {done,total,remaining:total-done,acts:todayActs};
-}
-
-let _prevMissionDone=-1; // 이전 완료 개수 (애니메이션 감지용)
-function renderMissionBar(){
-  const bar=document.getElementById('mission-bar');
-  const inner=document.getElementById('mission-bar-inner');
-  if(!bar||!inner)return;
-  const {done,total,remaining}=getTodayMissionProgress();
-  if(total===0){bar.style.display='none';return;}
-  bar.style.display='block';
-
-  const streak=getDisplayStreak();
-  const allDone=remaining===0;
-  const streakBonusEnabled=S.settings?.streakBonus!==false;
-  const bonusPts=S.settings?.streakBonusPts||100;
-  const streakAfterToday=allDone?(streak>=0?Math.max(streak,S.streak):0):streak;
-  const daysInCycle=allDone?((streakAfterToday)%7):(streak%7);
-  const daysUntilBonus=7-daysInCycle;
-
-  // SVG 아이콘들
-  const svgCheck='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>';
-  const svgFire='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 01-7 7 7 7 0 01-7-7c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg>';
-  const svgStar='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
-  const svgGift='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg>';
-
-  if(allDone){
-    // 올클리어 상태
-    const clearClass=_prevMissionDone>=0&&_prevMissionDone<total?'mission-clear-anim':'';
-    let bonusHtml='';
-    if(streakBonusEnabled){
-      // 7일 보너스 카운트다운 도트
-      let dots='';
-      for(let i=1;i<=7;i++){
-        const filled=i<=daysInCycle||(daysInCycle===0&&allDone);
-        dots+=`<span class="bonus-dot ${filled?'filled':'empty'}">${svgFire}</span>`;
-      }
-      if(daysInCycle===0&&allDone&&streakAfterToday>0&&streakAfterToday%7===0){
-        // 정확히 7일 달성!
-        bonusHtml=`<div style="margin-top:6px;font-size:12px;font-weight:800;color:rgba(255,255,255,.95)"><span style="display:inline-flex;align-items:center;gap:3px;vertical-align:middle;width:14px;height:14px">${svgGift}</span> ${streakAfterToday}일 달성! +${bonusPts}M 보너스!</div>
-        <div class="bonus-dots">${dots}</div>`;
-      }else{
-        bonusHtml=`<div class="bonus-dots" style="margin-top:6px">${dots}</div>
-        <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.7);margin-top:4px">${daysUntilBonus===7?'7':daysUntilBonus}일 후 보너스 +${bonusPts}M</div>`;
-      }
-    }
-    inner.innerHTML=`<div class="${clearClass}" style="text-align:center">
-      <div style="display:flex;align-items:center;justify-content:center;gap:6px;font-size:14px;font-weight:800;color:rgba(255,255,255,.95)">
-        <span style="display:inline-flex;width:16px;height:16px;color:#4ADE80">${svgCheck}</span> 오늘 할일 올클리어!
-      </div>
-      <div class="mission-dots">${Array(total).fill(0).map(()=>'<div class="mission-dot done"></div>').join('')}</div>
-      ${bonusHtml}
-    </div>`;
-  }else{
-    // 진행 중 상태
-    let dots='';
-    const {acts}=getTodayMissionProgress();
-    for(let i=0;i<total;i++){
-      const a=acts[i];
-      const isDone=countDone(a)>=a.maxDay;
-      const justDone=isDone&&_prevMissionDone>=0&&_prevMissionDone<done;
-      dots+=`<div class="mission-dot ${isDone?'done':''} ${justDone?'just-done':''}"></div>`;
-    }
-    const nextStreak=streak+1;
-    const encourageMsg=remaining===1
-      ?`마지막 1개! ${nextStreak}일 연속 달성!`
-      :remaining<=2
-        ?`${remaining}개만 더! ${nextStreak}일 연속까지!`
-        :`${done}/${total} 완료 — 전부하면 ${nextStreak}일 연속!`;
-
-    inner.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between">
-      <div style="display:flex;align-items:center;gap:5px;font-size:13px;font-weight:800;color:rgba(255,255,255,.9)">
-        <span style="display:inline-flex;width:14px;height:14px;opacity:.8">${svgStar}</span> 오늘 할일 ${done}/${total}
-      </div>
-      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.65)">${encourageMsg}</div>
-    </div>
-    <div class="mission-dots">${dots}</div>`;
-  }
-  _prevMissionDone=done;
 }
 
 // ── 마일리 캐릭터 SVG 생성 ──────────────────────────
@@ -10579,9 +10494,22 @@ function renderMilyGreeting(){
   _milyLastState=stateKey;
 
   el.style.display='flex';
-  el.className='mily-greeting'+(state==='celebrate'||state==='gift'?' celebrate':'');
+  el.className='mily-greeting-hero'+(state==='celebrate'||state==='gift'?' celebrate':'');
   charEl.innerHTML=_milySVG(charCfg);
-  msgEl.innerHTML=`${msg}${hint?`<div class="mily-hint">${hint}</div>`:''}`;
+
+  // 진행 도트 생성
+  let dotsHtml='';
+  if(total>0){
+    const {acts}=getTodayMissionProgress();
+    let dots='';
+    for(let i=0;i<total;i++){
+      const a=acts[i];
+      const isDone=a.maxDay>0?countDone(a)>=a.maxDay:countDone(a)>0;
+      dots+=`<div class="mission-dot ${isDone?'done':''}"></div>`;
+    }
+    dotsHtml=`<div class="mission-dots" style="margin-top:6px">${dots}</div>`;
+  }
+  msgEl.innerHTML=`${msg}${hint?`<div class="mily-hint">${hint}</div>`:''}${dotsHtml}`;
 }
 
 // ── streak pill 클릭 → 설명 팝업 ──────────────────────────
@@ -15474,6 +15402,13 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {
+    ver:'1.8.2 (v0402c)', date:'2026-04-02',
+    items:[
+      {type:'new',text:'마일리 캐릭터를 hero 영역 안으로 이동 — 진행 도트 포함'},
+      {type:'fix',text:'기존 오늘 할일 진행 바(mission-bar) 제거, 마일리 인사말로 통합'},
+    ]
+  },
   {
     ver:'1.8.1 (v0402b)', date:'2026-04-02',
     items:[
