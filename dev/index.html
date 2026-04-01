@@ -16268,9 +16268,11 @@ function showReceivedMsg(fromId,text,emotion,msgObj){
   }else{
     actionsEl.style.display='none';
   }
-  document.getElementById('recv-msg-bg').style.display='block';
+  const _recvBg=document.getElementById('recv-msg-bg');
+  const _alreadyOpen=_recvBg.style.display==='block';
+  _recvBg.style.display='block';
   document.getElementById('recv-msg-pop').style.display='block';
-  lockBodyScroll();
+  if(!_alreadyOpen) lockBodyScroll(); // 이미 열려있으면 중복 lock 방지
   if(emotion)playEmotionAnimation(emotion);
   reallyGoTab('home');
 }
