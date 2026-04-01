@@ -2,14 +2,14 @@
 
 > 이 문서는 새 세션에서 실수 없이 개발·테스트·배포할 수 있도록 모든 핵심 정보를 담고 있습니다.
 > **새 세션 시작 시 반드시 이 문서를 먼저 읽을 것.**
-> 최종 업데이트: 2026-04-01 (소셜 연동 해제 auth 레지스트리 수정, 로그인 후 상단 색단차 수정, 시작페이지 복원)
+> 최종 업데이트: 2026-04-01 (세션 11차 — 게이지 단축, 뱃지 난이도, 홈표시 토글, 텍스트 선택 방지, DB 정리)
 
 ---
 
 ## 1. 프로젝트 개요
 
 - **앱 이름**: 태민이 마일리지 (mile.ly)
-- **형태**: 단일 HTML 파일 PWA (~16,200줄, ~910KB)
+- **형태**: 단일 HTML 파일 PWA (~18,900줄)
 - **GitHub**: `https://github.com/kwakhyoshin/taemin_mileage`
 - **호스팅**: GitHub Pages (main 브랜치)
 - **운영 URL**: `https://kwakhyoshin.github.io/taemin_mileage/`
@@ -52,23 +52,24 @@ git config user.email "nonmarking@gmail.com"
 git config user.name "kwakhyoshin"
 ```
 
-### 3.2 Git 워크플로우
-- **main 브랜치만 사용** (별도 dev 브랜치 없음)
-- `main` 루트 `index.html` = 운영기, `main` `dev/index.html` = 개발기
-- **개발은 기본적으로 dev/index.html만 수정** (운영 반영은 사용자가 별도 요청 시에만)
+### 3.2 Git 워크플로우 — 트렁크 베이스드 개발
+- **main 브랜치 하나만 사용** (trunk)
+- **모든 코드 변경은 feature 브랜치에서 작업** → PR → main에 merge
+- main에 직접 코드 커밋하지 않는다 (문서/설정 파일 예외)
 
 ```bash
-# 개발기만 반영 (기본)
+# 1. feature 브랜치에서 개발
+git checkout main && git pull origin main
+git checkout -b feature/기능명
+# ... dev/index.html 수정 ...
 git add dev/index.html
-git commit -m "변경 내용"
-git push origin main
-
-# 운영기 동시 반영 (사용자 요청 시에만)
-# ⚠️ index.html의 _ENV='prod' 반드시 유지 확인!
-# ⚠️ CSS style 속성에 display 중복 정의 주의!
-git add index.html
-git commit -m "운영기 배포: 변경 내용"
-git push origin main
+git commit -m "feat: 기능 설명"
+git push origin feature/기능명
+gh pr create --title "제목" --body "설명"
+# 2. PR diff 확인 후 merge
+gh pr merge --merge
+git checkout main && git pull
+git branch -d feature/기능명
 ```
 
 ### 3.3 ⛔ 절대 하지 말 것
@@ -1598,3 +1599,54 @@ account: {
 - 네이버 로그인 검수 재제출 필요 (서비스 소개 문서 + 로그인 플로우 스크린샷)
 - 카카오 개발자 콘솔에서 닉네임 동의항목 활성화 필요
 - 초대 가입 소셜 로그인: 네이버 심사 완료 후 실제 네이버 가입 플로우 테스트 필요
+
+### 2026-04-01 세션 (11차) — 게이지 단축 + 뱃지 난이도 상향 + 홈표시 토글 + 텍스트 선택 방지 + DB 정리
+
+| 커밋 | PR | 설명 | 상태 |
+|------|-----|------|------|
+| `9f7448b` | #52 | feat: 게이지 0.4초 + 뱃지 난이도 상향 + 부모뱃지 버그 수정 + 오늘할일 체크 | ✅ merged |
+| `64fcd88` | #53 | fix: todayTask→showHome 통합 + 텍스트 선택 방지 | ✅ merged |
+
+**주요 변경:**
+
+1. **꾹 누르기 게이지 시간 단축** (1.0초 → 0.4초)
+   - CSS transition `width .4s linear`, setTimeout 400ms로 변경
+   - 홈탭/로그탭 모두 적용
+
+2. **뱃지 획득 난이도 전체 상향**
+   - 공부: 5→10, 15→25, 30→50, 50→100, streak 3→5, 7→10
+   - 꾸준함: 3→5, 7→10, 14→21, morning 7→15
+   - 도전: patience 5→10, school 7→14, allClear 5/10→7/15, weekend 3→5
+   - 생활습관: brush 30→50, vitamin 20→30, fold 15→25, wash 20→30, lotion 15→25, morning combo 3→5
+   - 감정: happy 5→10, msg 5/20→10/30
+   - 마일스톤: badge 10/25→15/30, reward 3/10→5/15, mood 7/30→15/50
+
+3. **부모 행위가 자녀 뱃지로 인정되던 버그 수정**
+   - 새 헬퍼 함수: `countOwnMoodLogs()`, `countOwnMoodType()`, `countOwnUniqueMoods()`, `countOwnSentMessages()`
+   - `_globalDataOwner` 기반으로 현재 데이터 소유자 판별, 본인 기록만 카운트
+   - `selectMood()`: 부모가 자녀 데이터 조회 중일 때 기분 입력이 자녀 moodLog에 들어가던 문제 수정 → 부모 자신의 memberData.moodLog에 기록
+
+4. **활동기록 탭 홈표시 토글** (부모 전용)
+   - 초기 구현: 별도 `todayTask` 속성 → **수정: 기존 `showHome` 속성으로 통합**
+   - 관리자 메뉴의 "홈 표시" 토글과 동일한 데이터 사용
+   - `showHome=true`인 활동은 체크 표시, 토글하면 홈탭에 즉시 반영
+   - `togActHome()`과 동일 로직 (memberData 동기화 포함)
+   - CSS: `.today-task-toggle`, `.log-item.has-today-toggle` (좌측 28px 패딩)
+
+5. **꾹 누르기 시 텍스트 선택/컨텍스트 메뉴 방지**
+   - 홈탭, 로그탭, 보상탭 3곳의 touchstart 이벤트: `{passive:true}` → `{passive:false}` + `e.preventDefault()`
+   - iOS/Android에서 longpress 시 텍스트 선택, 복사/찾아보기 팝업이 뜨던 문제 해결
+
+6. **Firestore 테스트 데이터 정리**
+   - REST API로 18개 테스트 가족 문서 삭제 (dev_로 시작하는 테스트 가족들)
+   - `families/_dev_auth_registry`에서 테스트 계정 매핑 정리
+   - 실제 가족 `taemin_dev`는 보존
+
+7. **크로스 패밀리 링크 조사 (나노 문제)**
+   - `nonmarking@gmail.com`이 `dev_eAEMKBVm` 가족의 "나노"로 등록되어 있었음
+   - 원인: 이전 테스트에서 생성된 가입 데이터 (버그 아님)
+   - 테스트 가족 삭제로 해결
+
+**APP_CHANGELOG:** v1.6.9 — 게이지 단축, 뱃지 난이도 상향, 부모뱃지 버그 수정, 홈표시 토글, 텍스트 선택 방지
+
+**버전:** DEV v0401zd
