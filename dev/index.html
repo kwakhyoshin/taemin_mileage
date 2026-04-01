@@ -7172,13 +7172,25 @@ async function _executeWithdrawal(initiator, memberIdsToDelete, memberName, over
       console.log('[Withdraw] Firestore listener unsubscribed');
     }
 
-    // 11. localStorage 정리
+    // 11. S-13: 회원탈퇴 시 민감 데이터 완전 삭제
     localStorage.removeItem(_LS_PREFIX+'current_user');
     localStorage.removeItem(_LS_PREFIX+'social_pending');
     localStorage.removeItem(_LS_PREFIX+'family_id');
-    localStorage.removeItem(_LS_PREFIX+'onboarded');
-    localStorage.removeItem(_LS_PREFIX+'tour_done');
+    localStorage.removeItem(_LS_PREFIX+'v6_backup');
+    localStorage.removeItem(_LS_PREFIX+'push_enabled');
+    localStorage.removeItem(_LS_PREFIX+'show_push_guide');
+    localStorage.removeItem(_LS_PREFIX+'push_banner_dismissed');
     localStorage.removeItem(_LS_PREFIX+'changelog_seen');
+    localStorage.removeItem(_LS_PREFIX+'tour_done');
+    localStorage.removeItem(_LS_PREFIX+'onboarded');
+    localStorage.removeItem(_LS_PREFIX+'onboarding_done');
+    localStorage.removeItem(_LS_PREFIX+'device_id');
+    localStorage.removeItem(_LS_PREFIX+'dark');
+    localStorage.removeItem(_LS_PREFIX+'theme');
+    localStorage.removeItem('taemin_v6_kakao_callback_result');
+    localStorage.removeItem('taemin_v6_naver_callback_result');
+    localStorage.removeItem('taemin_v6_naver_redirect');
+    try{ sessionStorage.removeItem('oauth_state_kakao'); sessionStorage.removeItem('oauth_state_naver'); }catch(e){}
 
     // 12. Firebase Auth 로그아웃
     if(fbAuth && signOut){
@@ -7225,8 +7237,20 @@ function logout() {
   _admViewChildId = null;
   _globalDataOwner = null;
   adminOK = false;
+  // S-13: 로그아웃 시 민감 데이터 완전 삭제
   localStorage.removeItem(_LS_PREFIX+'current_user');
-  localStorage.removeItem(_LS_PREFIX+'social_pending'); // 소셜 로그인 플래그 정리
+  localStorage.removeItem(_LS_PREFIX+'social_pending');
+  localStorage.removeItem(_LS_PREFIX+'family_id');
+  localStorage.removeItem(_LS_PREFIX+'v6_backup');
+  localStorage.removeItem(_LS_PREFIX+'push_enabled');
+  localStorage.removeItem(_LS_PREFIX+'show_push_guide');
+  localStorage.removeItem(_LS_PREFIX+'push_banner_dismissed');
+  localStorage.removeItem(_LS_PREFIX+'changelog_seen');
+  localStorage.removeItem(_LS_PREFIX+'tour_done');
+  localStorage.removeItem('taemin_v6_kakao_callback_result');
+  localStorage.removeItem('taemin_v6_naver_callback_result');
+  localStorage.removeItem('taemin_v6_naver_redirect');
+  try{ sessionStorage.removeItem('oauth_state_kakao'); sessionStorage.removeItem('oauth_state_naver'); }catch(e){}
   // Firebase Auth에서도 로그아웃
   if(fbAuth && signOut){
     try{ signOut(fbAuth); }catch(e){ console.warn('Firebase signOut error:', e); }
