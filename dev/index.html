@@ -7318,8 +7318,9 @@ async function _doKakaoLogin(){
     let resolved = false;
     // localStorage fallback 결과 초기화
     try{ localStorage.removeItem('taemin_v6_kakao_callback_result'); }catch(e){}
-    // postMessage로 결과 수신
+    // postMessage로 결과 수신 (origin 검증 포함)
     const handler = (e)=>{
+      if(e.origin !== 'https://kwakhyoshin.github.io') return; // S-04: origin 검증
       if(e.data && e.data.type === 'kakao_login'){
         resolved = true;
         window.removeEventListener('message', handler);
@@ -7397,8 +7398,9 @@ async function _doNaverLogin(){
     }
 
     let resolved = false;
-    // postMessage로 결과 수신
+    // postMessage로 결과 수신 (origin 검증 포함)
     const handler = (e)=>{
+      if(e.origin !== 'https://kwakhyoshin.github.io') return; // S-04: origin 검증
       if(e.data && e.data.type === 'naver_login'){
         resolved = true;
         window.removeEventListener('message', handler);
@@ -8806,6 +8808,17 @@ function syncGlobalToMember(targetId) {
   ms.rewardLog = S.rewardLog ? [...S.rewardLog] : [];
   ms.rewardInventory = JSON.parse(JSON.stringify(S.rewardInventory||[]));
   ms.rewardRequests = JSON.parse(JSON.stringify(S.rewardRequests||[]));
+}
+
+// ── S-09: 입력값 검증 유틸리티 ──
+function sanitizeInput(str, maxLen = 200) {
+  if (!str || typeof str !== 'string') return '';
+  return str.trim().slice(0, maxLen);
+}
+function sanitizeNumber(val, min = 0, max = 99999) {
+  const n = parseInt(val, 10);
+  if (isNaN(n)) return 0;
+  return Math.max(min, Math.min(max, n));
 }
 
 // Robust debounced save with in-flight guard
@@ -15833,7 +15846,7 @@ function closeMsgPop(){
 window.closeMsgPop=closeMsgPop;
 
 function sendFamilyMsg(){
-  const text=document.getElementById('msg-input').value.trim();
+  const text=sanitizeInput(document.getElementById('msg-input').value, 500);
   if(!text){toast('메시지를 입력해주세요');return;}
   if(!currentUser){toast('먼저 로그인해주세요');return;}
   if(!msgTargetUser)return;
@@ -17892,7 +17905,8 @@ window.cancelAvatarEditor=cancelAvatarEditor;
 function sanitizePhotoUrl(url){
   if(!url||typeof url!=='string')return '';
   // data:image/* 또는 https:// 만 허용
-  if(/^data:image\/(png|jpeg|jpg|gif|webp|svg\+xml);base64,/.test(url))return url;
+  // S-05: svg+xml 제거 (SVG 기반 XSS 방지)
+  if(/^data:image\/(png|jpeg|jpg|gif|webp);base64,/.test(url))return url;
   if(/^https:\/\//.test(url)){
     // HTML 특수문자 이스케이프
     return url.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -18008,7 +18022,7 @@ window._createState = _createState;
     // ── S-02: client_secret은 Cloudflare Worker 프록시에서 처리 ──
     // 결과 전달 헬퍼: postMessage + localStorage fallback
     function _deliverKakaoResult(data){
-      if(window.opener){ try{ window.opener.postMessage(data, '*'); }catch(e){} }
+      if(window.opener){ try{ window.opener.postMessage(data, 'https://kwakhyoshin.github.io'); }catch(e){} }
       try{ localStorage.setItem('taemin_v6_kakao_callback_result', JSON.stringify(data)); }catch(e){}
       setTimeout(()=>{ try{window.close();}catch(e){} }, 300);
     }
@@ -18095,7 +18109,7 @@ window._createState = _createState;
       } else {
         // 팝업 모드: 기존 방식 (postMessage + localStorage)
         if(window.opener){
-          try{ window.opener.postMessage(data, '*'); }catch(e){}
+          try{ window.opener.postMessage(data, 'https://kwakhyoshin.github.io'); }catch(e){}
         }
         try{ localStorage.setItem('taemin_v6_naver_callback_result', JSON.stringify(data)); }catch(e){}
         setTimeout(()=>window.close(), 300);

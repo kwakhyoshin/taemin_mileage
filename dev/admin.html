@@ -401,6 +401,12 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+// ── S-06: XSS 방지 — HTML 이스케이프 유틸리티 ──
+function escHtml(str) {
+  if (!str || typeof str !== 'string') return '';
+  return str.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
 // ── Admin credentials ──
 const ADMIN_SALT = 'taemin_sysadmin_v1_';
 const ADMIN_ACCOUNTS = {
@@ -453,19 +459,37 @@ window.toggleTheme = function() {
   if (btn) btn.textContent = next === 'dark' ? '☀️' : '🌙';
 };
 
-// ── Login ──
+// ── Login (S-07: brute-force 방지) ──
+let _loginAttempts = 0;
+let _loginLockUntil = 0;
+
 window.doAdminLogin = async function() {
   const id = document.getElementById('admin-id').value.trim();
   const pwd = document.getElementById('admin-pwd').value;
   const err = document.getElementById('login-error');
 
+  // S-07: 로그인 시도 횟수 제한 (5회 실패 시 30초 잠금)
+  if (Date.now() < _loginLockUntil) {
+    const remain = Math.ceil((_loginLockUntil - Date.now()) / 1000);
+    err.textContent = `너무 많은 시도입니다. ${remain}초 후에 다시 시도해주세요`;
+    return;
+  }
+
   if (!id || !pwd) { err.textContent = '아이디와 비밀번호를 입력해주세요'; return; }
 
   const account = ADMIN_ACCOUNTS[id];
-  if (!account) { err.textContent = '등록되지 않은 관리자입니다'; return; }
+  if (!account) {
+    _loginAttempts++;
+    if (_loginAttempts >= 5) { _loginLockUntil = Date.now() + 30000; _loginAttempts = 0; }
+    err.textContent = '아이디 또는 비밀번호가 틀립니다'; return;
+  }
 
   const hash = await hashPwd(pwd);
-  if (hash !== account.pwdHash) { err.textContent = '비밀번호가 틀렸어요'; return; }
+  if (hash !== account.pwdHash) {
+    _loginAttempts++;
+    if (_loginAttempts >= 5) { _loginLockUntil = Date.now() + 30000; _loginAttempts = 0; }
+    err.textContent = '아이디 또는 비밀번호가 틀립니다'; return;
+  }
 
   _loggedIn = true;
   _adminName = account.name;
@@ -681,17 +705,17 @@ function renderFamilyCard(f) {
   const created = fm.createdAt ? new Date(fm.createdAt).toLocaleDateString('ko-KR') : '-';
   const colors = ['#6366F1', '#EC4899', '#F59E0B', '#10B981', '#8B5CF6', '#EF4444', '#06B6D4'];
 
-  return `<div class="family-card" onclick="openFamilyDetail('${f.id}')">
+  return `<div class="family-card" onclick="openFamilyDetail('${escHtml(f.id)}')">
     <div class="family-card-head">
       <div>
-        <div class="family-card-name">${fm.familyName || f.id} ${f._isLegacy ? '<span class="badge-pill badge-inactive">레거시</span>' : ''}</div>
+        <div class="family-card-name">${escHtml(fm.familyName || f.id)} ${f._isLegacy ? '<span class="badge-pill badge-inactive">레거시</span>' : ''}</div>
         <div class="family-card-meta">구성원 ${memberCount}명 · 가입 ${registeredCount}명 · 모드: ${fm.mode === 'unified' ? '통합' : '독립'} · 생성: ${created}</div>
       </div>
-      <div style="font-size:12px;color:#94A3B8;font-weight:600">${f.id}</div>
+      <div style="font-size:12px;color:#94A3B8;font-weight:600">${escHtml(f.id)}</div>
     </div>
     <div class="family-card-members">
       ${Object.values(members).slice(0, 7).map((m, i) =>
-        `<div class="family-card-avatar" style="background:${colors[i % colors.length]}" title="${m.name}">${(m.name || '?')[0]}</div>`
+        `<div class="family-card-avatar" style="background:${colors[i % colors.length]}" title="${escHtml(m.name)}">${escHtml((m.name || '?')[0])}</div>`
       ).join('')}
     </div>
   </div>`;

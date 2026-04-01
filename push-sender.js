@@ -18,9 +18,11 @@
 const webpush = require('web-push');
 const admin = require('firebase-admin');
 
-// VAPID 설정
+// VAPID 설정 — Private Key는 환경변수에서 로드 (코드에 하드코딩 금지)
+// 실행 전: export VAPID_PRIVATE_KEY="your-vapid-private-key"
 const VAPID_PUBLIC = 'BMqfqNW-_vInMwqdq3H01AKHBepukX3-Lk1RX8ZkZ97jlixIOS7hIZDRJ0gwNy00hARwc2XilfOHnx9WBlcNJfI';
-const VAPID_PRIVATE = 'N6--Fo1_AniJRygwzF57hbNaapW26ntk30PnT1LOK1I';
+const VAPID_PRIVATE = process.env.VAPID_PRIVATE_KEY;
+if (!VAPID_PRIVATE) { console.error('ERROR: VAPID_PRIVATE_KEY 환경변수가 설정되지 않았습니다.'); process.exit(1); }
 
 webpush.setVapidDetails(
   'mailto:nonmarking@gmail.com',
