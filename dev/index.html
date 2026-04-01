@@ -8479,7 +8479,7 @@ const BADGES = [
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
-if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401zb';}}
+if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV v0401zd';}}
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
@@ -10050,7 +10050,6 @@ function renderHomeGrid(){
     const _gaugeText=st.cls==='done'||st.cls==='exhausted'?'rgba(16,185,129,.7)':st.cls==='partial'?'rgba(245,158,11,.7)':'rgba(99,102,241,.7)';
     return `<div class="act-card${cls}" data-actid="${a.id}" style="${st.exhausted?'cursor:default;':''}--lp-gauge-color:${_gaugeColor};--lp-gauge-text:${_gaugeText}">
       <div class="lp-gauge"><div class="lp-gauge-fill"></div><div class="lp-gauge-hint">꾹 누르기</div></div>
-      ${a.todayTask?'<div style="position:absolute;top:4px;right:6px;font-size:10px;z-index:4;opacity:.7">📌</div>':''}
       ${stickerHTML}
       <div class="e">${a.emoji}</div>
       <div class="n">${a.name}</div>
@@ -10072,13 +10071,15 @@ function renderHomeGrid(){
     const isStickerArea=(e)=>e.target&&e.target.closest('[data-stkid]');
     const startLP=(e)=>{
       if(isStickerArea(e))return;didLongPress=false;
+      // 텍스트 선택/컨텍스트 메뉴 방지 (v0401 fix)
+      e.preventDefault();
       // 게이지 애니메이션 시작
       if(gauge&&gaugeFill){gaugeFill.style.transition='none';gaugeFill.style.width='0';gauge.offsetHeight;gauge.classList.add('active');gaugeFill.style.transition='width .4s linear';gaugeFill.style.width='100%';}
       lpTimer=setTimeout(()=>{didLongPress=true;cancelGauge();if(navigator.vibrate)navigator.vibrate(30);showLongPressChoice(actId,card);},400);
     };
     const cancelGauge=()=>{if(gauge){gauge.classList.remove('active');if(gaugeFill){gaugeFill.style.transition='none';gaugeFill.style.width='0';}}};
     const cancelLP=()=>{clearTimeout(lpTimer);cancelGauge();};
-    card.addEventListener('touchstart',startLP,{passive:true});
+    card.addEventListener('touchstart',startLP,{passive:false});
     card.addEventListener('touchmove',cancelLP,{passive:true});
     card.addEventListener('touchend',cancelLP);
     card.addEventListener('touchcancel',cancelLP);
@@ -10125,8 +10126,8 @@ function renderLogList(){
     const _stampHTML=_isDone?'<div class="log-done-stamp"><svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="29" stroke="#10B981" stroke-width="3.5" stroke-dasharray="5 2.5" opacity=".9"/><circle cx="32" cy="32" r="21" stroke="#10B981" stroke-width="2.5" opacity=".65"/><text x="32" y="30" text-anchor="middle" font-size="14" font-weight="900" fill="#10B981" font-family="Noto Sans KR,sans-serif">완료</text><text x="32" y="43" text-anchor="middle" font-size="9" font-weight="800" fill="#10B981" font-family="sans-serif" letter-spacing="2" opacity=".7">DONE</text></svg></div>':'';
     const _lgColor=exhausted?'rgba(16,185,129,.12)':cls.includes('partial')?'rgba(245,158,11,.12)':'rgba(99,102,241,.12)';
     const _isCaregiver=isCaregiverUser();
-    const _isTodayTask=!!a.todayTask;
-    const _todayToggleHTML=_isCaregiver?`<div class="today-task-toggle${_isTodayTask?' on':''}" data-toggle-actid="${a.id}" title="오늘할일 ${_isTodayTask?'해제':'지정'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">${_isTodayTask?'<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>':'<circle cx="12" cy="12" r="10"/>'}</svg></div>`:'';
+    const _isShowHome=!!a.showHome;
+    const _todayToggleHTML=_isCaregiver?`<div class="today-task-toggle${_isShowHome?' on':''}" data-toggle-actid="${a.id}" title="홈표시 ${_isShowHome?'해제':'설정'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">${_isShowHome?'<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>':'<circle cx="12" cy="12" r="10"/>'}</svg></div>`:'';
     return `<div class="log-item${cls}${_isCaregiver?' has-today-toggle':''}" data-actid="${a.id}" style="${exhausted?'cursor:default;':''}position:relative;overflow:visible;--lp-gauge-color:${_lgColor}">
       ${_todayToggleHTML}
       <div class="lp-gauge" style="border-radius:0"><div class="lp-gauge-fill"></div></div>
@@ -10160,12 +10161,13 @@ function renderLogList(){
     const isStickerArea=(e)=>e.target&&e.target.closest('[data-stkid]');
     const startLP=(e)=>{
       if(isUndoBtn(e)||isStickerArea(e))return;didLongPress=false;
+      e.preventDefault(); // 텍스트 선택/컨텍스트 메뉴 방지
       if(gauge&&gaugeFill){gaugeFill.style.transition='none';gaugeFill.style.width='0';gauge.offsetHeight;gauge.classList.add('active');gaugeFill.style.transition='width .4s linear';gaugeFill.style.width='100%';}
       lpTimer=setTimeout(()=>{didLongPress=true;cancelGauge();if(navigator.vibrate)navigator.vibrate(30);showLongPressChoice(actId,item);},400);
     };
     const cancelGauge=()=>{if(gauge){gauge.classList.remove('active');if(gaugeFill){gaugeFill.style.transition='none';gaugeFill.style.width='0';}}};
     const cancelLP=()=>{clearTimeout(lpTimer);cancelGauge();};
-    item.addEventListener('touchstart',startLP,{passive:true});
+    item.addEventListener('touchstart',startLP,{passive:false});
     item.addEventListener('touchmove',cancelLP,{passive:true});
     item.addEventListener('touchend',cancelLP);
     item.addEventListener('touchcancel',cancelLP);
@@ -10687,8 +10689,9 @@ function attachRwdLongPress(){
     card.addEventListener('touchstart',(e)=>{
       didLongPress=false;didMove=false;
       startY=e.touches[0].clientY;
+      e.preventDefault(); // 텍스트 선택/컨텍스트 메뉴 방지
       lpTimer=setTimeout(()=>{didLongPress=true;showRwdGoalChoice(rwdId,card);},500);
-    },{passive:true});
+    },{passive:false});
     card.addEventListener('touchmove',(e)=>{
       if(Math.abs(e.touches[0].clientY-startY)>8){didMove=true;clearTimeout(lpTimer);}
     },{passive:true});
@@ -13496,22 +13499,24 @@ function togActDone(id){
     toast(`✅ "${a.name}" 오늘 완료 처리됨 (마일리지 변동 없음)`);
   }
 }
-// 오늘할일 토글 (부모 전용, v0401)
+// 홈표시 토글 (부모 전용, 활동기록 탭에서 — togActHome과 동일 동작)
 function toggleTodayTask(actId){
   if(!isCaregiverUser())return;
-  const a=S.acts.find(x=>x.id===actId);
+  const _ms=_getAdmMemberData();
+  const _acts=(_ms&&_ms.acts)?_ms.acts:S.acts;
+  const a=_acts.find(x=>x.id===actId);
   if(!a)return;
-  a.todayTask=!a.todayTask;
-  // memberData에도 반영
-  const vid=_globalDataOwner||viewingChildId||currentUser;
-  if(S.memberData&&S.memberData[vid]){
-    const ma=S.memberData[vid].acts?.find(x=>x.id===actId);
-    if(ma)ma.todayTask=a.todayTask;
+  a.showHome=!a.showHome;
+  // 글로벌 S.acts에도 반영
+  if(_globalDataOwner===(_admViewChildId||getViewedMemberId())){
+    const sa=S.acts.find(x=>x.id===actId);
+    if(sa)sa.showHome=a.showHome;
   }
   save();
   renderLogList();
   renderHomeGrid();
-  toast(a.todayTask?`📌 "${a.name}" 오늘할일로 지정했어요`:`📌 "${a.name}" 오늘할일에서 해제했어요`);
+  if(typeof renderAdmActList==='function')try{renderAdmActList();}catch(e){}
+  toast(a.showHome?`🏠 "${a.name}" 홈에 표시됩니다`:`➖ "${a.name}" 홈에서 숨깁니다`);
 }
 window.toggleTodayTask=toggleTodayTask;
 
@@ -14824,7 +14829,8 @@ const APP_CHANGELOG=[
       {type:'improve',text:'꾹 누르기 게이지 시간 1초→0.4초로 단축 (더 빠른 반응)'},
       {type:'improve',text:'뱃지 획득 난이도 전체 상향 (공부, 꾸준함, 도전, 생활습관 등)'},
       {type:'fix',text:'부모 행위(기분표현, 메시지)가 자녀 뱃지로 인정되던 버그 수정'},
-      {type:'new',text:'부모 전용: 활동기록 탭에서 오늘할일 체크 기능 (📌 표시)'},
+      {type:'new',text:'부모 전용: 활동기록 탭에서 홈표시 토글 (관리자 홈표시와 동일)'},
+      {type:'fix',text:'꾹 누르기 시 브라우저 텍스트 선택/컨텍스트 메뉴 방지'},
     ]
   },
   {
