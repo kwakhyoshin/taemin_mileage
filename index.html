@@ -5307,10 +5307,10 @@ async function doJoinSocialLogin(provider){
     if(!S.users)S.users={};
     S.users[mid]={authProvider:provider,authUid:uid,email,v:2};
 
-    // 프로필 사진 저장
+    // 프로필 사진 저장 (사용자가 직접 설정한 사진이 없을 때만)
     if(profileImage){
       if(!S.photos)S.photos={};
-      S.photos[mid]=profileImage;
+      if(!S.photos[mid]) S.photos[mid]=profileImage;
     }
 
     // 토큰 소비 처리
@@ -6648,10 +6648,10 @@ function _applySocialLinkToMemory(memberId){
     S.users[memberId].authUid = su.uid;
     S.users[memberId].email = su.email||'';
   }
-  // 소셜 프로필 사진이 있으면 S.photos에 저장
+  // 소셜 프로필 사진이 있으면 S.photos에 저장 (사용자가 직접 설정한 사진이 없을 때만)
   if(su.profileImage){
     if(!S.photos) S.photos={};
-    S.photos[memberId] = su.profileImage;
+    if(!S.photos[memberId]) S.photos[memberId] = su.profileImage;
   }
   console.log('[Social Link] Applied to memory:', su.provider, su.email, '→', memberId, su.profileImage?'(photo)':'');
   // auth registry는 비동기로 별도 처리 (UI 차단 없음)
@@ -7857,8 +7857,8 @@ async function _loginToFamily(familyId, memberId, authUid, provider, email, prof
       const _acc = S.familyMeta?.members?.[memberId]?.account;
       if(_acc){ _acc.authProvider = provider; _acc.authUid = authUid; if(email) _acc.email = email; }
       if(S.users?.[memberId]){ S.users[memberId].authProvider = provider; S.users[memberId].authUid = authUid; if(email) S.users[memberId].email = email; }
-      // 소셜 프로필 사진 저장
-      if(profileImage){ if(!S.photos) S.photos={}; S.photos[memberId]=profileImage; console.log('[_loginToFamily] Photo saved for', memberId, ':', profileImage.substring(0,60)); }
+      // 소셜 프로필 사진 저장 (사용자가 직접 설정한 사진이 없을 때만)
+      if(profileImage){ if(!S.photos) S.photos={}; if(!S.photos[memberId]){ S.photos[memberId]=profileImage; console.log('[_loginToFamily] Photo set from social:', memberId); } else { console.log('[_loginToFamily] Photo kept (user-set exists):', memberId); } }
       try{ await setDoc(DATA_DOC, S); }catch(_se){ console.warn('[_loginToFamily] account update save warning:', _se); }
     }
     cachedUsers = S.users || {};
