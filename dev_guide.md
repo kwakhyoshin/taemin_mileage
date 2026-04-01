@@ -1707,4 +1707,80 @@ account: {
 2. 소셜 계정 사진 (URL, 최초 연동/가입 시에만 설정)
 3. 기본 아바타 (SVG, `AVATARS[id]`)
 
-**버전:** DEV v0401zg (개발기), v1.6.9 (운영기)
+**버전:** DEV v0401d (개발기), v1.7.1 (운영기)
+
+---
+
+### 2026-04-01 세션 12차 — 푸시 알림 중복 수정 + 보안 강화 + 알림 안내 UX
+
+**적용 범위: 개발기 + 운영기 (v0401d)**
+
+#### 주요 변경 사항
+
+**1. 푸시 알림 중복 발송 수정 (4회→1회)**
+- **원인**: `_syncPushToLegacy()`가 pushBroadcast, rewardNotify, familyMessages 등 트리거 필드를 레거시 문서에도 동기화 → families/{familyId}와 users/taemin 양쪽 Cloud Functions가 동시 트리거
+- **수정**: `_syncPushToLegacy()`에서 `pushDevices`만 동기화, 나머지 트리거 필드 제거
+- **PR**: #70, #71, #72
+
+**2. 보상 승인/거절 알림 자녀 수신 수정**
+- **원인**: 아이폰에서 처음 부모로 로그인 후 유저 전환 시 `pushDevices[deviceId].user`가 여전히 부모 → 자녀 대상 알림이 라우팅 안 됨
+- **수정**: `_syncPushDeviceUser()` 함수 추가 — `devSwitchUser()`, `checkAuth()` 호출 시 자동 갱신
+- **PR**: #74
+
+**3. 아이폰 PWA 메시지 뱃지 미표시 수정**
+- **원인**: 아이폰 PWA에서 백그라운드 복귀 시 onSnapshot 지연으로 뱃지 미갱신
+- **수정**:
+  - `visibilitychange`에서 `checkNewMessages()` + `_updateFamilyBtnBadge()` 호출
+  - SW push 이벤트에서 `PUSH_RECEIVED` postMessage → 앱에서 뱃지 즉시 갱신
+  - 3곳의 onSnapshot 모두 `_hasDirtyLocal` else 분기 통일
+- **PR**: #78
+
+**4. 알림 꺼짐 안내 UX 3종**
+- 온보딩 4번째 슬라이드 "알림을 켜주세요" 추가 → 로그인 후 나의 메뉴 자동 이동 + 알림 토글 하이라이트 + 안내 팝업
+- 메시지 보내기 후 알림 꺼져 있으면 안내 팝업 (세션 1회)
+- 로그인 후 알림 off이면 상단 배너 표시 (`env(safe-area-inset-top)` 아이폰 대응)
+- **PR**: #79, #80
+
+**5. UI 개선**
+- 메시지 팝업 시 네비바 사라지는 CSS 제거
+- 활동기록 탭 구분선 개선 (`color-mix(in srgb, var(--tx) 8%, transparent)`)
+- **PR**: #74, #75
+
+#### 보안 강화 사항 (v0401 시리즈)
+
+| 항목 | 코드 | 설명 |
+|------|------|------|
+| S-02 | 카카오 토큰 프록시 | `client_secret`을 Cloudflare Worker 프록시(`kakao-token-proxy.nonmarking.workers.dev`)로 이전. 클라이언트 코드에서 secret 제거 |
+| S-04 | postMessage origin 검증 | 카카오/네이버 OAuth 콜백의 `postMessage`에서 `e.origin !== 'https://kwakhyoshin.github.io'` 검증 추가 |
+| S-05 | SVG XSS 방지 | `sanitizePhotoUrl()`에서 `svg+xml` MIME 타입 제거 — SVG 기반 XSS 벡터 차단 |
+| S-09 | 입력값 검증 유틸리티 | `sanitizeInput(str, maxLen)`, `sanitizeNumber(val, min, max)` 함수 추가, `sendFamilyMsg()`에서 사용 |
+
+#### 커밋/PR 목록
+| PR | 설명 | 상태 |
+|----|------|------|
+| #70 | fix: 푸시 알림 중복 발송 수정 (_syncPushToLegacy 트리거 필드 제거) | ✅ 운영 적용 |
+| #71 | fix: 메시지 푸시 중복 수정 (pushBroadcast 제거) | ✅ 운영 적용 |
+| #72 | fix: 보상 푸시 중복 수정 (rewardNotify 제거) | ✅ 운영 적용 |
+| #73 | chore: 버전 v0401b 확인용 | ✅ 운영 적용 |
+| #74 | fix: 유저 전환 시 pushDevice 자동 갱신 + 네비 숨김 제거 + 뱃지 즉시 갱신 | ✅ 운영 적용 |
+| #75 | style: 활동기록 탭 구분선 개선 | ✅ 운영 적용 |
+| #76 | release: v0401 운영 반영 | ✅ 운영 적용 |
+| #77 | chore: APP_CHANGELOG 버전 표시 | ✅ 운영 적용 |
+| #78 | fix: 아이폰 PWA 메시지 뱃지 미표시 수정 | ✅ 운영 적용 |
+| #79 | feat: 알림 꺼짐 안내 기능 3종 | ✅ 운영 적용 |
+| #80 | fix: 온보딩 후 알림 안내 자동 전환 + 배너 safe-area | ✅ 운영 적용 |
+
+#### 트러블슈팅 기록
+
+**푸시 알림 중복 디버깅 과정**:
+1. 최초 증상: 메시지 1건 발송 → 4건 수신
+2. 원인 분석: families/{familyId} + users/taemin 양쪽 문서 변경 × 2 디바이스 = 4건
+3. `_syncPushToLegacy`에서 트리거 필드 제거 → 2건으로 감소
+4. `sendFamilyMsg`에서 `pushBroadcast` 제거 → 메시지 1건
+5. `useReward/approveRewardRequest/rejectRewardRequest`에서 `rewardNotify` 제거 → 보상도 1건
+
+**아이폰 pushDevice 유저 미갱신 문제**:
+- 증상: 보상 승인 후 자녀에게 푸시 안 감
+- 원인: 아이폰에서 부모로 최초 로그인 → 유저 전환 시 `pushDevices[deviceId].user`가 부모로 유지
+- Cloud Functions `sendToDevices()`에서 `targetUsers.includes(device.user)` 필터링 → 자녀 대상 알림 미발송
+- 해결: `_syncPushDeviceUser()` 자동 호출 (devSwitchUser, checkAuth)

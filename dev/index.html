@@ -8525,7 +8525,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0401c';
+const _APP_VERSION = 'v0401d';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -14915,6 +14915,15 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {
+    ver:'1.7.1 (v0401d)', date:'2026-04-01',
+    items:[
+      {type:'new',text:'알림 켜기 안내: 온보딩 → 나의 메뉴 자동 이동 + 포커싱'},
+      {type:'new',text:'메시지 보내기 시 알림 꺼짐 안내 팝업'},
+      {type:'new',text:'로그인 후 알림 꺼짐 상단 배너 (탭하여 켜기)'},
+      {type:'fix',text:'아이폰 PWA 메시지 뱃지 미표시 수정'},
+    ]
+  },
   {
     ver:'1.7.0 (v0401c)', date:'2026-04-01',
     items:[
