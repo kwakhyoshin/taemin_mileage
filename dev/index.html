@@ -6075,7 +6075,7 @@ async function saveFamilyToFirestore(){
             checkNewMessages();
             renderNavUsers();
             console.log('🔄 다른 기기에서 데이터가 업데이트됐어요');
-          }
+          }else{const _sd=snap.data();if(_sd.familyMessages&&JSON.stringify(_sd.familyMessages)!==JSON.stringify(S.familyMessages)){S.familyMessages=_sd.familyMessages;checkNewMessages();_updateFamilyBtnBadge();}}
         });
         console.log('[saveFamilyToFirestore] New listener on', docPath);
       }catch(_e){ console.warn('New family listener failed:', _e); }
@@ -16332,6 +16332,12 @@ window.playEmotionAnimation=playEmotionAnimation;
 // Listen for SW notification click messages
 if('serviceWorker' in navigator){
   navigator.serviceWorker.addEventListener('message',(event)=>{
+    if(event.data&&event.data.type==='PUSH_RECEIVED'){
+      // SW에서 push 수신 시 뱃지 즉시 갱신 (아이폰 onSnapshot 지연 보완)
+      console.log('[SW→App] PUSH_RECEIVED - 뱃지 갱신');
+      setTimeout(()=>{ try{ checkNewMessages(); _updateFamilyBtnBadge(); }catch(e){} }, 1000);
+      return;
+    }
     if(event.data&&event.data.type==='NOTIFICATION_CLICK'){
       const d=event.data.data;
       if(d.type==='family_msg'&&d.from&&d.msgText){
@@ -17147,8 +17153,10 @@ scheduleMiddnightCheck();
 // ── APP RESUME: iOS PWA에서 백그라운드 복귀 시 날짜 변경 감지 ──
 document.addEventListener('visibilitychange',()=>{
   if(document.visibilityState==='visible'){
-    console.log('📱 앱 복귀 감지 - 날짜 체크');
+    console.log('📱 앱 복귀 감지 - 날짜 체크 + 뱃지 갱신');
     checkDayChange();
+    // 아이폰 PWA에서 백그라운드 복귀 시 onSnapshot 지연으로 뱃지가 안 뜨는 문제 보완
+    try{ checkNewMessages(); _updateFamilyBtnBadge(); }catch(e){}
   }
 });
 // bfcache 복원 시 항상 최신 버전으로 새로고침
