@@ -13031,12 +13031,12 @@ function useReward(invId){
   const _isCaregiver = isCaregiverUser();
   const _reqChildId = (_isCaregiver && viewingChildId) ? viewingChildId : currentUser;
 
-  // 알림 대상: 요청자 본인 제외, 양육자(caregiver/isAdmin)에게만 알림
-  // ⚠️ m.role !== 'child' 조건은 role이 undefined/빈값인 자녀도 포함시키는 버그 있었음
+  // 알림 대상: 양육자(caregiver) 중 admin에게만 (자녀는 admin이어도 제외)
   const adminMembers = [];
   if(S.familyMeta?.members){
     for(const [mid,m] of Object.entries(S.familyMeta.members)){
-      if(m.isAdmin && mid !== currentUser && mid !== _reqChildId){
+      const isChild = m.type === 'child' || m.role === 'child';
+      if(m.isAdmin && !isChild && mid !== currentUser){
         adminMembers.push(mid);
       }
     }
