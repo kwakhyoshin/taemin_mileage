@@ -434,6 +434,32 @@ body.dark .theme-pick.active .theme-pick-radio{border-color:#818CF8;background:#
 .streak-popup-overlay.show{opacity:1;pointer-events:auto}
 .streak-popup{background:var(--card);border-radius:24px;padding:28px 24px;width:min(320px,calc(100vw - 48px));box-shadow:var(--shadow-lg);text-align:center;transform:scale(.9);transition:transform .2s}
 .streak-popup-overlay.show .streak-popup{transform:scale(1)}
+/* ── 마일리 인사말 ── */
+.mily-greeting{display:flex;align-items:center;gap:10px;margin:0 16px;margin-top:-12px;position:relative;z-index:2;background:var(--card);border-radius:18px;padding:10px 14px 10px 6px;box-shadow:0 4px 16px rgba(99,102,241,.1);transition:opacity .3s}
+body.dark .mily-greeting{box-shadow:0 4px 16px rgba(0,0,0,.2)}
+.mily-char{width:52px;height:52px;flex-shrink:0}
+.mily-char svg{width:100%;height:100%}
+.mily-msg{flex:1;min-width:0;background:var(--tab-lt,rgba(99,102,241,.08));border-radius:14px;padding:9px 12px;position:relative;font-size:13px;font-weight:600;color:var(--tx);line-height:1.45}
+.mily-msg::before{content:'';position:absolute;left:-6px;top:50%;transform:translateY(-50%);border:6px solid transparent;border-right-color:var(--tab-lt,rgba(99,102,241,.08))}
+.mily-msg .mily-hint{font-size:11px;color:var(--tx2);margin-top:2px;font-weight:500}
+.mily-greeting.celebrate .mily-msg{background:linear-gradient(135deg,rgba(250,204,21,.12),rgba(251,146,60,.1))}
+.mily-greeting.celebrate .mily-msg::before{border-right-color:rgba(250,204,21,.12)}
+@keyframes milySlideIn{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:translateY(0)}}
+.mily-greeting{animation:milySlideIn .4s ease}
+/* 마일리 캐릭터 애니메이션 */
+@keyframes milyBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes milyWaveArm{0%,70%,100%{transform:rotate(0deg)}10%,30%,50%{transform:rotate(-35deg)}20%,40%,60%{transform:rotate(-15deg)}}
+@keyframes milyCheerL{0%,60%,100%{transform:rotate(0deg)}10%,30%,50%{transform:rotate(-28deg)}20%,40%{transform:rotate(-5deg)}}
+@keyframes milyCheerR{0%,60%,100%{transform:rotate(0deg)}10%,30%,50%{transform:rotate(28deg)}20%,40%{transform:rotate(5deg)}}
+@keyframes milyJump{0%,40%,100%{transform:translateY(0) scaleX(1) scaleY(1)}5%{transform:translateY(0) scaleX(1.08) scaleY(0.92)}10%,25%{transform:translateY(-18px) scaleX(0.94) scaleY(1.08)}30%{transform:translateY(0) scaleX(1.06) scaleY(0.94)}35%,80%{transform:translateY(0) scaleX(1) scaleY(1)}50%{transform:translateY(0) scaleX(1.08) scaleY(0.92)}55%,70%{transform:translateY(-18px) scaleX(0.94) scaleY(1.08)}75%{transform:translateY(0) scaleX(1.06) scaleY(0.94)}}
+@keyframes milySleepySway{0%,100%{transform:rotate(0deg) translateY(0)}25%{transform:rotate(-5deg) translateY(1px)}50%{transform:rotate(0deg) translateY(0)}75%{transform:rotate(5deg) translateY(1px)}}
+@keyframes milyNod{0%,100%{transform:rotate(0deg)}20%{transform:rotate(-8deg)}40%{transform:rotate(8deg)}60%{transform:rotate(-4deg)}80%{transform:rotate(0deg)}}
+@keyframes milyTada{0%,100%{transform:scale(1) rotate(0deg)}10%{transform:scale(0.9) rotate(-3deg)}20%{transform:scale(1.1) rotate(3deg)}30%{transform:scale(1.1) rotate(-3deg)}40%{transform:scale(1.1) rotate(3deg)}50%{transform:scale(1.1) rotate(0deg)}60%{transform:scale(1) rotate(0deg)}}
+@keyframes milyPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+@keyframes zzzFloat{0%{opacity:0;transform:translate(0,0) scale(.6)}15%{opacity:1}80%{opacity:1}100%{opacity:0;transform:translate(8px,-20px) scale(1)}}
+@keyframes starPop{0%{opacity:0;transform:scale(0) rotate(0deg)}30%{opacity:1;transform:scale(1.2) rotate(90deg)}60%{opacity:1;transform:scale(1) rotate(180deg)}100%{opacity:0;transform:scale(0) rotate(360deg)}}
+@keyframes heartFloat{0%{opacity:0;transform:translateY(0) scale(.5)}20%{opacity:1;transform:translateY(-8px) scale(1)}80%{opacity:.8;transform:translateY(-22px) scale(.9)}100%{opacity:0;transform:translateY(-30px) scale(.6)}}
+@keyframes cheekGlow{0%,100%{opacity:.35}50%{opacity:.55}}
 /* 올클리어 축하 */
 @keyframes missionClear{0%{transform:scale(.8);opacity:0}50%{transform:scale(1.05)}100%{transform:scale(1);opacity:1}}
 .mission-clear-anim{animation:missionClear .5s ease}
@@ -3467,6 +3493,11 @@ requestAnimationFrame(function(){
     <div id="mission-bar" style="margin-top:10px;background:rgba(255,255,255,.12);border-radius:14px;padding:10px 14px;backdrop-filter:blur(4px);display:none">
       <div id="mission-bar-inner"></div>
     </div>
+  </div>
+  <!-- 마일리 인사말 -->
+  <div class="mily-greeting" id="mily-greeting" style="display:none">
+    <div class="mily-char" id="mily-char"></div>
+    <div class="mily-msg" id="mily-msg"></div>
   </div>
   <!-- 생일 축하 배너 (동적 표시) -->
   <div id="birthday-banner" style="display:none;margin:0 16px 12px;border-radius:16px;background:linear-gradient(135deg,#FF6B6B,#FF8E53);padding:16px;position:relative;overflow:hidden">
@@ -8596,7 +8627,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0402a';
+const _APP_VERSION = 'v0402b';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -10241,6 +10272,8 @@ function renderHero(){
   }
   // 미션 바 렌더링
   renderMissionBar();
+  // 마일리 인사말 렌더링
+  renderMilyGreeting();
 }
 
 // ── 오늘 할일 진행 바 ──────────────────────────
@@ -10332,6 +10365,223 @@ function renderMissionBar(){
     <div class="mission-dots">${dots}</div>`;
   }
   _prevMissionDone=done;
+}
+
+// ── 마일리 캐릭터 SVG 생성 ──────────────────────────
+function _milyFace(opts={}){
+  const{eyeStyle='normal',mouthStyle='smile',cheekGlow=false}=opts;
+  let f='';const EL=-11,ER=11,EY=-4;
+  if(eyeStyle==='normal'){
+    f+=`<ellipse cx="${EL}" cy="${EY}" rx="8.5" ry="9" fill="#fff" stroke="#C7C2E8" stroke-width=".6"/>
+    <ellipse cx="${ER}" cy="${EY}" rx="8.5" ry="9" fill="#fff" stroke="#C7C2E8" stroke-width=".6"/>
+    <ellipse cx="${EL}" cy="${EY+1}" rx="6" ry="6.5" fill="#4345B8"/>
+    <ellipse cx="${ER}" cy="${EY+1}" rx="6" ry="6.5" fill="#4345B8"/>
+    <ellipse cx="${EL}" cy="${EY+1.5}" rx="3.8" ry="4" fill="#1a1a2e"/>
+    <ellipse cx="${ER}" cy="${EY+1.5}" rx="3.8" ry="4" fill="#1a1a2e"/>
+    <ellipse cx="${EL-2.5}" cy="${EY-2.5}" rx="2.2" ry="2" fill="#fff" opacity=".9"/>
+    <ellipse cx="${ER-2.5}" cy="${EY-2.5}" rx="2.2" ry="2" fill="#fff" opacity=".9"/>
+    <circle cx="${EL+1.5}" cy="${EY+2}" r="1" fill="#fff" opacity=".5"/>
+    <circle cx="${ER+1.5}" cy="${EY+2}" r="1" fill="#fff" opacity=".5"/>
+    <ellipse cx="${EL}" cy="${EY}" rx="9" ry="0" fill="#5457D9">
+      <animate attributeName="ry" values="0;0;9.5;0;0;0;9.5;0;0" dur="3.5s" repeatCount="indefinite" keyTimes="0;.42;.44;.48;.68;.70;.72;.76;1"/>
+    </ellipse>
+    <ellipse cx="${ER}" cy="${EY}" rx="9" ry="0" fill="#5457D9">
+      <animate attributeName="ry" values="0;0;9.5;0;0;0;9.5;0;0" dur="3.5s" repeatCount="indefinite" keyTimes="0;.42;.44;.48;.68;.70;.72;.76;1"/>
+    </ellipse>`;
+  }else if(eyeStyle==='happy'){
+    f+=`<path d="M${EL-6},${EY+1} Q${EL},${EY-7} ${EL+6},${EY+1}" fill="none" stroke="#1a1a2e" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M${ER-6},${EY+1} Q${ER},${EY-7} ${ER+6},${EY+1}" fill="none" stroke="#1a1a2e" stroke-width="2.5" stroke-linecap="round"/>`;
+  }else if(eyeStyle==='surprised'){
+    f+=`<ellipse cx="${EL}" cy="${EY}" rx="9" ry="10" fill="#fff" stroke="#C7C2E8" stroke-width=".6"/>
+    <ellipse cx="${ER}" cy="${EY}" rx="9" ry="10" fill="#fff" stroke="#C7C2E8" stroke-width=".6"/>
+    <ellipse cx="${EL}" cy="${EY}" rx="5" ry="5.5" fill="#4345B8"/>
+    <ellipse cx="${ER}" cy="${EY}" rx="5" ry="5.5" fill="#4345B8"/>
+    <ellipse cx="${EL}" cy="${EY}" rx="3" ry="3.2" fill="#1a1a2e"/>
+    <ellipse cx="${ER}" cy="${EY}" rx="3" ry="3.2" fill="#1a1a2e"/>
+    <ellipse cx="${EL-2}" cy="${EY-3}" rx="2.5" ry="2.2" fill="#fff" opacity=".9"/>
+    <ellipse cx="${ER-2}" cy="${EY-3}" rx="2.5" ry="2.2" fill="#fff" opacity=".9"/>`;
+  }else if(eyeStyle==='sleepy'){
+    f+=`<ellipse cx="${EL}" cy="${EY}" rx="8" ry="8.5" fill="#fff" stroke="#C7C2E8" stroke-width=".5"/>
+    <ellipse cx="${ER}" cy="${EY}" rx="8" ry="8.5" fill="#fff" stroke="#C7C2E8" stroke-width=".5"/>
+    <ellipse cx="${EL}" cy="${EY+1}" rx="5" ry="5.5" fill="#4345B8"/>
+    <ellipse cx="${ER}" cy="${EY+1}" rx="5" ry="5.5" fill="#4345B8"/>
+    <ellipse cx="${EL}" cy="${EY+1.5}" rx="3" ry="3.2" fill="#1a1a2e"/>
+    <ellipse cx="${ER}" cy="${EY+1.5}" rx="3" ry="3.2" fill="#1a1a2e"/>
+    <ellipse cx="${EL-2}" cy="${EY-1}" rx="1.8" ry="1.5" fill="#fff" opacity=".8"/>
+    <ellipse cx="${ER-2}" cy="${EY-1}" rx="1.8" ry="1.5" fill="#fff" opacity=".8"/>
+    <ellipse cx="${EL}" cy="${EY-3}" rx="9" ry="5.5" fill="#5457D9"/>
+    <ellipse cx="${ER}" cy="${EY-3}" rx="9" ry="5.5" fill="#5457D9"/>`;
+  }else if(eyeStyle==='love'){
+    f+=`<g transform="translate(${EL},${EY-1}) scale(.55)"><path d="M0,4 C0,-4 -10,-6 -10,0 C-10,6 0,14 0,14 C0,14 10,6 10,0 C10,-6 0,-4 0,4Z" fill="#EE4466"/></g>
+    <g transform="translate(${ER},${EY-1}) scale(.55)"><path d="M0,4 C0,-4 -10,-6 -10,0 C-10,6 0,14 0,14 C0,14 10,6 10,0 C10,-6 0,-4 0,4Z" fill="#EE4466"/></g>`;
+  }
+  if(cheekGlow){
+    f+=`<ellipse cx="${EL-5}" cy="6" rx="5" ry="3.5" fill="#FF9EB8" opacity=".35" style="animation:cheekGlow 2.5s ease-in-out infinite"/>
+    <ellipse cx="${ER+5}" cy="6" rx="5" ry="3.5" fill="#FF9EB8" opacity=".35" style="animation:cheekGlow 2.5s ease-in-out infinite"/>`;
+  }
+  f+=`<ellipse cx="0" cy="6" rx="2" ry="1.6" fill="#7B6FC4" opacity=".5"/>`;
+  if(mouthStyle==='smile')f+=`<path d="M-7,13 Q0,20 7,13" fill="none" stroke="#E64D59" stroke-width="2.2" stroke-linecap="round"/>`;
+  else if(mouthStyle==='open')f+=`<ellipse cx="0" cy="15" rx="7" ry="6" fill="#E64D59"/><ellipse cx="0" cy="18" rx="5" ry="3.5" fill="#F28C94"/><rect x="-3.5" y="11.5" width="7" height="3.5" rx="1" fill="#fff"/>`;
+  else if(mouthStyle==='grin')f+=`<path d="M-8,12 Q0,22 8,12" fill="#E64D59"/><path d="M-6,12 Q0,11 6,12" fill="#fff"/><ellipse cx="0" cy="17" rx="4" ry="2.5" fill="#F28C94"/>`;
+  else if(mouthStyle==='o')f+=`<ellipse cx="0" cy="14.5" rx="4" ry="4.5" fill="#E64D59"/><ellipse cx="0" cy="15.5" rx="2.5" ry="2" fill="#F28C94"/>`;
+  else if(mouthStyle==='sad')f+=`<path d="M-6,17 Q0,12 6,17" fill="none" stroke="#E64D59" stroke-width="2" stroke-linecap="round"/>`;
+  else if(mouthStyle==='sleepy')f+=`<path d="M-5,14.5 Q-2.5,13 0,14.5 Q2.5,13 5,14.5" fill="none" stroke="#C88090" stroke-width="1.8" stroke-linecap="round"/>`;
+  return f;
+}
+
+function _milySVG({face={},bodyAnim='bounce',armStyle='rest',effects=[]}={}){
+  const anims={bounce:'milyBounce 2.5s ease-in-out infinite',sway:'milySway 3s ease-in-out infinite',jump:'milyJump 2.8s ease-in-out infinite',sleepy:'milySleepySway 3s ease-in-out infinite',nod:'milyNod 2s ease-in-out infinite',tada:'milyTada 2.5s ease-in-out infinite',pulse:'milyPulse 1.5s ease-in-out infinite',none:'none'};
+  const ba=anims[bodyAnim]||anims.bounce;
+  let s=`<svg viewBox="-55 -60 110 120" xmlns="http://www.w3.org/2000/svg">`;
+  s+=`<ellipse cx="0" cy="42" rx="22" ry="5" fill="#0F172A" opacity=".07"/>`;
+  s+=`<g style="animation:${ba};transform-origin:center 10px">`;
+  s+=`<ellipse cx="-10" cy="32" rx="7" ry="5.5" fill="#4345B8"/><ellipse cx="10" cy="32" rx="7" ry="5.5" fill="#4345B8"/>`;
+  if(armStyle==='rest'){
+    s+=`<line x1="-28" y1="2" x2="-38" y2="-4" stroke="#5457D9" stroke-width="5" stroke-linecap="round"/><circle cx="-38" cy="-4" r="4" fill="#727BE0"/>
+    <line x1="28" y1="2" x2="38" y2="-4" stroke="#5457D9" stroke-width="5" stroke-linecap="round"/><circle cx="38" cy="-4" r="4" fill="#727BE0"/>`;
+  }else if(armStyle==='wave'){
+    s+=`<line x1="-28" y1="2" x2="-38" y2="-4" stroke="#5457D9" stroke-width="5" stroke-linecap="round"/><circle cx="-38" cy="-4" r="4" fill="#727BE0"/>
+    <g style="animation:milyWaveArm 1.8s ease-in-out infinite;transform-origin:28px 2px"><line x1="28" y1="2" x2="38" y2="-10" stroke="#5457D9" stroke-width="5" stroke-linecap="round"/><circle cx="38" cy="-10" r="4" fill="#727BE0"/></g>`;
+  }else if(armStyle==='cheer'){
+    s+=`<g style="animation:milyCheerL 1.6s ease-in-out infinite;transform-origin:-28px 2px"><line x1="-28" y1="2" x2="-38" y2="-10" stroke="#5457D9" stroke-width="5" stroke-linecap="round"/><circle cx="-38" cy="-10" r="4" fill="#727BE0"/></g>
+    <g style="animation:milyCheerR 1.6s ease-in-out infinite;transform-origin:28px 2px"><line x1="28" y1="2" x2="38" y2="-10" stroke="#5457D9" stroke-width="5" stroke-linecap="round"/><circle cx="38" cy="-10" r="4" fill="#727BE0"/></g>`;
+  }else if(armStyle==='up'){
+    s+=`<line x1="-26" y1="-2" x2="-34" y2="-18" stroke="#5457D9" stroke-width="5" stroke-linecap="round"/><circle cx="-34" cy="-18" r="4" fill="#727BE0"/>
+    <line x1="26" y1="-2" x2="34" y2="-18" stroke="#5457D9" stroke-width="5" stroke-linecap="round"/><circle cx="34" cy="-18" r="4" fill="#727BE0"/>`;
+  }else if(armStyle==='hug'){
+    s+=`<path d="M-28,4 Q-34,10 -24,16" stroke="#5457D9" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="-24" cy="16" r="4" fill="#727BE0"/>
+    <path d="M28,4 Q34,10 24,16" stroke="#5457D9" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="24" cy="16" r="4" fill="#727BE0"/>`;
+  }
+  // 왕관
+  s+=`<g transform="translate(0,-22)"><path d="M-14,0 L-14,-24 L-11,-14 L-5,-26 L0,-12 L5,-26 L11,-14 L14,-24 L14,0 Z" fill="#F5A623" stroke="#E8960E" stroke-width=".5"/>
+  <circle cx="0" cy="-20" r="2.5" fill="#EE4466"/><circle cx="-8" cy="-14" r="1.5" fill="#5DCCFF"/><circle cx="8" cy="-14" r="1.5" fill="#5DCCFF"/></g>`;
+  // 몸체
+  s+=`<ellipse cx="0" cy="2" rx="28" ry="27" fill="#5457D9"/><ellipse cx="0" cy="7" rx="18" ry="14" fill="#727BE0" opacity=".3"/>`;
+  s+=_milyFace(face);
+  s+=`</g>`;
+  // 이펙트
+  if(effects.includes('sparkle')){
+    for(let i=0;i<4;i++){const a=(i/4)*Math.PI*2;const x=Math.cos(a)*35;const y=-5+Math.sin(a)*30;
+    s+=`<circle cx="${x}" cy="${y}" r="1.5" fill="#F5D630" opacity="0" style="animation:starPop 2s ${i*.4}s ease infinite"/>`;}
+  }
+  if(effects.includes('stars')){
+    const cc=['#F5D630','#FF9EB8','#5DCCFF','#5FE89A','#F5A623','#C084FC'];
+    for(let i=0;i<6;i++){const a=(i/6)*Math.PI*2-Math.PI/2;const r=38;const x=Math.cos(a)*r;const y=-5+Math.sin(a)*r;
+    s+=`<polygon points="${x},${y-5} ${x+1.5},${y-1.5} ${x+5},${y} ${x+1.5},${y+1.5} ${x},${y+5} ${x-1.5},${y+1.5} ${x-5},${y} ${x-1.5},${y-1.5}" fill="${cc[i]}" opacity="0" style="animation:starPop 2.8s ${i*.3}s ease infinite"/>`;}
+  }
+  if(effects.includes('hearts')){
+    for(let i=0;i<3;i++){const x=-10+i*10;
+    s+=`<g style="animation:heartFloat 2.5s ${i*.6}s ease infinite" opacity="0"><path d="M${x},-20 C${x},-24 ${x-5},-25 ${x-5},-22 C${x-5},-19 ${x},-16 ${x},-16 C${x},-16 ${x+5},-19 ${x+5},-22 C${x+5},-25 ${x},-24 ${x},-20Z" fill="#EE4466" opacity=".8"/></g>`;}
+  }
+  if(effects.includes('zzz')){
+    for(let i=0;i<3;i++){s+=`<text x="${22+i*8}" y="${-15-i*12}" font-size="${10+i*3}" font-weight="900" fill="#8B7BCC" opacity="0" style="animation:zzzFloat 3s ${i*.8}s ease infinite;font-family:inherit">Z</text>`;}
+  }
+  s+=`</svg>`;return s;
+}
+
+// ── 마일리 인사말 상황 판단 + 렌더링 ──────────────────────────
+let _milyLastState='';
+function renderMilyGreeting(){
+  const el=document.getElementById('mily-greeting');
+  const charEl=document.getElementById('mily-char');
+  const msgEl=document.getElementById('mily-msg');
+  if(!el||!charEl||!msgEl)return;
+
+  const{done,total,remaining}=getTodayMissionProgress();
+  const streak=getDisplayStreak();
+  const h=new Date().getHours();
+  const allDone=remaining===0&&total>0;
+
+  // 마지막 접속일 체크 (오래 안 왔는지)
+  const lastLog=S.log&&S.log.length>0?S.log[S.log.length-1]:null;
+  const lastDate=lastLog?new Date(lastLog.ts):null;
+  const daysSinceLastVisit=lastDate?Math.floor((Date.now()-lastDate.getTime())/(1000*60*60*24)):0;
+
+  // 상황 판단
+  let state,charCfg,msg,hint;
+
+  if(total===0){
+    // 할일이 없으면 숨김
+    el.style.display='none';return;
+  }
+
+  const streakBonusEnabled=S.settings?.streakBonus!==false;
+  const bonusPts=S.settings?.streakBonusPts||100;
+
+  if(allDone&&streak>0&&streak%7===0){
+    // 7일 보너스 달성!
+    state='gift';
+    charCfg={face:{eyeStyle:'surprised',mouthStyle:'o'},bodyAnim:'tada',armStyle:'rest',effects:['sparkle']};
+    msg=`🎁 ${streak}일 연속 달성! +${bonusPts}M 보너스!`;
+    hint='대단해! 마일리도 깜짝 놀랐어!';
+  }else if(allDone){
+    // 올클리어
+    state='celebrate';
+    const msgs=[
+      '오늘 전부 해냈어! 정말 대단해! 🎊','완벽한 하루! 마일리가 자랑스러워! 🌟',
+      '올클리어! 너무 멋있어! ✨','오늘의 영웅! 다 해냈구나! 🏆'
+    ];
+    charCfg={face:{eyeStyle:'happy',mouthStyle:'open',cheekGlow:true},bodyAnim:'jump',armStyle:'up',effects:['stars']};
+    msg=msgs[Math.floor(Date.now()/60000)%msgs.length];
+    hint=streak>1?`${streak}일 연속 달성 중! 내일도 이어가자!`:'내일도 이어가면 연속기록 시작!';
+  }else if(daysSinceLastVisit>=3){
+    // 오래 안 왔을 때
+    state='miss';
+    charCfg={face:{eyeStyle:'sleepy',mouthStyle:'sleepy'},bodyAnim:'sleepy',armStyle:'rest',effects:['zzz']};
+    msg=`오랜만이야! 보고 싶었어~ 🥺`;
+    hint='오늘부터 다시 시작해볼까?';
+  }else if(streak===0&&done===0){
+    // 연속 끊기고 아직 시작 안 함
+    state='fighting';
+    charCfg={face:{eyeStyle:'normal',mouthStyle:'grin',cheekGlow:true},bodyAnim:'tada',armStyle:'cheer',effects:['sparkle']};
+    msg='괜찮아! 오늘부터 새로 시작! 💪';
+    hint='1일차부터 다시 파이팅!';
+  }else if(done===0){
+    // 시작 전 — 시간대별 인사
+    state='hello';
+    charCfg={face:{eyeStyle:'normal',mouthStyle:'open',cheekGlow:true},bodyAnim:'nod',armStyle:'wave'};
+    if(h<12){msg='좋은 아침! ☀️ 오늘도 화이팅하자!';hint=`오늘 할일 ${total}개 준비됐어!`;}
+    else if(h<18){msg='좋은 오후! 🌤️ 할일 시작해볼까?';hint=`${total}개 해야 할 일이 기다리고 있어!`;}
+    else{msg='좋은 저녁! 🌙 아직 할일이 남았어~';hint=`${total}개 중에 아직 하나도 안 했어!`;}
+  }else if(remaining===1){
+    // 마지막 1개!
+    state='almost';
+    charCfg={face:{eyeStyle:'happy',mouthStyle:'grin',cheekGlow:true},bodyAnim:'bounce',armStyle:'cheer',effects:['sparkle']};
+    msg='마지막 1개만 더! 거의 다 왔어! 🔥';
+    hint=`${streak+1}일 연속 달성까지 한 걸음!`;
+  }else if(remaining<=Math.ceil(total/2)){
+    // 절반 이상 완료
+    state='cheer';
+    const msgs=[
+      `벌써 ${done}개나 했어! 잘하고 있어! 👏`,
+      `${done}개 완료! ${remaining}개만 더! 🙌`,
+      `대단해! 반 넘었어! 이 기세로! 💫`
+    ];
+    charCfg={face:{eyeStyle:'happy',mouthStyle:'grin',cheekGlow:true},bodyAnim:'bounce',armStyle:'cheer',effects:['sparkle']};
+    msg=msgs[done%msgs.length];
+    hint=`오늘 할일 ${done}/${total} 완료`;
+  }else{
+    // 시작은 했지만 아직 초반
+    state='encourage';
+    const msgs=[
+      `좋아! ${done}개 했어! 계속 가자! 🚀`,
+      `잘 시작했어! 계속 하면 돼! 👍`,
+      `${done}개 완료! 하나씩 하다보면 금방이야! ⭐`
+    ];
+    charCfg={face:{eyeStyle:'normal',mouthStyle:'smile',cheekGlow:true},bodyAnim:'bounce',armStyle:'wave'};
+    msg=msgs[done%msgs.length];
+    hint=`${remaining}개 남았어, 할 수 있어!`;
+  }
+
+  // 상태 변경 시에만 DOM 업데이트 (불필요한 리렌더 방지)
+  const stateKey=state+'-'+done+'-'+total;
+  if(stateKey===_milyLastState)return;
+  _milyLastState=stateKey;
+
+  el.style.display='flex';
+  el.className='mily-greeting'+(state==='celebrate'||state==='gift'?' celebrate':'');
+  charEl.innerHTML=_milySVG(charCfg);
+  msgEl.innerHTML=`${msg}${hint?`<div class="mily-hint">${hint}</div>`:''}`;
 }
 
 // ── streak pill 클릭 → 설명 팝업 ──────────────────────────
@@ -15224,6 +15474,14 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {
+    ver:'1.8.1 (v0402b)', date:'2026-04-02',
+    items:[
+      {type:'new',text:'마일리 캐릭터 인사말 — 상황별 표정+메시지 (인사/응원/축하/졸림 등)'},
+      {type:'fix',text:'오늘 할일 카운트가 홈 그리드 카드 수와 일치하도록 수정'},
+      {type:'fix',text:'제목 영역 장식 동그라미 제거'},
+    ]
+  },
   {
     ver:'1.8.0 (v0402a)', date:'2026-04-02',
     items:[
