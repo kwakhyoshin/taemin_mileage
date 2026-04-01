@@ -2,7 +2,7 @@
 
 > 이 문서는 새 세션에서 실수 없이 개발·테스트·배포할 수 있도록 모든 핵심 정보를 담고 있습니다.
 > **새 세션 시작 시 반드시 이 문서를 먼저 읽을 것.**
-> 최종 업데이트: 2026-04-01 (세션 11차 — 게이지 단축, 뱃지 난이도, 홈표시 토글, 텍스트 선택 방지, DB 정리)
+> 최종 업데이트: 2026-04-01 (세션 13차 — 보안 감사 + CSP 긴급 수정, PR #85~#91)
 
 ---
 
@@ -1834,3 +1834,83 @@ account: {
   1. `visibilitychange`에 `checkNewMessages()` + `_updateFamilyBtnBadge()` 추가
   2. Service Worker에서 push 수신 시 `PUSH_RECEIVED` postMessage → 앱에서 1초 후 뱃지 갱신
   3. onSnapshot의 `_hasDirtyLocal` else 분기에 familyMessages 뱃지 갱신 통일
+
+### 2026-04-01 세션 13차 — 보안 감사 + CSP 긴급 수정
+
+**적용 범위: 개발기만 (v0401 시리즈)**
+
+#### 배경
+- Codex CI 보안 감사 + Claude 보안 분석 결과를 기반으로 14개 취약점 식별
+- 이 세션에서 High/Critical 항목 중심으로 7개 PR 생성·머지
+
+#### 보안 강화 사항
+
+| 항목 | PR | 설명 |
+|------|-----|------|
+| S-01 | #85 | **XSS 방지 — escapeHtml 적용**: `renderLog()`, `renderRewardList()`, `renderBadgeList()` 등 사용자 입력이 DOM에 삽입되는 곳에 `escapeHtml()` 유틸리티 적용 |
+| S-03 | #86 | **OAuth state CSRF 방어 강화**: 카카오/네이버 OAuth 콜백에서 `sessionStorage`의 `oauth_state_*` 값과 콜백 state 파라미터 비교 검증. 불일치 시 인증 거부 |
+| S-12 | #87 | **CSP(Content Security Policy) 메타 태그 추가**: `default-src 'self'`, `script-src`, `connect-src`, `style-src`, `font-src`, `img-src`, `worker-src`, `frame-src`, `object-src 'none'`, `base-uri 'self'` 설정 |
+| S-13 | #88 | **logout/withdraw localStorage 완전 정리**: 로그아웃·회원탈퇴 시 기존 6개 → 17개 localStorage 키 + sessionStorage OAuth 상태 삭제. `_LS_PREFIX` 기반 키 + 카카오/네이버 콜백 결과 등 |
+
+#### CSP 긴급 수정 (연쇄 3건)
+
+CSP 추가(#87) 후 개발기에서 "오프라인 모드" 에러 발생. 3단계에 걸쳐 수정:
+
+| PR | 문제 | 수정 |
+|-----|------|------|
+| #89 | `frame-src 'none'`이 Firebase Auth iframe 차단 | `frame-src https://*.firebaseapp.com https://apis.google.com` 허용. `script-src`에 `'unsafe-eval'` 추가 (Firebase SDK 요구). `connect-src`를 `*.googleapis.com`, `*.google.com` 와일드카드로 확장 |
+| #90 | Firestore WebSocket(`wss://`) 연결이 `connect-src`에 누락 | `connect-src`에 `wss://*.googleapis.com` 추가 |
+| #91 | reCAPTCHA Enterprise(`www.google.com/recaptcha/enterprise.js`) 차단 | `script-src`에 `https://www.google.com` 추가. `frame-src`에도 `https://www.google.com` 추가 (reCAPTCHA iframe) |
+
+#### 최종 CSP 설정
+
+```html
+<meta http-equiv="Content-Security-Policy" content="
+  default-src 'self';
+  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://www.google.com https://cdnjs.cloudflare.com https://t1.kakaocdn.net https://static.nid.naver.com https://apis.google.com;
+  style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com;
+  connect-src 'self' https://*.googleapis.com wss://*.googleapis.com https://*.google.com https://www.gstatic.com https://kakao-token-proxy.nonmarking.workers.dev https://kapi.kakao.com https://kauth.kakao.com https://nid.naver.com https://openapi.naver.com https://api.openweathermap.org https://api.waqi.info https://nominatim.openstreetmap.org https://wttr.in;
+  font-src 'self' https://cdnjs.cloudflare.com data:;
+  img-src 'self' data: blob: https:;
+  worker-src 'self';
+  frame-src https://*.firebaseapp.com https://apis.google.com https://www.google.com;
+  object-src 'none';
+  base-uri 'self';
+">
+```
+
+#### 커밋/PR 목록
+| PR | 설명 | 상태 |
+|----|------|------|
+| #85 | security: XSS 방지 — escapeHtml 적용 | ✅ 개발기 적용 |
+| #86 | security: OAuth state CSRF 방어 강화 | ✅ 개발기 적용 |
+| #87 | security: CSP 메타 태그 추가 (S-12) | ✅ 개발기 적용 |
+| #88 | security(S-13): logout/withdraw localStorage 완전 정리 | ✅ 개발기 적용 |
+| #89 | fix: CSP Firebase 연결 차단 긴급 수정 | ✅ 개발기 적용 |
+| #90 | fix: CSP wss:// 누락으로 Firestore 오프라인 에러 수정 | ✅ 개발기 적용 |
+| #91 | fix(S-12): CSP에 www.google.com 추가 — reCAPTCHA 차단 해결 | ✅ 개발기 적용 |
+
+#### 트러블슈팅: CSP 추가 후 Firebase 연결 실패
+
+**증상**: CSP 메타 태그 추가(PR #87) 후 개발기가 "⚠️ 오프라인 모드 — 인터넷 연결을 확인해주세요" 표시. 운영기는 정상 동작.
+
+**디버깅 과정**:
+1. 운영기에는 CSP가 없으므로 정상. 개발기에만 CSP 추가 → 명확히 CSP가 원인
+2. PR #89: `frame-src` 수정 + `connect-src` 확장 → 여전히 에러
+3. PR #90: Firestore가 `wss://` WebSocket 사용한다는 점 발견 → `wss://*.googleapis.com` 추가 → 여전히 에러
+4. Chrome 개발자 도구 Network 탭 확인: Firebase SDK 모듈(`.gstatic.com`)은 200 OK, 하지만 `https://www.google.com/recaptcha/enterprise.js`가 HTTP 503
+5. 원인: `script-src`에 `https://www.google.com`이 없어 reCAPTCHA Enterprise 스크립트 차단 → App Check(ReCaptchaEnterpriseProvider) 초기화 실패 → Firestore 인증 실패 → "client is offline"
+
+**교훈**:
+- Firebase App Check + reCAPTCHA Enterprise를 사용하는 앱에서 CSP를 설정할 때, `www.google.com`을 반드시 `script-src`와 `frame-src`에 포함해야 한다
+- CSP 관련 문제는 Chrome 개발자 도구의 Console(CSP violation 로그)과 Network 탭(blocked/503 응답)으로 디버깅
+- CSP는 한 번에 완성하기 어렵고, 실제 동작 테스트를 통해 누락된 도메인을 발견해야 하는 경우가 많다
+
+#### 미처리 보안 항목 (향후 세션에서 작업)
+| 항목 | 우선순위 | 설명 |
+|------|----------|------|
+| S-06 | High | 네이버 Authorization Code flow 전환 (현재 Implicit flow 사용) |
+| S-07 | Medium | 카카오 PKCE 적용 |
+| S-08 | Medium | 초대 링크 `Math.random()` → `crypto.getRandomValues()` 전환 |
+| S-10 | Medium | `eval()` 기반 계산기 → 안전한 파서로 교체 |
+| S-11 | Low | Subresource Integrity (SRI) 해시 추가 |
