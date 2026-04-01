@@ -1650,3 +1650,61 @@ account: {
 **APP_CHANGELOG:** v1.6.9 — 게이지 단축, 뱃지 난이도 상향, 부모뱃지 버그 수정, 홈표시 토글, 텍스트 선택 방지
 
 **버전:** DEV v0401zd
+
+---
+
+### 세션 12: 운영 배포 + 크로스 디바이스 동기화 + 프사 롤백 수정 (2026-04-01)
+
+#### PR #57: 운영기 배포 (v1.4.0 → v1.6.9)
+- dev/index.html의 모든 변경사항을 index.html에 반영
+- `_ENV='prod'` 유지 확인
+- 데이터 마이그레이션: 신규 스키마 자동 생성 (기존 데이터 영향 없음)
+- 백업: `backups/dev_index_v0401zg_20260401_130009.html`, `backups/prod_index_20260401_130009.html`
+
+#### PR #58: 운영기 메타 태그 수정
+- og:title에서 `[개발기]` 제거 → `마일리 ⭐ 우리 가족 마일리지`
+- og:url → `/taemin_mileage/`
+- og:image → `/taemin_mileage/og-image.png`
+- title → `마일리 ⭐`
+- 개발기에서는 `[개발기]` 유지
+
+#### PR #59: 레거시 계정 소셜 연동 수정
+- **증상**: ID/PW 레거시 계정(`users/taemin`)에서 소셜 계정 연동 시 "로그인후 이용하시기 바랍니다" 오류
+- **원인**: `_familyId=null`인 레거시 계정에서 `linkSocialFromMyMenu()` 차단
+- **수정**: 소셜 연동 시 자동으로 `families/` 컬렉션으로 마이그레이션 수행
+
+#### PR #60: 크로스 디바이스 마이그레이션 포인터
+- **증상**: 폰에서 소셜 연동 완료 후 iPad에서 연동 정보가 안 보임
+- **원인**: 폰은 `families/wwec8f4hpemnfki8fo`로 마이그레이션됐지만, iPad는 여전히 `users/taemin` 참조
+- **수정**:
+  - `_migratedTo` 필드를 레거시 문서에 기록하는 포인터 시스템
+  - `_checkLegacyMigrationPointer()`: 앱 초기화 시 레거시 문서의 포인터를 따라감
+  - `linkSocialFromMyMenu()`, `sendFamilyInvite()`: 마이그레이션 후 포인터 자동 기록
+  - Firestore `users/taemin`에 `_migratedTo: "wwec8f4hpemnfki8fo"` 수동 기록 (REST API)
+- **중복 families 문서 정리**: `695jqaueu5dmnfki83o`, `lnx6vqx26ujmnfki7cu` 삭제, `wwec8f4hpemnfki8fo` 유지
+
+#### PR #61: 프로필 사진 소셜 롤백 방지
+- **증상**: 프사를 직접 변경한 후 재로그인하면 소셜 계정 사진으로 롤백
+- **원인**: `_loginToFamily()`, 가족 합류, `linkSocialFromMyMenu()`에서 소셜 사진을 `S.photos[memberId]`에 무조건 덮어씀
+- **수정**: `S.photos[memberId]`가 이미 존재하면(사용자가 직접 설정한 사진) 소셜 사진으로 교체하지 않음
+- **3곳 수정**: `_loginToFamily()`, 가족 합류 로직, `linkSocialFromMyMenu()` 소셜 연동 로직
+
+#### 트러블슈팅 기록
+
+**레거시→families 마이그레이션 포인터 패턴**:
+```
+[레거시 문서: users/taemin]
+  _migratedTo: "wwec8f4hpemnfki8fo"  ← 포인터
+
+[families/wwec8f4hpemnfki8fo]
+  (실제 데이터)
+```
+- 앱 초기화: `updateDataDoc()` → `_checkLegacyMigrationPointer()` → 포인터 발견 시 `_familyId` + `DATA_DOC` + localStorage 갱신
+- 마이그레이션 시: `setDoc(LEGACY_DOC, {_migratedTo: docPath}, {merge:true})`
+
+**프로필 사진 우선순위**:
+1. 사용자 직접 설정 (base64, avatarEditor에서 저장)
+2. 소셜 계정 사진 (URL, 최초 연동/가입 시에만 설정)
+3. 기본 아바타 (SVG, `AVATARS[id]`)
+
+**버전:** DEV v0401zg (개발기), v1.6.9 (운영기)
