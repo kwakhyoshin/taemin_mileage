@@ -8,13 +8,13 @@
 <!-- S-12: Content Security Policy -->
 <meta http-equiv="Content-Security-Policy" content="
   default-src 'self';
-  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://cdnjs.cloudflare.com https://t1.kakaocdn.net https://static.nid.naver.com https://apis.google.com;
+  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://www.google.com https://cdnjs.cloudflare.com https://t1.kakaocdn.net https://static.nid.naver.com https://apis.google.com;
   style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com;
   connect-src 'self' https://*.googleapis.com wss://*.googleapis.com https://*.google.com https://www.gstatic.com https://kakao-token-proxy.nonmarking.workers.dev https://kapi.kakao.com https://kauth.kakao.com https://nid.naver.com https://openapi.naver.com https://api.openweathermap.org https://api.waqi.info https://nominatim.openstreetmap.org https://wttr.in;
   font-src 'self' https://cdnjs.cloudflare.com data:;
   img-src 'self' data: blob: https:;
   worker-src 'self';
-  frame-src https://*.firebaseapp.com https://apis.google.com;
+  frame-src https://*.firebaseapp.com https://apis.google.com https://www.google.com;
   object-src 'none';
   base-uri 'self';
 ">
