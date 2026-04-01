@@ -1555,17 +1555,39 @@ account: {
   2. 초대 링크 같은 cross-device 기능은 데이터 저장 경로가 일치해야 함
   3. ID/PW 계정과 소셜 계정의 데이터 경로가 다를 수 있다는 점을 테스트 시 항상 고려
 
+### 12.18 초대 링크 docPath 불일치 — dev_ prefix 처리 버그 (2026-04-01, PR #51)
+
+- **증상**: PR #48 수정 후에도 레거시 ID/PW 계정에서 초대 링크가 여전히 작동하지 않음. 수신자가 링크를 열면 가입 화면 대신 welcome 화면 표시.
+- **원인**: `_familyId`가 `'taemin_dev'`와 같이 `dev_` prefix 없이 설정된 경우:
+  1. Sender: `rawFamilyId = _familyId.startsWith('dev_') ? _familyId.slice(4) : _familyId` → `'taemin_dev'` (변경 없음)
+  2. URL: `?invite=taemin_dev`
+  3. Recipient: `docPath = 'dev_' + 'taemin_dev' = 'dev_taemin_dev'`
+  4. 실제 데이터는 `families/taemin_dev`에 있으나, `families/dev_taemin_dev`를 조회 → 문서 없음 → 실패
+- **진단 과정**: 디버그 토스트 추가(PR #50)로 URL에 `invite=taemin_dev`가 포함됨을 확인 → dev_ prefix 불일치 발견
+- **수정**:
+  1. Sender(sendFamilyInvite, shareInviteLink): `_familyId` 전체를 URL에 포함 (dev_ stripping 제거)
+  2. Recipient(checkUrlParams): familyId를 as-is로 먼저 조회 → 없으면 `dev_` prefix 추가해서 fallback 조회 (구버전 URL 하위 호환)
+- **교훈**:
+  1. URL 파라미터에서 prefix를 strip/add하는 것은 fragile — familyId가 항상 예상 형식이라는 가정이 깨질 수 있음
+  2. 디버그 로그/토스트를 배포하면 사용자가 직접 문제를 확인할 수 있어 효율적
+  3. `_familyId`가 어떤 코드에서 어떤 값으로 설정될 수 있는지 모든 경로를 파악해야 함
+
 ### 2026-04-01 세션 (10차) — 초대 화면 가족배지 → 로고 교체 + 레거시 초대 버그 수정
 
 | 커밋 | PR | 설명 | 상태 |
 |------|-----|------|------|
 | `a4b7ae7` | #47 | feat: 초대 가입 화면 가족배지 → mile.ly 로고 교체 + "가족 가족" 중복 수정 | ✅ merged |
 | `48a8913` | #48 | fix: 레거시 ID/PW 계정에서 초대 링크가 작동하지 않는 문제 수정 | ✅ merged |
+| `4e55967` | #49 | feat: 활동카드 꾹 누르기 게이지 애니메이션 | ✅ merged |
+| `85df557` | #50 | debug: 초대 링크 디버깅 로그 강화 | ✅ merged |
+| `e535a7e` | #51 | fix: 초대 링크 docPath 불일치 수정 (dev_ prefix 처리 개선) | ✅ merged |
 
 **주요 변경:**
 1. 초대 가입 화면의 `🏠 곽효신네 가족 가족` 배지를 mile.ly SVG 브랜드 로고로 교체 (#47)
 2. familyName이 이미 "가족"으로 끝나는 경우 중복 방지 처리 (#47)
 3. 레거시 ID/PW 계정의 `_familyId` null 문제로 초대 링크가 작동하지 않던 버그 수정 (#48)
+4. 활동카드 꾹 누르기 게이지 애니메이션 추가 (#49)
+5. 초대 링크 docPath 불일치 수정 — dev_ prefix strip/add 방식을 전체 familyId 전달로 변경 (#51)
 4. 초대 토큰에 `createdBy` 필드 추가 (#48)
 
 **APP_CHANGELOG:** v1.6.8 추가항목 — 초대 화면 로고 교체, "가족" 중복 수정, 레거시 계정 초대 링크 수정
