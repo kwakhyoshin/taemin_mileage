@@ -15861,14 +15861,8 @@ function sendFamilyMsg(){
   const sentMsg=S.familyMessages[S.familyMessages.length-1];
   const toName=(MEMBERS[msgTargetUser]?.name)||'가족';  // closeMsgPop 전에 캡처!
   const fromName=(MEMBERS[currentUser]?.name)||'가족';
-  // Push 알림 트리거 (Cloud Functions 경유)
-  if(!isSelfMessage){
-    S.pushBroadcast={
-      title:`💌 ${fromName}의 메시지`,
-      body:text.length>50?text.slice(0,50)+'…':text,
-      ts:Date.now()
-    };
-  }
+  // Push 알림은 onFamilyMessage Cloud Function이 familyMessages 변경을 감지하여 발송
+  // pushBroadcast 제거 — onFamilyMessage와 onBroadcastPush가 동시 트리거되어 중복 알림 발생 방지
   save();
   closeMsgPop();  // 여기서 msgTargetUser=null이 됨
   if(isSelfMessage){
