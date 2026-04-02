@@ -8621,7 +8621,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0402i';
+const _APP_VERSION = 'v0402j';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -20353,9 +20353,9 @@ let _milyCurrentTab='home';
 function _updateFabVisibility(){
   const fab=document.getElementById('mily-fab');
   if(!fab)return;
-  // 인증 화면이면 숨김
-  const authScreen=document.querySelector('.auth-screen');
-  if(authScreen&&authScreen.style.display!=='none'){
+  // 인증 화면이 하나라도 보이면 숨김
+  const visibleAuth=document.querySelector('.auth-screen:not(.hidden)');
+  if(visibleAuth){
     fab.classList.remove('visible');
     return;
   }
@@ -20393,24 +20393,24 @@ function _setupMilyObserver(){
   mutObs.observe(greeting,{attributes:true,attributeFilter:['style']});
 }
 
-// 탭 전환 감지
-const _origShowTab=window.showTab;
-if(typeof _origShowTab==='function'){
-  window.showTab=function(tab){
+// 탭 전환 감지 (goTab 훅)
+const _origGoTab=window.goTab;
+if(typeof _origGoTab==='function'){
+  window.goTab=function(tab){
     _milyCurrentTab=tab||'home';
-    _origShowTab.apply(this,arguments);
+    _origGoTab.apply(this,arguments);
     _updateFabVisibility();
   };
 }
 
-// 앱 준비 감지
-const _origShowApp=window._m_showApp;
-if(typeof _origShowApp==='function'){
-  window._m_showApp=function(){
-    _origShowApp.apply(this,arguments);
+// 앱 준비 감지 (hideAllAuth 훅 — 로그인 완료 시 호출됨)
+const _origHideAllAuth=window.hideAllAuth;
+if(typeof _origHideAllAuth==='function'){
+  window.hideAllAuth=function(){
+    _origHideAllAuth.apply(this,arguments);
     _milyAppReady=true;
     _setupMilyObserver();
-    _updateFabVisibility();
+    setTimeout(()=>_updateFabVisibility(),300);
   };
 }
 
@@ -20418,10 +20418,10 @@ if(typeof _origShowApp==='function'){
 const _milyAuthObserver=new MutationObserver(()=>_updateFabVisibility());
 _milyAuthObserver.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['style']});
 
-// 초기 상태
+// 초기 상태 — 이미 로그인 상태라면 바로 활성화
 setTimeout(()=>{
-  const authScreen=document.querySelector('.auth-screen');
-  if(!authScreen||authScreen.style.display==='none'){
+  const visibleAuth=document.querySelector('.auth-screen:not(.hidden)');
+  if(!visibleAuth){
     _milyAppReady=true;
     _setupMilyObserver();
   }
