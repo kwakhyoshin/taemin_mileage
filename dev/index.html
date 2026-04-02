@@ -8621,7 +8621,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0402k';
+const _APP_VERSION = 'v0402m';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -13282,6 +13282,7 @@ function getActiveMileage(){
   return S.pts||0;
 }
 window.getActiveMileage=getActiveMileage;
+window.isCaregiverUser=isCaregiverUser;
 
 // independent mode에서 자녀 전환 (양육자용)
 function switchViewingChild(childId){
@@ -18284,6 +18285,12 @@ window.postLoginInit=postLoginInit;
 window.renderAdmChildSelector=renderAdmChildSelector;
 window.renderAdmModeSection=renderAdmModeSection;
 
+// mily AI 챗봇 IIFE에서 접근 필요한 변수 exports
+window._S=S;
+window._MEMBERS=MEMBERS;
+window._globalDataOwner_ref=function(){return _globalDataOwner;};
+window._globalDataOwner_set=function(v){_globalDataOwner=v;};
+
 // Initial render
 renderDevUserSwitch();
 
@@ -19735,6 +19742,11 @@ body.dark .mily-fab{box-shadow:0 4px 20px rgba(99,102,241,.3)}
 (function(){
 'use strict';
 
+// 메인 스크립트에서 export된 변수 참조 (IIFE 스코프에서 접근 불가하므로)
+const S=window._S;
+const MEMBERS=window._MEMBERS;
+function _getGlobalDataOwner(){return window._globalDataOwner_ref();}
+
 const MILY_PROXY_URL='https://dry-meadow-3356mily-ai-proxy.nonmarking.workers.dev/';
 const MILY_MAX_HISTORY=20; // 대화 기록 최대 유지 수
 
@@ -20123,7 +20135,7 @@ function _toolAddActivity(input){
 
   ms.acts.push({...newAct});
   // 글로벌에도 반영
-  if(typeof _globalDataOwner!=='undefined'&&_globalDataOwner===vid){
+  if(_getGlobalDataOwner()===vid){
     S.acts.push({...newAct});
   }
   if(typeof save==='function') save();
@@ -20150,7 +20162,7 @@ function _toolEditActivity(input){
 
   // 글로벌 S.acts에도 반영
   const vid=typeof getViewedMemberId==='function'?getViewedMemberId():'';
-  if(typeof _globalDataOwner!=='undefined'&&_globalDataOwner===vid){
+  if(_getGlobalDataOwner()===vid){
     const sa=S.acts.find(x=>x.id===act.id);
     if(sa) Object.assign(sa,act);
   }
@@ -20172,7 +20184,7 @@ function _toolDeleteActivity(input){
 
   const removed=ms.acts.splice(idx,1)[0];
   // 글로벌에서도 제거
-  if(typeof _globalDataOwner!=='undefined'&&_globalDataOwner===vid){
+  if(_getGlobalDataOwner()===vid){
     const si=S.acts.findIndex(x=>x.id===removed.id);
     if(si>=0) S.acts.splice(si,1);
   }
@@ -20204,7 +20216,7 @@ function _toolAddReward(input){
   if(newRwd.goal) ms.rwds.forEach(r=>r.goal=false);
   ms.rwds.push({...newRwd});
 
-  if(typeof _globalDataOwner!=='undefined'&&_globalDataOwner===vid){
+  if(_getGlobalDataOwner()===vid){
     if(newRwd.goal) S.rwds.forEach(r=>r.goal=false);
     S.rwds.push({...newRwd});
   }
@@ -20236,7 +20248,7 @@ function _toolEditReward(input){
   }
 
   const vid=typeof getViewedMemberId==='function'?getViewedMemberId():'';
-  if(typeof _globalDataOwner!=='undefined'&&_globalDataOwner===vid){
+  if(_getGlobalDataOwner()===vid){
     const sr=S.rwds.find(x=>x.id===rwd.id);
     if(sr) Object.assign(sr,rwd);
   }
@@ -20257,7 +20269,7 @@ function _toolDeleteReward(input){
   if(idx<0) return {success:false,error:'해당 보상을 찾을 수 없습니다'};
 
   const removed=ms.rwds.splice(idx,1)[0];
-  if(typeof _globalDataOwner!=='undefined'&&_globalDataOwner===vid){
+  if(_getGlobalDataOwner()===vid){
     const si=S.rwds.findIndex(x=>x.id===removed.id);
     if(si>=0) S.rwds.splice(si,1);
   }
