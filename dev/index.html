@@ -8621,7 +8621,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0402j';
+const _APP_VERSION = 'v0402k';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -19665,7 +19665,7 @@ window._createState = _createState;
 .nav-container.docked~.mily-fab{bottom:72px}
 
 /* ── chat popup — 모바일 전체화면 ── */
-.mily-chat{position:fixed;inset:0;width:100%;height:100%;background:var(--card,#fff);border-radius:0;box-shadow:none;z-index:960;display:none;flex-direction:column;overflow:hidden;transition:opacity .2s,transform .2s}
+.mily-chat{position:fixed;left:0;right:0;top:0;bottom:0;width:100%;height:100dvh;background:var(--card,#fff);border-radius:0;box-shadow:none;z-index:960;display:none;flex-direction:column;overflow:hidden}
 .mily-chat.open{display:flex;animation:milyChatIn .25s ease}
 @keyframes milyChatIn{from{opacity:0;transform:translateY(100%)}to{opacity:1;transform:translateY(0)}}
 
@@ -20414,6 +20414,38 @@ if(typeof _origHideAllAuth==='function'){
   };
 }
 
+// 계정 전환 시 챗봇 리셋 (devSwitchUser 훅)
+const _origDevSwitch=window.devSwitchUser;
+if(typeof _origDevSwitch==='function'){
+  window.devSwitchUser=function(userId){
+    _origDevSwitch.apply(this,arguments);
+    _resetMilyChat();
+  };
+}
+
+// 자녀 전환 시 챗봇 리셋 (switchViewingChild 훅)
+const _origSwitchChild=window.switchViewingChild;
+if(typeof _origSwitchChild==='function'){
+  window.switchViewingChild=function(childId){
+    _origSwitchChild.apply(this,arguments);
+    _resetMilyChat();
+  };
+}
+
+function _resetMilyChat(){
+  _milyHistory=[];
+  const msgs=document.getElementById('mily-chat-msgs');
+  if(msgs){
+    const typing=document.getElementById('mily-typing');
+    // 메시지 전부 삭제 (typing indicator만 남김)
+    Array.from(msgs.children).forEach(el=>{
+      if(el!==typing) el.remove();
+    });
+  }
+  // 챗봇이 열려있으면 새 환영 메시지 표시
+  if(_milyOpen) _milyWelcome();
+}
+
 // auth 화면 변화 감지
 const _milyAuthObserver=new MutationObserver(()=>_updateFabVisibility());
 _milyAuthObserver.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['style']});
@@ -20427,6 +20459,45 @@ setTimeout(()=>{
   }
   _updateFabVisibility();
 },1000);
+
+// ── 모바일 키보드 대응 (visualViewport) ──
+if(window.visualViewport){
+  const _chatEl=document.getElementById('mily-chat');
+  const _inputArea=document.querySelector('.mily-chat-input');
+  let _lastVH=window.innerHeight;
+
+  window.visualViewport.addEventListener('resize',()=>{
+    if(!_milyOpen)return;
+    const vv=window.visualViewport;
+    const keyboardH=_lastVH-vv.height;
+    if(keyboardH>100){
+      // 키보드 올라옴
+      _chatEl.style.height=vv.height+'px';
+      _chatEl.style.bottom='auto';
+      _chatEl.style.top=vv.offsetTop+'px';
+    }else{
+      // 키보드 내려감
+      _chatEl.style.height='';
+      _chatEl.style.bottom='';
+      _chatEl.style.top='';
+    }
+    _scrollMilyBottom();
+  });
+
+  window.visualViewport.addEventListener('scroll',()=>{
+    if(!_milyOpen)return;
+    const vv=window.visualViewport;
+    _chatEl.style.top=vv.offsetTop+'px';
+  });
+
+  // innerHeight 기준값 업데이트 (화면 회전 대비)
+  window.addEventListener('resize',()=>{
+    if(!window.visualViewport)return;
+    const vv=window.visualViewport;
+    const keyboardH=window.innerHeight-vv.height;
+    if(keyboardH<100) _lastVH=window.innerHeight;
+  });
+}
 
 })();
 </script>
