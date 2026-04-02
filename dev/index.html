@@ -10,7 +10,7 @@
   default-src 'self';
   script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://www.google.com https://cdnjs.cloudflare.com https://t1.kakaocdn.net https://static.nid.naver.com https://apis.google.com;
   style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com;
-  connect-src 'self' https://*.googleapis.com wss://*.googleapis.com https://*.google.com https://www.gstatic.com https://kakao-token-proxy.nonmarking.workers.dev https://dry-meadow-3356mily-ai-proxy.nonmarking.workers.dev https://kapi.kakao.com https://kauth.kakao.com https://nid.naver.com https://openapi.naver.com https://api.openweathermap.org https://api.waqi.info https://nominatim.openstreetmap.org https://wttr.in;
+  connect-src 'self' https://*.googleapis.com wss://*.googleapis.com https://*.google.com https://www.gstatic.com https://mily-proxy.vercel.app https://kakao-token-proxy.nonmarking.workers.dev https://kapi.kakao.com https://kauth.kakao.com https://nid.naver.com https://openapi.naver.com https://api.openweathermap.org https://api.waqi.info https://nominatim.openstreetmap.org https://wttr.in;
   font-src 'self' https://cdnjs.cloudflare.com data:;
   img-src 'self' data: blob: https:;
   worker-src 'self';
@@ -8639,7 +8639,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0402z27';
+const _APP_VERSION = 'v0403a';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -10564,7 +10564,7 @@ function _tryAIGreeting(el,msgEl,ctx){
 }
 
 async function _fetchAIGreeting(ctx){
-  const PROXY=typeof MILY_PROXY_URL!=='undefined'?MILY_PROXY_URL:'https://dry-meadow-3356mily-ai-proxy.nonmarking.workers.dev/';
+  const PROXY=typeof MILY_PROXY_URL!=='undefined'?MILY_PROXY_URL:'https://mily-proxy.vercel.app/api/proxy';
   const h=new Date().getHours();
   const timeSlot=h<6?'새벽':h<12?'아침':h<18?'오후':'저녁';
   const isC=typeof isCaregiverUser==='function'&&isCaregiverUser();
@@ -20408,7 +20408,7 @@ function _getS(){ return window._S; }
 function _getMembers(){ return window._MEMBERS; }
 function _getGlobalDataOwner(){return window._globalDataOwner_ref();}
 
-const MILY_PROXY_URL='https://dry-meadow-3356mily-ai-proxy.nonmarking.workers.dev/';
+const MILY_PROXY_URL='https://mily-proxy.vercel.app/api/proxy';
 const MILY_MAX_HISTORY=20; // 대화 기록 최대 유지 수
 
 let _milyOpen=false;
