@@ -418,6 +418,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, doc, getDoc, getDocs, setDoc, deleteDoc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDTS81EBGgiuo564ThxvTTOpR_iAHLb8tg",
@@ -430,6 +431,22 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
+
+// Firebase 익명 인증 (Firestore 보안 규칙 충족용)
+let _fbAuthReady = false;
+async function ensureFirebaseAuth() {
+  if (_fbAuthReady) return true;
+  try {
+    await signInAnonymously(auth);
+    _fbAuthReady = true;
+    console.log('[Admin] Firebase 익명 인증 성공');
+    return true;
+  } catch (e) {
+    console.error('[Admin] Firebase 인증 실패:', e);
+    return false;
+  }
+}
 
 // ── S-06: XSS 방지 — HTML 이스케이프 유틸리티 ──
 function escHtml(str) {
@@ -558,6 +575,12 @@ async function loadAllData() {
   _registry = {};
   _adminLogs = [];
   _loadErrors = [];
+
+  // Firebase 인증 (Firestore 보안 규칙 충족)
+  const authOk = await ensureFirebaseAuth();
+  if (!authOk) {
+    _loadErrors.push('Firebase 인증 실패 — Firebase Console > Authentication > Sign-in method에서 "익명(Anonymous)" 활성화 필요');
+  }
 
   // 1. families 컬렉션 (새 가입 가족)
   try {
