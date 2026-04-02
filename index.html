@@ -8632,7 +8632,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'prod'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0402z11';
+const _APP_VERSION = 'v0402z12';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -20069,6 +20069,19 @@ window._createState = _createState;
 .mily-msg.bot{align-self:flex-start;background:var(--bg2,#F1F5F9);color:var(--tx,#1E293B);border-bottom-left-radius:6px}
 .mily-msg.user{align-self:flex-end;background:linear-gradient(135deg,#6366F1,#818CF8);color:#fff;border-bottom-right-radius:6px}
 .mily-msg.bot .mily-action-result{margin-top:6px;padding:8px 10px;background:rgba(99,102,241,.08);border-radius:12px;font-size:12px;border-left:3px solid #6366F1}
+/* markdown in chat */
+.mily-msg table{width:100%;border-collapse:collapse;margin:6px 0;font-size:12px}
+.mily-msg th,.mily-msg td{border:1px solid var(--bdr,#E2E8F0);padding:4px 8px;text-align:left}
+.mily-msg th{background:rgba(99,102,241,.08);font-weight:700;font-size:11.5px}
+.mily-msg ul,.mily-msg ol{margin:4px 0;padding-left:18px}
+.mily-msg li{margin:2px 0}
+.mily-msg h1,.mily-msg h2,.mily-msg h3{margin:8px 0 4px;font-weight:800}
+.mily-msg h1{font-size:15px}.mily-msg h2{font-size:14px}.mily-msg h3{font-size:13.5px}
+.mily-msg code{background:rgba(0,0,0,.06);padding:1px 4px;border-radius:4px;font-size:12px;font-family:monospace}
+.mily-msg pre{background:rgba(0,0,0,.06);padding:8px;border-radius:8px;overflow-x:auto;margin:6px 0}
+.mily-msg pre code{background:none;padding:0}
+.mily-msg blockquote{border-left:3px solid var(--bdr,#CBD5E1);padding-left:10px;margin:6px 0;color:var(--tx2,#64748B);font-style:italic}
+.mily-msg hr{border:none;border-top:1px solid var(--bdr,#E2E8F0);margin:8px 0}
 .mily-btn-group{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .mily-quick-btn{display:inline-block;padding:7px 14px;background:rgba(99,102,241,.1);color:#6366F1;border:1.5px solid rgba(99,102,241,.3);border-radius:18px;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent;user-select:none}
 .mily-quick-btn:hover,.mily-quick-btn:active{background:#6366F1;color:#fff;border-color:#6366F1}
@@ -20951,10 +20964,76 @@ function _addUserMsg(text){
 }
 
 function _milyFormat(text){
-  return text
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+  // 경량 마크다운 파서 — 테이블, 리스트, 헤더, 볼드, 이탤릭, 코드, 인용, 구분선 지원
+  const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const inline=s=>esc(s)
+    .replace(/`([^`]+)`/g,'<code>$1</code>')
     .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
-    .replace(/\n/g,'<br>');
+    .replace(/\*(.+?)\*/g,'<em>$1</em>');
+
+  const lines=text.split('\n');
+  let html='',i=0;
+  while(i<lines.length){
+    const line=lines[i];
+    // 테이블 감지: | 로 시작하고 | 로 끝남
+    if(/^\|(.+)\|$/.test(line.trim())){
+      let tbl='<table>';
+      let isHead=true;
+      while(i<lines.length && /^\|(.+)\|$/.test(lines[i].trim())){
+        const row=lines[i].trim();
+        // 구분선 행 (|---|---|) 스킵
+        if(/^\|[-\s:|]+\|$/.test(row)){i++;continue;}
+        const cells=row.slice(1,-1).split('|').map(c=>c.trim());
+        const tag=isHead?'th':'td';
+        tbl+='<tr>'+cells.map(c=>`<${tag}>${inline(c)}</${tag}>`).join('')+'</tr>';
+        isHead=false;
+        i++;
+      }
+      html+=tbl+'</table>';
+      continue;
+    }
+    // 코드블록
+    if(line.trim().startsWith('```')){
+      i++;let code='';
+      while(i<lines.length&&!lines[i].trim().startsWith('```')){code+=(code?'\n':'')+esc(lines[i]);i++;}
+      html+='<pre><code>'+code+'</code></pre>';
+      i++;continue;
+    }
+    // 헤더
+    const hm=line.match(/^(#{1,3})\s+(.+)/);
+    if(hm){html+=`<h${hm[1].length}>${inline(hm[2])}</h${hm[1].length}>`;i++;continue;}
+    // 구분선
+    if(/^(-{3,}|\*{3,}|_{3,})$/.test(line.trim())){html+='<hr>';i++;continue;}
+    // 인용
+    if(line.trim().startsWith('> ')){
+      let q='';
+      while(i<lines.length&&lines[i].trim().startsWith('> ')){q+=(q?'<br>':'')+inline(lines[i].trim().slice(2));i++;}
+      html+='<blockquote>'+q+'</blockquote>';continue;
+    }
+    // 순서 없는 리스트
+    if(/^[\s]*[-*]\s+/.test(line)){
+      html+='<ul>';
+      while(i<lines.length&&/^[\s]*[-*]\s+/.test(lines[i])){
+        html+='<li>'+inline(lines[i].replace(/^[\s]*[-*]\s+/,''))+'</li>';i++;
+      }
+      html+='</ul>';continue;
+    }
+    // 순서 있는 리스트
+    if(/^[\s]*\d+\.\s+/.test(line)){
+      html+='<ol>';
+      while(i<lines.length&&/^[\s]*\d+\.\s+/.test(lines[i])){
+        html+='<li>'+inline(lines[i].replace(/^[\s]*\d+\.\s+/,''))+'</li>';i++;
+      }
+      html+='</ol>';continue;
+    }
+    // 빈줄
+    if(!line.trim()){html+='<br>';i++;continue;}
+    // 일반 텍스트
+    html+=inline(line)+'<br>';
+    i++;
+  }
+  // 끝의 불필요한 <br> 제거
+  return html.replace(/(<br>)+$/,'');
 }
 
 function _showTyping(show){
