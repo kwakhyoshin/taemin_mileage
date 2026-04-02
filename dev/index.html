@@ -8621,7 +8621,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0402m';
+const _APP_VERSION = 'v0402n';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -19660,15 +19660,11 @@ window._createState = _createState;
      ═══════════════════════════════════════════════════════════════ -->
 <style>
 /* ── mily chatbot FAB ── */
-.mily-fab{position:fixed;bottom:100px;right:16px;width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#6366F1,#818CF8);border:none;cursor:pointer;z-index:950;box-shadow:0 4px 20px rgba(99,102,241,.45);display:none;align-items:center;justify-content:center;transition:transform .2s,box-shadow .2s,opacity .25s;-webkit-tap-highlight-color:transparent;opacity:0}
+.mily-fab{position:fixed;bottom:100px;right:10px;width:72px;height:72px;border-radius:50%;background:transparent;border:none;cursor:pointer;z-index:950;display:none;align-items:center;justify-content:center;transition:transform .2s,opacity .25s;-webkit-tap-highlight-color:transparent;opacity:0;filter:drop-shadow(0 3px 8px rgba(99,102,241,.35))}
 .mily-fab.visible{display:flex;opacity:1}
 .mily-fab:active{transform:scale(.92)}
-.mily-fab svg{width:40px;height:40px}
-.mily-fab .fab-close{display:none}
-.mily-fab.open .fab-open{display:none}
-.mily-fab.open .fab-close{display:block}
-.mily-fab.open{opacity:1!important;display:flex!important;z-index:970}
-.mily-fab-badge{position:absolute;top:-2px;right:-2px;width:14px;height:14px;background:#EF4444;border-radius:50%;border:2px solid #fff;display:none}
+.mily-fab svg{width:72px;height:72px}
+.mily-fab-badge{position:absolute;top:2px;right:2px;width:14px;height:14px;background:#EF4444;border-radius:50%;border:2px solid #fff;display:none}
 .nav-container.docked~.mily-fab{bottom:72px}
 
 /* ── chat popup — 모바일 전체화면 ── */
@@ -19684,6 +19680,10 @@ window._createState = _createState;
 .mily-chat-hd-status{font-size:11px;opacity:.7;font-weight:500}
 .mily-chat-close{background:none;border:none;color:rgba(255,255,255,.7);cursor:pointer;padding:4px;border-radius:50%;transition:background .15s}
 .mily-chat-close:hover{background:rgba(255,255,255,.15)}
+
+/* mily character in chat */
+.mily-chat-char{display:flex;justify-content:center;padding:8px 0 4px;flex-shrink:0}
+.mily-chat-char svg{width:100px;height:100px}
 
 /* messages area */
 .mily-chat-msgs{flex:1;overflow-y:auto;padding:12px 12px 8px;display:flex;flex-direction:column;gap:8px;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
@@ -19709,10 +19709,9 @@ body.dark .mily-chat{box-shadow:0 12px 48px rgba(0,0,0,.4)}
 body.dark .mily-fab{box-shadow:0 4px 20px rgba(99,102,241,.3)}
 </style>
 
-<!-- FAB 버튼 -->
+<!-- FAB 버튼 — 밀리 캐릭터 -->
 <button class="mily-fab" id="mily-fab" onclick="toggleMilyChat()" aria-label="밀리 AI 챗봇">
-  <span class="fab-open"><svg viewBox="0 0 48 48" fill="none"><circle cx="24" cy="20" r="14" fill="#fff" opacity=".15"/><circle cx="24" cy="20" r="10" fill="#fff"/><circle cx="20" cy="18" r="2" fill="#6366F1"/><circle cx="28" cy="18" r="2" fill="#6366F1"/><path d="M20 23q4 3.5 8 0" stroke="#6366F1" stroke-width="1.5" stroke-linecap="round" fill="none"/><path d="M14 34 Q24 42 34 34" stroke="#fff" stroke-width="2.5" stroke-linecap="round" fill="none" opacity=".6"/></svg></span>
-  <span class="fab-close"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" width="24" height="24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span>
+  <span id="mily-fab-char"></span>
   <span class="mily-fab-badge" id="mily-fab-badge"></span>
 </button>
 
@@ -19726,6 +19725,7 @@ body.dark .mily-fab{box-shadow:0 4px 20px rgba(99,102,241,.3)}
     </div>
     <button class="mily-chat-close" onclick="toggleMilyChat()"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
   </div>
+  <div class="mily-chat-char" id="mily-chat-char"></div>
   <div class="mily-chat-msgs" id="mily-chat-msgs">
     <div class="mily-typing" id="mily-typing"><span></span><span></span><span></span></div>
   </div>
@@ -19754,22 +19754,74 @@ let _milyOpen=false;
 let _milySending=false;
 let _milyHistory=[]; // {role,content}
 
+// ── 밀리 캐릭터 무드 프리셋 ──
+const _MILY_MOODS={
+  idle:    {face:{eyeStyle:'normal',mouthStyle:'smile'},bodyAnim:'bounce',armStyle:'rest',effects:[]},
+  wave:    {face:{eyeStyle:'normal',mouthStyle:'open',cheekGlow:true},bodyAnim:'nod',armStyle:'wave',effects:[]},
+  happy:   {face:{eyeStyle:'happy',mouthStyle:'grin',cheekGlow:true},bodyAnim:'bounce',armStyle:'cheer',effects:['sparkle']},
+  excited: {face:{eyeStyle:'happy',mouthStyle:'open',cheekGlow:true},bodyAnim:'jump',armStyle:'up',effects:['stars']},
+  think:   {face:{eyeStyle:'normal',mouthStyle:'smile'},bodyAnim:'nod',armStyle:'rest',effects:[]},
+  success: {face:{eyeStyle:'happy',mouthStyle:'grin',cheekGlow:true},bodyAnim:'tada',armStyle:'cheer',effects:['stars']},
+  love:    {face:{eyeStyle:'love',mouthStyle:'smile',cheekGlow:true},bodyAnim:'pulse',armStyle:'hug',effects:['hearts']},
+  sad:     {face:{eyeStyle:'sleepy',mouthStyle:'sad'},bodyAnim:'sleepy',armStyle:'rest',effects:[]},
+  surprise:{face:{eyeStyle:'surprised',mouthStyle:'o'},bodyAnim:'tada',armStyle:'rest',effects:['sparkle']},
+  sleepy:  {face:{eyeStyle:'sleepy',mouthStyle:'sleepy'},bodyAnim:'sleepy',armStyle:'rest',effects:['zzz']},
+};
+
+// 밀리 캐릭터 업데이트 (채팅창 내부)
+function _updateMilyChatChar(mood){
+  const el=document.getElementById('mily-chat-char');
+  if(!el)return;
+  const cfg=_MILY_MOODS[mood]||_MILY_MOODS.idle;
+  el.innerHTML=_milySVG(cfg);
+}
+
+// 밀리 FAB 캐릭터 초기화
+function _initMilyFabChar(){
+  const el=document.getElementById('mily-fab-char');
+  if(!el)return;
+  el.innerHTML=_milySVG({face:{eyeStyle:'normal',mouthStyle:'smile',cheekGlow:true},bodyAnim:'bounce',armStyle:'wave',effects:[]});
+}
+
+// 응답 텍스트에서 감정 감지
+function _detectMilyMood(text){
+  if(!text)return'idle';
+  const t=text.toLowerCase();
+  // 성공/완료 관련
+  if(/완료|추가했|수정했|삭제했|성공|해냈|했어!/.test(t))return'success';
+  // 기쁨/칭찬
+  if(/대단|멋|잘했|훌륭|최고|짱|축하|자랑/.test(t))return'excited';
+  // 사랑/감사
+  if(/사랑|좋아|고마|감사|응원|파이팅|화이팅/.test(t))return'love';
+  // 놀람
+  if(/우와|대박|놀라|깜짝|진짜\?|정말\?|헐/.test(t))return'surprise';
+  // 슬픔/미안
+  if(/미안|슬프|안타|아쉬|없어|못 찾|찾을 수 없/.test(t))return'sad';
+  // 인사/환영
+  if(/안녕|반가|환영|좋은 아침|좋은 오후|좋은 저녁/.test(t))return'wave';
+  // 생각/설명
+  if(/알려줄|설명|방법|이렇게|할 수 있|하면 돼/.test(t))return'think';
+  // 긍정/일반
+  if(/좋아|괜찮|네!|응!|알겠|할게/.test(t))return'happy';
+  return'idle';
+}
+
 // ── UI 토글 ──
 window.toggleMilyChat=function(){
   _milyOpen=!_milyOpen;
   const fab=document.getElementById('mily-fab');
-  fab.classList.toggle('open',_milyOpen);
   const chat=document.getElementById('mily-chat');
   if(_milyOpen){
     chat.classList.add('open');
-    fab.classList.add('visible'); // 챗봇 열리면 FAB 항상 표시
+    fab.classList.remove('visible'); // 채팅 열리면 FAB 숨김
+    _updateMilyChatChar('wave'); // 환영 표정
     // 첫 오픈 시 환영 메시지
     if(_milyHistory.length===0) _milyWelcome();
     setTimeout(()=>document.getElementById('mily-input').focus(),300);
     _scrollMilyBottom();
   }else{
     chat.classList.remove('open');
-    if(typeof _updateFabVisibility==='function') _updateFabVisibility();
+    if(typeof _updateFabVisibility==='function') _updateFabVisibility(); // FAB 다시 표시
   }
 };
 
@@ -19810,6 +19862,7 @@ async function _callMilyAPI(){
   _milySending=true;
   _setMilySendBtn(false);
   _showTyping(true);
+  _updateMilyChatChar('think'); // 생각하는 표정
 
   const systemPrompt=_buildSystemPrompt();
   const tools=_buildTools();
@@ -20323,6 +20376,9 @@ function _addBotMsg(text){
   div.innerHTML=_milyFormat(text);
   container.insertBefore(div,typing);
   _scrollMilyBottom();
+  // 밀리 캐릭터 표정 업데이트
+  const mood=_detectMilyMood(text);
+  _updateMilyChatChar(mood);
 }
 
 function _addUserMsg(text){
@@ -20375,9 +20431,9 @@ function _updateFabVisibility(){
     fab.classList.remove('visible');
     return;
   }
-  // 챗봇이 열려있으면 항상 FAB 표시 (닫기용)
+  // 챗봇이 열려있으면 FAB 숨김 (상단 X로 닫기)
   if(_milyOpen){
-    fab.classList.add('visible');
+    fab.classList.remove('visible');
     return;
   }
   // 홈탭에서 mily 인사말이 보이면 FAB 숨김
@@ -20454,6 +20510,7 @@ function _resetMilyChat(){
       if(el!==typing) el.remove();
     });
   }
+  _updateMilyChatChar('idle'); // 캐릭터 초기화
   // 챗봇이 열려있으면 새 환영 메시지 표시
   if(_milyOpen) _milyWelcome();
 }
@@ -20469,6 +20526,8 @@ setTimeout(()=>{
     _milyAppReady=true;
     _setupMilyObserver();
   }
+  _initMilyFabChar(); // FAB에 밀리 캐릭터 렌더링
+  _updateMilyChatChar('idle'); // 채팅창 기본 표정
   _updateFabVisibility();
 },1000);
 
