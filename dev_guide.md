@@ -2,7 +2,7 @@
 
 > 이 문서는 새 세션에서 실수 없이 개발·테스트·배포할 수 있도록 모든 핵심 정보를 담고 있습니다.
 > **새 세션 시작 시 반드시 이 문서를 먼저 읽을 것.**
-> 최종 업데이트: 2026-04-02 (인사말 존댓말 + 마일리지 용어 통일 + 활동통계 + 운영 배포, PR #140~#152)
+> 최종 업데이트: 2026-04-03 (Vercel 프록시 전환 + 챗봇 양육자 이름 + 오늘의 할일 학습 + 운영 배포, PR #160~#162)
 
 ---
 
@@ -2061,3 +2061,44 @@ CSP 추가(#87) 후 개발기에서 "오프라인 모드" 에러 발생. 3단계
 - 모바일 키보드 backdrop 수정 시도 (PR #127) → 기존보다 악화되어 즉시 revert
 
 **운영기 배포**: PR #128 — dev/index.html → index.html (`_ENV='prod'` 확인)
+
+### 2026-04-03 세션 (챗봇 전기기 동작 + 오늘의 할일 학습 + 운영 배포)
+
+**주요 변경 (v0403a / 1.9.7)**
+
+#### 챗봇 프록시 마이그레이션 (Cloudflare Worker → Vercel Edge Function)
+- **문제**: Cloudflare Worker에서 Anthropic API 호출 시 403 "Request not allowed" — CF-to-CF 라우팅 충돌
+- **원인**: Anthropic API도 Cloudflare 뒤에 있어서, CF Worker가 CF 보호 도메인을 호출하면 차단됨 (debug에서 HKG colo + `server: cloudflare` 확인)
+- **해결**: Vercel Edge Function으로 프록시 이전 (`mily-proxy.vercel.app`). AWS 기반 인프라라 CF-to-CF 충돌 없음
+- **프록시 URL**: `https://mily-proxy.vercel.app/api/proxy`
+- **API 키**: Vercel 환경변수 `ANTHROPIC_API_KEY`에 저장 (소스코드에 키 없음)
+- **보안**: CORS origin 체크 + rate limit (20req/60s per IP)
+- **CSP 업데이트**: `connect-src`에 `https://mily-proxy.vercel.app` 추가
+
+#### 챗봇 양육자 이름 인식 (PR #160)
+- `_buildSystemPrompt()`에서 `familyMeta.members[currentUser].name`으로 양육자 이름(`myName`) 추출
+- 시스템 프롬프트 `[상태]` 섹션에 `양육자(이름)` 형태로 표시
+
+#### 홈탭 인사말 복원 + 챗봇 오늘의 할일 학습 (PR #161)
+- **홈탭 인사말**: `_tryAIGreeting()` 호출 제거 → 기존 활동 진행 기반 메시지로 복원 (allDone/streak/remaining 등)
+- **getStatus() 확장**:
+  - `today_mission`: `{total, done, remaining}` — 오늘의 할일 진행 현황
+  - `activities[].showHome`: 오늘의 할일 포함 여부
+  - `streak.bonus_pts`: 7일 연속 보너스 마일리지 (기본 100M)
+- **시스템 프롬프트 `[오늘의 할일]` 섹션 추가**:
+  - `showHome=true` 활동 = 오늘의 할일
+  - 모두 완료 시 연속 성공일수(streak) +1
+  - 7일 연속 성공 → `streak.bonus_pts` 자동 지급
+  - `today_mission` 필드 활용 가이드
+- **`[통계 활용]` 섹션 보강**: `today_mission` 활용 예시 추가
+
+#### 운영기 배포 (PR #162)
+- `release/v0403a` 브랜치에서 `_ENV='prod'` 확인 후 merge
+- APP_CHANGELOG v1.9.7 항목 추가
+
+#### PR 목록
+| PR | 설명 | 상태 |
+|----|------|------|
+| #160 | feat: 챗봇 양육자 이름 인식 | ✅ 개발기+운영기 |
+| #161 | feat: 홈 인사말 복원 + 챗봇 오늘의 할일 학습 | ✅ 개발기+운영기 |
+| #162 | release: v0403a 운영 반영 | ✅ 운영기 배포 |
