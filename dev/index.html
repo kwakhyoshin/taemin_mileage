@@ -8632,7 +8632,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0402z7';
+const _APP_VERSION = 'v0402z8';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -20965,12 +20965,8 @@ function _updateFabVisibility(){
     fab.classList.remove('visible');
     return;
   }
-  // 홈탭에서 mily 인사말이 보이면 FAB 숨김
-  if(_milyCurrentTab==='home'&&_milyGreetingVisible){
-    fab.classList.remove('visible');
-  }else{
-    fab.classList.add('visible');
-  }
+  // FAB 항상 표시 (홈탭 인사말 영역과 무관)
+  fab.classList.add('visible');
 }
 
 // IntersectionObserver로 mily-greeting 가시성 감지
