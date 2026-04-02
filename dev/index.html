@@ -8621,7 +8621,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0402n';
+const _APP_VERSION = 'v0402p';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -18285,11 +18285,17 @@ window.postLoginInit=postLoginInit;
 window.renderAdmChildSelector=renderAdmChildSelector;
 window.renderAdmModeSection=renderAdmModeSection;
 
-// mily AI 챗봇 IIFE에서 접근 필요한 변수 exports
+// mily AI 챗봇 IIFE에서 접근 필요한 변수/함수 exports
+// (module scope는 window에 자동 노출되지 않으므로 명시적 export 필요)
 window._S=S;
 window._MEMBERS=MEMBERS;
 window._globalDataOwner_ref=function(){return _globalDataOwner;};
 window._globalDataOwner_set=function(v){_globalDataOwner=v;};
+window._milySVG=_milySVG;
+window._milyFace=_milyFace;
+window.save=save;
+window.renderAll=renderAll;
+window.doAct=doAct;
 
 // Initial render
 renderDevUserSwitch();
