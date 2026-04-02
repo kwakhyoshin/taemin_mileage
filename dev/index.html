@@ -8632,7 +8632,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0402z3';
+const _APP_VERSION = 'v0402z4';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -10502,6 +10502,90 @@ function renderMilyGreeting(){
   el.className='mily-greeting-hero';
   charEl.innerHTML=_milySVG(charCfg);
   msgEl.innerHTML=`${msg}${hint?`<div class="mily-hint">${hintIcon||''}${hint}</div>`:''}`;
+
+  // AI 인사말: 캐시 확인 → 캐시 있으면 즉시 교체, 없으면 백그라운드 호출
+  _tryAIGreeting(el,msgEl,{done,total,remaining,streak,state});
+}
+
+// ── AI 인사말 시스템 ──
+const _AI_GREET_INTERVAL=6*60*60*1000; // 6시간마다 1회
+const _AI_GREET_KEY=(_LS_PREFIX||'taemin_dev_')+'ai_greeting';
+
+function _tryAIGreeting(el,msgEl,ctx){
+  try{
+    const cached=localStorage.getItem(_AI_GREET_KEY);
+    if(cached){
+      const {msg:cMsg,ts,ctxKey}=JSON.parse(cached);
+      // 캐시가 유효하고 같은 상태면 AI 메시지로 교체
+      if(Date.now()-ts<_AI_GREET_INTERVAL&&cMsg){
+        msgEl.innerHTML=cMsg;
+        return;
+      }
+    }
+    // 캐시 없거나 만료 → 백그라운드 API 호출
+    _fetchAIGreeting(ctx).then(aiMsg=>{
+      if(aiMsg&&el.style.display!=='none'){
+        msgEl.innerHTML=aiMsg;
+      }
+    }).catch(()=>{});
+  }catch(e){console.log('[ai-greet]',e);}
+}
+
+async function _fetchAIGreeting(ctx){
+  const PROXY=typeof MILY_PROXY_URL!=='undefined'?MILY_PROXY_URL:'https://dry-meadow-3356mily-ai-proxy.nonmarking.workers.dev/';
+  const h=new Date().getHours();
+  const timeSlot=h<6?'새벽':h<12?'아침':h<18?'오후':'저녁';
+  const isC=typeof isCaregiverUser==='function'&&isCaregiverUser();
+  const kidName=typeof _getCurrentKidName==='function'?_getCurrentKidName():'';
+  const pts=typeof getActiveMileage==='function'?getActiveMileage():0;
+
+  const prompt=`한 문장(25자 이내) 캐릭터 인사말을 만들어. 반말. 밝고 친근하게. 절대 마크다운이나 이모지 사용하지 마.
+시간:${timeSlot} 유저:${isC?'양육자':'자녀(아이)'} 이름:${kidName} 마일리지:${pts}P 오늘진행:${ctx.done}/${ctx.total} 남은:${ctx.remaining}개 연속:${ctx.streak}일
+
+아래 주제 중 하나를 랜덤하게 골라서 한 문장만 출력해:
+${isC?'- 양육자 컨설팅: 활동/보상 밸런스 분석, 육아 팁 등 제안\n- 챗봇 홍보: 나(밀리)한테 말 걸어보라고 유도':'- 챗봇 홍보: 나(밀리)한테 궁금한거 물어보라고 유도'}
+- 오늘 활동 상황에 맞는 응원이나 칭찬
+- ${ctx.streak>3?'스트릭 '+ctx.streak+'일 축하/응원':'새로 시작하는 응원'}
+- 시간대별 상황 인사이트 (${timeSlot}에 맞는)
+
+한 문장만 출력해. 다른 설명 없이.`;
+
+  try{
+    const ctrl=new AbortController();
+    const tm=setTimeout(()=>ctrl.abort(),8000); // 8초 타임아웃
+    const resp=await fetch(PROXY,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      signal:ctrl.signal,
+      body:JSON.stringify({
+        model:'claude-haiku-4-5-20251001',
+        system:'너는 밀리야. 마일리 앱 캐릭터. 한 문장만 출력해.',
+        messages:[{role:'user',content:prompt}],
+        max_tokens:60
+      })
+    });
+    clearTimeout(tm);
+
+    if(!resp.ok)return null;
+    const data=await resp.json();
+    let text=data.content?.[0]?.text||null;
+    if(!text)return null;
+
+    // 정리: 따옴표, 이모지 제거, 길이 제한
+    text=text.replace(/^["'""]+|["'""]+$/g,'').trim();
+    if(text.length>40) text=text.slice(0,38)+'…';
+
+    // hint 영역에 챗봇 유도 문구 추가
+    const hintHtml=`<div class="mily-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:14px;height:14px"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>나를 눌러서 대화해봐!</div>`;
+    const aiMsg=text+hintHtml;
+
+    // 캐시 저장
+    localStorage.setItem(_AI_GREET_KEY,JSON.stringify({msg:aiMsg,ts:Date.now()}));
+    return aiMsg;
+  }catch(e){
+    console.log('[ai-greet] fetch error:',e.message);
+    return null;
+  }
 }
 
 // ── streak pill 클릭 → 설명 팝업 ──────────────────────────
