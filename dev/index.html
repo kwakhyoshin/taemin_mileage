@@ -435,10 +435,10 @@ body.dark .theme-pick.active .theme-pick-radio{border-color:#818CF8;background:#
 .streak-popup{background:var(--card);border-radius:24px;padding:28px 24px;width:min(320px,calc(100vw - 48px));box-shadow:var(--shadow-lg);text-align:center;transform:scale(.9);transition:transform .2s}
 .streak-popup-overlay.show .streak-popup{transform:scale(1)}
 /* ── 마일리 인사말 (hero 안) ── */
-.mily-greeting-hero{display:flex;align-items:center;gap:10px;margin-top:10px;background:rgba(255,255,255,.08);border-radius:24px;padding:8px 14px 8px 6px;transition:opacity .3s}
+.mily-greeting-hero{display:flex;align-items:flex-start;gap:10px;margin-top:10px;background:rgba(255,255,255,.08);border-radius:24px;padding:8px 14px 8px 6px;transition:opacity .3s}
 .mily-char{width:52px;height:52px;flex-shrink:0}
 .mily-char svg{width:100%;height:100%}
-.mily-msg-hero{flex:1;min-width:0;font-size:13px;font-weight:600;color:rgba(255,255,255,.92);line-height:1.5}
+.mily-msg-hero{flex:1;min-width:0;font-size:13px;font-weight:600;color:rgba(255,255,255,.92);line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .mily-msg-hero .mily-hint{font-size:11px;color:rgba(255,255,255,.55);margin-top:1px;font-weight:500;display:flex;align-items:center;gap:4px}
 .mily-msg-hero .mily-hint svg{width:11px;height:11px;flex-shrink:0}
 @keyframes milySlideIn{0%{opacity:0;transform:translateY(6px)}100%{opacity:1;transform:translateY(0)}}
@@ -8639,7 +8639,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0402z14';
+const _APP_VERSION = 'v0402z15';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -15507,11 +15507,12 @@ window.pfMenuAction=pfMenuAction;
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
   {
-    ver:'1.9.3 (v0402z14)', date:'2026-04-02',
+    ver:'1.9.3 (v0402z15)', date:'2026-04-02',
     items:[
       {type:'fix',text:'할인 보상 목표 게이지가 할인가 기준으로 표시 + 할인 마감 안내'},
-      {type:'new',text:'챗봇 폰트 크기 증가 및 mily AI SVG 로고 적용'},
+      {type:'new',text:'챗봇 폰트 크기 증가 및 mily.ai SVG path 로고 적용'},
       {type:'new',text:'챗봇 말투: 양육자 존댓말, 아이 친근한 반말'},
+      {type:'fix',text:'홈 인사말 영역 2줄 이상 표시 (말줄임 해소)'},
     ]
   },
   {
@@ -20171,7 +20172,7 @@ body.dark .mily-fab{box-shadow:0 4px 20px rgba(99,102,241,.3)}
   <div class="mily-chat-hd">
     <div class="mily-chat-hd-char" id="mily-chat-char"></div>
     <div class="mily-chat-hd-info">
-      <div class="mily-chat-hd-name"><svg width="100" height="24" viewBox="0 0 130 32" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="mily-sp-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#818CF8"/><stop offset="40%" stop-color="#C084FC"/><stop offset="100%" stop-color="#F472B6"/></linearGradient></defs><text x="0" y="24" font-family="-apple-system,'SF Pro Display','Segoe UI',sans-serif" font-size="24" font-weight="800" fill="#fff" letter-spacing="-0.8">mily</text><text x="66" y="24" font-family="-apple-system,'SF Pro Display','Segoe UI',sans-serif" font-size="14" font-weight="600" fill="rgba(255,255,255,.5)" letter-spacing="2">AI</text><path d="M100 2l1.8 7.2 7.2 1.8-7.2 1.8-1.8 7.2-1.8-7.2-7.2-1.8 7.2-1.8z" fill="url(#mily-sp-g)"/><path d="M122 6l1 4 4 1-4 1-1 4-1-4-4-1 4-1z" fill="url(#mily-sp-g)" opacity=".55"/></svg></div>
+      <div class="mily-chat-hd-name"><svg width="110" height="22" viewBox="0 0 300 60" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="mily-sp-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#818CF8"/><stop offset="40%" stop-color="#C084FC"/><stop offset="100%" stop-color="#F472B6"/></linearGradient></defs><path d="M10 48V28c0-5 3-9 8-9s8 4 8 9v0c0-5 3-9 8-9s8 4 8 9v20" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M54 24v24" stroke="#fff" stroke-width="8" stroke-linecap="round"/><circle cx="54" cy="14" r="4.5" fill="#fff"/><path d="M70 10v38" stroke="#fff" stroke-width="8" stroke-linecap="round"/><path d="M82 24l10 18M102 24l-14 30c-2 4-5 6-9 6" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="116" cy="47" r="5" fill="#FBBF24"/><path d="M142 48V32c0-5-4-9-9-9s-9 4-9 9c0 5 4 9 9 9h9" stroke="rgba(255,255,255,.5)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M156 24v24" stroke="rgba(255,255,255,.5)" stroke-width="8" stroke-linecap="round"/><circle cx="156" cy="14" r="4.5" fill="rgba(255,255,255,.5)"/><path d="M182 10l2.5 8 8 2.5-8 2.5-2.5 8-2.5-8-8-2.5 8-2.5z" fill="url(#mily-sp-g)"/><path d="M205 18l1.5 5 5 1.5-5 1.5-1.5 5-1.5-5-5-1.5 5-1.5z" fill="url(#mily-sp-g)" opacity=".55"/></svg></div>
       <div class="mily-chat-hd-status">마일리지 도우미</div>
     </div>
     <button class="mily-chat-close" onclick="toggleMilyChat()"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
