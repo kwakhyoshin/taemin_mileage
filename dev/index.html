@@ -3487,7 +3487,7 @@ requestAnimationFrame(function(){
     <div class="prog-track"><div class="prog-fill" id="hero-bar" style="width:0%"></div></div>
     <div class="prog-row"><span>0</span><span id="hero-bar-lbl"></span></div>
     <!-- 마일리 인사말 (hero 안) -->
-    <div id="mily-greeting" class="mily-greeting-hero" style="display:none">
+    <div id="mily-greeting" class="mily-greeting-hero" style="display:none;cursor:pointer" onclick="if(typeof toggleMilyChat==='function')toggleMilyChat()">
       <div class="mily-char" id="mily-char"></div>
       <div class="mily-msg-hero" id="mily-msg"></div>
     </div>
@@ -8621,7 +8621,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0402g';
+const _APP_VERSION = 'v0402h';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -19653,13 +19653,16 @@ window._createState = _createState;
      ═══════════════════════════════════════════════════════════════ -->
 <style>
 /* ── mily chatbot FAB ── */
-.mily-fab{position:fixed;bottom:100px;right:16px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#6366F1,#818CF8);border:none;cursor:pointer;z-index:950;box-shadow:0 4px 20px rgba(99,102,241,.45);display:flex;align-items:center;justify-content:center;transition:transform .2s,box-shadow .2s;-webkit-tap-highlight-color:transparent}
+.mily-fab{position:fixed;bottom:100px;right:16px;width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#6366F1,#818CF8);border:none;cursor:pointer;z-index:950;box-shadow:0 4px 20px rgba(99,102,241,.45);display:none;align-items:center;justify-content:center;transition:transform .2s,box-shadow .2s,opacity .25s;-webkit-tap-highlight-color:transparent;opacity:0}
+.mily-fab.visible{display:flex;opacity:1}
 .mily-fab:active{transform:scale(.92)}
-.mily-fab svg{width:32px;height:32px}
+.mily-fab svg{width:40px;height:40px}
 .mily-fab .fab-close{display:none}
 .mily-fab.open .fab-open{display:none}
 .mily-fab.open .fab-close{display:block}
+.mily-fab.open{opacity:1!important;display:flex!important}
 .mily-fab-badge{position:absolute;top:-2px;right:-2px;width:14px;height:14px;background:#EF4444;border-radius:50%;border:2px solid #fff;display:none}
+.nav-container.docked~.mily-fab{bottom:72px}
 
 /* ── chat popup ── */
 .mily-chat{position:fixed;bottom:168px;right:12px;width:calc(100vw - 24px);max-width:400px;height:60vh;max-height:500px;background:var(--card,#fff);border-radius:24px;box-shadow:0 12px 48px rgba(0,0,0,.18);z-index:940;display:none;flex-direction:column;overflow:hidden;transition:opacity .2s,transform .2s}
@@ -19742,16 +19745,19 @@ let _milyHistory=[]; // {role,content}
 // ── UI 토글 ──
 window.toggleMilyChat=function(){
   _milyOpen=!_milyOpen;
-  document.getElementById('mily-fab').classList.toggle('open',_milyOpen);
+  const fab=document.getElementById('mily-fab');
+  fab.classList.toggle('open',_milyOpen);
   const chat=document.getElementById('mily-chat');
   if(_milyOpen){
     chat.classList.add('open');
+    fab.classList.add('visible'); // 챗봇 열리면 FAB 항상 표시
     // 첫 오픈 시 환영 메시지
     if(_milyHistory.length===0) _milyWelcome();
     setTimeout(()=>document.getElementById('mily-input').focus(),300);
     _scrollMilyBottom();
   }else{
     chat.classList.remove('open');
+    if(typeof _updateFabVisibility==='function') _updateFabVisibility();
   }
 };
 
@@ -20338,33 +20344,89 @@ function _scrollMilyBottom(){
   requestAnimationFrame(()=>msgs.scrollTop=msgs.scrollHeight);
 }
 
-// ── 인증 전에는 FAB 숨기기 ──
+// ── FAB 가시성 관리 ──
+// 홈탭에서 mily-greeting이 보이면 FAB 숨김, 안 보이면 FAB 표시
+let _milyGreetingVisible=false;
+let _milyAppReady=false;
+let _milyCurrentTab='home';
+
+function _updateFabVisibility(){
+  const fab=document.getElementById('mily-fab');
+  if(!fab)return;
+  // 인증 화면이면 숨김
+  const authScreen=document.querySelector('.auth-screen');
+  if(authScreen&&authScreen.style.display!=='none'){
+    fab.classList.remove('visible');
+    return;
+  }
+  if(!_milyAppReady){
+    fab.classList.remove('visible');
+    return;
+  }
+  // 챗봇이 열려있으면 항상 FAB 표시 (닫기용)
+  if(_milyOpen){
+    fab.classList.add('visible');
+    return;
+  }
+  // 홈탭에서 mily 인사말이 보이면 FAB 숨김
+  if(_milyCurrentTab==='home'&&_milyGreetingVisible){
+    fab.classList.remove('visible');
+  }else{
+    fab.classList.add('visible');
+  }
+}
+
+// IntersectionObserver로 mily-greeting 가시성 감지
+function _setupMilyObserver(){
+  const greeting=document.getElementById('mily-greeting');
+  if(!greeting)return;
+  const observer=new IntersectionObserver((entries)=>{
+    _milyGreetingVisible=entries[0].isIntersecting&&greeting.style.display!=='none';
+    _updateFabVisibility();
+  },{threshold:0.3});
+  observer.observe(greeting);
+  // display:none 변경도 감지
+  const mutObs=new MutationObserver(()=>{
+    if(greeting.style.display==='none') _milyGreetingVisible=false;
+    _updateFabVisibility();
+  });
+  mutObs.observe(greeting,{attributes:true,attributeFilter:['style']});
+}
+
+// 탭 전환 감지
+const _origShowTab=window.showTab;
+if(typeof _origShowTab==='function'){
+  window.showTab=function(tab){
+    _milyCurrentTab=tab||'home';
+    _origShowTab.apply(this,arguments);
+    _updateFabVisibility();
+  };
+}
+
+// 앱 준비 감지
 const _origShowApp=window._m_showApp;
 if(typeof _origShowApp==='function'){
   window._m_showApp=function(){
     _origShowApp.apply(this,arguments);
-    document.getElementById('mily-fab').style.display='flex';
+    _milyAppReady=true;
+    _setupMilyObserver();
+    _updateFabVisibility();
   };
 }
-// auth 화면에서는 숨기기
-const _milyObserver=new MutationObserver(()=>{
-  const authScreen=document.querySelector('.auth-screen');
-  const fab=document.getElementById('mily-fab');
-  if(!fab)return;
-  if(authScreen&&authScreen.style.display!=='none'){
-    fab.style.display='none';
-  }
-});
-_milyObserver.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['style']});
 
-// 초기 상태: auth 화면이면 숨김
+// auth 화면 변화 감지
+const _milyAuthObserver=new MutationObserver(()=>_updateFabVisibility());
+_milyAuthObserver.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['style']});
+
+// 초기 상태
 setTimeout(()=>{
   const authScreen=document.querySelector('.auth-screen');
-  const fab=document.getElementById('mily-fab');
-  if(fab&&authScreen&&authScreen.style.display!=='none'){
-    fab.style.display='none';
+  if(!authScreen||authScreen.style.display==='none'){
+    _milyAppReady=true;
+    _setupMilyObserver();
   }
-},500);
+  _updateFabVisibility();
+},1000);
 
 })();
 </script>
