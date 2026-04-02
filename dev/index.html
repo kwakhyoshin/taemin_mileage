@@ -6703,9 +6703,22 @@ async function _doLinkSocial(provider){
     // auth registry 등록
     await _registerAuthLink(uid, _familyId, currentUser, provider, email);
     // 계정 데이터에 소셜 정보 추가
-    const acc = S.familyMeta?.members?.[currentUser]?.account;
-    if(acc){ acc.authProvider = provider; acc.authUid = uid; acc.email = email; if(displayName) acc.socialDisplayName = displayName; }
+    const _member = S.familyMeta?.members?.[currentUser];
+    if(_member){
+      if(!_member.account) _member.account = {};
+      _member.account.authProvider = provider;
+      _member.account.authUid = uid;
+      _member.account.email = email;
+      if(displayName) _member.account.socialDisplayName = displayName;
+    }
     if(S.users?.[currentUser]){ S.users[currentUser].authProvider = provider; S.users[currentUser].authUid = uid; S.users[currentUser].email = email; if(displayName) S.users[currentUser].socialDisplayName = displayName; }
+    // users 객체가 없는 경우에도 소셜 정보 저장 보장
+    if(!S.users) S.users = {};
+    if(!S.users[currentUser]) S.users[currentUser] = {};
+    S.users[currentUser].authProvider = provider;
+    S.users[currentUser].authUid = uid;
+    S.users[currentUser].email = email;
+    if(displayName) S.users[currentUser].socialDisplayName = displayName;
     await save();
     renderMyTab();
     toast(`✅ ${providerName} 계정이 연결되었어요!`);
@@ -7028,6 +7041,45 @@ function _renderHistHeroSub(){
 function isCurrentUserAdmin(){
   if(!currentUser||!S.familyMeta?.members)return false;
   return !!S.familyMeta.members[currentUser]?.isAdmin;
+}
+
+// ★ 레거시 가족(우리 가족) 관리자 → PRO 자동 설정
+// abo.taemin 등 다른 가족에는 적용하지 않음
+function _autoSetProIfAdmin(){
+  try{
+    if(!S.familyMeta) return;
+    // 레거시 가족 판별: familyId가 'legacy_taemin'이거나 DATA_DOC이 LEGACY_DOC인 경우
+    const isLegacyFamily = S.familyMeta.familyId === 'legacy_taemin' ||
+      (typeof DATA_DOC !== 'undefined' && typeof LEGACY_DOC !== 'undefined' && DATA_DOC === LEGACY_DOC) ||
+      (_familyId && (typeof _familyId === 'string') && S.familyMeta.familyId && S.familyMeta.familyId.indexOf('legacy') !== -1);
+    // 레거시에서 families/로 마이그레이션된 경우에도 지원
+    const isMigratedLegacy = !isLegacyFamily && S.familyMeta.createdBy === 'dad' && S.familyMeta.familyName === '우리 가족';
+    if(!isLegacyFamily && !isMigratedLegacy) return;
+    // 관리자(양육자)로 로그인한 경우에만
+    const isAdmin = isCurrentUserAdmin() || isCaregiverUser();
+    if(!isAdmin) return;
+    if(S.familyMeta.plan === 'pro') return; // 이미 PRO
+    S.familyMeta.plan = 'pro';
+    if(typeof save === 'function') save();
+    console.log('✅ 레거시 가족 관리자 PRO 등급 자동 설정 완료');
+  }catch(e){ console.warn('[_autoSetProIfAdmin] error:', e); }
+}
+
+// ★ 비-레거시 가족에서 잘못 설정된 PRO를 되돌림
+// (이전 버전 코드에서 모든 admin에게 PRO를 부여하는 버그로 인해 발생)
+function _cleanupWrongPro(){
+  try{
+    if(!S.familyMeta || S.familyMeta.plan !== 'pro') return;
+    const isLegacy = S.familyMeta.familyId === 'legacy_taemin' ||
+      (S.familyMeta.createdBy === 'dad' && S.familyMeta.familyName === '우리 가족');
+    if(isLegacy) return; // 레거시 가족은 PRO 유지
+    // proRequest가 있으면 정상적으로 신청한 것이므로 유지
+    if(S.familyMeta.proRequest) return;
+    // 비-레거시 가족에서 proRequest 없이 PRO → 잘못 설정된 것이므로 되돌림
+    console.log('🔧 비-레거시 가족 잘못된 PRO 설정 되돌림:', S.familyMeta.familyId);
+    delete S.familyMeta.plan;
+    if(typeof save === 'function') save();
+  }catch(e){ console.warn('[_cleanupWrongPro] error:', e); }
 }
 
 // 로그인 후 모드/뷰 초기화: independent 모드에서 양육자/관리자는 첫 자녀 뷰로 전환
@@ -8281,12 +8333,10 @@ function checkAuth() {
     postLoginInit();
     // 관리자 권한이면 자동으로 adminOK
     if(isCurrentUserAdmin()) adminOK = true;
-    // ★ 관리자 계정(nonmarking) PRO 등급 설정 (1회 마이그레이션)
-    if(isCurrentUserAdmin() && S.familyMeta && S.familyMeta.plan !== 'pro'){
-      S.familyMeta.plan = 'pro';
-      if(typeof save === 'function') save();
-      console.log('✅ 관리자 계정 PRO 등급 자동 설정 완료');
-    }
+    // ★ 레거시 가족 관리자 PRO 등급 자동 설정
+    _autoSetProIfAdmin();
+    // ★ 잘못 설정된 PRO 정리 (비-레거시 가족에서 proRequest 없이 PRO인 경우)
+    _cleanupWrongPro();
     hideAllAuth();
     // s-home 초기 on 클래스가 없으므로 명시적으로 홈 탭 활성화
     const _homeScr = document.getElementById('s-home');
@@ -8662,7 +8712,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0403b';
+const _APP_VERSION = 'v0403c';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -15548,6 +15598,14 @@ window.pfMenuAction=pfMenuAction;
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
   {
+    ver:'1.9.9 (v0403c)', date:'2026-04-03',
+    items:[
+      {type:'fix',text:'등급 배지 클릭 시 팝업 안뜨는 문제 수정'},
+      {type:'fix',text:'PRO 등급이 다른 계정에 잘못 적용되는 문제 수정'},
+      {type:'fix',text:'소셜 계정 연동 후 나의메뉴에 정보 안보이는 문제 수정'},
+    ]
+  },
+  {
     ver:'1.9.8 (v0403b)', date:'2026-04-03',
     items:[
       {type:'fix',text:'나의메뉴(MY) 탭 스와이프 이동 지원'},
@@ -20951,6 +21009,7 @@ function _updatePlanBadges(){
   const myBadge=document.getElementById('my-plan-badge');
   if(myBadge) myBadge.innerHTML=`<span class="my-plan-badge ${cls}" onclick="_showPlanPopup()">${svg} ${label}</span>`;
 }
+window._showPlanPopup=_showPlanPopup;
 function _showPlanPopup(){
   const isPro=_isPro();
   if(isPro){
@@ -20979,6 +21038,7 @@ function _showPlanPopup(){
   overlay.appendChild(card);
   document.body.appendChild(overlay);
 }
+window._requestProUpgradeFromUI=_requestProUpgradeFromUI;
 function _requestProUpgradeFromUI(){
   const result=_requestProUpgrade();
   if(result&&result.success) toast('🌟 PRO 업그레이드 신청이 접수되었어요!');
