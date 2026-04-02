@@ -8639,7 +8639,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0402z20';
+const _APP_VERSION = 'v0402z21';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -20091,7 +20091,7 @@ window._createState = _createState;
 @keyframes milyChatIn{from{opacity:0;transform:translateY(100%)}to{opacity:1;transform:translateY(0)}}
 
 /* chat header — 키보드 올라와도 고정 */
-.mily-chat-hd{background:linear-gradient(135deg,#6366F1,#818CF8);color:#fff;padding:10px 16px;padding-top:calc(10px + env(safe-area-inset-top));display:flex;align-items:center;gap:10px;flex-shrink:0;position:sticky;top:0;z-index:2}
+.mily-chat-hd{background:linear-gradient(135deg,#6366F1,#818CF8);color:#fff;padding:10px 16px;padding-top:calc(10px + env(safe-area-inset-top));display:flex;align-items:center;gap:6px;flex-shrink:0;position:sticky;top:0;z-index:2}
 .mily-chat-hd-avatar{width:36px;height:36px;flex-shrink:0;display:none}
 .mily-chat-hd-char{width:80px;height:80px;flex-shrink:0}
 .mily-chat-hd-char svg{width:80px;height:80px}
@@ -20110,6 +20110,7 @@ window._createState = _createState;
 .mily-msg{max-width:85%;padding:10px 14px;border-radius:18px;font-size:16.5px;line-height:1.6;word-break:break-word;animation:milyMsgIn .2s ease}
 @keyframes milyMsgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .mily-msg.bot{align-self:flex-start;background:var(--bg2,#F1F5F9);color:var(--tx,#1E293B);border-bottom-left-radius:6px}
+body.dark .mily-msg.bot{background:var(--card2,#334155)}
 .mily-msg.user{align-self:flex-end;background:linear-gradient(135deg,#6366F1,#818CF8);color:#fff;border-bottom-right-radius:6px}
 .mily-msg.bot .mily-action-result{margin-top:6px;padding:8px 10px;background:rgba(99,102,241,.08);border-radius:12px;font-size:12px;border-left:3px solid #6366F1}
 /* markdown in chat */
@@ -20121,7 +20122,9 @@ window._createState = _createState;
 .mily-msg h1,.mily-msg h2,.mily-msg h3{margin:8px 0 4px;font-weight:800}
 .mily-msg h1{font-size:18px}.mily-msg h2{font-size:17px}.mily-msg h3{font-size:16.5px}
 .mily-msg code{background:rgba(0,0,0,.06);padding:1px 4px;border-radius:4px;font-size:14px;font-family:monospace}
+body.dark .mily-msg.bot code{background:rgba(255,255,255,.08)}
 .mily-msg pre{background:rgba(0,0,0,.06);padding:8px;border-radius:8px;overflow-x:auto;margin:6px 0}
+body.dark .mily-msg.bot pre{background:rgba(255,255,255,.06)}
 .mily-msg pre code{background:none;padding:0}
 .mily-msg blockquote{border-left:3px solid var(--bdr,#CBD5E1);padding-left:10px;margin:6px 0;color:var(--tx2,#64748B);font-style:italic}
 .mily-msg hr{border:none;border-top:1px solid var(--bdr,#E2E8F0);margin:8px 0}
