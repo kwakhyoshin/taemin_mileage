@@ -7317,6 +7317,13 @@ function logout() {
   localStorage.removeItem('taemin_v6_naver_callback_result');
   localStorage.removeItem('taemin_v6_naver_redirect');
   try{ sessionStorage.removeItem('oauth_state_kakao'); sessionStorage.removeItem('oauth_state_naver'); }catch(e){}
+  // 밀리 챗봇 대화 초기화 & 패널 닫기
+  if(typeof _resetMilyChat==='function') _resetMilyChat();
+  _milyOpen=false;
+  const _chatPanel=document.getElementById('mily-chat-panel');
+  if(_chatPanel) _chatPanel.classList.remove('open');
+  // 밀리 버블 카운트 초기화
+  try{ localStorage.removeItem((_LS_PREFIX||'taemin_dev_')+'bubble_counts'); }catch(e){}
   // Firebase Auth에서도 로그아웃
   if(fbAuth && signOut){
     try{ signOut(fbAuth); }catch(e){ console.warn('Firebase signOut error:', e); }
@@ -8632,7 +8639,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0402z12';
+const _APP_VERSION = 'v0402z13';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -15481,6 +15488,12 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {
+    ver:'1.9.2 (v0402z13)', date:'2026-04-02',
+    items:[
+      {type:'fix',text:'로그아웃 후 재로그인 시 이전 계정 챗봇 대화가 남던 버그 수정'},
+    ]
+  },
   {
     ver:'1.9.1 (v0402z6)', date:'2026-04-02',
     items:[
