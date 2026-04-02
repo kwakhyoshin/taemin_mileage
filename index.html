@@ -69,8 +69,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="마일리">
-<meta name="screen-orientation" content="portrait">
-<meta name="x5-orientation" content="portrait">
+<!-- 가로모드 허용 -->
 <meta name="theme-color" id="theme-color-meta" content="#6366F1">
 <!-- Open Graph -->
 <meta property="og:type" content="website">
@@ -287,7 +286,10 @@ body.is-scrolling .hero,body.is-scrolling .log-header-sticky,body.is-scrolling .
 body.is-scrolling .hero *,body.is-scrolling .log-header-sticky *,body.is-scrolling .rwd-header-sticky *,body.is-scrolling .hist-hero *,body.is-scrolling .my-header *,body.is-scrolling .adm-top *{transition:none!important}
 /* Prevent iOS zoom on input focus */
 input,select,textarea{font-size:16px!important}
-body{font-family:'Pretendard Variable',-apple-system,sans-serif;background:var(--bg);color:var(--tx);max-width:430px;margin:0 auto;min-height:100vh;min-height:100dvh;overflow-x:hidden;transition:background .25s,color .25s}
+body{font-family:'Pretendard Variable',-apple-system,sans-serif;background:var(--bg);color:var(--tx);max-width:430px;margin:0 auto;min-height:100vh;min-height:100dvh;overflow-x:hidden;transition:background .25s,color .25s;scrollbar-width:none;-ms-overflow-style:none}
+body::-webkit-scrollbar{display:none}
+*::-webkit-scrollbar{width:0;height:0}
+*{scrollbar-width:none}
 html.popup-open,body.popup-open{overflow:hidden!important;height:100%!important}
 /* 팝업 열려도 네비게이션은 항상 표시 */
 @media(min-width:768px){body{max-width:100%;margin:0}}
@@ -975,14 +977,8 @@ body.dark .today-summary-card .ts-msg{background:linear-gradient(135deg,#312E81,
 #ep-bg{display:none;position:fixed;inset:0;z-index:499}
 
 /* LANDSCAPE BLOCK - only on small phones */
-.landscape-block{display:none;position:fixed;inset:0;background:linear-gradient(135deg,#6366F1,#818CF8);z-index:9999;align-items:center;justify-content:center;flex-direction:column;color:#fff;text-align:center;padding:20px}
-.landscape-block .icon{font-size:60px;margin-bottom:16px;animation:rotate-phone 1.5s ease-in-out infinite}
-.landscape-block h2{font-size:20px;font-weight:800;margin-bottom:8px}
-.landscape-block p{font-size:14px;opacity:.8}
-@keyframes rotate-phone{0%,100%{transform:rotate(0deg)}50%{transform:rotate(-90deg)}}
-@media screen and (orientation:landscape) and (max-height:500px){
-  .landscape-block{display:flex}
-}
+/* 가로모드 허용 — 차단 해제됨 (v0402z24) */
+.landscape-block{display:none!important}
 
 /* PIN */
 .pin-wrap{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:600;display:flex;align-items:center;justify-content:center}
@@ -8639,7 +8635,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'prod'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0402z23';
+const _APP_VERSION = 'v0402z24';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
