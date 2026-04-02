@@ -10,7 +10,7 @@
   default-src 'self';
   script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://www.google.com https://cdnjs.cloudflare.com https://t1.kakaocdn.net https://static.nid.naver.com https://apis.google.com;
   style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com;
-  connect-src 'self' https://*.googleapis.com wss://*.googleapis.com https://*.google.com https://www.gstatic.com https://kakao-token-proxy.nonmarking.workers.dev https://kapi.kakao.com https://kauth.kakao.com https://nid.naver.com https://openapi.naver.com https://api.openweathermap.org https://api.waqi.info https://nominatim.openstreetmap.org https://wttr.in;
+  connect-src 'self' https://*.googleapis.com wss://*.googleapis.com https://*.google.com https://www.gstatic.com https://kakao-token-proxy.nonmarking.workers.dev https://dry-meadow-3356mily-ai-proxy.nonmarking.workers.dev https://kapi.kakao.com https://kauth.kakao.com https://nid.naver.com https://openapi.naver.com https://api.openweathermap.org https://api.waqi.info https://nominatim.openstreetmap.org https://wttr.in;
   font-src 'self' https://cdnjs.cloudflare.com data:;
   img-src 'self' data: blob: https:;
   worker-src 'self';
@@ -3487,7 +3487,7 @@ requestAnimationFrame(function(){
     <div class="prog-track"><div class="prog-fill" id="hero-bar" style="width:0%"></div></div>
     <div class="prog-row"><span>0</span><span id="hero-bar-lbl"></span></div>
     <!-- 마일리 인사말 (hero 안) -->
-    <div id="mily-greeting" class="mily-greeting-hero" style="display:none">
+    <div id="mily-greeting" class="mily-greeting-hero" style="display:none;cursor:pointer" onclick="if(typeof toggleMilyChat==='function')toggleMilyChat()">
       <div class="mily-char" id="mily-char"></div>
       <div class="mily-msg-hero" id="mily-msg"></div>
     </div>
@@ -8621,7 +8621,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0402f';
+const _APP_VERSION = 'v0402h';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -15382,6 +15382,12 @@ window.pfMenuAction=pfMenuAction;
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
   {
+    ver:'1.9.0 (v0402g)', date:'2026-04-02',
+    items:[
+      {type:'new',text:'밀리 AI 챗봇 추가 — 활동/보상 추가·수정·삭제, 현황 조회, 앱 사용법 안내'},
+    ]
+  },
+  {
     ver:'1.8.4 (v0402f)', date:'2026-04-02',
     items:[
       {type:'fix',text:'마일리 캐릭터 크기 확대 (44→52px) 및 텍스트 간격 조정'},
@@ -19641,5 +19647,788 @@ window._createState = _createState;
 <div class="streak-popup-overlay" id="streak-popup-overlay" onclick="if(event.target===this)closeStreakPopup()">
   <div class="streak-popup" id="streak-popup-content"></div>
 </div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     mily AI 챗봇 — FAB + 채팅 팝업
+     ═══════════════════════════════════════════════════════════════ -->
+<style>
+/* ── mily chatbot FAB ── */
+.mily-fab{position:fixed;bottom:100px;right:16px;width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#6366F1,#818CF8);border:none;cursor:pointer;z-index:950;box-shadow:0 4px 20px rgba(99,102,241,.45);display:none;align-items:center;justify-content:center;transition:transform .2s,box-shadow .2s,opacity .25s;-webkit-tap-highlight-color:transparent;opacity:0}
+.mily-fab.visible{display:flex;opacity:1}
+.mily-fab:active{transform:scale(.92)}
+.mily-fab svg{width:40px;height:40px}
+.mily-fab .fab-close{display:none}
+.mily-fab.open .fab-open{display:none}
+.mily-fab.open .fab-close{display:block}
+.mily-fab.open{opacity:1!important;display:flex!important}
+.mily-fab-badge{position:absolute;top:-2px;right:-2px;width:14px;height:14px;background:#EF4444;border-radius:50%;border:2px solid #fff;display:none}
+.nav-container.docked~.mily-fab{bottom:72px}
+
+/* ── chat popup ── */
+.mily-chat{position:fixed;bottom:168px;right:12px;width:calc(100vw - 24px);max-width:400px;height:60vh;max-height:500px;background:var(--card,#fff);border-radius:24px;box-shadow:0 12px 48px rgba(0,0,0,.18);z-index:940;display:none;flex-direction:column;overflow:hidden;transition:opacity .2s,transform .2s}
+.mily-chat.open{display:flex;animation:milyChatIn .25s ease}
+@keyframes milyChatIn{from{opacity:0;transform:translateY(20px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+/* chat header */
+.mily-chat-hd{background:linear-gradient(135deg,#6366F1,#818CF8);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.mily-chat-hd-avatar{width:36px;height:36px;flex-shrink:0}
+.mily-chat-hd-info{flex:1;min-width:0}
+.mily-chat-hd-name{font-size:15px;font-weight:800}
+.mily-chat-hd-status{font-size:11px;opacity:.7;font-weight:500}
+.mily-chat-close{background:none;border:none;color:rgba(255,255,255,.7);cursor:pointer;padding:4px;border-radius:50%;transition:background .15s}
+.mily-chat-close:hover{background:rgba(255,255,255,.15)}
+
+/* messages area */
+.mily-chat-msgs{flex:1;overflow-y:auto;padding:12px 12px 8px;display:flex;flex-direction:column;gap:8px;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.mily-msg{max-width:85%;padding:10px 14px;border-radius:18px;font-size:13.5px;line-height:1.55;word-break:break-word;animation:milyMsgIn .2s ease}
+@keyframes milyMsgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.mily-msg.bot{align-self:flex-start;background:var(--bg2,#F1F5F9);color:var(--tx,#1E293B);border-bottom-left-radius:6px}
+.mily-msg.user{align-self:flex-end;background:linear-gradient(135deg,#6366F1,#818CF8);color:#fff;border-bottom-right-radius:6px}
+.mily-msg.bot .mily-action-result{margin-top:6px;padding:8px 10px;background:rgba(99,102,241,.08);border-radius:12px;font-size:12px;border-left:3px solid #6366F1}
+.mily-typing{align-self:flex-start;padding:10px 18px;background:var(--bg2,#F1F5F9);border-radius:18px;border-bottom-left-radius:6px;display:none;gap:4px;align-items:center}
+.mily-typing.show{display:flex}
+.mily-typing span{width:7px;height:7px;background:var(--tx2,#94A3B8);border-radius:50%;animation:milyDot 1.2s infinite}
+.mily-typing span:nth-child(2){animation-delay:.2s}
+.mily-typing span:nth-child(3){animation-delay:.4s}
+@keyframes milyDot{0%,80%,100%{transform:scale(.6);opacity:.4}40%{transform:scale(1);opacity:1}}
+
+/* input area */
+.mily-chat-input{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--bdr,#E2E8F0);flex-shrink:0;background:var(--card,#fff)}
+.mily-chat-input input{flex:1;border:1.5px solid var(--bdr,#E2E8F0);border-radius:24px;padding:10px 16px;font-size:14px;font-family:inherit;outline:none;background:var(--bg,#F8FAFC);color:var(--tx,#1E293B);transition:border-color .15s}
+.mily-chat-input input:focus{border-color:#6366F1}
+.mily-chat-input button{width:40px;height:40px;border-radius:50%;border:none;background:linear-gradient(135deg,#6366F1,#818CF8);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:opacity .15s}
+.mily-chat-input button:disabled{opacity:.4;cursor:default}
+body.dark .mily-chat{box-shadow:0 12px 48px rgba(0,0,0,.4)}
+body.dark .mily-fab{box-shadow:0 4px 20px rgba(99,102,241,.3)}
+</style>
+
+<!-- FAB 버튼 -->
+<button class="mily-fab" id="mily-fab" onclick="toggleMilyChat()" aria-label="밀리 AI 챗봇">
+  <span class="fab-open"><svg viewBox="0 0 48 48" fill="none"><circle cx="24" cy="20" r="14" fill="#fff" opacity=".15"/><circle cx="24" cy="20" r="10" fill="#fff"/><circle cx="20" cy="18" r="2" fill="#6366F1"/><circle cx="28" cy="18" r="2" fill="#6366F1"/><path d="M20 23q4 3.5 8 0" stroke="#6366F1" stroke-width="1.5" stroke-linecap="round" fill="none"/><path d="M14 34 Q24 42 34 34" stroke="#fff" stroke-width="2.5" stroke-linecap="round" fill="none" opacity=".6"/></svg></span>
+  <span class="fab-close"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" width="24" height="24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span>
+  <span class="mily-fab-badge" id="mily-fab-badge"></span>
+</button>
+
+<!-- 채팅 팝업 -->
+<div class="mily-chat" id="mily-chat">
+  <div class="mily-chat-hd">
+    <div class="mily-chat-hd-avatar"><svg viewBox="0 0 48 48" fill="none"><circle cx="24" cy="20" r="10" fill="#fff"/><circle cx="20" cy="18" r="2" fill="#6366F1"/><circle cx="28" cy="18" r="2" fill="#6366F1"/><path d="M20 23q4 3.5 8 0" stroke="#6366F1" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg></div>
+    <div class="mily-chat-hd-info">
+      <div class="mily-chat-hd-name">밀리 AI</div>
+      <div class="mily-chat-hd-status">마일리지 도우미</div>
+    </div>
+    <button class="mily-chat-close" onclick="toggleMilyChat()"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  </div>
+  <div class="mily-chat-msgs" id="mily-chat-msgs">
+    <div class="mily-typing" id="mily-typing"><span></span><span></span><span></span></div>
+  </div>
+  <div class="mily-chat-input">
+    <input type="text" id="mily-input" placeholder="밀리에게 물어보세요..." autocomplete="off" onkeydown="if(event.key==='Enter'&&!event.isComposing)sendMilyMsg()">
+    <button id="mily-send-btn" onclick="sendMilyMsg()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// mily AI 챗봇 모듈
+// ═══════════════════════════════════════════════════════════════
+(function(){
+'use strict';
+
+const MILY_PROXY_URL='https://dry-meadow-3356mily-ai-proxy.nonmarking.workers.dev/';
+const MILY_MAX_HISTORY=20; // 대화 기록 최대 유지 수
+
+let _milyOpen=false;
+let _milySending=false;
+let _milyHistory=[]; // {role,content}
+
+// ── UI 토글 ──
+window.toggleMilyChat=function(){
+  _milyOpen=!_milyOpen;
+  const fab=document.getElementById('mily-fab');
+  fab.classList.toggle('open',_milyOpen);
+  const chat=document.getElementById('mily-chat');
+  if(_milyOpen){
+    chat.classList.add('open');
+    fab.classList.add('visible'); // 챗봇 열리면 FAB 항상 표시
+    // 첫 오픈 시 환영 메시지
+    if(_milyHistory.length===0) _milyWelcome();
+    setTimeout(()=>document.getElementById('mily-input').focus(),300);
+    _scrollMilyBottom();
+  }else{
+    chat.classList.remove('open');
+    if(typeof _updateFabVisibility==='function') _updateFabVisibility();
+  }
+};
+
+// ── 환영 메시지 ──
+function _milyWelcome(){
+  const isC=typeof isCaregiverUser==='function'&&isCaregiverUser();
+  const kidName=_getCurrentKidName();
+  let msg='안녕! 나는 **밀리**야 🌟\n\n';
+  if(isC){
+    msg+=`${kidName?kidName+'의 ':''}마일리지를 도와줄게! 이런 걸 할 수 있어:\n\n`;
+    msg+='• **활동 추가/수정/삭제** — "양치하기 활동 추가해줘"\n';
+    msg+='• **보상 추가/수정/삭제** — "게임 30분 보상 만들어줘"\n';
+    msg+='• **현황 확인** — "오늘 뭐 했어?" "마일리지 얼마야?"\n';
+    msg+='• **앱 사용법** — "뱃지는 어떻게 받아?"\n';
+  }else{
+    msg+='마일리지에 대해 뭐든 물어봐!\n\n';
+    msg+='• "오늘 뭐 해야 해?" — 할 일 확인\n';
+    msg+='• "마일리지 얼마야?" — 잔액 확인\n';
+    msg+='• "뱃지 뭐 받았어?" — 뱃지 확인\n';
+  }
+  _addBotMsg(msg);
+}
+
+// ── 메시지 전송 ──
+window.sendMilyMsg=function(){
+  if(_milySending)return;
+  const input=document.getElementById('mily-input');
+  const text=input.value.trim();
+  if(!text)return;
+  input.value='';
+  _addUserMsg(text);
+  _milyHistory.push({role:'user',content:text});
+  _callMilyAPI();
+};
+
+// ── Claude API 호출 ──
+async function _callMilyAPI(){
+  _milySending=true;
+  _setMilySendBtn(false);
+  _showTyping(true);
+
+  const systemPrompt=_buildSystemPrompt();
+  const tools=_buildTools();
+
+  // 히스토리 트리밍
+  if(_milyHistory.length>MILY_MAX_HISTORY){
+    _milyHistory=_milyHistory.slice(-MILY_MAX_HISTORY);
+  }
+
+  try{
+    let messages=[..._milyHistory];
+    let loopCount=0;
+    const maxLoops=5; // tool_use 최대 반복
+
+    while(loopCount<maxLoops){
+      loopCount++;
+      const resp=await fetch(MILY_PROXY_URL,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          system:systemPrompt,
+          messages:messages,
+          tools:tools,
+          max_tokens:1024
+        })
+      });
+
+      if(!resp.ok){
+        const errData=await resp.json().catch(()=>({}));
+        throw new Error(errData.error?.message||errData.error||`API 오류 (${resp.status})`);
+      }
+
+      const data=await resp.json();
+
+      if(data.error){
+        throw new Error(data.error.message||JSON.stringify(data.error));
+      }
+
+      // stop_reason별 처리
+      if(data.stop_reason==='tool_use'||data.stop_reason==='tool_calls'){
+        // tool_use 블록 처리
+        const assistantContent=data.content||[];
+        messages.push({role:'assistant',content:assistantContent});
+
+        const toolResults=[];
+        for(const block of assistantContent){
+          if(block.type==='tool_use'){
+            const result=_executeTool(block.name,block.input);
+            toolResults.push({
+              type:'tool_result',
+              tool_use_id:block.id,
+              content:JSON.stringify(result)
+            });
+          }
+        }
+        messages.push({role:'user',content:toolResults});
+        // loop 계속 → 다음 API 호출
+        continue;
+      }
+
+      // end_turn — 텍스트 응답
+      let textReply='';
+      if(data.content){
+        for(const block of data.content){
+          if(block.type==='text') textReply+=block.text;
+        }
+      }
+      if(!textReply) textReply='(응답을 생성하지 못했어요)';
+
+      _milyHistory.push({role:'assistant',content:textReply});
+      _addBotMsg(textReply);
+      break;
+    }
+  }catch(e){
+    console.error('[mily-chat]',e);
+    _addBotMsg('⚠️ 오류가 발생했어요: '+e.message+'\n잠시 후 다시 시도해 주세요.');
+  }finally{
+    _milySending=false;
+    _setMilySendBtn(true);
+    _showTyping(false);
+    _scrollMilyBottom();
+  }
+}
+
+// ── 시스템 프롬프트 ──
+function _buildSystemPrompt(){
+  const isC=typeof isCaregiverUser==='function'&&isCaregiverUser();
+  const kidName=_getCurrentKidName();
+  const kidId=typeof getViewedMemberId==='function'?getViewedMemberId():'';
+  const pts=typeof getActiveMileage==='function'?getActiveMileage():0;
+  const acts=_getActsList();
+  const rwds=_getRwdsList();
+  const todayLog=_getTodayLog();
+
+  let prompt=`너는 "밀리"야. 태민이 마일리지 앱의 AI 도우미 캐릭터야.
+밝고 친근한 말투를 써. 존댓말 대신 반말로 말해 (예: "~해줄게!", "~했어!", "~할까?").
+이모지를 적절히 사용해. 답변은 간결하게.
+마크다운은 **볼드**만 사용하고 나머지 형식은 사용하지 마.
+
+현재 상태:
+- 사용자 유형: ${isC?'양육자(보호자)':'자녀'}
+- 현재 선택 자녀: ${kidName||'없음'} (ID: ${kidId})
+- 보유 마일리지: ${pts}P
+
+활동 목록 (${acts.length}개):
+${acts.map(a=>`  - ${a.emoji} ${a.name}: ${a.pts}P (${a.active?'활성':'비활성'}, ${a.cycle||'daily'})`).join('\n')||'  (없음)'}
+
+보상 목록 (${rwds.length}개):
+${rwds.map(r=>`  - ${r.emoji} ${r.name}: ${r.pts}P${r.goal?' [목표]':''}`).join('\n')||'  (없음)'}
+
+오늘 완료한 활동:
+${todayLog.map(l=>`  - ${l.emoji||''} ${l.name}: +${l.pts}P`).join('\n')||'  (없음)'}
+`;
+
+  if(isC){
+    prompt+=`\n양육자는 활동과 보상의 추가/수정/삭제가 가능해. tool을 사용해서 실행해줘.
+활동 추가 시 기본값: emoji=⭐, pts=20, maxDay=1, cycle=daily, active=true, showHome=false
+보상 추가 시 기본값: emoji=🎁, pts=500, goal=false
+사용자가 이름만 말하면 기본값으로 생성해줘.`;
+  }else{
+    prompt+=`\n자녀는 활동/보상을 직접 추가/수정/삭제할 수 없어. 현황 확인과 앱 사용법 안내만 해줘.
+활동 수행(doAct)은 할 수 있어.`;
+  }
+
+  return prompt;
+}
+
+// ── 도구 정의 ──
+function _buildTools(){
+  const isC=typeof isCaregiverUser==='function'&&isCaregiverUser();
+  const tools=[];
+
+  // 공통 도구: 현황 조회
+  tools.push({
+    name:'get_status',
+    description:'현재 마일리지, 활동 목록, 보상 목록, 오늘 기록을 조회',
+    input_schema:{type:'object',properties:{},required:[]}
+  });
+
+  tools.push({
+    name:'do_activity',
+    description:'활동을 수행(완료 처리)합니다. 마일리지가 적립됩니다.',
+    input_schema:{
+      type:'object',
+      properties:{
+        activity_id:{type:'string',description:'활동 ID (예: a_1234567890)'},
+        activity_name:{type:'string',description:'활동 이름 (ID를 모를 때 이름으로 검색)'}
+      },
+      required:[]
+    }
+  });
+
+  if(isC){
+    tools.push({
+      name:'add_activity',
+      description:'새 활동을 추가합니다',
+      input_schema:{
+        type:'object',
+        properties:{
+          name:{type:'string',description:'활동 이름 (필수, 20자 이내)'},
+          emoji:{type:'string',description:'이모지 (기본: ⭐)'},
+          pts:{type:'number',description:'마일리지 포인트 (기본: 20)'},
+          desc:{type:'string',description:'활동 설명'},
+          maxDay:{type:'number',description:'하루 최대 횟수 (기본: 1, 0=무제한)'},
+          cycle:{type:'string',enum:['daily','weekly','once'],description:'주기 (기본: daily)'}
+        },
+        required:['name']
+      }
+    });
+
+    tools.push({
+      name:'edit_activity',
+      description:'기존 활동을 수정합니다',
+      input_schema:{
+        type:'object',
+        properties:{
+          activity_id:{type:'string',description:'활동 ID'},
+          activity_name:{type:'string',description:'활동 이름 (ID를 모를 때)'},
+          name:{type:'string',description:'새 이름'},
+          emoji:{type:'string',description:'새 이모지'},
+          pts:{type:'number',description:'새 포인트'},
+          desc:{type:'string',description:'새 설명'},
+          maxDay:{type:'number',description:'새 하루 최대 횟수'},
+          cycle:{type:'string',enum:['daily','weekly','once'],description:'새 주기'},
+          active:{type:'boolean',description:'활성/비활성'}
+        },
+        required:[]
+      }
+    });
+
+    tools.push({
+      name:'delete_activity',
+      description:'활동을 삭제합니다',
+      input_schema:{
+        type:'object',
+        properties:{
+          activity_id:{type:'string',description:'활동 ID'},
+          activity_name:{type:'string',description:'활동 이름 (ID를 모를 때)'}
+        },
+        required:[]
+      }
+    });
+
+    tools.push({
+      name:'add_reward',
+      description:'새 보상을 추가합니다',
+      input_schema:{
+        type:'object',
+        properties:{
+          name:{type:'string',description:'보상 이름 (필수, 30자 이내)'},
+          emoji:{type:'string',description:'이모지 (기본: 🎁)'},
+          pts:{type:'number',description:'필요 마일리지 (기본: 500)'},
+          goal:{type:'boolean',description:'목표 보상 여부 (기본: false)'}
+        },
+        required:['name']
+      }
+    });
+
+    tools.push({
+      name:'edit_reward',
+      description:'기존 보상을 수정합니다',
+      input_schema:{
+        type:'object',
+        properties:{
+          reward_id:{type:'string',description:'보상 ID'},
+          reward_name:{type:'string',description:'보상 이름 (ID를 모를 때)'},
+          name:{type:'string',description:'새 이름'},
+          emoji:{type:'string',description:'새 이모지'},
+          pts:{type:'number',description:'새 포인트'},
+          goal:{type:'boolean',description:'목표 보상 여부'}
+        },
+        required:[]
+      }
+    });
+
+    tools.push({
+      name:'delete_reward',
+      description:'보상을 삭제합니다',
+      input_schema:{
+        type:'object',
+        properties:{
+          reward_id:{type:'string',description:'보상 ID'},
+          reward_name:{type:'string',description:'보상 이름 (ID를 모를 때)'}
+        },
+        required:[]
+      }
+    });
+  }
+
+  return tools;
+}
+
+// ── 도구 실행 ──
+function _executeTool(name,input){
+  try{
+    switch(name){
+      case 'get_status': return _toolGetStatus();
+      case 'do_activity': return _toolDoActivity(input);
+      case 'add_activity': return _toolAddActivity(input);
+      case 'edit_activity': return _toolEditActivity(input);
+      case 'delete_activity': return _toolDeleteActivity(input);
+      case 'add_reward': return _toolAddReward(input);
+      case 'edit_reward': return _toolEditReward(input);
+      case 'delete_reward': return _toolDeleteReward(input);
+      default: return {success:false,error:'알 수 없는 도구: '+name};
+    }
+  }catch(e){
+    return {success:false,error:e.message};
+  }
+}
+
+// ── 도구 구현 ──
+
+function _toolGetStatus(){
+  const pts=typeof getActiveMileage==='function'?getActiveMileage():0;
+  return {
+    success:true,
+    mileage:pts,
+    activities:_getActsList().map(a=>({id:a.id,emoji:a.emoji,name:a.name,pts:a.pts,active:a.active,cycle:a.cycle})),
+    rewards:_getRwdsList().map(r=>({id:r.id,emoji:r.emoji,name:r.name,pts:r.pts,goal:!!r.goal})),
+    today_log:_getTodayLog()
+  };
+}
+
+function _toolDoActivity(input){
+  const acts=_getActsList();
+  let act=null;
+  if(input.activity_id) act=acts.find(a=>a.id===input.activity_id);
+  if(!act&&input.activity_name) act=acts.find(a=>a.name.includes(input.activity_name)||input.activity_name.includes(a.name));
+  if(!act) return {success:false,error:'해당 활동을 찾을 수 없습니다: '+(input.activity_name||input.activity_id)};
+  if(!act.active) return {success:false,error:`"${act.name}" 활동은 현재 비활성 상태입니다`};
+
+  // doAct 호출
+  if(typeof doAct==='function'){
+    doAct(act.id);
+    return {success:true,message:`✅ "${act.name}" 활동 완료! +${act.pts}P 적립`};
+  }
+  return {success:false,error:'활동 수행 함수를 찾을 수 없습니다'};
+}
+
+function _toolAddActivity(input){
+  if(!input.name||!input.name.trim()) return {success:false,error:'활동 이름이 필요합니다'};
+  if(input.name.length>20) return {success:false,error:'활동 이름은 20자 이내'};
+
+  const vid=typeof getViewedMemberId==='function'?getViewedMemberId():'';
+  const ms=typeof getMemberState==='function'?getMemberState(vid):null;
+  if(!ms) return {success:false,error:'멤버 데이터를 찾을 수 없습니다'};
+  if(!ms.acts) ms.acts=JSON.parse(JSON.stringify(S.acts||[]));
+
+  const newId='a_'+Date.now();
+  const newAct={
+    id:newId,
+    emoji:input.emoji||'⭐',
+    name:input.name.trim(),
+    desc:input.desc||'',
+    pts:Math.max(1,input.pts||20),
+    maxDay:input.maxDay!==undefined?Math.max(0,input.maxDay):1,
+    cycle:input.cycle||'daily',
+    days:null,
+    active:true,
+    showHome:false
+  };
+
+  ms.acts.push({...newAct});
+  // 글로벌에도 반영
+  if(typeof _globalDataOwner!=='undefined'&&_globalDataOwner===vid){
+    S.acts.push({...newAct});
+  }
+  if(typeof save==='function') save();
+  if(typeof renderAll==='function') renderAll();
+
+  return {success:true,message:`✅ "${newAct.emoji} ${newAct.name}" 활동 추가 완료! (${newAct.pts}P, ${newAct.cycle})`};
+}
+
+function _toolEditActivity(input){
+  const acts=_getActsList();
+  let act=null;
+  if(input.activity_id) act=acts.find(a=>a.id===input.activity_id);
+  if(!act&&input.activity_name) act=acts.find(a=>a.name.includes(input.activity_name)||input.activity_name.includes(a.name));
+  if(!act) return {success:false,error:'해당 활동을 찾을 수 없습니다'};
+
+  const changes=[];
+  if(input.name!==undefined){act.name=input.name;changes.push('이름→'+input.name);}
+  if(input.emoji!==undefined){act.emoji=input.emoji;changes.push('이모지→'+input.emoji);}
+  if(input.pts!==undefined){act.pts=Math.max(1,input.pts);changes.push('포인트→'+act.pts);}
+  if(input.desc!==undefined){act.desc=input.desc;changes.push('설명 수정');}
+  if(input.maxDay!==undefined){act.maxDay=Math.max(0,input.maxDay);changes.push('하루최대→'+act.maxDay);}
+  if(input.cycle!==undefined){act.cycle=input.cycle;changes.push('주기→'+input.cycle);}
+  if(input.active!==undefined){act.active=input.active;changes.push(input.active?'활성화':'비활성화');}
+
+  // 글로벌 S.acts에도 반영
+  const vid=typeof getViewedMemberId==='function'?getViewedMemberId():'';
+  if(typeof _globalDataOwner!=='undefined'&&_globalDataOwner===vid){
+    const sa=S.acts.find(x=>x.id===act.id);
+    if(sa) Object.assign(sa,act);
+  }
+  if(typeof save==='function') save();
+  if(typeof renderAll==='function') renderAll();
+
+  return {success:true,message:`✅ "${act.emoji} ${act.name}" 수정 완료: ${changes.join(', ')}`};
+}
+
+function _toolDeleteActivity(input){
+  const vid=typeof getViewedMemberId==='function'?getViewedMemberId():'';
+  const ms=typeof getMemberState==='function'?getMemberState(vid):null;
+  if(!ms||!ms.acts) return {success:false,error:'멤버 데이터를 찾을 수 없습니다'};
+
+  let idx=-1;
+  if(input.activity_id) idx=ms.acts.findIndex(a=>a.id===input.activity_id);
+  if(idx<0&&input.activity_name) idx=ms.acts.findIndex(a=>a.name.includes(input.activity_name)||input.activity_name.includes(a.name));
+  if(idx<0) return {success:false,error:'해당 활동을 찾을 수 없습니다'};
+
+  const removed=ms.acts.splice(idx,1)[0];
+  // 글로벌에서도 제거
+  if(typeof _globalDataOwner!=='undefined'&&_globalDataOwner===vid){
+    const si=S.acts.findIndex(x=>x.id===removed.id);
+    if(si>=0) S.acts.splice(si,1);
+  }
+  if(typeof save==='function') save();
+  if(typeof renderAll==='function') renderAll();
+
+  return {success:true,message:`🗑️ "${removed.emoji} ${removed.name}" 활동이 삭제되었습니다`};
+}
+
+function _toolAddReward(input){
+  if(!input.name||!input.name.trim()) return {success:false,error:'보상 이름이 필요합니다'};
+  if(input.name.length>30) return {success:false,error:'보상 이름은 30자 이내'};
+
+  const vid=typeof getViewedMemberId==='function'?getViewedMemberId():'';
+  const ms=typeof getMemberState==='function'?getMemberState(vid):null;
+  if(!ms) return {success:false,error:'멤버 데이터를 찾을 수 없습니다'};
+  if(!ms.rwds) ms.rwds=JSON.parse(JSON.stringify(S.rwds||[]));
+
+  const newId='r_'+Date.now();
+  const newRwd={
+    id:newId,
+    emoji:input.emoji||'🎁',
+    name:input.name.trim(),
+    pts:Math.max(1,input.pts||500),
+    goal:!!input.goal,
+    sale:null
+  };
+
+  if(newRwd.goal) ms.rwds.forEach(r=>r.goal=false);
+  ms.rwds.push({...newRwd});
+
+  if(typeof _globalDataOwner!=='undefined'&&_globalDataOwner===vid){
+    if(newRwd.goal) S.rwds.forEach(r=>r.goal=false);
+    S.rwds.push({...newRwd});
+  }
+  if(typeof save==='function') save();
+  if(typeof renderAll==='function') renderAll();
+
+  return {success:true,message:`✅ "${newRwd.emoji} ${newRwd.name}" 보상 추가 완료! (${newRwd.pts}P 필요)`};
+}
+
+function _toolEditReward(input){
+  const rwds=_getRwdsList();
+  let rwd=null;
+  if(input.reward_id) rwd=rwds.find(r=>r.id===input.reward_id);
+  if(!rwd&&input.reward_name) rwd=rwds.find(r=>r.name.includes(input.reward_name)||input.reward_name.includes(r.name));
+  if(!rwd) return {success:false,error:'해당 보상을 찾을 수 없습니다'};
+
+  const changes=[];
+  if(input.name!==undefined){rwd.name=input.name;changes.push('이름→'+input.name);}
+  if(input.emoji!==undefined){rwd.emoji=input.emoji;changes.push('이모지→'+input.emoji);}
+  if(input.pts!==undefined){rwd.pts=Math.max(1,input.pts);changes.push('포인트→'+rwd.pts);}
+  if(input.goal!==undefined){
+    rwd.goal=input.goal;
+    if(input.goal){
+      const vid=typeof getViewedMemberId==='function'?getViewedMemberId():'';
+      const ms=typeof getMemberState==='function'?getMemberState(vid):null;
+      if(ms&&ms.rwds) ms.rwds.forEach(r=>{if(r.id!==rwd.id)r.goal=false;});
+    }
+    changes.push(input.goal?'목표 설정':'목표 해제');
+  }
+
+  const vid=typeof getViewedMemberId==='function'?getViewedMemberId():'';
+  if(typeof _globalDataOwner!=='undefined'&&_globalDataOwner===vid){
+    const sr=S.rwds.find(x=>x.id===rwd.id);
+    if(sr) Object.assign(sr,rwd);
+  }
+  if(typeof save==='function') save();
+  if(typeof renderAll==='function') renderAll();
+
+  return {success:true,message:`✅ "${rwd.emoji} ${rwd.name}" 수정 완료: ${changes.join(', ')}`};
+}
+
+function _toolDeleteReward(input){
+  const vid=typeof getViewedMemberId==='function'?getViewedMemberId():'';
+  const ms=typeof getMemberState==='function'?getMemberState(vid):null;
+  if(!ms||!ms.rwds) return {success:false,error:'멤버 데이터를 찾을 수 없습니다'};
+
+  let idx=-1;
+  if(input.reward_id) idx=ms.rwds.findIndex(r=>r.id===input.reward_id);
+  if(idx<0&&input.reward_name) idx=ms.rwds.findIndex(r=>r.name.includes(input.reward_name)||input.reward_name.includes(r.name));
+  if(idx<0) return {success:false,error:'해당 보상을 찾을 수 없습니다'};
+
+  const removed=ms.rwds.splice(idx,1)[0];
+  if(typeof _globalDataOwner!=='undefined'&&_globalDataOwner===vid){
+    const si=S.rwds.findIndex(x=>x.id===removed.id);
+    if(si>=0) S.rwds.splice(si,1);
+  }
+  if(typeof save==='function') save();
+  if(typeof renderAll==='function') renderAll();
+
+  return {success:true,message:`🗑️ "${removed.emoji} ${removed.name}" 보상이 삭제되었습니다`};
+}
+
+// ── 데이터 헬퍼 ──
+function _getActsList(){
+  try{
+    const vid=typeof getViewedMemberId==='function'?getViewedMemberId():'';
+    const ms=typeof getMemberState==='function'?getMemberState(vid):null;
+    return (ms&&ms.acts)?ms.acts:(S.acts||[]);
+  }catch(e){return S.acts||[];}
+}
+
+function _getRwdsList(){
+  try{
+    const vid=typeof getViewedMemberId==='function'?getViewedMemberId():'';
+    const ms=typeof getMemberState==='function'?getMemberState(vid):null;
+    return (ms&&ms.rwds)?ms.rwds:(S.rwds||[]);
+  }catch(e){return S.rwds||[];}
+}
+
+function _getTodayLog(){
+  try{
+    const today=new Date().toISOString().slice(0,10);
+    return (S.log||[]).filter(l=>l.date===today).map(l=>({name:l.name||'',emoji:l.emoji||'',pts:l.pts||0}));
+  }catch(e){return[];}
+}
+
+function _getCurrentKidName(){
+  try{
+    const vid=typeof getViewedMemberId==='function'?getViewedMemberId():'';
+    if(!vid)return'';
+    if(typeof MEMBERS!=='undefined'&&MEMBERS[vid])return MEMBERS[vid].name||vid;
+    if(S.familyMeta?.members?.[vid])return S.familyMeta.members[vid].name||vid;
+    return vid;
+  }catch(e){return'';}
+}
+
+// ── UI 헬퍼 ──
+function _addBotMsg(text){
+  const container=document.getElementById('mily-chat-msgs');
+  const typing=document.getElementById('mily-typing');
+  const div=document.createElement('div');
+  div.className='mily-msg bot';
+  // 간단 마크다운 처리 (**볼드**, 줄바꿈)
+  div.innerHTML=_milyFormat(text);
+  container.insertBefore(div,typing);
+  _scrollMilyBottom();
+}
+
+function _addUserMsg(text){
+  const container=document.getElementById('mily-chat-msgs');
+  const typing=document.getElementById('mily-typing');
+  const div=document.createElement('div');
+  div.className='mily-msg user';
+  div.textContent=text;
+  container.insertBefore(div,typing);
+  _scrollMilyBottom();
+}
+
+function _milyFormat(text){
+  return text
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\n/g,'<br>');
+}
+
+function _showTyping(show){
+  document.getElementById('mily-typing').classList.toggle('show',show);
+  _scrollMilyBottom();
+}
+
+function _setMilySendBtn(enabled){
+  document.getElementById('mily-send-btn').disabled=!enabled;
+}
+
+function _scrollMilyBottom(){
+  const msgs=document.getElementById('mily-chat-msgs');
+  requestAnimationFrame(()=>msgs.scrollTop=msgs.scrollHeight);
+}
+
+// ── FAB 가시성 관리 ──
+// 홈탭에서 mily-greeting이 보이면 FAB 숨김, 안 보이면 FAB 표시
+let _milyGreetingVisible=false;
+let _milyAppReady=false;
+let _milyCurrentTab='home';
+
+function _updateFabVisibility(){
+  const fab=document.getElementById('mily-fab');
+  if(!fab)return;
+  // 인증 화면이면 숨김
+  const authScreen=document.querySelector('.auth-screen');
+  if(authScreen&&authScreen.style.display!=='none'){
+    fab.classList.remove('visible');
+    return;
+  }
+  if(!_milyAppReady){
+    fab.classList.remove('visible');
+    return;
+  }
+  // 챗봇이 열려있으면 항상 FAB 표시 (닫기용)
+  if(_milyOpen){
+    fab.classList.add('visible');
+    return;
+  }
+  // 홈탭에서 mily 인사말이 보이면 FAB 숨김
+  if(_milyCurrentTab==='home'&&_milyGreetingVisible){
+    fab.classList.remove('visible');
+  }else{
+    fab.classList.add('visible');
+  }
+}
+
+// IntersectionObserver로 mily-greeting 가시성 감지
+function _setupMilyObserver(){
+  const greeting=document.getElementById('mily-greeting');
+  if(!greeting)return;
+  const observer=new IntersectionObserver((entries)=>{
+    _milyGreetingVisible=entries[0].isIntersecting&&greeting.style.display!=='none';
+    _updateFabVisibility();
+  },{threshold:0.3});
+  observer.observe(greeting);
+  // display:none 변경도 감지
+  const mutObs=new MutationObserver(()=>{
+    if(greeting.style.display==='none') _milyGreetingVisible=false;
+    _updateFabVisibility();
+  });
+  mutObs.observe(greeting,{attributes:true,attributeFilter:['style']});
+}
+
+// 탭 전환 감지
+const _origShowTab=window.showTab;
+if(typeof _origShowTab==='function'){
+  window.showTab=function(tab){
+    _milyCurrentTab=tab||'home';
+    _origShowTab.apply(this,arguments);
+    _updateFabVisibility();
+  };
+}
+
+// 앱 준비 감지
+const _origShowApp=window._m_showApp;
+if(typeof _origShowApp==='function'){
+  window._m_showApp=function(){
+    _origShowApp.apply(this,arguments);
+    _milyAppReady=true;
+    _setupMilyObserver();
+    _updateFabVisibility();
+  };
+}
+
+// auth 화면 변화 감지
+const _milyAuthObserver=new MutationObserver(()=>_updateFabVisibility());
+_milyAuthObserver.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['style']});
+
+// 초기 상태
+setTimeout(()=>{
+  const authScreen=document.querySelector('.auth-screen');
+  if(!authScreen||authScreen.style.display==='none'){
+    _milyAppReady=true;
+    _setupMilyObserver();
+  }
+  _updateFabVisibility();
+},1000);
+
+})();
+</script>
 </body>
 </html>
