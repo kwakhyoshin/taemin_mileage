@@ -8621,7 +8621,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0402p';
+const _APP_VERSION = 'v0402r';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -19666,30 +19666,34 @@ window._createState = _createState;
      ═══════════════════════════════════════════════════════════════ -->
 <style>
 /* ── mily chatbot FAB ── */
-.mily-fab{position:fixed;bottom:100px;right:10px;width:72px;height:72px;border-radius:50%;background:transparent;border:none;cursor:pointer;z-index:950;display:none;align-items:center;justify-content:center;transition:transform .2s,opacity .25s;-webkit-tap-highlight-color:transparent;opacity:0;filter:drop-shadow(0 3px 8px rgba(99,102,241,.35))}
+.mily-fab{position:fixed;bottom:120px;right:10px;width:72px;height:72px;border-radius:50%;background:transparent;border:none;cursor:pointer;z-index:950;display:none;align-items:center;justify-content:center;transition:transform .2s,opacity .25s;-webkit-tap-highlight-color:transparent;opacity:0;filter:drop-shadow(0 3px 8px rgba(99,102,241,.35))}
 .mily-fab.visible{display:flex;opacity:1}
 .mily-fab:active{transform:scale(.92)}
 .mily-fab svg{width:72px;height:72px}
 .mily-fab-badge{position:absolute;top:2px;right:2px;width:14px;height:14px;background:#EF4444;border-radius:50%;border:2px solid #fff;display:none}
-.nav-container.docked~.mily-fab{bottom:72px}
+.nav-container.docked~.mily-fab{bottom:92px}
 
+/* ── chat backdrop — 뒤 화면 가림 ── */
+.mily-chat-backdrop{position:fixed;left:0;right:0;top:0;bottom:0;width:100%;height:100%;background:var(--card,#fff);z-index:959;display:none}
+.mily-chat-backdrop.open{display:block}
 /* ── chat popup — 모바일 전체화면 ── */
-.mily-chat{position:fixed;left:0;right:0;top:0;bottom:0;width:100%;height:100dvh;background:var(--card,#fff);border-radius:0;box-shadow:none;z-index:960;display:none;flex-direction:column;overflow:hidden}
+.mily-chat{position:fixed;left:0;right:0;top:0;bottom:0;width:100%;height:100%;background:var(--card,#fff);border-radius:0;box-shadow:none;z-index:960;display:none;flex-direction:column;overflow:hidden}
 .mily-chat.open{display:flex;animation:milyChatIn .25s ease}
 @keyframes milyChatIn{from{opacity:0;transform:translateY(100%)}to{opacity:1;transform:translateY(0)}}
 
-/* chat header */
-.mily-chat-hd{background:linear-gradient(135deg,#6366F1,#818CF8);color:#fff;padding:14px 16px;padding-top:calc(14px + env(safe-area-inset-top));display:flex;align-items:center;gap:10px;flex-shrink:0}
-.mily-chat-hd-avatar{width:36px;height:36px;flex-shrink:0}
+/* chat header — 키보드 올라와도 고정 */
+.mily-chat-hd{background:linear-gradient(135deg,#6366F1,#818CF8);color:#fff;padding:10px 16px;padding-top:calc(10px + env(safe-area-inset-top));display:flex;align-items:center;gap:10px;flex-shrink:0;position:sticky;top:0;z-index:2}
+.mily-chat-hd-avatar{width:36px;height:36px;flex-shrink:0;display:none}
+.mily-chat-hd-char{width:52px;height:52px;flex-shrink:0}
+.mily-chat-hd-char svg{width:52px;height:52px}
 .mily-chat-hd-info{flex:1;min-width:0}
 .mily-chat-hd-name{font-size:15px;font-weight:800}
 .mily-chat-hd-status{font-size:11px;opacity:.7;font-weight:500}
 .mily-chat-close{background:none;border:none;color:rgba(255,255,255,.7);cursor:pointer;padding:4px;border-radius:50%;transition:background .15s}
 .mily-chat-close:hover{background:rgba(255,255,255,.15)}
 
-/* mily character in chat */
-.mily-chat-char{display:flex;justify-content:center;padding:8px 0 4px;flex-shrink:0}
-.mily-chat-char svg{width:100px;height:100px}
+/* mily character in chat — 헤더로 이동, 기존 영역 숨김 */
+.mily-chat-char{display:none}
 
 /* messages area */
 .mily-chat-msgs{flex:1;overflow-y:auto;padding:12px 12px 8px;display:flex;flex-direction:column;gap:8px;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
@@ -19721,17 +19725,18 @@ body.dark .mily-fab{box-shadow:0 4px 20px rgba(99,102,241,.3)}
   <span class="mily-fab-badge" id="mily-fab-badge"></span>
 </button>
 
+<!-- 채팅 백드롭 — 키보드 올라올 때 뒤 화면 가림 -->
+<div class="mily-chat-backdrop" id="mily-chat-backdrop"></div>
 <!-- 채팅 팝업 -->
 <div class="mily-chat" id="mily-chat">
   <div class="mily-chat-hd">
-    <div class="mily-chat-hd-avatar"><svg viewBox="0 0 48 48" fill="none"><circle cx="24" cy="20" r="10" fill="#fff"/><circle cx="20" cy="18" r="2" fill="#6366F1"/><circle cx="28" cy="18" r="2" fill="#6366F1"/><path d="M20 23q4 3.5 8 0" stroke="#6366F1" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg></div>
+    <div class="mily-chat-hd-char" id="mily-chat-char"></div>
     <div class="mily-chat-hd-info">
       <div class="mily-chat-hd-name">밀리 AI</div>
       <div class="mily-chat-hd-status">마일리지 도우미</div>
     </div>
     <button class="mily-chat-close" onclick="toggleMilyChat()"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
   </div>
-  <div class="mily-chat-char" id="mily-chat-char"></div>
   <div class="mily-chat-msgs" id="mily-chat-msgs">
     <div class="mily-typing" id="mily-typing"><span></span><span></span><span></span></div>
   </div>
@@ -19817,8 +19822,10 @@ window.toggleMilyChat=function(){
   _milyOpen=!_milyOpen;
   const fab=document.getElementById('mily-fab');
   const chat=document.getElementById('mily-chat');
+  const backdrop=document.getElementById('mily-chat-backdrop');
   if(_milyOpen){
     chat.classList.add('open');
+    if(backdrop) backdrop.classList.add('open');
     fab.classList.remove('visible'); // 채팅 열리면 FAB 숨김
     _updateMilyChatChar('wave'); // 환영 표정
     // 첫 오픈 시 환영 메시지
@@ -19827,6 +19834,11 @@ window.toggleMilyChat=function(){
     _scrollMilyBottom();
   }else{
     chat.classList.remove('open');
+    if(backdrop) backdrop.classList.remove('open');
+    // 키보드로 인해 변경된 스타일 초기화
+    chat.style.height='';
+    chat.style.top='';
+    chat.style.bottom='';
     if(typeof _updateFabVisibility==='function') _updateFabVisibility(); // FAB 다시 표시
   }
 };
@@ -19885,6 +19897,7 @@ async function _callMilyAPI(){
 
     while(loopCount<maxLoops){
       loopCount++;
+      console.log('[mily-chat] API call #'+loopCount, 'msgs:', messages.length, 'tools:', tools.length);
       const resp=await fetch(MILY_PROXY_URL,{
         method:'POST',
         headers:{'Content-Type':'application/json'},
@@ -19898,12 +19911,15 @@ async function _callMilyAPI(){
 
       if(!resp.ok){
         const errData=await resp.json().catch(()=>({}));
+        console.error('[mily-chat] API error:', resp.status, errData);
         throw new Error(errData.error?.message||errData.error||`API 오류 (${resp.status})`);
       }
 
       const data=await resp.json();
+      console.log('[mily-chat] API response:', data.stop_reason, data.content?.map(b=>b.type).join(','));
 
       if(data.error){
+        console.error('[mily-chat] data error:', data.error);
         throw new Error(data.error.message||JSON.stringify(data.error));
       }
 
@@ -19916,6 +19932,7 @@ async function _callMilyAPI(){
         const toolResults=[];
         for(const block of assistantContent){
           if(block.type==='tool_use'){
+            console.log('[mily-chat] calling tool:', block.name, block.input);
             const result=_executeTool(block.name,block.input);
             toolResults.push({
               type:'tool_result',
@@ -19983,14 +20000,18 @@ ${rwds.map(r=>`  - ${r.emoji} ${r.name}: ${r.pts}P${r.goal?' [목표]':''}`).joi
 ${todayLog.map(l=>`  - ${l.emoji||''} ${l.name}: +${l.pts}P`).join('\n')||'  (없음)'}
 `;
 
-  if(isC){
-    prompt+=`\n양육자는 활동과 보상의 추가/수정/삭제가 가능해. tool을 사용해서 실행해줘.
-활동 추가 시 기본값: emoji=⭐, pts=20, maxDay=1, cycle=daily, active=true, showHome=false
-보상 추가 시 기본값: emoji=🎁, pts=500, goal=false
-사용자가 이름만 말하면 기본값으로 생성해줘.`;
-  }else{
-    prompt+=`\n자녀는 활동/보상을 직접 추가/수정/삭제할 수 없어. 현황 확인과 앱 사용법 안내만 해줘.
-활동 수행(doAct)은 할 수 있어.`;
+  prompt+=`\n
+중요 규칙:
+- 사용자가 활동/보상을 추가, 수정, 삭제, 수행하라고 하면 반드시 tool을 호출해서 실행해. 절대 텍스트로만 답하지 마.
+- 조회 요청이면 get_status tool을 먼저 호출해.
+- 활동 수행 요청이면 do_activity tool을 호출해.
+- 활동 추가 시 기본값: emoji=⭐, pts=20, maxDay=1, cycle=daily
+- 보상 추가 시 기본값: emoji=🎁, pts=500, goal=false
+- 사용자가 이름만 말하면 기본값으로 바로 생성해.
+- tool 실행 결과를 보고 성공/실패를 알려줘.`;
+
+  if(!isC){
+    prompt+=`\n참고: 현재 자녀 모드야. 활동 수행(do_activity)과 현황 조회(get_status)는 가능하지만, 활동/보상의 추가/수정/삭제는 양육자만 할 수 있어.`;
   }
 
   return prompt;
@@ -19998,10 +20019,9 @@ ${todayLog.map(l=>`  - ${l.emoji||''} ${l.name}: +${l.pts}P`).join('\n')||'  (�
 
 // ── 도구 정의 ──
 function _buildTools(){
-  const isC=typeof isCaregiverUser==='function'&&isCaregiverUser();
   const tools=[];
 
-  // 공통 도구: 현황 조회
+  // 현황 조회
   tools.push({
     name:'get_status',
     description:'현재 마일리지, 활동 목록, 보상 목록, 오늘 기록을 조회',
@@ -20021,7 +20041,7 @@ function _buildTools(){
     }
   });
 
-  if(isC){
+  // 모든 도구를 항상 사용 가능하게 (권한은 시스템 프롬프트로 제어)
     tools.push({
       name:'add_activity',
       description:'새 활동을 추가합니다',
@@ -20116,26 +20136,31 @@ function _buildTools(){
         required:[]
       }
     });
-  }
 
+  console.log('[mily-tools] built', tools.length, 'tools:', tools.map(t=>t.name).join(', '));
   return tools;
 }
 
 // ── 도구 실행 ──
 function _executeTool(name,input){
+  console.log('[mily-tool] execute:', name, JSON.stringify(input));
   try{
+    let result;
     switch(name){
-      case 'get_status': return _toolGetStatus();
-      case 'do_activity': return _toolDoActivity(input);
-      case 'add_activity': return _toolAddActivity(input);
-      case 'edit_activity': return _toolEditActivity(input);
-      case 'delete_activity': return _toolDeleteActivity(input);
-      case 'add_reward': return _toolAddReward(input);
-      case 'edit_reward': return _toolEditReward(input);
-      case 'delete_reward': return _toolDeleteReward(input);
-      default: return {success:false,error:'알 수 없는 도구: '+name};
+      case 'get_status': result=_toolGetStatus(); break;
+      case 'do_activity': result=_toolDoActivity(input); break;
+      case 'add_activity': result=_toolAddActivity(input); break;
+      case 'edit_activity': result=_toolEditActivity(input); break;
+      case 'delete_activity': result=_toolDeleteActivity(input); break;
+      case 'add_reward': result=_toolAddReward(input); break;
+      case 'edit_reward': result=_toolEditReward(input); break;
+      case 'delete_reward': result=_toolDeleteReward(input); break;
+      default: result={success:false,error:'알 수 없는 도구: '+name};
     }
+    console.log('[mily-tool] result:', name, JSON.stringify(result));
+    return result;
   }catch(e){
+    console.error('[mily-tool] error:', name, e);
     return {success:false,error:e.message};
   }
 }
@@ -20433,9 +20458,10 @@ function _updateFabVisibility(){
     fab.classList.remove('visible');
     return;
   }
+  // 인증 화면이 없으면 앱 준비 완료로 판단
   if(!_milyAppReady){
-    fab.classList.remove('visible');
-    return;
+    _milyAppReady=true;
+    _setupMilyObserver();
   }
   // 챗봇이 열려있으면 FAB 숨김 (상단 X로 닫기)
   if(_milyOpen){
