@@ -20839,6 +20839,7 @@ function _buildSystemPrompt(){
   const isC=typeof isCaregiverUser==='function'&&isCaregiverUser();
   const kidName=_getCurrentKidName();
   const kidId=typeof getViewedMemberId==='function'?getViewedMemberId():'';
+  const myName=(()=>{try{const S=_getS();return S?.familyMeta?.members?.[currentUser]?.name||'';}catch(e){return '';}})();
   const pts=typeof getActiveMileage==='function'?getActiveMileage():0;
   const acts=_getActsList();
   const rwds=_getRwdsList();
@@ -20854,7 +20855,7 @@ function _buildSystemPrompt(){
 
   let prompt=`너는 "밀리"야. 마일리 앱의 AI 도우미. ${isC?'양육자에게는 존댓말(~요, ~해요, ~드릴게요)로 정중하고 따뜻하게.':'아이에게는 반말(~야, ~해, ~거야)로 친근하고 다정하게. 친구처럼!'} 짧게 답해. **볼드**만 사용.
 
-[상태] ${isC?'양육자':'자녀'} | 자녀: ${kidName||'없음'} | ${pts}M
+[상태] ${isC?'양육자':'자녀'}${myName?'('+myName+')':''} | 자녀: ${kidName||'없음'} | ${pts}M
 ${isMultiChild?`자녀(${childrenInfo.length}명): ${childrenInfo.join(', ')}\n`:''}활동: ${acts.slice(0,6).map(a=>`${a.emoji}${a.name}(${a.pts}M)`).join(', ')||'없음'}
 보상: ${rwds.slice(0,4).map(r=>`${r.emoji}${r.name}(${r.pts}M)`).join(', ')||'없음'}
 오늘: ${todayLog.map(l=>`${l.emoji||''}${l.name}`).join(', ')||'없음'}
