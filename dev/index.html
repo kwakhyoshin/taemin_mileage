@@ -5332,6 +5332,16 @@ async function doJoinSocialLogin(provider){
       if(!result.uid){localStorage.removeItem(_LS_PREFIX+'social_pending');toast('카카오 로그인 정보를 가져올 수 없었어요');return;}
       if(!_firebaseReady) await _initFirebase();
       firebaseUser=result;
+    } else if(provider==='naver'){
+      localStorage.setItem(_LS_PREFIX+'social_pending','naver');
+      const _naverPromise=_doNaverLogin();
+      if(!_firebaseReady) _initFirebase().catch(()=>{});
+      const result=await _naverPromise;
+      if(!result){localStorage.removeItem(_LS_PREFIX+'social_pending');return;}
+      if(result._error){localStorage.removeItem(_LS_PREFIX+'social_pending');toast('네이버 로그인 실패: '+result._error);return;}
+      if(!result.uid){localStorage.removeItem(_LS_PREFIX+'social_pending');toast('네이버 로그인 정보를 가져올 수 없었어요');return;}
+      if(!_firebaseReady) await _initFirebase();
+      firebaseUser=result;
     } else if(provider==='google'){
       if(!_firebaseReady) await _initFirebase();
       if(!fbAuth){toast('Firebase 초기화 실패');return;}
@@ -5378,11 +5388,13 @@ async function doJoinSocialLogin(provider){
 
     // 멤버 계정 정보 업데이트 (소셜 인증)
     if(!S.familyMeta.members[mid]){_hideSocialLoading();toast('구성원 정보를 찾을 수 없어요');return;}
-    S.familyMeta.members[mid].account={authProvider:provider,authUid:uid,email,v:2};
+    const _accObj={authProvider:provider,authUid:uid,email,v:2};
+    if(displayName) _accObj.socialDisplayName=displayName;
+    S.familyMeta.members[mid].account=_accObj;
     const _joinRole=S.familyMeta.members[mid].type||S.familyMeta.members[mid].role;
     if(_joinRole==='caregiver'||_joinRole==='parent') S.familyMeta.members[mid].isAdmin=true;
     if(!S.users)S.users={};
-    S.users[mid]={authProvider:provider,authUid:uid,email,v:2};
+    S.users[mid]={..._accObj};
 
     // 프로필 사진 저장 (사용자가 직접 설정한 사진이 없을 때만)
     if(profileImage){
@@ -6683,6 +6695,7 @@ async function _doLinkSocial(provider){
     if(!loginResult || !loginResult.uid) return;
     const uid = loginResult.uid;
     const email = loginResult.email || '';
+    const displayName = loginResult.displayName || '';
     const providerName = provider === 'google' ? 'Google' : provider === 'kakao' ? '카카오' : '네이버';
     // Firebase 초기화 확인 (카카오/네이버는 여기서)
     if(!_firebaseReady) await _initFirebase();
@@ -6690,8 +6703,8 @@ async function _doLinkSocial(provider){
     await _registerAuthLink(uid, _familyId, currentUser, provider, email);
     // 계정 데이터에 소셜 정보 추가
     const acc = S.familyMeta?.members?.[currentUser]?.account;
-    if(acc){ acc.authProvider = provider; acc.authUid = uid; acc.email = email; }
-    if(S.users?.[currentUser]){ S.users[currentUser].authProvider = provider; S.users[currentUser].authUid = uid; S.users[currentUser].email = email; }
+    if(acc){ acc.authProvider = provider; acc.authUid = uid; acc.email = email; if(displayName) acc.socialDisplayName = displayName; }
+    if(S.users?.[currentUser]){ S.users[currentUser].authProvider = provider; S.users[currentUser].authUid = uid; S.users[currentUser].email = email; if(displayName) S.users[currentUser].socialDisplayName = displayName; }
     await save();
     renderMyTab();
     toast(`✅ ${providerName} 계정이 연결되었어요!`);
@@ -7721,7 +7734,7 @@ async function _handleSocialLoginResult(firebaseUser, provider){
         console.log('[Social] Found existing link:', link);
         _updateSocialLoadingMsg('로그인 중...');
         try {
-          await _loginToFamily(link.familyId, link.memberId, uid, provider, email, profileImage);
+          await _loginToFamily(link.familyId, link.memberId, uid, provider, email, profileImage, displayName);
         } catch(_ltfErr) {
           console.error('[Social] _loginToFamily failed:', _ltfErr);
           toast(_ENV==='dev'?'[E2-loginFamily] '+(_ltfErr.message||_ltfErr):'로그인 처리 중 오류가 발생했어요. 다시 시도해주세요.');
@@ -7794,7 +7807,7 @@ async function _handleSocialLoginResult(firebaseUser, provider){
                   console.warn('[Social] Registry swap failed, fallback to registerAuthLink:', _regSwapErr);
                   await _registerAuthLink(uid, link.familyId, link.memberId, provider, email);
                 }
-                await _loginToFamily(link.familyId, link.memberId, uid, provider, email, profileImage);
+                await _loginToFamily(link.familyId, link.memberId, uid, provider, email, profileImage, displayName);
                 _restoreSocialLinkButtons();
               } catch(_loginErr){
                 console.error('[Social] Duplicate login failed:', _loginErr);
@@ -7874,7 +7887,7 @@ async function _handleSocialLoginResult(firebaseUser, provider){
                 } else {
                   await _registerAuthLink(uid, _fid, _mid, provider, email);
                 }
-                await _loginToFamily(_fid, _mid, uid, provider, email, profileImage);
+                await _loginToFamily(_fid, _mid, uid, provider, email, profileImage, displayName);
                 _restoreSocialLinkButtons();
               } catch(_loginErr2){
                 console.error('[Social] Fallback duplicate login failed:', _loginErr2);
@@ -7926,7 +7939,7 @@ function _restoreSocialLinkButtons(){
 }
 let _pendingSocialUser = null;
 
-async function _loginToFamily(familyId, memberId, authUid, provider, email, profileImage){
+async function _loginToFamily(familyId, memberId, authUid, provider, email, profileImage, displayName){
   // 1단계: Firestore에서 가족 데이터 로드 (실패 시 에러)
   let famSnap, famRef, docPath;
   try {
@@ -7939,7 +7952,7 @@ async function _loginToFamily(familyId, memberId, authUid, provider, email, prof
         const altRef = doc(db, 'families', altPath);
         const altSnap = await getDoc(altRef);
         if(altSnap.exists()){
-          return _loginToFamily(altPath, memberId, authUid, provider, email);
+          return _loginToFamily(altPath, memberId, authUid, provider, email, profileImage, displayName);
         }
       }
       toast('가족 데이터를 찾을 수 없어요');
@@ -7961,8 +7974,8 @@ async function _loginToFamily(familyId, memberId, authUid, provider, email, prof
     // 소셜 로그인 시 account 정보를 현재 provider로 갱신 (같은 이메일 다른 소셜로 로그인한 경우)
     if(authUid && provider){
       const _acc = S.familyMeta?.members?.[memberId]?.account;
-      if(_acc){ _acc.authProvider = provider; _acc.authUid = authUid; if(email) _acc.email = email; }
-      if(S.users?.[memberId]){ S.users[memberId].authProvider = provider; S.users[memberId].authUid = authUid; if(email) S.users[memberId].email = email; }
+      if(_acc){ _acc.authProvider = provider; _acc.authUid = authUid; if(email) _acc.email = email; if(displayName) _acc.socialDisplayName = displayName; }
+      if(S.users?.[memberId]){ S.users[memberId].authProvider = provider; S.users[memberId].authUid = authUid; if(email) S.users[memberId].email = email; if(displayName) S.users[memberId].socialDisplayName = displayName; }
       // 소셜 프로필 사진 저장 (사용자가 직접 설정한 사진이 없을 때만)
       if(profileImage){ if(!S.photos) S.photos={}; if(!S.photos[memberId]){ S.photos[memberId]=profileImage; console.log('[_loginToFamily] Photo set from social:', memberId); } else { console.log('[_loginToFamily] Photo kept (user-set exists):', memberId); } }
       try{ await setDoc(DATA_DOC, S); }catch(_se){ console.warn('[_loginToFamily] account update save warning:', _se); }
@@ -8619,7 +8632,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0402y';
+const _APP_VERSION = 'v0402z';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -15245,7 +15258,7 @@ function renderMyTab(){
         <span style="display:flex;align-items:center">${pSvg16}</span>
         <div style="flex:1;min-width:0">
           <div style="font-size:12px;font-weight:600;color:var(--tx)">${pName} 연동됨</div>
-          ${acc.email?`<div style="font-size:11px;color:var(--tx3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${acc.email}</div>`:acc.authUid?`<div style="font-size:11px;color:var(--tx3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">ID: ${acc.authUid.length>20?acc.authUid.substring(0,20)+'…':acc.authUid}</div>`:''}
+          ${acc.email?`<div style="font-size:11px;color:var(--tx3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${acc.email}</div>`:acc.socialDisplayName?`<div style="font-size:11px;color:var(--tx3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${acc.socialDisplayName}</div>`:(acc.authUid&&!acc.authUid.startsWith('naver_token_'))?`<div style="font-size:11px;color:var(--tx3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">ID: ${acc.authUid.length>20?acc.authUid.substring(0,20)+'…':acc.authUid}</div>`:''}
         </div>
         ${canUnlink?`<button onclick="unlinkSocial()" style="padding:4px 10px;background:none;border:1.5px solid var(--border,#E2E8F0);border-radius:8px;font-size:11px;font-weight:600;color:var(--tx3);cursor:pointer;white-space:nowrap">해제</button>`:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${pColor}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>`}
       </div>`;
