@@ -979,6 +979,10 @@ body.dark .today-summary-card .ts-msg{background:linear-gradient(135deg,#312E81,
 /* LANDSCAPE BLOCK - only on small phones */
 /* 가로모드 허용 — 차단 해제됨 (v0402z24) */
 .landscape-block{display:none!important}
+/* 가로모드 폰: max-width 해제하여 꽉 채움 */
+@media screen and (orientation:landscape) and (max-height:500px){
+  body{max-width:100%!important;margin:0!important}
+}
 
 /* PIN */
 .pin-wrap{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:600;display:flex;align-items:center;justify-content:center}
@@ -8635,7 +8639,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0402z24';
+const _APP_VERSION = 'v0402z25';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -20433,11 +20437,11 @@ window.toggleMilyChat=function(){
 function _milyWelcome(){
   const isC=typeof isCaregiverUser==='function'&&isCaregiverUser();
   const kidName=_getCurrentKidName();
-  let msg='안녕! 나는 **밀리**야 🌟\n\n';
+  let msg;
   if(isC){
-    msg+=`${kidName?kidName+'의 ':''}마일리지 도우미이자 육아 파트너야!`;
+    msg=`안녕하세요! 저는 **밀리**예요 🌟\n\n${kidName?kidName+'의 ':''}마일리지 도우미이자 육아 파트너예요!`;
   }else{
-    msg+='너의 마일리지 친구야! 같이 재미있게 해보자!';
+    msg='안녕! 나는 **밀리**야 🌟\n\n너의 마일리지 친구야! 같이 재미있게 해보자!';
   }
   _addBotMsg(msg);
   // 계층형 퀵액션 메뉴 렌더링
