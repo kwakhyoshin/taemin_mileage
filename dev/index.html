@@ -8632,7 +8632,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0402z6';
+const _APP_VERSION = 'v0402z7';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -20068,6 +20068,14 @@ window._createState = _createState;
 .mily-btn-group{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .mily-quick-btn{display:inline-block;padding:7px 14px;background:rgba(99,102,241,.1);color:#6366F1;border:1.5px solid rgba(99,102,241,.3);border-radius:18px;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent;user-select:none}
 .mily-quick-btn:hover,.mily-quick-btn:active{background:#6366F1;color:#fff;border-color:#6366F1}
+.mily-cat-btn{display:inline-flex;align-items:center;gap:5px;padding:8px 14px;background:var(--card,#fff);color:var(--tx,#1E293B);border:1.5px solid var(--bdr,#E2E8F0);border-radius:18px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent;user-select:none;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.mily-cat-btn:hover,.mily-cat-btn:active{border-color:#6366F1;background:rgba(99,102,241,.06)}
+.mily-cat-btn .mily-cat-icon{font-size:15px;line-height:1}
+.mily-cat-btn .mily-cat-arrow{font-size:10px;opacity:.4;margin-left:2px;transition:transform .2s}
+.mily-cat-btn.open .mily-cat-arrow{transform:rotate(180deg)}
+.mily-sub-btns{display:none;flex-wrap:wrap;gap:5px;margin-top:4px;padding-left:2px;animation:milySubIn .2s ease}
+.mily-sub-btns.show{display:flex}
+@keyframes milySubIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
 .mily-typing{align-self:flex-start;padding:10px 18px;background:var(--bg2,#F1F5F9);border-radius:18px;border-bottom-left-radius:6px;display:none;gap:4px;align-items:center}
 .mily-typing.show{display:flex}
 .mily-typing span{width:7px;height:7px;background:var(--tx2,#94A3B8);border-radius:50%;animation:milyDot 1.2s infinite}
@@ -20300,20 +20308,128 @@ window.toggleMilyChat=function(){
   }
 };
 
-// ── 환영 메시지 ──
+// ── 환영 메시지 + 계층형 퀵액션 ──
 function _milyWelcome(){
-  // refs now use getters
   const isC=typeof isCaregiverUser==='function'&&isCaregiverUser();
   const kidName=_getCurrentKidName();
   let msg='안녕! 나는 **밀리**야 🌟\n\n';
   if(isC){
-    msg+=`${kidName?kidName+'의 ':''}마일리지를 도와줄게!\n\n`;
-    msg+='[BUTTONS:오늘 현황 보여줘|활동 추가하고 싶어|보상 추가하고 싶어|육아 컨설팅 해줘]';
+    msg+=`${kidName?kidName+'의 ':''}마일리지 도우미이자 육아 파트너야!`;
   }else{
-    msg+='마일리지에 대해 뭐든 물어봐!\n\n';
-    msg+='[BUTTONS:오늘 뭐 해야 해?|마일리지 얼마야?|뱃지 뭐 받았어?]';
+    msg+='너의 마일리지 친구야! 같이 재미있게 해보자!';
   }
   _addBotMsg(msg);
+  // 계층형 퀵액션 메뉴 렌더링
+  setTimeout(()=>_renderQuickMenu(isC,kidName),200);
+}
+
+// 양육자/자녀별 계층형 메뉴 데이터
+function _getQuickMenuData(isC,kidName){
+  const k=kidName||'아이';
+  if(isC) return [
+    {icon:'📊',label:'우리 아이 리포트',subs:[
+      {label:'이번 주 활동 분석',prompt:`${k}의 이번 주 활동 패턴을 분석해줘. 어떤 활동을 꾸준히 하고 있는지, 빠뜨리고 있는 활동은 없는지, 전체적인 참여도를 평가하고 개선 포인트도 알려줘.`},
+      {label:'성장 포인트 찾기',prompt:`${k}의 활동 기록을 보고, 지금 특히 잘하고 있는 점과 앞으로 더 성장할 수 있는 영역을 분석해줘. 구체적인 칭찬 포인트와 다음 단계 제안도 부탁해.`},
+      {label:'보상 체계 점검',prompt:`현재 설정된 활동과 보상의 포인트 밸런스를 분석해줘. 너무 쉽게 보상을 받거나 너무 어려운 건 없는지, 동기부여에 효과적인 구조인지 평가하고 개선안을 제안해줘.`},
+    ]},
+    {icon:'💡',label:'육아 코칭',subs:[
+      {label:'동기부여 전략',prompt:`${k}의 현재 활동 현황과 마일리지를 보고, 지금 시점에 가장 효과적인 동기부여 전략을 추천해줘. 아이 심리를 고려한 구체적인 방법과 대화 예시도 포함해줘.`},
+      {label:'맞춤 활동 추천',prompt:`${k}의 현재 활동 목록을 보고, 빠져 있는 영역(생활습관, 학습, 운동, 창의력, 사회성 등)을 분석해서 새로 추가하면 좋을 활동 3~5개를 추천해줘. 포인트와 주기도 제안해줘.`},
+      {label:'칭찬 메시지 만들기',prompt:`${k}의 최근 활동 기록을 보고, 오늘 아이에게 보내줄 수 있는 진심 담긴 칭찬 메시지를 만들어줘. 구체적인 행동을 언급하면서 아이가 자부심을 느낄 수 있게 해줘.`},
+    ]},
+    {icon:'✅',label:'활동 관리',subs:[
+      {label:'활동 추가',prompt:'새로운 활동을 추가하고 싶어. 어떤 활동을 만들면 좋을지 같이 정해보자.'},
+      {label:'활동 완료 처리',prompt:'아이가 활동을 완료했어. 어떤 활동인지 확인하고 처리해줘.'},
+      {label:'활동 취소',prompt:'잘못 완료 처리한 활동이 있어. 확인하고 취소해줘.'},
+    ]},
+    {icon:'🎁',label:'보상 관리',subs:[
+      {label:'보상 추가',prompt:'새로운 보상을 추가하고 싶어. 아이가 좋아할 만한 보상을 같이 정해보자.'},
+      {label:'보상 교환',prompt:'아이가 보상을 교환하고 싶어해. 현재 마일리지로 교환 가능한 보상을 확인해줘.'},
+      {label:'보상 환불',prompt:'교환했던 보상을 환불하고 싶어.'},
+    ]},
+  ];
+  else return [
+    {icon:'🚀',label:'오늘의 모험',subs:[
+      {label:'오늘 할 일 알려줘',prompt:'오늘 내가 할 수 있는 활동이 뭐가 있는지 알려줘! 어떤 걸 먼저 하면 좋을지 추천도 해줘.'},
+      {label:'깜짝 도전!',prompt:'오늘 내가 도전해볼 만한 특별한 미션을 하나 만들어줘! 평소에 잘 안 하는 활동 중에서 재미있게 도전할 수 있는 걸로!'},
+    ]},
+    {icon:'💰',label:'내 마일리지',subs:[
+      {label:'얼마 모았어?',prompt:'지금 내 마일리지가 얼마인지, 오늘 얼마 벌었는지 알려줘!'},
+      {label:'목표까지 얼마나?',prompt:'내가 갖고 싶은 보상을 받으려면 마일리지가 얼마나 더 필요한지 알려줘! 며칠이면 모을 수 있을지도 알려줘.'},
+    ]},
+    {icon:'🏆',label:'나의 기록',subs:[
+      {label:'이번 주 성적표',prompt:'이번 주에 내가 얼마나 열심히 했는지 분석해줘! 잘한 점을 칭찬해주고, 재미있게 평가해줘.'},
+      {label:'내가 제일 잘하는 건?',prompt:'내 활동 기록을 보고, 내가 가장 꾸준히 잘 해내고 있는 활동이 뭔지 알려줘! 왜 대단한지도 말해줘.'},
+    ]},
+    {icon:'🎲',label:'밀리랑 놀자',subs:[
+      {label:'마일리지 퀴즈!',prompt:'내 마일리지 활동이랑 관련된 재미있는 퀴즈를 내줘! 맞추면 칭찬해줘!'},
+      {label:'오늘의 응원!',prompt:'오늘 하루도 힘내라고 나만을 위한 특별한 응원 메시지를 만들어줘! 내 활동 기록을 보고 진짜 나한테 맞는 응원이면 좋겠어.'},
+      {label:'만약에 게임',prompt:'재미있는 "만약에" 질문을 해줘! 예를 들어 "만약 마일리지가 100만 포인트가 된다면?" 같은 상상력을 자극하는 질문!'},
+    ]},
+  ];
+}
+
+// 계층형 퀵메뉴 렌더링
+function _renderQuickMenu(isC,kidName){
+  const container=document.getElementById('mily-chat-msgs');
+  const typing=document.getElementById('mily-typing');
+  const menu=_getQuickMenuData(isC,kidName);
+
+  const wrap=document.createElement('div');
+  wrap.className='mily-msg bot';
+  wrap.style.cssText='background:transparent;padding:0 4px;box-shadow:none';
+
+  const menuWrap=document.createElement('div');
+  menuWrap.className='mily-btn-group';
+  menuWrap.style.cssText='flex-direction:column;gap:6px;width:100%';
+
+  menu.forEach((cat,ci)=>{
+    const catWrap=document.createElement('div');
+    catWrap.style.cssText='width:100%';
+
+    // 카테고리 버튼
+    const catBtn=document.createElement('span');
+    catBtn.className='mily-cat-btn';
+    catBtn.innerHTML=`<span class="mily-cat-icon">${cat.icon}</span>${cat.label}<span class="mily-cat-arrow">▼</span>`;
+
+    // 서브 버튼 그룹
+    const subWrap=document.createElement('div');
+    subWrap.className='mily-sub-btns';
+
+    cat.subs.forEach(sub=>{
+      const btn=document.createElement('span');
+      btn.className='mily-quick-btn';
+      btn.textContent=sub.label;
+      btn.onclick=function(){
+        // 전체 메뉴 비활성화
+        wrap.querySelectorAll('.mily-quick-btn,.mily-cat-btn').forEach(b=>{b.style.opacity='0.5';b.style.pointerEvents='none';});
+        _addUserMsg(sub.label);
+        _milyHistory.push({role:'user',content:sub.prompt});
+        _callMilyAPI();
+      };
+      subWrap.appendChild(btn);
+    });
+
+    catBtn.onclick=function(){
+      const isOpen=subWrap.classList.contains('show');
+      // 다른 서브 모두 닫기
+      menuWrap.querySelectorAll('.mily-sub-btns').forEach(s=>s.classList.remove('show'));
+      menuWrap.querySelectorAll('.mily-cat-btn').forEach(b=>b.classList.remove('open'));
+      if(!isOpen){
+        subWrap.classList.add('show');
+        catBtn.classList.add('open');
+        _scrollMilyBottom();
+      }
+    };
+
+    catWrap.appendChild(catBtn);
+    catWrap.appendChild(subWrap);
+    menuWrap.appendChild(catWrap);
+  });
+
+  wrap.appendChild(menuWrap);
+  container.insertBefore(wrap,typing);
+  _scrollMilyBottom();
 }
 
 // ── 메시지 전송 ──
@@ -20465,14 +20581,23 @@ ${isMultiChild?`자녀(${childrenInfo.length}명): ${childrenInfo.join(', ')}\n`
 
 [규칙]
 1. 실행요청→반드시 tool호출. 텍스트만 답하지마.
-2. 응답 끝에 [BUTTONS:선택1|선택2|선택3] 추천 행동 제시.
+2. 응답 끝에 [BUTTONS:후속행동1|후속행동2] 맥락에 맞는 다음 행동 추천. 예: 분석 후→"활동 추가할까?|다른 분석 볼래?", 추가 후→"하나 더 만들까?|현황 볼래?"
 3. 모호한 요청→바로 만들어. 기본: pts=20, maxDay=1, cycle=daily.
 4. tool실행 후 결과를 구체적 수치로 보고: 이모지·이름·포인트·개수 포함.
 5. 추가 전 get_status로 기존 목록 조회→이름/의미 유사항목 있으면 추가 안하고 "이미 비슷한 항목 있어요" + 기존항목 표시 후 확인.
 6. 이모지는 의미에 맞게 선택(⭐🎁 기본값 금지). 예: 🪥양치 📖독서 🏃운동 🎮게임
 7. ${isC?'양육자→모든 기능 가능':'자녀→do_activity, get_status만 가능. 나머진 "부모님께 부탁해봐!"'}
 ${isMultiChild?`8. 다자녀(${childrenInfo.join(',')}): 모든 조치(추가/수정/삭제/수행/취소/교환) 전 "어떤 자녀?" 먼저 확인. 모두→target_kids="all"\n`:''}
-${isC?`[육아컨설팅] "분석해줘/괜찮을까?" 시 → 일일적립량vs보상비용 밸런스, 보상유형(경험형🟢/스크린🟡/현금🔴), 활동적절성을 데이터 기반 분석.`:''}
+${isC?`[분석·코칭 모드] get_status 먼저 호출 후 데이터 기반 응답:
+- 리포트: 꾸준한 활동 vs 빠진 활동, 참여도 패턴, 구체적 수치와 비교
+- 보상점검: 일일적립량vs보상비용, 보상유형(경험형🟢/스크린🟡/현금🔴), 도달 예상일
+- 코칭: 아이 심리 고려한 대화 예시, 단계별 전략, 칭찬은 구체적 행동 기반
+- 분석 응답은 최소 3~5줄로 충실하게. 단답 금지.`:''}
+${!isC?`[자녀모드 특별규칙] 재미있고 응원하는 톤 유지:
+- 성적표/분석: 재미있는 비유나 등급(S/A/B), 게임처럼 표현
+- 퀴즈: 활동·보상 데이터 기반 객관식 문제, 정답 시 칭찬
+- 응원: 구체적 활동 언급하며 개인화된 메시지
+- 도전: 잘 안 하는 활동 중 하나를 재미있는 미션으로 제안`:''}
 `;
 
   return prompt;
