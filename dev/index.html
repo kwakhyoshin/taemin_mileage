@@ -5313,8 +5313,8 @@ async function doJoinSocialLogin(provider){
   const errEl=document.getElementById('jr-method-error');
   if(errEl)errEl.textContent='';
 
-  // 네이버: 심사 대기 중
-  if(provider==='naver'){_showNaverPendingNotice();return;}
+  // 네이버: 검수 승인 완료 (2026-04-02)
+  // if(provider==='naver'){_showNaverPendingNotice();return;}
 
   _socialLoginPending=true;
   const _provLabel=provider==='google'?'Google':provider==='kakao'?'카카오':provider;
@@ -6561,7 +6561,7 @@ async function linkSocialFromMyMenu(){
       <button onclick="_doLinkSocial('kakao')" style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:#FEE500;border:none;border-radius:12px;cursor:pointer;font-size:14px;font-weight:600;color:#191919;width:100%">
         ${_kSvg} 카카오 계정으로 연동
       </button>
-      <button onclick="_showNaverPendingNotice();_closeSocialLinkSheet()" style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:#03C75A;border:none;border-radius:12px;cursor:pointer;font-size:14px;font-weight:600;color:#fff;width:100%">
+      <button onclick="_doLinkSocial('naver');_closeSocialLinkSheet()" style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:#03C75A;border:none;border-radius:12px;cursor:pointer;font-size:14px;font-weight:600;color:#fff;width:100%">
         ${_nSvg} 네이버 아이디로 연동
       </button>
     </div>
@@ -7600,10 +7600,8 @@ async function doSocialLogin(provider){
       return;
     }
 
-    // ── 네이버 로그인 (심사 대기 중) ──
+    // ── 네이버 로그인 (검수 승인 완료 2026-04-02) ──
     if(provider === 'naver'){
-      _showNaverPendingNotice();
-      return;
       // ★ 모바일에서 parent 탭 리로드 시 결과 수신을 위해 social_pending 설정
       localStorage.setItem(_LS_PREFIX+'social_pending', 'naver');
       try {
@@ -8621,7 +8619,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0402v';
+const _APP_VERSION = 'v0402w';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -9163,22 +9161,24 @@ async function _getLocationSilently(){
       if(Date.now()-ts<24*60*60*1000){_cachedCoords={lat,lon};return _cachedCoords;}
     }
   }catch(e){}
-  // navigator.permissions.query로 권한 상태 먼저 확인 (팝업 없이)
+  // navigator.permissions.query로 권한 상태 먼저 확인
   if(navigator.permissions&&navigator.permissions.query){
     try{
       const perm=await navigator.permissions.query({name:'geolocation'});
-      if(perm.state!=='granted'){
-        // 'prompt' 또는 'denied' → GPS 요청하지 않음 (팝업 방지)
-        console.log(`위치 권한 상태: ${perm.state} → 기본값 사용`);
+      if(perm.state==='denied'){
+        // denied → GPS 요청 불가
+        console.log('위치 권한 거부됨 → 기본값 사용');
         return null;
       }
+      // 'granted' 또는 'prompt' → GPS 요청 진행
+      console.log(`위치 권한 상태: ${perm.state} → GPS 요청`);
     }catch(e){/* permissions API 미지원 브라우저 → 아래에서 시도 */}
   }
-  // 권한이 granted인 경우에만 GPS 요청
+  // GPS 요청 (granted면 바로 응답, prompt면 브라우저 권한 팝업 표시)
   try{
     const pos=await new Promise((resolve,reject)=>{
       if(!navigator.geolocation){reject('No geolocation');}
-      navigator.geolocation.getCurrentPosition(resolve,reject,{timeout:5000,maximumAge:600000});
+      navigator.geolocation.getCurrentPosition(resolve,reject,{timeout:8000,maximumAge:600000});
     });
     _cachedCoords={lat:pos.coords.latitude,lon:pos.coords.longitude};
     // localStorage에 저장 (다음 앱 실행 시 빠르게 사용)
