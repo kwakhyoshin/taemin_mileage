@@ -10534,9 +10534,6 @@ function renderMilyGreeting(){
   el.className='mily-greeting-hero';
   charEl.innerHTML=_milySVG(charCfg);
   msgEl.innerHTML=`${msg}${hint?`<div class="mily-hint">${hintIcon||''}${hint}</div>`:''}`;
-
-  // AI 인사말: 캐시 확인 → 캐시 있으면 즉시 교체, 없으면 백그라운드 호출
-  _tryAIGreeting(el,msgEl,{done,total,remaining,streak,state});
 }
 
 // ── AI 인사말 시스템 ──
@@ -18683,13 +18680,18 @@ window._milyAPI={
     const longest=S.longest||0;
     const totalDone=S.totalDone||0;
 
+    // ── 오늘의 할일 진행상황 ──
+    const mission=typeof getTodayMissionProgress==='function'?getTodayMissionProgress():{done:0,total:0,remaining:0};
+    const bonusPts=S.settings?.streakBonusPts||100;
+
     return{success:true,mileage:pts,
-      activities:acts.map(a=>({id:a.id,emoji:a.emoji,name:a.name,pts:a.pts,active:a.active,cycle:a.cycle})),
+      activities:acts.map(a=>({id:a.id,emoji:a.emoji,name:a.name,pts:a.pts,active:a.active,cycle:a.cycle,showHome:!!a.showHome})),
       rewards:rwds.map(r=>({id:r.id,emoji:r.emoji,name:r.name,pts:r.pts,goal:!!r.goal})),
       today_log:todayLog,
+      today_mission:{total:mission.total,done:mission.done,remaining:mission.remaining},
       activity_stats:statsSorted,
       recent_7days:recent7Sorted,
-      streak:{current:streak,longest:longest,total_done:totalDone},
+      streak:{current:streak,longest:longest,total_done:totalDone,bonus_pts:bonusPts},
       total_log_count:logs.length};
   },
   doActivity(data){
@@ -20900,10 +20902,22 @@ ${!isC?`[자녀모드] 재미있고 응원하는 톤!
 - 뱃지 추가 시 이모지는 반드시 뱃지 의미에 맞게 선택. 예: 🏃연속운동 📚다독가 🌅아침형 💪꾸준함
 - "뱃지 난이도 조정해줘" → get_badges로 현황 파악 → 조건값 대비 난이도가 맞는지 분석 → edit_badge로 조정 제안
 
-[통계 활용] get_status 결과에 activity_stats(활동별 총횟수·총마일리지·활동일수), recent_7days(최근7일), streak(연속기록)이 포함됨.
+[오늘의 할일] 활동 중 showHome=true인 것들이 "오늘의 할일"(홈탭 목록). get_status 결과의 today_mission으로 현황 조회.
+- today_mission.total: 오늘 할 일 총 개수, today_mission.done: 완료 개수, today_mission.remaining: 남은 개수
+- 오늘의 할일을 **모두 완료**하면 "오늘 성공!" → 연속 성공일수(streak) +1
+- streak.current: 현재 연속 성공일수, streak.bonus_pts: 7일 보너스 마일리지(기본 100M)
+- **7일 연속 성공 시 보너스 마일리지(streak.bonus_pts) 자동 지급!** 매 7일마다 반복.
+- 대화 예: "오늘 할 일 몇 개 남았어?" → get_status → today_mission.remaining 답변
+- 대화 예: "연속 며칠째야?" → get_status → streak.current 답변 + 7일 보너스까지 남은 일수
+- 활동의 showHome 여부는 activities 배열의 showHome 필드로 확인 가능
+- toggleActivityHome 도구로 활동의 오늘의할일 포함 여부 변경 가능(양육자만)
+
+[통계 활용] get_status 결과에 activity_stats(활동별 총횟수·총마일리지·활동일수), recent_7days(최근7일), streak(연속기록), today_mission(오늘의 할일 현황)이 포함됨.
 - "제일 잘하는 건?" → activity_stats에서 count 1위 활동 + 구체적 횟수·마일리지 언급
 - "이번주 뭐했어?" → recent_7days로 최근 7일 활동 분석
 - "얼마나 열심히 했어?" → streak, total_done, activity_stats 종합 분석
+- "오늘 할 일 남았어?" → today_mission으로 남은 할일 개수·목록 안내
+- "연속 성공 며칠?" → streak.current + 7일 보너스까지 남은 일수 계산
 - 항상 수치를 구체적으로 말해줘: "○○을 ○번이나 했어!", "총 ○마일리지 모았어!"
 `;
 
