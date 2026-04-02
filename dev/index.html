@@ -8639,7 +8639,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0402z21';
+const _APP_VERSION = 'v0402z22';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -18624,12 +18624,50 @@ window._milyAPI={
     const ms=getMemberState(vid);
     const acts=(ms&&ms.acts)?ms.acts:S.acts;
     const rwds=(ms&&ms.rwds)?ms.rwds:S.rwds;
+    const logs=S.log||[];
     const today=new Date().toISOString().slice(0,10);
-    const todayLog=(S.log||[]).filter(l=>l.date===today).map(l=>({name:l.name||'',emoji:l.emoji||'',pts:l.pts||0}));
+    const todayLog=logs.filter(l=>l.date===today).map(l=>({name:l.name||'',emoji:l.emoji||'',pts:l.pts||0}));
+
+    // ── 활동별 통계 (전체 기록 기반) ──
+    const actStats={};
+    logs.forEach(l=>{
+      if(!l.actId)return; // 보너스/차감 등 제외
+      if(!actStats[l.actId])actStats[l.actId]={count:0,totalPts:0,name:l.name||'',emoji:l.emoji||'',dates:new Set()};
+      actStats[l.actId].count++;
+      actStats[l.actId].totalPts+=(l.pts||0);
+      if(l.date)actStats[l.actId].dates.add(l.date);
+    });
+    // 많이 한 순서대로 정렬
+    const statsSorted=Object.entries(actStats)
+      .map(([id,s])=>({id,name:s.name,emoji:s.emoji,count:s.count,totalPts:s.totalPts,days:s.dates.size}))
+      .sort((a,b)=>b.count-a.count);
+
+    // ── 최근 7일 통계 ──
+    const d7=new Date();d7.setDate(d7.getDate()-7);
+    const d7str=d7.toISOString().slice(0,10);
+    const recent7=logs.filter(l=>l.date>=d7str&&l.actId);
+    const r7Stats={};
+    recent7.forEach(l=>{
+      if(!r7Stats[l.actId])r7Stats[l.actId]={count:0,name:l.name||'',emoji:l.emoji||''};
+      r7Stats[l.actId].count++;
+    });
+    const recent7Sorted=Object.entries(r7Stats)
+      .map(([id,s])=>({name:s.name,emoji:s.emoji,count:s.count}))
+      .sort((a,b)=>b.count-a.count);
+
+    // ── 연속 기록 (streak) ──
+    const streak=S.streak||0;
+    const longest=S.longest||0;
+    const totalDone=S.totalDone||0;
+
     return{success:true,mileage:pts,
       activities:acts.map(a=>({id:a.id,emoji:a.emoji,name:a.name,pts:a.pts,active:a.active,cycle:a.cycle})),
       rewards:rwds.map(r=>({id:r.id,emoji:r.emoji,name:r.name,pts:r.pts,goal:!!r.goal})),
-      today_log:todayLog};
+      today_log:todayLog,
+      activity_stats:statsSorted,
+      recent_7days:recent7Sorted,
+      streak:{current:streak,longest:longest,total_done:totalDone},
+      total_log_count:logs.length};
   },
   doActivity(data){
     const vid=getViewedMemberId();
@@ -20696,6 +20734,11 @@ ${!isC?`[자녀모드] 재미있고 응원하는 톤!
 - 응원: 구체적 활동 언급, 개인화된 메시지. "네가 ~한 거 진짜 대단해!"
 - 도전: 잘 안하는 활동을 재미있는 미션으로. "오늘의 비밀미션!"
 - 목표: "~까지 ○P 남았어! ○일이면 모을수있어!" 희망적 수치 제시`:''}
+[통계 활용] get_status 결과에 activity_stats(활동별 총횟수·총포인트·활동일수), recent_7days(최근7일), streak(연속기록)이 포함됨.
+- "제일 잘하는 건?" → activity_stats에서 count 1위 활동 + 구체적 횟수·포인트 언급
+- "이번주 뭐했어?" → recent_7days로 최근 7일 활동 분석
+- "얼마나 열심히 했어?" → streak, total_done, activity_stats 종합 분석
+- 항상 수치를 구체적으로 말해줘: "○○을 ○번이나 했어!", "총 ○포인트 모았어!"
 `;
 
   return prompt;
@@ -20709,7 +20752,7 @@ function _buildTools(){
   // 공통: 현황 조회
   tools.push({
     name:'get_status',
-    description:'현재 마일리지, 활동 목록, 보상 목록, 오늘 기록을 조회',
+    description:'현재 마일리지, 활동 목록, 보상 목록, 오늘 기록, 활동별 통계(횟수·포인트·일수), 최근7일 통계, 연속기록을 조회',
     input_schema:{type:'object',properties:{},required:[]}
   });
 
