@@ -8632,7 +8632,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0402z';
+const _APP_VERSION = 'v0402z2';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -20250,20 +20250,35 @@ async function _callMilyAPI(){
     while(loopCount<maxLoops){
       loopCount++;
       console.log('[mily-chat] API call #'+loopCount, 'msgs:', messages.length, 'tools:', tools.length);
-      const resp=await fetch(MILY_PROXY_URL,{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({
-          system:systemPrompt,
-          messages:messages,
-          tools:tools,
-          max_tokens:1024
-        })
-      });
+      const _abortCtrl=new AbortController();
+      const _timeout=setTimeout(()=>_abortCtrl.abort(),30000); // 30초 타임아웃
+      let resp;
+      try{
+        resp=await fetch(MILY_PROXY_URL,{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          signal:_abortCtrl.signal,
+          body:JSON.stringify({
+            model:'claude-haiku-4-5-20241022',
+            system:systemPrompt,
+            messages:messages,
+            tools:tools,
+            max_tokens:1024
+          })
+        });
+      }catch(_fetchErr){
+        clearTimeout(_timeout);
+        if(_fetchErr.name==='AbortError') throw new Error('응답 시간 초과 (30초). 잠시 후 다시 시도해 주세요.');
+        throw _fetchErr;
+      }
+      clearTimeout(_timeout);
 
       if(!resp.ok){
         const errData=await resp.json().catch(()=>({}));
         console.error('[mily-chat] API error:', resp.status, errData);
+        // Rate limit (429) 또는 서버 오류 시 명확한 메시지
+        if(resp.status===429) throw new Error('API 사용량 한도에 도달했어요. 잠시 후 다시 시도해 주세요.');
+        if(resp.status===529||resp.status===503) throw new Error('AI 서버가 바쁘네요. 잠시 후 다시 시도해 주세요.');
         throw new Error(errData.error?.message||errData.error||`API 오류 (${resp.status})`);
       }
 
@@ -20900,8 +20915,8 @@ setTimeout(()=>{
 // ── 모바일 키보드 대응 (visualViewport) ──
 if(window.visualViewport){
   const _chatEl=document.getElementById('mily-chat');
-  const _inputArea=document.querySelector('.mily-chat-input');
   let _lastVH=window.innerHeight;
+  let _kbOpen=false; // 키보드 열림 상태 추적
 
   window.visualViewport.addEventListener('resize',()=>{
     if(!_milyOpen)return;
@@ -20909,11 +20924,13 @@ if(window.visualViewport){
     const keyboardH=_lastVH-vv.height;
     if(keyboardH>100){
       // 키보드 올라옴
+      _kbOpen=true;
       _chatEl.style.height=vv.height+'px';
       _chatEl.style.bottom='auto';
       _chatEl.style.top=vv.offsetTop+'px';
     }else{
-      // 키보드 내려감
+      // 키보드 내려감 — 모든 인라인 스타일 제거하여 CSS 기본값 복원
+      _kbOpen=false;
       _chatEl.style.height='';
       _chatEl.style.bottom='';
       _chatEl.style.top='';
@@ -20922,7 +20939,7 @@ if(window.visualViewport){
   });
 
   window.visualViewport.addEventListener('scroll',()=>{
-    if(!_milyOpen)return;
+    if(!_milyOpen||!_kbOpen)return; // 키보드 열린 상태에서만 top 조정
     const vv=window.visualViewport;
     _chatEl.style.top=vv.offsetTop+'px';
   });
