@@ -8632,7 +8632,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'prod'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0402z7';
+const _APP_VERSION = 'v0402z9';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -20035,6 +20035,10 @@ window._createState = _createState;
 .mily-fab svg{width:72px;height:72px;pointer-events:none}
 .mily-fab-badge{position:absolute;top:2px;right:2px;width:14px;height:14px;background:#EF4444;border-radius:50%;border:2px solid #fff;display:none}
 .nav-container.docked~.mily-fab{bottom:110px}
+/* ── FAB 말풍선 ── */
+.mily-bubble{position:fixed;right:100px;bottom:152px;max-width:200px;padding:10px 14px;background:var(--card,#fff);color:var(--tx,#1E293B);border-radius:16px;border-bottom-right-radius:4px;font-size:12.5px;line-height:1.5;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:949;opacity:0;transform:scale(.9) translateY(4px);transition:opacity .3s,transform .3s;pointer-events:none;font-weight:500}
+.mily-bubble.show{opacity:1;transform:scale(1) translateY(0);pointer-events:auto;cursor:pointer}
+.nav-container.docked~.mily-bubble{bottom:122px}
 
 /* ── chat backdrop — 뒤 화면 가림 ── */
 .mily-chat-backdrop{position:fixed;left:0;right:0;top:0;bottom:0;width:100%;height:100%;background:var(--card,#fff);z-index:959;display:none}
@@ -20106,6 +20110,7 @@ body.dark .mily-fab{box-shadow:0 4px 20px rgba(99,102,241,.3)}
   <span id="mily-fab-char"></span>
   <span class="mily-fab-badge" id="mily-fab-badge"></span>
 </button>
+<div class="mily-bubble" id="mily-bubble"></div>
 
 <!-- 채팅 백드롭 — 키보드 올라올 때 뒤 화면 가림 -->
 <div class="mily-chat-backdrop" id="mily-chat-backdrop"></div>
@@ -20965,12 +20970,8 @@ function _updateFabVisibility(){
     fab.classList.remove('visible');
     return;
   }
-  // 홈탭에서 mily 인사말이 보이면 FAB 숨김
-  if(_milyCurrentTab==='home'&&_milyGreetingVisible){
-    fab.classList.remove('visible');
-  }else{
-    fab.classList.add('visible');
-  }
+  // FAB 항상 표시 (홈탭 인사말 영역과 무관)
+  fab.classList.add('visible');
 }
 
 // IntersectionObserver로 mily-greeting 가시성 감지
@@ -20990,6 +20991,129 @@ function _setupMilyObserver(){
   mutObs.observe(greeting,{attributes:true,attributeFilter:['style']});
 }
 
+// ── FAB 말풍선 인사이트 시스템 ──
+const _BUBBLE_DAILY_MAX=2; // 탭당 하루 최대 횟수
+const _BUBBLE_DISPLAY_MS=6000; // 말풍선 표시 시간 6초
+let _bubbleTimer=null;
+let _bubbleCounts={}; // {acts:2,rwds:1,...} 오늘 표시 횟수
+
+function _getBubbleCountKey(){
+  return (_LS_PREFIX||'taemin_dev_')+'bubble_counts';
+}
+function _loadBubbleCounts(){
+  try{
+    const raw=localStorage.getItem(_getBubbleCountKey());
+    if(!raw)return{};
+    const data=JSON.parse(raw);
+    // 날짜가 다르면 리셋
+    if(data._date!==new Date().toDateString()) return {};
+    return data;
+  }catch(e){return{};}
+}
+function _saveBubbleCounts(){
+  _bubbleCounts._date=new Date().toDateString();
+  try{localStorage.setItem(_getBubbleCountKey(),JSON.stringify(_bubbleCounts));}catch(e){}
+}
+
+function _hideBubble(){
+  const el=document.getElementById('mily-bubble');
+  if(el) el.classList.remove('show');
+  if(_bubbleTimer){clearTimeout(_bubbleTimer);_bubbleTimer=null;}
+}
+
+function _showBubble(text){
+  _hideBubble();
+  const el=document.getElementById('mily-bubble');
+  if(!el||_milyOpen)return;
+  el.textContent=text;
+  // 짧은 딜레이 후 표시 (탭 전환 애니메이션 후)
+  setTimeout(()=>{
+    el.classList.add('show');
+    _bubbleTimer=setTimeout(()=>_hideBubble(),_BUBBLE_DISPLAY_MS);
+  },600);
+}
+
+// 말풍선 클릭, FAB 클릭, 스크롤 시 숨김
+document.getElementById('mily-bubble')?.addEventListener('click',()=>{_hideBubble();if(typeof toggleMilyChat==='function')toggleMilyChat();});
+document.getElementById('mily-fab')?.addEventListener('click',()=>_hideBubble());
+window.addEventListener('scroll',()=>{if(document.getElementById('mily-bubble')?.classList.contains('show'))_hideBubble();},{passive:true});
+
+// 탭별 인사이트 메시지 풀 (데이터 기반으로 선택)
+function _getTabInsight(tab){
+  const S=_getS();
+  if(!S)return null;
+  const isC=typeof isCaregiverUser==='function'&&isCaregiverUser();
+  const kidName=_getCurrentKidName()||'아이';
+  const pts=S.pts||0;
+  const acts=(S.acts||[]).filter(a=>a.active!==false);
+  const rwds=(S.rwds||[]).filter(r=>r.active!==false);
+  const todayLog=(S.log||[]).filter(l=>{const d=new Date(l.ts);const t=new Date();return d.toDateString()===t.toDateString();});
+  const doneToday=todayLog.length;
+  const hour=new Date().getHours();
+
+  if(tab==='acts'){
+    const pool=[];
+    if(isC){
+      const undone=acts.filter(a=>!todayLog.find(l=>l.id===a.id));
+      if(undone.length>0) pool.push(`오늘 아직 ${undone.length}개 활동이 남았어요!`);
+      if(doneToday>0) pool.push(`오늘 벌써 ${doneToday}개 완료! 잘하고 있어요 👏`);
+      if(acts.length>=8) pool.push(`활동이 ${acts.length}개나! 아이가 바쁘겠어요 😄`);
+      if(acts.length<=2) pool.push('활동을 더 추가해볼까요? 추천해드릴게요!');
+      const highPts=acts.filter(a=>a.pts>=30);
+      if(highPts.length>0) pool.push(`${highPts[0].emoji}${highPts[0].name}은 ${highPts[0].pts}P! 가장 보람찬 활동이에요`);
+      if(hour<12) pool.push('오전에 활동하면 습관이 더 잘 잡혀요!');
+      if(hour>=20) pool.push('오늘 하루 마무리! 못한 활동은 내일 도전 💪');
+    }else{
+      if(doneToday===0) pool.push('아직 시작 안 했네? 하나만 해볼까! 🚀');
+      if(doneToday>0&&doneToday<3) pool.push(`${doneToday}개 했다! 조금만 더 하면 대단해 ✨`);
+      if(doneToday>=3) pool.push(`벌써 ${doneToday}개나! 오늘 완전 열심히 하네! 🔥`);
+      const easy=acts.filter(a=>a.pts<=15);
+      if(easy.length>0) pool.push(`${easy[0].emoji}${easy[0].name} 금방 할 수 있어!`);
+    }
+    return pool.length>0 ? pool[Math.floor(Math.random()*pool.length)] : null;
+  }
+
+  if(tab==='rwds'){
+    const pool=[];
+    if(isC){
+      if(rwds.length===0) pool.push('보상을 추가하면 동기부여가 확 올라요!');
+      const cheapest=rwds.reduce((a,b)=>a.pts<b.pts?a:b,rwds[0]);
+      if(cheapest&&pts>=cheapest.pts) pool.push(`${cheapest.emoji}${cheapest.name} 교환 가능해요! (${cheapest.pts}P)`);
+      if(cheapest&&pts<cheapest.pts) pool.push(`${cheapest.emoji}${cheapest.name}까지 ${cheapest.pts-pts}P 남았어요`);
+      const expensive=rwds.reduce((a,b)=>a.pts>b.pts?a:b,rwds[0]);
+      if(expensive&&expensive!==cheapest) pool.push(`${expensive.emoji}${expensive.name}은 대형 목표! ${expensive.pts}P 도전 중`);
+      if(rwds.length>=5) pool.push(`보상이 ${rwds.length}개! 선택의 즐거움이 있네요 🎉`);
+    }else{
+      if(rwds.length===0) pool.push('아직 보상이 없네? 부모님께 부탁해봐!');
+      const cheapest=rwds.length>0?rwds.reduce((a,b)=>a.pts<b.pts?a:b,rwds[0]):null;
+      if(cheapest&&pts>=cheapest.pts) pool.push(`${cheapest.emoji}${cheapest.name} 바로 교환할 수 있어! 🎁`);
+      if(cheapest&&pts<cheapest.pts){
+        const left=cheapest.pts-pts;
+        pool.push(`${cheapest.emoji}${cheapest.name}까지 ${left}P만 더 모으면 돼!`);
+      }
+      if(pts>=100) pool.push(`${pts}P나 모았다! 대단해! 💰`);
+      if(pts<50) pool.push('활동 열심히 해서 마일리지 모아보자! 💪');
+    }
+    return pool.length>0 ? pool[Math.floor(Math.random()*pool.length)] : null;
+  }
+  return null;
+}
+
+function _tryShowTabInsight(tab){
+  if(!_milyAppReady||_milyOpen)return;
+  // acts, rwds 탭에서만 동작
+  const tabKey=tab==='acts'?'acts':tab==='rwds'?'rwds':null;
+  if(!tabKey)return;
+  _bubbleCounts=_loadBubbleCounts();
+  const count=_bubbleCounts[tabKey]||0;
+  if(count>=_BUBBLE_DAILY_MAX)return;
+  const msg=_getTabInsight(tabKey);
+  if(!msg)return;
+  _bubbleCounts[tabKey]=count+1;
+  _saveBubbleCounts();
+  _showBubble(msg);
+}
+
 // 탭 전환 감지 (goTab 훅)
 const _origGoTab=window.goTab;
 if(typeof _origGoTab==='function'){
@@ -20997,6 +21121,8 @@ if(typeof _origGoTab==='function'){
     _milyCurrentTab=tab||'home';
     _origGoTab.apply(this,arguments);
     _updateFabVisibility();
+    _hideBubble();
+    _tryShowTabInsight(tab);
   };
 }
 
