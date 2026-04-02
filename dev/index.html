@@ -8281,6 +8281,12 @@ function checkAuth() {
     postLoginInit();
     // 관리자 권한이면 자동으로 adminOK
     if(isCurrentUserAdmin()) adminOK = true;
+    // ★ 관리자 계정(nonmarking) PRO 등급 설정 (1회 마이그레이션)
+    if(isCurrentUserAdmin() && S.familyMeta && S.familyMeta.plan !== 'pro'){
+      S.familyMeta.plan = 'pro';
+      if(typeof save === 'function') save();
+      console.log('✅ 관리자 계정 PRO 등급 자동 설정 완료');
+    }
     hideAllAuth();
     // s-home 초기 on 클래스가 없으므로 명시적으로 홈 탭 활성화
     const _homeScr = document.getElementById('s-home');
