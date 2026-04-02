@@ -4058,7 +4058,10 @@ requestAnimationFrame(function(){
 <!-- MY TAB -->
 <div class="scr" id="s-my">
   <div class="my-header">
-    <h2>나의 메뉴 <svg class="hdr-ico" viewBox="0 0 24 24" style="width:24px;height:24px"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></h2>
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <h2 style="margin:0">나의 메뉴 <svg class="hdr-ico" viewBox="0 0 24 24" style="width:24px;height:24px"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></h2>
+      <div id="my-plan-badge" style="display:flex"></div>
+    </div>
     <p class="my-header-sub" id="my-header-sub">내 정보</p>
   </div>
   <div class="my-section-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> 나의 계정</div>
@@ -4072,11 +4075,8 @@ requestAnimationFrame(function(){
       <div class="my-role" id="my-role">역할</div>
     </div>
   </div>
-  <!-- 등급 + 소셜 연동 (프로필 카드 아래 별도 영역) -->
-  <div style="margin:8px 16px 0;display:flex;flex-direction:column;gap:8px">
-    <div id="my-plan-badge" style="display:flex"></div>
-    <div id="my-social-area"></div>
-  </div>
+  <!-- 소셜 연동 (프로필 카드 바로 아래) -->
+  <div id="my-social-area" style="margin:8px 16px 0"></div>
   <!-- 가족 구성원 아바타 가로 나열 (나 제외) -->
   <div class="my-section-title" id="my-family-title" style="display:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg> 우리가족</div>
   <div class="my-family-row" id="my-family-row" style="display:none"></div>
@@ -8716,7 +8716,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0403e';
+const _APP_VERSION = 'v0403f';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -15604,9 +15604,10 @@ window.pfMenuAction=pfMenuAction;
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
   {
-    ver:'1.9.10 (v0403e)', date:'2026-04-03',
+    ver:'1.9.10 (v0403f)', date:'2026-04-03',
     items:[
-      {type:'fix',text:'나의메뉴 등급 배지와 소셜 연동 정보 UI 분리 (겹침 해결)'},
+      {type:'fix',text:'등급 배지를 헤더 제목 영역으로 이동 (프로필/소셜 사이 끼임 해결)'},
+      {type:'fix',text:'나의메뉴 소셜 연동 정보가 프로필 카드 바로 아래 표시되도록 개선'},
       {type:'fix',text:'나의메뉴 우리가족 목록이 안보이는 문제 수정'},
       {type:'fix',text:'renderMyTab 각 섹션에 try/catch 추가 (한 섹션 오류가 전체 차단 방지)'},
     ]
