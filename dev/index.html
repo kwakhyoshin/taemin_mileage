@@ -8621,7 +8621,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0402s';
+const _APP_VERSION = 'v0402t';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -20255,10 +20255,8 @@ function _toolAddActivity(input){
   };
 
   ms.acts.push({...newAct});
-  // 글로벌에도 반영
-  if(_getGlobalDataOwner()===vid){
-    S.acts.push({...newAct});
-  }
+  // 글로벌 S.acts에 항상 반영 (홈 렌더링이 S.acts를 직접 참조)
+  S.acts.push({...newAct});
   if(typeof save==='function') save();
   if(typeof renderAll==='function') renderAll();
 
@@ -20281,12 +20279,9 @@ function _toolEditActivity(input){
   if(input.cycle!==undefined){act.cycle=input.cycle;changes.push('주기→'+input.cycle);}
   if(input.active!==undefined){act.active=input.active;changes.push(input.active?'활성화':'비활성화');}
 
-  // 글로벌 S.acts에도 반영
-  const vid=typeof getViewedMemberId==='function'?getViewedMemberId():'';
-  if(_getGlobalDataOwner()===vid){
-    const sa=S.acts.find(x=>x.id===act.id);
-    if(sa) Object.assign(sa,act);
-  }
+  // 글로벌 S.acts에도 항상 반영
+  const sa=S.acts.find(x=>x.id===act.id);
+  if(sa) Object.assign(sa,act);
   if(typeof save==='function') save();
   if(typeof renderAll==='function') renderAll();
 
@@ -20304,11 +20299,9 @@ function _toolDeleteActivity(input){
   if(idx<0) return {success:false,error:'해당 활동을 찾을 수 없습니다'};
 
   const removed=ms.acts.splice(idx,1)[0];
-  // 글로벌에서도 제거
-  if(_getGlobalDataOwner()===vid){
-    const si=S.acts.findIndex(x=>x.id===removed.id);
-    if(si>=0) S.acts.splice(si,1);
-  }
+  // 글로벌에서도 항상 제거
+  const si=S.acts.findIndex(x=>x.id===removed.id);
+  if(si>=0) S.acts.splice(si,1);
   if(typeof save==='function') save();
   if(typeof renderAll==='function') renderAll();
 
@@ -20336,11 +20329,9 @@ function _toolAddReward(input){
 
   if(newRwd.goal) ms.rwds.forEach(r=>r.goal=false);
   ms.rwds.push({...newRwd});
-
-  if(_getGlobalDataOwner()===vid){
-    if(newRwd.goal) S.rwds.forEach(r=>r.goal=false);
-    S.rwds.push({...newRwd});
-  }
+  // 글로벌 S.rwds에 항상 반영
+  if(newRwd.goal) S.rwds.forEach(r=>r.goal=false);
+  S.rwds.push({...newRwd});
   if(typeof save==='function') save();
   if(typeof renderAll==='function') renderAll();
 
@@ -20368,11 +20359,9 @@ function _toolEditReward(input){
     changes.push(input.goal?'목표 설정':'목표 해제');
   }
 
-  const vid=typeof getViewedMemberId==='function'?getViewedMemberId():'';
-  if(_getGlobalDataOwner()===vid){
-    const sr=S.rwds.find(x=>x.id===rwd.id);
-    if(sr) Object.assign(sr,rwd);
-  }
+  // 글로벌 S.rwds에도 항상 반영
+  const sr=S.rwds.find(x=>x.id===rwd.id);
+  if(sr) Object.assign(sr,rwd);
   if(typeof save==='function') save();
   if(typeof renderAll==='function') renderAll();
 
@@ -20390,10 +20379,9 @@ function _toolDeleteReward(input){
   if(idx<0) return {success:false,error:'해당 보상을 찾을 수 없습니다'};
 
   const removed=ms.rwds.splice(idx,1)[0];
-  if(_getGlobalDataOwner()===vid){
-    const si=S.rwds.findIndex(x=>x.id===removed.id);
-    if(si>=0) S.rwds.splice(si,1);
-  }
+  // 글로벌에서도 항상 제거
+  const si=S.rwds.findIndex(x=>x.id===removed.id);
+  if(si>=0) S.rwds.splice(si,1);
   if(typeof save==='function') save();
   if(typeof renderAll==='function') renderAll();
 
