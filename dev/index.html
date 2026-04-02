@@ -8621,7 +8621,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0402t';
+const _APP_VERSION = 'v0402u';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -18287,7 +18287,8 @@ window.renderAdmModeSection=renderAdmModeSection;
 
 // mily AI 챗봇 IIFE에서 접근 필요한 변수/함수 exports
 // (module scope는 window에 자동 노출되지 않으므로 명시적 export 필요)
-window._S=S;
+// ⚠️ S는 onSnapshot에서 교체되므로 getter로 제공해야 IIFE가 항상 최신 참조를 얻음
+Object.defineProperty(window,'_S',{get(){return S;},configurable:true});
 window._MEMBERS=MEMBERS;
 window._globalDataOwner_ref=function(){return _globalDataOwner;};
 window._globalDataOwner_set=function(v){_globalDataOwner=v;};
@@ -18296,6 +18297,124 @@ window._milyFace=_milyFace;
 window.save=save;
 window.renderAll=renderAll;
 window.doAct=doAct;
+
+// ── 밀리 챗봇용 API (모듈 스코프의 S를 직접 조작하므로 onSnapshot 교체에 안전) ──
+window._milyAPI={
+  addActivity(data){
+    const curAdm=_admViewChildId||getViewedMemberId();
+    const ms=getMemberState(curAdm);
+    if(!ms.acts)ms.acts=JSON.parse(JSON.stringify(S.acts||[]));
+    const newId='a_'+Date.now();
+    const newAct={id:newId,emoji:data.emoji||'⭐',name:data.name.trim(),desc:data.desc||'',
+      pts:Math.max(1,data.pts||20),maxDay:data.maxDay!==undefined?Math.max(0,data.maxDay):1,
+      cycle:data.cycle||'daily',days:null,active:true,showHome:false};
+    ms.acts.push({...newAct});
+    if(_globalDataOwner===curAdm)S.acts.push({...newAct});
+    else S.acts.push({...newAct}); // 항상 S.acts에도 반영
+    save();renderAll();
+    return {success:true,message:`✅ "${newAct.emoji} ${newAct.name}" 활동 추가 완료! (${newAct.pts}P, ${newAct.cycle})`,id:newId};
+  },
+  editActivity(data){
+    const curAdm=_admViewChildId||getViewedMemberId();
+    const ms=getMemberState(curAdm);
+    const acts=ms.acts||S.acts;
+    let act=null;
+    if(data.activity_id)act=acts.find(a=>a.id===data.activity_id);
+    if(!act&&data.activity_name)act=acts.find(a=>a.name.includes(data.activity_name)||data.activity_name.includes(a.name));
+    if(!act)return{success:false,error:'해당 활동을 찾을 수 없습니다'};
+    const changes=[];
+    if(data.name!==undefined){act.name=data.name;changes.push('이름→'+data.name);}
+    if(data.emoji!==undefined){act.emoji=data.emoji;changes.push('이모지→'+data.emoji);}
+    if(data.pts!==undefined){act.pts=Math.max(1,data.pts);changes.push('포인트→'+act.pts);}
+    if(data.desc!==undefined){act.desc=data.desc;changes.push('설명 수정');}
+    if(data.maxDay!==undefined){act.maxDay=Math.max(0,data.maxDay);changes.push('하루최대→'+act.maxDay);}
+    if(data.cycle!==undefined){act.cycle=data.cycle;changes.push('주기→'+data.cycle);}
+    if(data.active!==undefined){act.active=data.active;changes.push(data.active?'활성화':'비활성화');}
+    const sa=S.acts.find(x=>x.id===act.id);if(sa)Object.assign(sa,act);
+    save();renderAll();
+    return{success:true,message:`✅ "${act.emoji} ${act.name}" 수정 완료: ${changes.join(', ')}`};
+  },
+  deleteActivity(data){
+    const curAdm=_admViewChildId||getViewedMemberId();
+    const ms=getMemberState(curAdm);
+    if(!ms.acts)return{success:false,error:'멤버 데이터를 찾을 수 없습니다'};
+    let idx=-1;
+    if(data.activity_id)idx=ms.acts.findIndex(a=>a.id===data.activity_id);
+    if(idx<0&&data.activity_name)idx=ms.acts.findIndex(a=>a.name.includes(data.activity_name)||data.activity_name.includes(a.name));
+    if(idx<0)return{success:false,error:'해당 활동을 찾을 수 없습니다'};
+    const removed=ms.acts.splice(idx,1)[0];
+    const si=S.acts.findIndex(x=>x.id===removed.id);if(si>=0)S.acts.splice(si,1);
+    save();renderAll();
+    return{success:true,message:`🗑️ "${removed.emoji} ${removed.name}" 활동이 삭제되었습니다`};
+  },
+  addReward(data){
+    const curAdm=_admViewChildId||getViewedMemberId();
+    const ms=getMemberState(curAdm);
+    if(!ms.rwds)ms.rwds=JSON.parse(JSON.stringify(S.rwds||[]));
+    const newId='r_'+Date.now();
+    const newRwd={id:newId,emoji:data.emoji||'🎁',name:data.name.trim(),pts:Math.max(1,data.pts||500),goal:!!data.goal,sale:null};
+    if(newRwd.goal){ms.rwds.forEach(r=>r.goal=false);S.rwds.forEach(r=>r.goal=false);}
+    ms.rwds.push({...newRwd});
+    S.rwds.push({...newRwd});
+    save();renderAll();
+    return{success:true,message:`✅ "${newRwd.emoji} ${newRwd.name}" 보상 추가 완료! (${newRwd.pts}P 필요)`,id:newId};
+  },
+  editReward(data){
+    const curAdm=_admViewChildId||getViewedMemberId();
+    const ms=getMemberState(curAdm);
+    const rwds=ms.rwds||S.rwds;
+    let rwd=null;
+    if(data.reward_id)rwd=rwds.find(r=>r.id===data.reward_id);
+    if(!rwd&&data.reward_name)rwd=rwds.find(r=>r.name.includes(data.reward_name)||data.reward_name.includes(r.name));
+    if(!rwd)return{success:false,error:'해당 보상을 찾을 수 없습니다'};
+    const changes=[];
+    if(data.name!==undefined){rwd.name=data.name;changes.push('이름→'+data.name);}
+    if(data.emoji!==undefined){rwd.emoji=data.emoji;changes.push('이모지→'+data.emoji);}
+    if(data.pts!==undefined){rwd.pts=Math.max(1,data.pts);changes.push('포인트→'+rwd.pts);}
+    if(data.goal!==undefined){rwd.goal=data.goal;if(data.goal){ms.rwds.forEach(r=>{if(r.id!==rwd.id)r.goal=false;});S.rwds.forEach(r=>{if(r.id!==rwd.id)r.goal=false;});}changes.push(data.goal?'목표 설정':'목표 해제');}
+    const sr=S.rwds.find(x=>x.id===rwd.id);if(sr)Object.assign(sr,rwd);
+    save();renderAll();
+    return{success:true,message:`✅ "${rwd.emoji} ${rwd.name}" 수정 완료: ${changes.join(', ')}`};
+  },
+  deleteReward(data){
+    const curAdm=_admViewChildId||getViewedMemberId();
+    const ms=getMemberState(curAdm);
+    if(!ms.rwds)return{success:false,error:'멤버 데이터를 찾을 수 없습니다'};
+    let idx=-1;
+    if(data.reward_id)idx=ms.rwds.findIndex(r=>r.id===data.reward_id);
+    if(idx<0&&data.reward_name)idx=ms.rwds.findIndex(r=>r.name.includes(data.reward_name)||data.reward_name.includes(r.name));
+    if(idx<0)return{success:false,error:'해당 보상을 찾을 수 없습니다'};
+    const removed=ms.rwds.splice(idx,1)[0];
+    const si=S.rwds.findIndex(x=>x.id===removed.id);if(si>=0)S.rwds.splice(si,1);
+    save();renderAll();
+    return{success:true,message:`🗑️ "${removed.emoji} ${removed.name}" 보상이 삭제되었습니다`};
+  },
+  getStatus(){
+    const pts=getActiveMileage();
+    const vid=getViewedMemberId();
+    const ms=getMemberState(vid);
+    const acts=(ms&&ms.acts)?ms.acts:S.acts;
+    const rwds=(ms&&ms.rwds)?ms.rwds:S.rwds;
+    const today=new Date().toISOString().slice(0,10);
+    const todayLog=(S.log||[]).filter(l=>l.date===today).map(l=>({name:l.name||'',emoji:l.emoji||'',pts:l.pts||0}));
+    return{success:true,mileage:pts,
+      activities:acts.map(a=>({id:a.id,emoji:a.emoji,name:a.name,pts:a.pts,active:a.active,cycle:a.cycle})),
+      rewards:rwds.map(r=>({id:r.id,emoji:r.emoji,name:r.name,pts:r.pts,goal:!!r.goal})),
+      today_log:todayLog};
+  },
+  doActivity(data){
+    const vid=getViewedMemberId();
+    const ms=getMemberState(vid);
+    const acts=(ms&&ms.acts)?ms.acts:S.acts;
+    let act=null;
+    if(data.activity_id)act=acts.find(a=>a.id===data.activity_id);
+    if(!act&&data.activity_name)act=acts.find(a=>a.name.includes(data.activity_name)||data.activity_name.includes(a.name));
+    if(!act)return{success:false,error:'해당 활동을 찾을 수 없습니다: '+(data.activity_name||data.activity_id)};
+    if(!act.active)return{success:false,error:`"${act.name}" 활동은 현재 비활성 상태입니다`};
+    doAct(act.id);
+    return{success:true,message:`✅ "${act.name}" 활동 완료! +${act.pts}P 적립`};
+  }
+};
 
 // Initial render
 renderDevUserSwitch();
@@ -19757,14 +19876,10 @@ body.dark .mily-fab{box-shadow:0 4px 20px rgba(99,102,241,.3)}
 'use strict';
 
 // 메인 스크립트에서 export된 변수 참조 (IIFE 스코프에서 접근 불가하므로)
-// ⚠️ module script는 deferred → IIFE가 먼저 실행됨 → 여기서 const로 캡처하면 undefined
-// 따라서 lazy init 패턴 사용
-let S=null;
-let MEMBERS=null;
-function _ensureRefs(){
-  if(!S) S=window._S;
-  if(!MEMBERS) MEMBERS=window._MEMBERS;
-}
+// ⚠️ S는 onSnapshot에서 교체될 수 있으므로 항상 getter를 통해 접근
+// window._S는 Object.defineProperty getter로 정의 → 항상 모듈의 최신 S 반환
+function _getS(){ return window._S; }
+function _getMembers(){ return window._MEMBERS; }
 function _getGlobalDataOwner(){return window._globalDataOwner_ref();}
 
 const MILY_PROXY_URL='https://dry-meadow-3356mily-ai-proxy.nonmarking.workers.dev/';
@@ -19828,7 +19943,7 @@ function _detectMilyMood(text){
 
 // ── UI 토글 ──
 window.toggleMilyChat=function(){
-  _ensureRefs();
+  // refs now use getters
   _milyOpen=!_milyOpen;
   const fab=document.getElementById('mily-fab');
   const chat=document.getElementById('mily-chat');
@@ -19855,7 +19970,7 @@ window.toggleMilyChat=function(){
 
 // ── 환영 메시지 ──
 function _milyWelcome(){
-  _ensureRefs();
+  // refs now use getters
   const isC=typeof isCaregiverUser==='function'&&isCaregiverUser();
   const kidName=_getCurrentKidName();
   let msg='안녕! 나는 **밀리**야 🌟\n\n';
@@ -19883,7 +19998,7 @@ window.sendMilyMsg=function(){
 
 // ── Claude API 호출 ──
 async function _callMilyAPI(){
-  _ensureRefs();
+  // refs now use getters
   _milySending=true;
   _setMilySendBtn(false);
   _showTyping(true);
@@ -20177,21 +20292,22 @@ function _buildTools(){
   return tools;
 }
 
-// ── 도구 실행 ──
+// ── 도구 실행 (메인 모듈의 _milyAPI에 위임 — onSnapshot S 교체에 안전) ──
 function _executeTool(name,input){
-  _ensureRefs();
   console.log('[mily-tool] execute:', name, JSON.stringify(input));
   try{
+    const api=window._milyAPI;
+    if(!api) return {success:false,error:'앱이 아직 준비되지 않았습니다. 잠시 후 다시 시도해주세요.'};
     let result;
     switch(name){
-      case 'get_status': result=_toolGetStatus(); break;
-      case 'do_activity': result=_toolDoActivity(input); break;
-      case 'add_activity': result=_toolAddActivity(input); break;
-      case 'edit_activity': result=_toolEditActivity(input); break;
-      case 'delete_activity': result=_toolDeleteActivity(input); break;
-      case 'add_reward': result=_toolAddReward(input); break;
-      case 'edit_reward': result=_toolEditReward(input); break;
-      case 'delete_reward': result=_toolDeleteReward(input); break;
+      case 'get_status': result=api.getStatus(); break;
+      case 'do_activity': result=api.doActivity(input); break;
+      case 'add_activity': result=api.addActivity(input); break;
+      case 'edit_activity': result=api.editActivity(input); break;
+      case 'delete_activity': result=api.deleteActivity(input); break;
+      case 'add_reward': result=api.addReward(input); break;
+      case 'edit_reward': result=api.editReward(input); break;
+      case 'delete_reward': result=api.deleteReward(input); break;
       default: result={success:false,error:'알 수 없는 도구: '+name};
     }
     console.log('[mily-tool] result:', name, JSON.stringify(result));
@@ -20202,222 +20318,41 @@ function _executeTool(name,input){
   }
 }
 
-// ── 도구 구현 ──
-
-function _toolGetStatus(){
-  const pts=typeof getActiveMileage==='function'?getActiveMileage():0;
-  return {
-    success:true,
-    mileage:pts,
-    activities:_getActsList().map(a=>({id:a.id,emoji:a.emoji,name:a.name,pts:a.pts,active:a.active,cycle:a.cycle})),
-    rewards:_getRwdsList().map(r=>({id:r.id,emoji:r.emoji,name:r.name,pts:r.pts,goal:!!r.goal})),
-    today_log:_getTodayLog()
-  };
-}
-
-function _toolDoActivity(input){
-  const acts=_getActsList();
-  let act=null;
-  if(input.activity_id) act=acts.find(a=>a.id===input.activity_id);
-  if(!act&&input.activity_name) act=acts.find(a=>a.name.includes(input.activity_name)||input.activity_name.includes(a.name));
-  if(!act) return {success:false,error:'해당 활동을 찾을 수 없습니다: '+(input.activity_name||input.activity_id)};
-  if(!act.active) return {success:false,error:`"${act.name}" 활동은 현재 비활성 상태입니다`};
-
-  // doAct 호출
-  if(typeof doAct==='function'){
-    doAct(act.id);
-    return {success:true,message:`✅ "${act.name}" 활동 완료! +${act.pts}P 적립`};
-  }
-  return {success:false,error:'활동 수행 함수를 찾을 수 없습니다'};
-}
-
-function _toolAddActivity(input){
-  if(!input.name||!input.name.trim()) return {success:false,error:'활동 이름이 필요합니다'};
-  if(input.name.length>20) return {success:false,error:'활동 이름은 20자 이내'};
-
-  const vid=typeof getViewedMemberId==='function'?getViewedMemberId():'';
-  const ms=typeof getMemberState==='function'?getMemberState(vid):null;
-  if(!ms) return {success:false,error:'멤버 데이터를 찾을 수 없습니다'};
-  if(!ms.acts) ms.acts=JSON.parse(JSON.stringify(S.acts||[]));
-
-  const newId='a_'+Date.now();
-  const newAct={
-    id:newId,
-    emoji:input.emoji||'⭐',
-    name:input.name.trim(),
-    desc:input.desc||'',
-    pts:Math.max(1,input.pts||20),
-    maxDay:input.maxDay!==undefined?Math.max(0,input.maxDay):1,
-    cycle:input.cycle||'daily',
-    days:null,
-    active:true,
-    showHome:false
-  };
-
-  ms.acts.push({...newAct});
-  // 글로벌 S.acts에 항상 반영 (홈 렌더링이 S.acts를 직접 참조)
-  S.acts.push({...newAct});
-  if(typeof save==='function') save();
-  if(typeof renderAll==='function') renderAll();
-
-  return {success:true,message:`✅ "${newAct.emoji} ${newAct.name}" 활동 추가 완료! (${newAct.pts}P, ${newAct.cycle})`};
-}
-
-function _toolEditActivity(input){
-  const acts=_getActsList();
-  let act=null;
-  if(input.activity_id) act=acts.find(a=>a.id===input.activity_id);
-  if(!act&&input.activity_name) act=acts.find(a=>a.name.includes(input.activity_name)||input.activity_name.includes(a.name));
-  if(!act) return {success:false,error:'해당 활동을 찾을 수 없습니다'};
-
-  const changes=[];
-  if(input.name!==undefined){act.name=input.name;changes.push('이름→'+input.name);}
-  if(input.emoji!==undefined){act.emoji=input.emoji;changes.push('이모지→'+input.emoji);}
-  if(input.pts!==undefined){act.pts=Math.max(1,input.pts);changes.push('포인트→'+act.pts);}
-  if(input.desc!==undefined){act.desc=input.desc;changes.push('설명 수정');}
-  if(input.maxDay!==undefined){act.maxDay=Math.max(0,input.maxDay);changes.push('하루최대→'+act.maxDay);}
-  if(input.cycle!==undefined){act.cycle=input.cycle;changes.push('주기→'+input.cycle);}
-  if(input.active!==undefined){act.active=input.active;changes.push(input.active?'활성화':'비활성화');}
-
-  // 글로벌 S.acts에도 항상 반영
-  const sa=S.acts.find(x=>x.id===act.id);
-  if(sa) Object.assign(sa,act);
-  if(typeof save==='function') save();
-  if(typeof renderAll==='function') renderAll();
-
-  return {success:true,message:`✅ "${act.emoji} ${act.name}" 수정 완료: ${changes.join(', ')}`};
-}
-
-function _toolDeleteActivity(input){
-  const vid=typeof getViewedMemberId==='function'?getViewedMemberId():'';
-  const ms=typeof getMemberState==='function'?getMemberState(vid):null;
-  if(!ms||!ms.acts) return {success:false,error:'멤버 데이터를 찾을 수 없습니다'};
-
-  let idx=-1;
-  if(input.activity_id) idx=ms.acts.findIndex(a=>a.id===input.activity_id);
-  if(idx<0&&input.activity_name) idx=ms.acts.findIndex(a=>a.name.includes(input.activity_name)||input.activity_name.includes(a.name));
-  if(idx<0) return {success:false,error:'해당 활동을 찾을 수 없습니다'};
-
-  const removed=ms.acts.splice(idx,1)[0];
-  // 글로벌에서도 항상 제거
-  const si=S.acts.findIndex(x=>x.id===removed.id);
-  if(si>=0) S.acts.splice(si,1);
-  if(typeof save==='function') save();
-  if(typeof renderAll==='function') renderAll();
-
-  return {success:true,message:`🗑️ "${removed.emoji} ${removed.name}" 활동이 삭제되었습니다`};
-}
-
-function _toolAddReward(input){
-  if(!input.name||!input.name.trim()) return {success:false,error:'보상 이름이 필요합니다'};
-  if(input.name.length>30) return {success:false,error:'보상 이름은 30자 이내'};
-
-  const vid=typeof getViewedMemberId==='function'?getViewedMemberId():'';
-  const ms=typeof getMemberState==='function'?getMemberState(vid):null;
-  if(!ms) return {success:false,error:'멤버 데이터를 찾을 수 없습니다'};
-  if(!ms.rwds) ms.rwds=JSON.parse(JSON.stringify(S.rwds||[]));
-
-  const newId='r_'+Date.now();
-  const newRwd={
-    id:newId,
-    emoji:input.emoji||'🎁',
-    name:input.name.trim(),
-    pts:Math.max(1,input.pts||500),
-    goal:!!input.goal,
-    sale:null
-  };
-
-  if(newRwd.goal) ms.rwds.forEach(r=>r.goal=false);
-  ms.rwds.push({...newRwd});
-  // 글로벌 S.rwds에 항상 반영
-  if(newRwd.goal) S.rwds.forEach(r=>r.goal=false);
-  S.rwds.push({...newRwd});
-  if(typeof save==='function') save();
-  if(typeof renderAll==='function') renderAll();
-
-  return {success:true,message:`✅ "${newRwd.emoji} ${newRwd.name}" 보상 추가 완료! (${newRwd.pts}P 필요)`};
-}
-
-function _toolEditReward(input){
-  const rwds=_getRwdsList();
-  let rwd=null;
-  if(input.reward_id) rwd=rwds.find(r=>r.id===input.reward_id);
-  if(!rwd&&input.reward_name) rwd=rwds.find(r=>r.name.includes(input.reward_name)||input.reward_name.includes(r.name));
-  if(!rwd) return {success:false,error:'해당 보상을 찾을 수 없습니다'};
-
-  const changes=[];
-  if(input.name!==undefined){rwd.name=input.name;changes.push('이름→'+input.name);}
-  if(input.emoji!==undefined){rwd.emoji=input.emoji;changes.push('이모지→'+input.emoji);}
-  if(input.pts!==undefined){rwd.pts=Math.max(1,input.pts);changes.push('포인트→'+rwd.pts);}
-  if(input.goal!==undefined){
-    rwd.goal=input.goal;
-    if(input.goal){
-      const vid=typeof getViewedMemberId==='function'?getViewedMemberId():'';
-      const ms=typeof getMemberState==='function'?getMemberState(vid):null;
-      if(ms&&ms.rwds) ms.rwds.forEach(r=>{if(r.id!==rwd.id)r.goal=false;});
-    }
-    changes.push(input.goal?'목표 설정':'목표 해제');
-  }
-
-  // 글로벌 S.rwds에도 항상 반영
-  const sr=S.rwds.find(x=>x.id===rwd.id);
-  if(sr) Object.assign(sr,rwd);
-  if(typeof save==='function') save();
-  if(typeof renderAll==='function') renderAll();
-
-  return {success:true,message:`✅ "${rwd.emoji} ${rwd.name}" 수정 완료: ${changes.join(', ')}`};
-}
-
-function _toolDeleteReward(input){
-  const vid=typeof getViewedMemberId==='function'?getViewedMemberId():'';
-  const ms=typeof getMemberState==='function'?getMemberState(vid):null;
-  if(!ms||!ms.rwds) return {success:false,error:'멤버 데이터를 찾을 수 없습니다'};
-
-  let idx=-1;
-  if(input.reward_id) idx=ms.rwds.findIndex(r=>r.id===input.reward_id);
-  if(idx<0&&input.reward_name) idx=ms.rwds.findIndex(r=>r.name.includes(input.reward_name)||input.reward_name.includes(r.name));
-  if(idx<0) return {success:false,error:'해당 보상을 찾을 수 없습니다'};
-
-  const removed=ms.rwds.splice(idx,1)[0];
-  // 글로벌에서도 항상 제거
-  const si=S.rwds.findIndex(x=>x.id===removed.id);
-  if(si>=0) S.rwds.splice(si,1);
-  if(typeof save==='function') save();
-  if(typeof renderAll==='function') renderAll();
-
-  return {success:true,message:`🗑️ "${removed.emoji} ${removed.name}" 보상이 삭제되었습니다`};
-}
-
-// ── 데이터 헬퍼 ──
+// ── 데이터 헬퍼 (항상 _getS()로 최신 S 참조) ──
 function _getActsList(){
   try{
+    const S=_getS();
     const vid=typeof getViewedMemberId==='function'?getViewedMemberId():'';
     const ms=typeof getMemberState==='function'?getMemberState(vid):null;
-    return (ms&&ms.acts)?ms.acts:(S.acts||[]);
-  }catch(e){return S.acts||[];}
+    return (ms&&ms.acts)?ms.acts:(S?.acts||[]);
+  }catch(e){return _getS()?.acts||[];}
 }
 
 function _getRwdsList(){
   try{
+    const S=_getS();
     const vid=typeof getViewedMemberId==='function'?getViewedMemberId():'';
     const ms=typeof getMemberState==='function'?getMemberState(vid):null;
-    return (ms&&ms.rwds)?ms.rwds:(S.rwds||[]);
-  }catch(e){return S.rwds||[];}
+    return (ms&&ms.rwds)?ms.rwds:(S?.rwds||[]);
+  }catch(e){return _getS()?.rwds||[];}
 }
 
 function _getTodayLog(){
   try{
+    const S=_getS();
     const today=new Date().toISOString().slice(0,10);
-    return (S.log||[]).filter(l=>l.date===today).map(l=>({name:l.name||'',emoji:l.emoji||'',pts:l.pts||0}));
+    return (S?.log||[]).filter(l=>l.date===today).map(l=>({name:l.name||'',emoji:l.emoji||'',pts:l.pts||0}));
   }catch(e){return[];}
 }
 
 function _getCurrentKidName(){
   try{
+    const S=_getS();
+    const MEMBERS=_getMembers();
     const vid=typeof getViewedMemberId==='function'?getViewedMemberId():'';
     if(!vid)return'';
-    if(typeof MEMBERS!=='undefined'&&MEMBERS[vid])return MEMBERS[vid].name||vid;
-    if(S.familyMeta?.members?.[vid])return S.familyMeta.members[vid].name||vid;
+    if(MEMBERS&&MEMBERS[vid])return MEMBERS[vid].name||vid;
+    if(S?.familyMeta?.members?.[vid])return S.familyMeta.members[vid].name||vid;
     return vid;
   }catch(e){return'';}
 }
