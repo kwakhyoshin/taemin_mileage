@@ -6534,7 +6534,11 @@ async function linkSocialFromMyMenu(){
       const docPath=_ENV==='dev'?`dev_${newFamilyId}`:newFamilyId;
       const familyDoc=getFamilyDoc(docPath);
       if(familyDoc && familyDoc.path){
-        if(S.familyMeta) S.familyMeta.familyId=docPath;
+        if(S.familyMeta){
+          S.familyMeta.familyId=docPath;
+          S.familyMeta._fromLegacy=true; // 레거시에서 마이그레이션됨 마커 (PRO 자동 설정용)
+          if(S.familyMeta.plan==='pro') S.familyMeta._autoProSet=true; // 기존 PRO 유지 마커
+        }
         await setDoc(familyDoc, S);
         _familyId=docPath;
         DATA_DOC=familyDoc;
@@ -7046,40 +7050,49 @@ function isCurrentUserAdmin(){
 }
 
 // ★ 레거시 가족(우리 가족) 관리자 → PRO 자동 설정
-// abo.taemin 등 다른 가족에는 적용하지 않음
-// ★ PRO 자동 설정 — 정확히 레거시 문서 경로(users/taemin 또는 users/taemin_dev)에서
-//   직접 읽는 경우에만 적용. families/ 컬렉션은 절대 자동 PRO 대상 아님.
+// 레거시 직접 경로(users/taemin*) 또는 레거시에서 마이그레이션된 families/ 문서 모두 대상
+// abo.taemin 등 완전히 새로 만든 가족에는 적용하지 않음
 function _autoSetProIfAdmin(){
   try{
     if(!S.familyMeta) return;
-    // ★ 핵심 조건: _familyId가 null이고 DATA_DOC === LEGACY_DOC인 경우만 (레거시 직접 경로)
+    // 조건1: 레거시 직접 경로 (마이그레이션 전)
     const isDirectLegacy = !_familyId &&
       typeof DATA_DOC !== 'undefined' && typeof LEGACY_DOC !== 'undefined' &&
       DATA_DOC === LEGACY_DOC;
-    if(!isDirectLegacy) return;
+    // 조건2: 레거시에서 마이그레이션된 families/ 문서
+    // → familyMeta._fromLegacy 마커, 또는 _checkLegacyMigrationPointer가 감지한 플래그
+    if(window._pendingFromLegacy && !S.familyMeta._fromLegacy){
+      S.familyMeta._fromLegacy=true;
+      window._pendingFromLegacy=false;
+    }
+    const isMigratedLegacy = !!_familyId && S.familyMeta._fromLegacy === true;
+    if(!isDirectLegacy && !isMigratedLegacy) return;
     // 관리자(양육자)로 로그인한 경우에만
     if(!isCurrentUserAdmin() && !isCaregiverUser()) return;
     if(S.familyMeta.plan === 'pro') return; // 이미 PRO
     S.familyMeta.plan = 'pro';
+    S.familyMeta._autoProSet = true; // cleanupWrongPro가 건드리지 않게 마커
     if(typeof save === 'function') save();
-    console.log('✅ 레거시 가족 관리자 PRO 등급 자동 설정 완료');
+    console.log('✅ 레거시 가족 관리자 PRO 등급 자동 설정 완료', isDirectLegacy?'(직접경로)':'(마이그레이션)');
   }catch(e){ console.warn('[_autoSetProIfAdmin] error:', e); }
 }
 
 // ★ 잘못 설정된 PRO를 정리
-// proRequest 없이 PRO가 설정된 families/ 문서는 되돌림 (v0403b 버그 수정)
+// proRequest 없이, _autoProSet 마커도 없이 PRO가 설정된 families/ 문서는 되돌림
 // 단, 레거시 직접 경로는 제외
 function _cleanupWrongPro(){
   try{
     if(!S.familyMeta || S.familyMeta.plan !== 'pro') return;
     // proRequest가 있으면 정상 신청이므로 유지
     if(S.familyMeta.proRequest) return;
+    // _autoProSet 마커가 있으면 자동 설정된 PRO이므로 유지
+    if(S.familyMeta._autoProSet) return;
     // 레거시 직접 경로(users/taemin*)면 PRO 유지
     const isDirectLegacy = !_familyId &&
       typeof DATA_DOC !== 'undefined' && typeof LEGACY_DOC !== 'undefined' &&
       DATA_DOC === LEGACY_DOC;
     if(isDirectLegacy) return;
-    // 그 외: proRequest 없이 PRO → 잘못 설정된 것 → 되돌림
+    // 그 외: proRequest도 _autoProSet도 없이 PRO → 잘못 설정된 것 → 되돌림
     console.log('🔧 잘못된 PRO 설정 되돌림:', S.familyMeta.familyId || _familyId);
     delete S.familyMeta.plan;
     if(typeof save === 'function') save();
@@ -8716,7 +8729,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0403h';
+const _APP_VERSION = 'v0403i';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -8829,6 +8842,8 @@ async function _checkLegacyMigrationPointer(){
       _familyId=mt;
       DATA_DOC=getFamilyDoc(mt);
       localStorage.setItem(_LS_PREFIX+'family_id',mt);
+      // 레거시에서 마이그레이션됨 마커 (데이터 로드 후 familyMeta에 설정)
+      window._pendingFromLegacy=true;
     }
   }catch(e){ console.warn('[_checkLegacyMigrationPointer]', e); }
 }
@@ -15604,8 +15619,9 @@ window.pfMenuAction=pfMenuAction;
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
   {
-    ver:'1.9.10 (v0403h)', date:'2026-04-03',
+    ver:'1.9.10 (v0403i)', date:'2026-04-03',
     items:[
+      {type:'fix',text:'소셜 연동 후 마이그레이션된 계정의 PRO 등급이 해제되는 문제 수정'},
       {type:'improve',text:'AI챗봇 사용법 안내 확장 — 메시지 보내기, 스티커/말풍선, 오늘 할 일 설정, 보상 교환, 활동 취소 등 추가'},
       {type:'fix',text:'등급 배지를 헤더 제목 영역으로 이동 (프로필/소셜 사이 끼임 해결)'},
       {type:'fix',text:'나의메뉴 소셜 연동 정보가 프로필 카드 바로 아래 표시되도록 개선'},
