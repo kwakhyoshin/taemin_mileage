@@ -8621,7 +8621,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0402r';
+const _APP_VERSION = 'v0402s';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -19702,6 +19702,9 @@ window._createState = _createState;
 .mily-msg.bot{align-self:flex-start;background:var(--bg2,#F1F5F9);color:var(--tx,#1E293B);border-bottom-left-radius:6px}
 .mily-msg.user{align-self:flex-end;background:linear-gradient(135deg,#6366F1,#818CF8);color:#fff;border-bottom-right-radius:6px}
 .mily-msg.bot .mily-action-result{margin-top:6px;padding:8px 10px;background:rgba(99,102,241,.08);border-radius:12px;font-size:12px;border-left:3px solid #6366F1}
+.mily-btn-group{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.mily-quick-btn{display:inline-block;padding:7px 14px;background:rgba(99,102,241,.1);color:#6366F1;border:1.5px solid rgba(99,102,241,.3);border-radius:18px;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent;user-select:none}
+.mily-quick-btn:hover,.mily-quick-btn:active{background:#6366F1;color:#fff;border-color:#6366F1}
 .mily-typing{align-self:flex-start;padding:10px 18px;background:var(--bg2,#F1F5F9);border-radius:18px;border-bottom-left-radius:6px;display:none;gap:4px;align-items:center}
 .mily-typing.show{display:flex}
 .mily-typing span{width:7px;height:7px;background:var(--tx2,#94A3B8);border-radius:50%;animation:milyDot 1.2s infinite}
@@ -19754,8 +19757,14 @@ body.dark .mily-fab{box-shadow:0 4px 20px rgba(99,102,241,.3)}
 'use strict';
 
 // 메인 스크립트에서 export된 변수 참조 (IIFE 스코프에서 접근 불가하므로)
-const S=window._S;
-const MEMBERS=window._MEMBERS;
+// ⚠️ module script는 deferred → IIFE가 먼저 실행됨 → 여기서 const로 캡처하면 undefined
+// 따라서 lazy init 패턴 사용
+let S=null;
+let MEMBERS=null;
+function _ensureRefs(){
+  if(!S) S=window._S;
+  if(!MEMBERS) MEMBERS=window._MEMBERS;
+}
 function _getGlobalDataOwner(){return window._globalDataOwner_ref();}
 
 const MILY_PROXY_URL='https://dry-meadow-3356mily-ai-proxy.nonmarking.workers.dev/';
@@ -19819,6 +19828,7 @@ function _detectMilyMood(text){
 
 // ── UI 토글 ──
 window.toggleMilyChat=function(){
+  _ensureRefs();
   _milyOpen=!_milyOpen;
   const fab=document.getElementById('mily-fab');
   const chat=document.getElementById('mily-chat');
@@ -19845,20 +19855,16 @@ window.toggleMilyChat=function(){
 
 // ── 환영 메시지 ──
 function _milyWelcome(){
+  _ensureRefs();
   const isC=typeof isCaregiverUser==='function'&&isCaregiverUser();
   const kidName=_getCurrentKidName();
   let msg='안녕! 나는 **밀리**야 🌟\n\n';
   if(isC){
-    msg+=`${kidName?kidName+'의 ':''}마일리지를 도와줄게! 이런 걸 할 수 있어:\n\n`;
-    msg+='• **활동 추가/수정/삭제** — "양치하기 활동 추가해줘"\n';
-    msg+='• **보상 추가/수정/삭제** — "게임 30분 보상 만들어줘"\n';
-    msg+='• **현황 확인** — "오늘 뭐 했어?" "마일리지 얼마야?"\n';
-    msg+='• **앱 사용법** — "뱃지는 어떻게 받아?"\n';
+    msg+=`${kidName?kidName+'의 ':''}마일리지를 도와줄게!\n\n`;
+    msg+='[BUTTONS:오늘 현황 보여줘|활동 추가하고 싶어|보상 추가하고 싶어|육아 컨설팅 해줘]';
   }else{
     msg+='마일리지에 대해 뭐든 물어봐!\n\n';
-    msg+='• "오늘 뭐 해야 해?" — 할 일 확인\n';
-    msg+='• "마일리지 얼마야?" — 잔액 확인\n';
-    msg+='• "뱃지 뭐 받았어?" — 뱃지 확인\n';
+    msg+='[BUTTONS:오늘 뭐 해야 해?|마일리지 얼마야?|뱃지 뭐 받았어?]';
   }
   _addBotMsg(msg);
 }
@@ -19877,6 +19883,7 @@ window.sendMilyMsg=function(){
 
 // ── Claude API 호출 ──
 async function _callMilyAPI(){
+  _ensureRefs();
   _milySending=true;
   _setMilySendBtn(false);
   _showTyping(true);
@@ -19980,48 +19987,75 @@ function _buildSystemPrompt(){
   const rwds=_getRwdsList();
   const todayLog=_getTodayLog();
 
-  let prompt=`너는 "밀리"야. 태민이 마일리지 앱의 AI 도우미 캐릭터야.
-밝고 친근한 말투를 써. 존댓말 대신 반말로 말해 (예: "~해줄게!", "~했어!", "~할까?").
-이모지를 적절히 사용해. 답변은 간결하게.
-마크다운은 **볼드**만 사용하고 나머지 형식은 사용하지 마.
+  let prompt=`너는 "밀리"야. 마일리 앱의 AI 도우미 캐릭터야.
+성격: 밝고 친근하고 아이를 응원하는 느낌. 반말로 말해.
+답변: 짧고 핵심만. 마크다운은 **볼드**만.
 
-현재 상태:
-- 사용자 유형: ${isC?'양육자(보호자)':'자녀'}
-- 현재 선택 자녀: ${kidName||'없음'} (ID: ${kidId})
-- 보유 마일리지: ${pts}P
+[현재 상태]
+유저: ${isC?'양육자':'자녀'} | 자녀: ${kidName||'없음'} | 마일리지: ${pts}P
+활동(${acts.length}): ${acts.slice(0,8).map(a=>`${a.emoji}${a.name}(${a.pts}P)`).join(', ')||'없음'}
+보상(${rwds.length}): ${rwds.slice(0,5).map(r=>`${r.emoji}${r.name}(${r.pts}P)`).join(', ')||'없음'}
+오늘: ${todayLog.map(l=>`${l.emoji||''}${l.name}`).join(', ')||'없음'}
 
-활동 목록 (${acts.length}개):
-${acts.map(a=>`  - ${a.emoji} ${a.name}: ${a.pts}P (${a.active?'활성':'비활성'}, ${a.cycle||'daily'})`).join('\n')||'  (없음)'}
+[역할별 권한]
+양육자: 활동·보상 추가/수정/삭제, 활동수행, 현황조회, 육아컨설팅
+자녀: 활동수행(do_activity), 현황조회(get_status), 앱 사용법 질문
+현재 유저는 ${isC?'양육자 → 모든 기능 사용 가능':'자녀 → 활동수행과 현황조회만 가능. 추가/수정/삭제 요청 시 "양육자(부모님)에게 부탁해봐!" 라고 안내'}
 
-보상 목록 (${rwds.length}개):
-${rwds.map(r=>`  - ${r.emoji} ${r.name}: ${r.pts}P${r.goal?' [목표]':''}`).join('\n')||'  (없음)'}
+[핵심 규칙]
+1. 실행 요청 → 반드시 tool 호출. 텍스트로만 답하지 마.
+2. 빠른 선택지 제공: 응답 끝에 [BUTTONS:선택1|선택2|선택3] 형식으로 추천 다음 행동을 제시해.
+   예: [BUTTONS:네, 추가해주세요!|아니요, 수정할래요|다른 활동도 추가해줘]
+3. "알아서 해줘" 모드: 유저가 모호하게 요청하면 "제가 알아서 만들어볼까요? 결과를 보고 수정할 부분만 말씀해주세요!" 라고 제안해.
+4. 기본값: 활동(emoji=⭐, pts=20, maxDay=1, cycle=daily), 보상(emoji=🎁, pts=500, goal=false)
+5. 이름만 말하면 기본값으로 바로 생성해.
 
-오늘 완료한 활동:
-${todayLog.map(l=>`  - ${l.emoji||''} ${l.name}: +${l.pts}P`).join('\n')||'  (없음)'}
+[앱 사용법 가이드 — 유저가 물으면 이걸 참고해서 답해]
+• 활동: 매일/매주/1회 할 수 있는 과제. 완료하면 마일리지 적립. 하루최대횟수 설정 가능.
+• 보상: 마일리지를 모아서 교환하는 보상. 목표보상은 홈 화면에 진행률 표시.
+• 마일리지: 활동을 완료하면 쌓이고, 보상을 교환하면 차감.
+• 뱃지: 특정 조건(연속일수, 누적횟수 등) 달성 시 자동 획득. 뱃지탭에서 확인.
+• 스트릭: 매일 1개 이상 활동을 완료하면 연속일수가 쌓임. 놓치면 리셋.
+• 기분일기: 매일 기분을 이모지로 기록. MY탭에서 확인.
+• 가족: 가족 코드로 초대. 양육자/자녀 역할 구분. 독립모드에서 자녀별 데이터 분리.
+• 홈화면: 오늘의 활동, 마일리지, 스트릭, 캐릭터 인사말 표시.
+
+[육아 컨설팅 프레임워크 — 양육자 전용]
+양육자가 "이 보상 괜찮을까?", "포인트 밸런스 맞아?", "교육적으로 괜찮아?" 물으면:
+
+분석1: 활동-보상 밸런스
+- 일일 최대 적립량 = 활성활동들의 (pts×maxDay) 합
+- 가장 싼 보상까지 걸리는 일수 = 최소보상pts ÷ 일일최대적립량
+- 적정범위: 3~14일. 너무 짧으면(1-2일) 보상이 쉬워 동기↓, 너무 길면(15일+) 지쳐서 포기↑
+- 구체적 수치로 분석해서 알려줘.
+
+분석2: 보상 유형 평가
+- 🟢 추천: 경험형(가족외식, 공원, 영화관), 자율형(자기방꾸미기, 메뉴선택권), 성장형(원하는책, 새로운체험)
+- 🟡 적당히: 스크린타임(게임, 유튜브 — 시간제한 권장), 간식/군것질
+- 🔴 주의: 큰 금액의 현금/용돈, 학습회피형(숙제면제)
+- 등록된 보상들을 이 기준으로 평가해줘.
+
+분석3: 활동 적절성
+- 생활습관(양치,정리정돈): 🟢 매우 좋음 — 자동화까지 이어지면 포인트 줄이기
+- 학습(독서,숙제): 🟢 좋음 — 단, 과도한 보상은 내적동기 저하 주의
+- 건강(운동,물마시기): 🟢 좋음
+- 사회성(인사,감사표현): 🟢 좋음 — 습관화 목표
+- 주의: 이미 즐겨하는 활동에 보상 → 내적동기 감소(과잉정당화 효과) 경고
+
+유저가 "분석해줘" 또는 "괜찮을까?" 하면:
+→ 위 3가지 분석을 현재 데이터 기반으로 간단히 제시
+→ 끝에 [BUTTONS:밸런스 조정 제안받기|보상 추천받기|이대로 괜찮아요] 제공
 `;
-
-  prompt+=`\n
-중요 규칙:
-- 사용자가 활동/보상을 추가, 수정, 삭제, 수행하라고 하면 반드시 tool을 호출해서 실행해. 절대 텍스트로만 답하지 마.
-- 조회 요청이면 get_status tool을 먼저 호출해.
-- 활동 수행 요청이면 do_activity tool을 호출해.
-- 활동 추가 시 기본값: emoji=⭐, pts=20, maxDay=1, cycle=daily
-- 보상 추가 시 기본값: emoji=🎁, pts=500, goal=false
-- 사용자가 이름만 말하면 기본값으로 바로 생성해.
-- tool 실행 결과를 보고 성공/실패를 알려줘.`;
-
-  if(!isC){
-    prompt+=`\n참고: 현재 자녀 모드야. 활동 수행(do_activity)과 현황 조회(get_status)는 가능하지만, 활동/보상의 추가/수정/삭제는 양육자만 할 수 있어.`;
-  }
 
   return prompt;
 }
 
 // ── 도구 정의 ──
 function _buildTools(){
+  const isC=typeof isCaregiverUser==='function'&&isCaregiverUser();
   const tools=[];
 
-  // 현황 조회
+  // 공통: 현황 조회
   tools.push({
     name:'get_status',
     description:'현재 마일리지, 활동 목록, 보상 목록, 오늘 기록을 조회',
@@ -20041,7 +20075,8 @@ function _buildTools(){
     }
   });
 
-  // 모든 도구를 항상 사용 가능하게 (권한은 시스템 프롬프트로 제어)
+  if(isC){
+    // 양육자 전용 도구
     tools.push({
       name:'add_activity',
       description:'새 활동을 추가합니다',
@@ -20136,6 +20171,7 @@ function _buildTools(){
         required:[]
       }
     });
+  } // end if(isC)
 
   console.log('[mily-tools] built', tools.length, 'tools:', tools.map(t=>t.name).join(', '));
   return tools;
@@ -20143,6 +20179,7 @@ function _buildTools(){
 
 // ── 도구 실행 ──
 function _executeTool(name,input){
+  _ensureRefs();
   console.log('[mily-tool] execute:', name, JSON.stringify(input));
   try{
     let result;
@@ -20403,12 +20440,42 @@ function _addBotMsg(text){
   const typing=document.getElementById('mily-typing');
   const div=document.createElement('div');
   div.className='mily-msg bot';
+
+  // [BUTTONS:옵션1|옵션2|옵션3] 파싱
+  let buttons=[];
+  let cleanText=text.replace(/\[BUTTONS:([^\]]+)\]/g,(_,opts)=>{
+    buttons=opts.split('|').map(s=>s.trim()).filter(Boolean);
+    return '';
+  }).trim();
+
   // 간단 마크다운 처리 (**볼드**, 줄바꿈)
-  div.innerHTML=_milyFormat(text);
+  div.innerHTML=_milyFormat(cleanText);
+
+  // 버튼 렌더링
+  if(buttons.length>0){
+    const btnGroup=document.createElement('div');
+    btnGroup.className='mily-btn-group';
+    buttons.forEach(label=>{
+      const btn=document.createElement('span');
+      btn.className='mily-quick-btn';
+      btn.textContent=label;
+      btn.onclick=function(){
+        // 버튼 그룹 비활성화 (한번만 클릭)
+        btnGroup.querySelectorAll('.mily-quick-btn').forEach(b=>{b.style.opacity='0.5';b.style.pointerEvents='none';});
+        // 사용자 메시지로 전송
+        _addUserMsg(label);
+        _milyHistory.push({role:'user',content:label});
+        _callMilyAPI();
+      };
+      btnGroup.appendChild(btn);
+    });
+    div.appendChild(btnGroup);
+  }
+
   container.insertBefore(div,typing);
   _scrollMilyBottom();
   // 밀리 캐릭터 표정 업데이트
-  const mood=_detectMilyMood(text);
+  const mood=_detectMilyMood(cleanText);
   _updateMilyChatChar(mood);
 }
 
