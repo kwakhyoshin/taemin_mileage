@@ -7298,52 +7298,68 @@ async function _executeWithdrawal(initiator, memberIdsToDelete, memberName, over
 
 function logout() {
   if (!confirm('로그아웃 하시겠어요?')) return;
-  viewingChildId=null;
-  currentUser = null;
-  viewingChildId = null;
-  _admViewChildId = null;
-  _globalDataOwner = null;
-  adminOK = false;
+  // ★ 상태 초기화 — 개별 try/catch로 감싸서 하나가 실패해도 나머지 계속 실행
+  try{
+    viewingChildId=null;
+    currentUser = null;
+    _admViewChildId = null;
+    _globalDataOwner = null;
+    adminOK = false;
+  }catch(e){ console.warn('[logout] state reset error:', e); }
   // S-13: 로그아웃 시 민감 데이터 완전 삭제
-  localStorage.removeItem(_LS_PREFIX+'current_user');
-  localStorage.removeItem(_LS_PREFIX+'social_pending');
-  localStorage.removeItem(_LS_PREFIX+'family_id');
-  localStorage.removeItem(_LS_PREFIX+'v6_backup');
-  localStorage.removeItem(_LS_PREFIX+'push_enabled');
-  localStorage.removeItem(_LS_PREFIX+'show_push_guide');
-  localStorage.removeItem(_LS_PREFIX+'push_banner_dismissed');
-  localStorage.removeItem(_LS_PREFIX+'changelog_seen');
-  localStorage.removeItem(_LS_PREFIX+'tour_done');
-  localStorage.removeItem('taemin_v6_kakao_callback_result');
-  localStorage.removeItem('taemin_v6_naver_callback_result');
-  localStorage.removeItem('taemin_v6_naver_redirect');
-  try{ sessionStorage.removeItem('oauth_state_kakao'); sessionStorage.removeItem('oauth_state_naver'); }catch(e){}
+  try{
+    localStorage.removeItem(_LS_PREFIX+'current_user');
+    localStorage.removeItem(_LS_PREFIX+'social_pending');
+    localStorage.removeItem(_LS_PREFIX+'family_id');
+    localStorage.removeItem(_LS_PREFIX+'v6_backup');
+    localStorage.removeItem(_LS_PREFIX+'push_enabled');
+    localStorage.removeItem(_LS_PREFIX+'show_push_guide');
+    localStorage.removeItem(_LS_PREFIX+'push_banner_dismissed');
+    localStorage.removeItem(_LS_PREFIX+'changelog_seen');
+    localStorage.removeItem(_LS_PREFIX+'tour_done');
+    localStorage.removeItem('taemin_v6_kakao_callback_result');
+    localStorage.removeItem('taemin_v6_naver_callback_result');
+    localStorage.removeItem('taemin_v6_naver_redirect');
+    sessionStorage.removeItem('oauth_state_kakao'); sessionStorage.removeItem('oauth_state_naver');
+  }catch(e){ console.warn('[logout] localStorage cleanup error:', e); }
   // 밀리 챗봇 대화 초기화 & 패널 닫기
-  if(typeof _resetMilyChat==='function') _resetMilyChat();
-  _milyOpen=false;
-  const _chatPanel=document.getElementById('mily-chat-panel');
-  if(_chatPanel) _chatPanel.classList.remove('open');
-  // 밀리 버블 카운트 초기화
-  try{ localStorage.removeItem((_LS_PREFIX||'taemin_dev_')+'bubble_counts'); }catch(e){}
+  try{
+    if(typeof _resetMilyChat==='function') _resetMilyChat();
+    _milyOpen=false;
+    const _chatPanel=document.getElementById('mily-chat-panel');
+    if(_chatPanel) _chatPanel.classList.remove('open');
+    localStorage.removeItem((_LS_PREFIX||'taemin_dev_')+'bubble_counts');
+  }catch(e){ console.warn('[logout] mily reset error:', e); }
   // Firebase Auth에서도 로그아웃
-  if(fbAuth && signOut){
-    try{ signOut(fbAuth); }catch(e){ console.warn('Firebase signOut error:', e); }
+  try{
+    if(fbAuth && signOut) signOut(fbAuth);
+  }catch(e){ console.warn('[logout] Firebase signOut error:', e); }
+  // ★ 반드시 로그인 화면으로 전환 (위의 어떤 단계가 실패해도 여기는 실행)
+  try{
+    const _obDoneLogout = localStorage.getItem(_LS_PREFIX+'onboarding_done');
+    showAuthScreen(_obDoneLogout ? 'continue' : 'welcome');
+  }catch(e){
+    console.error('[logout] showAuthScreen failed:', e);
+    // 최후 수단: 직접 auth-continue 표시
+    try{
+      document.body.classList.add('auth-active');
+      const _as=document.getElementById('auth-continue');
+      if(_as) _as.classList.remove('hidden');
+    }catch(e2){}
   }
-  // 온보딩 미완료 시 시작페이지, 완료 시 통합 로그인
-  const _obDoneLogout = localStorage.getItem(_LS_PREFIX+'onboarding_done');
-  showAuthScreen(_obDoneLogout ? 'continue' : 'welcome');
   // 통합 로그인 폼 초기화
-  const _cId=document.getElementById('continue-login-id');
-  const _cPwd=document.getElementById('continue-login-pwd');
-  const _cErr=document.getElementById('continue-login-error');
-  if(_cId)_cId.value='';
-  if(_cPwd)_cPwd.value='';
-  if(_cErr)_cErr.textContent='';
-  // 레거시 로그인 폼도 초기화
-  const _lId=document.getElementById('login-id');
-  const _lPwd=document.getElementById('login-pwd');
-  if(_lId)_lId.value='';
-  if(_lPwd)_lPwd.value='';
+  try{
+    const _cId=document.getElementById('continue-login-id');
+    const _cPwd=document.getElementById('continue-login-pwd');
+    const _cErr=document.getElementById('continue-login-error');
+    if(_cId)_cId.value='';
+    if(_cPwd)_cPwd.value='';
+    if(_cErr)_cErr.textContent='';
+    const _lId=document.getElementById('login-id');
+    const _lPwd=document.getElementById('login-pwd');
+    if(_lId)_lId.value='';
+    if(_lPwd)_lPwd.value='';
+  }catch(e){}
 }
 
 // ── 소셜 로그인 / 이메일 인증 ──────────────────
@@ -8640,7 +8656,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0403a';
+const _APP_VERSION = 'v0403b';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -15482,7 +15498,7 @@ function goTab(tab){
     return;
   }
   if(tab==='my'){
-    renderMyTab();
+    try{ renderMyTab(); }catch(e){ console.warn('[goTab] renderMyTab error:', e); }
     reallyGoTab('my');
     return;
   }
@@ -15525,6 +15541,18 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {
+    ver:'1.9.8 (v0403b)', date:'2026-04-03',
+    items:[
+      {type:'fix',text:'나의메뉴(MY) 탭 스와이프 이동 지원'},
+      {type:'fix',text:'하단 탭 빠른 터치 시 씹힘 현상 수정'},
+      {type:'fix',text:'로그아웃 후 로그인 화면 전환 안 되는 문제 수정'},
+      {type:'new',text:'일반/PRO 등급 시스템 도입 (챗봇 기능 분리)'},
+      {type:'new',text:'챗봇 도구 결과 카드 UI'},
+      {type:'new',text:'등급 배지 (챗봇 헤더 + 나의메뉴)'},
+      {type:'fix',text:'활동 완료 취소 버튼 터치 응답 개선'},
+    ]
+  },
   {
     ver:'1.9.7 (v0403a)', date:'2026-04-03',
     items:[
@@ -17430,7 +17458,7 @@ document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{
 })();
 
 // ── SWIPE NAVIGATION ──────────────────────────
-const SWIPE_TABS=['home','log','rwd','hist'];
+const SWIPE_TABS=['home','log','rwd','hist','my'];
 let _swipeStartX=0,_swipeStartY=0,_swiping=false,_swipeCurrentTab=null;
 
 function getCurrentTab(){
@@ -17456,6 +17484,8 @@ function swipeToTab(tab,animClass){
     });
   }
 
+  // MY탭 진입 시 콘텐츠 렌더링
+  if(tab==='my'){ try{ renderMyTab(); }catch(e){} }
   // Start enter animation on new tab
   document.querySelectorAll('.nav-item').forEach(t=>t.classList.remove('active'));
   const el=document.getElementById('s-'+tab);
@@ -20191,9 +20221,10 @@ window._createState = _createState;
     if(e.touches.length > 1){ e.preventDefault(); }
   }, {passive:false});
 
-  // 더블탭 줌 방지
+  // 더블탭 줌 방지 (단, 네비게이션 아이템은 예외 — 빠른 탭 전환 허용)
   let lastTouchEnd = 0;
   document.addEventListener('touchend', function(e){
+    if(e.target.closest&&e.target.closest('.nav-item,.bottom-nav')) return;
     const now = Date.now();
     if(now - lastTouchEnd <= 300){ e.preventDefault(); }
     lastTouchEnd = now;

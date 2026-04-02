@@ -393,6 +393,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
             레지스트리 경로: families/_dev_id_registry<br>
             로그 경로: adminLogs/dev_log<br>
             로드 시간: <span id="load-time">—</span>
+            <div id="load-errors" style="display:none;margin-top:8px"></div>
           </div>
         </div>
       </div>
@@ -551,42 +552,80 @@ window.doAdminLogout = function() {
 })();
 
 // ── Data Loading ──
+let _loadErrors = [];
 async function loadAllData() {
   _allFamilies = [];
   _registry = {};
   _adminLogs = [];
+  _loadErrors = [];
 
+  // 1. families 컬렉션 (새 가입 가족)
   try {
     const familiesSnap = await getDocs(collection(db, 'families'));
+    let devCount = 0;
     familiesSnap.forEach(docSnap => {
       const id = docSnap.id;
-      if (id.startsWith('dev_')) {
+      if (id.startsWith('dev_') || id.startsWith('prod_')) {
         _allFamilies.push({ id, ...docSnap.data() });
+        devCount++;
       }
     });
+    console.log(`[Admin] families 컬렉션: 총 ${familiesSnap.size}건, 로드됨 ${devCount}건`);
   } catch (e) {
     console.error('Failed to load families:', e);
+    _loadErrors.push('families 컬렉션 읽기 실패: ' + e.message);
   }
 
-  try {
-    const legacySnap = await getDoc(doc(db, 'users', 'taemin_dev'));
-    if (legacySnap.exists()) {
-      const data = legacySnap.data();
-      _allFamilies.push({
-        id: '_legacy_taemin_dev',
-        _isLegacy: true,
-        familyMeta: {
-          familyId: '_legacy',
-          familyName: '태민이네 (레거시)',
+  // 2. 레거시 데이터 (users/taemin_dev, users/taemin)
+  const legacyDocs = [
+    { path: 'taemin_dev', label: '개발기 (레거시)', env: 'dev' },
+    { path: 'taemin', label: '운영기 (레거시)', env: 'prod' }
+  ];
+  for (const ld of legacyDocs) {
+    try {
+      const legacySnap = await getDoc(doc(db, 'users', ld.path));
+      if (legacySnap.exists()) {
+        const data = legacySnap.data();
+        // data에 familyMeta가 있으면 그것을 사용, 없으면 기본값
+        const hasFM = data.familyMeta && data.familyMeta.members && Object.keys(data.familyMeta.members).length > 0;
+        const defaultFM = {
+          familyId: '_legacy_' + ld.path,
+          familyName: ld.label,
           createdAt: 0,
           members: {},
           mode: 'independent'
-        },
-        ...data
-      });
+        };
+        _allFamilies.push({
+          id: '_legacy_' + ld.path,
+          _isLegacy: true,
+          _env: ld.env,
+          familyMeta: hasFM ? data.familyMeta : defaultFM,
+          ...data
+        });
+        console.log(`[Admin] ${ld.path}: 로드됨 (familyMeta.members: ${hasFM ? Object.keys(data.familyMeta.members).length + '명' : '없음 → users에서 추출'})`);
+        // familyMeta.members가 없으면 users 객체에서 회원 목록 생성
+        if (!hasFM && data.users) {
+          const lastFam = _allFamilies[_allFamilies.length - 1];
+          const synthMembers = {};
+          Object.entries(data.users).forEach(([uid, udata]) => {
+            synthMembers[uid] = {
+              name: udata.name || uid,
+              role: udata.role || 'member',
+              type: udata.role === 'child' ? 'child' : 'parent',
+              account: udata,
+              joinedAt: udata.joinedAt || 0
+            };
+          });
+          lastFam.familyMeta.members = synthMembers;
+        }
+      }
+    } catch (e) {
+      console.warn(`[Admin] ${ld.path} 로드 실패:`, e);
+      _loadErrors.push(`${ld.label} 읽기 실패: ` + e.message);
     }
-  } catch (e) {}
+  }
 
+  // 3. ID 레지스트리
   try {
     const regSnap = await getDoc(doc(db, 'families', '_dev_id_registry'));
     if (regSnap.exists()) {
@@ -594,8 +633,10 @@ async function loadAllData() {
     }
   } catch (e) {
     console.error('Failed to load registry:', e);
+    _loadErrors.push('레지스트리 읽기 실패: ' + e.message);
   }
 
+  // 4. 감사 로그
   try {
     const logsSnap = await getDoc(doc(db, 'adminLogs', 'dev_log'));
     if (logsSnap.exists()) {
@@ -607,6 +648,14 @@ async function loadAllData() {
   }
 
   document.getElementById('load-time').textContent = new Date(_loadedAt).toLocaleString('ko-KR');
+  // 에러가 있으면 화면에 표시
+  if (_loadErrors.length > 0) {
+    const errEl = document.getElementById('load-errors');
+    if (errEl) {
+      errEl.style.display = 'block';
+      errEl.innerHTML = _loadErrors.map(e => `<div style="color:#EF4444;font-size:12px;margin:2px 0">⚠️ ${escHtml(e)}</div>`).join('');
+    }
+  }
   renderDashboard();
   renderFamiliesList();
   renderMembersTable();
@@ -1026,7 +1075,8 @@ function renderMembersTable() {
   });
 
   if (rows.length === 0) {
-    wrap.innerHTML = '<div class="empty-state">등록된 회원이 없습니다</div>';
+    const errInfo = _loadErrors.length > 0 ? `<br><span style="color:#EF4444;font-size:12px">${_loadErrors.join('<br>')}</span>` : '';
+    wrap.innerHTML = `<div class="empty-state">등록된 회원이 없습니다<br><span style="font-size:12px;color:#94A3B8">로드된 가족: ${_allFamilies.length}건</span>${errInfo}</div>`;
     return;
   }
 
