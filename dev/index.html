@@ -8639,7 +8639,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0402z18';
+const _APP_VERSION = 'v0402z19';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -20095,10 +20095,10 @@ window._createState = _createState;
 .mily-chat-hd-avatar{width:36px;height:36px;flex-shrink:0;display:none}
 .mily-chat-hd-char{width:80px;height:80px;flex-shrink:0}
 .mily-chat-hd-char svg{width:80px;height:80px}
-.mily-chat-hd-info{flex:1;min-width:0;text-align:left}
+.mily-chat-hd-info{flex:1;min-width:0;text-align:left!important;display:flex;flex-direction:column;align-items:flex-start}
 .mily-chat-hd-name{font-size:15px;font-weight:800;line-height:0}
 .mily-chat-hd-name svg{display:block;margin:0}
-.mily-chat-hd-status{font-size:11px;opacity:.55;font-weight:500;margin-top:1px}
+.mily-chat-hd-status{font-size:11px;opacity:.55;font-weight:500;margin-top:3px;text-align:left}
 .mily-chat-close{background:none;border:none;color:rgba(255,255,255,.7);cursor:pointer;padding:4px;border-radius:50%;transition:background .15s}
 .mily-chat-close:hover{background:rgba(255,255,255,.15)}
 
