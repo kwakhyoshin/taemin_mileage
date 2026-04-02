@@ -10849,7 +10849,7 @@ function renderLogList(){
       </div>
       <div class="log-right">
         <span class="log-badge">+${a.pts} 마일리지</span>
-        ${done>0?`<button class="undo-btn" onclick="event.stopPropagation();undoAct('${a.id}')">취소↩</button>`:''}
+        ${done>0?`<button class="undo-btn" data-undo-actid="${a.id}">취소↩</button>`:''}
       </div>
       ${stickerHTML}
     </div>`;
@@ -10888,6 +10888,17 @@ function renderLogList(){
       if(didLongPress){didLongPress=false;e.preventDefault();return;}
       if(!exhausted&&a)doAct(actId);
     });
+  });
+  // 취소 버튼 전용 핸들러 — touchend에서 직접 처리하여 long-press/렌더링과 충돌 방지
+  let _undoLock=false;
+  el.querySelectorAll('.undo-btn[data-undo-actid]').forEach(btn=>{
+    const handler=(e)=>{
+      e.stopPropagation();e.preventDefault();
+      if(_undoLock)return;_undoLock=true;setTimeout(()=>{_undoLock=false;},600);
+      undoAct(btn.dataset.undoActid);
+    };
+    btn.addEventListener('touchend',handler,{passive:false});
+    btn.addEventListener('click',handler);
   });
   // 오늘할일 토글 핸들러 (부모 전용, v0401)
   el.querySelectorAll('.today-task-toggle[data-toggle-actid]').forEach(tog=>{
@@ -20336,6 +20347,22 @@ body.dark .mily-msg.bot{background:var(--card2,#334155)}
 body.dark .mily-msg.bot th,body.dark .mily-msg.bot td{border-color:#475569}
 body.dark .mily-msg.bot th{background:rgba(99,102,241,.15)}
 body.dark .mily-msg.bot code{background:rgba(255,255,255,.08)}
+/* 챗봇 카드 UI */
+.mily-tool-card{margin:6px 0;padding:12px 14px;border-radius:16px;background:linear-gradient(135deg,rgba(99,102,241,.06),rgba(139,92,246,.06));border:1.5px solid rgba(99,102,241,.15);display:flex;align-items:center;gap:12px}
+body.dark .mily-tool-card{background:linear-gradient(135deg,rgba(99,102,241,.12),rgba(139,92,246,.12));border-color:rgba(99,102,241,.25)}
+.mily-tool-card .tc-emoji{font-size:32px;flex-shrink:0;width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:rgba(99,102,241,.1);border-radius:12px}
+.mily-tool-card .tc-info{flex:1;min-width:0}
+.mily-tool-card .tc-name{font-size:15px;font-weight:800;color:var(--tx,#1E293B);line-height:1.3}
+.mily-tool-card .tc-meta{font-size:12px;color:var(--tx2,#64748B);margin-top:2px}
+.mily-tool-card .tc-pts{font-size:14px;font-weight:800;color:#6366F1;white-space:nowrap}
+.mily-tool-card.tc-add{border-color:rgba(34,197,94,.3);background:linear-gradient(135deg,rgba(34,197,94,.06),rgba(16,185,129,.06))}
+.mily-tool-card.tc-add .tc-pts{color:#16A34A}
+.mily-tool-card.tc-del{border-color:rgba(239,68,68,.3);background:linear-gradient(135deg,rgba(239,68,68,.06),rgba(244,63,94,.06))}
+.mily-tool-card.tc-del .tc-pts{color:#EF4444}
+.mily-tool-card.tc-do{border-color:rgba(99,102,241,.3);background:linear-gradient(135deg,rgba(99,102,241,.08),rgba(139,92,246,.08))}
+.mily-tool-card.tc-do .tc-emoji{background:rgba(99,102,241,.15)}
+.mily-tool-card.tc-badge .tc-emoji{background:rgba(245,158,11,.1)}
+.mily-tool-card.tc-badge{border-color:rgba(245,158,11,.3);background:linear-gradient(135deg,rgba(245,158,11,.06),rgba(251,146,60,.06))}
 .mily-msg pre{background:rgba(0,0,0,.06);padding:8px;border-radius:8px;overflow-x:auto;margin:6px 0}
 body.dark .mily-msg.bot pre{background:rgba(255,255,255,.06)}
 .mily-msg pre code{background:none;padding:0}
@@ -20796,6 +20823,8 @@ async function _callMilyAPI(){
           if(block.type==='tool_use'){
             console.log('[mily-chat] calling tool:', block.name, block.input);
             const result=_executeTool(block.name,block.input);
+            // 카드 UI: 활동/보상/뱃지 변경 결과를 시각적 카드로 표시
+            if(result&&result.success) _renderToolCard(block.name,block.input,result);
             toolResults.push({
               type:'tool_result',
               tool_use_id:block.id,
@@ -20845,90 +20874,65 @@ async function _callMilyAPI(){
   }
 }
 
+// ── 사용자 등급 시스템 ──
+// 'free'(일반) vs 'pro'(프로). Firestore families/{familyId}.plan 에 저장.
+// 관리자가 admin 페이지에서 승인하면 'pro'로 변경됨.
+function _getUserPlan(){
+  try{const S=_getS();return S?.familyMeta?.plan||'free';}catch(e){return 'free';}
+}
+function _isPro(){return _getUserPlan()==='pro';}
+
 // ── 시스템 프롬프트 ──
 function _buildSystemPrompt(){
   const isC=typeof isCaregiverUser==='function'&&isCaregiverUser();
+  const isPro=_isPro();
   const kidName=_getCurrentKidName();
-  const kidId=typeof getViewedMemberId==='function'?getViewedMemberId():'';
   const myName=(()=>{try{const S=_getS();return S?.familyMeta?.members?.[currentUser]?.name||'';}catch(e){return '';}})();
   const pts=typeof getActiveMileage==='function'?getActiveMileage():0;
   const acts=_getActsList();
   const rwds=_getRwdsList();
   const todayLog=_getTodayLog();
-  // 다자녀 정보
   const childIds=typeof getChildMemberIds==='function'?getChildMemberIds():[];
   const S=_getS();
-  const childrenInfo=childIds.map(id=>{
-    const m=S?.familyMeta?.members?.[id];
-    return m?`${m.name||id}`:'';
-  }).filter(Boolean);
+  const childrenInfo=childIds.map(id=>{const m=S?.familyMeta?.members?.[id];return m?`${m.name||id}`:'';}).filter(Boolean);
   const isMultiChild=childrenInfo.length>1;
 
-  let prompt=`너는 "밀리"야. 마일리 앱의 AI 도우미. ${isC?'양육자에게는 존댓말(~요, ~해요, ~드릴게요)로 정중하고 따뜻하게.':'아이에게는 반말(~야, ~해, ~거야)로 친근하고 다정하게. 친구처럼!'} 짧게 답해. **볼드**만 사용.
-
-[상태] ${isC?'양육자':'자녀'}${myName?'('+myName+')':''} | 자녀: ${kidName||'없음'} | ${pts}M
-${isMultiChild?`자녀(${childrenInfo.length}명): ${childrenInfo.join(', ')}\n`:''}활동: ${acts.slice(0,6).map(a=>`${a.emoji}${a.name}(${a.pts}M)`).join(', ')||'없음'}
-보상: ${rwds.slice(0,4).map(r=>`${r.emoji}${r.name}(${r.pts}M)`).join(', ')||'없음'}
-오늘: ${todayLog.map(l=>`${l.emoji||''}${l.name}`).join(', ')||'없음'}
-
-[용어] 이 앱의 단위는 "마일리지"(약칭 M). "포인트"라고 절대 부르지 마. 반드시 "마일리지" 또는 "M"으로. 예: "20마일리지 적립!", "100M 남았어!"
-
+  // ── 공통 기본 프롬프트 (일반+프로 공유) ──
+  let prompt=`너는 "밀리"야. 마일리 앱의 AI 도우미. ${isC?'양육자에게는 존댓말(~요,~해요)로 따뜻하게.':'아이에게는 반말(~야,~해)로 친근하게.'} **짧게** 답해(1~2줄). 단위="마일리지"(M). "포인트"라 하지마.
+[상태] ${isC?'양육자':'자녀'}${myName?'('+myName+')':''} | 자녀:${kidName||'없음'} | ${pts}M
+${isMultiChild?`자녀(${childrenInfo.length}명):${childrenInfo.join(',')}\n`:''}활동:${acts.slice(0,6).map(a=>`${a.emoji}${a.name}(${a.pts}M)`).join(',')||'없음'}
+보상:${rwds.slice(0,4).map(r=>`${r.emoji}${r.name}(${r.pts}M)`).join(',')||'없음'}
+오늘:${todayLog.map(l=>`${l.emoji||''}${l.name}`).join(',')||'없음'}
+[등급] ${isPro?'PRO':'일반'}
 [규칙]
-1. 실행요청→반드시 tool호출. 텍스트만 답하지마.
-2. 응답 끝에 [BUTTONS:후속행동1|후속행동2] 맥락에 맞는 다음 행동 추천. 예: 분석 후→"활동 추가할까?|다른 분석 볼래?", 추가 후→"하나 더 만들까?|현황 볼래?"
-3. 모호한 요청→바로 만들어. 기본: pts=20, maxDay=1, cycle=daily.
-4. tool실행 후 결과를 구체적 수치로 보고: 이모지·이름·마일리지·개수 포함.
-5. 추가 전 get_status로 기존 목록 조회→이름/의미 유사항목 있으면 추가 안하고 "이미 비슷한 항목 있어요" + 기존항목 표시 후 확인.
-6. 이모지는 의미에 맞게 선택(⭐🎁 기본값 금지). 예: 🪥양치 📖독서 🏃운동 🎮게임
-7. ${isC?'양육자→모든 기능 가능':'자녀→do_activity, get_status만 가능. 나머진 "부모님께 부탁해봐!"'}
-${isMultiChild?`8. 다자녀(${childrenInfo.join(',')}): 모든 조치(추가/수정/삭제/수행/취소/교환) 전 "어떤 자녀?" 먼저 확인. 모두→target_kids="all"\n`:''}
-${isC?`[과학기반 육아코칭] get_status 먼저 호출→데이터 기반 분석. 최소 4~6줄 충실 응답. 단답 금지.
-<근거>
-칭찬: 능력X 과정O (Dweck성장마인드셋). "똑똑해"→X, "열심히했네"→O. 구체적행동 언급 필수.
-동기: 이미 즐기는 활동에 외재보상→내재동기↓(과다정당화). 기피활동에만 마일리지.
-보상등급: 경험(영화/외출)🟢최고>선택권🟢>사회인정🟡>마일리지🟡>물질🔴>화면시간🔴금지.
-습관: 평균66일(18~254일). 신호→행동→보상 루프. 3주만에 포기말것.
-마일리지: 인플레이션주의. 초기강화(1~2주)→25%감소(3~4주)→가변강화(5~8주)→칭찬전환(9주+).
-형제: 비교절대금지. 개별목표설정. 협력목표>경쟁. "오빠는했어"→X.
-연속: 1회실패=낙심위험. "한번놓쳐도괜찮아" 필수. 월3일 쉬는날 허용.
-부모일관성: 규칙정하면 최소2주유지. 갑작스런변경=신뢰손상.
-</근거>
-<분석시>
-- 리포트: 꾸준활동vs빠진활동, 참여패턴, 카테고리균형(생활/학습/운동/창의/사회) 분석
-- 보상점검: 일일적립vs보상비용 밸런스, 보상등급평가, 도달예상일
-- 코칭: 위 근거 인용+구체적 대화예시. "~라고 말해보세요" 형태
-- 활동추천: 빠진카테고리 기반 3~5개, 마일리지·주기 포함`:''}
-${!isC?`[자녀모드] 재미있고 응원하는 톤!
-- 성적표: 등급(S/A/B/C)과 재미있는 비유로 표현. 게임처럼.
-- 퀴즈: 활동·보상 데이터 기반 객관식, 정답시 폭발칭찬
-- 응원: 구체적 활동 언급, 개인화된 메시지. "네가 ~한 거 진짜 대단해!"
-- 도전: 잘 안하는 활동을 재미있는 미션으로. "오늘의 비밀미션!"
-- 목표: "~까지 ○마일리지 남았어! ○일이면 모을수있어!" 희망적 수치 제시`:''}
-[뱃지 관리] get_badges로 전체 뱃지(내장+커스텀) 조회. 양육자만 add/edit/delete/award 가능.
-- 조건 타입: manual(수동수여), total_acts(총활동횟수), streak(연속일수), study_count(학습횟수), act_name_count(특정활동횟수), pts_total(총적립마일리지), pts_current(현재마일리지), mood_count(기분기록수), reward_count(보상교환수), perfect_days(만점일수), morning_acts(아침활동수), daily_max(하루최대횟수), badge_count(뱃지보유수)
-- 난이도: bronze→silver→gold→platinum→diamond. 조건값에 맞게 난이도 자동 제안: 1~10=bronze, 11~30=silver, 31~60=gold, 61~100=platinum, 100+=diamond
-- 내장 뱃지는 edit로 난이도·이모지·설명만 오버라이드 가능, 삭제 불가
-- 뱃지 추가 시 이모지는 반드시 뱃지 의미에 맞게 선택. 예: 🏃연속운동 📚다독가 🌅아침형 💪꾸준함
-- "뱃지 난이도 조정해줘" → get_badges로 현황 파악 → 조건값 대비 난이도가 맞는지 분석 → edit_badge로 조정 제안
+1. 실행요청→tool호출.
+2. 응답 끝에 [BUTTONS:행동1|행동2]
+3. ${isC?'양육자→모든 기능':'자녀→do_activity,get_status만. 나머진 "부모님께 부탁해봐!"'}
+${isMultiChild?`4. 다자녀(${childrenInfo.join(',')}): 조치 전 "어떤 자녀?" 확인.\n`:''}`;
 
-[오늘의 할일] 활동 중 showHome=true인 것들이 "오늘의 할일"(홈탭 목록). get_status 결과의 today_mission으로 현황 조회.
-- today_mission.total: 오늘 할 일 총 개수, today_mission.done: 완료 개수, today_mission.remaining: 남은 개수
-- 오늘의 할일을 **모두 완료**하면 "오늘 성공!" → 연속 성공일수(streak) +1
-- streak.current: 현재 연속 성공일수, streak.bonus_pts: 7일 보너스 마일리지(기본 100M)
-- **7일 연속 성공 시 보너스 마일리지(streak.bonus_pts) 자동 지급!** 매 7일마다 반복.
-- 대화 예: "오늘 할 일 몇 개 남았어?" → get_status → today_mission.remaining 답변
-- 대화 예: "연속 며칠째야?" → get_status → streak.current 답변 + 7일 보너스까지 남은 일수
-- 활동의 showHome 여부는 activities 배열의 showHome 필드로 확인 가능
-- toggleActivityHome 도구로 활동의 오늘의할일 포함 여부 변경 가능(양육자만)
-
-[통계 활용] get_status 결과에 activity_stats(활동별 총횟수·총마일리지·활동일수), recent_7days(최근7일), streak(연속기록), today_mission(오늘의 할일 현황)이 포함됨.
-- "제일 잘하는 건?" → activity_stats에서 count 1위 활동 + 구체적 횟수·마일리지 언급
-- "이번주 뭐했어?" → recent_7days로 최근 7일 활동 분석
-- "얼마나 열심히 했어?" → streak, total_done, activity_stats 종합 분석
-- "오늘 할 일 남았어?" → today_mission으로 남은 할일 개수·목록 안내
-- "연속 성공 며칠?" → streak.current + 7일 보너스까지 남은 일수 계산
-- 항상 수치를 구체적으로 말해줘: "○○을 ○번이나 했어!", "총 ○마일리지 모았어!"
-`;
+  if(!isPro){
+    // ── 일반등급: 간결한 조회 전용 프롬프트 ──
+    prompt+=`
+[일반등급 제한] 조회(get_status,do_activity,get_badges,get_children)만 가능.
+활동/보상 추가·수정·삭제, 육아코칭, 활동분석, 뱃지관리 등은 PRO 전용.
+사용자가 PRO 기능을 요청하면: "이 기능은 **PRO 등급**에서 사용할 수 있어요! 🌟 업그레이드하시겠어요?" + [BUTTONS:PRO 업그레이드 신청|괜찮아요]
+"PRO 업그레이드 신청"이라고 답하면 request_upgrade tool을 호출해.
+응답은 항상 1~2줄로 짧게.`;
+  }else{
+    // ── PRO등급: 풀 프롬프트 ──
+    prompt+=`
+[PRO] 이모지는 의미에 맞게(⭐🎁 기본값 금지). 추가 전 get_status로 유사항목 확인.
+${isC?`[육아코칭] get_status 호출→데이터 기반. 3~4줄 응답.
+칭찬: 과정O("열심히했네") 능력X("똑똑해"). 형제비교 절대금지.
+동기: 기피활동에만 마일리지. 보상: 경험🟢>선택권🟢>물질🔴.
+습관: 66일 평균. 1회실패→"괜찮아" 필수. 규칙 2주 유지.`:''}
+${!isC?`[자녀모드] 재미있고 응원하는 톤! 성적표(S/A/B/C), 퀴즈, "오늘의 비밀미션!" 등.`:''}
+[뱃지] get_badges 조회. 양육자만 add/edit/delete/award.
+조건타입: manual,total_acts,streak,study_count,act_name_count,pts_total,pts_current,mood_count,reward_count,perfect_days,morning_acts,daily_max,badge_count
+난이도: 1~10=bronze,11~30=silver,31~60=gold,61~100=platinum,100+=diamond
+[오늘의 할일] showHome=true 활동. today_mission으로 현황 조회. 모두 완료→streak+1. 7일 연속→보너스(streak.bonus_pts).
+[통계] activity_stats(횟수·마일리지·일수), recent_7days, streak, today_mission. 수치 구체적으로!`;
+  }
 
   return prompt;
 }
@@ -20936,26 +20940,36 @@ ${!isC?`[자녀모드] 재미있고 응원하는 톤!
 // ── 도구 정의 ──
 function _buildTools(){
   const isC=typeof isCaregiverUser==='function'&&isCaregiverUser();
+  const isPro=_isPro();
   const tools=[];
 
-  // 공통: 현황 조회
+  // 공통: 현황 조회 (일반+PRO)
   tools.push({
     name:'get_status',
-    description:'현재 마일리지, 활동 목록, 보상 목록, 오늘 기록, 활동별 통계(횟수·포인트·일수), 최근7일 통계, 연속기록을 조회',
+    description:'현재 마일리지, 활동/보상 목록, 오늘 기록, 통계, 연속기록 조회',
     input_schema:{type:'object',properties:{},required:[]}
   });
 
   tools.push({
     name:'get_badges',
-    description:'모든 뱃지(내장+커스텀) 목록, 달성 현황, 난이도 등을 조회합니다.',
+    description:'뱃지 목록·달성 현황 조회',
     input_schema:{type:'object',properties:{},required:[]}
   });
 
   tools.push({
     name:'get_children',
-    description:'가족 내 자녀 목록을 조회합니다. 다자녀 가정에서 대상 자녀를 확인할 때 사용.',
+    description:'자녀 목록 조회',
     input_schema:{type:'object',properties:{},required:[]}
   });
+
+  // 일반등급: 업그레이드 신청 도구
+  if(!isPro){
+    tools.push({
+      name:'request_upgrade',
+      description:'PRO 등급 업그레이드를 신청합니다. 사용자가 동의한 경우에만 호출.',
+      input_schema:{type:'object',properties:{},required:[]}
+    });
+  }
 
   tools.push({
     name:'do_activity',
@@ -20970,8 +20984,8 @@ function _buildTools(){
     }
   });
 
-  if(isC){
-    // 양육자 전용 도구
+  if(isC&&isPro){
+    // 양육자+PRO 전용 도구
     tools.push({
       name:'add_activity',
       description:'새 활동을 추가합니다. 다자녀 가정에서는 target_kids로 대상 자녀를 지정.',
@@ -21221,6 +21235,7 @@ function _executeTool(name,input){
       case 'edit_badge': result=api.editBadge(input); break;
       case 'delete_badge': result=api.deleteBadge(input); break;
       case 'award_badge': result=api.awardBadge(input); break;
+      case 'request_upgrade': result=_requestProUpgrade(); break;
       default: result={success:false,error:'알 수 없는 도구: '+name};
     }
     console.log('[mily-tool] result:', name, JSON.stringify(result));
@@ -21228,6 +21243,33 @@ function _executeTool(name,input){
   }catch(e){
     console.error('[mily-tool] error:', name, e);
     return {success:false,error:e.message};
+  }
+}
+
+// ── PRO 업그레이드 신청 ──
+function _requestProUpgrade(){
+  try{
+    const S=_getS();
+    const fid=S?.familyMeta?.familyId||S?.familyId||'';
+    const uid=typeof currentUser!=='undefined'?currentUser:'';
+    const uname=(()=>{try{return S?.familyMeta?.members?.[uid]?.name||uid;}catch(e){return uid;}})();
+    // Firestore의 pro_requests 컬렉션에 신청 저장
+    if(typeof setDoc==='function'&&typeof doc==='function'&&typeof db!=='undefined'){
+      const reqId='pr_'+Date.now();
+      const reqDoc=doc(db,'pro_requests',reqId);
+      setDoc(reqDoc,{
+        id:reqId,familyId:fid,userId:uid,userName:uname,
+        status:'pending',requestedAt:Date.now(),
+        plan:_ENV
+      }).catch(e=>console.warn('pro_request save failed',e));
+    }
+    // 로컬 상태에도 기록
+    if(!S.proRequest)S.proRequest={};
+    S.proRequest={status:'pending',requestedAt:Date.now()};
+    if(typeof save==='function')save();
+    return{success:true,message:'🌟 PRO 업그레이드 신청이 접수되었습니다! 관리자 승인 후 모든 기능을 사용할 수 있어요.'};
+  }catch(e){
+    return{success:false,error:'신청 중 오류: '+e.message};
   }
 }
 
@@ -21271,6 +21313,71 @@ function _getCurrentKidName(){
 }
 
 // ── UI 헬퍼 ──
+// ── 챗봇 카드 UI 렌더링 ──
+function _renderToolCard(toolName,input,result){
+  const container=document.getElementById('mily-chat-msgs');
+  const typing=document.getElementById('mily-typing');
+  if(!container||!typing)return;
+
+  let cardHTML='';
+  const S=_getS();
+  const acts=S?.acts||[];
+  const rwds=S?.rwds||[];
+
+  // 활동 완료
+  if(toolName==='do_activity'){
+    const act=acts.find(a=>a.id===input.activity_id)||(input.activity_name?acts.find(a=>a.name.includes(input.activity_name)):null);
+    if(act) cardHTML=`<div class="mily-tool-card tc-do"><div class="tc-emoji">${act.emoji||'✅'}</div><div class="tc-info"><div class="tc-name">${act.name}</div><div class="tc-meta">활동 완료!</div></div><div class="tc-pts">+${act.pts}M</div></div>`;
+  }
+  // 활동 추가
+  else if(toolName==='add_activity'){
+    cardHTML=`<div class="mily-tool-card tc-add"><div class="tc-emoji">${input.emoji||'⭐'}</div><div class="tc-info"><div class="tc-name">${input.name}</div><div class="tc-meta">${input.cycle||'daily'} · 최대 ${input.maxDay||1}회/일</div></div><div class="tc-pts">${input.pts||20}M</div></div>`;
+  }
+  // 활동 수정
+  else if(toolName==='edit_activity'){
+    const act=acts.find(a=>a.id===input.activity_id)||(input.activity_name?acts.find(a=>a.name.includes(input.activity_name)):null);
+    const name=input.name||(act?act.name:'활동');
+    const emoji=input.emoji||(act?act.emoji:'✏️');
+    cardHTML=`<div class="mily-tool-card"><div class="tc-emoji">${emoji}</div><div class="tc-info"><div class="tc-name">${name}</div><div class="tc-meta">수정 완료</div></div><div class="tc-pts">${input.pts||(act?act.pts:'')}M</div></div>`;
+  }
+  // 활동 삭제
+  else if(toolName==='delete_activity'){
+    cardHTML=`<div class="mily-tool-card tc-del"><div class="tc-emoji">🗑️</div><div class="tc-info"><div class="tc-name">${input.activity_name||'활동'}</div><div class="tc-meta">삭제됨</div></div><div class="tc-pts"></div></div>`;
+  }
+  // 보상 추가
+  else if(toolName==='add_reward'){
+    cardHTML=`<div class="mily-tool-card tc-add"><div class="tc-emoji">${input.emoji||'🎁'}</div><div class="tc-info"><div class="tc-name">${input.name}</div><div class="tc-meta">보상 추가됨</div></div><div class="tc-pts">${input.pts||500}M</div></div>`;
+  }
+  // 보상 교환
+  else if(toolName==='redeem_reward'){
+    const rwd=rwds.find(r=>r.id===input.reward_id)||(input.reward_name?rwds.find(r=>r.name.includes(input.reward_name)):null);
+    if(rwd) cardHTML=`<div class="mily-tool-card tc-del"><div class="tc-emoji">${rwd.emoji||'🎁'}</div><div class="tc-info"><div class="tc-name">${rwd.name}</div><div class="tc-meta">보상 교환!</div></div><div class="tc-pts">-${rwd.pts}M</div></div>`;
+  }
+  // 활동 취소
+  else if(toolName==='undo_activity'){
+    const act=acts.find(a=>a.id===input.activity_id)||(input.activity_name?acts.find(a=>a.name.includes(input.activity_name)):null);
+    if(act) cardHTML=`<div class="mily-tool-card tc-del"><div class="tc-emoji">${act.emoji||'↩'}</div><div class="tc-info"><div class="tc-name">${act.name}</div><div class="tc-meta">활동 취소됨</div></div><div class="tc-pts">-${act.pts}M</div></div>`;
+  }
+  // 뱃지 추가/수여
+  else if(toolName==='add_badge'||toolName==='award_badge'){
+    const emoji=input.emoji||'🏅';
+    const name=input.name||input.badge_name||'뱃지';
+    cardHTML=`<div class="mily-tool-card tc-badge"><div class="tc-emoji">${emoji}</div><div class="tc-info"><div class="tc-name">${name}</div><div class="tc-meta">${toolName==='award_badge'?'뱃지 수여!':'뱃지 추가됨'} · ${input.difficulty||'bronze'}</div></div></div>`;
+  }
+  // PRO 업그레이드 신청
+  else if(toolName==='request_upgrade'){
+    cardHTML=`<div class="mily-tool-card tc-add"><div class="tc-emoji">🌟</div><div class="tc-info"><div class="tc-name">PRO 업그레이드</div><div class="tc-meta">신청 접수 완료! 관리자 승인 대기 중</div></div></div>`;
+  }
+
+  if(cardHTML){
+    const div=document.createElement('div');
+    div.className='mily-msg bot';
+    div.innerHTML=cardHTML;
+    container.insertBefore(div,typing);
+    _scrollMilyBottom();
+  }
+}
+
 function _addBotMsg(text){
   const container=document.getElementById('mily-chat-msgs');
   const typing=document.getElementById('mily-typing');
