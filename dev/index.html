@@ -7045,19 +7045,18 @@ function isCurrentUserAdmin(){
 
 // ★ 레거시 가족(우리 가족) 관리자 → PRO 자동 설정
 // abo.taemin 등 다른 가족에는 적용하지 않음
+// ★ PRO 자동 설정 — 정확히 레거시 문서 경로(users/taemin 또는 users/taemin_dev)에서
+//   직접 읽는 경우에만 적용. families/ 컬렉션은 절대 자동 PRO 대상 아님.
 function _autoSetProIfAdmin(){
   try{
     if(!S.familyMeta) return;
-    // 레거시 가족 판별: familyId가 'legacy_taemin'이거나 DATA_DOC이 LEGACY_DOC인 경우
-    const isLegacyFamily = S.familyMeta.familyId === 'legacy_taemin' ||
-      (typeof DATA_DOC !== 'undefined' && typeof LEGACY_DOC !== 'undefined' && DATA_DOC === LEGACY_DOC) ||
-      (_familyId && (typeof _familyId === 'string') && S.familyMeta.familyId && S.familyMeta.familyId.indexOf('legacy') !== -1);
-    // 레거시에서 families/로 마이그레이션된 경우에도 지원
-    const isMigratedLegacy = !isLegacyFamily && S.familyMeta.createdBy === 'dad' && S.familyMeta.familyName === '우리 가족';
-    if(!isLegacyFamily && !isMigratedLegacy) return;
+    // ★ 핵심 조건: _familyId가 null이고 DATA_DOC === LEGACY_DOC인 경우만 (레거시 직접 경로)
+    const isDirectLegacy = !_familyId &&
+      typeof DATA_DOC !== 'undefined' && typeof LEGACY_DOC !== 'undefined' &&
+      DATA_DOC === LEGACY_DOC;
+    if(!isDirectLegacy) return;
     // 관리자(양육자)로 로그인한 경우에만
-    const isAdmin = isCurrentUserAdmin() || isCaregiverUser();
-    if(!isAdmin) return;
+    if(!isCurrentUserAdmin() && !isCaregiverUser()) return;
     if(S.familyMeta.plan === 'pro') return; // 이미 PRO
     S.familyMeta.plan = 'pro';
     if(typeof save === 'function') save();
@@ -7065,18 +7064,21 @@ function _autoSetProIfAdmin(){
   }catch(e){ console.warn('[_autoSetProIfAdmin] error:', e); }
 }
 
-// ★ 비-레거시 가족에서 잘못 설정된 PRO를 되돌림
-// (이전 버전 코드에서 모든 admin에게 PRO를 부여하는 버그로 인해 발생)
+// ★ 잘못 설정된 PRO를 정리
+// proRequest 없이 PRO가 설정된 families/ 문서는 되돌림 (v0403b 버그 수정)
+// 단, 레거시 직접 경로는 제외
 function _cleanupWrongPro(){
   try{
     if(!S.familyMeta || S.familyMeta.plan !== 'pro') return;
-    const isLegacy = S.familyMeta.familyId === 'legacy_taemin' ||
-      (S.familyMeta.createdBy === 'dad' && S.familyMeta.familyName === '우리 가족');
-    if(isLegacy) return; // 레거시 가족은 PRO 유지
-    // proRequest가 있으면 정상적으로 신청한 것이므로 유지
+    // proRequest가 있으면 정상 신청이므로 유지
     if(S.familyMeta.proRequest) return;
-    // 비-레거시 가족에서 proRequest 없이 PRO → 잘못 설정된 것이므로 되돌림
-    console.log('🔧 비-레거시 가족 잘못된 PRO 설정 되돌림:', S.familyMeta.familyId);
+    // 레거시 직접 경로(users/taemin*)면 PRO 유지
+    const isDirectLegacy = !_familyId &&
+      typeof DATA_DOC !== 'undefined' && typeof LEGACY_DOC !== 'undefined' &&
+      DATA_DOC === LEGACY_DOC;
+    if(isDirectLegacy) return;
+    // 그 외: proRequest 없이 PRO → 잘못 설정된 것 → 되돌림
+    console.log('🔧 잘못된 PRO 설정 되돌림:', S.familyMeta.familyId || _familyId);
     delete S.familyMeta.plan;
     if(typeof save === 'function') save();
   }catch(e){ console.warn('[_cleanupWrongPro] error:', e); }
@@ -8712,7 +8714,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0403c';
+const _APP_VERSION = 'v0403d';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -15598,10 +15600,10 @@ window.pfMenuAction=pfMenuAction;
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
   {
-    ver:'1.9.9 (v0403c)', date:'2026-04-03',
+    ver:'1.9.9 (v0403d)', date:'2026-04-03',
     items:[
       {type:'fix',text:'등급 배지 클릭 시 팝업 안뜨는 문제 수정'},
-      {type:'fix',text:'PRO 등급이 다른 계정에 잘못 적용되는 문제 수정'},
+      {type:'fix',text:'PRO 등급이 신규/다른 계정에 잘못 적용되는 문제 수정'},
       {type:'fix',text:'소셜 계정 연동 후 나의메뉴에 정보 안보이는 문제 수정'},
     ]
   },
