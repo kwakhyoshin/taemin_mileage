@@ -8619,7 +8619,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0402x';
+const _APP_VERSION = 'v0402y';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -19922,12 +19922,12 @@ window._createState = _createState;
      ═══════════════════════════════════════════════════════════════ -->
 <style>
 /* ── mily chatbot FAB ── */
-.mily-fab{position:fixed;bottom:120px;right:10px;width:72px;height:72px;border-radius:50%;background:transparent;border:none;cursor:pointer;z-index:950;display:none;align-items:center;justify-content:center;transition:transform .2s,opacity .25s;-webkit-tap-highlight-color:transparent;opacity:0;filter:drop-shadow(0 3px 8px rgba(99,102,241,.35))}
+.mily-fab{position:fixed;bottom:140px;right:20px;width:72px;height:72px;border-radius:50%;background:transparent;border:none;cursor:pointer;z-index:950;display:none;align-items:center;justify-content:center;transition:opacity .25s;-webkit-tap-highlight-color:transparent;opacity:0;filter:drop-shadow(0 3px 8px rgba(99,102,241,.35));touch-action:none;user-select:none;-webkit-user-select:none}
 .mily-fab.visible{display:flex;opacity:1}
-.mily-fab:active{transform:scale(.92)}
-.mily-fab svg{width:72px;height:72px}
+.mily-fab.dragging{transition:none !important;transform:scale(1.08) !important;filter:drop-shadow(0 6px 16px rgba(99,102,241,.5))}
+.mily-fab svg{width:72px;height:72px;pointer-events:none}
 .mily-fab-badge{position:absolute;top:2px;right:2px;width:14px;height:14px;background:#EF4444;border-radius:50%;border:2px solid #fff;display:none}
-.nav-container.docked~.mily-fab{bottom:92px}
+.nav-container.docked~.mily-fab{bottom:110px}
 
 /* ── chat backdrop — 뒤 화면 가림 ── */
 .mily-chat-backdrop{position:fixed;left:0;right:0;top:0;bottom:0;width:100%;height:100%;background:var(--card,#fff);z-index:959;display:none}
@@ -19979,7 +19979,7 @@ body.dark .mily-fab{box-shadow:0 4px 20px rgba(99,102,241,.3)}
 </style>
 
 <!-- FAB 버튼 — 밀리 캐릭터 -->
-<button class="mily-fab" id="mily-fab" onclick="toggleMilyChat()" aria-label="밀리 AI 챗봇">
+<button class="mily-fab" id="mily-fab" aria-label="밀리 AI 챗봇">
   <span id="mily-fab-char"></span>
   <span class="mily-fab-badge" id="mily-fab-badge"></span>
 </button>
@@ -20054,6 +20054,86 @@ function _initMilyFabChar(){
   if(!el)return;
   el.innerHTML=_milySVG({face:{eyeStyle:'normal',mouthStyle:'smile',cheekGlow:true},bodyAnim:'bounce',armStyle:'wave',effects:[]});
 }
+
+// ── FAB 드래그 이동 ──
+(function _initFabDrag(){
+  const fab=document.getElementById('mily-fab');
+  if(!fab)return;
+  let isDragging=false, hasMoved=false;
+  let startX=0, startY=0, fabStartX=0, fabStartY=0;
+  const DRAG_THRESHOLD=8; // px — 이 이상 움직여야 드래그로 판정
+
+  // 저장된 위치 복원
+  try{
+    const saved=localStorage.getItem('taemin_fab_pos');
+    if(saved){
+      const {r,b}=JSON.parse(saved);
+      fab.style.right=r+'px'; fab.style.bottom=b+'px';
+    }
+  }catch(e){}
+
+  function getPos(e){
+    const t=e.touches?e.touches[0]:e;
+    return {x:t.clientX, y:t.clientY};
+  }
+
+  function onStart(e){
+    const p=getPos(e);
+    startX=p.x; startY=p.y;
+    const rect=fab.getBoundingClientRect();
+    fabStartX=rect.left; fabStartY=rect.top;
+    isDragging=true; hasMoved=false;
+  }
+
+  function onMove(e){
+    if(!isDragging)return;
+    const p=getPos(e);
+    const dx=p.x-startX, dy=p.y-startY;
+    if(!hasMoved && Math.abs(dx)<DRAG_THRESHOLD && Math.abs(dy)<DRAG_THRESHOLD) return;
+    hasMoved=true;
+    e.preventDefault();
+    fab.classList.add('dragging');
+    // 새 위치 계산 (right, bottom 기준)
+    const vw=window.innerWidth, vh=window.innerHeight;
+    let newRight=vw-(fabStartX+dx+fab.offsetWidth);
+    let newBottom=vh-(fabStartY+dy+fab.offsetHeight);
+    // 경계 제한 (FAB가 화면 밖으로 나가지 않도록)
+    const pad=4;
+    newRight=Math.max(pad, Math.min(vw-fab.offsetWidth-pad, newRight));
+    newBottom=Math.max(pad, Math.min(vh-fab.offsetHeight-pad, newBottom));
+    fab.style.right=newRight+'px';
+    fab.style.bottom=newBottom+'px';
+  }
+
+  function onEnd(e){
+    if(!isDragging)return;
+    isDragging=false;
+    fab.classList.remove('dragging');
+    if(hasMoved){
+      // 위치 저장
+      const r=parseInt(fab.style.right)||20;
+      const b=parseInt(fab.style.bottom)||140;
+      try{localStorage.setItem('taemin_fab_pos',JSON.stringify({r,b}));}catch(e){}
+      // 드래그 끝 — 클릭 이벤트 차단
+      e.preventDefault(); e.stopPropagation();
+    } else {
+      // 드래그 안 했으면 클릭으로 처리
+      toggleMilyChat();
+    }
+  }
+
+  // 터치 이벤트 (모바일)
+  fab.addEventListener('touchstart', onStart, {passive:true});
+  fab.addEventListener('touchmove', onMove, {passive:false});
+  fab.addEventListener('touchend', onEnd);
+  fab.addEventListener('touchcancel', ()=>{isDragging=false;fab.classList.remove('dragging');});
+  // 마우스 이벤트 (데스크톱 테스트용)
+  fab.addEventListener('mousedown', onStart);
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup', onEnd);
+  // 기존 onclick 제거 (드래그와 클릭 구분은 onEnd에서 처리)
+  fab.onclick=null;
+})();
 
 // 응답 텍스트에서 감정 감지
 function _detectMilyMood(text){
