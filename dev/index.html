@@ -21315,22 +21315,11 @@ function _executeTool(name,input){
 function _requestProUpgrade(){
   try{
     const S=_getS();
-    const fid=S?.familyMeta?.familyId||S?.familyId||'';
     const uid=typeof currentUser!=='undefined'?currentUser:'';
     const uname=(()=>{try{return S?.familyMeta?.members?.[uid]?.name||uid;}catch(e){return uid;}})();
-    // Firestore의 pro_requests 컬렉션에 신청 저장
-    if(typeof setDoc==='function'&&typeof doc==='function'&&typeof db!=='undefined'){
-      const reqId='pr_'+Date.now();
-      const reqDoc=doc(db,'pro_requests',reqId);
-      setDoc(reqDoc,{
-        id:reqId,familyId:fid,userId:uid,userName:uname,
-        status:'pending',requestedAt:Date.now(),
-        plan:_ENV
-      }).catch(e=>console.warn('pro_request save failed',e));
-    }
-    // 로컬 상태에도 기록
-    if(!S.proRequest)S.proRequest={};
-    S.proRequest={status:'pending',requestedAt:Date.now()};
+    // families 문서의 proRequest 필드에 저장 (별도 컬렉션 불필요 — 기존 쓰기 권한 활용)
+    if(!S.familyMeta)S.familyMeta={};
+    S.familyMeta.proRequest={status:'pending',userId:uid,userName:uname,requestedAt:Date.now(),env:_ENV};
     if(typeof save==='function')save();
     return{success:true,message:'🌟 PRO 업그레이드 신청이 접수되었습니다! 관리자 승인 후 모든 기능을 사용할 수 있어요.'};
   }catch(e){
