@@ -1914,3 +1914,38 @@ CSP 추가(#87) 후 개발기에서 "오프라인 모드" 에러 발생. 3단계
 | S-08 | Medium | 초대 링크 `Math.random()` → `crypto.getRandomValues()` 전환 |
 | S-10 | Medium | `eval()` 기반 계산기 → 안전한 파서로 교체 |
 | S-11 | Low | Subresource Integrity (SRI) 해시 추가 |
+
+---
+
+### 14. 밀리 AI 챗봇 (v1.9.0, 2026-04-02)
+
+#### 개요
+밀리(mily) 캐릭터 기반 AI 챗봇. Claude Haiku 4.5 모델을 Cloudflare Worker 프록시를 통해 호출. `tool_use`로 활동/보상 CRUD 실행.
+
+#### 아키텍처
+```
+[PWA 앱] → [CF Worker 프록시] → [Anthropic Claude API]
+           dry-meadow-3356mily-ai-proxy.nonmarking.workers.dev
+```
+
+- **프록시**: `workers/mily-ai-proxy/worker.js` — Origin 검증, Rate limit(20/min), CORS
+- **시크릿**: Cloudflare Worker 환경변수 `ANTHROPIC_API_KEY`
+- **CSP**: `connect-src`에 프록시 URL 추가 완료
+
+#### UI
+- **FAB** (z-index:950, 64px): 홈탭 밀리 인사말 보이면 숨김(IntersectionObserver), 아니면 표시
+- **밀리 인사말 영역** 클릭 → 챗봇 오픈
+- **채팅 팝업** (z-index:940): 헤더+메시지+입력, 최대 20턴 대화 유지
+
+#### tool_use 도구
+| 도구 | 권한 |
+|------|------|
+| `get_status` | 공통 |
+| `do_activity` | 공통 |
+| `add/edit/delete_activity` | 양육자 |
+| `add/edit/delete_reward` | 양육자 |
+
+#### PR
+| PR | 설명 | 상태 |
+|----|------|------|
+| #103 | feat: 밀리 AI 챗봇 + FAB 스마트 표시 | ✅ 개발기 적용 |
