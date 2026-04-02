@@ -8639,7 +8639,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0402z26';
+const _APP_VERSION = 'v0402z27';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -20322,6 +20322,8 @@ body.dark .mily-msg.bot{background:var(--card2,#334155)}
 .mily-msg h1,.mily-msg h2,.mily-msg h3{margin:8px 0 4px;font-weight:800}
 .mily-msg h1{font-size:18px}.mily-msg h2{font-size:17px}.mily-msg h3{font-size:16.5px}
 .mily-msg code{background:rgba(0,0,0,.06);padding:1px 4px;border-radius:4px;font-size:14px;font-family:monospace}
+body.dark .mily-msg.bot th,body.dark .mily-msg.bot td{border-color:#475569}
+body.dark .mily-msg.bot th{background:rgba(99,102,241,.15)}
 body.dark .mily-msg.bot code{background:rgba(255,255,255,.08)}
 .mily-msg pre{background:rgba(0,0,0,.06);padding:8px;border-radius:8px;overflow-x:auto;margin:6px 0}
 body.dark .mily-msg.bot pre{background:rgba(255,255,255,.06)}
