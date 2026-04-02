@@ -4062,18 +4062,20 @@ requestAnimationFrame(function(){
     <p class="my-header-sub" id="my-header-sub">내 정보</p>
   </div>
   <div class="my-section-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> 나의 계정</div>
-  <div class="my-profile-card" style="flex-wrap:wrap">
+  <div class="my-profile-card">
     <div class="my-avatar-wrap" id="my-avatar-wrap"></div>
     <div class="my-info-text" style="flex:1;min-width:0">
       <div style="display:flex;align-items:center;gap:6px">
         <div class="my-name" id="my-name">이름</div>
         <span id="my-social-badge" style="display:none"></span>
-        <span id="my-plan-badge"></span>
       </div>
       <div class="my-role" id="my-role">역할</div>
     </div>
-    <!-- 소셜 연동 상세 (연동된 경우) 또는 연동 버튼 (미연동) -->
-    <div id="my-social-area" style="width:100%;margin-top:10px;display:none"></div>
+  </div>
+  <!-- 등급 + 소셜 연동 (프로필 카드 아래 별도 영역) -->
+  <div style="margin:8px 16px 0;display:flex;flex-direction:column;gap:8px">
+    <div id="my-plan-badge" style="display:flex"></div>
+    <div id="my-social-area"></div>
   </div>
   <!-- 가족 구성원 아바타 가로 나열 (나 제외) -->
   <div class="my-section-title" id="my-family-title" style="display:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg> 우리가족</div>
@@ -8714,7 +8716,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0403d';
+const _APP_VERSION = 'v0403e';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -15430,11 +15432,11 @@ function renderMyTab(){
   // 아바타
   const avatarWrap=document.getElementById('my-avatar-wrap');
   if(avatarWrap)avatarWrap.innerHTML=getAvatarHTML(currentUser,50);
-  updateMyAvatarMoodBadge();
+  try{updateMyAvatarMoodBadge();}catch(e){console.warn('[renderMyTab] mood badge err:',e);}
   // 등급 배지 업데이트 (나의메뉴 + 챗봇)
-  _updatePlanBadges();
-  // 소셜 인증 연동 정보 표시 (프로필 카드 내부)
-  const socialBadge=document.getElementById('my-social-badge');
+  try{_updatePlanBadges();}catch(e){console.warn('[renderMyTab] plan badge err:',e);}
+  // 소셜 인증 연동 정보 표시 (프로필 카드 아래 별도 영역)
+  try{const socialBadge=document.getElementById('my-social-badge');
   const socialArea=document.getElementById('my-social-area');
   if(socialBadge && socialArea){
     const acc=member?.account||S.users?.[currentUser]||{};
@@ -15472,7 +15474,7 @@ function renderMyTab(){
         소셜 계정 연동하기
       </button>`;
     }
-  }
+  }}catch(e){console.warn('[renderMyTab] social area err:',e);}
   // 관리자 버튼 표시 여부 (양육자 또는 isAdmin 권한이 있는 자녀)
   const adminBtn=document.getElementById('my-admin-btn');
   if(adminBtn)adminBtn.style.display=(isCaregiverUser()||isCurrentUserAdmin())?'':'none';
@@ -15480,7 +15482,7 @@ function renderMyTab(){
   const pwaBtn=document.getElementById('my-pwa-install-btn');
   if(pwaBtn)pwaBtn.style.display=_pwaInstalled?'none':'flex';
   // 업데이트 내역 배지
-  _updateChangelogBadge();
+  try{_updateChangelogBadge();}catch(e){console.warn('[renderMyTab] changelog err:',e);}
   // 다크모드 토글 상태 동기화
   const togDarkMy=document.getElementById('tog-dark-my');
   if(togDarkMy){
@@ -15491,17 +15493,18 @@ function renderMyTab(){
     }
   }
   // 가족 구성원 아바타 가로 나열 (나 자신 제외)
+  try{
   const familyRow=document.getElementById('my-family-row');
   const familyTitle=document.getElementById('my-family-title');
   if(familyRow){
     const fm=S.familyMeta?.members||{};
     const ids=Object.keys(fm).filter(mid=>mid!==currentUser); // 나 제외
     if(ids.length>0){
-      const _RLABELS={dad:'아빠',mom:'엄마',grandpa:'할아버지',grandma:'할머니',grandpa_m:'외할아버지',grandma_m:'외할머니',child:'자녀',caregiver:'양육자',parent:'양육자'};
+      const _RLABELS2={dad:'아빠',mom:'엄마',grandpa:'할아버지',grandma:'할머니',grandpa_m:'외할아버지',grandma_m:'외할머니',child:'자녀',caregiver:'양육자',parent:'양육자'};
       familyRow.innerHTML=ids.map(mid=>{
         const m=fm[mid];
         const mName=m?.name||MEMBERS[mid]?.name||mid;
-        const mRole=_RLABELS[m?.displayRole]||_RLABELS[m?.role]||m?.displayRole||m?.role||'멤버';
+        const mRole=_RLABELS2[m?.displayRole]||_RLABELS2[m?.role]||m?.displayRole||m?.role||'멤버';
         const clickAction='onUserIconClick(\''+mid+'\')';
         const moodEmoji=getMoodEmoji(mid);
         // 해당 멤버로부터 온 미읽은 메시지 수
@@ -15518,7 +15521,7 @@ function renderMyTab(){
         </div>`;
       }).join('');
       // 기분 파티클 애니메이션 시작
-      startMyFamilyMoodAnimations();
+      try{startMyFamilyMoodAnimations();}catch(e2){console.warn('[renderMyTab] mood anim err:',e2);}
       familyRow.style.display='flex';
       if(familyTitle)familyTitle.style.display='flex';
     }else{
@@ -15526,6 +15529,7 @@ function renderMyTab(){
       if(familyTitle)familyTitle.style.display='none';
     }
   }
+  }catch(e){console.warn('[renderMyTab] family row err:',e);}
 }
 window.renderMyTab=renderMyTab;
 
@@ -15599,6 +15603,14 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {
+    ver:'1.9.10 (v0403e)', date:'2026-04-03',
+    items:[
+      {type:'fix',text:'나의메뉴 등급 배지와 소셜 연동 정보 UI 분리 (겹침 해결)'},
+      {type:'fix',text:'나의메뉴 우리가족 목록이 안보이는 문제 수정'},
+      {type:'fix',text:'renderMyTab 각 섹션에 try/catch 추가 (한 섹션 오류가 전체 차단 방지)'},
+    ]
+  },
   {
     ver:'1.9.9 (v0403d)', date:'2026-04-03',
     items:[
