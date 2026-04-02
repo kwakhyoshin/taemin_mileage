@@ -4068,6 +4068,7 @@ requestAnimationFrame(function(){
       <div style="display:flex;align-items:center;gap:6px">
         <div class="my-name" id="my-name">이름</div>
         <span id="my-social-badge" style="display:none"></span>
+        <span id="my-plan-badge"></span>
       </div>
       <div class="my-role" id="my-role">역할</div>
     </div>
@@ -15356,6 +15357,8 @@ function renderMyTab(){
   const avatarWrap=document.getElementById('my-avatar-wrap');
   if(avatarWrap)avatarWrap.innerHTML=getAvatarHTML(currentUser,50);
   updateMyAvatarMoodBadge();
+  // 등급 배지 업데이트 (나의메뉴 + 챗봇)
+  _updatePlanBadges();
   // 소셜 인증 연동 정보 표시 (프로필 카드 내부)
   const socialBadge=document.getElementById('my-social-badge');
   const socialArea=document.getElementById('my-social-area');
@@ -20320,7 +20323,17 @@ window._createState = _createState;
 .mily-chat-hd-info{flex:1;min-width:0;text-align:left!important;display:flex;flex-direction:column;align-items:flex-start}
 .mily-chat-hd-name{font-size:15px;font-weight:800;line-height:0}
 .mily-chat-hd-name svg{display:block;margin:0}
-.mily-chat-hd-status{font-size:11px;opacity:.55;font-weight:500;margin-top:3px;text-align:left}
+.mily-chat-hd-status{font-size:11px;opacity:.55;font-weight:500;margin-top:3px;text-align:left;display:flex;align-items:center;gap:6px}
+/* 등급 배지 */
+.plan-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:800;line-height:1;cursor:pointer;vertical-align:middle;transition:transform .15s}
+.plan-badge:active{transform:scale(.92)}
+.plan-badge.free{background:linear-gradient(135deg,#E2E8F0,#CBD5E1);color:#475569}
+.plan-badge.pro{background:linear-gradient(135deg,#FDE68A,#F59E0B);color:#78350F;box-shadow:0 1px 4px rgba(245,158,11,.3)}
+.plan-badge svg{width:12px;height:12px;flex-shrink:0}
+.my-plan-badge{display:inline-flex;align-items:center;gap:3px;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:800;line-height:1;cursor:pointer}
+.my-plan-badge.free{background:var(--bg,#F1F5F9);color:var(--tx2,#64748B);border:1px solid var(--bdr,#E2E8F0)}
+.my-plan-badge.pro{background:linear-gradient(135deg,#FEF3C7,#FDE68A);color:#92400E;border:1px solid #F59E0B}
+.my-plan-badge svg{width:14px;height:14px;flex-shrink:0}
 .mily-chat-close{background:none;border:none;color:rgba(255,255,255,.7);cursor:pointer;padding:4px;border-radius:50%;transition:background .15s}
 .mily-chat-close:hover{background:rgba(255,255,255,.15)}
 
@@ -20419,7 +20432,7 @@ body.dark .mily-fab{box-shadow:0 4px 20px rgba(99,102,241,.3)}
     <div class="mily-chat-hd-char" id="mily-chat-char"></div>
     <div class="mily-chat-hd-info">
       <div class="mily-chat-hd-name"><svg width="192" height="39" viewBox="-2 6 200 64" preserveAspectRatio="xMinYMid meet" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="mily-sp-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#818CF8"/><stop offset="40%" stop-color="#C084FC"/><stop offset="100%" stop-color="#F472B6"/></linearGradient></defs><path d="M4 48V28c0-5 3-9 8-9s8 4 8 9v0c0-5 3-9 8-9s8 4 8 9v20" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M46 24v24" stroke="#fff" stroke-width="7" stroke-linecap="round"/><circle cx="46" cy="14" r="4" fill="#fff"/><path d="M60 10v38" stroke="#fff" stroke-width="7" stroke-linecap="round"/><path d="M72 24l10 18M92 24l-13 28c-2 4-5 6-8 6" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="104" cy="50" r="4.5" fill="#FBBF24"/><path d="M126 48V32c0-5-4-9-9-9s-9 4-9 9 4 9 9 9h9" stroke="rgba(255,255,255,.5)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M138 24v24" stroke="rgba(255,255,255,.5)" stroke-width="7" stroke-linecap="round"/><circle cx="138" cy="14" r="4" fill="rgba(255,255,255,.5)"/><path d="M162 8l2 7 7 2-7 2-2 7-2-7-7-2 7-2z" fill="url(#mily-sp-g)"/><path d="M184 14l1.2 4 4 1.2-4 1.2-1.2 4-1.2-4-4-1.2 4-1.2z" fill="url(#mily-sp-g)" opacity=".55"/></svg></div>
-      <div class="mily-chat-hd-status">마일리지 도우미</div>
+      <div class="mily-chat-hd-status">마일리지 도우미 <span id="mily-plan-badge" onclick="event.stopPropagation();_showPlanPopup()"></span></div>
     </div>
     <button class="mily-chat-close" onclick="toggleMilyChat()"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
   </div>
@@ -20597,6 +20610,7 @@ window.toggleMilyChat=function(){
     if(backdrop) backdrop.classList.add('open');
     fab.classList.remove('visible'); // 채팅 열리면 FAB 숨김
     _updateMilyChatChar('wave'); // 환영 표정
+    _updatePlanBadges(); // 등급 배지 업데이트
     // 첫 오픈 시 환영 메시지
     if(_milyHistory.length===0) _milyWelcome();
     setTimeout(()=>document.getElementById('mily-input').focus(),300);
@@ -20881,6 +20895,57 @@ function _getUserPlan(){
   try{const S=_getS();return S?.familyMeta?.plan||'free';}catch(e){return 'free';}
 }
 function _isPro(){return _getUserPlan()==='pro';}
+
+// ── 등급 배지 SVG ──
+const _PLAN_SVG={
+  free:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 12h8M12 8v8"/></svg>',
+  pro:'<svg viewBox="0 0 24 24" fill="none"><path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26z" fill="#F59E0B" stroke="#D97706" stroke-width="1.5"/></svg>'
+};
+function _updatePlanBadges(){
+  const isPro=_isPro();
+  const cls=isPro?'pro':'free';
+  const label=isPro?'PRO':'FREE';
+  const svg=_PLAN_SVG[cls];
+  // 챗봇 헤더 배지
+  const milyBadge=document.getElementById('mily-plan-badge');
+  if(milyBadge) milyBadge.innerHTML=`<span class="plan-badge ${cls}">${svg} ${label}</span>`;
+  // 나의메뉴 배지
+  const myBadge=document.getElementById('my-plan-badge');
+  if(myBadge) myBadge.innerHTML=`<span class="my-plan-badge ${cls}" onclick="_showPlanPopup()">${svg} ${label}</span>`;
+}
+function _showPlanPopup(){
+  const isPro=_isPro();
+  if(isPro){
+    toast('🌟 PRO 등급 이용 중!');
+    return;
+  }
+  // 일반 등급: 업그레이드 안내 팝업
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;animation:fadeIn .2s';
+  overlay.onclick=()=>overlay.remove();
+  const card=document.createElement('div');
+  card.style.cssText='background:var(--card,#fff);border-radius:20px;padding:32px 28px;max-width:340px;width:90%;text-align:center;box-shadow:0 16px 48px rgba(0,0,0,.2)';
+  card.onclick=e=>e.stopPropagation();
+  card.innerHTML=`
+    <div style="font-size:48px;margin-bottom:12px">🌟</div>
+    <div style="font-size:18px;font-weight:900;color:var(--tx,#1E293B);margin-bottom:8px">PRO 등급으로 업그레이드</div>
+    <div style="font-size:13px;color:var(--tx2,#64748B);line-height:1.6;margin-bottom:20px">
+      PRO 등급에서는 다음 기능을 이용할 수 있어요:<br>
+      <b>활동/보상 추가·수정·삭제</b><br>
+      <b>육아 코칭 및 활동 분석</b><br>
+      <b>뱃지 관리</b>
+    </div>
+    <button style="width:100%;padding:14px;background:linear-gradient(135deg,#F59E0B,#D97706);color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit" onclick="this.closest('div[style*=fixed]').remove();_requestProUpgradeFromUI()">업그레이드 신청하기</button>
+    <button style="width:100%;padding:12px;background:none;border:none;color:var(--tx3,#94A3B8);font-size:13px;font-weight:600;cursor:pointer;margin-top:8px;font-family:inherit" onclick="this.closest('div[style*=fixed]').remove()">다음에 할게요</button>
+  `;
+  overlay.appendChild(card);
+  document.body.appendChild(overlay);
+}
+function _requestProUpgradeFromUI(){
+  const result=_requestProUpgrade();
+  if(result&&result.success) toast('🌟 PRO 업그레이드 신청이 접수되었어요!');
+  else toast('⚠️ 신청 중 문제가 발생했어요');
+}
 
 // ── 시스템 프롬프트 ──
 function _buildSystemPrompt(){
