@@ -979,6 +979,10 @@ body.dark .today-summary-card .ts-msg{background:linear-gradient(135deg,#312E81,
 /* LANDSCAPE BLOCK - only on small phones */
 /* 가로모드 허용 — 차단 해제됨 (v0402z24) */
 .landscape-block{display:none!important}
+/* 가로모드 폰: 세로 사용 안내 표시 (태블릿/데스크톱 제외) */
+@media screen and (orientation:landscape) and (max-height:500px){
+  .landscape-block{display:flex!important;position:fixed;inset:0;z-index:9999;background:var(--bg,#fff);align-items:center;justify-content:center;flex-direction:column}
+}
 
 /* PIN */
 .pin-wrap{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:600;display:flex;align-items:center;justify-content:center}
@@ -1910,13 +1914,13 @@ body.dark .bubble-speech-log{background:rgba(255,255,255,.12);color:rgba(255,255
 @keyframes actFlipGlow{0%{box-shadow:0 2px 8px rgba(0,0,0,.04)}40%{box-shadow:0 8px 32px rgba(16,185,129,.4)}70%{box-shadow:0 12px 40px rgba(16,185,129,.5)}100%{box-shadow:0 4px 16px rgba(16,185,129,.12)}}
 @keyframes stampSlam{0%{transform:scale(3.5) rotate(-25deg);opacity:.1;filter:blur(3px)}55%{transform:scale(1) rotate(-15deg);opacity:.9;filter:blur(0)}70%{transform:scale(.93) rotate(-13deg);opacity:.92;filter:blur(0)}85%{transform:scale(1.03) rotate(-15.5deg);opacity:.88;filter:blur(0)}100%{transform:scale(1) rotate(-15deg);opacity:.85;filter:blur(0)}}
 .act-card.act-completing{animation:actFlip .8s cubic-bezier(.25,.46,.45,.94) forwards,actFlipGlow .8s ease forwards;transform-style:preserve-3d;z-index:10}
-.completion-stamp{position:absolute;top:45%;right:8px;width:64px;height:64px;margin-top:-32px;opacity:0;pointer-events:none;z-index:8;animation:stampSlam .6s cubic-bezier(.16,1,.3,1) forwards;animation-delay:.6s;filter:drop-shadow(0 3px 8px rgba(16,185,129,.5))}
+.completion-stamp{position:absolute;top:45%;right:8px;width:64px;height:64px;margin-top:-32px;opacity:0;pointer-events:none;z-index:8;animation:stampSlam .6s cubic-bezier(.16,1,.3,1) forwards;animation-delay:.6s;filter:drop-shadow(0 3px 8px rgba(16,185,129,.3))}
 /* Log item completion animation */
 @keyframes logItemFlash{0%{background:transparent}30%{background:rgba(16,185,129,.2)}100%{background:transparent}}
 .log-item.log-completing{animation:logItemFlash .8s ease forwards;position:relative}
-.log-completion-stamp{position:absolute;top:50%;right:0;width:46px;height:46px;margin-top:-23px;opacity:0;pointer-events:none;z-index:8;animation:stampSlam .6s cubic-bezier(.16,1,.3,1) forwards;animation-delay:.3s;filter:drop-shadow(0 3px 8px rgba(16,185,129,.5))}
-.log-done-stamp{position:absolute;top:50%;right:0;width:38px;height:38px;margin-top:-19px;opacity:.7;pointer-events:none;z-index:3;transform:rotate(-15deg);filter:drop-shadow(0 2px 4px rgba(16,185,129,.3))}
-.card-done-stamp{position:absolute;top:45%;right:8px;width:56px;height:56px;margin-top:-28px;opacity:.75;pointer-events:none;z-index:3;transform:rotate(-15deg);filter:drop-shadow(0 2px 6px rgba(16,185,129,.35))}
+.log-completion-stamp{position:absolute;top:50%;right:0;width:46px;height:46px;margin-top:-23px;opacity:0;pointer-events:none;z-index:8;animation:stampSlam .6s cubic-bezier(.16,1,.3,1) forwards;animation-delay:.3s;filter:drop-shadow(0 3px 8px rgba(16,185,129,.3))}
+.log-done-stamp{position:absolute;top:50%;right:0;width:38px;height:38px;margin-top:-19px;opacity:.55;pointer-events:none;z-index:3;transform:rotate(-15deg);filter:drop-shadow(0 2px 4px rgba(110,231,183,.2))}
+.card-done-stamp{position:absolute;top:45%;right:8px;width:56px;height:56px;margin-top:-28px;opacity:.6;pointer-events:none;z-index:3;transform:rotate(-15deg);filter:drop-shadow(0 2px 6px rgba(110,231,183,.25))}
 
 /* Member count stepper */
 .member-count-stepper{display:flex;align-items:center;justify-content:center;gap:16px;margin:16px 0;padding:16px;background:var(--bg2);border-radius:12px}
@@ -8635,7 +8639,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'prod'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0402z24';
+const _APP_VERSION = 'v0402z27';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -10762,7 +10766,7 @@ function renderHomeGrid(){
       ${a.maxDay>0?`<div class="count-badge">${st.label||'0/'+a.maxDay}</div>`:''}
       ${timer?`<div class="timer"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-1px;margin-right:2px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${timer}</div>`:''}
       <div class="act-card-prog"><div class="act-card-prog-fill" style="width:${st.pct}%;background:${st.cls==='done'||st.cls==='exhausted'?'var(--gn)':st.cls==='partial'?'var(--yw)':'var(--tab-color,var(--or))'}"></div></div>
-      ${_cardDone?'<div class="card-done-stamp"><svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="29" stroke="#10B981" stroke-width="3.5" stroke-dasharray="5 2.5" opacity=".9"/><circle cx="32" cy="32" r="21" stroke="#10B981" stroke-width="2.5" opacity=".65"/><text x="32" y="30" text-anchor="middle" font-size="14" font-weight="900" fill="#10B981" font-family="Noto Sans KR,sans-serif">완료</text><text x="32" y="43" text-anchor="middle" font-size="9" font-weight="800" fill="#10B981" font-family="sans-serif" letter-spacing="2" opacity=".7">DONE</text></svg></div>':''}
+      ${_cardDone?'<div class="card-done-stamp"><svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="29" stroke="#6EE7B7" stroke-width="3.5" stroke-dasharray="5 2.5" opacity=".7"/><circle cx="32" cy="32" r="21" stroke="#6EE7B7" stroke-width="2.5" opacity=".5"/><text x="32" y="30" text-anchor="middle" font-size="14" font-weight="900" fill="#6EE7B7" font-family="Noto Sans KR,sans-serif" opacity=".8">완료</text><text x="32" y="43" text-anchor="middle" font-size="9" font-weight="800" fill="#6EE7B7" font-family="sans-serif" letter-spacing="2" opacity=".55">DONE</text></svg></div>':''}
     </div>`;
   }).join('');
   // Attach long-press gauge + tap handlers
@@ -10827,7 +10831,7 @@ function renderLogList(){
     const countLabel=max>0?`${done}/${max}회`:'';
     const stickerHTML=renderStickersForLog(a.id);
     const _isDone=exhausted||(max===0&&done>0);
-    const _stampHTML=_isDone?'<div class="log-done-stamp"><svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="29" stroke="#10B981" stroke-width="3.5" stroke-dasharray="5 2.5" opacity=".9"/><circle cx="32" cy="32" r="21" stroke="#10B981" stroke-width="2.5" opacity=".65"/><text x="32" y="30" text-anchor="middle" font-size="14" font-weight="900" fill="#10B981" font-family="Noto Sans KR,sans-serif">완료</text><text x="32" y="43" text-anchor="middle" font-size="9" font-weight="800" fill="#10B981" font-family="sans-serif" letter-spacing="2" opacity=".7">DONE</text></svg></div>':'';
+    const _stampHTML=_isDone?'<div class="log-done-stamp"><svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="29" stroke="#6EE7B7" stroke-width="3.5" stroke-dasharray="5 2.5" opacity=".7"/><circle cx="32" cy="32" r="21" stroke="#6EE7B7" stroke-width="2.5" opacity=".5"/><text x="32" y="30" text-anchor="middle" font-size="14" font-weight="900" fill="#6EE7B7" font-family="Noto Sans KR,sans-serif" opacity=".8">완료</text><text x="32" y="43" text-anchor="middle" font-size="9" font-weight="800" fill="#6EE7B7" font-family="sans-serif" letter-spacing="2" opacity=".55">DONE</text></svg></div>':'';
     const _lgColor=exhausted?'rgba(16,185,129,.12)':cls.includes('partial')?'rgba(245,158,11,.12)':'rgba(99,102,241,.12)';
     const _isCaregiver=isCaregiverUser();
     const _isShowHome=!!a.showHome;
@@ -12909,7 +12913,7 @@ function _doActCore(id){
   const _actCard=_curTab==='home'?document.querySelector(`.act-card[data-actid="${id}"]`):null;
   const _logItem=_curTab==='log'?document.querySelector(`.log-item[data-actid="${id}"]`):null;
 
-  const _stampSVG='<svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="29" stroke="#10B981" stroke-width="3.5" stroke-dasharray="5 2.5" opacity=".9"/><circle cx="32" cy="32" r="21" stroke="#10B981" stroke-width="2.5" opacity=".65"/><text x="32" y="30" text-anchor="middle" font-size="14" font-weight="900" fill="#10B981" font-family="Noto Sans KR,sans-serif">완료</text><text x="32" y="43" text-anchor="middle" font-size="9" font-weight="800" fill="#10B981" font-family="sans-serif" letter-spacing="2" opacity=".7">DONE</text></svg>';
+  const _stampSVG='<svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="29" stroke="#6EE7B7" stroke-width="3.5" stroke-dasharray="5 2.5" opacity=".7"/><circle cx="32" cy="32" r="21" stroke="#6EE7B7" stroke-width="2.5" opacity=".5"/><text x="32" y="30" text-anchor="middle" font-size="14" font-weight="900" fill="#6EE7B7" font-family="Noto Sans KR,sans-serif" opacity=".8">완료</text><text x="32" y="43" text-anchor="middle" font-size="9" font-weight="800" fill="#6EE7B7" font-family="sans-serif" letter-spacing="2" opacity=".55">DONE</text></svg>';
   // 도장은 최종 완료(무제한 활동 또는 maxDay 도달)일 때만 표시
   const _doneCount=countDone(a);
   const _showStamp=(a.maxDay===0)||(a.maxDay>0&&_doneCount>=a.maxDay);
@@ -15510,6 +15514,14 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {
+    ver:'1.9.6 (v0402z26)', date:'2026-04-02',
+    items:[
+      {type:'new',text:'챗봇 뱃지 관리 기능 (추가/수정/삭제/수여/난이도 조정)'},
+      {type:'fix',text:'활동 완료 도장 색상 연하게 조정'},
+      {type:'fix',text:'모바일 가로모드 비활성화 (세로 고정)'},
+    ]
+  },
   {
     ver:'1.9.5 (v0402z23)', date:'2026-04-02',
     items:[
@@ -18756,6 +18768,137 @@ window._milyAPI={
     S.rewardLog.unshift({id:'rl_'+Date.now(),emoji:inv.rwdEmoji,name:inv.rwdName,pts:inv.pts,ts:Date.now(),rwdId:inv.rwdId,type:'refund'});
     save();renderAll();
     return{success:true,message:`↩ "${inv.rwdEmoji} ${inv.rwdName}" 환불 완료! +${inv.pts}M 복구 (잔여: ${S.pts}M)`};
+  },
+
+  // ── 뱃지 관리 ──
+  getBadges(){
+    const earned=S.badges||{};
+    const ovrs=S.badgeOverrides||{};
+    const customs=S.customBadges||[];
+    // 기본 뱃지
+    const builtinList=BADGES.map(b=>{
+      const ovr=ovrs[b.id]||{};
+      const eff={...b,...ovr};
+      const e=earned[b.id];
+      return{id:b.id,emoji:eff.emoji,name:eff.name,desc:eff.desc,category:eff.category,
+        bonus:eff.bonus||0,hidden:!!eff.hidden,earned:!!e,earnedAt:e?e.earnedAt:null,
+        condType:'builtin',type:'builtin'};
+    });
+    // 커스텀 뱃지
+    const customList=customs.map(b=>{
+      const e=earned[b.id];
+      return{id:b.id,emoji:b.emoji,name:b.name,desc:b.desc,category:b.category||'특별',
+        bonus:b.bonus||0,hidden:!!b.hidden,earned:!!e,earnedAt:e?e.earnedAt:null,
+        condType:b.condType||'manual',condValue:b.condValue||0,
+        condActName:b.condActName||'',type:'custom'};
+    });
+    const earnedCount=Object.keys(earned).length;
+    const totalCount=builtinList.length+customList.length;
+    return{success:true,earned_count:earnedCount,total_count:totalCount,
+      builtin_badges:builtinList,custom_badges:customList,
+      condition_types:['manual','total_acts','streak','study_count','study_streak','act_name_count','pts_total','pts_current','mood_count','reward_count','perfect_days','morning_acts','daily_max','badge_count']};
+  },
+
+  addBadge(data){
+    if(!data.name||!data.emoji)return{success:false,error:'이름과 이모지를 입력해주세요'};
+    if(!S.customBadges)S.customBadges=[];
+    const id='custom_'+Date.now();
+    const badge={
+      id,emoji:data.emoji,name:data.name,
+      desc:data.desc||data.name,
+      category:data.category||'특별',
+      bonus:data.bonus||10,
+      hidden:!!data.hidden,
+      label:data.label||(data.name||'').substring(0,4),
+      icon:data.icon||'',iconScale:100,
+      condType:data.cond_type||'manual',
+      condValue:data.cond_value||0,
+      condActName:data.cond_act_name||'',
+      condMoodType:data.cond_mood_type||''
+    };
+    S.customBadges.push(badge);
+    save();
+    if(typeof renderBadgeMgrList==='function')renderBadgeMgrList();
+    if(typeof renderBadges==='function')renderBadges();
+    if(typeof renderBadgeSummary==='function')renderBadgeSummary();
+    if(typeof renderBadgeViewGrid==='function')renderBadgeViewGrid();
+    if(typeof checkBadges==='function')checkBadges();
+    return{success:true,message:`🏅 "${badge.emoji} ${badge.name}" 뱃지 추가 완료! (달성조건: ${badge.condType==='manual'?'수동 지급':badge.condType+'≥'+badge.condValue}, 보너스: ${badge.bonus}M)`,id};
+  },
+
+  editBadge(data){
+    if(!data.badge_id)return{success:false,error:'badge_id를 지정해주세요'};
+    const customs=S.customBadges||[];
+    const idx=customs.findIndex(b=>b.id===data.badge_id);
+    const isBuiltin=BADGES.some(b=>b.id===data.badge_id);
+    const changes=[];
+
+    if(isBuiltin){
+      // 기본 뱃지 → badgeOverrides로 수정
+      if(!S.badgeOverrides)S.badgeOverrides={};
+      const ovr=S.badgeOverrides[data.badge_id]||{};
+      if(data.name){ovr.name=data.name;changes.push('이름→'+data.name);}
+      if(data.emoji){ovr.emoji=data.emoji;changes.push('이모지→'+data.emoji);}
+      if(data.desc){ovr.desc=data.desc;changes.push('설명 변경');}
+      if(data.category){ovr.category=data.category;changes.push('카테고리→'+data.category);}
+      if(data.bonus!==undefined){ovr.bonus=Math.max(0,data.bonus);changes.push('보너스→'+ovr.bonus+'M');}
+      if(data.hidden!==undefined){ovr.hidden=!!data.hidden;changes.push(data.hidden?'히든으로':'공개로');}
+      S.badgeOverrides[data.badge_id]=ovr;
+      save();
+      if(typeof renderBadgeMgrList==='function')renderBadgeMgrList();
+      if(typeof renderBadges==='function')renderBadges();
+      if(typeof renderBadgeViewGrid==='function')renderBadgeViewGrid();
+      return{success:true,message:`✏️ 기본 뱃지 수정 완료! (${changes.join(', ')})`};
+    }
+
+    if(idx<0)return{success:false,error:'해당 뱃지를 찾을 수 없습니다: '+data.badge_id};
+    const badge=customs[idx];
+    if(data.name){badge.name=data.name;changes.push('이름→'+data.name);}
+    if(data.emoji){badge.emoji=data.emoji;changes.push('이모지→'+data.emoji);}
+    if(data.desc){badge.desc=data.desc;changes.push('설명 변경');}
+    if(data.category){badge.category=data.category;changes.push('카테고리→'+data.category);}
+    if(data.bonus!==undefined){badge.bonus=Math.max(0,data.bonus);changes.push('보너스→'+badge.bonus+'M');}
+    if(data.hidden!==undefined){badge.hidden=!!data.hidden;changes.push(data.hidden?'히든으로':'공개로');}
+    if(data.cond_type){badge.condType=data.cond_type;changes.push('조건→'+data.cond_type);}
+    if(data.cond_value!==undefined){badge.condValue=data.cond_value;changes.push('목표값→'+data.cond_value);}
+    if(data.cond_act_name){badge.condActName=data.cond_act_name;changes.push('대상활동→'+data.cond_act_name);}
+    S.customBadges[idx]=badge;
+    save();
+    if(typeof renderBadgeMgrList==='function')renderBadgeMgrList();
+    if(typeof renderBadges==='function')renderBadges();
+    if(typeof renderBadgeViewGrid==='function')renderBadgeViewGrid();
+    if(typeof checkBadges==='function')checkBadges();
+    return{success:true,message:`✏️ "${badge.emoji} ${badge.name}" 뱃지 수정 완료! (${changes.join(', ')})`};
+  },
+
+  deleteBadge(data){
+    if(!data.badge_id)return{success:false,error:'badge_id를 지정해주세요'};
+    if(BADGES.some(b=>b.id===data.badge_id))return{success:false,error:'기본 뱃지는 삭제할 수 없습니다. 수정만 가능합니다.'};
+    const customs=S.customBadges||[];
+    const idx=customs.findIndex(b=>b.id===data.badge_id);
+    if(idx<0)return{success:false,error:'해당 커스텀 뱃지를 찾을 수 없습니다'};
+    const badge=customs[idx];
+    customs.splice(idx,1);
+    if(S.badges&&S.badges[data.badge_id])delete S.badges[data.badge_id];
+    save();
+    if(typeof renderBadgeMgrList==='function')renderBadgeMgrList();
+    if(typeof renderBadges==='function')renderBadges();
+    if(typeof renderBadgeViewGrid==='function')renderBadgeViewGrid();
+    return{success:true,message:`🗑️ "${badge.emoji} ${badge.name}" 뱃지가 삭제되었습니다`};
+  },
+
+  awardBadge(data){
+    if(!data.badge_id)return{success:false,error:'badge_id를 지정해주세요'};
+    const badge=BADGES.find(b=>b.id===data.badge_id)||(S.customBadges||[]).find(b=>b.id===data.badge_id);
+    if(!badge)return{success:false,error:'해당 뱃지를 찾을 수 없습니다'};
+    if(S.badges&&S.badges[data.badge_id])return{success:false,error:`"${badge.name}" 뱃지는 이미 획득했습니다`};
+    if(!S.badges)S.badges={};
+    S.badges[data.badge_id]={earnedAt:Date.now(),seen:false,claimed:false};
+    save();
+    if(typeof showBadgeCelebration==='function')showBadgeCelebration(badge);
+    if(typeof renderBadges==='function')renderBadges();
+    if(typeof renderBadgeViewGrid==='function')renderBadgeViewGrid();
+    return{success:true,message:`🎉 "${badge.emoji} ${badge.name}" 뱃지 지급 완료!`};
   }
 };
 
@@ -20179,6 +20322,8 @@ body.dark .mily-msg.bot{background:var(--card2,#334155)}
 .mily-msg h1,.mily-msg h2,.mily-msg h3{margin:8px 0 4px;font-weight:800}
 .mily-msg h1{font-size:18px}.mily-msg h2{font-size:17px}.mily-msg h3{font-size:16.5px}
 .mily-msg code{background:rgba(0,0,0,.06);padding:1px 4px;border-radius:4px;font-size:14px;font-family:monospace}
+body.dark .mily-msg.bot th,body.dark .mily-msg.bot td{border-color:#475569}
+body.dark .mily-msg.bot th{background:rgba(99,102,241,.15)}
 body.dark .mily-msg.bot code{background:rgba(255,255,255,.08)}
 .mily-msg pre{background:rgba(0,0,0,.06);padding:8px;border-radius:8px;overflow-x:auto;margin:6px 0}
 body.dark .mily-msg.bot pre{background:rgba(255,255,255,.06)}
@@ -20433,11 +20578,11 @@ window.toggleMilyChat=function(){
 function _milyWelcome(){
   const isC=typeof isCaregiverUser==='function'&&isCaregiverUser();
   const kidName=_getCurrentKidName();
-  let msg='안녕! 나는 **밀리**야 🌟\n\n';
+  let msg;
   if(isC){
-    msg+=`${kidName?kidName+'의 ':''}마일리지 도우미이자 육아 파트너야!`;
+    msg=`안녕하세요! 저는 **밀리**예요 🌟\n\n${kidName?kidName+'의 ':''}마일리지 도우미이자 육아 파트너예요!`;
   }else{
-    msg+='너의 마일리지 친구야! 같이 재미있게 해보자!';
+    msg='안녕! 나는 **밀리**야 🌟\n\n너의 마일리지 친구야! 같이 재미있게 해보자!';
   }
   _addBotMsg(msg);
   // 계층형 퀵액션 메뉴 렌더링
@@ -20747,6 +20892,13 @@ ${!isC?`[자녀모드] 재미있고 응원하는 톤!
 - 응원: 구체적 활동 언급, 개인화된 메시지. "네가 ~한 거 진짜 대단해!"
 - 도전: 잘 안하는 활동을 재미있는 미션으로. "오늘의 비밀미션!"
 - 목표: "~까지 ○마일리지 남았어! ○일이면 모을수있어!" 희망적 수치 제시`:''}
+[뱃지 관리] get_badges로 전체 뱃지(내장+커스텀) 조회. 양육자만 add/edit/delete/award 가능.
+- 조건 타입: manual(수동수여), total_acts(총활동횟수), streak(연속일수), study_count(학습횟수), act_name_count(특정활동횟수), pts_total(총적립마일리지), pts_current(현재마일리지), mood_count(기분기록수), reward_count(보상교환수), perfect_days(만점일수), morning_acts(아침활동수), daily_max(하루최대횟수), badge_count(뱃지보유수)
+- 난이도: bronze→silver→gold→platinum→diamond. 조건값에 맞게 난이도 자동 제안: 1~10=bronze, 11~30=silver, 31~60=gold, 61~100=platinum, 100+=diamond
+- 내장 뱃지는 edit로 난이도·이모지·설명만 오버라이드 가능, 삭제 불가
+- 뱃지 추가 시 이모지는 반드시 뱃지 의미에 맞게 선택. 예: 🏃연속운동 📚다독가 🌅아침형 💪꾸준함
+- "뱃지 난이도 조정해줘" → get_badges로 현황 파악 → 조건값 대비 난이도가 맞는지 분석 → edit_badge로 조정 제안
+
 [통계 활용] get_status 결과에 activity_stats(활동별 총횟수·총마일리지·활동일수), recent_7days(최근7일), streak(연속기록)이 포함됨.
 - "제일 잘하는 건?" → activity_stats에서 count 1위 활동 + 구체적 횟수·마일리지 언급
 - "이번주 뭐했어?" → recent_7days로 최근 7일 활동 분석
@@ -20766,6 +20918,12 @@ function _buildTools(){
   tools.push({
     name:'get_status',
     description:'현재 마일리지, 활동 목록, 보상 목록, 오늘 기록, 활동별 통계(횟수·포인트·일수), 최근7일 통계, 연속기록을 조회',
+    input_schema:{type:'object',properties:{},required:[]}
+  });
+
+  tools.push({
+    name:'get_badges',
+    description:'모든 뱃지(내장+커스텀) 목록, 달성 현황, 난이도 등을 조회합니다.',
     input_schema:{type:'object',properties:{},required:[]}
   });
 
@@ -20942,6 +21100,71 @@ function _buildTools(){
         required:[]
       }
     });
+    tools.push({
+      name:'add_badge',
+      description:'커스텀 뱃지를 새로 추가합니다. 조건 타입별 설정 가능.',
+      input_schema:{
+        type:'object',
+        properties:{
+          name:{type:'string',description:'뱃지 이름 (필수)'},
+          emoji:{type:'string',description:'뱃지 이모지 (필수, 의미에 맞는 이모지)'},
+          desc:{type:'string',description:'뱃지 설명'},
+          cond_type:{type:'string',enum:['manual','total_acts','streak','study_count','study_streak','act_name_count','pts_total','pts_current','mood_count','reward_count','perfect_days','morning_acts','daily_max','badge_count'],description:'달성 조건 타입 (기본: manual)'},
+          cond_value:{type:'number',description:'조건 목표값 (예: total_acts 50이면 총 50회 활동)'},
+          cond_act_name:{type:'string',description:'act_name_count 타입일 때 대상 활동 이름'},
+          cond_mood:{type:'string',description:'mood_count 타입일 때 대상 기분 (great/good/okay/bad/terrible)'},
+          difficulty:{type:'string',enum:['bronze','silver','gold','platinum','diamond'],description:'난이도 등급 (기본: bronze)'}
+        },
+        required:['name','emoji']
+      }
+    });
+
+    tools.push({
+      name:'edit_badge',
+      description:'커스텀 뱃지를 수정하거나, 내장 뱃지의 난이도·이모지·설명을 오버라이드합니다.',
+      input_schema:{
+        type:'object',
+        properties:{
+          badge_id:{type:'string',description:'뱃지 ID'},
+          badge_name:{type:'string',description:'뱃지 이름 (ID를 모를 때)'},
+          name:{type:'string',description:'새 이름 (커스텀만)'},
+          emoji:{type:'string',description:'새 이모지'},
+          desc:{type:'string',description:'새 설명'},
+          difficulty:{type:'string',enum:['bronze','silver','gold','platinum','diamond'],description:'새 난이도'},
+          cond_type:{type:'string',description:'새 조건 타입 (커스텀만)'},
+          cond_value:{type:'number',description:'새 조건 목표값 (커스텀만)'},
+          cond_act_name:{type:'string',description:'새 대상 활동 이름 (커스텀만)'}
+        },
+        required:[]
+      }
+    });
+
+    tools.push({
+      name:'delete_badge',
+      description:'커스텀 뱃지를 삭제합니다. 내장 뱃지는 삭제 불가.',
+      input_schema:{
+        type:'object',
+        properties:{
+          badge_id:{type:'string',description:'뱃지 ID'},
+          badge_name:{type:'string',description:'뱃지 이름 (ID를 모를 때)'}
+        },
+        required:[]
+      }
+    });
+
+    tools.push({
+      name:'award_badge',
+      description:'뱃지를 수동으로 수여합니다 (달성 처리).',
+      input_schema:{
+        type:'object',
+        properties:{
+          badge_id:{type:'string',description:'뱃지 ID'},
+          badge_name:{type:'string',description:'뱃지 이름 (ID를 모를 때)'}
+        },
+        required:[]
+      }
+    });
+
   } // end if(isC)
 
   console.log('[mily-tools] built', tools.length, 'tools:', tools.map(t=>t.name).join(', '));
@@ -20969,6 +21192,11 @@ function _executeTool(name,input){
       case 'undo_activity': result=api.undoActivity(input); break;
       case 'redeem_reward': result=api.redeemReward(input); break;
       case 'refund_reward': result=api.refundReward(input); break;
+      case 'get_badges': result=api.getBadges(); break;
+      case 'add_badge': result=api.addBadge(input); break;
+      case 'edit_badge': result=api.editBadge(input); break;
+      case 'delete_badge': result=api.deleteBadge(input); break;
+      case 'award_badge': result=api.awardBadge(input); break;
       default: result={success:false,error:'알 수 없는 도구: '+name};
     }
     console.log('[mily-tool] result:', name, JSON.stringify(result));
