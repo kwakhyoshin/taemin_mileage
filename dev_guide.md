@@ -1944,8 +1944,29 @@ CSP 추가(#87) 후 개발기에서 "오프라인 모드" 에러 발생. 3단계
 | `do_activity` | 공통 |
 | `add/edit/delete_activity` | 양육자 |
 | `add/edit/delete_reward` | 양육자 |
+| `get_children` | 공통 |
+| `toggle_activity_home` | 양육자 |
+| `undo_activity` | 양육자 |
+| `redeem_reward` | 양육자 |
+| `refund_reward` | 양육자 |
+
+#### 다자녀 지원
+- `target_kids` 파라미터: `"all"` (모든 자녀) 또는 쉼표 구분 자녀 ID
+- 시스템 프롬프트에서 다자녀 확인 규칙 자동 주입
+- `get_children` 도구로 자녀 목록 조회
+
+#### 이모지 자동선택
+- 시스템 프롬프트에 카테고리별 이모지 팔레트 제공
+- 기본값(⭐🎁) 사용 금지 규칙
+
+#### 처리 후 검증
+- 모든 쓰기 작업 후 `get_status` 재조회하여 반영 확인
 
 #### PR
 | PR | 설명 | 상태 |
 |----|------|------|
 | #103 | feat: 밀리 AI 챗봇 + FAB 스마트 표시 | ✅ 개발기 적용 |
+| #111 | fix: IIFE S 참조 타이밍 버그 수정 | ✅ 개발기 적용 |
+| #112 | fix: tool writes to ms.acts but not S.acts | ✅ 개발기 적용 |
+| #113 | fix: onSnapshot S 객체 교체 대응 (_milyAPI 모듈 스코프 이동) | ✅ 개발기 적용 |
+| #114 | feat: 다자녀 지원, 챗봇 기능 확장, 스트릭 팝업 수정 (v0402v) | ✅ 개발기 적용 |
