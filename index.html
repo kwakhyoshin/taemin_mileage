@@ -8632,7 +8632,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'prod'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0402z10';
+const _APP_VERSION = 'v0402z11';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -20468,6 +20468,7 @@ async function _callMilyAPI(){
     let messages=[..._milyHistory];
     let loopCount=0;
     const maxLoops=5;
+    let _accumulatedText=''; // max_tokens continuation 시 텍스트 누적
 
     while(loopCount<maxLoops){
       loopCount++;
@@ -20485,7 +20486,7 @@ async function _callMilyAPI(){
             system:systemPrompt,
             messages:messages,
             tools:tools,
-            max_tokens:1024
+            max_tokens:2048
           })
         });
       }catch(_fetchErr){
@@ -20535,13 +20536,26 @@ async function _callMilyAPI(){
         continue;
       }
 
-      // end_turn — 텍스트 응답
+      // max_tokens로 잘린 경우 → 누적 후 이어서 요청
+      if(data.stop_reason==='max_tokens'){
+        let partial='';
+        if(data.content) for(const block of data.content) if(block.type==='text') partial+=block.text;
+        if(partial){
+          _accumulatedText+=partial;
+          messages.push({role:'assistant',content:data.content});
+          messages.push({role:'user',content:[{type:'text',text:'계속'}]});
+          continue;
+        }
+      }
+
+      // end_turn — 텍스트 응답 (누적 텍스트 + 마지막 응답 합치기)
       let textReply='';
       if(data.content){
         for(const block of data.content){
           if(block.type==='text') textReply+=block.text;
         }
       }
+      textReply=_accumulatedText+textReply;
       if(!textReply) textReply='(응답을 생성하지 못했어요)';
 
       _milyHistory.push({role:'assistant',content:textReply});
