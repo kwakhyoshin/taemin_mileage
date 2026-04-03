@@ -603,18 +603,19 @@ async function loadAllData() {
     _loadErrors.push('Firebase 인증 실패 — Firebase Console > Authentication > Sign-in method에서 "익명(Anonymous)" 활성화 필요');
   }
 
-  // 1. families 컬렉션 (새 가입 가족)
+  // 1. families 컬렉션 (현재 환경의 가족만 로드)
+  const FAMILY_PREFIX = _ENV === 'dev' ? 'dev_' : 'prod_';
   try {
     const familiesSnap = await getDocs(collection(db, 'families'));
-    let devCount = 0;
+    let loadCount = 0;
     familiesSnap.forEach(docSnap => {
       const id = docSnap.id;
-      if (id.startsWith('dev_') || id.startsWith('prod_')) {
+      if (id.startsWith(FAMILY_PREFIX)) {
         _allFamilies.push({ id, ...docSnap.data() });
-        devCount++;
+        loadCount++;
       }
     });
-    console.log(`[Admin] families 컬렉션: 총 ${familiesSnap.size}건, 로드됨 ${devCount}건`);
+    console.log(`[Admin] families 컬렉션: 총 ${familiesSnap.size}건, ${_ENV} 환경 로드됨 ${loadCount}건`);
   } catch (e) {
     console.error('Failed to load families:', e);
     _loadErrors.push('families 컬렉션 읽기 실패: ' + e.message);
@@ -1227,12 +1228,13 @@ async function loadProRequests(){
   try{
     const pending=[];const done=[];const proActive=[];
 
-    // 1) families 컬렉션
+    // 1) families 컬렉션 (현재 환경만)
+    const _prefix = _ENV === 'dev' ? 'dev_' : 'prod_';
     const snap=await getDocs(collection(db,'families'));
     snap.forEach(d=>{
       const data=d.data();
       const fid=d.id;
-      if(fid.startsWith('_'))return;
+      if(!fid.startsWith(_prefix))return;
       const fm=data.familyMeta||{};
       const req=fm.proRequest;
       const plan=fm.plan||'free';
