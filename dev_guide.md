@@ -2248,3 +2248,43 @@ function _cleanupWrongPro(){
 | #179 | v0403m | isLegacyNamedFamily 조건 추가 (PRO 최종 수정) |
 | #180 | v0403n | 챗봇 활동/보상/뱃지 추가 시 desc 필수 |
 | #182 | — | admin 페이지 App Check + 익명인증 추가 |
+| #183 | — | 운영기 admin 환경 변수 분리 (_ENV 기반 경로) |
+| #184 | — | admin loadAllData() 환경별 가족 필터링 |
+| #185 | — | admin 전체 가족 표시 + PRO 배지 + 소셜 계정 정보 |
+| #186 | v0403p | PRO 업그레이드 신청 기능 스코프 문제 해결 |
+| #187 | v0403p | 운영기 반영 (release/v0403p) |
+
+---
+
+### 12.22 PRO 업그레이드 신청 기능 동작 안 됨 (2026-04-03, PR #186)
+
+#### 증상
+- AI챗봇 `request_upgrade` 도구 호출 시 실패 ("잘 안된다"고 답변)
+- 직접 '업그레이드 신청하기' 버튼 클릭 시 동작 안 함
+
+#### 원인
+`_requestProUpgrade()` 함수가 밀리 챗봇 IIFE(`<script>` 블록, line 20592~22032)에 있는데,
+이 함수가 참조하는 `_ENV`와 `currentUser`는 `<script type="module">` 블록(line 4599~20346)에 정의됨.
+
+- **`_ENV`** (const, module scope): IIFE에서 직접 참조 → `ReferenceError: _ENV is not defined` 발생
+- **`currentUser`** (let, module scope): `typeof` 체크로 crash는 방지되나 항상 빈 문자열로 평가
+
+`_requestProUpgrade()`의 try/catch가 ReferenceError를 잡아서 `{success:false}` 반환 → 챗봇과 UI 모두 실패로 처리.
+
+#### 수정
+모듈 exports 섹션(line 18640 부근)에 추가:
+```javascript
+window._ENV_REF = _ENV;
+window._currentUser_ref = function(){ return currentUser; };
+```
+
+`_requestProUpgrade()`에서:
+- `_ENV` → `window._ENV_REF`
+- `currentUser` → `window._currentUser_ref()`
+
+`_buildSystemPrompt()`의 `currentUser` 참조도 동일하게 수정.
+
+#### 교훈
+- `<script type="module">` 스코프의 변수는 다른 `<script>` 블록에서 접근 불가
+- IIFE에서 모듈 변수를 사용할 때는 반드시 `window` 경유 export 필요
+- 기존 exports 섹션(line 18631~)에 누락된 변수가 없는지 새 기능 추가 시 확인할 것
