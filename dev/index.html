@@ -8728,7 +8728,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0403t';
+const _APP_VERSION = 'v0403u';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -10854,7 +10854,7 @@ function renderHomeGrid(){
       ${a.maxDay>0?`<div class="count-badge">${st.label||'0/'+a.maxDay}</div>`:''}
       ${timer?`<div class="timer"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-1px;margin-right:2px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${timer}</div>`:''}
       <div class="act-card-prog"><div class="act-card-prog-fill" style="width:${st.pct}%;background:${st.cls==='done'||st.cls==='exhausted'?'var(--gn)':st.cls==='partial'?'var(--yw)':'var(--tab-color,var(--or))'}"></div></div>
-      ${_cardDone?'<div class="card-done-stamp"><svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="29" stroke="#6EE7B7" stroke-width="3.5" stroke-dasharray="5 2.5" opacity=".7"/><circle cx="32" cy="32" r="21" stroke="#6EE7B7" stroke-width="2.5" opacity=".5"/><text x="32" y="30" text-anchor="middle" font-size="14" font-weight="900" fill="#6EE7B7" font-family="Noto Sans KR,sans-serif" opacity=".8">완료</text><text x="32" y="43" text-anchor="middle" font-size="9" font-weight="800" fill="#6EE7B7" font-family="sans-serif" letter-spacing="2" opacity=".55">DONE</text></svg></div>':''}
+      ${_cardDone?'<div class="card-done-stamp"><svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="29" stroke="#34D399" stroke-width="3.5" stroke-dasharray="5 2.5" opacity=".9"/><circle cx="32" cy="32" r="21" stroke="#34D399" stroke-width="2.5" opacity=".7"/><text x="32" y="30" text-anchor="middle" font-size="14" font-weight="900" fill="#10B981" font-family="Noto Sans KR,sans-serif" opacity=".95">완료</text><text x="32" y="43" text-anchor="middle" font-size="9" font-weight="800" fill="#10B981" font-family="sans-serif" letter-spacing="2" opacity=".75">DONE</text></svg></div>':''}
     </div>`;
   }).join('');
   // Attach long-press gauge + tap handlers
@@ -10919,7 +10919,7 @@ function renderLogList(){
     const countLabel=max>0?`${done}/${max}회`:'';
     const stickerHTML=renderStickersForLog(a.id);
     const _isDone=exhausted||(max===0&&done>0);
-    const _stampHTML=_isDone?'<div class="log-done-stamp"><svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="29" stroke="#6EE7B7" stroke-width="3.5" stroke-dasharray="5 2.5" opacity=".7"/><circle cx="32" cy="32" r="21" stroke="#6EE7B7" stroke-width="2.5" opacity=".5"/><text x="32" y="30" text-anchor="middle" font-size="14" font-weight="900" fill="#6EE7B7" font-family="Noto Sans KR,sans-serif" opacity=".8">완료</text><text x="32" y="43" text-anchor="middle" font-size="9" font-weight="800" fill="#6EE7B7" font-family="sans-serif" letter-spacing="2" opacity=".55">DONE</text></svg></div>':'';
+    const _stampHTML=_isDone?'<div class="log-done-stamp"><svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="29" stroke="#34D399" stroke-width="3.5" stroke-dasharray="5 2.5" opacity=".9"/><circle cx="32" cy="32" r="21" stroke="#34D399" stroke-width="2.5" opacity=".7"/><text x="32" y="30" text-anchor="middle" font-size="14" font-weight="900" fill="#10B981" font-family="Noto Sans KR,sans-serif" opacity=".95">완료</text><text x="32" y="43" text-anchor="middle" font-size="9" font-weight="800" fill="#10B981" font-family="sans-serif" letter-spacing="2" opacity=".75">DONE</text></svg></div>':'';
     const _lgColor=exhausted?'rgba(16,185,129,.12)':cls.includes('partial')?'rgba(245,158,11,.12)':'rgba(99,102,241,.12)';
     const _isCaregiver=isCaregiverUser();
     const _isShowHome=!!a.showHome;
@@ -13012,7 +13012,7 @@ function _doActCore(id){
   const _actCard=_curTab==='home'?document.querySelector(`.act-card[data-actid="${id}"]`):null;
   const _logItem=_curTab==='log'?document.querySelector(`.log-item[data-actid="${id}"]`):null;
 
-  const _stampSVG='<svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="29" stroke="#6EE7B7" stroke-width="3.5" stroke-dasharray="5 2.5" opacity=".7"/><circle cx="32" cy="32" r="21" stroke="#6EE7B7" stroke-width="2.5" opacity=".5"/><text x="32" y="30" text-anchor="middle" font-size="14" font-weight="900" fill="#6EE7B7" font-family="Noto Sans KR,sans-serif" opacity=".8">완료</text><text x="32" y="43" text-anchor="middle" font-size="9" font-weight="800" fill="#6EE7B7" font-family="sans-serif" letter-spacing="2" opacity=".55">DONE</text></svg>';
+  const _stampSVG='<svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="29" stroke="#34D399" stroke-width="3.5" stroke-dasharray="5 2.5" opacity=".9"/><circle cx="32" cy="32" r="21" stroke="#34D399" stroke-width="2.5" opacity=".7"/><text x="32" y="30" text-anchor="middle" font-size="14" font-weight="900" fill="#10B981" font-family="Noto Sans KR,sans-serif" opacity=".95">완료</text><text x="32" y="43" text-anchor="middle" font-size="9" font-weight="800" fill="#10B981" font-family="sans-serif" letter-spacing="2" opacity=".75">DONE</text></svg>';
   // 도장은 최종 완료(무제한 활동 또는 maxDay 도달)일 때만 표시
   const _doneCount=countDone(a);
   const _showStamp=(a.maxDay===0)||(a.maxDay>0&&_doneCount>=a.maxDay);
@@ -15617,6 +15617,12 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.17 (v0403u)',date:'2026-04-03',items:[
+    {type:'fix',text:'챗봇 가족 구성원 초대 기능 오류 수정 (모듈 스코프 문제)'},
+    {type:'new',text:'챗봇 오류 자동 로깅 기능 (Firestore 저장)'},
+    {type:'fix',text:'업데이트 배너가 미니 아이콘으로 남는 문제 수정 (자동 사라짐)'},
+    {type:'fix',text:'활동 완료 도장 라이트모드 가시성 개선 (알파값 상향)'},
+  ]},
   {
     ver:'1.9.16 (v0403t)', date:'2026-04-03',
     items:[
@@ -16002,30 +16008,12 @@ function _showChangelogPopupIfNew(){
     };
     document.body.appendChild(banner);
     requestAnimationFrame(()=>requestAnimationFrame(()=>{banner.style.transform='translateY(0)';}));
-    // 5초 후 미니 FAB로 축소
+    // 5초 후 배너 자동 닫기 (미니 FAB 없이 그냥 사라짐)
     setTimeout(()=>{
       const b=document.getElementById('changelog-banner');
       if(!b)return;
       b.style.transform='translateY(-100%)';
-      setTimeout(()=>{
-        b.remove();
-        // 미니 FAB 생성 (우측 상단)
-        const mini=document.createElement('div');
-        mini.id='changelog-mini';
-        mini.style.cssText='position:fixed;top:calc(env(safe-area-inset-top,0) + 8px);right:12px;z-index:9000;width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#6366F1,#8B5CF6);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 16px rgba(99,102,241,.4);transform:scale(0);transition:transform .3s cubic-bezier(.22,1,.36,1)';
-        mini.innerHTML='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
-        // NEW 뱃지
-        const dot=document.createElement('div');
-        dot.style.cssText='position:absolute;top:-2px;right:-2px;width:14px;height:14px;border-radius:50%;background:#F43F5E;border:2px solid #fff;font-size:0';
-        mini.appendChild(dot);
-        mini.onclick=function(){
-          mini.style.transform='scale(0)';
-          setTimeout(()=>mini.remove(),300);
-          openChangelog();
-        };
-        document.body.appendChild(mini);
-        requestAnimationFrame(()=>requestAnimationFrame(()=>{mini.style.transform='scale(1)';}));
-      },400);
+      setTimeout(()=>{ b.remove(); },400);
     },5000);
   },1500);
 }
@@ -18655,6 +18643,13 @@ window.renderAll=renderAll;
 window.doAct=doAct;
 window._ENV_REF=_ENV; // IIFE에서 _ENV 접근용
 window._currentUser_ref=function(){return currentUser;}; // IIFE에서 currentUser 접근용
+window.ROLE_DEFS=ROLE_DEFS;
+window.generateSecureRandom=generateSecureRandom;
+window.rebuildMembersFromFamily=rebuildMembersFromFamily;
+Object.defineProperty(window,'_familyId_ref',{get(){return _familyId;},configurable:true});
+window._ENV=_ENV;
+window._firestore_ref=function(){return typeof db!=='undefined'?db:null;};
+window._APP_VERSION_REF=_APP_VERSION;
 
 // ── 밀리 챗봇용 API (모듈 스코프의 S를 직접 조작하므로 onSnapshot 교체에 안전) ──
 window._milyAPI={
@@ -21020,6 +21015,7 @@ async function _callMilyAPI(){
     }
   }catch(e){
     console.error('[mily-chat]',e);
+    _logChatError('api_call', e, {historyLength:_milyHistory.length});
     _addBotMsg('⚠️ 오류가 발생했어요: '+e.message+'\n잠시 후 다시 시도해 주세요.');
   }finally{
     _milySending=false;
@@ -21639,6 +21635,51 @@ function _buildTools(){
   return tools;
 }
 
+// ── 챗봇 오류 로깅 → Firestore ──
+function _logChatError(context, error, extra){
+  try{
+    const S=_getS();
+    const uid=typeof window._currentUser_ref==='function'?window._currentUser_ref()||'anonymous':'anonymous';
+    const fid=window._familyId_ref||'';
+    const ts=Date.now();
+    const errorDoc={
+      context: context||'unknown',
+      error: typeof error==='string'?error:(error?.message||String(error)),
+      stack: error?.stack||'',
+      extra: extra||{},
+      uid: uid,
+      familyId: fid,
+      appVersion: window._APP_VERSION_REF||'',
+      env: window._ENV||'dev',
+      userAgent: navigator.userAgent,
+      timestamp: ts,
+      date: new Date(ts).toISOString()
+    };
+    // Firestore에 저장 (firebase가 로드된 경우)
+    if(window._firestore_ref&&typeof window._firestore_ref==='function'){
+      const db=window._firestore_ref();
+      if(db){
+        const colRef=db.collection('chatErrors');
+        colRef.add(errorDoc).then(()=>{
+          console.log('[chat-error-log] saved to Firestore:', context);
+        }).catch(e2=>{
+          console.warn('[chat-error-log] Firestore save failed:', e2);
+        });
+        return;
+      }
+    }
+    // fallback: localStorage
+    const key='_chatErrors';
+    const existing=JSON.parse(localStorage.getItem(key)||'[]');
+    existing.push(errorDoc);
+    if(existing.length>50)existing.splice(0,existing.length-50);
+    localStorage.setItem(key,JSON.stringify(existing));
+    console.log('[chat-error-log] saved to localStorage (no Firestore):', context);
+  }catch(e){
+    console.warn('[chat-error-log] logging failed:', e);
+  }
+}
+
 // ── 도구 실행 (메인 모듈의 _milyAPI에 위임 — onSnapshot S 교체에 안전) ──
 function _executeTool(name,input){
   console.log('[mily-tool] execute:', name, JSON.stringify(input));
@@ -21674,6 +21715,7 @@ function _executeTool(name,input){
     return result;
   }catch(e){
     console.error('[mily-tool] error:', name, e);
+    _logChatError('tool_execute', e, {toolName:name, input:input});
     return {success:false,error:e.message};
   }
 }
@@ -21701,10 +21743,11 @@ function _requestProUpgrade(){
 // ── 가족 구성원 목록 조회 ──
 function _getFamilyMembers(){
   try{
+    const _RD=window.ROLE_DEFS||{};
     const S=_getS();
     const fm=S?.familyMeta?.members||{};
     const members=Object.entries(fm).map(([id,m])=>{
-      const rd=ROLE_DEFS[m.displayRole||m.role]||ROLE_DEFS.child;
+      const rd=_RD[m.displayRole||m.role]||_RD.child||{label:'구성원'};
       return{
         id,name:m.name||'(이름없음)',role:rd.label||m.role,
         type:m.type||m.role,isAdmin:!!m.isAdmin,
@@ -21720,6 +21763,8 @@ function _getFamilyMembers(){
 // ── 챗봇에서 가족 구성원 초대 ──
 function _inviteMemberFromChat(input){
   try{
+    const _rnd=window.generateSecureRandom||function(n){const a=new Uint8Array(n);crypto.getRandomValues(a);return Array.from(a,b=>b.toString(16).padStart(2,'0')).join('');};
+    const _RD=window.ROLE_DEFS||{};
     const S=_getS();
     if(!S||!S.familyMeta){return{success:false,error:'가족 정보를 불러올 수 없습니다.'};}
     const name=input.name?.trim();
@@ -21735,7 +21780,7 @@ function _inviteMemberFromChat(input){
     if(role!=='child'&&role!=='caregiver'){
       const usedRoles=Object.values(fm).map(m=>m.displayRole||m.role);
       if(usedRoles.includes(role)){
-        const rd=ROLE_DEFS[role];
+        const rd=_RD[role];
         return{success:false,error:`${rd?.label||role} 역할은 이미 등록되어 있어요.`};
       }
     }
@@ -21743,8 +21788,8 @@ function _inviteMemberFromChat(input){
     // 구성원 추가
     const memberRole=role==='child'?'child':'caregiver';
     const memberDisplayRole=(role!=='child'&&role!=='caregiver')?role:'';
-    const rd=ROLE_DEFS[memberDisplayRole||memberRole]||ROLE_DEFS.child;
-    const newId='mid_'+Date.now()+'_'+generateSecureRandom(4);
+    const rd=_RD[memberDisplayRole||memberRole]||_RD.child||{color:'#F1F5F9',textColor:'#64748B'};
+    const newId='mid_'+Date.now()+'_'+_rnd(4);
     const existingOrders=Object.values(fm).map(m=>m.sortOrder||0);
     const nextOrder=(existingOrders.length>0?Math.max(...existingOrders):0)+1;
 
@@ -21756,7 +21801,7 @@ function _inviteMemberFromChat(input){
     };
 
     // 초대 토큰 생성
-    const inviteToken=generateSecureRandom(16)+Date.now().toString(36);
+    const inviteToken=_rnd(16)+Date.now().toString(36);
     if(!S.familyMeta.inviteTokens)S.familyMeta.inviteTokens=[];
     const tokenEntry={
       token:inviteToken,memberId:newId,
@@ -21766,16 +21811,17 @@ function _inviteMemberFromChat(input){
     S.familyMeta.inviteTokens.push(tokenEntry);
 
     // 저장
-    if(typeof save==='function')save();
-    if(typeof rebuildMembersFromFamily==='function')rebuildMembersFromFamily();
-    if(typeof renderAll==='function')renderAll();
+    if(typeof window.save==='function')window.save();
+    if(typeof window.rebuildMembersFromFamily==='function')window.rebuildMembersFromFamily();
+    if(typeof window.renderAll==='function')window.renderAll();
 
     // 초대 링크 생성
-    const basePath=_ENV==='dev'?'taemin_mileage/dev/':'taemin_mileage/';
-    const fid=typeof _familyId!=='undefined'?_familyId:'';
+    const envVal=window._ENV||'dev';
+    const basePath=envVal==='dev'?'taemin_mileage/dev/':'taemin_mileage/';
+    const fid=(typeof window._familyId_ref!=='undefined'&&window._familyId_ref)?window._familyId_ref:'';
     const url=`https://kwakhyoshin.github.io/${basePath}?invite=${encodeURIComponent(fid)}&token=${inviteToken}&mid=${newId}`;
     const familyName=S.familyMeta?.familyName||'가족';
-    const roleLabel=ROLE_DEFS[memberDisplayRole||memberRole]?.label||'구성원';
+    const roleLabel=_RD[memberDisplayRole||memberRole]?.label||'구성원';
 
     // 공유 또는 클립보드 (비동기 — 결과와 별도로 트리거)
     const shareTitle=`${familyName} 가족 초대`;
