@@ -2,7 +2,7 @@
 
 > 이 문서는 새 세션에서 실수 없이 개발·테스트·배포할 수 있도록 모든 핵심 정보를 담고 있습니다.
 > **새 세션 시작 시 반드시 이 문서를 먼저 읽을 것.**
-> 최종 업데이트: 2026-04-03 (PRO 등급 해제 버그 수정 + 나의메뉴 UI 개선 + 사용법 안내 보강 + admin App Check 수정, PR #172~#182)
+> 최종 업데이트: 2026-04-03 (챗봇 초대 링크 버튼 UX + 운영 반영 v0403v + admin chatErrors 수정, PR #200~#203)
 
 ---
 
@@ -1038,9 +1038,9 @@ account: {
 
 ## 변경 이력 (Change Log)
 
-### 2026-04-03 세션 — 챗봇 가족초대 수정 + 오류 로깅 + UI 개선
+### 2026-04-03 세션 — 챗봇 가족초대 수정 + 오류 로깅 + 초대 링크 버튼 + 운영 반영
 
-**적용 범위: 개발기 (DEV v0403u)**
+**적용 범위: 개발기 (DEV v0403v) + 운영기 (v0403v)**
 
 #### 주요 변경사항
 
@@ -1070,6 +1070,23 @@ account: {
 6. **Naver 프록시 Vercel 배포 완료**
    - `kwakhyoshin/mily-proxy` 저장소에 `api/naver-profile.js` 추가 → 자동 배포
    - CORS: `kwakhyoshin.github.io` 허용
+
+7. **챗봇 초대 링크 — 공유 버튼 UX 개선 (v0403v, PR #201)**
+   - 자동 공유 팝업(setTimeout + navigator.share) 제거 → 사용자 혼란 방지
+   - 초대 완료 카드에 `📨 초대 링크 공유하기` 버튼 추가 (보라색 pill 스타일)
+   - 버튼 탭 시 navigator.share (모바일) 또는 클립보드 복사 동작
+   - 시스템 프롬프트에 "URL 텍스트로 보여주지 말고 버튼 안내" 지침 추가
+   - CSS: `.mily-invite-btn` 클래스 (gradient #6366F1→#818CF8, border-radius 20px)
+   - `_inviteMemberFromChat` return의 `inviteUrl` 필드를 `_renderToolCard`에서 활용
+
+8. **운영 반영 v0403v (PR #202)**
+   - v0403p → v0403v: 네이버 로그인, 도장 가시성, 챗봇 초대, 오류 로깅, 배너 등 일괄 반영
+   - `_ENV='prod'` 확인 완료
+
+9. **admin.html 챗봇 오류 조회 Firestore 버전 불일치 수정 (PR #203)**
+   - **원인**: `loadChatErrors`/`clearChatErrors`에서 Firebase 10.7.1을 동적 import → `db`는 10.12.0의 getFirestore로 생성 → `collection()`이 db를 인식 못함
+   - **수정**: 동적 import 제거, 상단 10.12.0 static import에 `orderBy`, `fsLimit` 추가
+   - **교훈**: Firebase SDK 버전 혼용 금지. 한 파일 내에서는 반드시 동일 버전 사용
 
 ### 2026-04-02 세션 2 — 챗봇 UI 개선 + mily.ai 로고 + 다크모드 + 존댓말 + 마일리지 통일
 
