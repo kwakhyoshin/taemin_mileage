@@ -7617,15 +7617,18 @@ async function _doNaverLogin(){
     window.addEventListener('message', handler);
     // 팝업 닫힘 + localStorage 폴링 (모바일에서 popup.closed 감지 안 될 수 있음)
     const pollTimer = setInterval(()=>{
-      // ★ 팝업 열려있는 동안에도 localStorage 폴링
+      // ★ 팝업 열려있는 동안: SDK 최종 결과만 수용 (_preliminary 무시)
       if(!resolved){
         try{
           const stored = localStorage.getItem('taemin_v6_naver_callback_result');
           if(stored){
-            localStorage.removeItem('taemin_v6_naver_callback_result');
             const data = JSON.parse(stored);
-            if(data && data.type === 'naver_login' && data.uid){
-              console.log('[Naver] localStorage fallback 사용:', data.uid);
+            // _preliminary 마커가 있으면 SDK 로드 전 임시 결과 → 팝업 열려있는 동안은 건너뜀
+            if(data && data._preliminary){
+              // SDK 최종 결과가 올 때까지 대기 (삭제하지 않음)
+            } else if(data && data.type === 'naver_login' && data.uid){
+              localStorage.removeItem('taemin_v6_naver_callback_result');
+              console.log('[Naver] localStorage SDK result:', data.uid, 'email:', data.email||'(none)', 'photo:', data.profileImage?'있음':'없음');
               resolved = true;
               window.removeEventListener('message', handler);
               clearInterval(pollTimer);
@@ -7640,14 +7643,14 @@ async function _doNaverLogin(){
         setTimeout(()=>{
           if(!resolved){
             window.removeEventListener('message', handler);
-            // 마지막으로 localStorage 한 번 더 확인
+            // 팝업 닫힌 후: localStorage 결과 수용 (preliminary 포함 — 이 시점에선 최종 결과)
             try{
               const stored = localStorage.getItem('taemin_v6_naver_callback_result');
               if(stored){
                 localStorage.removeItem('taemin_v6_naver_callback_result');
                 const data = JSON.parse(stored);
                 if(data && data.type === 'naver_login' && data.uid){
-                  console.log('[Naver] localStorage fallback (after close):', data.uid);
+                  console.log('[Naver] localStorage fallback (after close):', data.uid, 'email:', data.email||'(none)', 'preliminary:', !!data._preliminary);
                   resolved = true;
                   resolve(data);
                   return;
@@ -8725,7 +8728,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0403q';
+const _APP_VERSION = 'v0403r';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -15615,6 +15618,13 @@ window.pfMenuAction=pfMenuAction;
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
   {
+    ver:'1.9.14 (v0403r)', date:'2026-04-03',
+    items:[
+      {type:'fix',text:'네이버 로그인 시 이메일·프로필사진 누락 수정 — SDK 최종 결과 우선 수용, preliminary fallback 타이밍 개선'},
+      {type:'improve',text:'네이버 콜백 디버깅 로그 강화 (email, name, photo 개별 출력)'},
+    ]
+  },
+  {
     ver:'1.9.13 (v0403q)', date:'2026-04-03',
     items:[
       {type:'new',text:'AI챗봇: 가족 구성원 추가 및 초대 링크 공유 기능 (FREE/PRO 공통)'},
@@ -19553,13 +19563,15 @@ window._createState = _createState;
         }catch(e){}
       }
       if(accessToken){
-        console.log('[Naver Callback] access_token detected, storing fallback immediately + loading SDK...');
-        // ★ SDK 로드 전에 즉시 localStorage에 fallback 결과 저장 (모바일에서 SDK 로딩이 중단될 수 있음)
+        console.log('[Naver Callback] access_token detected, storing preliminary marker + loading SDK...');
+        // ★ SDK 로드 전에 "preliminary" 마커만 저장 — 부모 창이 SDK 결과를 기다리도록 함
+        // 이전 방식: 즉시 빈 email/displayName으로 저장 → 부모가 이걸 최종 결과로 소비 → 프로필 누락
+        // 새 방식: _preliminary:true 마커 → 부모는 팝업이 닫힌 후에만 이 결과를 사용
         if(!_isNaverRedirectReturn){
           try{
             localStorage.setItem('taemin_v6_naver_callback_result', JSON.stringify({
               type:'naver_login', uid:'naver_token_'+accessToken.substring(0,16),
-              email:'', displayName:'', provider:'naver', _fallback:true
+              email:'', displayName:'', provider:'naver', _fallback:true, _preliminary:true
             }));
           }catch(e){}
         }
@@ -19584,15 +19596,19 @@ window._createState = _createState;
             }, 10000);
             naverLogin.getLoginStatus((status)=>{
               clearTimeout(timeout);
-              console.log('[Naver Callback] getLoginStatus:', status);
+              console.log('[Naver Callback] getLoginStatus:', status, 'user:', naverLogin.user ? 'exists' : 'null');
               if(status && naverLogin.user){
                 const uid = naverLogin.user.getId();
-                console.log('[Naver Callback] User ID:', uid);
+                const _email = naverLogin.user.getEmail()||'';
+                const _name = naverLogin.user.getName()||'';
+                const _nick = naverLogin.user.getNickName()||'';
+                const _photo = naverLogin.user.getProfileImage()||'';
+                console.log('[Naver Callback] User ID:', uid, 'email:', _email, 'name:', _name, 'nick:', _nick, 'photo:', _photo ? _photo.substring(0,60)+'...' : '(none)');
                 _deliverNaverResult({
                   type:'naver_login', uid:'naver_'+uid,
-                  email: naverLogin.user.getEmail()||'',
-                  displayName: naverLogin.user.getName()||naverLogin.user.getNickName()||'',
-                  provider:'naver', profileImage: naverLogin.user.getProfileImage()||''
+                  email: _email,
+                  displayName: _name||_nick,
+                  provider:'naver', profileImage: _photo
                 });
               } else {
                 console.error('[Naver Callback] getLoginStatus failed, status:', status);
