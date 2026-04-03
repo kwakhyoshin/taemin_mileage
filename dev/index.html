@@ -8728,7 +8728,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0403z4';
+const _APP_VERSION = 'v0403z5';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -12792,7 +12792,10 @@ function renderAdmActList(){
           ${!a.active?'<span class="adm-pill adm-pill-off">비활성</span>':''}
         </div>
       </div>
-      <button class="icon-btn" onclick="openActForm('${a.id}')" style="width:36px;height:36px;min-width:36px;min-height:36px"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg></button>
+      <div style="display:flex;gap:4px;flex-shrink:0">
+        <button class="icon-btn" onclick="openActForm('${a.id}')" style="width:36px;height:36px;min-width:36px;min-height:36px"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg></button>
+        <button class="icon-btn del" onclick="delAct('${a.id}')" style="width:36px;height:36px;min-width:36px;min-height:36px;color:#EF4444"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>
+      </div>
     </div>`;
   }).join('');
   initActDrag();
@@ -12924,7 +12927,10 @@ function renderAdmRwdList(){
           ${hasSale?`<span class="adm-pill adm-pill-rd">${r.sale.percent}% 할인${r.sale.endDate?' ~'+r.sale.endDate.slice(5).replace('-','/'):''}</span>`:''}
         </div>
       </div>
-      <button class="icon-btn" onclick="openRwdForm('${r.id}')" style="width:36px;height:36px;min-width:36px;min-height:36px"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg></button>
+      <div style="display:flex;gap:4px;flex-shrink:0">
+        <button class="icon-btn" onclick="openRwdForm('${r.id}')" style="width:36px;height:36px;min-width:36px;min-height:36px"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg></button>
+        <button class="icon-btn del" onclick="delRwd('${r.id}')" style="width:36px;height:36px;min-width:36px;min-height:36px;color:#EF4444"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>
+      </div>
     </div>`;
   }).join('');
   initRwdDrag();
