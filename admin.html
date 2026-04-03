@@ -1090,7 +1090,7 @@ window.openFamilyDetail = function(familyId) {
     }
   }
   let rwdsHtml = allRwds.length === 0 ? '<div class="empty-state">보상이 없습니다</div>' :
-    `<table class="data-table"><thead><tr><th></th><th>보상명</th><th>필요 마일리지</th><th>상태</th><th>관리</th></tr></thead><tbody>` +
+    `<div style="overflow-x:auto"><table class="data-table"><thead><tr><th></th><th>보상명</th><th>필요 마일리지</th><th>상태</th><th>관리</th></tr></thead><tbody>` +
     allRwds.map((r, idx) => {
       const isClosed = r.closed === true;
       const statusBadge = isClosed
@@ -1101,12 +1101,14 @@ window.openFamilyDetail = function(familyId) {
         <td style="font-weight:700">${escHtml(r.name || '-')}</td>
         <td>${(r.pts || 0).toLocaleString()}M</td>
         <td>${statusBadge}</td>
-        <td style="white-space:nowrap">
-          <button class="btn-sm ${isClosed?'btn-primary':'btn-ghost'}" onclick="toggleRwdStatus('${familyId}','${r.id}',${isClosed})">${isClosed?'운영 재개':'종료'}</button>
-          <button class="btn-sm btn-danger" onclick="deleteRwd('${familyId}','${r.id}','${escHtml(r.name||'')}')">삭제</button>
+        <td>
+          <div style="display:flex;gap:4px;flex-wrap:wrap">
+            <button class="btn-sm ${isClosed?'btn-primary':'btn-ghost'}" onclick="toggleRwdStatus('${familyId}','${r.id}',${isClosed})">${isClosed?'운영 재개':'종료'}</button>
+            <button class="btn-sm btn-danger" onclick="deleteRwd('${familyId}','${r.id}','${escHtml(r.name||'')}')">삭제</button>
+          </div>
         </td>
       </tr>`;
-    }).join('') + '</tbody></table>';
+    }).join('') + '</tbody></table></div>';
 
   let membersHtml = Object.entries(members).map(([mid, m]) => {
     const hasAccount = !!m.account || !!users[mid];
