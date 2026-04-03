@@ -1379,6 +1379,13 @@ async function manualSetPlan(){
   }catch(e){alert('변경 실패: '+e.message);}
 }
 
+// ── module 함수를 window에 노출 (onclick에서 접근 가능하도록) ──
+// 아래 함수들은 function 선언으로 정의되어 module 스코프에 갇혀있으므로 window에 노출 필요
+window.approveProRequest=approveProRequest;
+window.rejectProRequest=rejectProRequest;
+window.manualSetPlan=manualSetPlan;
+window.loadProRequests=loadProRequests;
+
 </script>
 </body>
 </html>

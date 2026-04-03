@@ -21072,6 +21072,32 @@ function _showPlanPopup(){
     toast('🌟 PRO 등급 이용 중!');
     return;
   }
+  // 승인 대기 중 확인
+  const S=_getS();
+  const proReq=S?.familyMeta?.proRequest;
+  if(proReq&&proReq.status==='pending'){
+    // 승인 대기 중 팝업
+    const reqDate=proReq.requestedAt?new Date(proReq.requestedAt).toLocaleDateString('ko-KR'):'';
+    const overlay=document.createElement('div');
+    overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;animation:fadeIn .2s';
+    overlay.onclick=()=>overlay.remove();
+    const card=document.createElement('div');
+    card.style.cssText='background:var(--card,#fff);border-radius:20px;padding:32px 28px;max-width:340px;width:90%;text-align:center;box-shadow:0 16px 48px rgba(0,0,0,.2)';
+    card.onclick=e=>e.stopPropagation();
+    card.innerHTML=`
+      <div style="font-size:48px;margin-bottom:12px">⏳</div>
+      <div style="font-size:18px;font-weight:900;color:var(--tx,#1E293B);margin-bottom:8px">PRO 승인 대기 중</div>
+      <div style="font-size:13px;color:var(--tx2,#64748B);line-height:1.6;margin-bottom:20px">
+        PRO 업그레이드 신청이 접수되었어요!<br>
+        관리자 승인 후 모든 기능을 이용할 수 있어요.<br>
+        <span style="font-size:12px;color:var(--tx3,#94A3B8)">신청일: ${reqDate}</span>
+      </div>
+      <button style="width:100%;padding:14px;background:var(--pri,#6C63FF);color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit" onclick="this.closest('div[style*=fixed]').remove()">확인</button>
+    `;
+    overlay.appendChild(card);
+    document.body.appendChild(overlay);
+    return;
+  }
   // 일반 등급: 업그레이드 안내 팝업
   const overlay=document.createElement('div');
   overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;animation:fadeIn .2s';
