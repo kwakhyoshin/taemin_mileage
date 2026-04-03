@@ -3968,21 +3968,6 @@ requestAnimationFrame(function(){
         <div id="cache-info" style="padding:8px 4px 0;font-size:13px;color:var(--tx3);line-height:1.5"></div>
       </div>
     </div>
-    <!-- ── 앱 정보 ── -->
-    <div class="adm-sec">
-      <div class="adm-sec-lbl">앱 정보</div>
-      <div class="adm-card">
-        <div class="adm-row">
-          <div class="adm-row-l"><div class="adm-row-nm"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg> 앱 가이드 · 브로셔</div><div class="adm-row-sub">기획 의도와 전체 기능 소개</div></div>
-          <button class="btn-sm" onclick="location.href='guide.html'">보기</button>
-        </div>
-        <div class="divider"></div>
-        <div class="adm-row">
-          <div class="adm-row-l"><div class="adm-row-nm"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg> 시스템 아키텍처</div><div class="adm-row-sub">기술 구조 문서 보기</div></div>
-          <button class="btn-sm" onclick="location.href='architecture.html'">보기</button>
-        </div>
-      </div>
-    </div>
     <!-- ── 회원 탈퇴 ── -->
     <div class="adm-sec">
       <div class="adm-sec-lbl" style="color:#9CA3AF">계정</div>
@@ -7632,15 +7617,18 @@ async function _doNaverLogin(){
     window.addEventListener('message', handler);
     // 팝업 닫힘 + localStorage 폴링 (모바일에서 popup.closed 감지 안 될 수 있음)
     const pollTimer = setInterval(()=>{
-      // ★ 팝업 열려있는 동안에도 localStorage 폴링
+      // ★ 팝업 열려있는 동안: SDK 최종 결과만 수용 (_preliminary 무시)
       if(!resolved){
         try{
           const stored = localStorage.getItem('taemin_v6_naver_callback_result');
           if(stored){
-            localStorage.removeItem('taemin_v6_naver_callback_result');
             const data = JSON.parse(stored);
-            if(data && data.type === 'naver_login' && data.uid){
-              console.log('[Naver] localStorage fallback 사용:', data.uid);
+            // _preliminary 마커가 있으면 SDK 로드 전 임시 결과 → 팝업 열려있는 동안은 건너뜀
+            if(data && data._preliminary){
+              // SDK 최종 결과가 올 때까지 대기 (삭제하지 않음)
+            } else if(data && data.type === 'naver_login' && data.uid){
+              localStorage.removeItem('taemin_v6_naver_callback_result');
+              console.log('[Naver] localStorage SDK result:', data.uid, 'email:', data.email||'(none)', 'photo:', data.profileImage?'있음':'없음');
               resolved = true;
               window.removeEventListener('message', handler);
               clearInterval(pollTimer);
@@ -7655,14 +7643,14 @@ async function _doNaverLogin(){
         setTimeout(()=>{
           if(!resolved){
             window.removeEventListener('message', handler);
-            // 마지막으로 localStorage 한 번 더 확인
+            // 팝업 닫힌 후: localStorage 결과 수용 (preliminary 포함 — 이 시점에선 최종 결과)
             try{
               const stored = localStorage.getItem('taemin_v6_naver_callback_result');
               if(stored){
                 localStorage.removeItem('taemin_v6_naver_callback_result');
                 const data = JSON.parse(stored);
                 if(data && data.type === 'naver_login' && data.uid){
-                  console.log('[Naver] localStorage fallback (after close):', data.uid);
+                  console.log('[Naver] localStorage fallback (after close):', data.uid, 'email:', data.email||'(none)', 'preliminary:', !!data._preliminary);
                   resolved = true;
                   resolve(data);
                   return;
@@ -8740,7 +8728,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'prod'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0403p';
+const _APP_VERSION = 'v0403v';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -10866,7 +10854,7 @@ function renderHomeGrid(){
       ${a.maxDay>0?`<div class="count-badge">${st.label||'0/'+a.maxDay}</div>`:''}
       ${timer?`<div class="timer"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-1px;margin-right:2px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${timer}</div>`:''}
       <div class="act-card-prog"><div class="act-card-prog-fill" style="width:${st.pct}%;background:${st.cls==='done'||st.cls==='exhausted'?'var(--gn)':st.cls==='partial'?'var(--yw)':'var(--tab-color,var(--or))'}"></div></div>
-      ${_cardDone?'<div class="card-done-stamp"><svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="29" stroke="#6EE7B7" stroke-width="3.5" stroke-dasharray="5 2.5" opacity=".7"/><circle cx="32" cy="32" r="21" stroke="#6EE7B7" stroke-width="2.5" opacity=".5"/><text x="32" y="30" text-anchor="middle" font-size="14" font-weight="900" fill="#6EE7B7" font-family="Noto Sans KR,sans-serif" opacity=".8">완료</text><text x="32" y="43" text-anchor="middle" font-size="9" font-weight="800" fill="#6EE7B7" font-family="sans-serif" letter-spacing="2" opacity=".55">DONE</text></svg></div>':''}
+      ${_cardDone?'<div class="card-done-stamp"><svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="29" stroke="#34D399" stroke-width="3.5" stroke-dasharray="5 2.5" opacity=".9"/><circle cx="32" cy="32" r="21" stroke="#34D399" stroke-width="2.5" opacity=".7"/><text x="32" y="30" text-anchor="middle" font-size="14" font-weight="900" fill="#10B981" font-family="Noto Sans KR,sans-serif" opacity=".95">완료</text><text x="32" y="43" text-anchor="middle" font-size="9" font-weight="800" fill="#10B981" font-family="sans-serif" letter-spacing="2" opacity=".75">DONE</text></svg></div>':''}
     </div>`;
   }).join('');
   // Attach long-press gauge + tap handlers
@@ -10931,7 +10919,7 @@ function renderLogList(){
     const countLabel=max>0?`${done}/${max}회`:'';
     const stickerHTML=renderStickersForLog(a.id);
     const _isDone=exhausted||(max===0&&done>0);
-    const _stampHTML=_isDone?'<div class="log-done-stamp"><svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="29" stroke="#6EE7B7" stroke-width="3.5" stroke-dasharray="5 2.5" opacity=".7"/><circle cx="32" cy="32" r="21" stroke="#6EE7B7" stroke-width="2.5" opacity=".5"/><text x="32" y="30" text-anchor="middle" font-size="14" font-weight="900" fill="#6EE7B7" font-family="Noto Sans KR,sans-serif" opacity=".8">완료</text><text x="32" y="43" text-anchor="middle" font-size="9" font-weight="800" fill="#6EE7B7" font-family="sans-serif" letter-spacing="2" opacity=".55">DONE</text></svg></div>':'';
+    const _stampHTML=_isDone?'<div class="log-done-stamp"><svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="29" stroke="#34D399" stroke-width="3.5" stroke-dasharray="5 2.5" opacity=".9"/><circle cx="32" cy="32" r="21" stroke="#34D399" stroke-width="2.5" opacity=".7"/><text x="32" y="30" text-anchor="middle" font-size="14" font-weight="900" fill="#10B981" font-family="Noto Sans KR,sans-serif" opacity=".95">완료</text><text x="32" y="43" text-anchor="middle" font-size="9" font-weight="800" fill="#10B981" font-family="sans-serif" letter-spacing="2" opacity=".75">DONE</text></svg></div>':'';
     const _lgColor=exhausted?'rgba(16,185,129,.12)':cls.includes('partial')?'rgba(245,158,11,.12)':'rgba(99,102,241,.12)';
     const _isCaregiver=isCaregiverUser();
     const _isShowHome=!!a.showHome;
@@ -13024,7 +13012,7 @@ function _doActCore(id){
   const _actCard=_curTab==='home'?document.querySelector(`.act-card[data-actid="${id}"]`):null;
   const _logItem=_curTab==='log'?document.querySelector(`.log-item[data-actid="${id}"]`):null;
 
-  const _stampSVG='<svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="29" stroke="#6EE7B7" stroke-width="3.5" stroke-dasharray="5 2.5" opacity=".7"/><circle cx="32" cy="32" r="21" stroke="#6EE7B7" stroke-width="2.5" opacity=".5"/><text x="32" y="30" text-anchor="middle" font-size="14" font-weight="900" fill="#6EE7B7" font-family="Noto Sans KR,sans-serif" opacity=".8">완료</text><text x="32" y="43" text-anchor="middle" font-size="9" font-weight="800" fill="#6EE7B7" font-family="sans-serif" letter-spacing="2" opacity=".55">DONE</text></svg>';
+  const _stampSVG='<svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="29" stroke="#34D399" stroke-width="3.5" stroke-dasharray="5 2.5" opacity=".9"/><circle cx="32" cy="32" r="21" stroke="#34D399" stroke-width="2.5" opacity=".7"/><text x="32" y="30" text-anchor="middle" font-size="14" font-weight="900" fill="#10B981" font-family="Noto Sans KR,sans-serif" opacity=".95">완료</text><text x="32" y="43" text-anchor="middle" font-size="9" font-weight="800" fill="#10B981" font-family="sans-serif" letter-spacing="2" opacity=".75">DONE</text></svg>';
   // 도장은 최종 완료(무제한 활동 또는 maxDay 도달)일 때만 표시
   const _doneCount=countDone(a);
   const _showStamp=(a.maxDay===0)||(a.maxDay>0&&_doneCount>=a.maxDay);
@@ -15629,6 +15617,32 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.18 (v0403v)',date:'2026-04-03',items:[
+    {type:'improve',text:'가족 초대 링크를 채팅 내 공유 버튼으로 표시 (URL 노출 제거)'},
+    {type:'improve',text:'자동 공유 팝업 제거 — 사용자가 버튼으로 직접 공유'},
+  ]},
+  {ver:'1.9.17 (v0403u)',date:'2026-04-03',items:[
+    {type:'fix',text:'챗봇 가족 구성원 초대 기능 오류 수정 (모듈 스코프 문제)'},
+    {type:'new',text:'챗봇 오류 자동 로깅 기능 (Firestore 저장)'},
+    {type:'fix',text:'업데이트 배너가 미니 아이콘으로 남는 문제 수정 (자동 사라짐)'},
+    {type:'fix',text:'활동 완료 도장 라이트모드 가시성 개선 (알파값 상향)'},
+  ]},
+  {
+    ver:'1.9.16 (v0403t)', date:'2026-04-03',
+    items:[
+      {type:'fix',text:'네이버 로그인: Vercel 프록시 경유로 Profile API 호출 (CORS 우회)'},
+      {type:'fix',text:'네이버 이메일·프로필사진·이름이 정상적으로 가져와지도록 수정'},
+    ]
+  },
+  {
+    ver:'1.9.13 (v0403q)', date:'2026-04-03',
+    items:[
+      {type:'new',text:'AI챗봇: 가족 구성원 추가 및 초대 링크 공유 기능 (FREE/PRO 공통)'},
+      {type:'new',text:'AI챗봇: 가족 구성원 목록 조회 도구 추가'},
+      {type:'improve',text:'챗봇 퀵메뉴에 "가족 구성원 초대" 카테고리 추가'},
+      {type:'fix',text:'관리자 설정에서 앱 가이드/시스템 아키텍처 링크 제거'},
+    ]
+  },
   {
     ver:'1.9.12 (v0403p)', date:'2026-04-03',
     items:[
@@ -15998,30 +16012,12 @@ function _showChangelogPopupIfNew(){
     };
     document.body.appendChild(banner);
     requestAnimationFrame(()=>requestAnimationFrame(()=>{banner.style.transform='translateY(0)';}));
-    // 5초 후 미니 FAB로 축소
+    // 5초 후 배너 자동 닫기 (미니 FAB 없이 그냥 사라짐)
     setTimeout(()=>{
       const b=document.getElementById('changelog-banner');
       if(!b)return;
       b.style.transform='translateY(-100%)';
-      setTimeout(()=>{
-        b.remove();
-        // 미니 FAB 생성 (우측 상단)
-        const mini=document.createElement('div');
-        mini.id='changelog-mini';
-        mini.style.cssText='position:fixed;top:calc(env(safe-area-inset-top,0) + 8px);right:12px;z-index:9000;width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#6366F1,#8B5CF6);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 16px rgba(99,102,241,.4);transform:scale(0);transition:transform .3s cubic-bezier(.22,1,.36,1)';
-        mini.innerHTML='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
-        // NEW 뱃지
-        const dot=document.createElement('div');
-        dot.style.cssText='position:absolute;top:-2px;right:-2px;width:14px;height:14px;border-radius:50%;background:#F43F5E;border:2px solid #fff;font-size:0';
-        mini.appendChild(dot);
-        mini.onclick=function(){
-          mini.style.transform='scale(0)';
-          setTimeout(()=>mini.remove(),300);
-          openChangelog();
-        };
-        document.body.appendChild(mini);
-        requestAnimationFrame(()=>requestAnimationFrame(()=>{mini.style.transform='scale(1)';}));
-      },400);
+      setTimeout(()=>{ b.remove(); },400);
     },5000);
   },1500);
 }
@@ -18651,6 +18647,13 @@ window.renderAll=renderAll;
 window.doAct=doAct;
 window._ENV_REF=_ENV; // IIFE에서 _ENV 접근용
 window._currentUser_ref=function(){return currentUser;}; // IIFE에서 currentUser 접근용
+window.ROLE_DEFS=ROLE_DEFS;
+window.generateSecureRandom=generateSecureRandom;
+window.rebuildMembersFromFamily=rebuildMembersFromFamily;
+Object.defineProperty(window,'_familyId_ref',{get(){return _familyId;},configurable:true});
+window._ENV=_ENV;
+window._firestore_ref=function(){return typeof db!=='undefined'?db:null;};
+window._APP_VERSION_REF=_APP_VERSION;
 
 // ── 밀리 챗봇용 API (모듈 스코프의 S를 직접 조작하므로 onSnapshot 교체에 안전) ──
 window._milyAPI={
@@ -19559,65 +19562,43 @@ window._createState = _createState;
         }catch(e){}
       }
       if(accessToken){
-        console.log('[Naver Callback] access_token detected, storing fallback immediately + loading SDK...');
-        // ★ SDK 로드 전에 즉시 localStorage에 fallback 결과 저장 (모바일에서 SDK 로딩이 중단될 수 있음)
-        if(!_isNaverRedirectReturn){
+        console.log('[Naver Callback] access_token detected, calling Profile API via proxy...');
+        // ★ SDK 의존 제거 — Vercel 프록시 경유로 네이버 Profile API 호출 (CORS 우회)
+        (async()=>{
           try{
-            localStorage.setItem('taemin_v6_naver_callback_result', JSON.stringify({
-              type:'naver_login', uid:'naver_token_'+accessToken.substring(0,16),
-              email:'', displayName:'', provider:'naver', _fallback:true
-            }));
-          }catch(e){}
-        }
-        const script = document.createElement('script');
-        script.src = 'https://static.nid.naver.com/js/naveridlogin_js_sdk_2.0.2.js';
-        script.onload = ()=>{
-          console.log('[Naver Callback] SDK loaded, initializing...');
-          try {
-            const naverLogin = new window.naver.LoginWithNaverId({
-              clientId: _NAVER_CLIENT_ID || '',
-              callbackUrl: window.location.href.split('#')[0].split('?')[0],
-              isPopup: !_isNaverRedirectReturn,
-              callbackHandle: true
+            const resp=await fetch('https://mily-proxy.vercel.app/api/naver-profile',{
+              method:'POST',
+              headers:{'Content-Type':'application/json'},
+              body:JSON.stringify({access_token:accessToken})
             });
-            naverLogin.init();
-            const timeout = setTimeout(()=>{
-              console.error('[Naver Callback] getLoginStatus timeout');
+            if(!resp.ok){
+              console.error('[Naver Callback] Profile API error:', resp.status);
+              _deliverNaverResult({type:'naver_login',uid:'naver_token_'+accessToken.substring(0,16),email:'',displayName:'',provider:'naver',_fallback:true});
+              return;
+            }
+            const json=await resp.json();
+            console.log('[Naver Callback] Profile API response:', JSON.stringify(json).substring(0,300));
+            if(json.resultcode==='00'&&json.response){
+              const r=json.response;
+              const uid=r.id||'';
+              const email=r.email||'';
+              const name=r.name||r.nickname||'';
+              const photo=r.profile_image||'';
+              console.log('[Naver Callback] User:', uid, 'email:', email, 'name:', name, 'photo:', photo?photo.substring(0,60)+'...':'(none)');
               _deliverNaverResult({
-                type:'naver_login', uid:'naver_token_'+accessToken.substring(0,16),
-                email:'', displayName:'', provider:'naver', _fallback:true
+                type:'naver_login',uid:'naver_'+uid,
+                email:email,displayName:name,
+                provider:'naver',profileImage:photo
               });
-            }, 10000);
-            naverLogin.getLoginStatus((status)=>{
-              clearTimeout(timeout);
-              console.log('[Naver Callback] getLoginStatus:', status);
-              if(status && naverLogin.user){
-                const uid = naverLogin.user.getId();
-                console.log('[Naver Callback] User ID:', uid);
-                _deliverNaverResult({
-                  type:'naver_login', uid:'naver_'+uid,
-                  email: naverLogin.user.getEmail()||'',
-                  displayName: naverLogin.user.getName()||naverLogin.user.getNickName()||'',
-                  provider:'naver', profileImage: naverLogin.user.getProfileImage()||''
-                });
-              } else {
-                console.error('[Naver Callback] getLoginStatus failed, status:', status);
-                _deliverNaverResult({
-                  type:'naver_login', uid:'naver_token_'+accessToken.substring(0,16),
-                  email:'', displayName:'', provider:'naver', _fallback:true
-                });
-              }
-            });
-          } catch(sdkErr){
-            console.error('[Naver Callback] SDK init error:', sdkErr);
-            _deliverNaverResult({type:'naver_login', uid:'naver_token_'+accessToken.substring(0,16), email:'', displayName:'', provider:'naver', _fallback:true});
+            }else{
+              console.error('[Naver Callback] Profile API unexpected result:', json.resultcode, json.message);
+              _deliverNaverResult({type:'naver_login',uid:'naver_token_'+accessToken.substring(0,16),email:'',displayName:'',provider:'naver',_fallback:true});
+            }
+          }catch(apiErr){
+            console.error('[Naver Callback] Profile API fetch error:', apiErr);
+            _deliverNaverResult({type:'naver_login',uid:'naver_token_'+accessToken.substring(0,16),email:'',displayName:'',provider:'naver',_fallback:true});
           }
-        };
-        script.onerror = ()=>{
-          console.error('[Naver Callback] SDK load failed');
-          _deliverNaverResult({type:'naver_login', uid:'naver_token_'+accessToken.substring(0,16), email:'', displayName:'', provider:'naver', _fallback:true});
-        };
-        document.head.appendChild(script);
+        })();
         if(!_isNaverRedirectReturn) return; // 팝업: 이 창은 콜백 처리만 하고 종료
         // redirect 모드: return하지 않고 앱 초기화 계속 진행 (위의 async에서 로그인 처리)
       }
@@ -20523,6 +20504,8 @@ body.dark .mily-tool-card{background:linear-gradient(135deg,rgba(99,102,241,.12)
 .mily-tool-card .tc-name{font-size:15px;font-weight:800;color:var(--tx,#1E293B);line-height:1.3}
 .mily-tool-card .tc-meta{font-size:12px;color:var(--tx2,#64748B);margin-top:2px}
 .mily-tool-card .tc-pts{font-size:14px;font-weight:800;color:#6366F1;white-space:nowrap}
+.mily-invite-btn{display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:8px 16px;background:linear-gradient(135deg,#6366F1,#818CF8);color:#fff;border:none;border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(99,102,241,.3);transition:all .2s}
+.mily-invite-btn:active{transform:scale(.96);box-shadow:0 1px 4px rgba(99,102,241,.2)}
 .mily-tool-card.tc-add{border-color:rgba(34,197,94,.3);background:linear-gradient(135deg,rgba(34,197,94,.06),rgba(16,185,129,.06))}
 .mily-tool-card.tc-add .tc-pts{color:#16A34A}
 .mily-tool-card.tc-del{border-color:rgba(239,68,68,.3);background:linear-gradient(135deg,rgba(239,68,68,.06),rgba(244,63,94,.06))}
@@ -20820,6 +20803,10 @@ function _getQuickMenuData(isC,kidName){
       {label:'보상 교환',prompt:'아이가 보상을 교환하고 싶어해. 현재 마일리지로 교환 가능한 보상을 확인해줘.'},
       {label:'보상 환불',prompt:'교환했던 보상을 환불하고 싶어.'},
     ]},
+    {icon:'👨‍👩‍👧‍👦',label:'가족 구성원 초대',subs:[
+      {label:'구성원 추가하기',prompt:'새 가족 구성원을 추가하고 초대 링크를 보내고 싶어. 어떤 구성원인지 물어봐줘 (이름, 역할: 아빠/엄마/할아버지/할머니/외할아버지/외할머니/양육자/자녀).'},
+      {label:'현재 가족 구성 보기',prompt:'현재 우리 가족에 누가 등록되어 있는지 알려줘. 각 구성원의 이름과 역할, 가입 여부도 함께 보여줘.'},
+    ]},
   ];
   else return [
     {icon:'🚀',label:'오늘의 모험',subs:[
@@ -21034,6 +21021,7 @@ async function _callMilyAPI(){
     }
   }catch(e){
     console.error('[mily-chat]',e);
+    _logChatError('api_call', e, {historyLength:_milyHistory.length});
     _addBotMsg('⚠️ 오류가 발생했어요: '+e.message+'\n잠시 후 다시 시도해 주세요.');
   }finally{
     _milySending=false;
@@ -21075,6 +21063,7 @@ function _showPlanPopup(){
   const proReq=S?.familyMeta?.proRequest;
   const isPending=proReq&&proReq.status==='pending';
 
+  // ── 오버레이 생성 ──
   const overlay=document.createElement('div');
   overlay.id='plan-popup-overlay';
   overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center;animation:fadeIn .2s;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)';
@@ -21083,9 +21072,11 @@ function _showPlanPopup(){
   card.style.cssText='background:var(--card,#fff);border-radius:24px;padding:28px 24px 24px;max-width:380px;width:92%;box-shadow:0 20px 60px rgba(0,0,0,.25);position:relative;max-height:90vh;overflow-y:auto';
   card.onclick=e=>e.stopPropagation();
 
+  // ── 닫기 버튼 (항상 존재) ──
   const closeBtn='<button onclick="document.getElementById(\'plan-popup-overlay\').remove()" style="position:absolute;top:14px;right:14px;background:var(--bg2,#F1F5F9);border:none;width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer;color:var(--tx2,#64748B);display:flex;align-items:center;justify-content:center;font-weight:700;z-index:2">✕</button>';
 
   if(isPro){
+    // ═══ PRO 사용자: 현재 플랜 정보 + 다운그레이드 옵션 ═══
     card.innerHTML=`${closeBtn}
       <div style="text-align:center;margin-bottom:20px">
         <div style="display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#F59E0B,#D97706);margin-bottom:12px">
@@ -21106,6 +21097,7 @@ function _showPlanPopup(){
       <button onclick="_requestPlanDowngrade()" style="width:100%;padding:12px;background:none;border:1.5px solid var(--bdr,#E2E8F0);border-radius:14px;font-size:13px;font-weight:700;cursor:pointer;color:var(--tx3,#94A3B8);font-family:inherit;transition:all .15s">FREE 플랜으로 변경하기</button>
     `;
   } else if(isPending){
+    // ═══ 승인 대기 중: 대기 상태 표시 + 중복 신청 불가 ═══
     const reqDate=proReq.requestedAt?new Date(proReq.requestedAt).toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'}):'';
     card.innerHTML=`${closeBtn}
       <div style="text-align:center;margin-bottom:20px">
@@ -21131,11 +21123,14 @@ function _showPlanPopup(){
       <button onclick="document.getElementById('plan-popup-overlay').remove()" style="width:100%;padding:14px;background:var(--pri,#6366F1);color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit">닫기</button>
     `;
   } else {
+    // ═══ FREE 사용자: FREE vs PRO 비교 구독 페이지 ═══
     card.innerHTML=`${closeBtn}
       <div style="text-align:center;margin-bottom:20px">
         <div style="font-size:20px;font-weight:900;color:var(--tx,#1E293B)">나에게 맞는 플랜 선택</div>
         <div style="font-size:13px;color:var(--tx2,#64748B);margin-top:4px">PRO로 더 스마트하게 관리해보세요</div>
       </div>
+
+      <!-- FREE 플랜 -->
       <div style="border:1.5px solid var(--bdr,#E2E8F0);border-radius:16px;padding:16px;margin-bottom:12px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
           <div>
@@ -21154,6 +21149,8 @@ function _showPlanPopup(){
           <div style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--tx3,#94A3B8)"><span style="color:var(--tx3,#94A3B8);font-size:13px">✕</span> AI 육아 코칭 & 맞춤 분석</div>
         </div>
       </div>
+
+      <!-- PRO 플랜 -->
       <div style="border:2px solid #F59E0B;border-radius:16px;padding:16px;margin-bottom:20px;background:linear-gradient(135deg,rgba(245,158,11,.04),rgba(217,119,6,.02));position:relative">
         <div style="position:absolute;top:-10px;right:16px;background:linear-gradient(135deg,#F59E0B,#D97706);color:#fff;font-size:10px;font-weight:800;padding:3px 10px;border-radius:8px">추천</div>
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
@@ -21172,12 +21169,14 @@ function _showPlanPopup(){
           <div style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:#D97706"><span style="color:#F59E0B;font-size:13px">★</span> AI 스마트 보상 추천</div>
         </div>
       </div>
+
       <button id="plan-popup-upgrade-btn" onclick="_requestProUpgradeFromUI()" style="width:100%;padding:14px;background:linear-gradient(135deg,#F59E0B,#D97706);color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 16px rgba(245,158,11,.3);transition:all .15s"><svg viewBox="0 0 24 24" fill="none" width="16" height="16" style="vertical-align:middle;margin-right:4px;margin-top:-2px"><path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26z" fill="#fff" stroke="#fff" stroke-width="1"/></svg>PRO 업그레이드 신청하기</button>
     `;
   }
 
   overlay.appendChild(card);
   document.body.appendChild(overlay);
+  // 오버레이 바깥 클릭 시 닫기 (카드 안은 stopPropagation)
   overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.remove();});
 }
 
@@ -21190,6 +21189,7 @@ function _requestProUpgradeFromUI(){
   if(!card) return;
 
   if(result&&result.success){
+    // 팝업을 닫지 않고 승인 대기 상태로 전환
     const S=_getS();
     const proReq=S?.familyMeta?.proRequest;
     const reqDate=proReq?.requestedAt?new Date(proReq.requestedAt).toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'}):'오늘';
@@ -21212,12 +21212,14 @@ function _requestProUpgradeFromUI(){
       </div>
       <button onclick="document.getElementById('plan-popup-overlay').remove()" style="width:100%;padding:14px;background:var(--pri,#6366F1);color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit">닫기</button>
     `;
+    // 배지 즉시 갱신
     _updatePlanBadges();
   } else {
     toast('⚠️ 신청 중 문제가 발생했어요');
   }
 }
 
+// ── PRO → FREE 다운그레이드 요청 ──
 window._requestPlanDowngrade=_requestPlanDowngrade;
 function _requestPlanDowngrade(){
   const overlay=document.getElementById('plan-popup-overlay');
@@ -21253,6 +21255,7 @@ function _confirmPlanDowngrade(){
     const S=_getS();
     if(!S||!S.familyMeta) return;
     S.familyMeta.plan='free';
+    // proRequest도 초기화
     if(S.familyMeta.proRequest) delete S.familyMeta.proRequest;
     if(typeof save==='function') save();
     _updatePlanBadges();
@@ -21291,13 +21294,13 @@ ${isMultiChild?`자녀(${childrenInfo.length}명):${childrenInfo.join(',')}\n`:'
 [규칙]
 1. 실행요청→tool호출.
 2. 응답 끝에 [BUTTONS:행동1|행동2]
-3. ${isC?'양육자→모든 기능':'자녀→do_activity,get_status만. 나머진 "부모님께 부탁해봐!"'}
+3. ${isC?'양육자→모든 기능. 가족 초대 시 invite_member 사용(이름+역할 필수). 역할: dad,mom,grandpa,grandma,grandpa_m,grandma_m,caregiver,child. 초대 완료 후 URL을 텍스트로 보여주지 말고 "아래 초대 링크 버튼을 눌러 공유해주세요!" 안내':'자녀→do_activity,get_status만. 나머진 "부모님께 부탁해봐!"'}
 ${isMultiChild?`4. 다자녀(${childrenInfo.join(',')}): 조치 전 "어떤 자녀?" 확인.\n`:''}`;
 
   if(!isPro){
     // ── 일반등급: 조회 전용 + 수동 방법 안내 프롬프트 ──
     prompt+=`
-[일반등급] AI챗봇 기능: 조회(get_status,do_activity,get_badges,get_children)만 가능.
+[일반등급] AI챗봇 기능: 조회(get_status,do_activity,get_badges,get_children,get_family_members)와 가족 초대(invite_member)가 가능.
 AI챗봇을 통한 자동 추가·수정·삭제, 육아코칭, 활동분석, 뱃지관리는 PRO 전용.
 ★ 중요: "추가/수정/삭제가 불가능하다"고 말하지 마! 수동으로는 가능해. AI자동처리만 PRO임을 명확히 해.
 사용자가 PRO 기능을 요청하거나 앱 사용법을 물으면:
@@ -21368,12 +21371,34 @@ function _buildTools(){
     input_schema:{type:'object',properties:{},required:[]}
   });
 
+  tools.push({
+    name:'get_family_members',
+    description:'전체 가족 구성원 목록 조회 (이름, 역할, 가입여부 포함)',
+    input_schema:{type:'object',properties:{},required:[]}
+  });
+
   // 일반등급: 업그레이드 신청 도구
   if(!isPro){
     tools.push({
       name:'request_upgrade',
       description:'PRO 등급 업그레이드를 신청합니다. 사용자가 동의한 경우에만 호출.',
       input_schema:{type:'object',properties:{},required:[]}
+    });
+  }
+
+  // 양육자 전용: 가족 구성원 초대 (FREE/PRO 공통)
+  if(isC){
+    tools.push({
+      name:'invite_member',
+      description:'새 가족 구성원을 추가하고 초대 링크를 생성합니다. 이름과 역할을 받아서 구성원을 등록하고, 초대 링크를 공유할 수 있게 합니다.',
+      input_schema:{
+        type:'object',
+        properties:{
+          name:{type:'string',description:'구성원 이름 (필수)'},
+          role:{type:'string',enum:['dad','mom','grandpa','grandma','grandpa_m','grandma_m','caregiver','child'],description:'역할 (필수). dad=아빠, mom=엄마, grandpa=할아버지, grandma=할머니, grandpa_m=외할아버지, grandma_m=외할머니, caregiver=양육자(호칭없음), child=자녀'}
+        },
+        required:['name','role']
+      }
     });
   }
 
@@ -21616,6 +21641,51 @@ function _buildTools(){
   return tools;
 }
 
+// ── 챗봇 오류 로깅 → Firestore ──
+function _logChatError(context, error, extra){
+  try{
+    const S=_getS();
+    const uid=typeof window._currentUser_ref==='function'?window._currentUser_ref()||'anonymous':'anonymous';
+    const fid=window._familyId_ref||'';
+    const ts=Date.now();
+    const errorDoc={
+      context: context||'unknown',
+      error: typeof error==='string'?error:(error?.message||String(error)),
+      stack: error?.stack||'',
+      extra: extra||{},
+      uid: uid,
+      familyId: fid,
+      appVersion: window._APP_VERSION_REF||'',
+      env: window._ENV||'dev',
+      userAgent: navigator.userAgent,
+      timestamp: ts,
+      date: new Date(ts).toISOString()
+    };
+    // Firestore에 저장 (firebase가 로드된 경우)
+    if(window._firestore_ref&&typeof window._firestore_ref==='function'){
+      const db=window._firestore_ref();
+      if(db){
+        const colRef=db.collection('chatErrors');
+        colRef.add(errorDoc).then(()=>{
+          console.log('[chat-error-log] saved to Firestore:', context);
+        }).catch(e2=>{
+          console.warn('[chat-error-log] Firestore save failed:', e2);
+        });
+        return;
+      }
+    }
+    // fallback: localStorage
+    const key='_chatErrors';
+    const existing=JSON.parse(localStorage.getItem(key)||'[]');
+    existing.push(errorDoc);
+    if(existing.length>50)existing.splice(0,existing.length-50);
+    localStorage.setItem(key,JSON.stringify(existing));
+    console.log('[chat-error-log] saved to localStorage (no Firestore):', context);
+  }catch(e){
+    console.warn('[chat-error-log] logging failed:', e);
+  }
+}
+
 // ── 도구 실행 (메인 모듈의 _milyAPI에 위임 — onSnapshot S 교체에 안전) ──
 function _executeTool(name,input){
   console.log('[mily-tool] execute:', name, JSON.stringify(input));
@@ -21626,6 +21696,7 @@ function _executeTool(name,input){
     switch(name){
       case 'get_status': result=api.getStatus(); break;
       case 'get_children': result=api.getChildren(); break;
+      case 'get_family_members': result=_getFamilyMembers(); break;
       case 'do_activity': result=api.doActivity(input); break;
       case 'add_activity': result=api.addActivity(input); break;
       case 'edit_activity': result=api.editActivity(input); break;
@@ -21643,12 +21714,14 @@ function _executeTool(name,input){
       case 'delete_badge': result=api.deleteBadge(input); break;
       case 'award_badge': result=api.awardBadge(input); break;
       case 'request_upgrade': result=_requestProUpgrade(); break;
+      case 'invite_member': result=_inviteMemberFromChat(input); break;
       default: result={success:false,error:'알 수 없는 도구: '+name};
     }
     console.log('[mily-tool] result:', name, JSON.stringify(result));
     return result;
   }catch(e){
     console.error('[mily-tool] error:', name, e);
+    _logChatError('tool_execute', e, {toolName:name, input:input});
     return {success:false,error:e.message};
   }
 }
@@ -21670,6 +21743,98 @@ function _requestProUpgrade(){
   }catch(e){
     console.error('[PRO] 업그레이드 신청 오류:', e);
     return{success:false,error:'신청 중 오류: '+e.message};
+  }
+}
+
+// ── 가족 구성원 목록 조회 ──
+function _getFamilyMembers(){
+  try{
+    const _RD=window.ROLE_DEFS||{};
+    const S=_getS();
+    const fm=S?.familyMeta?.members||{};
+    const members=Object.entries(fm).map(([id,m])=>{
+      const rd=_RD[m.displayRole||m.role]||_RD.child||{label:'구성원'};
+      return{
+        id,name:m.name||'(이름없음)',role:rd.label||m.role,
+        type:m.type||m.role,isAdmin:!!m.isAdmin,
+        joined:!!m.joinedAt,joinedAt:m.joinedAt?new Date(m.joinedAt).toLocaleDateString('ko-KR'):null
+      };
+    });
+    return{success:true,familyName:S?.familyMeta?.familyName||'',memberCount:members.length,maxMembers:7,members};
+  }catch(e){
+    return{success:false,error:'가족 구성원 조회 오류: '+e.message};
+  }
+}
+
+// ── 챗봇에서 가족 구성원 초대 ──
+function _inviteMemberFromChat(input){
+  try{
+    const _rnd=window.generateSecureRandom||function(n){const a=new Uint8Array(n);crypto.getRandomValues(a);return Array.from(a,b=>b.toString(16).padStart(2,'0')).join('');};
+    const _RD=window.ROLE_DEFS||{};
+    const S=_getS();
+    if(!S||!S.familyMeta){return{success:false,error:'가족 정보를 불러올 수 없습니다.'};}
+    const name=input.name?.trim();
+    const role=input.role;
+    if(!name){return{success:false,error:'이름을 입력해주세요.'};}
+    if(!role){return{success:false,error:'역할을 선택해주세요.'};}
+
+    const fm=S.familyMeta.members||{};
+    const memberCount=Object.keys(fm).length;
+    if(memberCount>=7){return{success:false,error:'최대 7명까지 추가할 수 있어요.'};}
+
+    // 중복 역할 검증 (child, caregiver 제외)
+    if(role!=='child'&&role!=='caregiver'){
+      const usedRoles=Object.values(fm).map(m=>m.displayRole||m.role);
+      if(usedRoles.includes(role)){
+        const rd=_RD[role];
+        return{success:false,error:`${rd?.label||role} 역할은 이미 등록되어 있어요.`};
+      }
+    }
+
+    // 구성원 추가
+    const memberRole=role==='child'?'child':'caregiver';
+    const memberDisplayRole=(role!=='child'&&role!=='caregiver')?role:'';
+    const rd=_RD[memberDisplayRole||memberRole]||_RD.child||{color:'#F1F5F9',textColor:'#64748B'};
+    const newId='mid_'+Date.now()+'_'+_rnd(4);
+    const existingOrders=Object.values(fm).map(m=>m.sortOrder||0);
+    const nextOrder=(existingOrders.length>0?Math.max(...existingOrders):0)+1;
+
+    if(!S.familyMeta.members)S.familyMeta.members={};
+    S.familyMeta.members[newId]={
+      name,role:memberRole,displayRole:memberDisplayRole,type:memberRole,
+      color:rd.color||'#F1F5F9',textColor:rd.textColor||'#64748B',
+      isAdmin:false,joinedAt:null,sortOrder:nextOrder
+    };
+
+    // 초대 토큰 생성
+    const inviteToken=_rnd(16)+Date.now().toString(36);
+    if(!S.familyMeta.inviteTokens)S.familyMeta.inviteTokens=[];
+    const tokenEntry={
+      token:inviteToken,memberId:newId,
+      createdBy:typeof window._currentUser_ref==='function'?window._currentUser_ref()||'':'',
+      createdAt:Date.now(),expiresAt:Date.now()+7*24*60*60*1000,type:'invite'
+    };
+    S.familyMeta.inviteTokens.push(tokenEntry);
+
+    // 저장
+    if(typeof window.save==='function')window.save();
+    if(typeof window.rebuildMembersFromFamily==='function')window.rebuildMembersFromFamily();
+    if(typeof window.renderAll==='function')window.renderAll();
+
+    // 초대 링크 생성
+    const envVal=window._ENV||'dev';
+    const basePath=envVal==='dev'?'taemin_mileage/dev/':'taemin_mileage/';
+    const fid=(typeof window._familyId_ref!=='undefined'&&window._familyId_ref)?window._familyId_ref:'';
+    const url=`https://kwakhyoshin.github.io/${basePath}?invite=${encodeURIComponent(fid)}&token=${inviteToken}&mid=${newId}`;
+    const familyName=S.familyMeta?.familyName||'가족';
+    const roleLabel=_RD[memberDisplayRole||memberRole]?.label||'구성원';
+
+    // 공유는 챗봇 카드의 버튼으로 대체 (자동 공유 팝업 제거)
+    console.log('[invite_member] ✅ member added:', newId, name, role, 'URL:', url);
+    return{success:true,message:`${name}님(${roleLabel})이 가족에 추가되었어요! 아래 초대 링크 버튼을 눌러 공유해주세요.`,memberId:newId,memberName:name,roleLabel,inviteUrl:url};
+  }catch(e){
+    console.error('[invite_member] error:', e);
+    return{success:false,error:'구성원 초대 중 오류: '+e.message};
   }
 }
 
@@ -21767,6 +21932,12 @@ function _renderToolCard(toolName,input,result){
   // PRO 업그레이드 신청
   else if(toolName==='request_upgrade'){
     cardHTML=`<div class="mily-tool-card tc-add"><div class="tc-emoji">🌟</div><div class="tc-info"><div class="tc-name">PRO 업그레이드</div><div class="tc-meta">신청 접수 완료! 관리자 승인 대기 중</div></div></div>`;
+  }
+  // 가족 구성원 초대
+  else if(toolName==='invite_member'&&result.memberName){
+    const roleLabel=result.roleLabel||input.role||'구성원';
+    const invUrl=result.inviteUrl||'';
+    cardHTML=`<div class="mily-tool-card tc-add"><div class="tc-emoji">👋</div><div class="tc-info"><div class="tc-name">${result.memberName} (${roleLabel})</div><div class="tc-meta">가족에 추가됨</div>${invUrl?`<button class="mily-invite-btn" onclick="(function(u){if(navigator.share){navigator.share({title:'가족 초대',text:'가족에 초대합니다!',url:u}).catch(function(){navigator.clipboard.writeText(u).then(function(){if(typeof toast==='function')toast('초대 링크가 복사되었어요! 📋');}).catch(function(){});});}else{navigator.clipboard.writeText(u).then(function(){if(typeof toast==='function')toast('초대 링크가 복사되었어요! 📋');}).catch(function(){});}})(decodeURIComponent('${encodeURIComponent(invUrl)}'))">📨 초대 링크 공유하기</button>`:''}</div></div>`;
   }
 
   if(cardHTML){
