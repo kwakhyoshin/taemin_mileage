@@ -8728,7 +8728,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0403z';
+const _APP_VERSION = 'v0403z2';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -15617,6 +15617,10 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.23 (v0403z2)',date:'2026-04-03',items:[
+    {type:'new',text:'챗봇 질문 로그 — 사용자 질문을 Firestore에 기록 및 관리자 조회'},
+    {type:'fix',text:'챗봇 invite_member 도구에 삼촌/이모 역할 enum 추가 (도구 호출 가능하도록)'},
+  ]},
   {ver:'1.9.22 (v0403z)',date:'2026-04-03',items:[
     {type:'improve',text:'가족 구성원 초대 시 역할별 이모지 표시 (아빠👨 엄마👩 할아버지👴 등)'},
   ]},
@@ -21019,6 +21023,7 @@ function _renderQuickMenu(isC,kidName){
         // 전체 메뉴 비활성화
         wrap.querySelectorAll('.mily-quick-btn,.mily-cat-btn').forEach(b=>{b.style.opacity='0.5';b.style.pointerEvents='none';});
         _addUserMsg(sub.label);
+        _logChatQuery(sub.label,'quick_menu');
         // 로컬 인텐트 먼저 시도 (label 기준)
         const _li=_tryLocalIntent(sub.label);
         if(_li){
@@ -21066,6 +21071,7 @@ window.sendMilyMsg=function(){
   if(!text)return;
   input.value='';
   _addUserMsg(text);
+  _logChatQuery(text,'input');
   // 로컬 인텐트 먼저 시도
   const local=_tryLocalIntent(text);
   if(local){
@@ -21545,7 +21551,7 @@ function _buildTools(){
         type:'object',
         properties:{
           name:{type:'string',description:'구성원 이름 (필수)'},
-          role:{type:'string',enum:['dad','mom','grandpa','grandma','grandpa_m','grandma_m','caregiver','child'],description:'역할 (필수). dad=아빠, mom=엄마, grandpa=할아버지, grandma=할머니, grandpa_m=외할아버지, grandma_m=외할머니, caregiver=양육자(호칭없음), child=자녀'}
+          role:{type:'string',enum:['dad','mom','grandpa','grandma','grandpa_m','grandma_m','uncle','aunt','caregiver','child'],description:'역할 (필수). dad=아빠, mom=엄마, grandpa=할아버지, grandma=할머니, grandpa_m=외할아버지, grandma_m=외할머니, uncle=삼촌, aunt=이모, caregiver=양육자(호칭없음), child=자녀'}
         },
         required:['name','role']
       }
@@ -21834,6 +21840,34 @@ function _logChatError(context, error, extra){
   }catch(e){
     console.warn('[chat-error-log] logging failed:', e);
   }
+}
+
+// ── 사용자 질문 로깅 → Firestore (chatQueries) ──
+function _logChatQuery(text, source){
+  try{
+    const uid=typeof window._currentUser_ref==='function'?window._currentUser_ref()||'anonymous':'anonymous';
+    const fid=window._familyId_ref||'';
+    const isC=typeof isCaregiverUser==='function'&&isCaregiverUser();
+    const ts=Date.now();
+    const doc={
+      text: (text||'').substring(0,500),
+      source: source||'input', // input, button, quick_menu
+      uid: uid,
+      familyId: fid,
+      role: isC?'caregiver':'child',
+      appVersion: window._APP_VERSION_REF||'',
+      env: window._ENV||'dev',
+      timestamp: ts,
+      date: new Date(ts).toISOString()
+    };
+    if(window._firestore_ref&&typeof window._firestore_ref==='function'){
+      const db=window._firestore_ref();
+      if(db){
+        db.collection('chatQueries').add(doc).catch(()=>{});
+        return;
+      }
+    }
+  }catch(e){}
 }
 
 // ── 도구 실행 (메인 모듈의 _milyAPI에 위임 — onSnapshot S 교체에 안전) ──
@@ -22129,6 +22163,7 @@ function _addBotMsg(text){
         // 버튼 그룹 비활성화 (한번만 클릭)
         btnGroup.querySelectorAll('.mily-quick-btn').forEach(b=>{b.style.opacity='0.5';b.style.pointerEvents='none';});
         _addUserMsg(label);
+        _logChatQuery(label,'button');
         // 로컬 인텐트 먼저 시도
         const _li=_tryLocalIntent(label);
         if(_li){
