@@ -8728,7 +8728,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0403s';
+const _APP_VERSION = 'v0403t';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -15618,9 +15618,9 @@ window.pfMenuAction=pfMenuAction;
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
   {
-    ver:'1.9.15 (v0403s)', date:'2026-04-03',
+    ver:'1.9.16 (v0403t)', date:'2026-04-03',
     items:[
-      {type:'fix',text:'네이버 로그인: SDK getLoginStatus 의존 제거 → access_token으로 Profile API 직접 호출 방식으로 전환'},
+      {type:'fix',text:'네이버 로그인: Vercel 프록시 경유로 Profile API 호출 (CORS 우회)'},
       {type:'fix',text:'네이버 이메일·프로필사진·이름이 정상적으로 가져와지도록 수정'},
     ]
   },
@@ -19563,13 +19563,14 @@ window._createState = _createState;
         }catch(e){}
       }
       if(accessToken){
-        console.log('[Naver Callback] access_token detected, calling Profile API directly...');
-        // ★ SDK 의존 제거 — access_token으로 네이버 Profile API 직접 호출
-        // SDK의 getLoginStatus가 환경에 따라 실패하는 문제 해결 (팝업 cross-origin, 콜백URL 불일치 등)
+        console.log('[Naver Callback] access_token detected, calling Profile API via proxy...');
+        // ★ SDK 의존 제거 — Vercel 프록시 경유로 네이버 Profile API 호출 (CORS 우회)
         (async()=>{
           try{
-            const resp=await fetch('https://openapi.naver.com/v1/nid/me',{
-              headers:{'Authorization':'Bearer '+accessToken}
+            const resp=await fetch('https://mily-proxy.vercel.app/api/naver-profile',{
+              method:'POST',
+              headers:{'Content-Type':'application/json'},
+              body:JSON.stringify({access_token:accessToken})
             });
             if(!resp.ok){
               console.error('[Naver Callback] Profile API error:', resp.status);
