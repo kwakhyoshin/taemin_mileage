@@ -8728,7 +8728,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0403y';
+const _APP_VERSION = 'v0403z';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -15617,6 +15617,9 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.22 (v0403z)',date:'2026-04-03',items:[
+    {type:'improve',text:'가족 구성원 초대 시 역할별 이모지 표시 (아빠👨 엄마👩 할아버지👴 등)'},
+  ]},
   {ver:'1.9.21 (v0403y)',date:'2026-04-03',items:[
     {type:'fix',text:'챗봇 시스템 프롬프트에 삼촌/이모 역할 추가'},
   ]},
@@ -22084,7 +22087,9 @@ function _renderToolCard(toolName,input,result){
   else if(toolName==='invite_member'&&result.memberName){
     const roleLabel=result.roleLabel||input.role||'구성원';
     const invUrl=result.inviteUrl||'';
-    cardHTML=`<div class="mily-tool-card tc-add"><div class="tc-emoji">👋</div><div class="tc-info"><div class="tc-name">${result.memberName} (${roleLabel})</div><div class="tc-meta">가족에 추가됨</div>${invUrl?`<button class="mily-invite-btn" onclick="(function(u){if(navigator.share){navigator.share({title:'가족 초대',text:'가족에 초대합니다!',url:u}).catch(function(){navigator.clipboard.writeText(u).then(function(){if(typeof toast==='function')toast('초대 링크가 복사되었어요! 📋');}).catch(function(){});});}else{navigator.clipboard.writeText(u).then(function(){if(typeof toast==='function')toast('초대 링크가 복사되었어요! 📋');}).catch(function(){});}})(decodeURIComponent('${encodeURIComponent(invUrl)}'))">📨 초대 링크 공유하기</button>`:''}</div></div>`;
+    const _roleEmoji={dad:'👨',mom:'👩',grandpa:'👴',grandma:'👵',grandpa_m:'👴',grandma_m:'👵',uncle:'🧔',aunt:'👩‍🦱',child:'🧒',caregiver:'🤗'};
+    const _rEmoji=_roleEmoji[input.role]||'👋';
+    cardHTML=`<div class="mily-tool-card tc-add"><div class="tc-emoji">${_rEmoji}</div><div class="tc-info"><div class="tc-name">${result.memberName} (${roleLabel})</div><div class="tc-meta">가족에 추가됨</div>${invUrl?`<button class="mily-invite-btn" onclick="(function(u){if(navigator.share){navigator.share({title:'가족 초대',text:'가족에 초대합니다!',url:u}).catch(function(){navigator.clipboard.writeText(u).then(function(){if(typeof toast==='function')toast('초대 링크가 복사되었어요! 📋');}).catch(function(){});});}else{navigator.clipboard.writeText(u).then(function(){if(typeof toast==='function')toast('초대 링크가 복사되었어요! 📋');}).catch(function(){});}})(decodeURIComponent('${encodeURIComponent(invUrl)}'))">📨 초대 링크 공유하기</button>`:''}</div></div>`;
   }
 
   if(cardHTML){
