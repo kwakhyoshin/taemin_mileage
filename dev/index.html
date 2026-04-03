@@ -8728,7 +8728,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0403v';
+const _APP_VERSION = 'v0403w';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -15617,6 +15617,9 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.19 (v0403w)',date:'2026-04-03',items:[
+    {type:'new',text:'채팅 이력 유지 — 앱 재실행 후에도 이전 대화가 복원됩니다'},
+  ]},
   {ver:'1.9.18 (v0403v)',date:'2026-04-03',items:[
     {type:'improve',text:'가족 초대 링크를 채팅 내 공유 버튼으로 표시 (URL 노출 제거)'},
     {type:'improve',text:'자동 공유 팝업 제거 — 사용자가 버튼으로 직접 공유'},
@@ -20603,6 +20606,26 @@ const MILY_MAX_HISTORY=20; // 대화 기록 최대 유지 수
 let _milyOpen=false;
 let _milySending=false;
 let _milyHistory=[]; // {role,content}
+const _MILY_CHAT_LS_KEY=((window._ENV||'dev')==='dev'?'taemin_dev_':'taemin_')+'chat_history';
+const _MILY_CHAT_MAX_PERSIST=50; // localStorage 저장 최대 메시지 수
+
+function _saveChatHistory(){
+  try{
+    const toSave=_milyHistory.slice(-_MILY_CHAT_MAX_PERSIST);
+    localStorage.setItem(_MILY_CHAT_LS_KEY,JSON.stringify(toSave));
+  }catch(e){console.warn('[mily-chat] history save failed:',e);}
+}
+function _loadChatHistory(){
+  try{
+    const raw=localStorage.getItem(_MILY_CHAT_LS_KEY);
+    if(!raw)return[];
+    const arr=JSON.parse(raw);
+    return Array.isArray(arr)?arr.slice(-_MILY_CHAT_MAX_PERSIST):[];
+  }catch(e){return[];}
+}
+function _clearChatHistory(){
+  try{localStorage.removeItem(_MILY_CHAT_LS_KEY);}catch(e){}
+}
 
 // ── 밀리 캐릭터 무드 프리셋 ──
 const _MILY_MOODS={
@@ -20749,8 +20772,20 @@ window.toggleMilyChat=function(){
     fab.classList.remove('visible'); // 채팅 열리면 FAB 숨김
     _updateMilyChatChar('wave'); // 환영 표정
     _updatePlanBadges(); // 등급 배지 업데이트
-    // 첫 오픈 시 환영 메시지
-    if(_milyHistory.length===0) _milyWelcome();
+    // 첫 오픈 시: 저장된 이력 복원 또는 환영 메시지
+    if(_milyHistory.length===0){
+      const saved=_loadChatHistory();
+      if(saved.length>0){
+        _milyHistory=saved;
+        // DOM에 이전 대화 복원
+        saved.forEach(m=>{
+          if(m.role==='user') _addUserMsg(m.content);
+          else if(m.role==='assistant') _addBotMsg(m.content);
+        });
+      }else{
+        _milyWelcome();
+      }
+    }
     setTimeout(()=>document.getElementById('mily-input').focus(),300);
     _scrollMilyBottom();
   }else{
@@ -20865,6 +20900,7 @@ function _renderQuickMenu(isC,kidName){
         wrap.querySelectorAll('.mily-quick-btn,.mily-cat-btn').forEach(b=>{b.style.opacity='0.5';b.style.pointerEvents='none';});
         _addUserMsg(sub.label);
         _milyHistory.push({role:'user',content:sub.prompt});
+        _saveChatHistory();
         _callMilyAPI();
       };
       subWrap.appendChild(btn);
@@ -20901,6 +20937,7 @@ window.sendMilyMsg=function(){
   input.value='';
   _addUserMsg(text);
   _milyHistory.push({role:'user',content:text});
+  _saveChatHistory();
   _callMilyAPI();
 };
 
@@ -21016,6 +21053,7 @@ async function _callMilyAPI(){
       if(!textReply) textReply='(응답을 생성하지 못했어요)';
 
       _milyHistory.push({role:'assistant',content:textReply});
+      _saveChatHistory();
       _addBotMsg(textReply);
       break;
     }
@@ -21979,6 +22017,7 @@ function _addBotMsg(text){
         // 사용자 메시지로 전송
         _addUserMsg(label);
         _milyHistory.push({role:'user',content:label});
+        _saveChatHistory();
         _callMilyAPI();
       };
       btnGroup.appendChild(btn);
@@ -22302,6 +22341,7 @@ if(typeof _origSwitchChild==='function'){
 
 function _resetMilyChat(){
   _milyHistory=[];
+  _clearChatHistory();
   const msgs=document.getElementById('mily-chat-msgs');
   if(msgs){
     const typing=document.getElementById('mily-typing');
