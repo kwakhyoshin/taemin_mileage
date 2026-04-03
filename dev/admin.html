@@ -1077,6 +1077,37 @@ window.openFamilyDetail = function(familyId) {
 
   const ROLE_LABELS = { dad: '아빠', mom: '엄마', grandpa: '할아버지', grandma: '할머니', grandpa_m: '외할아버지', grandma_m: '외할머니', child: '자녀' };
 
+  // 보상 목록 수집 (memberData에서 첫 번째 자녀 또는 글로벌 rwds)
+  const memberData = f.memberData || {};
+  let allRwds = f.rwds || [];
+  let rwdSourceMid = null;
+  // memberData에서 rwds가 있는 첫 번째 멤버 찾기
+  for (const [mid, md] of Object.entries(memberData)) {
+    if (md.rwds && md.rwds.length > 0) {
+      allRwds = md.rwds;
+      rwdSourceMid = mid;
+      break;
+    }
+  }
+  let rwdsHtml = allRwds.length === 0 ? '<div class="empty-state">보상이 없습니다</div>' :
+    `<table class="data-table"><thead><tr><th></th><th>보상명</th><th>필요 마일리지</th><th>상태</th><th>관리</th></tr></thead><tbody>` +
+    allRwds.map((r, idx) => {
+      const isClosed = r.closed === true;
+      const statusBadge = isClosed
+        ? '<span style="background:#FEE2E2;color:#991B1B;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700">종료</span>'
+        : '<span style="background:#D1FAE5;color:#065F46;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700">운영중</span>';
+      return `<tr style="${isClosed?'opacity:0.5':''}">
+        <td style="font-size:18px;text-align:center">${r.emoji || '🎁'}</td>
+        <td style="font-weight:700">${escHtml(r.name || '-')}</td>
+        <td>${(r.pts || 0).toLocaleString()}M</td>
+        <td>${statusBadge}</td>
+        <td style="white-space:nowrap">
+          <button class="btn-sm ${isClosed?'btn-primary':'btn-ghost'}" onclick="toggleRwdStatus('${familyId}','${r.id}',${isClosed})">${isClosed?'운영 재개':'종료'}</button>
+          <button class="btn-sm btn-danger" onclick="deleteRwd('${familyId}','${r.id}','${escHtml(r.name||'')}')">삭제</button>
+        </td>
+      </tr>`;
+    }).join('') + '</tbody></table>';
+
   let membersHtml = Object.entries(members).map(([mid, m]) => {
     const hasAccount = !!m.account || !!users[mid];
     const roleBadge = m.type === 'child' ? 'badge-child' : 'badge-parent';
@@ -1179,6 +1210,13 @@ window.openFamilyDetail = function(familyId) {
         <button class="btn-sm btn-primary" onclick="addMember('${familyId}')">구성원 추가</button>
       </div>
       ${membersHtml || '<div class="empty-state">구성원이 없습니다</div>'}
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">보상 목록 (${allRwds.length}개)</div>
+      </div>
+      ${rwdsHtml}
     </div>
   `;
 };
@@ -1597,6 +1635,52 @@ window.approveProRequest=approveProRequest;
 window.rejectProRequest=rejectProRequest;
 window.manualSetPlan=manualSetPlan;
 window.loadProRequests=loadProRequests;
+
+// ── 보상 관리 (종료/재개, 삭제) ──
+async function toggleRwdStatus(familyId, rwdId, currentlyClosed){
+  const f = _allFamilies.find(x => x.id === familyId);
+  if(!f) return;
+  const newClosed = !currentlyClosed;
+  const action = newClosed ? '종료' : '운영 재개';
+  // 글로벌 rwds에서 변경
+  if(f.rwds){
+    const r = f.rwds.find(x => x.id === rwdId);
+    if(r) r.closed = newClosed;
+  }
+  // memberData 내 모든 멤버의 rwds에서도 변경
+  const memberData = f.memberData || {};
+  for(const [mid, md] of Object.entries(memberData)){
+    if(md.rwds){
+      const r = md.rwds.find(x => x.id === rwdId);
+      if(r) r.closed = newClosed;
+    }
+  }
+  try{
+    await setDoc(doc(db, 'families', familyId), f);
+    logAdminAction(`보상 ${action}`, `${familyId} / ${rwdId}`);
+    showFamilyDetail(familyId);
+  }catch(e){alert('변경 실패: '+e.message);}
+}
+window.toggleRwdStatus = toggleRwdStatus;
+
+async function deleteRwd(familyId, rwdId, rwdName){
+  if(!confirm(`"${rwdName}" 보상을 삭제하시겠습니까?`)) return;
+  const f = _allFamilies.find(x => x.id === familyId);
+  if(!f) return;
+  // 글로벌 rwds에서 삭제
+  if(f.rwds) f.rwds = f.rwds.filter(x => x.id !== rwdId);
+  // memberData 내 모든 멤버의 rwds에서도 삭제
+  const memberData = f.memberData || {};
+  for(const [mid, md] of Object.entries(memberData)){
+    if(md.rwds) md.rwds = md.rwds.filter(x => x.id !== rwdId);
+  }
+  try{
+    await setDoc(doc(db, 'families', familyId), f);
+    logAdminAction('보상 삭제', `${familyId} / ${rwdId} (${rwdName})`);
+    showFamilyDetail(familyId);
+  }catch(e){alert('삭제 실패: '+e.message);}
+}
+window.deleteRwd = deleteRwd;
 
 // ── 챗봇 질문 로그 조회 ──
 async function loadChatQueries(){
