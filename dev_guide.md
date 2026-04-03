@@ -2,7 +2,7 @@
 
 > 이 문서는 새 세션에서 실수 없이 개발·테스트·배포할 수 있도록 모든 핵심 정보를 담고 있습니다.
 > **새 세션 시작 시 반드시 이 문서를 먼저 읽을 것.**
-> 최종 업데이트: 2026-04-03 (PRO 등급 해제 버그 수정 + 나의메뉴 UI 개선 + 사용법 안내 보강, PR #172~#179)
+> 최종 업데이트: 2026-04-03 (PRO 등급 해제 버그 수정 + 나의메뉴 UI 개선 + 사용법 안내 보강 + admin App Check 수정, PR #172~#182)
 
 ---
 
@@ -2211,6 +2211,29 @@ function _cleanupWrongPro(){
 
 ---
 
+### 12.21 시스템 어드민 페이지 App Check + 익명인증 추가 (2026-04-03, PR #182)
+
+#### 증상
+- 시스템 어드민 페이지(`admin.html`, `dev/admin.html`)에서 사용자 목록이 조회되지 않음
+- PRO 신청 승인/거부 기능 동작 안 됨
+
+#### 원인
+2026-04-02 보안 조치로 Firebase에 다음이 적용됨:
+1. **Firestore 보안 규칙**: `families/{familyId}` 컬렉션에 `request.auth != null` 조건 추가
+2. **Firebase App Check**: ReCaptchaEnterprise 기반 App Check 활성화
+
+메인 앱(`index.html`, `dev/index.html`)에는 이미 `signInAnonymously` + App Check가 있었으나, admin 페이지에는 적용되지 않아 Firestore 접근이 차단됨.
+
+#### 수정
+- **`dev/admin.html`**: App Check 초기화 추가 (기존에 `signInAnonymously`는 있었음)
+- **`admin.html`(운영)**: App Check + `getAuth`/`signInAnonymously` import + `ensureFirebaseAuth()` 함수 + `loadAllData()`에서 인증 호출 — 모두 신규 추가
+
+#### 교훈
+- 보안 규칙 변경 시 **모든 클라이언트** (메인 앱, admin 페이지 등)에 대한 영향을 확인해야 함
+- admin 페이지는 별도 파일이라 메인 앱 수정 시 누락되기 쉬움
+
+---
+
 ### 세션 PR 전체 목록 (2026-04-03, v0403e~v0403n)
 
 | PR | 버전 | 설명 |
@@ -2224,3 +2247,4 @@ function _cleanupWrongPro(){
 | #178 | v0403k | ⚠️ updateDataDoc family_id 삭제 (문제 발생 — v0403m에서 되돌림) |
 | #179 | v0403m | isLegacyNamedFamily 조건 추가 (PRO 최종 수정) |
 | #180 | v0403n | 챗봇 활동/보상/뱃지 추가 시 desc 필수 |
+| #182 | — | admin 페이지 App Check + 익명인증 추가 |
