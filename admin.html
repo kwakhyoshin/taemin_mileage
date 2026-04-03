@@ -388,6 +388,8 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, doc, getDoc, getDocs, setDoc, deleteDoc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDTS81EBGgiuo564ThxvTTOpR_iAHLb8tg",
@@ -400,6 +402,33 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
+
+// App Check — Firestore 접근에 필요 (메인 앱과 동일한 reCAPTCHA Enterprise 키)
+try {
+  initializeAppCheck(app, {
+    provider: new ReCaptchaEnterpriseProvider('6LebG6EsAAAAAHDVc21krou2ConwJdB_m9nsAP3R'),
+    isTokenAutoRefreshEnabled: true
+  });
+  console.log('[Admin] App Check initialized OK');
+} catch(e) {
+  console.warn('[Admin] App Check init failed:', e);
+}
+
+// Firebase 익명 인증 (Firestore 보안 규칙 충족용)
+let _fbAuthReady = false;
+async function ensureFirebaseAuth() {
+  if (_fbAuthReady) return true;
+  try {
+    await signInAnonymously(auth);
+    _fbAuthReady = true;
+    console.log('[Admin] Firebase 익명 인증 성공');
+    return true;
+  } catch (e) {
+    console.error('[Admin] Firebase 인증 실패:', e);
+    return false;
+  }
+}
 
 // ── Admin credentials (S-07: 해시/실명을 Firestore에서 로드) ──
 const ADMIN_SALT = 'taemin_sysadmin_v1_';
@@ -529,6 +558,12 @@ async function loadAllData() {
   _allFamilies = [];
   _registry = {};
   _adminLogs = [];
+
+  // Firebase 인증 (Firestore 보안 규칙 충족)
+  const authOk = await ensureFirebaseAuth();
+  if (!authOk) {
+    console.error('[Admin] Firebase 인증 실패 — 데이터 로드 불가');
+  }
 
   try {
     const familiesSnap = await getDocs(collection(db, 'families'));
