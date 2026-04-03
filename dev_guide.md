@@ -2191,3 +2191,36 @@ function _cleanupWrongPro(){
 3. **PRO 등급 관련 로직 변경 시 반드시 개발기에서 먼저 테스트** — `_cleanupWrongPro`가 예기치 않게 PRO를 삭제할 수 있음
 4. **`S` 변수는 클로저 안에 있어 Chrome MCP JavaScript로 접근 불가** — `window.save`, `window.renderMyTab`만 window에 노출
 5. **Firebase App Check 때문에 Node.js에서 인증 없이 Firestore 접근 불가** — DB 직접 수정이 필요하면 Firebase Console UI 사용
+
+### 12.20 AI챗봇 활동/보상/뱃지 추가 시 설명 필수 (2026-04-03, PR #180)
+
+#### 변경 사항
+챗봇이 `add_activity`, `add_reward`, `add_badge` tool 호출 시 `desc`(설명) 필드를 반드시 포함하도록 개선.
+
+#### 수정 위치
+1. **시스템 프롬프트** (`_buildSystemPrompt` PRO 섹션): "활동/보상/뱃지 추가 시 반드시 desc를 포함해" 지침 추가
+2. **Tool schema** (`_buildTools`):
+   - `add_activity.desc`: "반드시 포함! 아이가 이해할 수 있는 짧은 설명 1줄"
+   - `add_reward.desc`: 신규 파라미터 추가 + "반드시 포함! 아이가 기대할 수 있는 짧은 설명 1줄"
+   - `add_badge.desc`: "반드시 포함! 어떤 조건으로 받는 뱃지인지 짧은 설명 1줄"
+3. **`addReward` 함수**: `data.desc` 처리 로직 추가 (`if(data.desc) newRwd.desc=data.desc.trim()`)
+
+#### 참고
+- `add_activity`와 `add_badge`는 이미 desc 필드를 데이터에 저장하는 로직이 있었음
+- `add_reward`만 desc 저장 로직이 없어서 함수 수정이 필요했음
+
+---
+
+### 세션 PR 전체 목록 (2026-04-03, v0403e~v0403n)
+
+| PR | 버전 | 설명 |
+|----|------|------|
+| #172 | v0403e | 나의메뉴 우리가족/소셜정보 미표시 수정 + renderMyTab try/catch |
+| #173 | v0403f | 등급 배지를 헤더 제목 영역으로 이동 |
+| #174 | v0403g | AI챗봇 사용법 안내 오류 수정 (4건) |
+| #175 | v0403h | 오늘 할 일 설정 방법 2가지 + 메시지/스티커/보상교환/활동취소 안내 추가 |
+| #176 | v0403i | 소셜 연동 마이그레이션 PRO 해제 방지 — _fromLegacy, _autoProSet 마커 |
+| #177 | v0403j | 레거시 _migratedTo 포인터 자동 감지 (async) |
+| #178 | v0403k | ⚠️ updateDataDoc family_id 삭제 (문제 발생 — v0403m에서 되돌림) |
+| #179 | v0403m | isLegacyNamedFamily 조건 추가 (PRO 최종 수정) |
+| #180 | v0403n | 챗봇 활동/보상/뱃지 추가 시 desc 필수 |
