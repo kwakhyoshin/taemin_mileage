@@ -338,7 +338,11 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
         <h2>PRO 등급 관리</h2>
         <div class="subtitle">PRO 업그레이드 신청 및 회원 등급 관리</div>
         <div class="section">
-          <div class="section-header"><div class="section-title">대기 중인 신청</div><button class="btn-sm btn-primary" onclick="loadProRequests()">새로고침</button></div>
+          <div class="section-header"><div class="section-title">현재 PRO 가족</div><button class="btn-sm btn-primary" onclick="loadProRequests()">새로고침</button></div>
+          <div id="pro-active-list"><div class="empty-state">로딩 중...</div></div>
+        </div>
+        <div class="section">
+          <div class="section-header"><div class="section-title">대기 중인 신청</div></div>
           <div id="pro-pending-list"><div class="empty-state">로딩 중...</div></div>
         </div>
         <div class="section">
@@ -429,6 +433,11 @@ const firebaseConfig = {
   messagingSenderId: "1002709736057",
   appId: "1:1002709736057:web:5e4df58febe004c765d2a8"
 };
+
+const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
+const LEGACY_DOC = _ENV === 'dev' ? 'taemin_dev' : 'taemin';
+const REGISTRY_DOC = _ENV === 'dev' ? '_dev_id_registry' : '_id_registry';
+const LOG_DOC = _ENV === 'dev' ? 'dev_log' : 'prod_log';
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -611,11 +620,10 @@ async function loadAllData() {
     _loadErrors.push('families 컬렉션 읽기 실패: ' + e.message);
   }
 
-  // 2. 레거시 데이터 (users/taemin_dev, users/taemin)
-  const legacyDocs = [
-    { path: 'taemin_dev', label: '개발기 (레거시)', env: 'dev' },
-    { path: 'taemin', label: '운영기 (레거시)', env: 'prod' }
-  ];
+  // 2. 레거시 데이터 — 현재 환경의 레거시 문서만 로드
+  const legacyDocs = _ENV === 'dev'
+    ? [{ path: 'taemin_dev', label: '개발기 (레거시)', env: 'dev' }]
+    : [{ path: 'taemin', label: '운영기 (레거시)', env: 'prod' }];
   for (const ld of legacyDocs) {
     try {
       const legacySnap = await getDoc(doc(db, 'users', ld.path));
@@ -662,7 +670,7 @@ async function loadAllData() {
 
   // 3. ID 레지스트리
   try {
-    const regSnap = await getDoc(doc(db, 'families', '_dev_id_registry'));
+    const regSnap = await getDoc(doc(db, 'families', REGISTRY_DOC));
     if (regSnap.exists()) {
       _registry = regSnap.data() || {};
     }
@@ -673,7 +681,7 @@ async function loadAllData() {
 
   // 4. 감사 로그
   try {
-    const logsSnap = await getDoc(doc(db, 'adminLogs', 'dev_log'));
+    const logsSnap = await getDoc(doc(db, 'adminLogs', LOG_DOC));
     if (logsSnap.exists()) {
       const data = logsSnap.data();
       _adminLogs = data.entries || [];
@@ -709,7 +717,7 @@ async function logAdminAction(action, details = '') {
     memberId: _lastMemberId || ''
   });
   try {
-    await setDoc(doc(db, 'adminLogs', 'dev_log'), { entries: _adminLogs });
+    await setDoc(doc(db, 'adminLogs', LOG_DOC), { entries: _adminLogs });
   } catch (e) {
     console.error('Failed to save log:', e);
   }
@@ -722,7 +730,7 @@ window.clearLogs = async function() {
     async () => {
       _adminLogs = [];
       try {
-        await setDoc(doc(db, 'adminLogs', 'dev_log'), { entries: [] });
+        await setDoc(doc(db, 'adminLogs', LOG_DOC), { entries: [] });
         renderLogs();
         alert('로그가 초기화되었습니다');
         await logAdminAction('로그 초기화');
@@ -818,11 +826,13 @@ function renderFamilyCard(f) {
   const registeredCount = Object.keys(f.users || {}).length;
   const created = fm.createdAt ? new Date(fm.createdAt).toLocaleDateString('ko-KR') : '-';
   const colors = ['#6366F1', '#EC4899', '#F59E0B', '#10B981', '#8B5CF6', '#EF4444', '#06B6D4'];
+  const plan = fm.plan || 'free';
+  const planBadge = plan === 'pro' ? '<span class="badge-pill" style="background:#6366F1;color:#fff">PRO</span>' : '<span class="badge-pill badge-inactive">FREE</span>';
 
   return `<div class="family-card" onclick="openFamilyDetail('${escHtml(f.id)}')">
     <div class="family-card-head">
       <div>
-        <div class="family-card-name">${escHtml(fm.familyName || f.id)} ${f._isLegacy ? '<span class="badge-pill badge-inactive">레거시</span>' : ''}</div>
+        <div class="family-card-name">${escHtml(fm.familyName || f.id)} ${planBadge} ${f._isLegacy ? '<span class="badge-pill badge-inactive">레거시</span>' : ''}</div>
         <div class="family-card-meta">구성원 ${memberCount}명 · 가입 ${registeredCount}명 · 모드: ${fm.mode === 'unified' ? '통합' : '독립'} · 생성: ${created}</div>
       </div>
       <div style="font-size:12px;color:#94A3B8;font-weight:600">${escHtml(f.id)}</div>
@@ -934,7 +944,7 @@ window.toggleAdmin = async function(familyId, memberId, grant) {
   f.familyMeta.members[memberId].isAdmin = grant;
   try {
     if (f._isLegacy) {
-      await setDoc(doc(db, 'users', 'taemin_dev'), f);
+      await setDoc(doc(db, 'users', LEGACY_DOC), f);
     } else {
       await setDoc(doc(db, 'families', familyId), f);
     }
@@ -961,7 +971,7 @@ window.resetMemberPassword = function(familyId, memberId, memberName) {
         f.users = f.users || {};
         f.users[memberId] = { id: f.familyMeta.members[memberId].account.id, pwdHash: hash, v: 1 };
         if (f._isLegacy) {
-          await setDoc(doc(db, 'users', 'taemin_dev'), f);
+          await setDoc(doc(db, 'users', LEGACY_DOC), f);
         } else {
           await setDoc(doc(db, 'families', familyId), f);
         }
@@ -988,7 +998,7 @@ window.deleteMember = function(familyId, memberId, memberName) {
         delete f.familyMeta.members[memberId];
         if (f.users) delete f.users[memberId];
         if (f._isLegacy) {
-          await setDoc(doc(db, 'users', 'taemin_dev'), f);
+          await setDoc(doc(db, 'users', LEGACY_DOC), f);
         } else {
           await setDoc(doc(db, 'families', familyId), f);
         }
@@ -1020,7 +1030,7 @@ window.addMember = function(familyId) {
           joinedAt: Date.now()
         };
         if (f._isLegacy) {
-          await setDoc(doc(db, 'users', 'taemin_dev'), f);
+          await setDoc(doc(db, 'users', LEGACY_DOC), f);
         } else {
           await setDoc(doc(db, 'families', familyId), f);
         }
@@ -1215,39 +1225,64 @@ document.addEventListener('keydown', e => {
 // ── PRO 등급 관리 (families 컬렉션의 proRequest 필드 기반) ──
 async function loadProRequests(){
   try{
-    // families 컬렉션 전체를 이미 _allFamilies에 로드했으므로 재활용
-    // 새로고침 시 최신 데이터도 가져옴
-    const snap=await getDocs(collection(db,'families'));
     const pending=[];const done=[];const proActive=[];
+
+    // 1) families 컬렉션
+    const snap=await getDocs(collection(db,'families'));
     snap.forEach(d=>{
       const data=d.data();
       const fid=d.id;
-      if(fid.startsWith('_'))return; // 레지스트리 등 제외
+      if(fid.startsWith('_'))return;
       const fm=data.familyMeta||{};
       const req=fm.proRequest;
       const plan=fm.plan||'free';
-      // 현재 PRO인 가족
-      if(plan==='pro') proActive.push({familyId:fid,plan,members:fm.members||data.members||{}});
-      // proRequest가 있는 가족
+      const memberNames=Object.values(fm.members||{}).map(m=>m.name||'').filter(Boolean).join(', ');
+      if(plan==='pro') proActive.push({familyId:fid,plan,memberNames,source:'families'});
       if(req&&req.status==='pending') pending.push({...req,familyId:fid,_docId:fid});
       else if(req&&(req.status==='approved'||req.status==='rejected')) done.push({...req,familyId:fid,_docId:fid});
     });
+
+    // 2) 레거시 데이터도 확인
+    for(const f of _allFamilies){
+      if(!f._isLegacy) continue;
+      const fm=f.familyMeta||{};
+      const plan=fm.plan||'free';
+      if(plan==='pro'){
+        const memberNames=Object.values(fm.members||{}).map(m=>m.name||'').filter(Boolean).join(', ');
+        // families에 이미 있는지 중복 체크
+        if(!proActive.find(p=>p.familyId===f.id))
+          proActive.push({familyId:f.id,plan,memberNames,source:'legacy('+LEGACY_DOC+')'});
+      }
+    }
+
     pending.sort((a,b)=>(b.requestedAt||0)-(a.requestedAt||0));
     done.sort((a,b)=>(b.processedAt||b.requestedAt||0)-(a.processedAt||a.requestedAt||0));
 
-    const pendEl=document.getElementById('pro-pending-list');
-    const doneEl=document.getElementById('pro-done-list');
+    // 현재 PRO 가족
+    const activeEl=document.getElementById('pro-active-list');
+    if(!proActive.length){activeEl.innerHTML='<div class="empty-state">현재 PRO 등급 가족이 없습니다</div>';}
+    else{activeEl.innerHTML=proActive.map(r=>`<div class="table-row" style="display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--bdr)">
+      <span style="font-size:14px;font-weight:700;width:60px;flex-shrink:0;color:var(--primary)">⭐ PRO</span>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:14px;font-weight:600">${escHtml(r.familyId)}</div>
+        <div style="font-size:12px;color:var(--tx2)">${escHtml(r.memberNames||'—')} · ${escHtml(r.source)}</div>
+      </div>
+    </div>`).join('');}
 
+    // 대기 중인 신청
+    const pendEl=document.getElementById('pro-pending-list');
     if(!pending.length){pendEl.innerHTML='<div class="empty-state">대기 중인 신청이 없습니다</div>';}
     else{pendEl.innerHTML=pending.map(r=>`<div class="table-row" style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--bdr)">
       <div style="flex:1;min-width:0">
         <div style="font-weight:700;font-size:14px">${escHtml(r.userName||r.userId||'?')}</div>
-        <div style="font-size:12px;color:var(--tx2)">가족: ${escHtml(r.familyId)} · ${r.env==='dev'?'개발':'운영'}기 · ${new Date(r.requestedAt).toLocaleString('ko')}</div>
+        <div style="font-size:12px;color:var(--tx2)">가족: ${escHtml(r.familyId)} · ${new Date(r.requestedAt).toLocaleString('ko')}</div>
       </div>
       <button class="btn-sm btn-primary" onclick="approveProRequest('${escHtml(r.familyId)}')">승인</button>
       <button class="btn-sm btn-ghost" onclick="rejectProRequest('${escHtml(r.familyId)}')">거절</button>
     </div>`).join('');}
 
+    // 처리 완료
+    const doneEl=document.getElementById('pro-done-list');
     if(!done.length){doneEl.innerHTML='<div class="empty-state">처리 완료된 건이 없습니다</div>';}
     else{doneEl.innerHTML=done.slice(0,20).map(r=>`<div class="table-row" style="display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--bdr)">
       <span style="font-size:14px;font-weight:700;width:80px;flex-shrink:0;color:${r.status==='approved'?'var(--success)':'var(--danger)'}">${r.status==='approved'?'✅ 승인':'❌ 거절'}</span>
