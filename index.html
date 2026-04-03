@@ -8728,7 +8728,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'prod'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0403z2';
+const _APP_VERSION = 'v0403z4';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -8749,7 +8749,7 @@ if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.
   if(vi) vi.textContent=(_ENV==='dev'?'DEV ':'')+ _APP_VERSION;
 })();
 
-let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction;
+let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction, _fsCollection, _fsAddDoc;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
 let fbApp, db, fbAuth, LEGACY_DOC, DATA_DOC;
 let _firebaseReady = false;
@@ -8762,7 +8762,7 @@ async function _initFirebase(){
     const fbAuthMod = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
     const fbAppCheckMod = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check.js");
     initializeApp = fbAppMod.initializeApp;
-    ({getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction} = fbFsMod);
+    ({getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction, collection: _fsCollection, addDoc: _fsAddDoc} = fbFsMod);
     ({getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut: signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken} = fbAuthMod);
     const {initializeAppCheck, ReCaptchaEnterpriseProvider} = fbAppCheckMod;
 
@@ -15617,6 +15617,11 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.24 (v0403z4)',date:'2026-04-03',items:[
+    {type:'fix',text:'챗봇 질문 로그 Firestore 저장 수정 (modular SDK 호환)'},
+    {type:'new',text:'"뭐 할 수 있어?" 질문 시 퀵 메뉴 다시 표시'},
+    {type:'improve',text:'채팅창 열 때마다 퀵 메뉴 자동 표시'},
+  ]},
   {ver:'1.9.23 (v0403z2)',date:'2026-04-03',items:[
     {type:'new',text:'챗봇 질문 로그 — 사용자 질문을 Firestore에 기록 및 관리자 조회'},
     {type:'fix',text:'챗봇 invite_member 도구에 삼촌/이모 역할 enum 추가 (도구 호출 가능하도록)'},
@@ -18672,6 +18677,9 @@ window.rebuildMembersFromFamily=rebuildMembersFromFamily;
 Object.defineProperty(window,'_familyId_ref',{get(){return _familyId;},configurable:true});
 window._ENV=_ENV;
 window._firestore_ref=function(){return typeof db!=='undefined'?db:null;};
+window._fsAddDocToCollection=function(colName,data){
+  try{if(db&&_fsCollection&&_fsAddDoc){return _fsAddDoc(_fsCollection(db,colName),data);}return Promise.resolve();}catch(e){return Promise.resolve();}
+};
 window._APP_VERSION_REF=_APP_VERSION;
 
 // ── 밀리 챗봇용 API (모듈 스코프의 S를 직접 조작하므로 onSnapshot 교체에 안전) ──
@@ -20747,6 +20755,11 @@ function _tryLocalIntent(text){
     return{text:full+`\n[BUTTONS:${honorific?'뱃지 상세 보기|활동 현황':'내 뱃지 자세히!|활동 하기'}]`,mood:'success'};
   }
 
+  // 7. 도움말 / 뭐 할 수 있어?
+  if(/(뭐할수|뭘할수|무엇을할수|뭐할수있|뭘할수있|무엇.*할수|도움말|도와줘|기능|help|메뉴|사용법|어떻게.*써|뭐.*해줄수)/.test(t)){
+    return{text:'_SHOW_QUICK_MENU_',mood:'idle',showMenu:true};
+  }
+
   // 매칭 안 됨 → API 호출
   return null;
 }
@@ -20910,6 +20923,10 @@ window.toggleMilyChat=function(){
         _milyWelcome();
       }
     }
+    // 퀵 메뉴 항상 표시 (열 때마다)
+    const _isC=typeof isCaregiverUser==='function'&&isCaregiverUser();
+    const _kn=_getCurrentKidName()||'아이';
+    _renderQuickMenu(_isC,_kn);
     setTimeout(()=>document.getElementById('mily-input').focus(),300);
     _scrollMilyBottom();
   }else{
@@ -21028,6 +21045,16 @@ function _renderQuickMenu(isC,kidName){
         const _li=_tryLocalIntent(sub.label);
         if(_li){
           _milyHistory.push({role:'user',content:sub.label});
+          if(_li.showMenu){
+            const _isC=typeof isCaregiverUser==='function'&&isCaregiverUser();
+            const _kn=_getCurrentKidName()||'아이';
+            const _hm=_isC?'제가 도와드릴 수 있는 것들이에요! 아래에서 골라주세요 😊':'내가 도와줄 수 있는 거야! 골라봐 😊';
+            _milyHistory.push({role:'assistant',content:_hm});
+            _saveChatHistory();
+            _addBotMsg(_hm);
+            _renderQuickMenu(_isC,_kn);
+            return;
+          }
           _milyHistory.push({role:'assistant',content:_li.text});
           _saveChatHistory();
           if(_li.mood) _updateMilyChatChar(_li.mood);
@@ -21076,6 +21103,16 @@ window.sendMilyMsg=function(){
   const local=_tryLocalIntent(text);
   if(local){
     _milyHistory.push({role:'user',content:text});
+    if(local.showMenu){
+      const isC=typeof isCaregiverUser==='function'&&isCaregiverUser();
+      const kn=_getCurrentKidName()||'아이';
+      const helpMsg=isC?'제가 도와드릴 수 있는 것들이에요! 아래에서 골라주세요 😊':'내가 도와줄 수 있는 거야! 골라봐 😊';
+      _milyHistory.push({role:'assistant',content:helpMsg});
+      _saveChatHistory();
+      _addBotMsg(helpMsg);
+      _renderQuickMenu(isC,kn);
+      return;
+    }
     _milyHistory.push({role:'assistant',content:local.text});
     _saveChatHistory();
     if(local.mood) _updateMilyChatChar(local.mood);
@@ -21817,18 +21854,14 @@ function _logChatError(context, error, extra){
       timestamp: ts,
       date: new Date(ts).toISOString()
     };
-    // Firestore에 저장 (firebase가 로드된 경우)
-    if(window._firestore_ref&&typeof window._firestore_ref==='function'){
-      const db=window._firestore_ref();
-      if(db){
-        const colRef=db.collection('chatErrors');
-        colRef.add(errorDoc).then(()=>{
-          console.log('[chat-error-log] saved to Firestore:', context);
-        }).catch(e2=>{
-          console.warn('[chat-error-log] Firestore save failed:', e2);
-        });
-        return;
-      }
+    // Firestore에 저장 (modular SDK 헬퍼 사용)
+    if(window._fsAddDocToCollection){
+      window._fsAddDocToCollection('chatErrors',errorDoc).then(()=>{
+        console.log('[chat-error-log] saved to Firestore:', context);
+      }).catch(e2=>{
+        console.warn('[chat-error-log] Firestore save failed:', e2);
+      });
+      return;
     }
     // fallback: localStorage
     const key='_chatErrors';
@@ -21860,12 +21893,9 @@ function _logChatQuery(text, source){
       timestamp: ts,
       date: new Date(ts).toISOString()
     };
-    if(window._firestore_ref&&typeof window._firestore_ref==='function'){
-      const db=window._firestore_ref();
-      if(db){
-        db.collection('chatQueries').add(doc).catch(()=>{});
-        return;
-      }
+    if(window._fsAddDocToCollection){
+      window._fsAddDocToCollection('chatQueries',doc).catch(()=>{});
+      return;
     }
   }catch(e){}
 }
@@ -22168,6 +22198,16 @@ function _addBotMsg(text){
         const _li=_tryLocalIntent(label);
         if(_li){
           _milyHistory.push({role:'user',content:label});
+          if(_li.showMenu){
+            const _isC=typeof isCaregiverUser==='function'&&isCaregiverUser();
+            const _kn=_getCurrentKidName()||'아이';
+            const _hm=_isC?'제가 도와드릴 수 있는 것들이에요! 아래에서 골라주세요 😊':'내가 도와줄 수 있는 거야! 골라봐 😊';
+            _milyHistory.push({role:'assistant',content:_hm});
+            _saveChatHistory();
+            _addBotMsg(_hm);
+            _renderQuickMenu(_isC,_kn);
+            return;
+          }
           _milyHistory.push({role:'assistant',content:_li.text});
           _saveChatHistory();
           if(_li.mood) _updateMilyChatChar(_li.mood);
