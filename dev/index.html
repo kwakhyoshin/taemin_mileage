@@ -8728,7 +8728,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0403x';
+const _APP_VERSION = 'v0403y';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -15617,6 +15617,9 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.21 (v0403y)',date:'2026-04-03',items:[
+    {type:'fix',text:'챗봇 시스템 프롬프트에 삼촌/이모 역할 추가'},
+  ]},
   {ver:'1.9.20 (v0403x)',date:'2026-04-03',items:[
     {type:'new',text:'로컬 인텐트 엔진 — 조회성 질문은 API 호출 없이 즉시 응답'},
     {type:'improve',text:'버튼 클릭 시 로컬 처리 우선 → API 사용량 절감'},
@@ -21466,7 +21469,7 @@ ${isMultiChild?`자녀(${childrenInfo.length}명):${childrenInfo.join(',')}\n`:'
 [규칙]
 1. 실행요청→tool호출. 결과 1줄 요약+이모지.
 2. ★필수: 응답 끝에 반드시 [BUTTONS:다음행동1|다음행동2] (2~3개). 사용자가 다음에 할 가능성 높은 행동을 예측해서 제시.
-3. ${isC?'양육자→모든 기능. 가족 초대: invite_member(이름+역할). 역할:dad,mom,grandpa,grandma,grandpa_m,grandma_m,caregiver,child. 초대 후 URL 노출 금지→"아래 버튼을 눌러 공유하세요" 안내':'자녀→do_activity,get_status만. 나머진 "부모님께 부탁해봐!"'}
+3. ${isC?'양육자→모든 기능. 가족 초대: invite_member(이름+역할). 역할:dad,mom,grandpa,grandma,grandpa_m,grandma_m,uncle,aunt,caregiver,child. 초대 후 URL 노출 금지→"아래 버튼을 눌러 공유하세요" 안내':'자녀→do_activity,get_status만. 나머진 "부모님께 부탁해봐!"'}
 ${isMultiChild?`4. 다자녀(${childrenInfo.join(',')}): 조치 전 "어떤 자녀?" 확인.\n`:''}`;
 
   if(!isPro){
