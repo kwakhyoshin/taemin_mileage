@@ -2,7 +2,7 @@
 
 > 이 문서는 새 세션에서 실수 없이 개발·테스트·배포할 수 있도록 모든 핵심 정보를 담고 있습니다.
 > **새 세션 시작 시 반드시 이 문서를 먼저 읽을 것.**
-> 최종 업데이트: 2026-04-03 (Vercel 프록시 전환 + 챗봇 양육자 이름 + 오늘의 할일 학습 + 운영 배포, PR #160~#162)
+> 최종 업데이트: 2026-04-03 (PRO 등급 해제 버그 수정 + 나의메뉴 UI 개선 + 사용법 안내 보강, PR #172~#179)
 
 ---
 
@@ -2102,3 +2102,92 @@ CSP 추가(#87) 후 개발기에서 "오프라인 모드" 에러 발생. 3단계
 | #160 | feat: 챗봇 양육자 이름 인식 | ✅ 개발기+운영기 |
 | #161 | feat: 홈 인사말 복원 + 챗봇 오늘의 할일 학습 | ✅ 개발기+운영기 |
 | #162 | release: v0403a 운영 반영 | ✅ 운영기 배포 |
+
+---
+
+### 12.19 소셜 연동 후 PRO 등급 해제 — 전체 경위 (2026-04-03, PR #172~#179)
+
+#### 증상
+- nonmarking 계정(개발기)이 갑자기 FREE 등급으로 표시됨
+- 나의 메뉴에서 소셜 연동 정보, 가족 목록이 안 보이는 문제도 동시 발생
+
+#### 근본 원인: family_id = 'taemin_dev' (레거시 문서명과 동일)
+개발기에서 소셜 연동 과정이나 이전 코드에 의해 `localStorage`의 `taemin_dev_family_id`가 `'taemin_dev'`로 설정됨. 이 값은 레거시 Firestore 문서명(`users/taemin_dev`)과 동일하지만, 앱은 이를 `families/taemin_dev`라는 별도 컬렉션의 문서 경로로 해석.
+
+이로 인해:
+1. `_familyId = 'taemin_dev'` → `isDirectLegacy = false` (직접 레거시 경로가 아님)
+2. `_fromLegacy` 마커 없음 → `isMigratedLegacy = false`
+3. `_autoSetProIfAdmin()` 조건 불충족 → PRO 설정 안 됨
+4. `_cleanupWrongPro()`가 기존 PRO를 삭제
+
+#### 시도한 접근과 교훈
+
+1. **v0403i**: `_fromLegacy`, `_autoProSet` 마커 + `_pendingFromLegacy` 플래그 추가
+   - 문제: localStorage에 이미 family_id가 있어 `_checkLegacyMigrationPointer()`를 거치지 않음 → 마커 미설정
+
+2. **v0403j**: `_autoSetProIfAdmin`을 async로 변경, `getDoc(LEGACY_DOC)`로 `_migratedTo` 포인터 확인
+   - 문제: `users/taemin_dev`에 `_migratedTo` 포인터가 없을 수 있음 (family_id가 레거시명으로 설정된 경우 정상적인 마이그레이션 경로를 거치지 않았을 수 있음)
+
+3. **v0403k**: `updateDataDoc()`에서 family_id가 레거시명이면 삭제하고 LEGACY_DOC 사용
+   - **⚠️ 사고 발생**: `families/taemin_dev` 문서에 실제 데이터가 있었음. family_id 삭제로 데이터를 찾지 못해 `auth-continue` 화면이 표시됨
+   - **교훈**: family_id를 함부로 삭제하면 안 됨. 해당 Firestore 문서에 데이터가 있을 수 있음
+
+4. **v0403m (최종 수정)**: `isLegacyNamedFamily` 조건 추가
+   - family_id가 레거시 문서명과 동일한 경우 → 레거시 가족으로 간주 → PRO 자동 설정
+   - `updateDataDoc()`는 원래 동작으로 복원, 데이터 경로 변경 없음
+   - `_cleanupWrongPro()`에도 동일한 보호 조건 추가
+
+#### 최종 코드 구조 (v0403m)
+
+```javascript
+// _autoSetProIfAdmin() — PRO 자동 설정 조건
+function _autoSetProIfAdmin(){
+  // 조건1: isDirectLegacy — _familyId 없음 + DATA_DOC === LEGACY_DOC
+  // 조건1b: isLegacyNamedFamily — _familyId가 'taemin_dev' 또는 'taemin'
+  // 조건2: isMigratedLegacy — _familyId 있음 + _fromLegacy 마커
+  // → 하나라도 true + 관리자/양육자 → PRO 설정 + _autoProSet 마커
+}
+
+// _cleanupWrongPro() — 잘못된 PRO 제거 (방어 로직)
+function _cleanupWrongPro(){
+  // proRequest 있으면 유지
+  // _autoProSet 있으면 유지
+  // family_id가 레거시명이면 유지 (isLegacyNamedFamily)
+  // isDirectLegacy이면 유지
+  // 그 외: PRO 삭제
+}
+```
+
+#### 데이터 경로 구조 (핵심)
+| 경로 | 변수 | 설명 |
+|------|------|------|
+| `users/taemin_dev` | `LEGACY_DOC` | 레거시 문서. 항상 이 경로로 초기화 |
+| `users/taemin` | `LEGACY_DOC` (운영기) | 운영기 레거시 문서 |
+| `families/{randomId}` | `DATA_DOC` (마이그레이션 후) | 소셜 연동 시 생성되는 정상 family 문서 |
+| `families/taemin_dev` | `DATA_DOC` (이상 케이스) | family_id가 레거시명으로 설정된 경우. 문서 존재 가능 |
+
+#### localStorage 키
+| 키 | 값 예시 | 설명 |
+|----|---------|------|
+| `taemin_dev_family_id` | `dev_abc123...` | 정상: families/ 컬렉션의 문서 ID |
+| `taemin_dev_family_id` | `taemin_dev` | 이상: 레거시 문서명과 동일 → isLegacyNamedFamily로 처리 |
+| `taemin_dev_family_id` | (없음) | 미마이그레이션: LEGACY_DOC 직접 사용 |
+
+#### 관련 PR 목록
+| PR | 버전 | 설명 |
+|----|------|------|
+| #172 | v0403e | 나의메뉴 우리가족/소셜정보 미표시 수정 + renderMyTab try/catch |
+| #173 | v0403f | 등급 배지를 헤더 제목 영역으로 이동 |
+| #174 | v0403g | AI챗봇 사용법 안내 오류 수정 (4건) |
+| #175 | v0403h | 오늘 할 일 설정 방법 2가지 + 메시지/스티커/보상교환/활동취소 안내 추가 |
+| #176 | v0403i | 소셜 연동 마이그레이션 PRO 해제 방지 — _fromLegacy, _autoProSet 마커 |
+| #177 | v0403j | 레거시 _migratedTo 포인터 자동 감지 (async) |
+| #178 | v0403k | ⚠️ updateDataDoc family_id 삭제 (문제 발생 — v0403m에서 되돌림) |
+| #179 | v0403m | isLegacyNamedFamily 조건 추가 (최종 수정) |
+
+#### 핵심 교훈
+1. **localStorage의 family_id를 함부로 삭제하지 말 것** — 해당 Firestore 경로에 실제 데이터가 있을 수 있음
+2. **family_id 값이 레거시 문서명과 동일한 케이스가 존재** — 정상적인 마이그레이션 외의 경로로 설정될 수 있음
+3. **PRO 등급 관련 로직 변경 시 반드시 개발기에서 먼저 테스트** — `_cleanupWrongPro`가 예기치 않게 PRO를 삭제할 수 있음
+4. **`S` 변수는 클로저 안에 있어 Chrome MCP JavaScript로 접근 불가** — `window.save`, `window.renderMyTab`만 window에 노출
+5. **Firebase App Check 때문에 Node.js에서 인증 없이 Firestore 접근 불가** — DB 직접 수정이 필요하면 Firebase Console UI 사용
