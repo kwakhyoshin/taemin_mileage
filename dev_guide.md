@@ -2,7 +2,7 @@
 
 > 이 문서는 새 세션에서 실수 없이 개발·테스트·배포할 수 있도록 모든 핵심 정보를 담고 있습니다.
 > **새 세션 시작 시 반드시 이 문서를 먼저 읽을 것.**
-> 최종 업데이트: 2026-04-03 (챗봇 초대 링크 버튼 UX + 운영 반영 v0403v + admin chatErrors 수정, PR #200~#203)
+> 최종 업데이트: 2026-04-03 (로컬 인텐트 엔진 + 채팅 이력 유지 + 삼촌/이모 역할 추가, PR #200~#208)
 
 ---
 
@@ -1087,6 +1087,41 @@ account: {
    - **원인**: `loadChatErrors`/`clearChatErrors`에서 Firebase 10.7.1을 동적 import → `db`는 10.12.0의 getFirestore로 생성 → `collection()`이 db를 인식 못함
    - **수정**: 동적 import 제거, 상단 10.12.0 static import에 `orderBy`, `fsLimit` 추가
    - **교훈**: Firebase SDK 버전 혼용 금지. 한 파일 내에서는 반드시 동일 버전 사용
+
+### 2026-04-03 세션 2 — 채팅 이력 유지 + 로컬 인텐트 엔진 + 삼촌/이모 역할 추가
+
+**적용 범위: 개발기**
+
+#### 커밋 목록 (PR #204~#208)
+| PR | 설명 | 상태 |
+|----|------|------|
+| #204 | feat: 채팅 이력 localStorage 저장 (앱 재시작 후 복원) | ✅ merged |
+| #205 | release: 운영 반영 v0403w | ✅ merged |
+| #206 | feat: 로컬 인텐트 엔진 + 버튼 로컬 처리 + 프롬프트 경량화 | ✅ merged |
+| #207 | fix: 운영 admin.html chatErrors 패널 동기화 | ✅ merged |
+| #208 | feat: 챗봇 시스템 프롬프트에 삼촌/이모 역할 추가 | ✅ merged |
+
+#### 상세 변경 내용
+
+**채팅 이력 유지 (PR #204)**
+- localStorage에 최근 50개 메시지 저장, 앱 재시작 시 복원
+- 환경별 키 분리: `taemin_dev_chat_history` / `taemin_chat_history`
+- 채팅 초기화 시 이력도 삭제
+
+**로컬 인텐트 엔진 (PR #206)**
+- `_tryLocalIntent()`: 마일리지 조회, 오늘 활동, 활동 목록, 보상 목록, 가족 구성원, 뱃지 등 6개 패턴을 정규식으로 매칭
+- 매칭 시 API 호출 없이 앱 데이터에서 즉시 응답 → API 사용량 대폭 절감
+- 인라인 버튼·퀵메뉴 버튼도 로컬 인텐트 우선 처리
+- 시스템 프롬프트 토큰 ~40% 절감 (간결한 규칙 형식으로 압축)
+
+**삼촌/이모 역할 추가 (PR #208)**
+- 시스템 프롬프트 역할 목록에 `uncle`(삼촌), `aunt`(이모) 추가
+- ROLE_DEFS에는 이미 정의되어 있었으나 프롬프트에서 누락되어 가족 초대 시 해당 역할이 챗봇에 인식되지 않았음
+
+**Firestore 보안 규칙 이슈 (chatErrors)**
+- dev/admin.html에서 chatErrors 조회 시 "Missing or insufficient permissions" 오류
+- 원인: Firestore 규칙에서 `chatErrors` match가 `/{document=**}` (전체 차단) 블록 안에 중첩됨
+- 해결: `chatErrors` match를 최상위로 이동 + `if true`로 변경 (인증 없이 동작하므로)
 
 ### 2026-04-02 세션 2 — 챗봇 UI 개선 + mily.ai 로고 + 다크모드 + 존댓말 + 마일리지 통일
 
