@@ -8728,7 +8728,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0403u';
+const _APP_VERSION = 'v0403v';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -15617,6 +15617,10 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.18 (v0403v)',date:'2026-04-03',items:[
+    {type:'improve',text:'가족 초대 링크를 채팅 내 공유 버튼으로 표시 (URL 노출 제거)'},
+    {type:'improve',text:'자동 공유 팝업 제거 — 사용자가 버튼으로 직접 공유'},
+  ]},
   {ver:'1.9.17 (v0403u)',date:'2026-04-03',items:[
     {type:'fix',text:'챗봇 가족 구성원 초대 기능 오류 수정 (모듈 스코프 문제)'},
     {type:'new',text:'챗봇 오류 자동 로깅 기능 (Firestore 저장)'},
@@ -20500,6 +20504,8 @@ body.dark .mily-tool-card{background:linear-gradient(135deg,rgba(99,102,241,.12)
 .mily-tool-card .tc-name{font-size:15px;font-weight:800;color:var(--tx,#1E293B);line-height:1.3}
 .mily-tool-card .tc-meta{font-size:12px;color:var(--tx2,#64748B);margin-top:2px}
 .mily-tool-card .tc-pts{font-size:14px;font-weight:800;color:#6366F1;white-space:nowrap}
+.mily-invite-btn{display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:8px 16px;background:linear-gradient(135deg,#6366F1,#818CF8);color:#fff;border:none;border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(99,102,241,.3);transition:all .2s}
+.mily-invite-btn:active{transform:scale(.96);box-shadow:0 1px 4px rgba(99,102,241,.2)}
 .mily-tool-card.tc-add{border-color:rgba(34,197,94,.3);background:linear-gradient(135deg,rgba(34,197,94,.06),rgba(16,185,129,.06))}
 .mily-tool-card.tc-add .tc-pts{color:#16A34A}
 .mily-tool-card.tc-del{border-color:rgba(239,68,68,.3);background:linear-gradient(135deg,rgba(239,68,68,.06),rgba(244,63,94,.06))}
@@ -21288,7 +21294,7 @@ ${isMultiChild?`자녀(${childrenInfo.length}명):${childrenInfo.join(',')}\n`:'
 [규칙]
 1. 실행요청→tool호출.
 2. 응답 끝에 [BUTTONS:행동1|행동2]
-3. ${isC?'양육자→모든 기능. 가족 초대 시 invite_member 사용(이름+역할 필수). 역할: dad,mom,grandpa,grandma,grandpa_m,grandma_m,caregiver,child':'자녀→do_activity,get_status만. 나머진 "부모님께 부탁해봐!"'}
+3. ${isC?'양육자→모든 기능. 가족 초대 시 invite_member 사용(이름+역할 필수). 역할: dad,mom,grandpa,grandma,grandpa_m,grandma_m,caregiver,child. 초대 완료 후 URL을 텍스트로 보여주지 말고 "아래 초대 링크 버튼을 눌러 공유해주세요!" 안내':'자녀→do_activity,get_status만. 나머진 "부모님께 부탁해봐!"'}
 ${isMultiChild?`4. 다자녀(${childrenInfo.join(',')}): 조치 전 "어떤 자녀?" 확인.\n`:''}`;
 
   if(!isPro){
@@ -21823,23 +21829,9 @@ function _inviteMemberFromChat(input){
     const familyName=S.familyMeta?.familyName||'가족';
     const roleLabel=_RD[memberDisplayRole||memberRole]?.label||'구성원';
 
-    // 공유 또는 클립보드 (비동기 — 결과와 별도로 트리거)
-    const shareTitle=`${familyName} 가족 초대`;
-    const shareText=`${name}님(${roleLabel}), ${familyName} 가족에 초대합니다! 링크를 눌러 가입하세요.`;
-    setTimeout(()=>{
-      if(navigator.share){
-        navigator.share({title:shareTitle,text:shareText,url}).catch(()=>{
-          navigator.clipboard.writeText(url).catch(()=>{});
-        });
-      }else{
-        navigator.clipboard.writeText(url).then(()=>{
-          if(typeof toast==='function')toast('초대 링크가 복사되었어요! 📋');
-        }).catch(()=>{});
-      }
-    },500);
-
+    // 공유는 챗봇 카드의 버튼으로 대체 (자동 공유 팝업 제거)
     console.log('[invite_member] ✅ member added:', newId, name, role, 'URL:', url);
-    return{success:true,message:`${name}님(${roleLabel})이 가족에 추가되었어요! 초대 링크 공유 화면이 열립니다.`,memberId:newId,memberName:name,roleLabel,inviteUrl:url};
+    return{success:true,message:`${name}님(${roleLabel})이 가족에 추가되었어요! 아래 초대 링크 버튼을 눌러 공유해주세요.`,memberId:newId,memberName:name,roleLabel,inviteUrl:url};
   }catch(e){
     console.error('[invite_member] error:', e);
     return{success:false,error:'구성원 초대 중 오류: '+e.message};
@@ -21944,7 +21936,8 @@ function _renderToolCard(toolName,input,result){
   // 가족 구성원 초대
   else if(toolName==='invite_member'&&result.memberName){
     const roleLabel=result.roleLabel||input.role||'구성원';
-    cardHTML=`<div class="mily-tool-card tc-add"><div class="tc-emoji">👋</div><div class="tc-info"><div class="tc-name">${result.memberName} (${roleLabel})</div><div class="tc-meta">가족에 추가됨 · 초대 링크 공유 중</div></div></div>`;
+    const invUrl=result.inviteUrl||'';
+    cardHTML=`<div class="mily-tool-card tc-add"><div class="tc-emoji">👋</div><div class="tc-info"><div class="tc-name">${result.memberName} (${roleLabel})</div><div class="tc-meta">가족에 추가됨</div>${invUrl?`<button class="mily-invite-btn" onclick="(function(u){if(navigator.share){navigator.share({title:'가족 초대',text:'가족에 초대합니다!',url:u}).catch(function(){navigator.clipboard.writeText(u).then(function(){if(typeof toast==='function')toast('초대 링크가 복사되었어요! 📋');}).catch(function(){});});}else{navigator.clipboard.writeText(u).then(function(){if(typeof toast==='function')toast('초대 링크가 복사되었어요! 📋');}).catch(function(){});}})(decodeURIComponent('${encodeURIComponent(invUrl)}'))">📨 초대 링크 공유하기</button>`:''}</div></div>`;
   }
 
   if(cardHTML){
