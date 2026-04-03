@@ -2393,3 +2393,65 @@ window._currentUser_ref = function(){ return currentUser; };
 - `<script type="module">` 스코프의 변수는 다른 `<script>` 블록에서 접근 불가
 - IIFE에서 모듈 변수를 사용할 때는 반드시 `window` 경유 export 필요
 - 기존 exports 섹션(line 18631~)에 누락된 변수가 없는지 새 기능 추가 시 확인할 것
+
+---
+
+### 2026-04-03~04 세션 (밀리 애니메이션 + 스플래시 + 로딩화면 리디자인 + 챗봇 퀴즈 강화)
+
+#### 삭제 버튼 복원 (PR #220, v0403z5)
+- **증상**: 활동/보상 관리 목록에서 삭제 버튼이 사라져 있었음
+- **원인**: 이전 리팩토링 시 삭제 버튼 HTML이 누락됨 (함수 `delAct()`, `delRwd()`는 존재)
+- **수정**: 수정 버튼 옆에 삭제 버튼 div 래퍼 추가 (`display:flex;gap:4px`)
+- **위치**: 활동 목록 (~line 12795), 보상 목록 (~line 12927)
+
+#### 밀리 캐릭터 애니메이션 5종 추가 (PR #222, v0404a)
+- **추가된 애니메이션**: 춤추기(dance), 걸어가다 쉬기(walk+rest), 팔짝팔짝 뛰기(hop), 놀리기(tease), 엉덩이 춤(butt-dance)
+- **구현 방식**: CSS @keyframes + inline SVG `style="animation:..."` 조합
+- **CSS 키프레임 위치**: line ~462 (`milyDance`, `milyHop`, `milyTease`, `milyButtDance`, `milyWalk` 등)
+- **기존 3종**: bounce(기본), tada(축하), wave(인사) — 총 8종
+
+#### 스플래시 로딩 화면 (PR #222, v0404a)
+- **디자인**: 시그니처 보라색 그라데이션 + mile.ly 로고(앱 아이콘 동일) + 랜덤 밀리 애니메이션 8종
+- **HTML 위치**: `<div id="mily-splash">` (line ~2612)
+- **인라인 스크립트**: `<body>` 직후에 즉시 실행 — `_milySVG()` 정의 전이므로 인라인 SVG 문자열로 구현
+- **숨김 로직**: `_hideSplash()` 함수가 `.hide` 클래스 추가 → 400ms fade-out → `display:none`
+- **호출 시점**: `hideAllAuth()` (즉시), `showAuthScreen()` (1.5초 딜레이)
+- **안전장치**: 5초 후 자동 숨김 timeout
+
+##### 트러블슈팅: 스플래시 vs 데이터 로딩 화면 혼동
+- **문제**: 사용자가 여전히 "트로피 + 데이터 불러오는 중..." 화면이 뜬다고 보고
+- **원인**: 앱에 **두 개의 로딩 화면**이 존재:
+  1. `#mily-splash` — 앱 초기 로드 스플래시 (새로 만듦, 정상 동작)
+  2. `showLoading('데이터 불러오는 중...')` — Firebase 데이터 로드 중 표시되는 **별도** 오버레이 (구 트로피 디자인)
+- **교훈**: 로딩 관련 UI 변경 시 `showLoading()`과 `#mily-splash` 두 곳 모두 확인할 것
+
+#### 데이터 로딩 화면 리디자인 (PR #224, v0404b)
+- **변경**: `showLoading()` 함수 내부 — 트로피 SVG → 밀리 캐릭터 바운스 SVG, 흰 배경 → 보라색 그라데이션
+- **위치**: line ~9247
+- **주의**: `showLoading()`은 `_milySVG()` 정의 전에 호출될 수 있으므로, 인라인 SVG 문자열로 밀리 캐릭터 구현
+
+#### 챗봇 퀴즈/놀이 대화 기능 강화 (PR #224, v0404b)
+- **문제**: 토큰 최적화로 시스템 프롬프트가 극도로 압축되면서, 자녀 모드에서 퀴즈/놀이 대화가 불가능해짐
+- **수정 내용**:
+  - 기본 프롬프트: 응답 길이 제한 `1~2줄` → `1~3줄(퀴즈/놀이 대화는 더 길어도 OK)`
+  - PRO 자녀 모드: `[자녀] 재미+응원!` → 퀴즈/수수께끼/끝말잇기/OX퀴즈 구체적 지시 추가
+  - 일반 자녀 모드: `[자녀대화]` 섹션 신규 추가 — 놀이 요청 적극 응대 지시
+  - 퀵 메뉴 "밀리랑 놀자": 수수께끼, 끝말잇기, OX퀴즈 3개 항목 추가, 기존 퀴즈 프롬프트 개선(3지선다 명시)
+- **위치**: `_buildSystemPrompt()` (~line 21631), `_getQuickMenuData()` (~line 21122)
+- **교훈**: 토큰 최적화 시 자녀 대상 인터랙티브 기능(퀴즈, 게임)은 별도 보호 필요
+
+#### PR 목록
+| PR | 내용 | 버전 |
+|----|------|------|
+| #220 | 활동/보상 삭제 버튼 복원 | - |
+| #221 | 운영 반영 v0403z5 | v0403z5 |
+| #222 | 밀리 애니메이션 5종 + 스플래시 로딩 | - |
+| #223 | 운영 반영 v0404a | v0404a |
+| #224 | 로딩 화면 리디자인 + 챗봇 퀴즈 강화 | - |
+| #225 | 운영 반영 v0404b | v0404b |
+
+#### Git 작업 환경 트러블슈팅
+- **git index.lock 문제**: `/sessions/.../mnt/taemin_mileage/.git/index.lock`이 잠겨 삭제 불가 (Operation not permitted)
+  - **해결**: `/tmp/taemin_work`에 repo를 새로 clone하여 작업
+  - **remote URL 주의**: `taemin-mileage`(하이픈)이 아니라 `taemin_mileage`(언더스코어)
+  - **git config 필요**: clone 후 `git config user.email`/`user.name` 설정 필수
