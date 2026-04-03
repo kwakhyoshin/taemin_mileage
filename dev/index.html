@@ -7052,7 +7052,7 @@ function isCurrentUserAdmin(){
 // ★ 레거시 가족(우리 가족) 관리자 → PRO 자동 설정
 // 레거시 직접 경로(users/taemin*) 또는 레거시에서 마이그레이션된 families/ 문서 모두 대상
 // abo.taemin 등 완전히 새로 만든 가족에는 적용하지 않음
-function _autoSetProIfAdmin(){
+async function _autoSetProIfAdmin(){
   try{
     if(!S.familyMeta) return;
     // 조건1: 레거시 직접 경로 (마이그레이션 전)
@@ -7064,6 +7064,20 @@ function _autoSetProIfAdmin(){
     if(window._pendingFromLegacy && !S.familyMeta._fromLegacy){
       S.familyMeta._fromLegacy=true;
       window._pendingFromLegacy=false;
+    }
+    // 조건3: _fromLegacy 마커가 아직 없지만 레거시 문서에 _migratedTo 포인터가 있는 경우
+    // (기존 마이그레이션된 가족인데 마커 설정 전에 PRO가 해제된 경우 자동 복구)
+    if(!!_familyId && !S.familyMeta._fromLegacy && _firebaseReady && LEGACY_DOC && LEGACY_DOC.path){
+      try{
+        const legSnap = await getDoc(LEGACY_DOC);
+        if(legSnap.exists()){
+          const mt = legSnap.data()?._migratedTo;
+          if(mt === _familyId){
+            console.log('🔧 [_autoSetProIfAdmin] 레거시 마이그레이션 감지, _fromLegacy 마커 설정:', mt);
+            S.familyMeta._fromLegacy = true;
+          }
+        }
+      }catch(le){ console.warn('[_autoSetProIfAdmin] legacy check err:', le); }
     }
     const isMigratedLegacy = !!_familyId && S.familyMeta._fromLegacy === true;
     if(!isDirectLegacy && !isMigratedLegacy) return;
@@ -8729,7 +8743,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0403i';
+const _APP_VERSION = 'v0403j';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -15618,6 +15632,12 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {
+    ver:'1.9.11 (v0403j)', date:'2026-04-03',
+    items:[
+      {type:'fix',text:'마이그레이션된 레거시 가족의 PRO 등급 자동 복구 — 레거시 문서 _migratedTo 포인터 자동 감지'},
+    ]
+  },
   {
     ver:'1.9.10 (v0403i)', date:'2026-04-03',
     items:[
