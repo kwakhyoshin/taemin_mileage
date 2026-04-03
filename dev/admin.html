@@ -1351,7 +1351,7 @@ async function approveProRequest(familyId){
   try{
     const famRef=doc(db,'families',familyId);
     await updateDoc(famRef,{'familyMeta.plan':'pro','familyMeta.proRequest.status':'approved','familyMeta.proRequest.processedAt':Date.now()});
-    addLog('PRO 승인: '+familyId);
+    logAdminAction('PRO 승인', familyId);
     loadProRequests();
   }catch(e){alert('승인 실패: '+e.message);}
 }
@@ -1360,7 +1360,7 @@ async function rejectProRequest(familyId){
   try{
     const famRef=doc(db,'families',familyId);
     await updateDoc(famRef,{'familyMeta.proRequest.status':'rejected','familyMeta.proRequest.processedAt':Date.now()});
-    addLog('PRO 거절: '+familyId);
+    logAdminAction('PRO 거절', familyId);
     loadProRequests();
   }catch(e){alert('거절 실패: '+e.message);}
 }
@@ -1374,7 +1374,7 @@ async function manualSetPlan(){
     const famSnap=await getDoc(famRef);
     if(!famSnap.exists()){alert('해당 Family를 찾을 수 없습니다: '+fid);return;}
     await updateDoc(famRef,{'familyMeta.plan':plan});
-    addLog('수동 등급 변경: '+fid+' → '+plan);
+    logAdminAction('수동 등급 변경', fid+' → '+plan);
     alert(fid+' → '+plan+' 변경 완료!');
   }catch(e){alert('변경 실패: '+e.message);}
 }
