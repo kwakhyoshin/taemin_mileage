@@ -1038,6 +1038,39 @@ account: {
 
 ## 변경 이력 (Change Log)
 
+### 2026-04-03 세션 — 챗봇 가족초대 수정 + 오류 로깅 + UI 개선
+
+**적용 범위: 개발기 (DEV v0403u)**
+
+#### 주요 변경사항
+
+1. **챗봇 invite_member / get_family_members 도구 오류 수정**
+   - **원인**: 챗봇 IIFE(`<script>`)에서 모듈 스코프(`<script type="module">`)의 `ROLE_DEFS`, `generateSecureRandom`, `_familyId`, `_ENV`에 접근 불가 → ReferenceError
+   - **수정**: 모듈에서 `window.ROLE_DEFS`, `window.generateSecureRandom`, `window.rebuildMembersFromFamily`, `window._familyId_ref`, `window._ENV` 등을 명시적 export. 챗봇 함수 내부에서 `window.*` 참조 사용
+   - **교훈**: `<script type="module">` 안의 변수는 다른 `<script>` 블록에서 접근 불가. 챗봇 IIFE에서 사용할 변수는 반드시 window에 export 필요
+
+2. **챗봇 오류 자동 로깅 기능 (Firestore `chatErrors` 컬렉션)**
+   - `_logChatError(context, error, extra)` 함수 추가
+   - tool_execute 오류, API 호출 오류 시 자동으로 Firestore에 저장
+   - 저장 내용: context, error, stack, uid, familyId, appVersion, env, userAgent, timestamp
+   - Firestore 미접근 시 localStorage fallback (최대 50건)
+
+3. **시스템 관리자 페이지(admin.html) — 챗봇 오류 조회 패널 추가**
+   - 사이드바에 "챗봇 오류" 메뉴 추가
+   - Firestore `chatErrors` 컬렉션 조회 (최근 100건, 시간순 정렬)
+   - 유형(tool_execute/api_call) 구분, 전체 삭제 기능
+
+4. **업데이트 배너 미니 FAB 제거**
+   - 5초 후 배너가 우측 상단 뱃지 아이콘으로 남는 동작 → 단순히 사라지도록 변경
+
+5. **활동 완료 도장 라이트모드 가시성 개선**
+   - SVG 스트로크/텍스트 색상: `#6EE7B7` → `#34D399`/`#10B981` (더 진한 에메랄드)
+   - opacity: 외부원 .7→.9, 내부원 .5→.7, 완료텍스트 .8→.95, DONE텍스트 .55→.75
+
+6. **Naver 프록시 Vercel 배포 완료**
+   - `kwakhyoshin/mily-proxy` 저장소에 `api/naver-profile.js` 추가 → 자동 배포
+   - CORS: `kwakhyoshin.github.io` 허용
+
 ### 2026-04-02 세션 2 — 챗봇 UI 개선 + mily.ai 로고 + 다크모드 + 존댓말 + 마일리지 통일
 
 **적용 범위: 개발기 + 운영기**
