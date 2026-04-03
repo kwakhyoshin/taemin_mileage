@@ -8728,7 +8728,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0403w';
+const _APP_VERSION = 'v0403x';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -15617,6 +15617,12 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.20 (v0403x)',date:'2026-04-03',items:[
+    {type:'new',text:'로컬 인텐트 엔진 — 조회성 질문은 API 호출 없이 즉시 응답'},
+    {type:'improve',text:'버튼 클릭 시 로컬 처리 우선 → API 사용량 절감'},
+    {type:'improve',text:'시스템 프롬프트 경량화 — 토큰 사용량 약 40% 절감'},
+    {type:'improve',text:'챗봇 응답 간결화 — 1~2줄 + 예측 버튼 방식'},
+  ]},
   {ver:'1.9.19 (v0403w)',date:'2026-04-03',items:[
     {type:'new',text:'채팅 이력 유지 — 앱 재실행 후에도 이전 대화가 복원됩니다'},
   ]},
@@ -20627,6 +20633,114 @@ function _clearChatHistory(){
   try{localStorage.removeItem(_MILY_CHAT_LS_KEY);}catch(e){}
 }
 
+// ── 로컬 인텐트 엔진 (API 호출 없이 즉시 응답) ──
+function _tryLocalIntent(text){
+  const t=text.replace(/\s+/g,'').toLowerCase();
+  const isC=typeof isCaregiverUser==='function'&&isCaregiverUser();
+  const kidName=_getCurrentKidName()||'아이';
+  const S=_getS();
+  const honorific=isC; // 양육자=존댓말, 자녀=반말
+
+  // 1. 마일리지 조회
+  if(/마일리지|포인트|얼마|몇포|몇m|잔액/.test(t)&&!/교환|사용|충전|추가/.test(t)){
+    const pts=typeof getActiveMileage==='function'?getActiveMileage():0;
+    const todayLog=_getTodayLog();
+    const todayPts=todayLog.reduce((s,l)=>s+(l.pts||0),0);
+    const msg=honorific
+      ?`${kidName}의 현재 마일리지는 **${pts}M**${todayPts>0?` (오늘 +${todayPts}M)`:''} 이에요! ✨`
+      :`지금 **${pts}M** 모았어${todayPts>0?`! 오늘만 +${todayPts}M 벌었다`:''} 💰`;
+    const btns=honorific?'활동 현황 보기|보상 목록 보기':'오늘 할 일|보상 뭐 있어?';
+    return{text:msg+`\n[BUTTONS:${btns}]`,mood:'happy'};
+  }
+
+  // 2. 오늘 활동 내역
+  if(/(오늘|금일).*(뭐|무엇|어떤|활동|했|기록|내역)|(했던거|한거|한일|할일)/.test(t)&&!/추가|만들|삭제/.test(t)){
+    const todayLog=_getTodayLog();
+    if(todayLog.length===0){
+      const msg=honorific?`${kidName}은 오늘 아직 완료한 활동이 없어요. 시작해볼까요? 😊`:`오늘 아직 아무것도 안 했어! 뭐부터 해볼까? 🚀`;
+      return{text:msg+'\n[BUTTONS:활동 목록 보기|오늘 뭐 할까?]',mood:'idle'};
+    }
+    const list=todayLog.map(l=>`${l.emoji||'✅'} ${l.name} (+${l.pts}M)`).join('\n');
+    const totalPts=todayLog.reduce((s,l)=>s+(l.pts||0),0);
+    const msg=honorific
+      ?`${kidName}이 오늘 완료한 활동이에요 (${todayLog.length}건, +${totalPts}M):\n${list}`
+      :`오늘 ${todayLog.length}개 했어! (+${totalPts}M) 대단해! 🌟\n${list}`;
+    return{text:msg+`\n[BUTTONS:${honorific?'활동 더 하기|마일리지 확인':'다른 거 할래!|마일리지 얼마야?'}]`,mood:'happy'};
+  }
+
+  // 3. 활동 목록 보기
+  if(/(활동|할수있|할거|할것).*(목록|리스트|뭐가|뭐있|보여|알려|종류)|(뭐할수|뭐할까|뭐있어)/.test(t)&&!/추가|만들|삭제|보상/.test(t)){
+    const acts=_getActsList();
+    if(!acts||acts.length===0){
+      return{text:honorific?'등록된 활동이 없어요. 활동을 추가해볼까요?':'아직 활동이 없어! 부모님께 부탁해봐!',mood:'sad'};
+    }
+    const showHome=acts.filter(a=>a.showHome);
+    const display=showHome.length>0?showHome:acts.slice(0,8);
+    const list=display.map(a=>{
+      const done=_getTodayLog().filter(l=>l.name===a.name).length;
+      const max=a.maxDay||0;
+      const status=max>0?(done>=max?'✅완료':`${done}/${max}`):(done>0?`${done}회`:'');
+      return `${a.emoji||'⭐'} ${a.name} ${a.pts}M ${status}`;
+    }).join('\n');
+    const msg=honorific
+      ?`${kidName}의 활동 목록이에요:\n${list}`
+      :`할 수 있는 활동들이야:\n${list}`;
+    const btns=honorific?'활동 완료 처리|새 활동 추가':'활동 하기!|마일리지 얼마야?';
+    return{text:msg+`\n[BUTTONS:${btns}]`,mood:'idle'};
+  }
+
+  // 4. 보상 목록 보기
+  if(/(보상|상품|선물).*(목록|뭐가|뭐있|리스트|보여|알려|종류)|(교환.*(뭐|무엇)|뭐.*교환|보상.*뭐)/.test(t)&&!/추가|만들|삭제/.test(t)){
+    const rwds=_getRwdsList();
+    const pts=typeof getActiveMileage==='function'?getActiveMileage():0;
+    if(!rwds||rwds.length===0){
+      return{text:honorific?'등록된 보상이 없어요. 보상을 추가해볼까요?':'아직 보상이 없어! 부모님께 부탁해봐!',mood:'sad'};
+    }
+    const list=rwds.map(r=>{
+      const canGet=pts>=r.pts?'🟢교환가능':'🔴'+Math.abs(pts-r.pts)+'M 부족';
+      return `${r.emoji||'🎁'} ${r.name} ${r.pts}M ${canGet}`;
+    }).join('\n');
+    const msg=honorific
+      ?`보상 목록이에요 (보유: ${pts}M):\n${list}`
+      :`보상 목록! (내 마일리지: ${pts}M)\n${list}`;
+    return{text:msg+`\n[BUTTONS:${honorific?'보상 교환하기|마일리지 확인':'보상 교환!|활동 더 하기'}]`,mood:'excited'};
+  }
+
+  // 5. 가족 구성원 조회
+  if(/(가족|구성원|식구|멤버).*(누구|보여|알려|목록|현황)|(누가.*있|누구.*등록)/.test(t)&&!/추가|초대/.test(t)){
+    const fm=S?.familyMeta?.members||{};
+    const _RD=window.ROLE_DEFS||{};
+    const list=Object.entries(fm).map(([id,m])=>{
+      const rd=_RD[m.displayRole||m.role]||{label:'구성원'};
+      const joined=m.joinedAt?'✅가입':'⏳대기';
+      return `${rd.emoji||'👤'} ${m.name||'(이름없음)'} — ${rd.label} ${joined}`;
+    }).join('\n');
+    const familyName=S?.familyMeta?.familyName||'우리 가족';
+    const msg=honorific
+      ?`**${familyName}** 구성원이에요 (${Object.keys(fm).length}명):\n${list}`
+      :`**${familyName}** 식구들이야:\n${list}`;
+    return{text:msg+`\n[BUTTONS:${honorific?'구성원 초대하기|활동 현황 보기':'마일리지 얼마야?|오늘 뭐 하지?'}]`,mood:'love'};
+  }
+
+  // 6. 뱃지 조회
+  if(/(뱃지|배지|훈장|메달).*(보여|알려|뭐|목록|몇개|현황)/.test(t)&&!/추가|만들|삭제|수여/.test(t)){
+    const badges=S?.badges||[];
+    const earned=badges.filter(b=>b.earnedAt);
+    if(badges.length===0){
+      return{text:honorific?'아직 뱃지가 없어요. 뱃지를 추가해볼까요?':'아직 뱃지가 없어!',mood:'sad'};
+    }
+    const msg=honorific
+      ?`뱃지 현황: 총 ${badges.length}개 중 **${earned.length}개** 획득! 🏅`
+      :`뱃지 ${badges.length}개 중 **${earned.length}개** 모았어! 🏅`;
+    const recent=earned.slice(-3).map(b=>`${b.emoji||'🏅'} ${b.name}`).join(', ');
+    const full=msg+(recent?`\n최근 획득: ${recent}`:'');
+    return{text:full+`\n[BUTTONS:${honorific?'뱃지 상세 보기|활동 현황':'내 뱃지 자세히!|활동 하기'}]`,mood:'success'};
+  }
+
+  // 매칭 안 됨 → API 호출
+  return null;
+}
+
 // ── 밀리 캐릭터 무드 프리셋 ──
 const _MILY_MOODS={
   idle:    {face:{eyeStyle:'normal',mouthStyle:'smile'},bodyAnim:'bounce',armStyle:'rest',effects:[]},
@@ -20899,6 +21013,16 @@ function _renderQuickMenu(isC,kidName){
         // 전체 메뉴 비활성화
         wrap.querySelectorAll('.mily-quick-btn,.mily-cat-btn').forEach(b=>{b.style.opacity='0.5';b.style.pointerEvents='none';});
         _addUserMsg(sub.label);
+        // 로컬 인텐트 먼저 시도 (label 기준)
+        const _li=_tryLocalIntent(sub.label);
+        if(_li){
+          _milyHistory.push({role:'user',content:sub.label});
+          _milyHistory.push({role:'assistant',content:_li.text});
+          _saveChatHistory();
+          if(_li.mood) _updateMilyChatChar(_li.mood);
+          _addBotMsg(_li.text);
+          return;
+        }
         _milyHistory.push({role:'user',content:sub.prompt});
         _saveChatHistory();
         _callMilyAPI();
@@ -20936,6 +21060,16 @@ window.sendMilyMsg=function(){
   if(!text)return;
   input.value='';
   _addUserMsg(text);
+  // 로컬 인텐트 먼저 시도
+  const local=_tryLocalIntent(text);
+  if(local){
+    _milyHistory.push({role:'user',content:text});
+    _milyHistory.push({role:'assistant',content:local.text});
+    _saveChatHistory();
+    if(local.mood) _updateMilyChatChar(local.mood);
+    _addBotMsg(local.text);
+    return;
+  }
   _milyHistory.push({role:'user',content:text});
   _saveChatHistory();
   _callMilyAPI();
@@ -21323,62 +21457,34 @@ function _buildSystemPrompt(){
   const isMultiChild=childrenInfo.length>1;
 
   // ── 공통 기본 프롬프트 (일반+프로 공유) ──
-  let prompt=`너는 "밀리"야. 마일리 앱의 AI 도우미. ${isC?'양육자에게는 존댓말(~요,~해요)로 따뜻하게.':'아이에게는 반말(~야,~해)로 친근하게.'} **짧게** 답해(1~2줄). 단위="마일리지"(M). "포인트"라 하지마.
+  let prompt=`너는 "밀리"야. 마일리 앱 AI도우미. ${isC?'존댓말(~요)':'반말(~야)'}로. **1~2줄 이내** 간결 답변. 단위="마일리지"(M). "포인트" 금지.
 [상태] ${isC?'양육자':'자녀'}${myName?'('+myName+')':''} | 자녀:${kidName||'없음'} | ${pts}M
 ${isMultiChild?`자녀(${childrenInfo.length}명):${childrenInfo.join(',')}\n`:''}활동:${acts.slice(0,6).map(a=>`${a.emoji}${a.name}(${a.pts}M)`).join(',')||'없음'}
 보상:${rwds.slice(0,4).map(r=>`${r.emoji}${r.name}(${r.pts}M)`).join(',')||'없음'}
 오늘:${todayLog.map(l=>`${l.emoji||''}${l.name}`).join(',')||'없음'}
 [등급] ${isPro?'PRO':'일반'}
 [규칙]
-1. 실행요청→tool호출.
-2. 응답 끝에 [BUTTONS:행동1|행동2]
-3. ${isC?'양육자→모든 기능. 가족 초대 시 invite_member 사용(이름+역할 필수). 역할: dad,mom,grandpa,grandma,grandpa_m,grandma_m,caregiver,child. 초대 완료 후 URL을 텍스트로 보여주지 말고 "아래 초대 링크 버튼을 눌러 공유해주세요!" 안내':'자녀→do_activity,get_status만. 나머진 "부모님께 부탁해봐!"'}
+1. 실행요청→tool호출. 결과 1줄 요약+이모지.
+2. ★필수: 응답 끝에 반드시 [BUTTONS:다음행동1|다음행동2] (2~3개). 사용자가 다음에 할 가능성 높은 행동을 예측해서 제시.
+3. ${isC?'양육자→모든 기능. 가족 초대: invite_member(이름+역할). 역할:dad,mom,grandpa,grandma,grandpa_m,grandma_m,caregiver,child. 초대 후 URL 노출 금지→"아래 버튼을 눌러 공유하세요" 안내':'자녀→do_activity,get_status만. 나머진 "부모님께 부탁해봐!"'}
 ${isMultiChild?`4. 다자녀(${childrenInfo.join(',')}): 조치 전 "어떤 자녀?" 확인.\n`:''}`;
 
   if(!isPro){
-    // ── 일반등급: 조회 전용 + 수동 방법 안내 프롬프트 ──
     prompt+=`
-[일반등급] AI챗봇 기능: 조회(get_status,do_activity,get_badges,get_children,get_family_members)와 가족 초대(invite_member)가 가능.
-AI챗봇을 통한 자동 추가·수정·삭제, 육아코칭, 활동분석, 뱃지관리는 PRO 전용.
-★ 중요: "추가/수정/삭제가 불가능하다"고 말하지 마! 수동으로는 가능해. AI자동처리만 PRO임을 명확히 해.
-사용자가 PRO 기능을 요청하거나 앱 사용법을 물으면:
-1) 먼저 수동으로 하는 방법을 친절하게 안내해:
-   [활동 관리]
-   - 활동 추가: "나의 메뉴 탭 → 관리(관리자 페이지) → 활동 탭 → + 추가 버튼 → 활동 이름·이모지·포인트 입력 → 저장"
-   - 활동 수정/삭제: "나의 메뉴 탭 → 관리(관리자 페이지) → 활동 탭 → 활동 옆 연필 아이콘(수정) 또는 삭제"
-   - 활동 완료(기록): "홈 탭에서 오늘 할 일 카드를 톡! 탭하면 마일리지 적립"
-   - 활동 취소(되돌리기): "기록 탭에서 완료된 활동의 '취소↩' 버튼 탭"
-   - 오늘 할 일 설정: "관리자 페이지 → 활동 탭 → 활동 옆 '홈 표시'/'홈 숨김' 버튼 탭, 또는 기록 탭 → 활동 맨 좌측 아이콘 탭으로도 전환 가능"
-   [보상 관리]
-   - 보상 추가: "나의 메뉴 탭 → 관리(관리자 페이지) → 가족 탭 → 보상 목록의 + 추가 버튼 → 보상 이름·필요 포인트 입력 → 저장"
-   - 보상 수정/삭제: "나의 메뉴 탭 → 관리(관리자 페이지) → 가족 탭 → 보상 옆 연필 아이콘(수정) 또는 삭제"
-   - 보상 교환(사용): "보상 탭에서 마일리지가 충분한 보상의 '교환하기' 버튼 탭"
-   - 보상 목표 설정: "보상 탭에서 보상 카드를 길게 누르면 목표 설정/해제"
-   [소통 기능]
-   - 가족 메시지 보내기: "나의 메뉴 탭 → 우리가족 아바타를 탭 → '메시지 보내기' 선택 → 메시지 입력 + 감정 이모지 선택(선택사항) → 보내기"
-   - 받은 메시지 확인: "나의 메뉴 탭 → 우리가족 아바타를 탭 → '메시지 읽기' 선택"
-   - 스티커/말풍선 남기기: "홈 탭에서 활동 카드를 길게 꾹~ 누르면 스티커 또는 말풍선을 남길 수 있어요"
-   [뱃지/리포트]
-   - 뱃지 확인: "리포트 탭 → 뱃지 섹션에서 획득한 뱃지와 진행 상황 확인"
-   - 뱃지 추가/관리: "나의 메뉴 → 관리(관리자 페이지) → 뱃지 탭"
-2) PRO 전용 기능 요청 시 PRO 안내: "AI챗봇을 통한 자동 추가·관리는 **PRO 등급**에서 가능해요! 🌟 업그레이드하시겠어요?" + [BUTTONS:PRO 업그레이드 신청|괜찮아요]
-"PRO 업그레이드 신청"이라고 답하면 request_upgrade tool을 호출해.
-응답은 수동 안내 포함해서 3~4줄 이내로.`;
+[일반등급] 조회(get_status,do_activity,get_badges,get_children,get_family_members)+가족초대(invite_member) 가능.
+자동 추가·수정·삭제/육아코칭/활동분석/뱃지관리=PRO 전용.
+★"불가능"이라 하지마→"수동으로 가능, AI자동만 PRO" 안내.
+수동 방법: 활동추가="나의메뉴→관리→활동탭→+추가", 활동완료="홈에서 카드 탭", 보상추가="관리→가족탭→보상+추가", 보상교환="보상탭→교환하기", 뱃지="리포트탭", 메시지="나의메뉴→아바타탭→메시지", 스티커="홈에서 카드 길게누르기"
+PRO 요청 시: 수동방법 1줄 안내 후 "AI자동은 **PRO**에서! 🌟" + [BUTTONS:PRO 업그레이드 신청|괜찮아요]`;
   }else{
-    // ── PRO등급: 풀 프롬프트 ──
+    // ── PRO등급: 간결 프롬프트 ──
     prompt+=`
-[PRO] 이모지는 의미에 맞게(⭐🎁 기본값 금지). 추가 전 get_status로 유사항목 확인.
-★ 활동/보상/뱃지 추가 시 반드시 desc(설명)를 포함해. 아이가 이해할 수 있는 짧은 설명 1줄(예: "매일 아침 세수하고 양치하기", "열심히 한 나에게 주는 선물").
-${isC?`[육아코칭] get_status 호출→데이터 기반. 3~4줄 응답.
-칭찬: 과정O("열심히했네") 능력X("똑똑해"). 형제비교 절대금지.
-동기: 기피활동에만 마일리지. 보상: 경험🟢>선택권🟢>물질🔴.
-습관: 66일 평균. 1회실패→"괜찮아" 필수. 규칙 2주 유지.`:''}
-${!isC?`[자녀모드] 재미있고 응원하는 톤! 성적표(S/A/B/C), 퀴즈, "오늘의 비밀미션!" 등.`:''}
-[뱃지] get_badges 조회. 양육자만 add/edit/delete/award.
-조건타입: manual,total_acts,streak,study_count,act_name_count,pts_total,pts_current,mood_count,reward_count,perfect_days,morning_acts,daily_max,badge_count
-난이도: 1~10=bronze,11~30=silver,31~60=gold,61~100=platinum,100+=diamond
-[오늘의 할일] showHome=true 활동. today_mission으로 현황 조회. 모두 완료→streak+1. 7일 연속→보너스(streak.bonus_pts).
-[통계] activity_stats(횟수·마일리지·일수), recent_7days, streak, today_mission. 수치 구체적으로!`;
+[PRO] 이모지=의미에맞게. 추가 전 get_status로 중복확인. desc(설명) 필수 포함.
+${isC?`[코칭] 데이터기반 2~3줄. 칭찬=과정O 능력X. 형제비교금지. 보상=경험🟢>물질🔴. 1회실패→"괜찮아".`:''}
+${!isC?`[자녀] 재미+응원! 성적표/퀴즈/"비밀미션!" 활용.`:''}
+[뱃지] get_badges조회. 조건:manual,total_acts,streak,act_name_count,pts_total 등. 난이도:1~10=bronze,11~30=silver,31~60=gold,61+=platinum
+[할일] showHome=true. today_mission조회. 완료→streak+1.
+[통계] activity_stats,recent_7days,streak. 수치 구체적.`;
   }
 
   return prompt;
@@ -22014,8 +22120,17 @@ function _addBotMsg(text){
       btn.onclick=function(){
         // 버튼 그룹 비활성화 (한번만 클릭)
         btnGroup.querySelectorAll('.mily-quick-btn').forEach(b=>{b.style.opacity='0.5';b.style.pointerEvents='none';});
-        // 사용자 메시지로 전송
         _addUserMsg(label);
+        // 로컬 인텐트 먼저 시도
+        const _li=_tryLocalIntent(label);
+        if(_li){
+          _milyHistory.push({role:'user',content:label});
+          _milyHistory.push({role:'assistant',content:_li.text});
+          _saveChatHistory();
+          if(_li.mood) _updateMilyChatChar(_li.mood);
+          _addBotMsg(_li.text);
+          return;
+        }
         _milyHistory.push({role:'user',content:label});
         _saveChatHistory();
         _callMilyAPI();
