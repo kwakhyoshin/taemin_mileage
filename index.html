@@ -4058,11 +4058,14 @@ requestAnimationFrame(function(){
 <!-- MY TAB -->
 <div class="scr" id="s-my">
   <div class="my-header">
-    <h2>나의 메뉴 <svg class="hdr-ico" viewBox="0 0 24 24" style="width:24px;height:24px"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></h2>
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <h2 style="margin:0">나의 메뉴 <svg class="hdr-ico" viewBox="0 0 24 24" style="width:24px;height:24px"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></h2>
+      <div id="my-plan-badge" style="display:flex"></div>
+    </div>
     <p class="my-header-sub" id="my-header-sub">내 정보</p>
   </div>
   <div class="my-section-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> 나의 계정</div>
-  <div class="my-profile-card" style="flex-wrap:wrap">
+  <div class="my-profile-card">
     <div class="my-avatar-wrap" id="my-avatar-wrap"></div>
     <div class="my-info-text" style="flex:1;min-width:0">
       <div style="display:flex;align-items:center;gap:6px">
@@ -4071,9 +4074,9 @@ requestAnimationFrame(function(){
       </div>
       <div class="my-role" id="my-role">역할</div>
     </div>
-    <!-- 소셜 연동 상세 (연동된 경우) 또는 연동 버튼 (미연동) -->
-    <div id="my-social-area" style="width:100%;margin-top:10px;display:none"></div>
   </div>
+  <!-- 소셜 연동 (프로필 카드 바로 아래) -->
+  <div id="my-social-area" style="margin:8px 16px 0"></div>
   <!-- 가족 구성원 아바타 가로 나열 (나 제외) -->
   <div class="my-section-title" id="my-family-title" style="display:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg> 우리가족</div>
   <div class="my-family-row" id="my-family-row" style="display:none"></div>
@@ -6531,7 +6534,11 @@ async function linkSocialFromMyMenu(){
       const docPath=_ENV==='dev'?`dev_${newFamilyId}`:newFamilyId;
       const familyDoc=getFamilyDoc(docPath);
       if(familyDoc && familyDoc.path){
-        if(S.familyMeta) S.familyMeta.familyId=docPath;
+        if(S.familyMeta){
+          S.familyMeta.familyId=docPath;
+          S.familyMeta._fromLegacy=true; // 레거시에서 마이그레이션됨 마커 (PRO 자동 설정용)
+          if(S.familyMeta.plan==='pro') S.familyMeta._autoProSet=true; // 기존 PRO 유지 마커
+        }
         await setDoc(familyDoc, S);
         _familyId=docPath;
         DATA_DOC=familyDoc;
@@ -6702,9 +6709,22 @@ async function _doLinkSocial(provider){
     // auth registry 등록
     await _registerAuthLink(uid, _familyId, currentUser, provider, email);
     // 계정 데이터에 소셜 정보 추가
-    const acc = S.familyMeta?.members?.[currentUser]?.account;
-    if(acc){ acc.authProvider = provider; acc.authUid = uid; acc.email = email; if(displayName) acc.socialDisplayName = displayName; }
+    const _member = S.familyMeta?.members?.[currentUser];
+    if(_member){
+      if(!_member.account) _member.account = {};
+      _member.account.authProvider = provider;
+      _member.account.authUid = uid;
+      _member.account.email = email;
+      if(displayName) _member.account.socialDisplayName = displayName;
+    }
     if(S.users?.[currentUser]){ S.users[currentUser].authProvider = provider; S.users[currentUser].authUid = uid; S.users[currentUser].email = email; if(displayName) S.users[currentUser].socialDisplayName = displayName; }
+    // users 객체가 없는 경우에도 소셜 정보 저장 보장
+    if(!S.users) S.users = {};
+    if(!S.users[currentUser]) S.users[currentUser] = {};
+    S.users[currentUser].authProvider = provider;
+    S.users[currentUser].authUid = uid;
+    S.users[currentUser].email = email;
+    if(displayName) S.users[currentUser].socialDisplayName = displayName;
     await save();
     renderMyTab();
     toast(`✅ ${providerName} 계정이 연결되었어요!`);
@@ -7029,6 +7049,64 @@ function isCurrentUserAdmin(){
   return !!S.familyMeta.members[currentUser]?.isAdmin;
 }
 
+// ★ 레거시 가족(우리 가족) 관리자 → PRO 자동 설정
+// 레거시 직접 경로(users/taemin*) 또는 레거시에서 마이그레이션된 families/ 문서 모두 대상
+// abo.taemin 등 완전히 새로 만든 가족에는 적용하지 않음
+function _autoSetProIfAdmin(){
+  try{
+    if(!S.familyMeta) return;
+    // 조건1: 레거시 직접 경로 (마이그레이션 전)
+    const isDirectLegacy = !_familyId &&
+      typeof DATA_DOC !== 'undefined' && typeof LEGACY_DOC !== 'undefined' &&
+      DATA_DOC === LEGACY_DOC;
+    // 조건1b: family_id가 레거시 문서명(taemin_dev/taemin)과 동일한 경우도 레거시로 간주
+    // (families/taemin_dev 문서를 사용하지만 실질적으로 레거시 데이터)
+    const _legacyDocName = _ENV==='dev' ? 'taemin_dev' : 'taemin';
+    const isLegacyNamedFamily = _familyId === _legacyDocName;
+    // 조건2: 레거시에서 마이그레이션된 families/ 문서
+    // → familyMeta._fromLegacy 마커, 또는 _checkLegacyMigrationPointer가 감지한 플래그
+    if(window._pendingFromLegacy && !S.familyMeta._fromLegacy){
+      S.familyMeta._fromLegacy=true;
+      window._pendingFromLegacy=false;
+    }
+    const isMigratedLegacy = !!_familyId && S.familyMeta._fromLegacy === true;
+    if(!isDirectLegacy && !isLegacyNamedFamily && !isMigratedLegacy) return;
+    // 관리자(양육자)로 로그인한 경우에만
+    if(!isCurrentUserAdmin() && !isCaregiverUser()) return;
+    if(S.familyMeta.plan === 'pro') return; // 이미 PRO
+    S.familyMeta.plan = 'pro';
+    S.familyMeta._autoProSet = true; // cleanupWrongPro가 건드리지 않게 마커
+    if(typeof save === 'function') save();
+    const reason = isDirectLegacy?'직접경로':isLegacyNamedFamily?'레거시명 family':'마이그레이션';
+    console.log('✅ 레거시 가족 관리자 PRO 등급 자동 설정 완료 ('+reason+')');
+  }catch(e){ console.warn('[_autoSetProIfAdmin] error:', e); }
+}
+
+// ★ 잘못 설정된 PRO를 정리
+// proRequest 없이, _autoProSet 마커도 없이 PRO가 설정된 families/ 문서는 되돌림
+// 단, 레거시 직접 경로는 제외
+function _cleanupWrongPro(){
+  try{
+    if(!S.familyMeta || S.familyMeta.plan !== 'pro') return;
+    // proRequest가 있으면 정상 신청이므로 유지
+    if(S.familyMeta.proRequest) return;
+    // _autoProSet 마커가 있으면 자동 설정된 PRO이므로 유지
+    if(S.familyMeta._autoProSet) return;
+    // family_id가 레거시 문서명과 동일하면 레거시로 간주 → PRO 유지
+    const _legDocName = _ENV==='dev' ? 'taemin_dev' : 'taemin';
+    if(_familyId === _legDocName) return;
+    // 레거시 직접 경로(users/taemin*)면 PRO 유지
+    const isDirectLegacy = !_familyId &&
+      typeof DATA_DOC !== 'undefined' && typeof LEGACY_DOC !== 'undefined' &&
+      DATA_DOC === LEGACY_DOC;
+    if(isDirectLegacy) return;
+    // 그 외: proRequest도 _autoProSet도 없이 PRO → 잘못 설정된 것 → 되돌림
+    console.log('🔧 잘못된 PRO 설정 되돌림:', S.familyMeta.familyId || _familyId);
+    delete S.familyMeta.plan;
+    if(typeof save === 'function') save();
+  }catch(e){ console.warn('[_cleanupWrongPro] error:', e); }
+}
+
 // 로그인 후 모드/뷰 초기화: independent 모드에서 양육자/관리자는 첫 자녀 뷰로 전환
 function postLoginInit(){
   viewingChildId = null;
@@ -7297,52 +7375,68 @@ async function _executeWithdrawal(initiator, memberIdsToDelete, memberName, over
 
 function logout() {
   if (!confirm('로그아웃 하시겠어요?')) return;
-  viewingChildId=null;
-  currentUser = null;
-  viewingChildId = null;
-  _admViewChildId = null;
-  _globalDataOwner = null;
-  adminOK = false;
+  // ★ 상태 초기화 — 개별 try/catch로 감싸서 하나가 실패해도 나머지 계속 실행
+  try{
+    viewingChildId=null;
+    currentUser = null;
+    _admViewChildId = null;
+    _globalDataOwner = null;
+    adminOK = false;
+  }catch(e){ console.warn('[logout] state reset error:', e); }
   // S-13: 로그아웃 시 민감 데이터 완전 삭제
-  localStorage.removeItem(_LS_PREFIX+'current_user');
-  localStorage.removeItem(_LS_PREFIX+'social_pending');
-  localStorage.removeItem(_LS_PREFIX+'family_id');
-  localStorage.removeItem(_LS_PREFIX+'v6_backup');
-  localStorage.removeItem(_LS_PREFIX+'push_enabled');
-  localStorage.removeItem(_LS_PREFIX+'show_push_guide');
-  localStorage.removeItem(_LS_PREFIX+'push_banner_dismissed');
-  localStorage.removeItem(_LS_PREFIX+'changelog_seen');
-  localStorage.removeItem(_LS_PREFIX+'tour_done');
-  localStorage.removeItem('taemin_v6_kakao_callback_result');
-  localStorage.removeItem('taemin_v6_naver_callback_result');
-  localStorage.removeItem('taemin_v6_naver_redirect');
-  try{ sessionStorage.removeItem('oauth_state_kakao'); sessionStorage.removeItem('oauth_state_naver'); }catch(e){}
+  try{
+    localStorage.removeItem(_LS_PREFIX+'current_user');
+    localStorage.removeItem(_LS_PREFIX+'social_pending');
+    localStorage.removeItem(_LS_PREFIX+'family_id');
+    localStorage.removeItem(_LS_PREFIX+'v6_backup');
+    localStorage.removeItem(_LS_PREFIX+'push_enabled');
+    localStorage.removeItem(_LS_PREFIX+'show_push_guide');
+    localStorage.removeItem(_LS_PREFIX+'push_banner_dismissed');
+    localStorage.removeItem(_LS_PREFIX+'changelog_seen');
+    localStorage.removeItem(_LS_PREFIX+'tour_done');
+    localStorage.removeItem('taemin_v6_kakao_callback_result');
+    localStorage.removeItem('taemin_v6_naver_callback_result');
+    localStorage.removeItem('taemin_v6_naver_redirect');
+    sessionStorage.removeItem('oauth_state_kakao'); sessionStorage.removeItem('oauth_state_naver');
+  }catch(e){ console.warn('[logout] localStorage cleanup error:', e); }
   // 밀리 챗봇 대화 초기화 & 패널 닫기
-  if(typeof _resetMilyChat==='function') _resetMilyChat();
-  _milyOpen=false;
-  const _chatPanel=document.getElementById('mily-chat-panel');
-  if(_chatPanel) _chatPanel.classList.remove('open');
-  // 밀리 버블 카운트 초기화
-  try{ localStorage.removeItem((_LS_PREFIX||'taemin_dev_')+'bubble_counts'); }catch(e){}
+  try{
+    if(typeof _resetMilyChat==='function') _resetMilyChat();
+    _milyOpen=false;
+    const _chatPanel=document.getElementById('mily-chat-panel');
+    if(_chatPanel) _chatPanel.classList.remove('open');
+    localStorage.removeItem((_LS_PREFIX||'taemin_dev_')+'bubble_counts');
+  }catch(e){ console.warn('[logout] mily reset error:', e); }
   // Firebase Auth에서도 로그아웃
-  if(fbAuth && signOut){
-    try{ signOut(fbAuth); }catch(e){ console.warn('Firebase signOut error:', e); }
+  try{
+    if(fbAuth && signOut) signOut(fbAuth);
+  }catch(e){ console.warn('[logout] Firebase signOut error:', e); }
+  // ★ 반드시 로그인 화면으로 전환 (위의 어떤 단계가 실패해도 여기는 실행)
+  try{
+    const _obDoneLogout = localStorage.getItem(_LS_PREFIX+'onboarding_done');
+    showAuthScreen(_obDoneLogout ? 'continue' : 'welcome');
+  }catch(e){
+    console.error('[logout] showAuthScreen failed:', e);
+    // 최후 수단: 직접 auth-continue 표시
+    try{
+      document.body.classList.add('auth-active');
+      const _as=document.getElementById('auth-continue');
+      if(_as) _as.classList.remove('hidden');
+    }catch(e2){}
   }
-  // 온보딩 미완료 시 시작페이지, 완료 시 통합 로그인
-  const _obDoneLogout = localStorage.getItem(_LS_PREFIX+'onboarding_done');
-  showAuthScreen(_obDoneLogout ? 'continue' : 'welcome');
   // 통합 로그인 폼 초기화
-  const _cId=document.getElementById('continue-login-id');
-  const _cPwd=document.getElementById('continue-login-pwd');
-  const _cErr=document.getElementById('continue-login-error');
-  if(_cId)_cId.value='';
-  if(_cPwd)_cPwd.value='';
-  if(_cErr)_cErr.textContent='';
-  // 레거시 로그인 폼도 초기화
-  const _lId=document.getElementById('login-id');
-  const _lPwd=document.getElementById('login-pwd');
-  if(_lId)_lId.value='';
-  if(_lPwd)_lPwd.value='';
+  try{
+    const _cId=document.getElementById('continue-login-id');
+    const _cPwd=document.getElementById('continue-login-pwd');
+    const _cErr=document.getElementById('continue-login-error');
+    if(_cId)_cId.value='';
+    if(_cPwd)_cPwd.value='';
+    if(_cErr)_cErr.textContent='';
+    const _lId=document.getElementById('login-id');
+    const _lPwd=document.getElementById('login-pwd');
+    if(_lId)_lId.value='';
+    if(_lPwd)_lPwd.value='';
+  }catch(e){}
 }
 
 // ── 소셜 로그인 / 이메일 인증 ──────────────────
@@ -8264,6 +8358,10 @@ function checkAuth() {
     postLoginInit();
     // 관리자 권한이면 자동으로 adminOK
     if(isCurrentUserAdmin()) adminOK = true;
+    // ★ 레거시 가족 관리자 PRO 등급 자동 설정
+    _autoSetProIfAdmin();
+    // ★ 잘못 설정된 PRO 정리 (비-레거시 가족에서 proRequest 없이 PRO인 경우)
+    _cleanupWrongPro();
     hideAllAuth();
     // s-home 초기 on 클래스가 없으므로 명시적으로 홈 탭 활성화
     const _homeScr = document.getElementById('s-home');
@@ -8639,7 +8737,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'prod'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0403a';
+const _APP_VERSION = 'v0403n';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -8752,6 +8850,8 @@ async function _checkLegacyMigrationPointer(){
       _familyId=mt;
       DATA_DOC=getFamilyDoc(mt);
       localStorage.setItem(_LS_PREFIX+'family_id',mt);
+      // 레거시에서 마이그레이션됨 마커 (데이터 로드 후 familyMeta에 설정)
+      window._pendingFromLegacy=true;
     }
   }catch(e){ console.warn('[_checkLegacyMigrationPointer]', e); }
 }
@@ -10849,7 +10949,7 @@ function renderLogList(){
       </div>
       <div class="log-right">
         <span class="log-badge">+${a.pts} 마일리지</span>
-        ${done>0?`<button class="undo-btn" onclick="event.stopPropagation();undoAct('${a.id}')">취소↩</button>`:''}
+        ${done>0?`<button class="undo-btn" data-undo-actid="${a.id}">취소↩</button>`:''}
       </div>
       ${stickerHTML}
     </div>`;
@@ -10888,6 +10988,17 @@ function renderLogList(){
       if(didLongPress){didLongPress=false;e.preventDefault();return;}
       if(!exhausted&&a)doAct(actId);
     });
+  });
+  // 취소 버튼 전용 핸들러 — touchend에서 직접 처리하여 long-press/렌더링과 충돌 방지
+  let _undoLock=false;
+  el.querySelectorAll('.undo-btn[data-undo-actid]').forEach(btn=>{
+    const handler=(e)=>{
+      e.stopPropagation();e.preventDefault();
+      if(_undoLock)return;_undoLock=true;setTimeout(()=>{_undoLock=false;},600);
+      undoAct(btn.dataset.undoActid);
+    };
+    btn.addEventListener('touchend',handler,{passive:false});
+    btn.addEventListener('click',handler);
   });
   // 오늘할일 토글 핸들러 (부모 전용, v0401)
   el.querySelectorAll('.today-task-toggle[data-toggle-actid]').forEach(tog=>{
@@ -15344,9 +15455,11 @@ function renderMyTab(){
   // 아바타
   const avatarWrap=document.getElementById('my-avatar-wrap');
   if(avatarWrap)avatarWrap.innerHTML=getAvatarHTML(currentUser,50);
-  updateMyAvatarMoodBadge();
-  // 소셜 인증 연동 정보 표시 (프로필 카드 내부)
-  const socialBadge=document.getElementById('my-social-badge');
+  try{updateMyAvatarMoodBadge();}catch(e){console.warn('[renderMyTab] mood badge err:',e);}
+  // 등급 배지 업데이트 (나의메뉴 + 챗봇)
+  try{_updatePlanBadges();}catch(e){console.warn('[renderMyTab] plan badge err:',e);}
+  // 소셜 인증 연동 정보 표시 (프로필 카드 아래 별도 영역)
+  try{const socialBadge=document.getElementById('my-social-badge');
   const socialArea=document.getElementById('my-social-area');
   if(socialBadge && socialArea){
     const acc=member?.account||S.users?.[currentUser]||{};
@@ -15384,7 +15497,7 @@ function renderMyTab(){
         소셜 계정 연동하기
       </button>`;
     }
-  }
+  }}catch(e){console.warn('[renderMyTab] social area err:',e);}
   // 관리자 버튼 표시 여부 (양육자 또는 isAdmin 권한이 있는 자녀)
   const adminBtn=document.getElementById('my-admin-btn');
   if(adminBtn)adminBtn.style.display=(isCaregiverUser()||isCurrentUserAdmin())?'':'none';
@@ -15392,7 +15505,7 @@ function renderMyTab(){
   const pwaBtn=document.getElementById('my-pwa-install-btn');
   if(pwaBtn)pwaBtn.style.display=_pwaInstalled?'none':'flex';
   // 업데이트 내역 배지
-  _updateChangelogBadge();
+  try{_updateChangelogBadge();}catch(e){console.warn('[renderMyTab] changelog err:',e);}
   // 다크모드 토글 상태 동기화
   const togDarkMy=document.getElementById('tog-dark-my');
   if(togDarkMy){
@@ -15403,17 +15516,18 @@ function renderMyTab(){
     }
   }
   // 가족 구성원 아바타 가로 나열 (나 자신 제외)
+  try{
   const familyRow=document.getElementById('my-family-row');
   const familyTitle=document.getElementById('my-family-title');
   if(familyRow){
     const fm=S.familyMeta?.members||{};
     const ids=Object.keys(fm).filter(mid=>mid!==currentUser); // 나 제외
     if(ids.length>0){
-      const _RLABELS={dad:'아빠',mom:'엄마',grandpa:'할아버지',grandma:'할머니',grandpa_m:'외할아버지',grandma_m:'외할머니',child:'자녀',caregiver:'양육자',parent:'양육자'};
+      const _RLABELS2={dad:'아빠',mom:'엄마',grandpa:'할아버지',grandma:'할머니',grandpa_m:'외할아버지',grandma_m:'외할머니',child:'자녀',caregiver:'양육자',parent:'양육자'};
       familyRow.innerHTML=ids.map(mid=>{
         const m=fm[mid];
         const mName=m?.name||MEMBERS[mid]?.name||mid;
-        const mRole=_RLABELS[m?.displayRole]||_RLABELS[m?.role]||m?.displayRole||m?.role||'멤버';
+        const mRole=_RLABELS2[m?.displayRole]||_RLABELS2[m?.role]||m?.displayRole||m?.role||'멤버';
         const clickAction='onUserIconClick(\''+mid+'\')';
         const moodEmoji=getMoodEmoji(mid);
         // 해당 멤버로부터 온 미읽은 메시지 수
@@ -15430,7 +15544,7 @@ function renderMyTab(){
         </div>`;
       }).join('');
       // 기분 파티클 애니메이션 시작
-      startMyFamilyMoodAnimations();
+      try{startMyFamilyMoodAnimations();}catch(e2){console.warn('[renderMyTab] mood anim err:',e2);}
       familyRow.style.display='flex';
       if(familyTitle)familyTitle.style.display='flex';
     }else{
@@ -15438,6 +15552,7 @@ function renderMyTab(){
       if(familyTitle)familyTitle.style.display='none';
     }
   }
+  }catch(e){console.warn('[renderMyTab] family row err:',e);}
 }
 window.renderMyTab=renderMyTab;
 
@@ -15468,7 +15583,7 @@ function goTab(tab){
     return;
   }
   if(tab==='my'){
-    renderMyTab();
+    try{ renderMyTab(); }catch(e){ console.warn('[goTab] renderMyTab error:', e); }
     reallyGoTab('my');
     return;
   }
@@ -15511,6 +15626,44 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {
+    ver:'1.9.11 (v0403n)', date:'2026-04-03',
+    items:[
+      {type:'improve',text:'AI챗봇: 활동/보상/뱃지 추가 시 설명(desc) 필수 포함하도록 개선'},
+      {type:'fix',text:'레거시 문서명과 동일한 family_id(taemin_dev) 사용 시 PRO 자동 설정 — isLegacyNamedFamily 조건 추가'},
+    ]
+  },
+  {
+    ver:'1.9.10 (v0403i)', date:'2026-04-03',
+    items:[
+      {type:'fix',text:'소셜 연동 후 마이그레이션된 계정의 PRO 등급이 해제되는 문제 수정'},
+      {type:'improve',text:'AI챗봇 사용법 안내 확장 — 메시지 보내기, 스티커/말풍선, 오늘 할 일 설정, 보상 교환, 활동 취소 등 추가'},
+      {type:'fix',text:'등급 배지를 헤더 제목 영역으로 이동 (프로필/소셜 사이 끼임 해결)'},
+      {type:'fix',text:'나의메뉴 소셜 연동 정보가 프로필 카드 바로 아래 표시되도록 개선'},
+      {type:'fix',text:'나의메뉴 우리가족 목록이 안보이는 문제 수정'},
+      {type:'fix',text:'renderMyTab 각 섹션에 try/catch 추가 (한 섹션 오류가 전체 차단 방지)'},
+    ]
+  },
+  {
+    ver:'1.9.9 (v0403d)', date:'2026-04-03',
+    items:[
+      {type:'fix',text:'등급 배지 클릭 시 팝업 안뜨는 문제 수정'},
+      {type:'fix',text:'PRO 등급이 신규/다른 계정에 잘못 적용되는 문제 수정'},
+      {type:'fix',text:'소셜 계정 연동 후 나의메뉴에 정보 안보이는 문제 수정'},
+    ]
+  },
+  {
+    ver:'1.9.8 (v0403b)', date:'2026-04-03',
+    items:[
+      {type:'fix',text:'나의메뉴(MY) 탭 스와이프 이동 지원'},
+      {type:'fix',text:'하단 탭 빠른 터치 시 씹힘 현상 수정'},
+      {type:'fix',text:'로그아웃 후 로그인 화면 전환 안 되는 문제 수정'},
+      {type:'new',text:'일반/PRO 등급 시스템 도입 (챗봇 기능 분리)'},
+      {type:'new',text:'챗봇 도구 결과 카드 UI'},
+      {type:'new',text:'등급 배지 (챗봇 헤더 + 나의메뉴)'},
+      {type:'fix',text:'활동 완료 취소 버튼 터치 응답 개선'},
+    ]
+  },
   {
     ver:'1.9.7 (v0403a)', date:'2026-04-03',
     items:[
@@ -17416,7 +17569,7 @@ document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{
 })();
 
 // ── SWIPE NAVIGATION ──────────────────────────
-const SWIPE_TABS=['home','log','rwd','hist'];
+const SWIPE_TABS=['home','log','rwd','hist','my'];
 let _swipeStartX=0,_swipeStartY=0,_swiping=false,_swipeCurrentTab=null;
 
 function getCurrentTab(){
@@ -17442,6 +17595,8 @@ function swipeToTab(tab,animClass){
     });
   }
 
+  // MY탭 진입 시 콘텐츠 렌더링
+  if(tab==='my'){ try{ renderMyTab(); }catch(e){} }
   // Start enter animation on new tab
   document.querySelectorAll('.nav-item').forEach(t=>t.classList.remove('active'));
   const el=document.getElementById('s-'+tab);
@@ -18597,6 +18752,7 @@ window._milyAPI={
     if(!ms.rwds)ms.rwds=JSON.parse(JSON.stringify(S.rwds||[]));
     const newId='r_'+Date.now();
     const newRwd={id:newId,emoji:data.emoji||'🎁',name:data.name.trim(),pts:Math.max(1,data.pts||500),goal:!!data.goal,sale:null};
+    if(data.desc) newRwd.desc=data.desc.trim();
     if(newRwd.goal){ms.rwds.forEach(r=>r.goal=false);S.rwds.forEach(r=>r.goal=false);}
     ms.rwds.push({...newRwd});
     S.rwds.push({...newRwd});
@@ -20177,9 +20333,10 @@ window._createState = _createState;
     if(e.touches.length > 1){ e.preventDefault(); }
   }, {passive:false});
 
-  // 더블탭 줌 방지
+  // 더블탭 줌 방지 (단, 네비게이션 아이템은 예외 — 빠른 탭 전환 허용)
   let lastTouchEnd = 0;
   document.addEventListener('touchend', function(e){
+    if(e.target.closest&&e.target.closest('.nav-item,.bottom-nav')) return;
     const now = Date.now();
     if(now - lastTouchEnd <= 300){ e.preventDefault(); }
     lastTouchEnd = now;
@@ -20309,7 +20466,18 @@ window._createState = _createState;
 .mily-chat-hd-info{flex:1;min-width:0;text-align:left!important;display:flex;flex-direction:column;align-items:flex-start}
 .mily-chat-hd-name{font-size:15px;font-weight:800;line-height:0}
 .mily-chat-hd-name svg{display:block;margin:0}
-.mily-chat-hd-status{font-size:11px;opacity:.55;font-weight:500;margin-top:3px;text-align:left}
+.mily-chat-hd-status{font-size:11px;opacity:.55;font-weight:500;margin-top:3px;text-align:left;display:flex;align-items:center;gap:6px}
+/* 등급 배지 */
+.plan-badge{display:inline-flex;align-items:center;gap:3px;padding:4px 10px;border-radius:10px;font-size:11px;font-weight:800;line-height:1;cursor:pointer;vertical-align:middle;transition:transform .15s;-webkit-tap-highlight-color:rgba(99,102,241,.2);min-height:28px;position:relative;opacity:1}
+.plan-badge:active{transform:scale(.92)}
+.plan-badge.free{background:linear-gradient(135deg,#E2E8F0,#CBD5E1);color:#475569}
+.plan-badge.pro{background:linear-gradient(135deg,#FDE68A,#F59E0B);color:#78350F;box-shadow:0 1px 4px rgba(245,158,11,.3)}
+.plan-badge svg{width:13px;height:13px;flex-shrink:0}
+.my-plan-badge{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:12px;font-size:12px;font-weight:800;line-height:1;cursor:pointer;-webkit-tap-highlight-color:rgba(99,102,241,.2);min-height:30px;transition:transform .15s}
+.my-plan-badge:active{transform:scale(.93)}
+.my-plan-badge.free{background:var(--bg,#F1F5F9);color:var(--tx2,#64748B);border:1.5px solid var(--bdr,#E2E8F0)}
+.my-plan-badge.pro{background:linear-gradient(135deg,#FEF3C7,#FDE68A);color:#92400E;border:1.5px solid #F59E0B}
+.my-plan-badge svg{width:15px;height:15px;flex-shrink:0}
 .mily-chat-close{background:none;border:none;color:rgba(255,255,255,.7);cursor:pointer;padding:4px;border-radius:50%;transition:background .15s}
 .mily-chat-close:hover{background:rgba(255,255,255,.15)}
 
@@ -20336,6 +20504,22 @@ body.dark .mily-msg.bot{background:var(--card2,#334155)}
 body.dark .mily-msg.bot th,body.dark .mily-msg.bot td{border-color:#475569}
 body.dark .mily-msg.bot th{background:rgba(99,102,241,.15)}
 body.dark .mily-msg.bot code{background:rgba(255,255,255,.08)}
+/* 챗봇 카드 UI */
+.mily-tool-card{margin:6px 0;padding:12px 14px;border-radius:16px;background:linear-gradient(135deg,rgba(99,102,241,.06),rgba(139,92,246,.06));border:1.5px solid rgba(99,102,241,.15);display:flex;align-items:center;gap:12px}
+body.dark .mily-tool-card{background:linear-gradient(135deg,rgba(99,102,241,.12),rgba(139,92,246,.12));border-color:rgba(99,102,241,.25)}
+.mily-tool-card .tc-emoji{font-size:32px;flex-shrink:0;width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:rgba(99,102,241,.1);border-radius:12px}
+.mily-tool-card .tc-info{flex:1;min-width:0}
+.mily-tool-card .tc-name{font-size:15px;font-weight:800;color:var(--tx,#1E293B);line-height:1.3}
+.mily-tool-card .tc-meta{font-size:12px;color:var(--tx2,#64748B);margin-top:2px}
+.mily-tool-card .tc-pts{font-size:14px;font-weight:800;color:#6366F1;white-space:nowrap}
+.mily-tool-card.tc-add{border-color:rgba(34,197,94,.3);background:linear-gradient(135deg,rgba(34,197,94,.06),rgba(16,185,129,.06))}
+.mily-tool-card.tc-add .tc-pts{color:#16A34A}
+.mily-tool-card.tc-del{border-color:rgba(239,68,68,.3);background:linear-gradient(135deg,rgba(239,68,68,.06),rgba(244,63,94,.06))}
+.mily-tool-card.tc-del .tc-pts{color:#EF4444}
+.mily-tool-card.tc-do{border-color:rgba(99,102,241,.3);background:linear-gradient(135deg,rgba(99,102,241,.08),rgba(139,92,246,.08))}
+.mily-tool-card.tc-do .tc-emoji{background:rgba(99,102,241,.15)}
+.mily-tool-card.tc-badge .tc-emoji{background:rgba(245,158,11,.1)}
+.mily-tool-card.tc-badge{border-color:rgba(245,158,11,.3);background:linear-gradient(135deg,rgba(245,158,11,.06),rgba(251,146,60,.06))}
 .mily-msg pre{background:rgba(0,0,0,.06);padding:8px;border-radius:8px;overflow-x:auto;margin:6px 0}
 body.dark .mily-msg.bot pre{background:rgba(255,255,255,.06)}
 .mily-msg pre code{background:none;padding:0}
@@ -20392,7 +20576,7 @@ body.dark .mily-fab{box-shadow:0 4px 20px rgba(99,102,241,.3)}
     <div class="mily-chat-hd-char" id="mily-chat-char"></div>
     <div class="mily-chat-hd-info">
       <div class="mily-chat-hd-name"><svg width="192" height="39" viewBox="-2 6 200 64" preserveAspectRatio="xMinYMid meet" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="mily-sp-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#818CF8"/><stop offset="40%" stop-color="#C084FC"/><stop offset="100%" stop-color="#F472B6"/></linearGradient></defs><path d="M4 48V28c0-5 3-9 8-9s8 4 8 9v0c0-5 3-9 8-9s8 4 8 9v20" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M46 24v24" stroke="#fff" stroke-width="7" stroke-linecap="round"/><circle cx="46" cy="14" r="4" fill="#fff"/><path d="M60 10v38" stroke="#fff" stroke-width="7" stroke-linecap="round"/><path d="M72 24l10 18M92 24l-13 28c-2 4-5 6-8 6" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="104" cy="50" r="4.5" fill="#FBBF24"/><path d="M126 48V32c0-5-4-9-9-9s-9 4-9 9 4 9 9 9h9" stroke="rgba(255,255,255,.5)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M138 24v24" stroke="rgba(255,255,255,.5)" stroke-width="7" stroke-linecap="round"/><circle cx="138" cy="14" r="4" fill="rgba(255,255,255,.5)"/><path d="M162 8l2 7 7 2-7 2-2 7-2-7-7-2 7-2z" fill="url(#mily-sp-g)"/><path d="M184 14l1.2 4 4 1.2-4 1.2-1.2 4-1.2-4-4-1.2 4-1.2z" fill="url(#mily-sp-g)" opacity=".55"/></svg></div>
-      <div class="mily-chat-hd-status">마일리지 도우미</div>
+      <div class="mily-chat-hd-status">마일리지 도우미 <span id="mily-plan-badge" onclick="event.stopPropagation();_showPlanPopup()"></span></div>
     </div>
     <button class="mily-chat-close" onclick="toggleMilyChat()"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
   </div>
@@ -20570,6 +20754,7 @@ window.toggleMilyChat=function(){
     if(backdrop) backdrop.classList.add('open');
     fab.classList.remove('visible'); // 채팅 열리면 FAB 숨김
     _updateMilyChatChar('wave'); // 환영 표정
+    _updatePlanBadges(); // 등급 배지 업데이트
     // 첫 오픈 시 환영 메시지
     if(_milyHistory.length===0) _milyWelcome();
     setTimeout(()=>document.getElementById('mily-input').focus(),300);
@@ -20796,6 +20981,8 @@ async function _callMilyAPI(){
           if(block.type==='tool_use'){
             console.log('[mily-chat] calling tool:', block.name, block.input);
             const result=_executeTool(block.name,block.input);
+            // 카드 UI: 활동/보상/뱃지 변경 결과를 시각적 카드로 표시
+            if(result&&result.success) _renderToolCard(block.name,block.input,result);
             toolResults.push({
               type:'tool_result',
               tool_use_id:block.id,
@@ -20845,90 +21032,140 @@ async function _callMilyAPI(){
   }
 }
 
+// ── 사용자 등급 시스템 ──
+// 'free'(일반) vs 'pro'(프로). Firestore families/{familyId}.plan 에 저장.
+// 관리자가 admin 페이지에서 승인하면 'pro'로 변경됨.
+function _getUserPlan(){
+  try{const S=_getS();return S?.familyMeta?.plan||'free';}catch(e){return 'free';}
+}
+function _isPro(){return _getUserPlan()==='pro';}
+
+// ── 등급 배지 SVG ──
+const _PLAN_SVG={
+  free:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 12h8M12 8v8"/></svg>',
+  pro:'<svg viewBox="0 0 24 24" fill="none"><path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26z" fill="#F59E0B" stroke="#D97706" stroke-width="1.5"/></svg>'
+};
+function _updatePlanBadges(){
+  const isPro=_isPro();
+  const cls=isPro?'pro':'free';
+  const label=isPro?'PRO':'FREE';
+  const svg=_PLAN_SVG[cls];
+  // 챗봇 헤더 배지
+  const milyBadge=document.getElementById('mily-plan-badge');
+  if(milyBadge) milyBadge.innerHTML=`<span class="plan-badge ${cls}">${svg} ${label}</span>`;
+  // 나의메뉴 배지
+  const myBadge=document.getElementById('my-plan-badge');
+  if(myBadge) myBadge.innerHTML=`<span class="my-plan-badge ${cls}" onclick="_showPlanPopup()">${svg} ${label}</span>`;
+}
+window._showPlanPopup=_showPlanPopup;
+function _showPlanPopup(){
+  const isPro=_isPro();
+  if(isPro){
+    toast('🌟 PRO 등급 이용 중!');
+    return;
+  }
+  // 일반 등급: 업그레이드 안내 팝업
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;animation:fadeIn .2s';
+  overlay.onclick=()=>overlay.remove();
+  const card=document.createElement('div');
+  card.style.cssText='background:var(--card,#fff);border-radius:20px;padding:32px 28px;max-width:340px;width:90%;text-align:center;box-shadow:0 16px 48px rgba(0,0,0,.2)';
+  card.onclick=e=>e.stopPropagation();
+  card.innerHTML=`
+    <div style="font-size:48px;margin-bottom:12px">🌟</div>
+    <div style="font-size:18px;font-weight:900;color:var(--tx,#1E293B);margin-bottom:8px">PRO 등급으로 업그레이드</div>
+    <div style="font-size:13px;color:var(--tx2,#64748B);line-height:1.6;margin-bottom:20px">
+      PRO 등급에서는 다음 기능을 이용할 수 있어요:<br>
+      <b>활동/보상 추가·수정·삭제</b><br>
+      <b>육아 코칭 및 활동 분석</b><br>
+      <b>뱃지 관리</b>
+    </div>
+    <button style="width:100%;padding:14px;background:linear-gradient(135deg,#F59E0B,#D97706);color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit" onclick="this.closest('div[style*=fixed]').remove();_requestProUpgradeFromUI()">업그레이드 신청하기</button>
+    <button style="width:100%;padding:12px;background:none;border:none;color:var(--tx3,#94A3B8);font-size:13px;font-weight:600;cursor:pointer;margin-top:8px;font-family:inherit" onclick="this.closest('div[style*=fixed]').remove()">다음에 할게요</button>
+  `;
+  overlay.appendChild(card);
+  document.body.appendChild(overlay);
+}
+window._requestProUpgradeFromUI=_requestProUpgradeFromUI;
+function _requestProUpgradeFromUI(){
+  const result=_requestProUpgrade();
+  if(result&&result.success) toast('🌟 PRO 업그레이드 신청이 접수되었어요!');
+  else toast('⚠️ 신청 중 문제가 발생했어요');
+}
+
 // ── 시스템 프롬프트 ──
 function _buildSystemPrompt(){
   const isC=typeof isCaregiverUser==='function'&&isCaregiverUser();
+  const isPro=_isPro();
   const kidName=_getCurrentKidName();
-  const kidId=typeof getViewedMemberId==='function'?getViewedMemberId():'';
   const myName=(()=>{try{const S=_getS();return S?.familyMeta?.members?.[currentUser]?.name||'';}catch(e){return '';}})();
   const pts=typeof getActiveMileage==='function'?getActiveMileage():0;
   const acts=_getActsList();
   const rwds=_getRwdsList();
   const todayLog=_getTodayLog();
-  // 다자녀 정보
   const childIds=typeof getChildMemberIds==='function'?getChildMemberIds():[];
   const S=_getS();
-  const childrenInfo=childIds.map(id=>{
-    const m=S?.familyMeta?.members?.[id];
-    return m?`${m.name||id}`:'';
-  }).filter(Boolean);
+  const childrenInfo=childIds.map(id=>{const m=S?.familyMeta?.members?.[id];return m?`${m.name||id}`:'';}).filter(Boolean);
   const isMultiChild=childrenInfo.length>1;
 
-  let prompt=`너는 "밀리"야. 마일리 앱의 AI 도우미. ${isC?'양육자에게는 존댓말(~요, ~해요, ~드릴게요)로 정중하고 따뜻하게.':'아이에게는 반말(~야, ~해, ~거야)로 친근하고 다정하게. 친구처럼!'} 짧게 답해. **볼드**만 사용.
-
-[상태] ${isC?'양육자':'자녀'}${myName?'('+myName+')':''} | 자녀: ${kidName||'없음'} | ${pts}M
-${isMultiChild?`자녀(${childrenInfo.length}명): ${childrenInfo.join(', ')}\n`:''}활동: ${acts.slice(0,6).map(a=>`${a.emoji}${a.name}(${a.pts}M)`).join(', ')||'없음'}
-보상: ${rwds.slice(0,4).map(r=>`${r.emoji}${r.name}(${r.pts}M)`).join(', ')||'없음'}
-오늘: ${todayLog.map(l=>`${l.emoji||''}${l.name}`).join(', ')||'없음'}
-
-[용어] 이 앱의 단위는 "마일리지"(약칭 M). "포인트"라고 절대 부르지 마. 반드시 "마일리지" 또는 "M"으로. 예: "20마일리지 적립!", "100M 남았어!"
-
+  // ── 공통 기본 프롬프트 (일반+프로 공유) ──
+  let prompt=`너는 "밀리"야. 마일리 앱의 AI 도우미. ${isC?'양육자에게는 존댓말(~요,~해요)로 따뜻하게.':'아이에게는 반말(~야,~해)로 친근하게.'} **짧게** 답해(1~2줄). 단위="마일리지"(M). "포인트"라 하지마.
+[상태] ${isC?'양육자':'자녀'}${myName?'('+myName+')':''} | 자녀:${kidName||'없음'} | ${pts}M
+${isMultiChild?`자녀(${childrenInfo.length}명):${childrenInfo.join(',')}\n`:''}활동:${acts.slice(0,6).map(a=>`${a.emoji}${a.name}(${a.pts}M)`).join(',')||'없음'}
+보상:${rwds.slice(0,4).map(r=>`${r.emoji}${r.name}(${r.pts}M)`).join(',')||'없음'}
+오늘:${todayLog.map(l=>`${l.emoji||''}${l.name}`).join(',')||'없음'}
+[등급] ${isPro?'PRO':'일반'}
 [규칙]
-1. 실행요청→반드시 tool호출. 텍스트만 답하지마.
-2. 응답 끝에 [BUTTONS:후속행동1|후속행동2] 맥락에 맞는 다음 행동 추천. 예: 분석 후→"활동 추가할까?|다른 분석 볼래?", 추가 후→"하나 더 만들까?|현황 볼래?"
-3. 모호한 요청→바로 만들어. 기본: pts=20, maxDay=1, cycle=daily.
-4. tool실행 후 결과를 구체적 수치로 보고: 이모지·이름·마일리지·개수 포함.
-5. 추가 전 get_status로 기존 목록 조회→이름/의미 유사항목 있으면 추가 안하고 "이미 비슷한 항목 있어요" + 기존항목 표시 후 확인.
-6. 이모지는 의미에 맞게 선택(⭐🎁 기본값 금지). 예: 🪥양치 📖독서 🏃운동 🎮게임
-7. ${isC?'양육자→모든 기능 가능':'자녀→do_activity, get_status만 가능. 나머진 "부모님께 부탁해봐!"'}
-${isMultiChild?`8. 다자녀(${childrenInfo.join(',')}): 모든 조치(추가/수정/삭제/수행/취소/교환) 전 "어떤 자녀?" 먼저 확인. 모두→target_kids="all"\n`:''}
-${isC?`[과학기반 육아코칭] get_status 먼저 호출→데이터 기반 분석. 최소 4~6줄 충실 응답. 단답 금지.
-<근거>
-칭찬: 능력X 과정O (Dweck성장마인드셋). "똑똑해"→X, "열심히했네"→O. 구체적행동 언급 필수.
-동기: 이미 즐기는 활동에 외재보상→내재동기↓(과다정당화). 기피활동에만 마일리지.
-보상등급: 경험(영화/외출)🟢최고>선택권🟢>사회인정🟡>마일리지🟡>물질🔴>화면시간🔴금지.
-습관: 평균66일(18~254일). 신호→행동→보상 루프. 3주만에 포기말것.
-마일리지: 인플레이션주의. 초기강화(1~2주)→25%감소(3~4주)→가변강화(5~8주)→칭찬전환(9주+).
-형제: 비교절대금지. 개별목표설정. 협력목표>경쟁. "오빠는했어"→X.
-연속: 1회실패=낙심위험. "한번놓쳐도괜찮아" 필수. 월3일 쉬는날 허용.
-부모일관성: 규칙정하면 최소2주유지. 갑작스런변경=신뢰손상.
-</근거>
-<분석시>
-- 리포트: 꾸준활동vs빠진활동, 참여패턴, 카테고리균형(생활/학습/운동/창의/사회) 분석
-- 보상점검: 일일적립vs보상비용 밸런스, 보상등급평가, 도달예상일
-- 코칭: 위 근거 인용+구체적 대화예시. "~라고 말해보세요" 형태
-- 활동추천: 빠진카테고리 기반 3~5개, 마일리지·주기 포함`:''}
-${!isC?`[자녀모드] 재미있고 응원하는 톤!
-- 성적표: 등급(S/A/B/C)과 재미있는 비유로 표현. 게임처럼.
-- 퀴즈: 활동·보상 데이터 기반 객관식, 정답시 폭발칭찬
-- 응원: 구체적 활동 언급, 개인화된 메시지. "네가 ~한 거 진짜 대단해!"
-- 도전: 잘 안하는 활동을 재미있는 미션으로. "오늘의 비밀미션!"
-- 목표: "~까지 ○마일리지 남았어! ○일이면 모을수있어!" 희망적 수치 제시`:''}
-[뱃지 관리] get_badges로 전체 뱃지(내장+커스텀) 조회. 양육자만 add/edit/delete/award 가능.
-- 조건 타입: manual(수동수여), total_acts(총활동횟수), streak(연속일수), study_count(학습횟수), act_name_count(특정활동횟수), pts_total(총적립마일리지), pts_current(현재마일리지), mood_count(기분기록수), reward_count(보상교환수), perfect_days(만점일수), morning_acts(아침활동수), daily_max(하루최대횟수), badge_count(뱃지보유수)
-- 난이도: bronze→silver→gold→platinum→diamond. 조건값에 맞게 난이도 자동 제안: 1~10=bronze, 11~30=silver, 31~60=gold, 61~100=platinum, 100+=diamond
-- 내장 뱃지는 edit로 난이도·이모지·설명만 오버라이드 가능, 삭제 불가
-- 뱃지 추가 시 이모지는 반드시 뱃지 의미에 맞게 선택. 예: 🏃연속운동 📚다독가 🌅아침형 💪꾸준함
-- "뱃지 난이도 조정해줘" → get_badges로 현황 파악 → 조건값 대비 난이도가 맞는지 분석 → edit_badge로 조정 제안
+1. 실행요청→tool호출.
+2. 응답 끝에 [BUTTONS:행동1|행동2]
+3. ${isC?'양육자→모든 기능':'자녀→do_activity,get_status만. 나머진 "부모님께 부탁해봐!"'}
+${isMultiChild?`4. 다자녀(${childrenInfo.join(',')}): 조치 전 "어떤 자녀?" 확인.\n`:''}`;
 
-[오늘의 할일] 활동 중 showHome=true인 것들이 "오늘의 할일"(홈탭 목록). get_status 결과의 today_mission으로 현황 조회.
-- today_mission.total: 오늘 할 일 총 개수, today_mission.done: 완료 개수, today_mission.remaining: 남은 개수
-- 오늘의 할일을 **모두 완료**하면 "오늘 성공!" → 연속 성공일수(streak) +1
-- streak.current: 현재 연속 성공일수, streak.bonus_pts: 7일 보너스 마일리지(기본 100M)
-- **7일 연속 성공 시 보너스 마일리지(streak.bonus_pts) 자동 지급!** 매 7일마다 반복.
-- 대화 예: "오늘 할 일 몇 개 남았어?" → get_status → today_mission.remaining 답변
-- 대화 예: "연속 며칠째야?" → get_status → streak.current 답변 + 7일 보너스까지 남은 일수
-- 활동의 showHome 여부는 activities 배열의 showHome 필드로 확인 가능
-- toggleActivityHome 도구로 활동의 오늘의할일 포함 여부 변경 가능(양육자만)
-
-[통계 활용] get_status 결과에 activity_stats(활동별 총횟수·총마일리지·활동일수), recent_7days(최근7일), streak(연속기록), today_mission(오늘의 할일 현황)이 포함됨.
-- "제일 잘하는 건?" → activity_stats에서 count 1위 활동 + 구체적 횟수·마일리지 언급
-- "이번주 뭐했어?" → recent_7days로 최근 7일 활동 분석
-- "얼마나 열심히 했어?" → streak, total_done, activity_stats 종합 분석
-- "오늘 할 일 남았어?" → today_mission으로 남은 할일 개수·목록 안내
-- "연속 성공 며칠?" → streak.current + 7일 보너스까지 남은 일수 계산
-- 항상 수치를 구체적으로 말해줘: "○○을 ○번이나 했어!", "총 ○마일리지 모았어!"
-`;
+  if(!isPro){
+    // ── 일반등급: 조회 전용 + 수동 방법 안내 프롬프트 ──
+    prompt+=`
+[일반등급] AI챗봇 기능: 조회(get_status,do_activity,get_badges,get_children)만 가능.
+AI챗봇을 통한 자동 추가·수정·삭제, 육아코칭, 활동분석, 뱃지관리는 PRO 전용.
+★ 중요: "추가/수정/삭제가 불가능하다"고 말하지 마! 수동으로는 가능해. AI자동처리만 PRO임을 명확히 해.
+사용자가 PRO 기능을 요청하거나 앱 사용법을 물으면:
+1) 먼저 수동으로 하는 방법을 친절하게 안내해:
+   [활동 관리]
+   - 활동 추가: "나의 메뉴 탭 → 관리(관리자 페이지) → 활동 탭 → + 추가 버튼 → 활동 이름·이모지·포인트 입력 → 저장"
+   - 활동 수정/삭제: "나의 메뉴 탭 → 관리(관리자 페이지) → 활동 탭 → 활동 옆 연필 아이콘(수정) 또는 삭제"
+   - 활동 완료(기록): "홈 탭에서 오늘 할 일 카드를 톡! 탭하면 마일리지 적립"
+   - 활동 취소(되돌리기): "기록 탭에서 완료된 활동의 '취소↩' 버튼 탭"
+   - 오늘 할 일 설정: "관리자 페이지 → 활동 탭 → 활동 옆 '홈 표시'/'홈 숨김' 버튼 탭, 또는 기록 탭 → 활동 맨 좌측 아이콘 탭으로도 전환 가능"
+   [보상 관리]
+   - 보상 추가: "나의 메뉴 탭 → 관리(관리자 페이지) → 가족 탭 → 보상 목록의 + 추가 버튼 → 보상 이름·필요 포인트 입력 → 저장"
+   - 보상 수정/삭제: "나의 메뉴 탭 → 관리(관리자 페이지) → 가족 탭 → 보상 옆 연필 아이콘(수정) 또는 삭제"
+   - 보상 교환(사용): "보상 탭에서 마일리지가 충분한 보상의 '교환하기' 버튼 탭"
+   - 보상 목표 설정: "보상 탭에서 보상 카드를 길게 누르면 목표 설정/해제"
+   [소통 기능]
+   - 가족 메시지 보내기: "나의 메뉴 탭 → 우리가족 아바타를 탭 → '메시지 보내기' 선택 → 메시지 입력 + 감정 이모지 선택(선택사항) → 보내기"
+   - 받은 메시지 확인: "나의 메뉴 탭 → 우리가족 아바타를 탭 → '메시지 읽기' 선택"
+   - 스티커/말풍선 남기기: "홈 탭에서 활동 카드를 길게 꾹~ 누르면 스티커 또는 말풍선을 남길 수 있어요"
+   [뱃지/리포트]
+   - 뱃지 확인: "리포트 탭 → 뱃지 섹션에서 획득한 뱃지와 진행 상황 확인"
+   - 뱃지 추가/관리: "나의 메뉴 → 관리(관리자 페이지) → 뱃지 탭"
+2) PRO 전용 기능 요청 시 PRO 안내: "AI챗봇을 통한 자동 추가·관리는 **PRO 등급**에서 가능해요! 🌟 업그레이드하시겠어요?" + [BUTTONS:PRO 업그레이드 신청|괜찮아요]
+"PRO 업그레이드 신청"이라고 답하면 request_upgrade tool을 호출해.
+응답은 수동 안내 포함해서 3~4줄 이내로.`;
+  }else{
+    // ── PRO등급: 풀 프롬프트 ──
+    prompt+=`
+[PRO] 이모지는 의미에 맞게(⭐🎁 기본값 금지). 추가 전 get_status로 유사항목 확인.
+★ 활동/보상/뱃지 추가 시 반드시 desc(설명)를 포함해. 아이가 이해할 수 있는 짧은 설명 1줄(예: "매일 아침 세수하고 양치하기", "열심히 한 나에게 주는 선물").
+${isC?`[육아코칭] get_status 호출→데이터 기반. 3~4줄 응답.
+칭찬: 과정O("열심히했네") 능력X("똑똑해"). 형제비교 절대금지.
+동기: 기피활동에만 마일리지. 보상: 경험🟢>선택권🟢>물질🔴.
+습관: 66일 평균. 1회실패→"괜찮아" 필수. 규칙 2주 유지.`:''}
+${!isC?`[자녀모드] 재미있고 응원하는 톤! 성적표(S/A/B/C), 퀴즈, "오늘의 비밀미션!" 등.`:''}
+[뱃지] get_badges 조회. 양육자만 add/edit/delete/award.
+조건타입: manual,total_acts,streak,study_count,act_name_count,pts_total,pts_current,mood_count,reward_count,perfect_days,morning_acts,daily_max,badge_count
+난이도: 1~10=bronze,11~30=silver,31~60=gold,61~100=platinum,100+=diamond
+[오늘의 할일] showHome=true 활동. today_mission으로 현황 조회. 모두 완료→streak+1. 7일 연속→보너스(streak.bonus_pts).
+[통계] activity_stats(횟수·마일리지·일수), recent_7days, streak, today_mission. 수치 구체적으로!`;
+  }
 
   return prompt;
 }
@@ -20936,26 +21173,36 @@ ${!isC?`[자녀모드] 재미있고 응원하는 톤!
 // ── 도구 정의 ──
 function _buildTools(){
   const isC=typeof isCaregiverUser==='function'&&isCaregiverUser();
+  const isPro=_isPro();
   const tools=[];
 
-  // 공통: 현황 조회
+  // 공통: 현황 조회 (일반+PRO)
   tools.push({
     name:'get_status',
-    description:'현재 마일리지, 활동 목록, 보상 목록, 오늘 기록, 활동별 통계(횟수·포인트·일수), 최근7일 통계, 연속기록을 조회',
+    description:'현재 마일리지, 활동/보상 목록, 오늘 기록, 통계, 연속기록 조회',
     input_schema:{type:'object',properties:{},required:[]}
   });
 
   tools.push({
     name:'get_badges',
-    description:'모든 뱃지(내장+커스텀) 목록, 달성 현황, 난이도 등을 조회합니다.',
+    description:'뱃지 목록·달성 현황 조회',
     input_schema:{type:'object',properties:{},required:[]}
   });
 
   tools.push({
     name:'get_children',
-    description:'가족 내 자녀 목록을 조회합니다. 다자녀 가정에서 대상 자녀를 확인할 때 사용.',
+    description:'자녀 목록 조회',
     input_schema:{type:'object',properties:{},required:[]}
   });
+
+  // 일반등급: 업그레이드 신청 도구
+  if(!isPro){
+    tools.push({
+      name:'request_upgrade',
+      description:'PRO 등급 업그레이드를 신청합니다. 사용자가 동의한 경우에만 호출.',
+      input_schema:{type:'object',properties:{},required:[]}
+    });
+  }
 
   tools.push({
     name:'do_activity',
@@ -20970,8 +21217,8 @@ function _buildTools(){
     }
   });
 
-  if(isC){
-    // 양육자 전용 도구
+  if(isC&&isPro){
+    // 양육자+PRO 전용 도구
     tools.push({
       name:'add_activity',
       description:'새 활동을 추가합니다. 다자녀 가정에서는 target_kids로 대상 자녀를 지정.',
@@ -20981,7 +21228,7 @@ function _buildTools(){
           name:{type:'string',description:'활동 이름 (필수, 20자 이내)'},
           emoji:{type:'string',description:'이모지 — 반드시 활동 의미에 맞는 이모지 선택 (기본값 ⭐ 사용 금지)'},
           pts:{type:'number',description:'마일리지 (기본: 20)'},
-          desc:{type:'string',description:'활동 설명'},
+          desc:{type:'string',description:'활동 설명 — 반드시 포함! 아이가 이해할 수 있는 짧은 설명 1줄'},
           maxDay:{type:'number',description:'하루 최대 횟수 (기본: 1, 0=무제한)'},
           cycle:{type:'string',enum:['daily','weekly','once'],description:'주기 (기본: daily)'},
           target_kids:{type:'string',description:'"all"이면 모든 자녀에게 적용, 쉼표 구분 자녀ID이면 해당 자녀에게만 적용. 생략 시 현재 보고 있는 자녀에게만 적용.'}
@@ -21034,6 +21281,7 @@ function _buildTools(){
           name:{type:'string',description:'보상 이름 (필수, 30자 이내)'},
           emoji:{type:'string',description:'이모지 — 반드시 보상 의미에 맞는 이모지 선택 (기본값 🎁 사용 금지)'},
           pts:{type:'number',description:'필요 마일리지 (기본: 500)'},
+          desc:{type:'string',description:'보상 설명 — 반드시 포함! 아이가 기대할 수 있는 짧은 설명 1줄'},
           goal:{type:'boolean',description:'목표 보상 여부 (기본: false)'},
           target_kids:{type:'string',description:'"all"이면 모든 자녀에게 적용, 쉼표 구분 자녀ID이면 해당 자녀에게만 적용'}
         },
@@ -21132,7 +21380,7 @@ function _buildTools(){
         properties:{
           name:{type:'string',description:'뱃지 이름 (필수)'},
           emoji:{type:'string',description:'뱃지 이모지 (필수, 의미에 맞는 이모지)'},
-          desc:{type:'string',description:'뱃지 설명'},
+          desc:{type:'string',description:'뱃지 설명 — 반드시 포함! 어떤 조건으로 받는 뱃지인지 짧은 설명 1줄'},
           cond_type:{type:'string',enum:['manual','total_acts','streak','study_count','study_streak','act_name_count','pts_total','pts_current','mood_count','reward_count','perfect_days','morning_acts','daily_max','badge_count'],description:'달성 조건 타입 (기본: manual)'},
           cond_value:{type:'number',description:'조건 목표값 (예: total_acts 50이면 총 50회 활동)'},
           cond_act_name:{type:'string',description:'act_name_count 타입일 때 대상 활동 이름'},
@@ -21221,6 +21469,7 @@ function _executeTool(name,input){
       case 'edit_badge': result=api.editBadge(input); break;
       case 'delete_badge': result=api.deleteBadge(input); break;
       case 'award_badge': result=api.awardBadge(input); break;
+      case 'request_upgrade': result=_requestProUpgrade(); break;
       default: result={success:false,error:'알 수 없는 도구: '+name};
     }
     console.log('[mily-tool] result:', name, JSON.stringify(result));
@@ -21228,6 +21477,22 @@ function _executeTool(name,input){
   }catch(e){
     console.error('[mily-tool] error:', name, e);
     return {success:false,error:e.message};
+  }
+}
+
+// ── PRO 업그레이드 신청 ──
+function _requestProUpgrade(){
+  try{
+    const S=_getS();
+    const uid=typeof currentUser!=='undefined'?currentUser:'';
+    const uname=(()=>{try{return S?.familyMeta?.members?.[uid]?.name||uid;}catch(e){return uid;}})();
+    // families 문서의 proRequest 필드에 저장 (별도 컬렉션 불필요 — 기존 쓰기 권한 활용)
+    if(!S.familyMeta)S.familyMeta={};
+    S.familyMeta.proRequest={status:'pending',userId:uid,userName:uname,requestedAt:Date.now(),env:_ENV};
+    if(typeof save==='function')save();
+    return{success:true,message:'🌟 PRO 업그레이드 신청이 접수되었습니다! 관리자 승인 후 모든 기능을 사용할 수 있어요.'};
+  }catch(e){
+    return{success:false,error:'신청 중 오류: '+e.message};
   }
 }
 
@@ -21271,6 +21536,71 @@ function _getCurrentKidName(){
 }
 
 // ── UI 헬퍼 ──
+// ── 챗봇 카드 UI 렌더링 ──
+function _renderToolCard(toolName,input,result){
+  const container=document.getElementById('mily-chat-msgs');
+  const typing=document.getElementById('mily-typing');
+  if(!container||!typing)return;
+
+  let cardHTML='';
+  const S=_getS();
+  const acts=S?.acts||[];
+  const rwds=S?.rwds||[];
+
+  // 활동 완료
+  if(toolName==='do_activity'){
+    const act=acts.find(a=>a.id===input.activity_id)||(input.activity_name?acts.find(a=>a.name.includes(input.activity_name)):null);
+    if(act) cardHTML=`<div class="mily-tool-card tc-do"><div class="tc-emoji">${act.emoji||'✅'}</div><div class="tc-info"><div class="tc-name">${act.name}</div><div class="tc-meta">활동 완료!</div></div><div class="tc-pts">+${act.pts}M</div></div>`;
+  }
+  // 활동 추가
+  else if(toolName==='add_activity'){
+    cardHTML=`<div class="mily-tool-card tc-add"><div class="tc-emoji">${input.emoji||'⭐'}</div><div class="tc-info"><div class="tc-name">${input.name}</div><div class="tc-meta">${input.cycle||'daily'} · 최대 ${input.maxDay||1}회/일</div></div><div class="tc-pts">${input.pts||20}M</div></div>`;
+  }
+  // 활동 수정
+  else if(toolName==='edit_activity'){
+    const act=acts.find(a=>a.id===input.activity_id)||(input.activity_name?acts.find(a=>a.name.includes(input.activity_name)):null);
+    const name=input.name||(act?act.name:'활동');
+    const emoji=input.emoji||(act?act.emoji:'✏️');
+    cardHTML=`<div class="mily-tool-card"><div class="tc-emoji">${emoji}</div><div class="tc-info"><div class="tc-name">${name}</div><div class="tc-meta">수정 완료</div></div><div class="tc-pts">${input.pts||(act?act.pts:'')}M</div></div>`;
+  }
+  // 활동 삭제
+  else if(toolName==='delete_activity'){
+    cardHTML=`<div class="mily-tool-card tc-del"><div class="tc-emoji">🗑️</div><div class="tc-info"><div class="tc-name">${input.activity_name||'활동'}</div><div class="tc-meta">삭제됨</div></div><div class="tc-pts"></div></div>`;
+  }
+  // 보상 추가
+  else if(toolName==='add_reward'){
+    cardHTML=`<div class="mily-tool-card tc-add"><div class="tc-emoji">${input.emoji||'🎁'}</div><div class="tc-info"><div class="tc-name">${input.name}</div><div class="tc-meta">보상 추가됨</div></div><div class="tc-pts">${input.pts||500}M</div></div>`;
+  }
+  // 보상 교환
+  else if(toolName==='redeem_reward'){
+    const rwd=rwds.find(r=>r.id===input.reward_id)||(input.reward_name?rwds.find(r=>r.name.includes(input.reward_name)):null);
+    if(rwd) cardHTML=`<div class="mily-tool-card tc-del"><div class="tc-emoji">${rwd.emoji||'🎁'}</div><div class="tc-info"><div class="tc-name">${rwd.name}</div><div class="tc-meta">보상 교환!</div></div><div class="tc-pts">-${rwd.pts}M</div></div>`;
+  }
+  // 활동 취소
+  else if(toolName==='undo_activity'){
+    const act=acts.find(a=>a.id===input.activity_id)||(input.activity_name?acts.find(a=>a.name.includes(input.activity_name)):null);
+    if(act) cardHTML=`<div class="mily-tool-card tc-del"><div class="tc-emoji">${act.emoji||'↩'}</div><div class="tc-info"><div class="tc-name">${act.name}</div><div class="tc-meta">활동 취소됨</div></div><div class="tc-pts">-${act.pts}M</div></div>`;
+  }
+  // 뱃지 추가/수여
+  else if(toolName==='add_badge'||toolName==='award_badge'){
+    const emoji=input.emoji||'🏅';
+    const name=input.name||input.badge_name||'뱃지';
+    cardHTML=`<div class="mily-tool-card tc-badge"><div class="tc-emoji">${emoji}</div><div class="tc-info"><div class="tc-name">${name}</div><div class="tc-meta">${toolName==='award_badge'?'뱃지 수여!':'뱃지 추가됨'} · ${input.difficulty||'bronze'}</div></div></div>`;
+  }
+  // PRO 업그레이드 신청
+  else if(toolName==='request_upgrade'){
+    cardHTML=`<div class="mily-tool-card tc-add"><div class="tc-emoji">🌟</div><div class="tc-info"><div class="tc-name">PRO 업그레이드</div><div class="tc-meta">신청 접수 완료! 관리자 승인 대기 중</div></div></div>`;
+  }
+
+  if(cardHTML){
+    const div=document.createElement('div');
+    div.className='mily-msg bot';
+    div.innerHTML=cardHTML;
+    container.insertBefore(div,typing);
+    _scrollMilyBottom();
+  }
+}
+
 function _addBotMsg(text){
   const container=document.getElementById('mily-chat-msgs');
   const typing=document.getElementById('mily-typing');
