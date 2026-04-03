@@ -144,6 +144,28 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
 .family-card-members{display:flex;gap:4px;margin-top:10px;flex-wrap:wrap}
 .family-card-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;border:2px solid var(--bg2);box-shadow:0 1px 4px rgba(0,0,0,.1)}
 
+/* ── Usage Stats (가족 카드) ── */
+.usage-stats-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center}
+.usage-stat{display:flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--tx2);background:var(--bg3);padding:3px 8px;border-radius:8px}
+.usage-stat .stat-icon{font-size:13px}
+.activity-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.activity-dot.active{background:#10B981}
+.activity-dot.moderate{background:#F59E0B}
+.activity-dot.inactive{background:#EF4444}
+.activity-dot.dormant{background:#94A3B8}
+
+/* ── Usage Detail Section ── */
+.usage-detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:20px}
+.usage-detail-card{background:var(--bg3);border-radius:14px;padding:16px;border:1px solid var(--bdr)}
+.usage-detail-label{font-size:11px;font-weight:800;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.usage-detail-value{font-size:22px;font-weight:900;color:var(--tx)}
+.usage-detail-sub{font-size:11px;color:var(--tx2);font-weight:600;margin-top:2px}
+.member-activity-bar{display:flex;align-items:center;gap:10px;padding:8px 0}
+.member-activity-name{width:60px;font-size:12px;font-weight:700;color:var(--tx);text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0}
+.member-activity-track{flex:1;height:20px;background:var(--bdr2);border-radius:6px;overflow:hidden;position:relative}
+.member-activity-fill{height:100%;border-radius:6px;transition:width .4s ease;min-width:2px}
+.member-activity-count{width:40px;font-size:11px;font-weight:700;color:var(--tx2);text-align:left;flex-shrink:0}
+
 /* ── Detail ── */
 .detail-back{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700;color:#6366F1;cursor:pointer;margin-bottom:18px;background:none;border:none;font-family:inherit}
 .detail-back:hover{text-decoration:underline}
@@ -851,6 +873,92 @@ function renderDashboard() {
       }).join('');
 }
 
+// ── Usage Analytics Util ──
+function _relativeTime(ts) {
+  const diff = Date.now() - ts;
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return '방금 전';
+  if (mins < 60) return `${mins}분 전`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}시간 전`;
+  const days = Math.floor(hrs / 24);
+  if (days < 7) return `${days}일 전`;
+  if (days < 30) return `${Math.floor(days / 7)}주 전`;
+  if (days < 365) return `${Math.floor(days / 30)}개월 전`;
+  return `${Math.floor(days / 365)}년 전`;
+}
+
+function calcFamilyUsage(f) {
+  const log = Array.isArray(f.log) ? f.log : [];
+  const memberData = f.memberData || {};
+  const members = f.familyMeta?.members || {};
+  const now = Date.now();
+  const DAY = 86400000;
+  const d7 = now - 7 * DAY;
+  const d30 = now - 30 * DAY;
+
+  // 최근 활동일 (log에서 최신 ts)
+  let lastActivityTs = 0;
+  log.forEach(l => { if (l.ts > lastActivityTs) lastActivityTs = l.ts; });
+  // memberData 내 log도 확인
+  Object.values(memberData).forEach(md => {
+    (Array.isArray(md.log) ? md.log : []).forEach(l => { if (l.ts > lastActivityTs) lastActivityTs = l.ts; });
+  });
+
+  const lastActivity = lastActivityTs || 0;
+  const daysSinceLast = lastActivity ? Math.floor((now - lastActivity) / DAY) : -1;
+
+  // 활성도 등급
+  let activityLevel = 'dormant'; // 기본
+  if (daysSinceLast >= 0 && daysSinceLast <= 1) activityLevel = 'active';
+  else if (daysSinceLast >= 0 && daysSinceLast <= 7) activityLevel = 'moderate';
+  else if (daysSinceLast >= 0 && daysSinceLast <= 30) activityLevel = 'inactive';
+
+  // 최근 7일/30일 활동 횟수
+  const allLogs = [...log];
+  Object.values(memberData).forEach(md => {
+    if (Array.isArray(md.log)) allLogs.push(...md.log);
+  });
+  const last7 = allLogs.filter(l => l.ts >= d7).length;
+  const last30 = allLogs.filter(l => l.ts >= d30).length;
+
+  // 마일리지 현황
+  const pts = f.pts || 0;
+  const totalEarned = allLogs.reduce((s, l) => s + (l.pts > 0 ? l.pts : 0), 0);
+  const rewardCount = (f.rewardInventory || []).length;
+
+  // 구성원별 활동 횟수
+  const memberActivity = {};
+  const memberNames = {};
+  Object.entries(members).forEach(([mid, m]) => {
+    memberNames[mid] = m.name || mid;
+    memberActivity[mid] = 0;
+  });
+
+  // 통합 log에서 user 필드로 집계
+  allLogs.forEach(l => {
+    if (l.user && memberActivity[l.user] !== undefined) {
+      memberActivity[l.user]++;
+    }
+  });
+  // memberData에서도 집계
+  Object.entries(memberData).forEach(([mid, md]) => {
+    if (memberActivity[mid] !== undefined && Array.isArray(md.log)) {
+      memberActivity[mid] += md.log.length;
+    }
+  });
+
+  return {
+    lastActivity, daysSinceLast, activityLevel,
+    last7, last30,
+    pts, totalEarned, rewardCount,
+    totalDone: f.totalDone || 0,
+    streak: f.streak || 0,
+    longest: f.longest || 0,
+    memberActivity, memberNames, totalLogs: allLogs.length
+  };
+}
+
 // ── Families ──
 function renderFamilyCard(f) {
   const fm = f.familyMeta || {};
@@ -862,6 +970,10 @@ function renderFamilyCard(f) {
   const plan = fm.plan || 'free';
   const planBadge = plan === 'pro' ? '<span class="badge-pill" style="background:#6366F1;color:#fff">PRO</span>' : '<span class="badge-pill badge-inactive">FREE</span>';
 
+  const usage = calcFamilyUsage(f);
+  const LEVEL_LABELS = { active: '활성', moderate: '보통', inactive: '비활성', dormant: '미사용' };
+  const lastActText = usage.lastActivity ? _relativeTime(usage.lastActivity) : '기록 없음';
+
   return `<div class="family-card" onclick="openFamilyDetail('${escHtml(f.id)}')">
     <div class="family-card-head">
       <div>
@@ -869,6 +981,13 @@ function renderFamilyCard(f) {
         <div class="family-card-meta">구성원 ${memberCount}명 · 가입 ${registeredCount}명 · 모드: ${fm.mode === 'unified' ? '통합' : '독립'} · 생성: ${created}</div>
       </div>
       <div style="font-size:12px;color:#94A3B8;font-weight:600">${escHtml(f.id)}</div>
+    </div>
+    <div class="usage-stats-row">
+      <div class="usage-stat"><span class="activity-dot ${usage.activityLevel}"></span> ${LEVEL_LABELS[usage.activityLevel]}</div>
+      <div class="usage-stat"><span class="stat-icon">📅</span> ${lastActText}</div>
+      <div class="usage-stat"><span class="stat-icon">🔥</span> 7일 ${usage.last7}회</div>
+      <div class="usage-stat"><span class="stat-icon">💰</span> ${usage.pts}P</div>
+      <div class="usage-stat"><span class="stat-icon">⚡</span> 연속 ${usage.streak}일</div>
     </div>
     <div class="family-card-members">
       ${Object.values(members).slice(0, 7).map((m, i) =>
@@ -952,6 +1071,23 @@ window.openFamilyDetail = function(familyId) {
     </div>`;
   }).join('');
 
+  const usage = calcFamilyUsage(f);
+  const LEVEL_LABELS = { active: '🟢 활성', moderate: '🟡 보통', inactive: '🔴 비활성', dormant: '⚪ 미사용' };
+  const lastActText = usage.lastActivity ? new Date(usage.lastActivity).toLocaleString('ko-KR') + ` (${_relativeTime(usage.lastActivity)})` : '기록 없음';
+
+  // 구성원별 참여도 바 차트
+  const maxAct = Math.max(1, ...Object.values(usage.memberActivity));
+  const barColors = ['#6366F1', '#EC4899', '#F59E0B', '#10B981', '#8B5CF6', '#EF4444', '#06B6D4'];
+  let memberBarsHtml = Object.entries(usage.memberActivity).map(([mid, count], i) => {
+    const pct = Math.round((count / maxAct) * 100);
+    const name = usage.memberNames[mid] || mid;
+    return `<div class="member-activity-bar">
+      <div class="member-activity-name" title="${escHtml(name)}">${escHtml(name)}</div>
+      <div class="member-activity-track"><div class="member-activity-fill" style="width:${pct}%;background:${barColors[i % barColors.length]}"></div></div>
+      <div class="member-activity-count">${count}회</div>
+    </div>`;
+  }).join('');
+
   document.getElementById('family-detail-content').innerHTML = `
     <h2>${fm.familyName || f.id}</h2>
     <div class="subtitle">ID: ${f.id} · 모드: ${fm.mode === 'unified' ? '통합 관리' : '독립 관리'} · 생성: ${fm.createdAt ? new Date(fm.createdAt).toLocaleString('ko-KR') : '-'}</div>
@@ -961,6 +1097,39 @@ window.openFamilyDetail = function(familyId) {
       <div class="stat-card"><div class="stat-label">총 활동</div><div class="stat-value">${f.totalDone || 0}회</div></div>
       <div class="stat-card"><div class="stat-label">뱃지</div><div class="stat-value">${Object.keys(f.badges || {}).length}개</div></div>
     </div>
+
+    <div class="section">
+      <div class="section-title" style="margin-bottom:14px">📊 활용 현황</div>
+      <div class="usage-detail-grid">
+        <div class="usage-detail-card">
+          <div class="usage-detail-label">활성도</div>
+          <div class="usage-detail-value">${LEVEL_LABELS[usage.activityLevel]}</div>
+          <div class="usage-detail-sub">마지막 활동: ${lastActText}</div>
+        </div>
+        <div class="usage-detail-card">
+          <div class="usage-detail-label">최근 7일 활동</div>
+          <div class="usage-detail-value">${usage.last7}회</div>
+          <div class="usage-detail-sub">30일: ${usage.last30}회 · 전체: ${usage.totalLogs}회</div>
+        </div>
+        <div class="usage-detail-card">
+          <div class="usage-detail-label">마일리지</div>
+          <div class="usage-detail-value">${usage.pts.toLocaleString()}P</div>
+          <div class="usage-detail-sub">총 적립: ${usage.totalEarned.toLocaleString()}P · 보상교환: ${usage.rewardCount}건</div>
+        </div>
+        <div class="usage-detail-card">
+          <div class="usage-detail-label">출석 기록</div>
+          <div class="usage-detail-value">${usage.streak}일 연속</div>
+          <div class="usage-detail-sub">최장 연속: ${usage.longest}일</div>
+        </div>
+      </div>
+      ${Object.keys(usage.memberActivity).length > 0 ? `
+        <div style="margin-top:10px">
+          <div style="font-size:13px;font-weight:800;color:var(--tx2);margin-bottom:10px">👥 구성원별 참여도</div>
+          ${memberBarsHtml}
+        </div>
+      ` : ''}
+    </div>
+
     <div class="section">
       <div class="section-header">
         <div class="section-title">구성원 (${Object.keys(members).length}명)</div>
