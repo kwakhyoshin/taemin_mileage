@@ -290,6 +290,10 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
         PRO 등급 관리
       </div>
       <div class="sidebar-divider"></div>
+      <div class="sidebar-item" onclick="showPanel('chat_queries')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        챗봇 질문 로그
+      </div>
       <div class="sidebar-item" onclick="showPanel('chat_errors')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
         챗봇 오류
@@ -386,6 +390,28 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
             <button class="btn-sm btn-primary" onclick="manualSetPlan()">변경</button>
           </div>
         </div>
+      </div>
+
+      <!-- Chat Queries -->
+      <div class="panel" id="panel-chat_queries">
+        <h2>챗봇 질문 로그</h2>
+        <div class="subtitle">사용자가 챗봇에 보낸 질문 기록</div>
+        <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
+          <button class="btn-sm btn-primary" onclick="loadChatQueries()">새로고침</button>
+          <button class="btn-sm btn-ghost" onclick="clearChatQueries()">전체 삭제</button>
+          <select id="cq-env-filter" onchange="loadChatQueries()" style="padding:4px 8px;border-radius:6px;border:1px solid var(--bd);font-size:12px;background:var(--bg)">
+            <option value="">전체 환경</option>
+            <option value="dev">dev</option>
+            <option value="prod">prod</option>
+          </select>
+          <select id="cq-source-filter" onchange="loadChatQueries()" style="padding:4px 8px;border-radius:6px;border:1px solid var(--bd);font-size:12px;background:var(--bg)">
+            <option value="">전체 소스</option>
+            <option value="input">직접 입력</option>
+            <option value="button">인라인 버튼</option>
+            <option value="quick_menu">퀵 메뉴</option>
+          </select>
+        </div>
+        <div id="chat-queries-container" style="font-size:13px">패널을 열면 자동 로드됩니다.</div>
       </div>
 
       <!-- Chat Errors -->
@@ -831,7 +857,7 @@ window.showPanel = function(panel) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.getElementById('panel-' + panel).classList.add('active');
   document.querySelectorAll('.sidebar-item').forEach(s => {
-    const texts = { dashboard: '대시보드', families: '가족 관리', registry: '사용자 레지스트리', members: '전체 회원', pro_requests: 'PRO 등급 관리', chat_errors: '챗봇 오류', logs: '감사 로그', settings: '시스템 설정' };
+    const texts = { dashboard: '대시보드', families: '가족 관리', registry: '사용자 레지스트리', members: '전체 회원', pro_requests: 'PRO 등급 관리', chat_queries: '챗봇 질문 로그', chat_errors: '챗봇 오류', logs: '감사 로그', settings: '시스템 설정' };
     s.classList.toggle('active', s.textContent.trim() === texts[panel]);
   });
   if (panel === 'families') {
@@ -839,6 +865,7 @@ window.showPanel = function(panel) {
     document.getElementById('family-detail-view').style.display = 'none';
   }
   if (panel === 'pro_requests') loadProRequests();
+  if (panel === 'chat_queries') loadChatQueries();
   if (panel === 'chat_errors') loadChatErrors();
   closeSidebarMobile();
 };
@@ -1570,6 +1597,69 @@ window.approveProRequest=approveProRequest;
 window.rejectProRequest=rejectProRequest;
 window.manualSetPlan=manualSetPlan;
 window.loadProRequests=loadProRequests;
+
+// ── 챗봇 질문 로그 조회 ──
+async function loadChatQueries(){
+  const container=document.getElementById('chat-queries-container');
+  if(!container)return;
+  container.innerHTML='<div style="padding:20px;text-align:center;color:var(--tx2)">로딩 중...</div>';
+  try{
+    const envFilter=document.getElementById('cq-env-filter')?.value||'';
+    const srcFilter=document.getElementById('cq-source-filter')?.value||'';
+    let q=query(collection(db,'chatQueries'),orderBy('timestamp','desc'),fsLimit(200));
+    const snap=await getDocs(q);
+    if(snap.empty){
+      container.innerHTML='<div style="padding:40px;text-align:center;color:var(--tx2)">질문 기록이 없습니다</div>';
+      return;
+    }
+    const srcLabels={input:'직접입력',button:'버튼',quick_menu:'퀵메뉴'};
+    const srcColors={input:'#DBEAFE',button:'#FEF3C7',quick_menu:'#D1FAE5'};
+    const srcTextColors={input:'#1E40AF',button:'#92400E',quick_menu:'#065F46'};
+    let html='<table class="data-table"><thead><tr><th>시간</th><th>질문</th><th>소스</th><th>역할</th><th>사용자</th><th>환경</th><th>버전</th></tr></thead><tbody>';
+    let count=0;
+    snap.forEach(d=>{
+      const e=d.data();
+      if(envFilter&&e.env!==envFilter)return;
+      if(srcFilter&&e.source!==srcFilter)return;
+      count++;
+      const time=e.timestamp?new Date(e.timestamp).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}):'?';
+      const text=(e.text||'').substring(0,100);
+      const src=e.source||'?';
+      const role=e.role==='caregiver'?'양육자':'자녀';
+      const uid=(e.uid||'').substring(0,12);
+      const env=e.env||'?';
+      const ver=e.appVersion||'?';
+      html+=`<tr>
+        <td style="white-space:nowrap;font-size:12px">${time}</td>
+        <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${(e.text||'').replace(/"/g,'&quot;')}">${text}</td>
+        <td><span style="background:${srcColors[src]||'#F3F4F6'};color:${srcTextColors[src]||'#374151'};padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700">${srcLabels[src]||src}</span></td>
+        <td style="font-size:12px">${role}</td>
+        <td style="font-size:12px">${uid}</td>
+        <td style="font-size:11px"><span style="background:${env==='prod'?'#FEE2E2':'#E0E7FF'};color:${env==='prod'?'#991B1B':'#3730A3'};padding:1px 6px;border-radius:8px;font-size:10px;font-weight:700">${env}</span></td>
+        <td style="font-size:12px">${ver}</td>
+      </tr>`;
+    });
+    html+='</tbody></table>';
+    html+=`<div style="margin-top:8px;font-size:12px;color:var(--tx2)">총 ${count}건${envFilter||srcFilter?' (필터 적용)':''}</div>`;
+    container.innerHTML=html;
+  }catch(e){
+    container.innerHTML=`<div style="padding:20px;color:#EF4444">질문 로그 로드 실패: ${e.message}</div>`;
+  }
+}
+
+async function clearChatQueries(){
+  if(!confirm('모든 챗봇 질문 기록을 삭제하시겠습니까?'))return;
+  try{
+    const snap=await getDocs(collection(db,'chatQueries'));
+    const batch=[];
+    snap.forEach(d=>batch.push(deleteDoc(d.ref)));
+    await Promise.all(batch);
+    document.getElementById('chat-queries-container').innerHTML='<div style="padding:40px;text-align:center;color:var(--tx2)">질문 기록이 없습니다</div>';
+    logAdminAction('챗봇 질문 로그 전체 삭제');
+  }catch(e){alert('삭제 실패: '+e.message);}
+}
+window.loadChatQueries=loadChatQueries;
+window.clearChatQueries=clearChatQueries;
 
 // ── 챗봇 오류 조회 ──
 async function loadChatErrors(){
