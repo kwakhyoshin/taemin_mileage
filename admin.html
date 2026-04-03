@@ -390,12 +390,12 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
 
         <div class="section">
           <div class="section-header"><div class="section-title">환경 정보</div></div>
-          <div style="background:#fff;border-radius:12px;padding:16px;border:1px solid #E2E8F0;font-size:13px;font-weight:600;line-height:2">
-            환경: <span style="color:#EF4444;font-weight:800">DEV</span><br>
+          <div id="env-info-box" style="background:#fff;border-radius:12px;padding:16px;border:1px solid #E2E8F0;font-size:13px;font-weight:600;line-height:2">
+            환경: <span id="info-env-label" style="font-weight:800">—</span><br>
             Firebase 프로젝트: taemin-mileage<br>
-            Firestore 컬렉션: families (dev_*)<br>
-            레지스트리 경로: families/_dev_id_registry<br>
-            로그 경로: adminLogs/dev_log<br>
+            Firestore 컬렉션: <span id="info-collection">—</span><br>
+            레지스트리 경로: <span id="info-registry">—</span><br>
+            로그 경로: <span id="info-log">—</span><br>
             로드 시간: <span id="load-time">—</span>
             <div id="load-errors" style="display:none;margin-top:8px"></div>
           </div>
@@ -444,9 +444,18 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-// Update environment label
+// Update environment labels
 document.getElementById('env-label').textContent = _ENV === 'dev' ? 'DEV' : 'PROD';
 document.getElementById('env-label').style.color = _ENV === 'dev' ? '#EF4444' : '#2563EB';
+// Info box dynamic values
+const _infoEnv = document.getElementById('info-env-label');
+if(_infoEnv){ _infoEnv.textContent = _ENV === 'dev' ? 'DEV' : 'PROD'; _infoEnv.style.color = _ENV === 'dev' ? '#EF4444' : '#2563EB'; }
+const _infoCol = document.getElementById('info-collection');
+if(_infoCol) _infoCol.textContent = _ENV === 'dev' ? 'families (dev_*)' : 'families (prod)';
+const _infoReg = document.getElementById('info-registry');
+if(_infoReg) _infoReg.textContent = 'families/' + REGISTRY_DOC;
+const _infoLog = document.getElementById('info-log');
+if(_infoLog) _infoLog.textContent = 'adminLogs/' + LOG_DOC;
 
 // App Check — Firestore 접근에 필요 (메인 앱과 동일한 reCAPTCHA Enterprise 키)
 try {
@@ -614,9 +623,16 @@ async function loadAllData() {
   try {
     const familiesSnap = await getDocs(collection(db, 'families'));
     let loadCount = 0;
+    const _legacyDevDoc = 'taemin_dev'; // 레거시 개발기 문서 (dev_ prefix 없음)
     familiesSnap.forEach(docSnap => {
       const id = docSnap.id;
       if (id.startsWith('_')) return; // 내부 문서 제외 (레지스트리 등)
+      // 환경별 필터링: dev → dev_* 또는 taemin_dev, prod → dev_* 및 taemin_dev 제외
+      if (_ENV === 'dev') {
+        if (!id.startsWith('dev_') && id !== _legacyDevDoc) return;
+      } else {
+        if (id.startsWith('dev_') || id === _legacyDevDoc) return;
+      }
       _allFamilies.push({ id, ...docSnap.data() });
       loadCount++;
     });
@@ -1262,10 +1278,14 @@ async function loadProRequests(){
 
     // 1) families 컬렉션 (내부 문서 제외)
     const snap=await getDocs(collection(db,'families'));
+    const _legDev='taemin_dev';
     snap.forEach(d=>{
       const data=d.data();
       const fid=d.id;
       if(fid.startsWith('_'))return; // 내부 문서 제외
+      // 환경별 필터링
+      if(_ENV==='dev'){if(!fid.startsWith('dev_')&&fid!==_legDev)return;}
+      else{if(fid.startsWith('dev_')||fid===_legDev)return;}
       const fm=data.familyMeta||{};
       const req=fm.proRequest;
       const plan=fm.plan||'free';
