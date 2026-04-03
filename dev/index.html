@@ -7055,6 +7055,18 @@ function isCurrentUserAdmin(){
 async function _autoSetProIfAdmin(){
   try{
     if(!S.familyMeta) return;
+    // ─ 레거시 경로명과 동일한 family_id 정리 ─
+    // family_id가 레거시 문서 이름(taemin_dev/taemin)과 동일하면
+    // 잘못된 설정이므로 정리하여 레거시 직접 경로로 복원
+    const _legacyDocName = _ENV==='dev' ? 'taemin_dev' : 'taemin';
+    if(_familyId === _legacyDocName){
+      console.log('🔧 [_autoSetProIfAdmin] family_id가 레거시 문서명과 동일 — 정리:', _familyId);
+      _familyId = null;
+      localStorage.removeItem((_ENV==='dev'?'taemin_dev_':'taemin_')+'family_id');
+      if(_firebaseReady && typeof LEGACY_DOC !== 'undefined' && LEGACY_DOC && LEGACY_DOC.path){
+        DATA_DOC = LEGACY_DOC;
+      }
+    }
     // 조건1: 레거시 직접 경로 (마이그레이션 전)
     const isDirectLegacy = !_familyId &&
       typeof DATA_DOC !== 'undefined' && typeof LEGACY_DOC !== 'undefined' &&
@@ -7101,6 +7113,9 @@ function _cleanupWrongPro(){
     if(S.familyMeta.proRequest) return;
     // _autoProSet 마커가 있으면 자동 설정된 PRO이므로 유지
     if(S.familyMeta._autoProSet) return;
+    // family_id가 레거시 문서명과 동일하면 레거시로 간주 → PRO 유지
+    const _legDocName = _ENV==='dev' ? 'taemin_dev' : 'taemin';
+    if(_familyId === _legDocName) return;
     // 레거시 직접 경로(users/taemin*)면 PRO 유지
     const isDirectLegacy = !_familyId &&
       typeof DATA_DOC !== 'undefined' && typeof LEGACY_DOC !== 'undefined' &&
@@ -8743,7 +8758,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0403j';
+const _APP_VERSION = 'v0403k';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -8837,10 +8852,17 @@ function getFamilyDoc(familyId){
 function updateDataDoc(){
   if(!_firebaseReady) return;
   const savedFamilyId = localStorage.getItem(_LS_PREFIX+'family_id');
-  if(savedFamilyId){
+  // family_id가 레거시 문서명(taemin_dev/taemin)과 동일하면 잘못된 설정 → 무시
+  const _legDocName = _ENV==='dev' ? 'taemin_dev' : 'taemin';
+  if(savedFamilyId && savedFamilyId !== _legDocName){
     _familyId = savedFamilyId;
     DATA_DOC = getFamilyDoc(savedFamilyId);
   }else{
+    if(savedFamilyId === _legDocName){
+      console.log('🔧 [updateDataDoc] family_id가 레거시 문서명과 동일 — 무시:', savedFamilyId);
+      localStorage.removeItem(_LS_PREFIX+'family_id');
+    }
+    _familyId = null;
     DATA_DOC = LEGACY_DOC;
   }
 }
@@ -15633,8 +15655,9 @@ window.pfMenuAction=pfMenuAction;
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
   {
-    ver:'1.9.11 (v0403j)', date:'2026-04-03',
+    ver:'1.9.11 (v0403k)', date:'2026-04-03',
     items:[
+      {type:'fix',text:'family_id가 레거시 문서명과 동일한 잘못된 설정 자동 정리 → 레거시 직접 경로로 복원'},
       {type:'fix',text:'마이그레이션된 레거시 가족의 PRO 등급 자동 복구 — 레거시 문서 _migratedTo 포인터 자동 감지'},
     ]
   },
