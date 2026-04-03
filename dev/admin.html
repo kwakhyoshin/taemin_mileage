@@ -237,7 +237,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
       </button>
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
       <div class="topbar-title">우리가족 마일리지 — 시스템 관리자</div>
-      <div class="topbar-env">DEV</div>
+      <div class="topbar-env" id="env-label">DEV</div>
     </div>
     <div class="topbar-right">
       <span class="topbar-user" id="topbar-user"></span>
@@ -437,11 +437,16 @@ const firebaseConfig = {
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
 const LEGACY_DOC = _ENV === 'dev' ? 'taemin_dev' : 'taemin';
 const REGISTRY_DOC = _ENV === 'dev' ? '_dev_id_registry' : '_id_registry';
+const AUTH_REGISTRY_DOC = _ENV === 'dev' ? '_dev_auth_registry' : '_auth_registry';
 const LOG_DOC = _ENV === 'dev' ? 'dev_log' : 'prod_log';
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
+
+// Update environment label
+document.getElementById('env-label').textContent = _ENV === 'dev' ? 'DEV' : 'PROD';
+document.getElementById('env-label').style.color = _ENV === 'dev' ? '#EF4444' : '#2563EB';
 
 // App Check — Firestore 접근에 필요 (메인 앱과 동일한 reCAPTCHA Enterprise 키)
 try {
@@ -497,6 +502,7 @@ let _loggedIn = false;
 let _adminName = '';
 let _allFamilies = [];
 let _registry = {};
+let _authRegistry = {};
 let _adminLogs = [];
 let _loadedAt = Date.now();
 let _lastFamilyId = null;
@@ -594,6 +600,7 @@ let _loadErrors = [];
 async function loadAllData() {
   _allFamilies = [];
   _registry = {};
+  _authRegistry = {};
   _adminLogs = [];
   _loadErrors = [];
 
@@ -603,19 +610,17 @@ async function loadAllData() {
     _loadErrors.push('Firebase 인증 실패 — Firebase Console > Authentication > Sign-in method에서 "익명(Anonymous)" 활성화 필요');
   }
 
-  // 1. families 컬렉션 (현재 환경의 가족만 로드)
-  const FAMILY_PREFIX = _ENV === 'dev' ? 'dev_' : 'prod_';
+  // 1. families 컬렉션 (모든 가족 로드, 내부 문서 제외)
   try {
     const familiesSnap = await getDocs(collection(db, 'families'));
     let loadCount = 0;
     familiesSnap.forEach(docSnap => {
       const id = docSnap.id;
-      if (id.startsWith(FAMILY_PREFIX)) {
-        _allFamilies.push({ id, ...docSnap.data() });
-        loadCount++;
-      }
+      if (id.startsWith('_')) return; // 내부 문서 제외 (레지스트리 등)
+      _allFamilies.push({ id, ...docSnap.data() });
+      loadCount++;
     });
-    console.log(`[Admin] families 컬렉션: 총 ${familiesSnap.size}건, ${_ENV} 환경 로드됨 ${loadCount}건`);
+    console.log(`[Admin] families 컬렉션: 총 ${familiesSnap.size}건, 로드됨 ${loadCount}건`);
   } catch (e) {
     console.error('Failed to load families:', e);
     _loadErrors.push('families 컬렉션 읽기 실패: ' + e.message);
@@ -689,6 +694,17 @@ async function loadAllData() {
     }
   } catch (e) {
     console.error('Failed to load logs:', e);
+  }
+
+  // 5. 소셜 인증 레지스트리
+  try {
+    const authRegSnap = await getDoc(doc(db, 'families', AUTH_REGISTRY_DOC));
+    if (authRegSnap.exists()) {
+      _authRegistry = authRegSnap.data() || {};
+      console.log(`[Admin] 인증 레지스트리: ${Object.keys(_authRegistry).length}건`);
+    }
+  } catch (e) {
+    console.warn('[Admin] 인증 레지스트리 로드 실패:', e);
   }
 
   document.getElementById('load-time').textContent = new Date(_loadedAt).toLocaleString('ko-KR');
@@ -893,13 +909,24 @@ window.openFamilyDetail = function(familyId) {
     const birthInfo = m.birthDate ? ` · ${m.birthDate}` : '';
     const genderInfo = m.gender === 'M' ? ' · 남' : m.gender === 'F' ? ' · 여' : '';
 
+    // 소셜 계정 연동 정보
+    const socialLinks = Object.entries(_authRegistry)
+      .filter(([uid, info]) => info.familyId === familyId && info.memberId === mid)
+      .map(([uid, info]) => {
+        const provLabel = info.provider === 'google' ? '🔵 Google' : info.provider === 'kakao' ? '🟡 카카오' : info.provider || '?';
+        return `${provLabel}: ${info.email || uid}`;
+      });
+    const socialDisplay = socialLinks.length > 0
+      ? socialLinks.map(s => `<div style="font-size:11px;color:#8B5CF6;margin-top:2px">${s}</div>`).join('')
+      : '<div style="font-size:11px;color:#CBD5E1;margin-top:2px">소셜 연동 없음</div>';
+
     return `<div class="member-row">
       <div class="member-row-avatar" style="background:${m.color || '#F1F5F9'};border-radius:50%">
         <svg viewBox="0 0 24 24" fill="none" stroke="${m.type === 'child' ? '#059669' : '#3B82F6'}" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg>
       </div>
       <div class="member-row-info">
         <div class="member-row-name">${m.name || '-'} <span class="badge-pill ${roleBadge}">${ROLE_LABELS[m.role] || m.role}</span>${adminBadge}</div>
-        <div class="member-row-role">${accountStatus} · 로그인ID: ${loginIdDisplay}${birthInfo}${genderInfo}</div>
+        <div class="member-row-role">${accountStatus} · 로그인ID: ${loginIdDisplay}${birthInfo}${genderInfo}${socialDisplay}</div>
       </div>
       <div class="member-row-actions">
         <button class="btn-sm btn-primary" onclick="resetMemberPassword('${familyId}','${mid}','${m.name}')">비밀번호 재설정</button>
@@ -1106,6 +1133,9 @@ function renderMembersTable() {
     Object.entries(members).forEach(([mid, m]) => {
       const hasAccount = !!m.account || !!users[mid];
       const loginId = m.account?.id || users[mid]?.id || null;
+      const socialLinks = Object.entries(_authRegistry)
+        .filter(([uid, info]) => info.familyId === f.id && info.memberId === mid)
+        .map(([uid, info]) => `${info.provider === 'google' ? 'Google' : info.provider === 'kakao' ? '카카오' : info.provider}: ${info.email || uid}`);
       rows.push({
         familyName: fm.familyName || f.id,
         familyId: f.id,
@@ -1115,7 +1145,8 @@ function renderMembersTable() {
         isAdmin: m.isAdmin,
         hasAccount,
         loginId,
-        joinedAt: m.joinedAt
+        joinedAt: m.joinedAt,
+        social: socialLinks
       });
     });
   });
@@ -1127,7 +1158,7 @@ function renderMembersTable() {
   }
 
   wrap.innerHTML = `<table class="data-table">
-    <thead><tr><th>이름</th><th>역할</th><th>가족</th><th>로그인 ID</th><th>권한</th><th>계정</th><th>가입일</th></tr></thead>
+    <thead><tr><th>이름</th><th>역할</th><th>가족</th><th>로그인 ID</th><th>권한</th><th>계정</th><th>소셜 연동</th><th>가입일</th></tr></thead>
     <tbody>${rows.map(r => `<tr>
       <td style="font-weight:800">${r.name}</td>
       <td><span class="badge-pill ${r.type === 'child' ? 'badge-child' : 'badge-parent'}">${r.role}</span></td>
@@ -1135,6 +1166,7 @@ function renderMembersTable() {
       <td style="color:#6366F1;font-weight:700">${r.loginId || '<span style="color:#CBD5E1">-</span>'}</td>
       <td>${r.isAdmin ? '<span class="badge-pill badge-admin">관리자</span>' : '-'}</td>
       <td>${r.hasAccount ? '<span style="color:#10B981;font-weight:700">가입완료</span>' : '<span style="color:#CBD5E1">미가입</span>'}</td>
+      <td style="font-size:11px;color:#8B5CF6">${r.social.length > 0 ? r.social.join('<br>') : '<span style="color:#CBD5E1">—</span>'}</td>
       <td style="color:#94A3B8;font-size:12px">${r.joinedAt ? new Date(r.joinedAt).toLocaleDateString('ko-KR') : '-'}</td>
     </tr>`).join('')}</tbody>
   </table>`;
@@ -1228,13 +1260,12 @@ async function loadProRequests(){
   try{
     const pending=[];const done=[];const proActive=[];
 
-    // 1) families 컬렉션 (현재 환경만)
-    const _prefix = _ENV === 'dev' ? 'dev_' : 'prod_';
+    // 1) families 컬렉션 (내부 문서 제외)
     const snap=await getDocs(collection(db,'families'));
     snap.forEach(d=>{
       const data=d.data();
       const fid=d.id;
-      if(!fid.startsWith(_prefix))return;
+      if(fid.startsWith('_'))return; // 내부 문서 제외
       const fm=data.familyMeta||{};
       const req=fm.proRequest;
       const plan=fm.plan||'free';
