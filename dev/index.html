@@ -8844,7 +8844,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0404c';
+const _APP_VERSION = 'v0404d';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -15757,6 +15757,11 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.27 (v0404d)',date:'2026-04-04',items:[
+    {type:'fix',text:'챗봇 활동/보상 추가 시 중복 체크 — 비슷한 이름이 있으면 미리 알려줍니다'},
+    {type:'fix',text:'챗봇이 도구 호출 없이 "추가했어요"라고 거짓 응답하는 문제 방지'},
+    {type:'fix',text:'채팅방 재진입 시 퀵메뉴 버튼 중복 표시 방지'},
+  ]},
   {ver:'1.9.26 (v0404c)',date:'2026-04-04',items:[
     {type:'fix',text:'챗봇 도구 호출 복원 — 활동/보상/뱃지 추가 시 카드 UI가 다시 표시됩니다'},
     {type:'improve',text:'시스템 프롬프트 도구 사용 지시 강화'},
@@ -18857,12 +18862,23 @@ window._milyAPI={
   },
   addActivity(data){
     const curAdm=_admViewChildId||getViewedMemberId();
+    // ── 중복 활동 체크 ──
+    const ms=getMemberState(curAdm);
+    const existActs=(ms.acts||S.acts||[]).filter(a=>a.active!==false);
+    const newName=(data.name||'').trim().toLowerCase().replace(/\s+/g,'');
+    if(newName){
+      const dup=existActs.find(a=>{
+        const aName=(a.name||'').toLowerCase().replace(/\s+/g,'');
+        // 완전 일치 또는 포함 관계 체크
+        return aName===newName||aName.includes(newName)||newName.includes(aName);
+      });
+      if(dup) return {success:false,error:`이미 비슷한 활동이 있어요: "${dup.emoji} ${dup.name}" (${dup.pts}M). 다른 이름으로 추가하거나, 기존 활동을 수정할 수 있어요.`,duplicate:true,existing:{id:dup.id,name:dup.name,emoji:dup.emoji,pts:dup.pts}};
+    }
     const newId='a_'+Date.now();
     const newAct={id:newId,emoji:data.emoji||'⭐',name:data.name.trim(),desc:data.desc||'',
       pts:Math.max(1,data.pts||20),maxDay:data.maxDay!==undefined?Math.max(0,data.maxDay):1,
       cycle:data.cycle||'daily',days:null,active:true,showHome:false};
     // 메인 자녀에 추가
-    const ms=getMemberState(curAdm);
     if(!ms.acts)ms.acts=JSON.parse(JSON.stringify(S.acts||[]));
     ms.acts.push({...newAct});
     S.acts.push({...newAct});
@@ -18939,6 +18955,16 @@ window._milyAPI={
   addReward(data){
     const curAdm=_admViewChildId||getViewedMemberId();
     const ms=getMemberState(curAdm);
+    // ── 중복 보상 체크 ──
+    const existRwds=(ms.rwds||S.rwds||[]);
+    const newName=(data.name||'').trim().toLowerCase().replace(/\s+/g,'');
+    if(newName){
+      const dup=existRwds.find(r=>{
+        const rName=(r.name||'').toLowerCase().replace(/\s+/g,'');
+        return rName===newName||rName.includes(newName)||newName.includes(rName);
+      });
+      if(dup) return {success:false,error:`이미 비슷한 보상이 있어요: "${dup.emoji} ${dup.name}" (${dup.pts}M). 다른 이름으로 추가하거나, 기존 보상을 수정할 수 있어요.`,duplicate:true,existing:{id:dup.id,name:dup.name,emoji:dup.emoji,pts:dup.pts}};
+    }
     if(!ms.rwds)ms.rwds=JSON.parse(JSON.stringify(S.rwds||[]));
     const newId='r_'+Date.now();
     const newRwd={id:newId,emoji:data.emoji||'🎁',name:data.name.trim(),pts:Math.max(1,data.pts||500),goal:!!data.goal,sale:null};
@@ -21072,10 +21098,13 @@ window.toggleMilyChat=function(){
         _milyWelcome();
       }
     }
-    // 퀵 메뉴 항상 표시 (열 때마다)
+    // 퀵 메뉴 표시 (마지막 메시지가 이미 퀵메뉴 버튼이면 스킵)
     const _isC=typeof isCaregiverUser==='function'&&isCaregiverUser();
     const _kn=_getCurrentKidName()||'아이';
-    _renderQuickMenu(_isC,_kn);
+    const _lastBotMsgs=document.querySelectorAll('#mily-chat-msgs .mily-msg.bot');
+    const _lastBotMsg=_lastBotMsgs.length>0?_lastBotMsgs[_lastBotMsgs.length-1]:null;
+    const _hasQuickMenu=_lastBotMsg&&_lastBotMsg.querySelector('.mily-cat-btn');
+    if(!_hasQuickMenu) _renderQuickMenu(_isC,_kn);
     setTimeout(()=>document.getElementById('mily-input').focus(),300);
     _scrollMilyBottom();
   }else{
@@ -21334,7 +21363,7 @@ async function _callMilyAPI(){
 
       const data=await resp.json();
       console.log('[mily-chat] API response:', data.stop_reason, data.content?.map(b=>b.type).join(','));
-      console.log('[mily-chat] DEBUG full response keys:', Object.keys(data).join(','), 'stop_reason=', data.stop_reason);
+      console.log('[mily-chat] response keys:', Object.keys(data).join(','));
 
       if(data.error){
         console.error('[mily-chat] data error:', data.error);
@@ -21352,20 +21381,11 @@ async function _callMilyAPI(){
           if(block.type==='tool_use'){
             console.log('[mily-chat] calling tool:', block.name, block.input);
             const result=_executeTool(block.name,block.input);
-            console.log('[mily-chat] DEBUG tool result:', block.name, 'success=', result?.success, 'result=', JSON.stringify(result).substring(0,200));
+            console.log('[mily-chat] tool result:', block.name, 'success=', result?.success);
             // 카드 UI: 활동/보상/뱃지 변경 결과를 시각적 카드로 표시
             if(result&&result.success){
-              console.log('[mily-chat] DEBUG calling _renderToolCard for', block.name);
-              try{
-                _renderToolCard(block.name,block.input,result);
-                if(typeof toast==='function') toast('[DEBUG] 카드 렌더 시도: '+block.name);
-              }catch(_cardErr){
-                console.error('[mily-chat] DEBUG _renderToolCard ERROR:', _cardErr);
-                if(typeof toast==='function') toast('[DEBUG] 카드 에러: '+_cardErr.message);
-              }
-            }else{
-              console.warn('[mily-chat] DEBUG card NOT rendered — result.success is falsy:', result);
-              if(typeof toast==='function') toast('[DEBUG] 카드 미생성: success='+result?.success);
+              try{ _renderToolCard(block.name,block.input,result); }
+              catch(_cardErr){ console.error('[mily-chat] _renderToolCard error:', _cardErr); }
             }
             toolResults.push({
               type:'tool_result',
@@ -21378,9 +21398,6 @@ async function _callMilyAPI(){
         // loop 계속 → 다음 API 호출
         continue;
       }
-
-      // DEBUG: tool_use 분기에 안 들어간 경우
-      console.warn('[mily-chat] DEBUG: NOT tool_use path. stop_reason=', data.stop_reason, 'content has tool_use?', data.content?.some(b=>b.type==='tool_use'));
 
       // max_tokens로 잘린 경우 → 누적 후 이어서 요청
       if(data.stop_reason==='max_tokens'){
@@ -21682,7 +21699,7 @@ ${isMultiChild?`자녀(${childrenInfo.length}명):${childrenInfo.join(',')}\n`:'
 오늘:${todayLog.map(l=>`${l.emoji||''}${l.name}`).join(',')||'없음'}
 [등급] ${isPro?'PRO':'일반'}
 [규칙]
-1. 실행요청(추가/수정/삭제/완료/교환)→반드시 tool 호출해서 실제 실행! 결과 1줄 요약+이모지. "이렇게 하세요"라고 안내만 하지 말 것.
+1. 실행요청(추가/수정/삭제/완료/교환)→반드시 tool 호출해서 실제 실행! 결과 1줄 요약+이모지. "이렇게 하세요"라고 안내만 하지 말 것. ★tool 호출 없이 "추가했어요"라고 말하는 것은 거짓말임→절대 금지. tool의 반환값이 error이면 그 error 메시지를 사용자에게 솔직히 전달.
 2. ★필수: 응답 끝에 반드시 [BUTTONS:다음행동1|다음행동2] (2~3개). 사용자가 다음에 할 가능성 높은 행동을 예측해서 제시.
 3. ${isC?'양육자→모든 기능. 가족 초대: invite_member(이름+역할). 역할:dad,mom,grandpa,grandma,grandpa_m,grandma_m,uncle,aunt,caregiver,child. 초대 후 URL 노출 금지→"아래 버튼을 눌러 공유하세요" 안내':'자녀→do_activity,get_status만. 나머진 "부모님께 부탁해봐!"'}
 ${isMultiChild?`4. 다자녀(${childrenInfo.join(',')}): 조치 전 "어떤 자녀?" 확인.\n`:''}`;
@@ -21698,7 +21715,7 @@ ${!isC?`[자녀대화] 퀴즈/수수께끼/끝말잇기/OX퀴즈 등 놀이 요�
   }else{
     // ── PRO등급: 간결 프롬프트 ──
     prompt+=`
-[PRO] ★★ 활동/보상/뱃지 추가·수정·삭제·완료 요청→반드시 도구(tool) 호출! 텍스트 안내만 하지 말고 실제로 실행해. 이모지=의미에맞게(⭐🎁 기본값 금지). 추가 전 get_status로 중복확인. desc(설명) 필수 포함.
+[PRO] ★★ 활동/보상/뱃지 추가·수정·삭제·완료 요청→반드시 도구(tool) 호출! 텍스트 안내만 하지 말고 실제로 실행해. tool 호출 없이 "추가했어요"는 거짓말=절대금지. tool이 error 반환 시 그 에러를 솔직히 전달(중복 있으면 "이미 비슷한 활동이 있어요"라고 안내). 이모지=의미에맞게(⭐🎁 기본값 금지). desc(설명) 필수 포함.
 ${isC?`[코칭] 데이터기반 2~3줄. 칭찬=과정O 능력X. 형제비교금지. 보상=경험🟢>물질🔴. 1회실패→"괜찮아".`:''}
 ${!isC?`[자녀모드] 재미+응원! 퀴즈/수수께끼/끝말잇기/OX퀴즈 등 놀이대화 적극 응해줘. "퀴즈 내줘"→활동/보상 관련 3지선다 퀴즈, "수수께끼"→재미있는 수수께끼, "놀자/심심해"→간단한 말놀이 제안. 정답 맞추면 크게 칭찬! 틀려도 힌트주며 격려. 일상대화("오늘 뭐했어?" 등)에도 친근하게 반응.`:''}
 [뱃지] get_badges조회. 조건:manual,total_acts,streak,act_name_count,pts_total 등. 난이도:1~10=bronze,11~30=silver,31~60=gold,61+=platinum
@@ -22264,13 +22281,9 @@ function _getCurrentKidName(){
 // ── UI 헬퍼 ──
 // ── 챗봇 카드 UI 렌더링 ──
 function _renderToolCard(toolName,input,result){
-  console.log('[mily-card] _renderToolCard called:', toolName, input, result);
   const container=document.getElementById('mily-chat-msgs');
   const typing=document.getElementById('mily-typing');
-  if(!container||!typing){
-    console.warn('[mily-card] ABORT: container=', !!container, 'typing=', !!typing);
-    return;
-  }
+  if(!container||!typing)return;
 
   let cardHTML='';
   const S=_getS();
@@ -22331,14 +22344,11 @@ function _renderToolCard(toolName,input,result){
   }
 
   if(cardHTML){
-    console.log('[mily-card] rendering card HTML for', toolName);
     const div=document.createElement('div');
     div.className='mily-msg bot';
     div.innerHTML=cardHTML;
     container.insertBefore(div,typing);
     _scrollMilyBottom();
-  }else{
-    console.warn('[mily-card] NO cardHTML generated for toolName:', toolName);
   }
 }
 
