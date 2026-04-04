@@ -2450,6 +2450,32 @@ window._currentUser_ref = function(){ return currentUser; };
 | #224 | 로딩 화면 리디자인 + 챗봇 퀴즈 강화 | - |
 | #225 | 운영 반영 v0404b | v0404b |
 
+### 12.23 보상 사용승인 요청 시 양육자 알림 미전달 (2026-04-04, PR #233~#234)
+
+**증상**: 보상 사용 승인요청을 하면 양육자에게 알림이 안 오고 메시지도 안 보임
+
+**근본 원인 (3가지 복합)**:
+1. **`adminMembers` 필터에서 양육자 본인 제외**: `useReward()`에서 알림 대상을 정할 때 `mid === currentUser`로 요청자를 제외하는데, 양육자가 자녀 대신 요청하면 `currentUser`=양육자이므로 양육자 본인이 제외됨. 단일 양육자 가정에서는 알림 대상이 0명이 됨
+2. **`devSwitchUser()` 후 `checkNewMessages()` 미호출**: 사용자 전환 후 알림 팝업이 표시되지 않음
+3. **`useReward()` 완료 후 `checkNewMessages()` 미호출**: 보상 요청 직후 즉시 알림이 뜨지 않음
+
+**수정**:
+- 양육자가 대신 신청 시 본인도 `adminMembers`에 포함 (`!_isCaregiver && mid === currentUser` 조건으로 변경)
+- `devSwitchUser()` 끝에 `setTimeout(()=>checkNewMessages(), 500)` 추가
+- `useReward()` 끝에 `setTimeout(()=>checkNewMessages(), 600)` 추가
+- 보상 승인/거절 시 자녀 `memberData`에도 상태 직접 반영 (독립모드 동기화 누락 방지)
+- 로그인(`_loginToFamily`) 직후 `checkNewMessages()` 명시적 호출 추가
+
+**비즈니스 규칙 (반드시 숙지)**:
+- **자녀가 직접 요청** → 양육자에게 알림 (승인대기 메시지 + 팝업)
+- **부모가 자녀 대신 요청** → 아이의 행동으로 간주, 아이에게 알림 안 감. 부모에게는 승인 알림 전달
+- **자녀는 절대 알림 대상이 아님** (isChild 체크로 필터)
+
+**교훈**:
+- `checkNewMessages()`는 알림 팝업의 유일한 트리거 — 메시지를 생성하는 모든 흐름 끝에 반드시 호출해야 함
+- `currentUser`를 기준으로 필터링할 때, "누가 실제로 버튼을 눌렀는가"와 "누구의 행동으로 간주되는가"를 구분해야 함
+- 사용자 전환 함수(`devSwitchUser`)에서 알림 관련 함수 호출을 누락하기 쉬움
+
 #### Git 작업 환경 트러블슈팅
 - **git index.lock 문제**: `/sessions/.../mnt/taemin_mileage/.git/index.lock`이 잠겨 삭제 불가 (Operation not permitted)
   - **해결**: `/tmp/taemin_work`에 repo를 새로 clone하여 작업
