@@ -8201,6 +8201,9 @@ async function _loginToFamily(familyId, memberId, authUid, provider, email, prof
   try { reallyGoTab('home'); } catch(e){ console.warn('[_loginToFamily] reallyGoTab warning:', e); }
   toast(`${MEMBERS[memberId]?.name||'회원'}님 환영해요!`);
   console.log('[_loginToFamily] Complete:', familyId, memberId);
+  // ★ 로그인 직후 미읽은 메시지 확인 (onSnapshot 가드에 의해 누락될 수 있으므로 명시적 호출)
+  try { if(typeof checkNewMessages==='function') checkNewMessages(); } catch(e){}
+  try { if(typeof _updateFamilyBtnBadge==='function') _updateFamilyBtnBadge(); } catch(e){}
   // 온보딩 완료 후 알림 안내 또는 알림 꺼짐 배너
   setTimeout(()=>{
     if(typeof _checkOnboardingPushGuide==='function') _checkOnboardingPushGuide();
@@ -8844,7 +8847,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0404f';
+const _APP_VERSION = 'v0404g';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -13855,16 +13858,21 @@ function useReward(invId){
   const _isCaregiver = isCaregiverUser();
   const _reqChildId = (_isCaregiver && viewingChildId) ? viewingChildId : currentUser;
 
-  // 알림 대상: 양육자(caregiver) 중 admin에게만 (자녀는 admin이어도 제외)
+  // 알림 대상: 양육자(caregiver/parent) 또는 admin 권한이 있는 비-자녀 멤버
+  // ★ isAdmin 플래그가 없는 레거시 양육자도 포함되도록 type/role 기반으로도 체크
   const adminMembers = [];
   if(S.familyMeta?.members){
     for(const [mid,m] of Object.entries(S.familyMeta.members)){
+      if(mid === currentUser) continue; // 요청자 본인 제외
       const isChild = m.type === 'child' || m.role === 'child';
-      if(m.isAdmin && !isChild && mid !== currentUser){
+      if(isChild) continue; // 자녀 제외
+      const isCaregiver = m.type === 'caregiver' || m.type === 'parent' || m.role === 'caregiver' || m.role === 'parent';
+      if(m.isAdmin || isCaregiver){
         adminMembers.push(mid);
       }
     }
   }
+  console.log('[useReward] adminMembers:', adminMembers, 'currentUser:', currentUser);
 
   // fromUser: 양육자가 대신하면 아이(forChild)가 요청자
   const _effectiveFrom = (_isCaregiver && viewingChildId) ? viewingChildId : currentUser;
@@ -13944,6 +13952,20 @@ function approveRewardRequest(reqId,approver){
     inv.approvedAt=Date.now();
   }
 
+  // ★ 독립모드: 자녀의 memberData에도 승인 상태 반영 (save 시 누락 방지)
+  const _childId = req.forChild || req.fromUser;
+  if(S.memberData && S.memberData[_childId]){
+    const _cms = S.memberData[_childId];
+    if(_cms.rewardRequests){
+      const _cr = _cms.rewardRequests.find(x=>x.id===reqId);
+      if(_cr){ _cr.status='approved'; _cr.approvedBy=approver; _cr.approvedAt=Date.now(); }
+    }
+    if(_cms.rewardInventory){
+      const _ci = _cms.rewardInventory.find(x=>x.id===req.rwdInvId);
+      if(_ci){ _ci.status='approved'; _ci.approvedBy=approver; _ci.approvedAt=Date.now(); }
+    }
+  }
+
   // Add message to requester
   if(!S.familyMessages)S.familyMessages=[];
   const approverName=MEMBERS[approver]?.name||approver;
@@ -13982,6 +14004,20 @@ function rejectRewardRequest(reqId,rejector){
   const inv=S.rewardInventory.find(x=>x.id===req.rwdInvId);
   if(inv){
     inv.status='owned';
+  }
+
+  // ★ 독립모드: 자녀의 memberData에도 거절 상태 반영 (save 시 누락 방지)
+  const _childId = req.forChild || req.fromUser;
+  if(S.memberData && S.memberData[_childId]){
+    const _cms = S.memberData[_childId];
+    if(_cms.rewardRequests){
+      const _cr = _cms.rewardRequests.find(x=>x.id===reqId);
+      if(_cr){ _cr.status='rejected'; _cr.approvedBy=rejector; _cr.approvedAt=Date.now(); }
+    }
+    if(_cms.rewardInventory){
+      const _ci = _cms.rewardInventory.find(x=>x.id===req.rwdInvId);
+      if(_ci){ _ci.status='owned'; }
+    }
   }
 
   // Add message to requester
@@ -15757,6 +15793,11 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.30 (v0404g)',date:'2026-04-04',items:[
+    {type:'fix',text:'보상 사용승인 요청 시 양육자에게 알림/메시지가 안 오던 버그 수정'},
+    {type:'fix',text:'보상 승인/거절 시 자녀 데이터에도 상태 반영 (독립모드 동기화 개선)'},
+    {type:'fix',text:'로그인 직후 미읽은 메시지 확인 명시적 호출 추가'},
+  ]},
   {ver:'1.9.29 (v0404f)',date:'2026-04-04',items:[
     {type:'fix',text:'스플래시 화면 제거 — 원래 시작 페이지(로그인 화면)가 바로 표시됩니다'},
   ]},
