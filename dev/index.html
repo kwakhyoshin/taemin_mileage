@@ -8844,7 +8844,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0404d';
+const _APP_VERSION = 'v0404e';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -15757,6 +15757,9 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.28 (v0404e)',date:'2026-04-04',items:[
+    {type:'fix',text:'챗봇 실행 요청 시 도구 호출 강제 (tool_choice) — 거짓 응답 근본 해결'},
+  ]},
   {ver:'1.9.27 (v0404d)',date:'2026-04-04',items:[
     {type:'fix',text:'챗봇 활동/보상 추가 시 중복 체크 — 비슷한 이름이 있으면 미리 알려줍니다'},
     {type:'fix',text:'챗봇이 도구 호출 없이 "추가했어요"라고 거짓 응답하는 문제 방지'},
@@ -21326,24 +21329,39 @@ async function _callMilyAPI(){
     const maxLoops=5;
     let _accumulatedText=''; // max_tokens continuation 시 텍스트 누적
 
+    // ── 실행 요청 감지 → tool_choice 강제 ──
+    // 마지막 사용자 메시지가 실행 요청(추가/수정/삭제/완료/교환 등)이면
+    // 첫 API 호출에서 반드시 도구를 사용하도록 강제
+    const _lastUserMsg=(()=>{
+      for(let i=messages.length-1;i>=0;i--){
+        if(messages[i].role==='user'&&typeof messages[i].content==='string') return messages[i].content;
+      }
+      return '';
+    })();
+    const _isActionRequest=/추가|등록|만들어|삭제|제거|지워|수정|변경|바꿔|완료|했어|교환|사용|뱃지.*줘|활동.*줘|보상.*줘/.test(_lastUserMsg);
+
     while(loopCount<maxLoops){
       loopCount++;
-      console.log('[mily-chat] API call #'+loopCount, 'msgs:', messages.length, 'tools:', tools.length);
+      // 첫 호출 + 실행 요청이면 tool_choice:"any"로 강제
+      const _forceToolUse=loopCount===1&&_isActionRequest&&tools.length>0;
+      console.log('[mily-chat] API call #'+loopCount, 'msgs:', messages.length, 'tools:', tools.length, _forceToolUse?'FORCE_TOOL':'auto');
       const _abortCtrl=new AbortController();
       const _timeout=setTimeout(()=>_abortCtrl.abort(),30000); // 30초 타임아웃
+      const _reqBody={
+        model:'claude-haiku-4-5-20251001',
+        system:systemPrompt,
+        messages:messages,
+        tools:tools,
+        max_tokens:2048
+      };
+      if(_forceToolUse) _reqBody.tool_choice={type:'any'};
       let resp;
       try{
         resp=await fetch(MILY_PROXY_URL,{
           method:'POST',
           headers:{'Content-Type':'application/json'},
           signal:_abortCtrl.signal,
-          body:JSON.stringify({
-            model:'claude-haiku-4-5-20251001',
-            system:systemPrompt,
-            messages:messages,
-            tools:tools,
-            max_tokens:2048
-          })
+          body:JSON.stringify(_reqBody)
         });
       }catch(_fetchErr){
         clearTimeout(_timeout);
