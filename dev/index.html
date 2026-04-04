@@ -21356,9 +21356,16 @@ async function _callMilyAPI(){
             // 카드 UI: 활동/보상/뱃지 변경 결과를 시각적 카드로 표시
             if(result&&result.success){
               console.log('[mily-chat] DEBUG calling _renderToolCard for', block.name);
-              _renderToolCard(block.name,block.input,result);
+              try{
+                _renderToolCard(block.name,block.input,result);
+                if(typeof toast==='function') toast('[DEBUG] 카드 렌더 시도: '+block.name);
+              }catch(_cardErr){
+                console.error('[mily-chat] DEBUG _renderToolCard ERROR:', _cardErr);
+                if(typeof toast==='function') toast('[DEBUG] 카드 에러: '+_cardErr.message);
+              }
             }else{
               console.warn('[mily-chat] DEBUG card NOT rendered — result.success is falsy:', result);
+              if(typeof toast==='function') toast('[DEBUG] 카드 미생성: success='+result?.success);
             }
             toolResults.push({
               type:'tool_result',
@@ -21371,6 +21378,9 @@ async function _callMilyAPI(){
         // loop 계속 → 다음 API 호출
         continue;
       }
+
+      // DEBUG: tool_use 분기에 안 들어간 경우
+      console.warn('[mily-chat] DEBUG: NOT tool_use path. stop_reason=', data.stop_reason, 'content has tool_use?', data.content?.some(b=>b.type==='tool_use'));
 
       // max_tokens로 잘린 경우 → 누적 후 이어서 요청
       if(data.stop_reason==='max_tokens'){
