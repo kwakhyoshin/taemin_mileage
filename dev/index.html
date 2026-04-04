@@ -1172,9 +1172,11 @@ body.dark .auth-divider::before,body.dark .auth-divider::after{border-color:#334
 .social-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:13px;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:opacity .2s}
 .social-btn:active{opacity:.8}
 .social-btn:disabled{opacity:.5;cursor:not-allowed}
+.social-apple{background:#000;color:#fff}
 .social-google{background:#fff;color:#374151;border:1.5px solid #D1D5DB}
 .social-kakao{background:#FEE500;color:#3C1E1E}
 .social-naver{background:#03C75A;color:#fff}
+body.dark .social-apple{background:#fff;color:#000}
 body.dark .social-google{background:#1E293B;color:#F1F5F9;border-color:#475569}
 body.dark .social-email{background:#334155!important;color:#E2E8F0!important;border-color:#475569!important}
 /* 인증코드 입력 */
@@ -2894,6 +2896,10 @@ requestAnimationFrame(function(){
     <div class="auth-sub" style="margin-bottom:24px">간편하게 시작하세요</div>
 
     <div class="social-login-btns">
+      <button class="social-btn social-apple" onclick="doSocialLogin('apple')">
+        <svg width="20" height="20" viewBox="0 0 24 24"><path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.32 2.32-2.11 4.45-3.74 4.25z" fill="currentColor"/></svg>
+        <span>Apple로 계속하기</span>
+      </button>
       <button class="social-btn social-google" onclick="doSocialLogin('google')">
         <svg width="20" height="20" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
         <span>Google로 계속하기</span>
@@ -3504,6 +3510,10 @@ requestAnimationFrame(function(){
           <div class="toss-question" id="jr-method-title">계정을 만들어볼게요!</div>
           <div class="toss-desc">간편하게 가입할 방법을 선택해주세요</div>
           <div class="social-login-btns" style="margin-top:20px">
+            <button class="social-btn social-apple" onclick="doJoinSocialLogin('apple')">
+              <svg width="20" height="20" viewBox="0 0 24 24"><path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.32 2.32-2.11 4.45-3.74 4.25z" fill="currentColor"/></svg>
+              <span>Apple로 가입</span>
+            </button>
             <button class="social-btn social-google" onclick="doJoinSocialLogin('google')">
               <svg width="20" height="20" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
               <span>Google로 가입</span>
@@ -5444,7 +5454,7 @@ async function doJoinSocialLogin(provider){
   // if(provider==='naver'){_showNaverPendingNotice();return;}
 
   _socialLoginPending=true;
-  const _provLabel=provider==='google'?'Google':provider==='kakao'?'카카오':provider;
+  const _provLabel=provider==='google'?'Google':provider==='kakao'?'카카오':provider==='apple'?'Apple':provider;
 
   try {
     let firebaseUser=null;
@@ -5469,6 +5479,23 @@ async function doJoinSocialLogin(provider){
       if(!result.uid){localStorage.removeItem(_LS_PREFIX+'social_pending');toast('네이버 로그인 정보를 가져올 수 없었어요');return;}
       if(!_firebaseReady) await _initFirebase();
       firebaseUser=result;
+    } else if(provider==='apple'){
+      if(!_firebaseReady) await _initFirebase();
+      if(!fbAuth){toast('Firebase 초기화 실패');return;}
+      const appleProv=new OAuthProvider('apple.com');
+      appleProv.addScope('email');
+      appleProv.addScope('name');
+      appleProv.setCustomParameters({locale:'ko'});
+      localStorage.setItem(_LS_PREFIX+'social_pending','apple');
+      try {
+        const result=await signInWithPopup(fbAuth,appleProv);
+        if(result&&result.user) firebaseUser=result.user;
+      } catch(popupErr){
+        if(popupErr.code==='auth/popup-closed-by-user'||popupErr.code==='auth/cancelled-popup-request'){
+          localStorage.removeItem(_LS_PREFIX+'social_pending');return;
+        }
+        throw popupErr;
+      }
     } else if(provider==='google'){
       if(!_firebaseReady) await _initFirebase();
       if(!fbAuth){toast('Firebase 초기화 실패');return;}
@@ -7815,7 +7842,7 @@ async function doSocialLogin(provider){
   _socialLoginPending = true;
   _socialAuthHandled = false; // 새 시도 시 플래그 리셋
 
-  const _provLabel = provider === 'google' ? 'Google' : provider === 'kakao' ? '카카오' : provider === 'naver' ? '네이버' : provider;
+  const _provLabel = provider === 'google' ? 'Google' : provider === 'kakao' ? '카카오' : provider === 'naver' ? '네이버' : provider === 'apple' ? 'Apple' : provider;
 
   try {
     // ── 카카오 로그인 ──
@@ -7876,6 +7903,38 @@ async function doSocialLogin(provider){
         console.error('[Naver Login] Error:', e);
         _hideSocialLoading();
         toast('네이버 로그인 중 오류: ' + (e.message||e));
+      }
+      return;
+    }
+
+    // ── Apple 로그인 (Firebase 필요) ──
+    if(provider === 'apple'){
+      if(!_firebaseReady) await _initFirebase();
+      if(!fbAuth){ toast('Firebase 초기화 실패'); return; }
+      const appleProv = new OAuthProvider('apple.com');
+      appleProv.addScope('email');
+      appleProv.addScope('name');
+      appleProv.setCustomParameters({ locale: 'ko' });
+      localStorage.setItem(_LS_PREFIX+'social_pending', 'apple');
+      try {
+        const result = await signInWithPopup(fbAuth, appleProv);
+        if(result && result.user && !_socialAuthHandled){
+          _socialAuthHandled = true;
+          localStorage.setItem(_LS_PREFIX+'social_pending', 'handled');
+          console.log('[Social Login] Apple popup success:', result.user.uid);
+          await _handleSocialLoginResult(result.user, provider);
+        }
+      } catch(popupErr){
+        if(popupErr.code === 'auth/popup-closed-by-user' || popupErr.code === 'auth/cancelled-popup-request'){
+          localStorage.removeItem(_LS_PREFIX+'social_pending');
+        } else if(popupErr.code === 'auth/popup-blocked'){
+          console.log('[Social Login] Apple popup blocked, trying redirect...');
+          try { await signInWithRedirect(fbAuth, appleProv); return; } catch(e){}
+        } else {
+          console.error('[Apple Login Error]', popupErr.code, popupErr.message);
+          localStorage.removeItem(_LS_PREFIX+'social_pending');
+          toast('Apple 로그인 중 오류가 발생했어요. 다시 시도해주세요.');
+        }
       }
       return;
     }
@@ -8891,7 +8950,7 @@ if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.
 })();
 
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction, _fsCollection, _fsAddDoc;
-let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken;
+let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, OAuthProvider, signInWithCustomToken;
 let fbApp, db, fbAuth, LEGACY_DOC, DATA_DOC;
 let _firebaseReady = false;
 let _dataListenerUnsub = null; // onSnapshot 구독 해제 함수
@@ -8904,7 +8963,7 @@ async function _initFirebase(){
     const fbAppCheckMod = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check.js");
     initializeApp = fbAppMod.initializeApp;
     ({getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction, collection: _fsCollection, addDoc: _fsAddDoc} = fbFsMod);
-    ({getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut: signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCustomToken} = fbAuthMod);
+    ({getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut: signOut, onAuthStateChanged, GoogleAuthProvider, OAuthProvider, signInWithCustomToken} = fbAuthMod);
     const {initializeAppCheck, ReCaptchaEnterpriseProvider} = fbAppCheckMod;
 
     const firebaseConfig = {
