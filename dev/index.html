@@ -21334,6 +21334,7 @@ async function _callMilyAPI(){
 
       const data=await resp.json();
       console.log('[mily-chat] API response:', data.stop_reason, data.content?.map(b=>b.type).join(','));
+      console.log('[mily-chat] DEBUG full response keys:', Object.keys(data).join(','), 'stop_reason=', data.stop_reason);
 
       if(data.error){
         console.error('[mily-chat] data error:', data.error);
@@ -21351,8 +21352,14 @@ async function _callMilyAPI(){
           if(block.type==='tool_use'){
             console.log('[mily-chat] calling tool:', block.name, block.input);
             const result=_executeTool(block.name,block.input);
+            console.log('[mily-chat] DEBUG tool result:', block.name, 'success=', result?.success, 'result=', JSON.stringify(result).substring(0,200));
             // 카드 UI: 활동/보상/뱃지 변경 결과를 시각적 카드로 표시
-            if(result&&result.success) _renderToolCard(block.name,block.input,result);
+            if(result&&result.success){
+              console.log('[mily-chat] DEBUG calling _renderToolCard for', block.name);
+              _renderToolCard(block.name,block.input,result);
+            }else{
+              console.warn('[mily-chat] DEBUG card NOT rendered — result.success is falsy:', result);
+            }
             toolResults.push({
               type:'tool_result',
               tool_use_id:block.id,
@@ -22247,9 +22254,13 @@ function _getCurrentKidName(){
 // ── UI 헬퍼 ──
 // ── 챗봇 카드 UI 렌더링 ──
 function _renderToolCard(toolName,input,result){
+  console.log('[mily-card] _renderToolCard called:', toolName, input, result);
   const container=document.getElementById('mily-chat-msgs');
   const typing=document.getElementById('mily-typing');
-  if(!container||!typing)return;
+  if(!container||!typing){
+    console.warn('[mily-card] ABORT: container=', !!container, 'typing=', !!typing);
+    return;
+  }
 
   let cardHTML='';
   const S=_getS();
@@ -22310,11 +22321,14 @@ function _renderToolCard(toolName,input,result){
   }
 
   if(cardHTML){
+    console.log('[mily-card] rendering card HTML for', toolName);
     const div=document.createElement('div');
     div.className='mily-msg bot';
     div.innerHTML=cardHTML;
     container.insertBefore(div,typing);
     _scrollMilyBottom();
+  }else{
+    console.warn('[mily-card] NO cardHTML generated for toolName:', toolName);
   }
 }
 
