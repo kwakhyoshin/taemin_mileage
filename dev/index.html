@@ -8847,7 +8847,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0404g';
+const _APP_VERSION = 'v0404h';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -13858,24 +13858,28 @@ function useReward(invId){
   const _isCaregiver = isCaregiverUser();
   const _reqChildId = (_isCaregiver && viewingChildId) ? viewingChildId : currentUser;
 
-  // 알림 대상: 양육자(caregiver/parent) 또는 admin 권한이 있는 비-자녀 멤버
-  // ★ isAdmin 플래그가 없는 레거시 양육자도 포함되도록 type/role 기반으로도 체크
+  // fromUser: 양육자가 대신 요청하면 아이가 발신자
+  const _effectiveFrom = (_isCaregiver && viewingChildId) ? viewingChildId : currentUser;
+
+  // ── 알림 대상 결정 ──
+  // 케이스1: 자녀가 직접 요청 → 모든 양육자/관리자에게 알림
+  // 케이스2: 양육자가 자녀 대신 요청 → 다른 양육자에게 알림 + 본인에게도 알림(승인 UI 위해)
   const adminMembers = [];
   if(S.familyMeta?.members){
     for(const [mid,m] of Object.entries(S.familyMeta.members)){
-      if(mid === currentUser) continue; // 요청자 본인 제외
       const isChild = m.type === 'child' || m.role === 'child';
-      if(isChild) continue; // 자녀 제외
-      const isCaregiver = m.type === 'caregiver' || m.type === 'parent' || m.role === 'caregiver' || m.role === 'parent';
-      if(m.isAdmin || isCaregiver){
+      if(isChild) continue; // 자녀는 알림 대상 아님
+      const isCg = m.type === 'caregiver' || m.type === 'parent' || m.role === 'caregiver' || m.role === 'parent';
+      if(m.isAdmin || isCg){
+        // 자녀가 직접 요청한 경우 → 자녀 본인(currentUser)만 제외
+        // 양육자가 대신 요청한 경우 → 양육자 본인도 포함 (승인 알림 필요)
+        if(!_isCaregiver && mid === currentUser) continue; // 자녀 본인이면 스킵
         adminMembers.push(mid);
       }
     }
   }
-  console.log('[useReward] adminMembers:', adminMembers, 'currentUser:', currentUser);
+  console.log('[useReward] adminMembers:', adminMembers, 'currentUser:', currentUser, '_isCaregiver:', _isCaregiver);
 
-  // fromUser: 양육자가 대신하면 아이(forChild)가 요청자
-  const _effectiveFrom = (_isCaregiver && viewingChildId) ? viewingChildId : currentUser;
   S.rewardRequests.push({
     id:item.requestId,
     rwdInvId:invId,
@@ -13890,12 +13894,10 @@ function useReward(invId){
     approvedAt:null
   });
 
-  // Add family messages for parents
+  // 가족 메시지 생성 — 각 알림 대상에게
   if(!S.familyMessages)S.familyMessages=[];
   const _childName = MEMBERS[_reqChildId]?.name || _reqChildId;
-  const _msgText = _isCaregiver
-    ? `🎁 ${_childName}이(가) "${item.rwdName}" 보상 사용을 요청했어요!`
-    : `🎁 ${_childName}이(가) "${item.rwdName}" 보상 사용을 요청했어요!`;
+  const _msgText = `🎁 ${_childName}이(가) "${item.rwdName}" 보상 사용을 요청했어요!`;
   for(const adminId of adminMembers){
     S.familyMessages.push({
       from:_effectiveFrom,
@@ -13910,7 +13912,6 @@ function useReward(invId){
   }
 
   // Push 알림은 onFamilyMessage Cloud Function이 familyMessages 변경을 감지하여 발송
-  // rewardNotify 제거 — familyMessages와 중복 트리거 방지
 
   // 이력 기록
   if(!S.rewardLog)S.rewardLog=[];
@@ -13918,6 +13919,8 @@ function useReward(invId){
 
   save();renderAll();
   toast(`📲 사용 요청을 보냈어요! 양육자의 승인을 기다려주세요.`);
+  // ★ 메시지 생성 후 알림 팝업/뱃지 즉시 갱신
+  setTimeout(()=>{ try{ checkNewMessages(); _updateFamilyBtnBadge(); }catch(e){} }, 600);
 }
 
 function refundReward(invId){
@@ -15793,6 +15796,11 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.31 (v0404h)',date:'2026-04-04',items:[
+    {type:'fix',text:'보상 사용승인 요청 시 양육자 알림 근본 수정 — 양육자가 대신 신청해도 승인 알림 정상 수신'},
+    {type:'fix',text:'사용자 전환(devSwitchUser) 후 미읽은 메시지 알림 팝업이 안 뜨던 문제 수정'},
+    {type:'fix',text:'보상 요청 직후 checkNewMessages 즉시 호출로 알림 누락 방지'},
+  ]},
   {ver:'1.9.30 (v0404g)',date:'2026-04-04',items:[
     {type:'fix',text:'보상 사용승인 요청 시 양육자에게 알림/메시지가 안 오던 버그 수정'},
     {type:'fix',text:'보상 승인/거절 시 자녀 데이터에도 상태 반영 (독립모드 동기화 개선)'},
@@ -18839,6 +18847,8 @@ function devSwitchUser(userId){
   renderDevUserSwitch();
   reallyGoTab('home');
   toast('🔄 '+MEMBERS[userId].name+'(으)로 전환됨');
+  // ★ 전환 후 미읽은 메시지 확인 (알림 팝업 + 뱃지)
+  setTimeout(()=>{ try{ checkNewMessages(); _updateFamilyBtnBadge(); }catch(e){} }, 500);
 }
 window.devSwitchUser=devSwitchUser;
 window.renderDevUserSwitch=renderDevUserSwitch;
