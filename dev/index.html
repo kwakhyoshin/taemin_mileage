@@ -6320,6 +6320,7 @@ async function saveFamilyToFirestore(){
             renderAll();
             checkNewMessages();
             renderNavUsers();
+            try{_updatePlanBadges();}catch(e){}
             console.log('🔄 다른 기기에서 데이터가 업데이트됐어요');
           }else{const _sd=snap.data();if(_sd.familyMessages&&JSON.stringify(_sd.familyMessages)!==JSON.stringify(S.familyMessages)){S.familyMessages=_sd.familyMessages;checkNewMessages();_updateFamilyBtnBadge();}}
         });
@@ -20279,6 +20280,7 @@ window._createState = _createState;
       renderAll();
       checkNewMessages();
       renderNavUsers();
+      try{_updatePlanBadges();}catch(e){}
       console.log('🔄 다른 기기에서 데이터가 업데이트됐어요');
     });
   }catch(e){ console.warn('Realtime listener failed:', e); }
@@ -20804,11 +20806,11 @@ window._createState = _createState;
 .mily-chat-hd-name svg{display:block;margin:0}
 .mily-chat-hd-status{font-size:11px;opacity:.55;font-weight:500;margin-top:3px;text-align:left;display:flex;align-items:center;gap:6px}
 /* 등급 배지 */
-.plan-badge{display:inline-flex;align-items:center;gap:3px;padding:4px 10px;border-radius:10px;font-size:11px;font-weight:800;line-height:1;cursor:pointer;vertical-align:middle;transition:transform .15s;-webkit-tap-highlight-color:rgba(99,102,241,.2);min-height:28px;position:relative;opacity:1}
+.plan-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:16px;font-size:10px;font-weight:800;letter-spacing:.3px;line-height:1;cursor:pointer;vertical-align:middle;transition:transform .15s,box-shadow .15s;-webkit-tap-highlight-color:transparent;min-height:24px;position:relative}
 .plan-badge:active{transform:scale(.92)}
-.plan-badge.free{background:linear-gradient(135deg,#E2E8F0,#CBD5E1);color:#475569}
-.plan-badge.pro{background:linear-gradient(135deg,#FDE68A,#F59E0B);color:#78350F;box-shadow:0 1px 4px rgba(245,158,11,.3)}
-.plan-badge svg{width:13px;height:13px;flex-shrink:0}
+.plan-badge.free{background:rgba(255,255,255,.15);color:rgba(255,255,255,.7)}
+.plan-badge.pro{background:linear-gradient(135deg,#F59E0B,#D97706);color:#fff;box-shadow:0 2px 6px rgba(245,158,11,.3)}
+.plan-badge svg{width:11px;height:11px;flex-shrink:0}
 .my-plan-badge{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:20px;font-size:11px;font-weight:800;letter-spacing:.3px;line-height:1;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .15s,box-shadow .15s}
 .my-plan-badge:active{transform:scale(.93)}
 .my-plan-badge.free{background:var(--bg2,#F1F5F9);color:var(--tx3,#94A3B8)}
@@ -21616,7 +21618,12 @@ function _updatePlanBadges(){
   const svg=_PLAN_SVG[cls];
   // 챗봇 헤더 배지
   const milyBadge=document.getElementById('mily-plan-badge');
-  if(milyBadge) milyBadge.innerHTML=`<span class="plan-badge ${cls}">${svg} ${label}</span>`;
+  if(milyBadge){
+    const milySvg=isPro
+      ?'<svg viewBox="0 0 24 24" fill="none" width="11" height="11"><path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26z" fill="currentColor"/></svg>'
+      :'<svg viewBox="0 0 24 24" fill="none" width="11" height="11" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/></svg>';
+    milyBadge.innerHTML=`<span class="plan-badge ${cls}">${milySvg} ${label}</span>`;
+  }
   // 나의메뉴 프로필카드 내 배지
   const myBadge=document.getElementById('my-plan-badge');
   if(myBadge){

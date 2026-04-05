@@ -2,16 +2,67 @@
 // 태민이 마일리지 — Service Worker (Push + Cache)
 // ═══════════════════════════════════════════════
 
-const CACHE_NAME = 'taemin-v3';
+const CACHE_NAME = 'taemin-v4';
 
-// Install — cache essential files
+// Install — skip waiting to activate immediately
 self.addEventListener('install', (e) => {
   self.skipWaiting();
 });
 
-// Activate — clean old caches
+// Activate — claim clients + clean old caches
 self.addEventListener('activate', (e) => {
-  e.waitUntil(clients.claim());
+  e.waitUntil(
+    caches.keys().then(names =>
+      Promise.all(
+        names.filter(n => n !== CACHE_NAME).map(n => caches.delete(n))
+      )
+    ).then(() => clients.claim())
+  );
+});
+
+// Fetch — Network-first strategy for HTML, network-only for API calls
+self.addEventListener('fetch', (e) => {
+  const url = new URL(e.request.url);
+
+  // Skip non-GET requests
+  if (e.request.method !== 'GET') return;
+
+  // Skip cross-origin requests (Firebase, APIs, CDNs)
+  if (url.origin !== self.location.origin) return;
+
+  // HTML pages (index.html, /, etc.) — Network first, fallback to cache
+  if (e.request.mode === 'navigate' || e.request.destination === 'document' ||
+      url.pathname.endsWith('.html') || url.pathname.endsWith('/')) {
+    e.respondWith(
+      fetch(e.request)
+        .then(response => {
+          // Cache the fresh response for offline fallback
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
+          return response;
+        })
+        .catch(() => {
+          // Network failed — serve from cache (offline support)
+          return caches.match(e.request);
+        })
+    );
+    return;
+  }
+
+  // Static assets (icons, manifest) — Cache first, then network
+  if (url.pathname.match(/\.(png|jpg|jpeg|svg|ico|json)$/)) {
+    e.respondWith(
+      caches.match(e.request).then(cached => {
+        const fetchPromise = fetch(e.request).then(response => {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
+          return response;
+        }).catch(() => cached);
+        return cached || fetchPromise;
+      })
+    );
+    return;
+  }
 });
 
 // Push — receive push notification
