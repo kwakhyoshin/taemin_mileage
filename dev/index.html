@@ -365,7 +365,11 @@ body.dark .dtog-in{transform:translateX(20px)}
 .my-header.compact{padding:10px 20px 10px;padding-top:calc(10px + env(safe-area-inset-top))}
 .my-header.compact h2{font-size:16px}
 .my-header.compact .my-header-sub{font-size:0;margin:0;opacity:0;max-height:0;overflow:hidden}
-.my-profile-card{display:flex;align-items:center;gap:14px;background:var(--card);border-radius:16px;margin:16px 16px 0;padding:16px 18px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.my-profile-card{display:flex;align-items:center;gap:14px;background:var(--card);border-radius:16px;margin:16px 16px 0;padding:16px 18px;box-shadow:0 1px 4px rgba(0,0,0,.06);position:relative;border:1.5px solid transparent;transition:border-color .3s,box-shadow .3s,background .3s}
+.my-profile-card.tier-pro{border-color:rgba(245,158,11,.35);box-shadow:0 2px 12px rgba(245,158,11,.12),0 1px 4px rgba(0,0,0,.06);background:linear-gradient(135deg,var(--card) 60%,rgba(254,243,199,.25))}
+body.dark .my-profile-card.tier-pro{border-color:rgba(245,158,11,.3);box-shadow:0 2px 12px rgba(245,158,11,.08),0 1px 4px rgba(0,0,0,.15);background:linear-gradient(135deg,var(--card) 60%,rgba(245,158,11,.08))}
+.my-profile-card.tier-free{border-color:var(--bdr,#E2E8F0)}
+.my-plan-badge-wrap{flex-shrink:0;display:flex;align-items:center}
 .my-avatar-wrap{width:50px;height:50px;border-radius:50%;overflow:visible;border:2.5px solid var(--tab-color,#475569);box-shadow:0 2px 8px rgba(0,0,0,.1);background:var(--bg2);flex-shrink:0;position:relative}
 .my-mood-badge{position:absolute;bottom:-2px;right:-4px;font-size:18px;line-height:1;z-index:2;animation:fpMoodPulse 2s ease-in-out infinite;filter:drop-shadow(0 1px 3px rgba(0,0,0,.3));pointer-events:none}
 .my-mood-particles{position:absolute;top:50%;left:50%;width:0;height:0;pointer-events:none;z-index:3;overflow:visible}
@@ -4175,12 +4179,11 @@ requestAnimationFrame(function(){
   <div class="my-header">
     <div style="display:flex;align-items:center;justify-content:space-between">
       <h2 style="margin:0">나의 메뉴 <svg class="hdr-ico" viewBox="0 0 24 24" style="width:24px;height:24px"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></h2>
-      <div id="my-plan-badge" style="display:flex"></div>
     </div>
     <p class="my-header-sub" id="my-header-sub">내 정보</p>
   </div>
   <div class="my-section-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> 나의 계정</div>
-  <div class="my-profile-card">
+  <div class="my-profile-card" id="my-profile-card">
     <div class="my-avatar-wrap" id="my-avatar-wrap"></div>
     <div class="my-info-text" style="flex:1;min-width:0">
       <div style="display:flex;align-items:center;gap:6px">
@@ -4189,6 +4192,7 @@ requestAnimationFrame(function(){
       </div>
       <div class="my-role" id="my-role">역할</div>
     </div>
+    <div id="my-plan-badge" class="my-plan-badge-wrap"></div>
   </div>
   <!-- 소셜 연동 (프로필 카드 바로 아래) -->
   <div id="my-social-area" style="margin:8px 16px 0"></div>
@@ -20805,11 +20809,12 @@ window._createState = _createState;
 .plan-badge.free{background:linear-gradient(135deg,#E2E8F0,#CBD5E1);color:#475569}
 .plan-badge.pro{background:linear-gradient(135deg,#FDE68A,#F59E0B);color:#78350F;box-shadow:0 1px 4px rgba(245,158,11,.3)}
 .plan-badge svg{width:13px;height:13px;flex-shrink:0}
-.my-plan-badge{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:12px;font-size:12px;font-weight:800;line-height:1;cursor:pointer;-webkit-tap-highlight-color:rgba(99,102,241,.2);min-height:30px;transition:transform .15s}
+.my-plan-badge{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:20px;font-size:11px;font-weight:800;letter-spacing:.3px;line-height:1;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .15s,box-shadow .15s}
 .my-plan-badge:active{transform:scale(.93)}
-.my-plan-badge.free{background:var(--bg,#F1F5F9);color:var(--tx2,#64748B);border:1.5px solid var(--bdr,#E2E8F0)}
-.my-plan-badge.pro{background:linear-gradient(135deg,#FEF3C7,#FDE68A);color:#92400E;border:1.5px solid #F59E0B}
-.my-plan-badge svg{width:15px;height:15px;flex-shrink:0}
+.my-plan-badge.free{background:var(--bg2,#F1F5F9);color:var(--tx3,#94A3B8)}
+.my-plan-badge.pro{background:linear-gradient(135deg,#F59E0B,#D97706);color:#fff;box-shadow:0 2px 8px rgba(245,158,11,.3)}
+body.dark .my-plan-badge.pro{box-shadow:0 2px 8px rgba(245,158,11,.2)}
+.my-plan-badge svg{width:13px;height:13px;flex-shrink:0}
 .mily-chat-close{background:none;border:none;color:rgba(255,255,255,.7);cursor:pointer;padding:4px;border-radius:50%;transition:background .15s}
 .mily-chat-close:hover{background:rgba(255,255,255,.15)}
 
@@ -21612,9 +21617,20 @@ function _updatePlanBadges(){
   // 챗봇 헤더 배지
   const milyBadge=document.getElementById('mily-plan-badge');
   if(milyBadge) milyBadge.innerHTML=`<span class="plan-badge ${cls}">${svg} ${label}</span>`;
-  // 나의메뉴 배지
+  // 나의메뉴 프로필카드 내 배지
   const myBadge=document.getElementById('my-plan-badge');
-  if(myBadge) myBadge.innerHTML=`<span class="my-plan-badge ${cls}" onclick="_showPlanPopup()">${svg} ${label}</span>`;
+  if(myBadge){
+    const badgeSvg=isPro
+      ?'<svg viewBox="0 0 24 24" fill="none" width="13" height="13"><path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26z" fill="currentColor"/></svg>'
+      :'<svg viewBox="0 0 24 24" fill="none" width="13" height="13" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/></svg>';
+    myBadge.innerHTML=`<span class="my-plan-badge ${cls}" onclick="_showPlanPopup()">${badgeSvg} ${label}</span>`;
+  }
+  // 프로필카드 tier 스타일
+  const profileCard=document.getElementById('my-profile-card');
+  if(profileCard){
+    profileCard.classList.remove('tier-pro','tier-free');
+    profileCard.classList.add(isPro?'tier-pro':'tier-free');
+  }
 }
 window._showPlanPopup=_showPlanPopup;
 function _showPlanPopup(){
