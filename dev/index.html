@@ -7297,6 +7297,9 @@ function postLoginInit(){
   }
   _admViewChildId = getChildMemberIds()[0] || null;
 
+  // 레벨 XP 마이그레이션 (누적 마일리지 기반)
+  if(typeof _migrateLevelXP==='function')_migrateLevelXP();
+
   // Daily bonus check
   setTimeout(()=>{if(typeof checkDailyBonus==='function')checkDailyBonus();},2000);
 }
@@ -9066,16 +9069,26 @@ let cachedUsers = null;
 
 // ── LEVEL SYSTEM CONSTANTS ──────────────────────────────
 const LEVEL_DEFS = [
-  {level:1, title:'마일리지 새싹', minXP:0, emoji:'🌱'},
-  {level:2, title:'열심 학생', minXP:100, emoji:'📚'},
-  {level:3, title:'습관 견습생', minXP:300, emoji:'⭐'},
-  {level:4, title:'꾸준한 도전자', minXP:600, emoji:'🔥'},
-  {level:5, title:'습관 마스터', minXP:1000, emoji:'🏆'},
-  {level:6, title:'마일리지 고수', minXP:1500, emoji:'💎'},
-  {level:7, title:'전설의 챔피언', minXP:2200, emoji:'👑'},
-  {level:8, title:'마일리지 영웅', minXP:3000, emoji:'🦸'},
-  {level:9, title:'습관 전설', minXP:4000, emoji:'🌟'},
-  {level:10, title:'최강 마스터', minXP:5500, emoji:'🐉'},
+  {level:1,  title:'마일리지 새싹',   minXP:0,     emoji:'🌱'},
+  {level:2,  title:'열심 학생',       minXP:50,    emoji:'📚'},
+  {level:3,  title:'습관 견습생',     minXP:150,   emoji:'⭐'},
+  {level:4,  title:'작은 도전자',     minXP:300,   emoji:'🌿'},
+  {level:5,  title:'꾸준한 노력가',   minXP:500,   emoji:'🔥'},
+  {level:6,  title:'습관 수호자',     minXP:800,   emoji:'🛡️'},
+  {level:7,  title:'성실한 실천가',   minXP:1200,  emoji:'💪'},
+  {level:8,  title:'마일리지 장인',   minXP:1700,  emoji:'🏅'},
+  {level:9,  title:'습관 달인',       minXP:2300,  emoji:'💎'},
+  {level:10, title:'마일리지 고수',   minXP:3000,  emoji:'🏆'},
+  {level:11, title:'전설의 도전자',   minXP:4000,  emoji:'👑'},
+  {level:12, title:'습관 영웅',       minXP:5200,  emoji:'🦸'},
+  {level:13, title:'마일리지 현자',   minXP:6800,  emoji:'🧙'},
+  {level:14, title:'불굴의 전사',     minXP:8800,  emoji:'⚔️'},
+  {level:15, title:'습관 전설',       minXP:11500, emoji:'🌟'},
+  {level:16, title:'마일리지 왕',     minXP:15000, emoji:'👸'},
+  {level:17, title:'초월의 경지',     minXP:20000, emoji:'🐲'},
+  {level:18, title:'우주의 챔피언',   minXP:27000, emoji:'🚀'},
+  {level:19, title:'전설의 마스터',   minXP:36000, emoji:'🌌'},
+  {level:20, title:'최강 마일리지 신',minXP:50000, emoji:'🐉'},
 ];
 function getLevelInfo(xp){
   let lv=LEVEL_DEFS[0];
@@ -9084,6 +9097,27 @@ function getLevelInfo(xp){
   const next=LEVEL_DEFS[idx+1]||null;
   const pct=next?Math.round((xp-lv.minXP)/(next.minXP-lv.minXP)*100):100;
   return{...lv,xp,nextXP:next?next.minXP:lv.minXP,pct,nextTitle:next?next.title:null,nextEmoji:next?next.emoji:null};
+}
+// 누적 마일리지 기반 XP 계산 (기존 사용자 마이그레이션)
+function _migrateLevelXP(){
+  const ld=S.levelData||(S.levelData={xp:0,level:1,xpLog:[]});
+  if(ld._migrated)return; // 이미 마이그레이션 완료
+  // log에서 누적 획득 마일리지 합산 (pts > 0인 것만)
+  const totalEarned=(S.log||[]).reduce((sum,l)=>sum+(l.pts>0?l.pts:0),0);
+  // totalDone * 평균pts로 보정 (log가 300개 제한이므로 실제보다 적을 수 있음)
+  const logCount=(S.log||[]).filter(l=>l.pts>0).length;
+  const td=S.totalDone||0;
+  let estimatedXP=totalEarned;
+  if(td>logCount&&logCount>0){
+    // 로그 제한으로 잘린 경우: 평균 pts로 나머지 추정
+    const avgPts=totalEarned/logCount;
+    estimatedXP=Math.round(avgPts*td);
+  }
+  if(estimatedXP>ld.xp){
+    ld.xp=estimatedXP;
+    ld.level=getLevelInfo(ld.xp).level;
+  }
+  ld._migrated=true;
 }
 
 // ── CHALLENGE TEMPLATES ──────────────────────────────
@@ -11945,7 +11979,7 @@ function showLevelUpCelebration(lvInfo){
     <div style="font-size:64px;margin-bottom:8px">${lvInfo.emoji}</div>
     <div style="font-size:22px;font-weight:900;color:var(--tx);margin-bottom:4px">레벨 업!</div>
     <div style="font-size:16px;font-weight:700;color:var(--tab-color,var(--or))">Lv.${lvInfo.level} ${lvInfo.title}</div>
-    <div style="margin-top:12px;font-size:13px;color:var(--tx3)">총 ${lvInfo.xp} XP 달성!</div>
+    <div style="margin-top:12px;font-size:13px;color:var(--tx3)">누적 ${lvInfo.xp.toLocaleString()} 마일리지 달성!</div>
     <button onclick="this.closest('div[style*=fixed]').remove()" style="margin-top:16px;padding:10px 32px;border:none;border-radius:12px;background:var(--tab-color,var(--or));color:#fff;font-size:14px;font-weight:700;cursor:pointer">멋져요! 🎉</button>
   </div>`;
   document.body.appendChild(ov);
@@ -11962,12 +11996,13 @@ function openLevelPopup(){
   ov.innerHTML=`<div class="streak-popup" style="transform:scale(1)">
     <div style="font-size:48px;margin-bottom:8px">${info.emoji}</div>
     <div style="font-size:20px;font-weight:900;color:var(--tx)">Lv.${info.level} ${info.title}</div>
-    <div style="margin:12px 0 8px;font-size:13px;color:var(--tx3);font-weight:700">${info.xp} / ${info.nextXP} XP</div>
+    <div style="margin:12px 0 8px;font-size:13px;color:var(--tx3);font-weight:700">누적 ${info.xp.toLocaleString()} / ${info.nextXP.toLocaleString()} 마일리지</div>
     <div style="background:var(--bdr);border-radius:6px;height:10px;overflow:hidden">
       <div style="height:100%;border-radius:6px;background:linear-gradient(90deg,var(--tab-color,#F59E0B),#EF4444);width:${info.pct}%;transition:width .5s"></div>
     </div>
-    ${info.nextTitle?`<div style="margin-top:8px;font-size:12px;color:var(--tx3)">다음: ${info.nextEmoji} ${info.nextTitle} (${info.nextXP} XP)</div>`:'<div style="margin-top:8px;font-size:12px;color:var(--gn2);font-weight:700">🏆 최고 레벨 달성!</div>'}
-    <button onclick="this.closest('.streak-popup-overlay').remove()" style="margin-top:16px;padding:10px 32px;border:none;border-radius:12px;background:var(--tab-color,var(--or));color:#fff;font-size:14px;font-weight:700;cursor:pointer">확인</button>
+    ${info.nextTitle?`<div style="margin-top:8px;font-size:12px;color:var(--tx3)">다음: ${info.nextEmoji} Lv.${info.level+1} ${info.nextTitle} (${info.nextXP.toLocaleString()})</div>`:'<div style="margin-top:8px;font-size:12px;color:var(--gn2);font-weight:700">🏆 최고 레벨 달성!</div>'}
+    <div style="margin-top:10px;font-size:11px;color:var(--tx3);opacity:.7">활동 총 ${(S.totalDone||0)}회 완료</div>
+    <button onclick="this.closest('.streak-popup-overlay').remove()" style="margin-top:14px;padding:10px 32px;border:none;border-radius:12px;background:var(--tab-color,var(--or));color:#fff;font-size:14px;font-weight:700;cursor:pointer">확인</button>
   </div>`;
   document.body.appendChild(ov);
   ov.addEventListener('click',(e)=>{if(e.target===ov)ov.remove();});
