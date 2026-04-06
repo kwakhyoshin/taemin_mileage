@@ -9003,7 +9003,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0406g';
+const _APP_VERSION = 'v0406h';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -16427,12 +16427,13 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
-  {ver:'v1.9.38',date:'2026-04-06',items:[{type:'fix',text:'비홈 탭(활동기록·보상·성과·나의) 헤더 스크롤 시 자연스럽게 축소 — 갑작스런 크기 변경 제거'}]},
-  {ver:'v1.9.37',date:'2026-04-06',items:[{type:'improve',text:'레벨 pill을 마일리지 숫자 옆으로 이동 — 더 깔끔한 레이아웃'},{type:'improve',text:'챌린지 섹션에 라벨 추가 + hero 영역과 간격 확보'}]},
-  {ver:'v1.9.36',date:'2026-04-06',items:[{type:'improve',text:'🎮 게이미피케이션 관리 — 관리자 설정에서 룰렛·챌린지·레벨 ON/OFF, 마일리지 범위 조정 가능'}]},
-  {ver:'v1.9.35',date:'2026-04-06',items:[{type:'fix',text:'레벨 pill과 제목 텍스트 겹침 수정 — flex 레이아웃으로 변경'},{type:'fix',text:'월간 활동 통계가 자녀끼리 통합 표시되던 문제 수정 — 자녀별 로그 분리 필터링'}]},
-  {ver:'v1.9.34',date:'2026-04-06',items:['🎰 룰렛 개선 — 스핀 중 마일리지 표시, 자녀 전용, 부모 알림, 코인 애니메이션','🎨 레벨 아이콘 — 20개 고퀄리티 SVG 아이콘으로 교체']},
-  {ver:'v1.9.33',date:'2026-04-06',items:['🎮 레벨 시스템 — 활동하면 XP를 얻어 레벨업!','🏆 주간/월간 챌린지 — 한정 미션 달성하고 보상 받기','🎰 일일 보너스 룰렛 — 매일 첫 접속 시 보너스 마일리지']},
+  {ver:'1.9.39 (v0406h)',date:'2026-04-06',items:[{type:'fix',text:'릴리즈 노트 버전 표시 오류 수정 — vv 중복, undefined 항목, dev버전 누락'},{type:'improve',text:'릴리즈 노트에 개선(노란색) 뱃지 추가'}]},
+  {ver:'1.9.38 (v0406g)',date:'2026-04-06',items:[{type:'fix',text:'비홈 탭(활동기록·보상·성과·나의) 헤더 스크롤 시 자연스럽게 축소 — 갑작스런 크기 변경 제거'}]},
+  {ver:'1.9.37 (v0406f)',date:'2026-04-06',items:[{type:'improve',text:'레벨 pill을 마일리지 숫자 옆으로 이동 — 더 깔끔한 레이아웃'},{type:'improve',text:'챌린지 섹션에 라벨 추가 + hero 영역과 간격 확보'}]},
+  {ver:'1.9.36 (v0406e)',date:'2026-04-06',items:[{type:'new',text:'게이미피케이션 관리 — 관리자 설정에서 룰렛·챌린지·레벨 ON/OFF, 마일리지 범위 조정 가능'}]},
+  {ver:'1.9.35 (v0406d)',date:'2026-04-06',items:[{type:'fix',text:'레벨 pill과 제목 텍스트 겹침 수정 — flex 레이아웃으로 변경'},{type:'fix',text:'월간 활동 통계가 자녀끼리 통합 표시되던 문제 수정 — 자녀별 로그 분리 필터링'}]},
+  {ver:'1.9.34 (v0406c)',date:'2026-04-06',items:[{type:'new',text:'룰렛 개선 — 스핀 중 마일리지 표시, 자녀 전용, 부모 알림, 코인 애니메이션'},{type:'new',text:'레벨 아이콘 — 20개 고퀄리티 SVG 아이콘으로 교체'}]},
+  {ver:'1.9.33 (v0406b)',date:'2026-04-06',items:[{type:'new',text:'레벨 시스템 — 활동하면 XP를 얻어 레벨업!'},{type:'new',text:'주간/월간 챌린지 — 한정 미션 달성하고 보상 받기'},{type:'new',text:'일일 보너스 룰렛 — 매일 첫 접속 시 보너스 마일리지'}]},
   {ver:'1.9.32 (v0405a)',date:'2026-04-05',items:[
     {type:'improve',text:'챗봇 실행 전 확인 — 활동/보상/뱃지 추가·수정·삭제 시 "이렇게 할까요?" 확인 후 진행'},
     {type:'fix',text:'나의메뉴 플랜 배지가 챗봇 열기 전에 표시되지 않던 문제 수정'},
@@ -16833,16 +16834,24 @@ function openChangelog(){
       const dateStr=release.date;
       const isLatest=idx===0;
       const items=release.items.map(it=>{
-        const badge=it.type==='new'
-          ?'<span style="flex-shrink:0;display:inline-block;background:#6366F1;color:#fff;font-size:10px;font-weight:800;padding:1px 6px;border-radius:8px;white-space:nowrap;margin-top:3px">신규</span>'
-          :'<span style="flex-shrink:0;display:inline-block;background:#10B981;color:#fff;font-size:10px;font-weight:800;padding:1px 6px;border-radius:8px;white-space:nowrap;margin-top:3px">수정</span>';
-        return `<div style="display:flex;align-items:flex-start;gap:6px;padding:6px 0;font-size:13px;color:var(--tx2);line-height:1.5">${badge}<span>${it.text}</span></div>`;
+        // 문자열 또는 {type,text} 객체 모두 지원
+        const isStr=typeof it==='string';
+        const txt=isStr?it:it.text;
+        const tp=isStr?'new':it.type;
+        const badgeColors={new:'#6366F1',improve:'#F59E0B',fix:'#10B981'};
+        const badgeLabels={new:'신규',improve:'개선',fix:'수정'};
+        const bg=badgeColors[tp]||'#6366F1';
+        const lbl=badgeLabels[tp]||'신규';
+        const badge=`<span style="flex-shrink:0;display:inline-block;background:${bg};color:#fff;font-size:10px;font-weight:800;padding:1px 6px;border-radius:8px;white-space:nowrap;margin-top:3px">${lbl}</span>`;
+        return `<div style="display:flex;align-items:flex-start;gap:6px;padding:6px 0;font-size:13px;color:var(--tx2);line-height:1.5">${badge}<span>${txt}</span></div>`;
       }).join('');
       const latestTag=isLatest?'<span style="display:inline-block;background:#F43F5E;color:#fff;font-size:9px;font-weight:800;padding:1px 5px;border-radius:6px;margin-left:4px;vertical-align:middle">최신</span>':'';
       const separator=idx>0?'<div style="border-top:1px solid var(--bd);margin-bottom:16px"></div>':'';
+      // ver가 v로 시작하면 그대로, 아니면 v 접두어 추가
+      const verStr=release.ver.startsWith('v')?release.ver:'v'+release.ver;
       return `${separator}<div style="margin-bottom:20px">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-          <span style="font-size:16px;font-weight:800;color:var(--tx)">v${release.ver}</span>${latestTag}
+          <span style="font-size:16px;font-weight:800;color:var(--tx)">${verStr}</span>${latestTag}
           <span style="font-size:12px;color:var(--tx3)">${dateStr}</span>
         </div>
         ${items}
@@ -16868,12 +16877,13 @@ function _showChangelogPopupIfNew(){
   const latest=APP_CHANGELOG[0];
   if(!latest)return;
   setTimeout(()=>{
-    const newCount=latest.items.filter(i=>i.type==='new').length;
-    const fixCount=latest.items.filter(i=>i.type==='fix').length;
+    const newCount=latest.items.filter(i=>typeof i==='string'||i.type==='new'||i.type==='improve').length;
+    const fixCount=latest.items.filter(i=>typeof i!=='string'&&i.type==='fix').length;
     let desc=[];
-    if(newCount)desc.push(`신규 기능 ${newCount}건`);
-    if(fixCount)desc.push(`버그 수정 ${fixCount}건`);
-    const msg=`v${latest.ver} 업데이트! ${desc.join(', ')}`;
+    if(newCount)desc.push(`신규/개선 ${newCount}건`);
+    if(fixCount)desc.push(`수정 ${fixCount}건`);
+    const _vStr=latest.ver.startsWith('v')?latest.ver:'v'+latest.ver;
+    const msg=`${_vStr} 업데이트! ${desc.join(', ')}`;
     // 풀 배너
     const banner=document.createElement('div');
     banner.id='changelog-banner';
