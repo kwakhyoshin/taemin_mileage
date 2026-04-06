@@ -9025,7 +9025,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0406l';
+const _APP_VERSION = 'v0406m';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -16552,6 +16552,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.44 (v0406m)',date:'2026-04-06',items:[{type:'fix',text:'활동기록/보상/성과 탭에서 스크롤 복귀 시 제목 크기가 원래대로 돌아오지 않던 문제 수정'}]},
   {ver:'1.9.43 (v0406l)',date:'2026-04-06',items:[{type:'new',text:'레벨제 챌린지 시스템 — 주간/월간 각 9단계 순차 해금, 난이도 쉬움→보통→어려움'},{type:'fix',text:'"오늘 할 일 모두 완료" 챌린지가 등록된 활동 전부 완료 기준으로 정확히 판정'}]},
   {ver:'1.9.42 (v0406k)',date:'2026-04-06',items:[{type:'fix',text:'양육자가 대신 기록한 활동이 자녀 전환 시 사라지던 문제 수정'},{type:'fix',text:'활동 취소 시 "취소할 기록이 없어요" 오류 수정'}]},
   {ver:'1.9.41 (v0406j)',date:'2026-04-06',items:[{type:'fix',text:'다자녀 가족에서 주간/월간 챌린지가 자녀별로 분리되지 않던 문제 수정 — 자녀별 독립 챌린지 데이터'}]},
@@ -21229,6 +21230,22 @@ window._createState = _createState;
   // 비홈 탭 헤더 스무스 축소 헬퍼
   function _smoothHeader(hdr,ratio,brStr,cfg){
     const r=Math.max(0,Math.min(1,ratio));
+    // ratio≈0(맨 위): 인라인 스타일 전부 제거 → CSS 기본값 복원 (크기 불일치 방지)
+    if(r<0.01){
+      hdr.style.paddingTop='';hdr.style.paddingBottom='';hdr.style.borderRadius='';
+      const h2=hdr.querySelector('h2');if(h2)h2.style.fontSize='';
+      const sub=hdr.querySelector('p')||hdr.querySelector('.my-header-sub');
+      if(sub){sub.style.opacity='';sub.style.maxHeight='';sub.style.margin='';sub.style.overflow='';}
+      const stats=hdr.querySelector('.hdr-stats');
+      if(stats){
+        stats.style.marginTop='';stats.style.padding='';
+        stats.querySelectorAll('.hdr-stat-num').forEach(n=>{n.style.fontSize='';});
+        stats.querySelectorAll('.hdr-stat-lbl').forEach(l=>{l.style.fontSize='';});
+        stats.querySelectorAll('.hdr-stat-divider').forEach(d=>{d.style.height='';});
+      }
+      if(hdr.classList.contains('compact'))hdr.classList.remove('compact');
+      return;
+    }
     // padding (top/bottom)
     const pad=cfg.padMax-(cfg.padMax-cfg.padMin)*r;
     hdr.style.paddingTop='calc('+pad+'px + env(safe-area-inset-top))';
@@ -21327,25 +21344,27 @@ window._createState = _createState;
       }
       // ── 다른 탭 스무스 축소 (binary compact → progressive interpolation) ──
       const _r=brRatioOther; // 0(top) → 1(scrolled)
+      // h2 기본 크기: CSS에서 26px (모바일), 28px (태블릿 ≥768px)
+      const _h2Default=isWide?28:26;
       // Log
       const logHdr = document.querySelector('.log-header-sticky');
       if(logHdr && document.getElementById('s-log')?.classList.contains('on')){
-        _smoothHeader(logHdr,_r,brStrOther,{padMax:18,padMin:10,h2Max:22,h2Min:16});
+        _smoothHeader(logHdr,_r,brStrOther,{padMax:18,padMin:10,h2Max:_h2Default,h2Min:16});
       }
-      // Reward
+      // Reward — rwd h2 기본 24px(인라인)
       const rwdHdr = document.querySelector('.rwd-header-sticky');
       if(rwdHdr && document.getElementById('s-rwd')?.classList.contains('on')){
-        _smoothHeader(rwdHdr,_r,brStrOther,{padMax:18,padMin:10,h2Max:22,h2Min:16});
+        _smoothHeader(rwdHdr,_r,brStrOther,{padMax:18,padMin:10,h2Max:isWide?28:24,h2Min:16});
       }
       // History/Stats
       const histHdr = document.querySelector('.hist-hero');
       if(histHdr && document.getElementById('s-hist')?.classList.contains('on')){
-        _smoothHeader(histHdr,_r,brStrOther,{padMax:20,padMin:10,h2Max:22,h2Min:16});
+        _smoothHeader(histHdr,_r,brStrOther,{padMax:20,padMin:10,h2Max:_h2Default,h2Min:16});
       }
       // My
       const myHdr = document.querySelector('.my-header');
       if(myHdr && document.getElementById('s-my')?.classList.contains('on')){
-        _smoothHeader(myHdr,_r,brStrOther,{padMax:18,padMin:10,h2Max:22,h2Min:16});
+        _smoothHeader(myHdr,_r,brStrOther,{padMax:18,padMin:10,h2Max:_h2Default,h2Min:16});
       }
     });
   }
