@@ -5127,6 +5127,7 @@ function _migrateLegacyToFamilyMeta(){
       rwds:JSON.parse(JSON.stringify(S.rwds||[])),
       log:JSON.parse(JSON.stringify(S.log||[])),
       actDone:JSON.parse(JSON.stringify(S.actDone||{})),
+      allDoneDays:S.allDoneDays?[...S.allDoneDays]:[],
       moodLog:S.moodLog?[...S.moodLog]:[],
       badges:S.badges?{...S.badges}:{},
       badgeLog:S.badgeLog?[...S.badgeLog]:[],
@@ -9024,7 +9025,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0406k';
+const _APP_VERSION = 'v0406l';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -9222,13 +9223,36 @@ function _migrateLevelXP(){
 }
 
 // ── CHALLENGE TEMPLATES ──────────────────────────────
-const CHALLENGE_TEMPLATES=[
-  {emoji:'📚',title:'{n}일 연속 달성하기',type:'weekly',targets:[3,4,5],reward:50,check:'streak'},
-  {emoji:'⭐',title:'활동 {n}회 완료하기',type:'weekly',targets:[10,15,20],reward:30,check:'totalActs'},
-  {emoji:'🏃',title:'오늘 할 일 모두 완료 {n}일',type:'weekly',targets:[3,4,5],reward:60,check:'allDoneDays'},
-  {emoji:'💪',title:'이번 달 활동 {n}회',type:'monthly',targets:[30,50,70],reward:100,check:'monthlyActs'},
-  {emoji:'🔥',title:'이번 달 {n}일 연속',type:'monthly',targets:[7,10,14],reward:80,check:'monthlyStreak'},
-  {emoji:'🎯',title:'이번 달 마일리지 {n} 모으기',type:'monthly',targets:[200,300,500],reward:70,check:'monthlyPts'},
+// ── 레벨제 챌린지 템플릿 ─────────────────────────────
+// 주간/월간 각각 독립 레벨 트랙. level 1부터 순차 해금.
+// 같은 기간(주/월) 내에서 현재 레벨의 챌린지를 완료→보상 수령해야 다음 레벨 해금.
+const WEEKLY_CHALLENGE_LEVELS=[
+  // Lv1 ~ Lv3: 쉬움
+  {level:1,emoji:'⭐',title:'활동 5회 완료하기',target:5,reward:20,check:'totalActs'},
+  {level:2,emoji:'📚',title:'2일 연속 달성하기',target:2,reward:30,check:'streak'},
+  {level:3,emoji:'🏃',title:'오늘 할 일 모두 완료 1일',target:1,reward:30,check:'allDoneDays'},
+  // Lv4 ~ Lv6: 보통
+  {level:4,emoji:'⭐',title:'활동 10회 완료하기',target:10,reward:40,check:'totalActs'},
+  {level:5,emoji:'📚',title:'3일 연속 달성하기',target:3,reward:50,check:'streak'},
+  {level:6,emoji:'🏃',title:'오늘 할 일 모두 완료 3일',target:3,reward:50,check:'allDoneDays'},
+  // Lv7 ~ Lv9: 어려움
+  {level:7,emoji:'💪',title:'활동 20회 완료하기',target:20,reward:60,check:'totalActs'},
+  {level:8,emoji:'🔥',title:'5일 연속 달성하기',target:5,reward:80,check:'streak'},
+  {level:9,emoji:'🏆',title:'오늘 할 일 모두 완료 5일',target:5,reward:100,check:'allDoneDays'},
+];
+const MONTHLY_CHALLENGE_LEVELS=[
+  // Lv1 ~ Lv3: 쉬움
+  {level:1,emoji:'💪',title:'이번 달 활동 15회',target:15,reward:30,check:'monthlyActs'},
+  {level:2,emoji:'🔥',title:'이번 달 3일 연속',target:3,reward:40,check:'monthlyStreak'},
+  {level:3,emoji:'🎯',title:'이번 달 마일리지 100 모으기',target:100,reward:40,check:'monthlyPts'},
+  // Lv4 ~ Lv6: 보통
+  {level:4,emoji:'💪',title:'이번 달 활동 30회',target:30,reward:60,check:'monthlyActs'},
+  {level:5,emoji:'🔥',title:'이번 달 7일 연속',target:7,reward:70,check:'monthlyStreak'},
+  {level:6,emoji:'🎯',title:'이번 달 마일리지 300 모으기',target:300,reward:70,check:'monthlyPts'},
+  // Lv7 ~ Lv9: 어려움
+  {level:7,emoji:'💪',title:'이번 달 활동 60회',target:60,reward:100,check:'monthlyActs'},
+  {level:8,emoji:'🔥',title:'이번 달 14일 연속',target:14,reward:120,check:'monthlyStreak'},
+  {level:9,emoji:'🏆',title:'이번 달 마일리지 500 모으기',target:500,reward:150,check:'monthlyPts'},
 ];
 
 // ── ROULETTE PRIZES ──────────────────────────────
@@ -9253,6 +9277,7 @@ function defaultState(){
     badgeLog:[], // {id, badgeId, badgeName, badgeEmoji, pts, ts}
     settings:{streakBonus:true,streakBonusPts:100,pinHash:'',msgMode:'auto',customMsg:'',birthdayBonus:true,birthdayBonusPts:100,birthdayMsg:'생일 축하해! 오늘은 네 특별한 날이야! 🎂🎉'},
     actDone:{},
+    allDoneDays:[], // 등록된 활동을 모두 완료한 날짜 배열 ['2026-04-06',...]
     dark:false,
     greeting:'안녕하세요! 👋', // deprecated, kept for backwards compat
     greetings:{
@@ -9318,6 +9343,7 @@ function getMemberState(memberId) {
       rwds: (isMe && !isStaleGlobal && S.rwds) ? JSON.parse(JSON.stringify(S.rwds)) : (inheritRwds || safeInheritRwds || JSON.parse(JSON.stringify(DRWDS))),
       log: (isMe && !isStaleGlobal && S.log) ? S.log.filter(l=>!l.user||l.user===memberId) : [],
       actDone: (isMe && !isStaleGlobal && S.actDone) ? {...S.actDone} : {},
+      allDoneDays: (isMe && !isStaleGlobal && S.allDoneDays) ? [...S.allDoneDays] : [],
       moodLog: (isMe && !isStaleGlobal && S.moodLog) ? [...S.moodLog] : [],
       badges: (isMe && !isStaleGlobal && S.badges) ? {...S.badges} : {},
       badgeLog: (isMe && !isStaleGlobal && S.badgeLog) ? [...S.badgeLog] : [],
@@ -9386,6 +9412,7 @@ function syncMemberToGlobal(targetId) {
   S.lastDate = ms.lastDate || null;
   S.totalDone = ms.totalDone || 0;
   S.actDone = ms.actDone ? JSON.parse(JSON.stringify(ms.actDone)) : {};
+  S.allDoneDays = ms.allDoneDays ? [...ms.allDoneDays] : [];
   S.log = ms.log ? JSON.parse(JSON.stringify(ms.log)) : [];
   // ※ memberData는 이미 자녀별로 분리되어 있으므로 여기서 user 필터링하지 않음
   //   (양육자가 대신 기록한 활동의 user 필드가 caregiver ID일 수 있어 필터링하면 사라짐)
@@ -9427,6 +9454,7 @@ function syncGlobalToMember(targetId) {
   ms.rwds = JSON.parse(JSON.stringify(S.rwds||[]));
   ms.log = JSON.parse(JSON.stringify(S.log||[]));
   ms.actDone = JSON.parse(JSON.stringify(S.actDone||{}));
+  ms.allDoneDays = S.allDoneDays ? [...S.allDoneDays] : [];
   ms.moodLog = S.moodLog ? [...S.moodLog] : [];
   ms.badges = S.badges ? {...S.badges} : {};
   ms.badgeLog = S.badgeLog ? [...S.badgeLog] : [];
@@ -12124,42 +12152,96 @@ function openLevelPopup(){
 window.openLevelPopup=openLevelPopup;
 
 // ── CHALLENGE SYSTEM FUNCTIONS ──────────────────────────────
+
+// 현재 주간/월간 레벨 계산 — challengeHistory에서 해당 기간 내 claimed 수 기반
+function _getChallengeLevel(type){
+  const hist=S.challengeHistory||[];
+  // 해당 타입에서 보상 수령(claimed)된 챌린지 총 수 = 현재 레벨
+  const claimedCount=hist.filter(h=>h.type===type&&h.claimed).length;
+  return claimedCount; // 0이면 아직 아무것도 안 함 → level 1 부여
+}
+
 function generateChallenges(){
   const now=new Date();
   const gs=S.settings?.gamification||{};
   const challenges=S.challenges||[];
-  // 만료된 챌린지 정리
+  // 만료된 미완료 챌린지 정리 (완료+미수령은 유지)
   const active=challenges.filter(c=>{
-    if(new Date(c.endDate)<now&&!c.completed){
-      return false;
-    }
+    if(new Date(c.endDate)<now&&!c.completed) return false;
     return true;
   });
-  // 주간 챌린지 체크 (월요일 시작)
+
+  // ── 주간 챌린지 (레벨제) ──
   if(gs.weeklyEnabled!==false){
     const dayOfWeek=now.getDay()||7;
     const weekStart=new Date(now);weekStart.setDate(now.getDate()-(dayOfWeek-1));weekStart.setHours(0,0,0,0);
     const weekEnd=new Date(weekStart);weekEnd.setDate(weekStart.getDate()+6);weekEnd.setHours(23,59,59,999);
-    const hasWeekly=active.some(c=>c.type==='weekly'&&new Date(c.startDate)>=weekStart);
-    if(!hasWeekly){
-      const wTemplates=CHALLENGE_TEMPLATES.filter(t=>t.type==='weekly');
-      const wt=wTemplates[Math.floor(Math.random()*wTemplates.length)];
-      const tn=wt.targets[Math.floor(Math.random()*wt.targets.length)];
-      const wReward=gs.weeklyReward||wt.reward;
-      active.push({id:'ch_'+Date.now(),emoji:wt.emoji,title:wt.title.replace('{n}',tn),type:'weekly',target:tn,progress:0,reward:wReward,check:wt.check,startDate:weekStart.toISOString(),endDate:weekEnd.toISOString(),completed:false,claimed:false});
+    // 이번 주 활성 주간 챌린지가 있고, 아직 미수령이면 새로 만들지 않음
+    const thisWeekCh=active.find(c=>c.type==='weekly'&&new Date(c.startDate)>=weekStart);
+    if(!thisWeekCh){
+      const wLv=_getChallengeLevel('weekly');
+      const tmpl=WEEKLY_CHALLENGE_LEVELS[wLv % WEEKLY_CHALLENGE_LEVELS.length];
+      const cycle=Math.floor(wLv / WEEKLY_CHALLENGE_LEVELS.length); // 전체 순회 횟수
+      const rewardBonus=cycle*10; // 순회할수록 보상 약간 증가
+      active.push({
+        id:'ch_'+Date.now(),emoji:tmpl.emoji,title:tmpl.title,type:'weekly',
+        target:tmpl.target,progress:0,reward:(gs.weeklyReward||tmpl.reward)+rewardBonus,
+        check:tmpl.check,level:tmpl.level,trackLevel:wLv+1,
+        startDate:weekStart.toISOString(),endDate:weekEnd.toISOString(),
+        completed:false,claimed:false
+      });
+    } else if(thisWeekCh.claimed){
+      // 이번 주 챌린지를 이미 수령했으면 다음 레벨 챌린지 추가
+      const wLv=_getChallengeLevel('weekly');
+      const tmpl=WEEKLY_CHALLENGE_LEVELS[wLv % WEEKLY_CHALLENGE_LEVELS.length];
+      const cycle=Math.floor(wLv / WEEKLY_CHALLENGE_LEVELS.length);
+      const rewardBonus=cycle*10;
+      // 이번 주에 아직 미수령 챌린지가 없을 때만
+      const hasUnclaimed=active.some(c=>c.type==='weekly'&&new Date(c.startDate)>=weekStart&&!c.claimed);
+      if(!hasUnclaimed){
+        active.push({
+          id:'ch_'+Date.now(),emoji:tmpl.emoji,title:tmpl.title,type:'weekly',
+          target:tmpl.target,progress:0,reward:(gs.weeklyReward||tmpl.reward)+rewardBonus,
+          check:tmpl.check,level:tmpl.level,trackLevel:wLv+1,
+          startDate:weekStart.toISOString(),endDate:weekEnd.toISOString(),
+          completed:false,claimed:false
+        });
+      }
     }
   }
-  // 월간 챌린지 체크
+
+  // ── 월간 챌린지 (레벨제) ──
   if(gs.monthlyEnabled!==false){
     const monthStart=new Date(now.getFullYear(),now.getMonth(),1);
     const monthEnd=new Date(now.getFullYear(),now.getMonth()+1,0,23,59,59,999);
-    const hasMonthly=active.some(c=>c.type==='monthly'&&new Date(c.startDate)>=monthStart);
-    if(!hasMonthly){
-      const mTemplates=CHALLENGE_TEMPLATES.filter(t=>t.type==='monthly');
-      const mt=mTemplates[Math.floor(Math.random()*mTemplates.length)];
-      const mn=mt.targets[Math.floor(Math.random()*mt.targets.length)];
-      const mReward=gs.monthlyReward||mt.reward;
-      active.push({id:'ch_'+Date.now()+'m',emoji:mt.emoji,title:mt.title.replace('{n}',mn),type:'monthly',target:mn,progress:0,reward:mReward,check:mt.check,startDate:monthStart.toISOString(),endDate:monthEnd.toISOString(),completed:false,claimed:false});
+    const thisMonthCh=active.find(c=>c.type==='monthly'&&new Date(c.startDate)>=monthStart);
+    if(!thisMonthCh){
+      const mLv=_getChallengeLevel('monthly');
+      const tmpl=MONTHLY_CHALLENGE_LEVELS[mLv % MONTHLY_CHALLENGE_LEVELS.length];
+      const cycle=Math.floor(mLv / MONTHLY_CHALLENGE_LEVELS.length);
+      const rewardBonus=cycle*20;
+      active.push({
+        id:'ch_'+Date.now()+'m',emoji:tmpl.emoji,title:tmpl.title,type:'monthly',
+        target:tmpl.target,progress:0,reward:(gs.monthlyReward||tmpl.reward)+rewardBonus,
+        check:tmpl.check,level:tmpl.level,trackLevel:mLv+1,
+        startDate:monthStart.toISOString(),endDate:monthEnd.toISOString(),
+        completed:false,claimed:false
+      });
+    } else if(thisMonthCh.claimed){
+      const mLv=_getChallengeLevel('monthly');
+      const tmpl=MONTHLY_CHALLENGE_LEVELS[mLv % MONTHLY_CHALLENGE_LEVELS.length];
+      const cycle=Math.floor(mLv / MONTHLY_CHALLENGE_LEVELS.length);
+      const rewardBonus=cycle*20;
+      const hasUnclaimed=active.some(c=>c.type==='monthly'&&new Date(c.startDate)>=monthStart&&!c.claimed);
+      if(!hasUnclaimed){
+        active.push({
+          id:'ch_'+Date.now()+'m',emoji:tmpl.emoji,title:tmpl.title,type:'monthly',
+          target:tmpl.target,progress:0,reward:(gs.monthlyReward||tmpl.reward)+rewardBonus,
+          check:tmpl.check,level:tmpl.level,trackLevel:mLv+1,
+          startDate:monthStart.toISOString(),endDate:monthEnd.toISOString(),
+          completed:false,claimed:false
+        });
+      }
     }
   }
   S.challenges=active;
@@ -12175,17 +12257,22 @@ function updateChallengeProgress(){
     let prog=0;
     if(c.check==='streak'){prog=Math.min(c.target,S.streak||0);}
     else if(c.check==='totalActs'){
-      // 이번 기간 내 완료 횟수
       prog=S.log.filter(l=>new Date(l.ts)>=start&&l.pts>0).length;
     }
     else if(c.check==='allDoneDays'){
-      // 모든 할 일 완료한 날 수 계산
-      const days=new Set();
-      S.log.filter(l=>new Date(l.ts)>=start&&l.pts>0).forEach(l=>{
-        const d=new Date(l.ts);days.add(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`);
-      });
-      // 간소화: 활동이 있는 날 수로 근사
-      prog=days.size;
+      // 등록된 활동을 모두 완료한 날 수 계산
+      // allDoneDays 트래킹: S.allDoneDays 배열에 날짜 기록 (renderAll 시 오늘 체크)
+      const tracker=S.allDoneDays||[];
+      // 이번 기간(주간) 내의 완료 날 수만 카운트
+      const startStr=`${start.getFullYear()}-${String(start.getMonth()+1).padStart(2,'0')}-${String(start.getDate()).padStart(2,'0')}`;
+      prog=tracker.filter(d=>d>=startStr).length;
+      // 오늘 체크: isTodayAllDone()이 true이면 오늘 날짜 추가
+      const todayS=todayStr();
+      if(isTodayAllDone()&&!tracker.includes(todayS)){
+        tracker.push(todayS);
+        S.allDoneDays=tracker;
+        prog=tracker.filter(d=>d>=startStr).length;
+      }
     }
     else if(c.check==='monthlyActs'){prog=S.log.filter(l=>new Date(l.ts)>=start&&l.pts>0).length;}
     else if(c.check==='monthlyStreak'){prog=Math.min(c.target,S.streak||0);}
@@ -12228,18 +12315,28 @@ function renderChallengeCards(){
   if(!chs.length){el.innerHTML='';return;}
   // 컴팩트 섹션 라벨
   let _chHdr='<div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;padding:0 2px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--tx3)" stroke-width="2.5" stroke-linecap="round" style="opacity:.7"><path d="M6 9H4.5a2.5 2.5 0 010-5H6"/><path d="M18 9h1.5a2.5 2.5 0 000-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0012 0V2z"/></svg><span style="font-size:12px;font-weight:800;color:var(--tx3);letter-spacing:.3px">진행 중인 챌린지</span></div>';
-  el.innerHTML=_chHdr+chs.map(c=>{
+  // 수령 완료(claimed)된 챌린지는 숨기고, 미완료+미수령만 표시
+  const visibleChs=chs.filter(c=>!c.claimed);
+  if(!visibleChs.length){el.innerHTML='';return;}
+  el.innerHTML=_chHdr+visibleChs.map(c=>{
     const pct=Math.round(c.progress/c.target*100);
     const isComplete=c.completed;
     const isClaimed=c.claimed;
     const typeLabel=c.type==='weekly'?'주간':'월간';
     const daysLeft=Math.max(0,Math.ceil((new Date(c.endDate)-new Date())/(1000*60*60*24)));
+    // 레벨 표시: trackLevel이 있으면 표시
+    const lvLabel=c.trackLevel?`Lv.${c.trackLevel}`:'';
+    // 난이도 색상 (레벨 기준)
+    const lvNum=c.level||1;
+    const diffColor=lvNum<=3?'#10B981':lvNum<=6?'#F59E0B':'#EF4444'; // 쉬움(초록)/보통(노랑)/어려움(빨강)
+    const diffLabel=lvNum<=3?'쉬움':lvNum<=6?'보통':'어려움';
     return `<div style="background:var(--card);border-radius:16px;padding:14px 16px;margin-bottom:8px;box-shadow:0 2px 8px rgba(0,0,0,.04);border:.5px solid var(--bdr);${isComplete&&!isClaimed?'border-color:var(--tab-color,#F59E0B);box-shadow:0 2px 12px rgba(245,158,11,.15)':''}">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
         <span style="font-size:24px">${c.emoji}</span>
         <div style="flex:1;min-width:0">
-          <div style="display:flex;align-items:center;gap:6px">
+          <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">
             <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:10px;background:${c.type==='weekly'?'rgba(99,102,241,.12)':'rgba(236,72,153,.12)'};color:${c.type==='weekly'?'#6366F1':'#EC4899'}">${typeLabel}</span>
+            ${lvLabel?`<span style="font-size:10px;font-weight:800;padding:2px 7px;border-radius:10px;background:${diffColor}18;color:${diffColor}">${lvLabel} ${diffLabel}</span>`:''}
             <span style="font-size:11px;color:var(--tx3);font-weight:600">${daysLeft}일 남음</span>
           </div>
           <div style="font-size:13px;font-weight:700;color:var(--tx);margin-top:2px">${c.title}</div>
@@ -16455,6 +16552,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.43 (v0406l)',date:'2026-04-06',items:[{type:'new',text:'레벨제 챌린지 시스템 — 주간/월간 각 9단계 순차 해금, 난이도 쉬움→보통→어려움'},{type:'fix',text:'"오늘 할 일 모두 완료" 챌린지가 등록된 활동 전부 완료 기준으로 정확히 판정'}]},
   {ver:'1.9.42 (v0406k)',date:'2026-04-06',items:[{type:'fix',text:'양육자가 대신 기록한 활동이 자녀 전환 시 사라지던 문제 수정'},{type:'fix',text:'활동 취소 시 "취소할 기록이 없어요" 오류 수정'}]},
   {ver:'1.9.41 (v0406j)',date:'2026-04-06',items:[{type:'fix',text:'다자녀 가족에서 주간/월간 챌린지가 자녀별로 분리되지 않던 문제 수정 — 자녀별 독립 챌린지 데이터'}]},
   {ver:'1.9.40 (v0406i)',date:'2026-04-06',items:[{type:'new',text:'챌린지 보상 수령 시 화려한 축하 애니메이션 — 무지개 별 파티클, 버스트 이펙트, 스파클 트레일, 링 웨이브'}]},
