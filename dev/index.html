@@ -8945,7 +8945,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0406b';
+const _APP_VERSION = 'v0406c';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -9068,27 +9068,49 @@ async function _checkLegacyMigrationPointer(){
 let cachedUsers = null;
 
 // ── LEVEL SYSTEM CONSTANTS ──────────────────────────────
+const _LV_SVG={
+  sprout:'<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="#E8F5E9"/><path d="M24 36V22" stroke="#4CAF50" stroke-width="2.5" stroke-linecap="round"/><path d="M24 22c-2-8-12-8-12-2s10 6 12 2z" fill="#66BB6A"/><path d="M24 22c2-8 12-8 12-2s-10 6-12 2z" fill="#43A047"/><circle cx="24" cy="38" r="3" fill="#795548"/></svg>',
+  book:'<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="#E3F2FD"/><rect x="12" y="10" width="24" height="28" rx="2" fill="#1565C0"/><rect x="14" y="12" width="20" height="24" rx="1" fill="#42A5F5"/><path d="M24 12v24" stroke="#1565C0" stroke-width="1"/><path d="M18 18h4M18 22h4M26 18h4M26 22h4" stroke="#E3F2FD" stroke-width="1.5" stroke-linecap="round"/></svg>',
+  star:'<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="#FFF8E1"/><path d="M24 8l4.9 9.9 10.9 1.6-7.9 7.7 1.9 10.8L24 32.8l-9.8 5.2 1.9-10.8-7.9-7.7 10.9-1.6z" fill="#FFD600" stroke="#FFA000" stroke-width="1"/></svg>',
+  leaf:'<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="#E8F5E9"/><path d="M14 34c0-16 20-24 20-24s0 20-16 24" fill="#4CAF50"/><path d="M14 34c0-16 20-24 20-24" stroke="#2E7D32" stroke-width="1.5" fill="none"/><path d="M18 30c2-6 8-12 14-16" stroke="#81C784" stroke-width="1" fill="none"/></svg>',
+  fire:'<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="#FFF3E0"/><path d="M24 8c0 0-10 10-10 18a10 10 0 0020 0c0-8-10-18-10-18z" fill="#FF9800"/><path d="M24 16c0 0-6 6-6 12a6 6 0 0012 0c0-6-6-12-6-12z" fill="#FFC107"/><path d="M24 24c0 0-3 3-3 6a3 3 0 006 0c0-3-3-6-3-6z" fill="#FFEB3B"/></svg>',
+  shield:'<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="#E8EAF6"/><path d="M24 6L8 14v10c0 10 7 18 16 20 9-2 16-10 16-20V14z" fill="#3F51B5"/><path d="M24 10l-12 6v8c0 8 5 14 12 16 7-2 12-8 12-16v-8z" fill="#5C6BC0"/><path d="M21 24l3 3 6-6" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  muscle:'<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="#FCE4EC"/><path d="M16 30c0-4 2-8 4-10s6-2 6 2-2 6-2 8 4 4 6 2 4-6 4-10" stroke="#E91E63" stroke-width="3" stroke-linecap="round" fill="none"/><circle cx="18" cy="18" r="2" fill="#E91E63"/><path d="M14 32l4-2M34 20l-2-4" stroke="#F48FB1" stroke-width="1.5" stroke-linecap="round"/></svg>',
+  medal:'<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="#FFF8E1"/><path d="M18 8l-4 16h4l2-6 4 10 4-10 2 6h4L30 8" fill="#F44336"/><circle cx="24" cy="30" r="10" fill="#FFD600" stroke="#FFA000" stroke-width="1.5"/><circle cx="24" cy="30" r="7" fill="#FFC107"/><text x="24" y="34" text-anchor="middle" font-size="10" font-weight="900" fill="#F57F17">★</text></svg>',
+  gem:'<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="#E8EAF6"/><path d="M14 18l10-10 10 10-10 20z" fill="#7C4DFF"/><path d="M14 18h20L24 38z" fill="#651FFF"/><path d="M14 18l10-10 10 10" fill="#B388FF"/><path d="M19 18l5-10 5 10" fill="#D1C4E9"/><path d="M24 18v20l-10-20h20z" fill="none" stroke="#4527A0" stroke-width=".5"/></svg>',
+  trophy:'<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="#FFF8E1"/><path d="M16 10h16v10c0 6-4 10-8 10s-8-4-8-10z" fill="#FFD600" stroke="#F9A825" stroke-width="1"/><path d="M16 14h-4c-2 0-3 2-2 4l2 4c1 2 3 2 4 0" fill="#FFC107"/><path d="M32 14h4c2 0 3 2 2 4l-2 4c-1 2-3 2-4 0" fill="#FFC107"/><rect x="20" y="30" width="8" height="4" fill="#F9A825"/><rect x="18" y="34" width="12" height="4" rx="1" fill="#F9A825"/><text x="24" y="24" text-anchor="middle" font-size="10" font-weight="900" fill="#F57F17">10</text></svg>',
+  crown:'<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="#FFF3E0"/><path d="M8 32l6-16 5 8 5-12 5 12 5-8 6 16z" fill="#FFD600"/><path d="M8 32h32v4H8z" fill="#FFA000"/><circle cx="14" cy="16" r="2" fill="#FF6F00"/><circle cx="24" cy="12" r="2" fill="#FF6F00"/><circle cx="34" cy="16" r="2" fill="#FF6F00"/></svg>',
+  hero:'<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="#E3F2FD"/><circle cx="24" cy="16" r="6" fill="#FFB74D"/><path d="M14 36c0-6 4-10 10-10s10 4 10 10" fill="#1565C0"/><path d="M18 26l6-2 6 2" fill="#F44336"/><path d="M20 28l4-10 4 10" fill="#F44336"/><path d="M30 20l6-4-4 6" fill="#F44336"/><path d="M18 20l-6-4 4 6" fill="#1565C0"/></svg>',
+  wizard:'<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="#EDE7F6"/><path d="M24 4l-10 22h20z" fill="#7B1FA2"/><circle cx="24" cy="22" r="2" fill="#FFD600"/><path d="M14 26c0 0 4 2 10 2s10-2 10-2" stroke="#7B1FA2" stroke-width="2"/><circle cx="24" cy="34" r="6" fill="#FFB74D"/><path d="M20 32c2-1 6-1 8 0" stroke="#5D4037" stroke-width="1"/></svg>',
+  sword:'<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="#ECEFF1"/><path d="M24 6v26" stroke="#78909C" stroke-width="3" stroke-linecap="round"/><path d="M24 6l3 8h-6z" fill="#B0BEC5"/><path d="M16 32h16" stroke="#795548" stroke-width="3" stroke-linecap="round"/><rect x="22" y="32" width="4" height="8" rx="1" fill="#795548"/><circle cx="24" cy="40" r="2" fill="#FFD600"/></svg>',
+  starBurst:'<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="#FFF8E1"/><circle cx="24" cy="24" r="14" fill="#FFD600"/><circle cx="24" cy="24" r="10" fill="#FFC107"/><path d="M24 6l2 8-2-2-2 2zM24 42l2-8-2 2-2-2zM6 24l8 2-2-2 2-2zM42 24l-8 2 2-2-2-2zM10 10l7 5-2-1 1-2zM38 38l-7-5 2 1-1 2zM38 10l-5 7-1-2 2-1zM10 38l5-7 1 2-2 1z" fill="#FF8F00"/></svg>',
+  queenCrown:'<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="#FCE4EC"/><path d="M10 34l4-14 5 6 5-10 5 10 5-6 4 14z" fill="#E91E63"/><path d="M10 34h28v3H10z" fill="#AD1457"/><circle cx="14" cy="20" r="2.5" fill="#F48FB1"/><circle cx="24" cy="16" r="2.5" fill="#F48FB1"/><circle cx="34" cy="20" r="2.5" fill="#F48FB1"/></svg>',
+  dragon:'<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="#E8F5E9"/><path d="M12 28c4-12 16-16 22-10-2-6-10-10-16-8-4 1-8 8-6 18z" fill="#4CAF50"/><circle cx="28" cy="20" r="2" fill="#FFD600"/><path d="M32 18c2-4 6-4 8-2" stroke="#2E7D32" stroke-width="1.5" fill="none"/><path d="M14 30c-2 2-6 2-8 0" stroke="#2E7D32" stroke-width="1.5" fill="none"/><path d="M20 34c4 4 10 4 14 0" stroke="#4CAF50" stroke-width="2" fill="none"/></svg>',
+  rocket:'<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="#E3F2FD"/><path d="M24 6c-4 8-4 20-2 28h4c2-8 2-20-2-28z" fill="#E0E0E0" stroke="#9E9E9E" stroke-width=".5"/><path d="M24 6c-2 4-3 10-3 16h6c0-6-1-12-3-16z" fill="#1565C0"/><circle cx="24" cy="18" r="3" fill="#BBDEFB"/><path d="M18 30l-4 6 6-2M30 30l4 6-6-2" fill="#F44336"/><path d="M20 36l4 6 4-6" fill="#FF9800"/><path d="M22 38l2 4 2-4" fill="#FFC107"/></svg>',
+  galaxy:'<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="#1A237E"/><ellipse cx="24" cy="24" rx="18" ry="8" fill="none" stroke="#7C4DFF" stroke-width="1.5" transform="rotate(-30 24 24)"/><ellipse cx="24" cy="24" rx="14" ry="6" fill="none" stroke="#B388FF" stroke-width="1" transform="rotate(20 24 24)"/><circle cx="24" cy="24" r="4" fill="#FFD600"/><circle cx="16" cy="16" r="1" fill="#fff"/><circle cx="34" cy="14" r="1.5" fill="#fff"/><circle cx="32" cy="34" r="1" fill="#fff"/><circle cx="12" cy="30" r="1.2" fill="#fff"/><circle cx="36" cy="24" r=".8" fill="#B388FF"/></svg>',
+  dragonGod:'<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="#FFF8E1"/><circle cx="24" cy="24" r="18" fill="none" stroke="#FFD600" stroke-width="2" stroke-dasharray="3 2"/><path d="M24 6l-2 6 4-2-2 4 4-2-2 6h-4l-2-6-4 2 2-4-4 2 2-6" fill="#FF6F00" transform="rotate(0 24 24)"/><circle cx="24" cy="24" r="10" fill="#FFD600"/><circle cx="24" cy="24" r="7" fill="#FFC107"/><text x="24" y="28" text-anchor="middle" font-size="12" font-weight="900" fill="#E65100">神</text></svg>'
+};
 const LEVEL_DEFS = [
-  {level:1,  title:'마일리지 새싹',   minXP:0,     emoji:'🌱'},
-  {level:2,  title:'열심 학생',       minXP:50,    emoji:'📚'},
-  {level:3,  title:'습관 견습생',     minXP:150,   emoji:'⭐'},
-  {level:4,  title:'작은 도전자',     minXP:300,   emoji:'🌿'},
-  {level:5,  title:'꾸준한 노력가',   minXP:500,   emoji:'🔥'},
-  {level:6,  title:'습관 수호자',     minXP:800,   emoji:'🛡️'},
-  {level:7,  title:'성실한 실천가',   minXP:1200,  emoji:'💪'},
-  {level:8,  title:'마일리지 장인',   minXP:1700,  emoji:'🏅'},
-  {level:9,  title:'습관 달인',       minXP:2300,  emoji:'💎'},
-  {level:10, title:'마일리지 고수',   minXP:3000,  emoji:'🏆'},
-  {level:11, title:'전설의 도전자',   minXP:4000,  emoji:'👑'},
-  {level:12, title:'습관 영웅',       minXP:5200,  emoji:'🦸'},
-  {level:13, title:'마일리지 현자',   minXP:6800,  emoji:'🧙'},
-  {level:14, title:'불굴의 전사',     minXP:8800,  emoji:'⚔️'},
-  {level:15, title:'습관 전설',       minXP:11500, emoji:'🌟'},
-  {level:16, title:'마일리지 왕',     minXP:15000, emoji:'👸'},
-  {level:17, title:'초월의 경지',     minXP:20000, emoji:'🐲'},
-  {level:18, title:'우주의 챔피언',   minXP:27000, emoji:'🚀'},
-  {level:19, title:'전설의 마스터',   minXP:36000, emoji:'🌌'},
-  {level:20, title:'최강 마일리지 신',minXP:50000, emoji:'🐉'},
+  {level:1,  title:'마일리지 새싹',   minXP:0,     emoji:'🌱', svg:_LV_SVG.sprout},
+  {level:2,  title:'열심 학생',       minXP:50,    emoji:'📚', svg:_LV_SVG.book},
+  {level:3,  title:'습관 견습생',     minXP:150,   emoji:'⭐', svg:_LV_SVG.star},
+  {level:4,  title:'작은 도전자',     minXP:300,   emoji:'🌿', svg:_LV_SVG.leaf},
+  {level:5,  title:'꾸준한 노력가',   minXP:500,   emoji:'🔥', svg:_LV_SVG.fire},
+  {level:6,  title:'습관 수호자',     minXP:800,   emoji:'🛡️', svg:_LV_SVG.shield},
+  {level:7,  title:'성실한 실천가',   minXP:1200,  emoji:'💪', svg:_LV_SVG.muscle},
+  {level:8,  title:'마일리지 장인',   minXP:1700,  emoji:'🏅', svg:_LV_SVG.medal},
+  {level:9,  title:'습관 달인',       minXP:2300,  emoji:'💎', svg:_LV_SVG.gem},
+  {level:10, title:'마일리지 고수',   minXP:3000,  emoji:'🏆', svg:_LV_SVG.trophy},
+  {level:11, title:'전설의 도전자',   minXP:4000,  emoji:'👑', svg:_LV_SVG.crown},
+  {level:12, title:'습관 영웅',       minXP:5200,  emoji:'🦸', svg:_LV_SVG.hero},
+  {level:13, title:'마일리지 현자',   minXP:6800,  emoji:'🧙', svg:_LV_SVG.wizard},
+  {level:14, title:'불굴의 전사',     minXP:8800,  emoji:'⚔️', svg:_LV_SVG.sword},
+  {level:15, title:'습관 전설',       minXP:11500, emoji:'🌟', svg:_LV_SVG.starBurst},
+  {level:16, title:'마일리지 왕',     minXP:15000, emoji:'👸', svg:_LV_SVG.queenCrown},
+  {level:17, title:'초월의 경지',     minXP:20000, emoji:'🐲', svg:_LV_SVG.dragon},
+  {level:18, title:'우주의 챔피언',   minXP:27000, emoji:'🚀', svg:_LV_SVG.rocket},
+  {level:19, title:'전설의 마스터',   minXP:36000, emoji:'🌌', svg:_LV_SVG.galaxy},
+  {level:20, title:'최강 마일리지 신',minXP:50000, emoji:'🐉', svg:_LV_SVG.dragonGod},
 ];
 function getLevelInfo(xp){
   let lv=LEVEL_DEFS[0];
@@ -9096,7 +9118,7 @@ function getLevelInfo(xp){
   const idx=LEVEL_DEFS.indexOf(lv);
   const next=LEVEL_DEFS[idx+1]||null;
   const pct=next?Math.round((xp-lv.minXP)/(next.minXP-lv.minXP)*100):100;
-  return{...lv,xp,nextXP:next?next.minXP:lv.minXP,pct,nextTitle:next?next.title:null,nextEmoji:next?next.emoji:null};
+  return{...lv,xp,nextXP:next?next.minXP:lv.minXP,pct,nextTitle:next?next.title:null,nextEmoji:next?next.emoji:null,nextSvg:next?next.svg:null};
 }
 // 누적 마일리지 기반 XP 계산 (기존 사용자 마이그레이션)
 function _migrateLevelXP(){
@@ -10715,7 +10737,7 @@ function renderHero(){
   if(_lvPill){
     const _ld=S.levelData||{xp:0,level:1};
     const _lvInfo=getLevelInfo(_ld.xp);
-    _lvPill.textContent=`${_lvInfo.emoji} Lv.${_lvInfo.level}`;
+    _lvPill.innerHTML=`<span style="display:inline-flex;align-items:center;vertical-align:middle;width:16px;height:16px;margin-right:2px">${_lvInfo.svg||_lvInfo.emoji}</span> Lv.${_lvInfo.level}`;
   }
 }
 
@@ -11976,7 +11998,7 @@ function showLevelUpCelebration(lvInfo){
   const ov=document.createElement('div');
   ov.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;animation:fadeIn .3s';
   ov.innerHTML=`<div style="background:var(--card);border-radius:24px;padding:32px 28px;text-align:center;width:min(300px,85vw);animation:popIn .4s cubic-bezier(.175,.885,.32,1.275)">
-    <div style="font-size:64px;margin-bottom:8px">${lvInfo.emoji}</div>
+    <div style="width:64px;height:64px;margin:0 auto 8px">${lvInfo.svg||`<span style="font-size:64px">${lvInfo.emoji}</span>`}</div>
     <div style="font-size:22px;font-weight:900;color:var(--tx);margin-bottom:4px">레벨 업!</div>
     <div style="font-size:16px;font-weight:700;color:var(--tab-color,var(--or))">Lv.${lvInfo.level} ${lvInfo.title}</div>
     <div style="margin-top:12px;font-size:13px;color:var(--tx3)">누적 ${lvInfo.xp.toLocaleString()} 마일리지 달성!</div>
@@ -11994,13 +12016,13 @@ function openLevelPopup(){
   const ov=document.createElement('div');
   ov.className='streak-popup-overlay show';
   ov.innerHTML=`<div class="streak-popup" style="transform:scale(1)">
-    <div style="font-size:48px;margin-bottom:8px">${info.emoji}</div>
+    <div style="width:48px;height:48px;margin:0 auto 8px">${info.svg||`<span style="font-size:48px">${info.emoji}</span>`}</div>
     <div style="font-size:20px;font-weight:900;color:var(--tx)">Lv.${info.level} ${info.title}</div>
     <div style="margin:12px 0 8px;font-size:13px;color:var(--tx3);font-weight:700">누적 ${info.xp.toLocaleString()} / ${info.nextXP.toLocaleString()} 마일리지</div>
     <div style="background:var(--bdr);border-radius:6px;height:10px;overflow:hidden">
       <div style="height:100%;border-radius:6px;background:linear-gradient(90deg,var(--tab-color,#F59E0B),#EF4444);width:${info.pct}%;transition:width .5s"></div>
     </div>
-    ${info.nextTitle?`<div style="margin-top:8px;font-size:12px;color:var(--tx3)">다음: ${info.nextEmoji} Lv.${info.level+1} ${info.nextTitle} (${info.nextXP.toLocaleString()})</div>`:'<div style="margin-top:8px;font-size:12px;color:var(--gn2);font-weight:700">🏆 최고 레벨 달성!</div>'}
+    ${info.nextTitle?`<div style="margin-top:8px;font-size:12px;color:var(--tx3);display:flex;align-items:center;justify-content:center;gap:4px">다음: <span style="display:inline-flex;width:16px;height:16px">${info.nextSvg||info.nextEmoji}</span> Lv.${info.level+1} ${info.nextTitle} (${info.nextXP.toLocaleString()})</div>`:'<div style="margin-top:8px;font-size:12px;color:var(--gn2);font-weight:700">🏆 최고 레벨 달성!</div>'}
     <div style="margin-top:10px;font-size:11px;color:var(--tx3);opacity:.7">활동 총 ${(S.totalDone||0)}회 완료</div>
     <button onclick="this.closest('.streak-popup-overlay').remove()" style="margin-top:14px;padding:10px 32px;border:none;border-radius:12px;background:var(--tab-color,var(--or));color:#fff;font-size:14px;font-weight:700;cursor:pointer">확인</button>
   </div>`;
@@ -12139,6 +12161,8 @@ function pickRoulettePrize(){
 }
 
 function checkDailyBonus(){
+  // 양육자는 룰렛 표시하지 않음 (자녀 전용)
+  if(isCaregiverUser())return;
   const db=S.dailyBonus||(S.dailyBonus={lastDate:null,history:[]});
   const today=todayStr();
   if(db.lastDate===today)return; // 오늘 이미 받음
@@ -12179,12 +12203,12 @@ function spinRoulette(){
   let count=0;const total=20;
   const interval=setInterval(()=>{
     const rp=ROULETTE_PRIZES[Math.floor(Math.random()*ROULETTE_PRIZES.length)];
-    display.textContent=rp.emoji;
+    display.innerHTML=`<div style="font-size:48px">${rp.emoji}</div><div style="font-size:14px;font-weight:800;color:var(--tx3);margin-top:2px">${rp.label}</div>`;
     display.style.transform=`scale(${1+Math.sin(count/3)*.1})`;
     count++;
     if(count>=total){
       clearInterval(interval);
-      display.textContent=prize.emoji;
+      display.innerHTML=`<div style="font-size:48px">${prize.emoji}</div><div style="font-size:14px;font-weight:800;color:var(--tx3);margin-top:2px">${prize.label}</div>`;
       display.style.transform='scale(1.2)';
       display.style.transition='transform .3s';
       setTimeout(()=>{display.style.transform='scale(1)';},300);
@@ -12199,11 +12223,21 @@ function spinRoulette(){
       const _ld=S.levelData||(S.levelData={xp:0,level:1,xpLog:[]});
       _ld.xp+=prize.pts;
       _ld.level=getLevelInfo(_ld.xp).level;
+
+      // 부모에게 푸시 알림 (familyMessages에 시스템 메시지 추가)
+      const childName=MEMBERS[currentUser]?.name||'자녀';
+      if(!S.familyMessages)S.familyMessages=[];
+      const _caregiverIds=Object.entries(S.familyMeta?.members||{}).filter(([k,v])=>v.role==='caregiver').map(([k])=>k);
+      _caregiverIds.forEach(pid=>{
+        S.familyMessages.push({from:currentUser,to:pid,text:`🎰 ${childName}이(가) 오늘의 보너스 룰렛에서 +${prize.pts} 마일리지를 획득했어요!`,emotion:'star',ts:Date.now(),read:false,type:'roulette_bonus'});
+      });
+      if(S.familyMessages.length>500)S.familyMessages=S.familyMessages.slice(-500);
+
       save();
       renderAll();
 
       // 결과 표시
-      const resultHTML=`<div style="font-size:64px">${prize.emoji}</div><div style="font-size:18px;font-weight:900;color:var(--tab-color,var(--or));margin-top:8px">+${prize.pts} 마일리지!</div>`;
+      const resultHTML=`<div style="font-size:64px">${prize.emoji}</div><div style="font-size:22px;font-weight:900;color:var(--tab-color,var(--or));margin-top:8px">+${prize.pts} 마일리지!</div>`;
       display.innerHTML=resultHTML;
       display.style.height='auto';
       display.style.padding='16px';
@@ -12211,6 +12245,8 @@ function spinRoulette(){
       document.getElementById('rlt-close-btn').style.display='';
       if(navigator.vibrate)navigator.vibrate([50,50,50]);
       if(prize.pts>=30)confetti();
+      // 코인 날아가는 애니메이션 (display 요소에서 hero-pts로)
+      flyCoinsToMileage(display, prize.pts);
       toast(`🎰 오늘의 보너스: +${prize.pts} 마일리지!`);
     }
   },80);
@@ -16251,6 +16287,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'v1.9.34',date:'2026-04-06',items:['🎰 룰렛 개선 — 스핀 중 마일리지 표시, 자녀 전용, 부모 알림, 코인 애니메이션','🎨 레벨 아이콘 — 20개 고퀄리티 SVG 아이콘으로 교체']},
   {ver:'v1.9.33',date:'2026-04-06',items:['🎮 레벨 시스템 — 활동하면 XP를 얻어 레벨업!','🏆 주간/월간 챌린지 — 한정 미션 달성하고 보상 받기','🎰 일일 보너스 룰렛 — 매일 첫 접속 시 보너스 마일리지']},
   {ver:'1.9.32 (v0405a)',date:'2026-04-05',items:[
     {type:'improve',text:'챗봇 실행 전 확인 — 활동/보상/뱃지 추가·수정·삭제 시 "이렇게 할까요?" 확인 후 진행'},
