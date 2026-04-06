@@ -9024,7 +9024,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0406j';
+const _APP_VERSION = 'v0406k';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -9387,10 +9387,8 @@ function syncMemberToGlobal(targetId) {
   S.totalDone = ms.totalDone || 0;
   S.actDone = ms.actDone ? JSON.parse(JSON.stringify(ms.actDone)) : {};
   S.log = ms.log ? JSON.parse(JSON.stringify(ms.log)) : [];
-  // 다른 자녀의 로그 항목 필터링 (공유 log에서 마이그레이션된 경우)
-  if(S.log.length>0 && mid){
-    S.log = S.log.filter(l=>!l.user || l.user===mid);
-  }
+  // ※ memberData는 이미 자녀별로 분리되어 있으므로 여기서 user 필터링하지 않음
+  //   (양육자가 대신 기록한 활동의 user 필드가 caregiver ID일 수 있어 필터링하면 사라짐)
   S.moodLog = ms.moodLog ? [...ms.moodLog] : [];
   S.badges = ms.badges ? {...ms.badges} : {};
   S.badgeLog = ms.badgeLog ? [...ms.badgeLog] : [];
@@ -13751,7 +13749,7 @@ function _doActCore(id){
   }
 
   S.pts+=a.pts+bonus;S.totalDone++;
-  S.log.unshift({id:'l_'+Date.now(),emoji:a.emoji,name:a.name,pts:a.pts+bonus,ts:Date.now(),actId:a.id,user:currentUser});
+  S.log.unshift({id:'l_'+Date.now(),emoji:a.emoji,name:a.name,pts:a.pts+bonus,ts:Date.now(),actId:a.id,user:_globalDataOwner||currentUser});
   if(S.log.length>300)S.log=S.log.slice(0,300);
 
   // Level XP
@@ -14688,7 +14686,7 @@ function giveBonus(){
     save();renderAll();renderMilesTargetInfo();toast(`⭐ ${MEMBERS[targetId]?.name||'자녀'}에게 +${v} 마일리지 지급!`);confetti();flyCoinsToMileage(null,v);
     return;
   }
-  S.pts+=v;S.log.unshift({id:'l_'+Date.now(),emoji:'⭐',name:`보너스 +${v} 마일리지`,pts:v,ts:Date.now(),actId:null,user:currentUser});
+  S.pts+=v;S.log.unshift({id:'l_'+Date.now(),emoji:'⭐',name:`보너스 +${v} 마일리지`,pts:v,ts:Date.now(),actId:null,user:_globalDataOwner||currentUser});
   save();renderAll();toast(`⭐ 보너스 +${v} 마일리지 지급!`);confetti();flyCoinsToMileage(null,v);
 }
 function deductPts(){
@@ -14709,7 +14707,7 @@ function deductPts(){
   }
   if(!confirm(`${v} 마일리지를 차감할까요?`))return;
   S.pts=Math.max(0,S.pts-v);
-  S.log.unshift({id:'l_'+Date.now(),emoji:'📉',name:`차감 -${v} 마일리지`,pts:-v,ts:Date.now(),actId:null,user:currentUser});
+  S.log.unshift({id:'l_'+Date.now(),emoji:'📉',name:`차감 -${v} 마일리지`,pts:-v,ts:Date.now(),actId:null,user:_globalDataOwner||currentUser});
   save();renderAll();toast(`📉 ${v} 마일리지 차감됨`);
 }
 
@@ -16457,6 +16455,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.42 (v0406k)',date:'2026-04-06',items:[{type:'fix',text:'양육자가 대신 기록한 활동이 자녀 전환 시 사라지던 문제 수정'},{type:'fix',text:'활동 취소 시 "취소할 기록이 없어요" 오류 수정'}]},
   {ver:'1.9.41 (v0406j)',date:'2026-04-06',items:[{type:'fix',text:'다자녀 가족에서 주간/월간 챌린지가 자녀별로 분리되지 않던 문제 수정 — 자녀별 독립 챌린지 데이터'}]},
   {ver:'1.9.40 (v0406i)',date:'2026-04-06',items:[{type:'new',text:'챌린지 보상 수령 시 화려한 축하 애니메이션 — 무지개 별 파티클, 버스트 이펙트, 스파클 트레일, 링 웨이브'}]},
   {ver:'1.9.39 (v0406h)',date:'2026-04-06',items:[{type:'fix',text:'릴리즈 노트 버전 표시 오류 수정 — vv 중복, undefined 항목, dev버전 누락'},{type:'improve',text:'릴리즈 노트에 개선(노란색) 뱃지 추가'}]},
