@@ -4029,6 +4029,61 @@ requestAnimationFrame(function(){
       <div class="adm-sec-lbl">홈 화면 인사말 변경</div>
       <div id="greetings-settings-container"></div>
     </div>
+    <!-- ── 게이미피케이션 설정 ── -->
+    <div class="adm-sec">
+      <div class="adm-sec-lbl">🎮 게이미피케이션 설정</div>
+      <div class="adm-card">
+        <!-- 일일 룰렛 -->
+        <div class="adm-row">
+          <div class="adm-row-l"><div class="adm-row-nm">🎰 일일 보너스 룰렛</div><div class="adm-row-sub">매일 첫 접속 시 보너스 룰렛</div></div>
+          <button class="tog" id="tog-roulette" onclick="togGameSetting('rouletteEnabled')"><div class="tog-dot"></div></button>
+        </div>
+        <div class="divider"></div>
+        <div class="adm-row" style="flex-direction:column;align-items:stretch;gap:8px">
+          <div class="adm-row-l"><div class="adm-row-nm">룰렛 마일리지 범위</div><div class="adm-row-sub">최소~최대 당첨 마일리지</div></div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <input class="num-inp" id="rlt-min-inp" type="number" value="5" min="1" max="500" style="width:70px" onchange="saveGameSettings()">
+            <span style="font-size:13px;font-weight:700;color:var(--tx3)">~</span>
+            <input class="num-inp" id="rlt-max-inp" type="number" value="100" min="1" max="1000" style="width:70px" onchange="saveGameSettings()">
+            <span style="font-size:12px;color:var(--tx3);font-weight:600">마일리지</span>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <!-- 주간 챌린지 -->
+        <div class="adm-row">
+          <div class="adm-row-l"><div class="adm-row-nm">🏆 주간 챌린지</div><div class="adm-row-sub">매주 자동 생성 미션</div></div>
+          <button class="tog" id="tog-weekly" onclick="togGameSetting('weeklyEnabled')"><div class="tog-dot"></div></button>
+        </div>
+        <div class="divider"></div>
+        <div class="adm-row" style="flex-direction:column;align-items:stretch;gap:8px">
+          <div class="adm-row-l"><div class="adm-row-nm">주간 챌린지 보상</div><div class="adm-row-sub">완료 시 지급 마일리지</div></div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <input class="num-inp" id="ch-weekly-reward" type="number" value="50" min="1" max="500" style="width:70px" onchange="saveGameSettings()">
+            <span style="font-size:12px;color:var(--tx3);font-weight:600">마일리지</span>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <!-- 월간 챌린지 -->
+        <div class="adm-row">
+          <div class="adm-row-l"><div class="adm-row-nm">📅 월간 챌린지</div><div class="adm-row-sub">매월 자동 생성 미션</div></div>
+          <button class="tog" id="tog-monthly" onclick="togGameSetting('monthlyEnabled')"><div class="tog-dot"></div></button>
+        </div>
+        <div class="divider"></div>
+        <div class="adm-row" style="flex-direction:column;align-items:stretch;gap:8px">
+          <div class="adm-row-l"><div class="adm-row-nm">월간 챌린지 보상</div><div class="adm-row-sub">완료 시 지급 마일리지</div></div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <input class="num-inp" id="ch-monthly-reward" type="number" value="100" min="1" max="1000" style="width:70px" onchange="saveGameSettings()">
+            <span style="font-size:12px;color:var(--tx3);font-weight:600">마일리지</span>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <!-- 레벨 시스템 -->
+        <div class="adm-row">
+          <div class="adm-row-l"><div class="adm-row-nm">🎮 레벨 시스템</div><div class="adm-row-sub">누적 마일리지 기반 레벨</div></div>
+          <button class="tog" id="tog-level" onclick="togGameSetting('levelEnabled')"><div class="tog-dot"></div></button>
+        </div>
+      </div>
+    </div>
     <!-- ── 알림 테스트 ── -->
     <div class="adm-sec">
       <div class="adm-sec-lbl">알림 테스트</div>
@@ -8949,7 +9004,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0406d';
+const _APP_VERSION = 'v0406e';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -10743,9 +10798,14 @@ function renderHero(){
   // Level pill update
   const _lvPill=document.getElementById('level-pill');
   if(_lvPill){
-    const _ld=S.levelData||{xp:0,level:1};
-    const _lvInfo=getLevelInfo(_ld.xp);
-    _lvPill.innerHTML=`<span style="display:inline-flex;align-items:center;vertical-align:middle;width:16px;height:16px;margin-right:2px">${_lvInfo.svg||_lvInfo.emoji}</span> Lv.${_lvInfo.level}`;
+    if(S.settings?.gamification?.levelEnabled===false){
+      _lvPill.style.display='none';
+    }else{
+      _lvPill.style.display='';
+      const _ld=S.levelData||{xp:0,level:1};
+      const _lvInfo=getLevelInfo(_ld.xp);
+      _lvPill.innerHTML=`<span style="display:inline-flex;align-items:center;vertical-align:middle;width:16px;height:16px;margin-right:2px">${_lvInfo.svg||_lvInfo.emoji}</span> Lv.${_lvInfo.level}`;
+    }
   }
 }
 
@@ -12042,35 +12102,41 @@ window.openLevelPopup=openLevelPopup;
 // ── CHALLENGE SYSTEM FUNCTIONS ──────────────────────────────
 function generateChallenges(){
   const now=new Date();
+  const gs=S.settings?.gamification||{};
   const challenges=S.challenges||[];
   // 만료된 챌린지 정리
   const active=challenges.filter(c=>{
     if(new Date(c.endDate)<now&&!c.completed){
-      // 만료 → 히스토리에 실패로 기록
       return false;
     }
     return true;
   });
   // 주간 챌린지 체크 (월요일 시작)
-  const dayOfWeek=now.getDay()||7;
-  const weekStart=new Date(now);weekStart.setDate(now.getDate()-(dayOfWeek-1));weekStart.setHours(0,0,0,0);
-  const weekEnd=new Date(weekStart);weekEnd.setDate(weekStart.getDate()+6);weekEnd.setHours(23,59,59,999);
-  const hasWeekly=active.some(c=>c.type==='weekly'&&new Date(c.startDate)>=weekStart);
-  if(!hasWeekly){
-    const wTemplates=CHALLENGE_TEMPLATES.filter(t=>t.type==='weekly');
-    const wt=wTemplates[Math.floor(Math.random()*wTemplates.length)];
-    const tn=wt.targets[Math.floor(Math.random()*wt.targets.length)];
-    active.push({id:'ch_'+Date.now(),emoji:wt.emoji,title:wt.title.replace('{n}',tn),type:'weekly',target:tn,progress:0,reward:wt.reward,check:wt.check,startDate:weekStart.toISOString(),endDate:weekEnd.toISOString(),completed:false,claimed:false});
+  if(gs.weeklyEnabled!==false){
+    const dayOfWeek=now.getDay()||7;
+    const weekStart=new Date(now);weekStart.setDate(now.getDate()-(dayOfWeek-1));weekStart.setHours(0,0,0,0);
+    const weekEnd=new Date(weekStart);weekEnd.setDate(weekStart.getDate()+6);weekEnd.setHours(23,59,59,999);
+    const hasWeekly=active.some(c=>c.type==='weekly'&&new Date(c.startDate)>=weekStart);
+    if(!hasWeekly){
+      const wTemplates=CHALLENGE_TEMPLATES.filter(t=>t.type==='weekly');
+      const wt=wTemplates[Math.floor(Math.random()*wTemplates.length)];
+      const tn=wt.targets[Math.floor(Math.random()*wt.targets.length)];
+      const wReward=gs.weeklyReward||wt.reward;
+      active.push({id:'ch_'+Date.now(),emoji:wt.emoji,title:wt.title.replace('{n}',tn),type:'weekly',target:tn,progress:0,reward:wReward,check:wt.check,startDate:weekStart.toISOString(),endDate:weekEnd.toISOString(),completed:false,claimed:false});
+    }
   }
   // 월간 챌린지 체크
-  const monthStart=new Date(now.getFullYear(),now.getMonth(),1);
-  const monthEnd=new Date(now.getFullYear(),now.getMonth()+1,0,23,59,59,999);
-  const hasMonthly=active.some(c=>c.type==='monthly'&&new Date(c.startDate)>=monthStart);
-  if(!hasMonthly){
-    const mTemplates=CHALLENGE_TEMPLATES.filter(t=>t.type==='monthly');
-    const mt=mTemplates[Math.floor(Math.random()*mTemplates.length)];
-    const mn=mt.targets[Math.floor(Math.random()*mt.targets.length)];
-    active.push({id:'ch_'+Date.now()+'m',emoji:mt.emoji,title:mt.title.replace('{n}',mn),type:'monthly',target:mn,progress:0,reward:mt.reward,check:mt.check,startDate:monthStart.toISOString(),endDate:monthEnd.toISOString(),completed:false,claimed:false});
+  if(gs.monthlyEnabled!==false){
+    const monthStart=new Date(now.getFullYear(),now.getMonth(),1);
+    const monthEnd=new Date(now.getFullYear(),now.getMonth()+1,0,23,59,59,999);
+    const hasMonthly=active.some(c=>c.type==='monthly'&&new Date(c.startDate)>=monthStart);
+    if(!hasMonthly){
+      const mTemplates=CHALLENGE_TEMPLATES.filter(t=>t.type==='monthly');
+      const mt=mTemplates[Math.floor(Math.random()*mTemplates.length)];
+      const mn=mt.targets[Math.floor(Math.random()*mt.targets.length)];
+      const mReward=gs.monthlyReward||mt.reward;
+      active.push({id:'ch_'+Date.now()+'m',emoji:mt.emoji,title:mt.title.replace('{n}',mn),type:'monthly',target:mn,progress:0,reward:mReward,check:mt.check,startDate:monthStart.toISOString(),endDate:monthEnd.toISOString(),completed:false,claimed:false});
+    }
   }
   S.challenges=active;
 }
@@ -12127,6 +12193,8 @@ window.claimChallengeReward=claimChallengeReward;
 function renderChallengeCards(){
   const el=document.getElementById('challenge-cards');
   if(!el)return;
+  const _gs=S.settings?.gamification||{};
+  if(_gs.weeklyEnabled===false&&_gs.monthlyEnabled===false){el.innerHTML='';return;}
   generateChallenges();
   updateChallengeProgress();
   const chs=(S.challenges||[]).filter(c=>new Date(c.endDate)>=new Date());
@@ -12161,16 +12229,36 @@ function renderChallengeCards(){
 }
 
 // ── DAILY BONUS ROULETTE FUNCTIONS ──────────────────────────────
+function _getEffectiveRoulettePrizes(){
+  const gs=S.settings?.gamification||{};
+  const minP=gs.rouletteMin||5;
+  const maxP=gs.rouletteMax||100;
+  // 기본 ROULETTE_PRIZES를 min~max 범위로 필터링/조정
+  const filtered=ROULETTE_PRIZES.filter(p=>p.pts>=minP&&p.pts<=maxP);
+  if(filtered.length>0)return filtered;
+  // 범위 내에 기본 상품이 없으면 동적 생성
+  const range=maxP-minP;
+  const steps=[0,.15,.3,.5,.7,.85,1];
+  const emojis=['🎉','⭐','💫','🔥','💎','👑','🐉'];
+  const weights=[30,25,20,12,8,4,1];
+  return steps.map((s,i)=>{
+    const pts=Math.round(minP+range*s);
+    return{emoji:emojis[i]||'⭐',label:`${pts} 마일리지`,pts,weight:weights[i]||5};
+  }).filter((p,i,arr)=>i===0||p.pts!==arr[i-1].pts);
+}
 function pickRoulettePrize(){
-  const total=ROULETTE_PRIZES.reduce((s,p)=>s+p.weight,0);
+  const prizes=_getEffectiveRoulettePrizes();
+  const total=prizes.reduce((s,p)=>s+p.weight,0);
   let r=Math.random()*total;
-  for(const p of ROULETTE_PRIZES){r-=p.weight;if(r<=0)return p;}
-  return ROULETTE_PRIZES[0];
+  for(const p of prizes){r-=p.weight;if(r<=0)return p;}
+  return prizes[0];
 }
 
 function checkDailyBonus(){
   // 양육자는 룰렛 표시하지 않음 (자녀 전용)
   if(isCaregiverUser())return;
+  // 관리자가 룰렛 비활성화한 경우
+  if(S.settings?.gamification?.rouletteEnabled===false)return;
   const db=S.dailyBonus||(S.dailyBonus={lastDate:null,history:[]});
   const today=todayStr();
   if(db.lastDate===today)return; // 오늘 이미 받음
@@ -12185,7 +12273,7 @@ function showDailyRoulette(){
   ov.id='roulette-overlay';
   ov.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;animation:fadeIn .3s';
 
-  const prizes=ROULETTE_PRIZES;
+  const prizes=_getEffectiveRoulettePrizes();
   const slotHTML=prizes.map(p=>`<div class="rlt-item" style="padding:12px;text-align:center"><span style="font-size:28px">${p.emoji}</span><div style="font-size:11px;font-weight:700;color:var(--tx);margin-top:4px">${p.label}</div></div>`).join('');
 
   ov.innerHTML=`<div style="background:var(--card);border-radius:24px;padding:28px 24px;text-align:center;width:min(320px,85vw);animation:popIn .4s cubic-bezier(.175,.885,.32,1.275)">
@@ -12210,7 +12298,7 @@ function spinRoulette(){
   // Slot machine animation
   let count=0;const total=20;
   const interval=setInterval(()=>{
-    const rp=ROULETTE_PRIZES[Math.floor(Math.random()*ROULETTE_PRIZES.length)];
+    const _ep=_getEffectiveRoulettePrizes();const rp=_ep[Math.floor(Math.random()*_ep.length)];
     display.innerHTML=`<div style="font-size:48px">${rp.emoji}</div><div style="font-size:14px;font-weight:800;color:var(--tx3);margin-top:2px">${rp.label}</div>`;
     display.style.transform=`scale(${1+Math.sin(count/3)*.1})`;
     count++;
@@ -13564,6 +13652,8 @@ function renderAdmSettings(){
   const bdayDetail=document.getElementById('bday-settings-detail');if(bdayDetail)bdayDetail.style.display=bdayOn?'':'none';
   const bdayPts=document.getElementById('bday-pts-inp');if(bdayPts)bdayPts.value=S.settings.birthdayBonusPts||100;
   const bdayMsg=document.getElementById('bday-msg-inp');if(bdayMsg&&!bdayMsg.matches(':focus'))bdayMsg.value=S.settings.birthdayMsg||'생일 축하해! 오늘은 네 특별한 날이야! 🎂🎉';
+  // 게이미피케이션 설정 렌더링
+  renderGameSettings();
   // 다자녀 모드 섹션 렌더링
   renderAdmModeSection();
   // 자녀 선택기 렌더링
@@ -14981,6 +15071,47 @@ function delRwd(id){if(!confirm('이 보상을 삭제할까요?'))return;const c
 function toggleRwdClosed(id){const _ms=_getAdmMemberData();const _rwds=(_ms&&_ms.rwds)?_ms.rwds:S.rwds;const r=_rwds.find(x=>x.id===id);if(!r)return;r.closed=!r.closed;if(_globalDataOwner===(_admViewChildId||getViewedMemberId())){const sr=S.rwds.find(x=>x.id===id);if(sr)sr.closed=r.closed;}save();renderAll();toast(r.closed?'⛔ 보상이 종료됐어요':'✅ 보상이 다시 운영돼요');}
 function togSetting(k){if(k==='streak')S.settings.streakBonus=!S.settings.streakBonus;save();renderAdmSettings();toast(S.settings.streakBonus?'✅ 연속 보너스 켜짐':'🔕 꺼짐');}
 function saveSettings(){S.settings.streakBonusPts=parseInt(document.getElementById('bonus-pts-inp').value)||100;save();}
+// ── 게이미피케이션 설정 ──
+function _getGameSettings(){
+  if(!S.settings.gamification)S.settings.gamification={};
+  return S.settings.gamification;
+}
+function togGameSetting(key){
+  const gs=_getGameSettings();
+  gs[key]=gs[key]===false?true:!(gs[key]!==false);
+  save();renderGameSettings();
+  const labels={rouletteEnabled:'일일 룰렛',weeklyEnabled:'주간 챌린지',monthlyEnabled:'월간 챌린지',levelEnabled:'레벨 시스템'};
+  toast(gs[key]!==false?`✅ ${labels[key]||key} 켜짐`:`🔕 ${labels[key]||key} 꺼짐`);
+  if(key==='levelEnabled')renderAll();
+}
+function saveGameSettings(){
+  const gs=_getGameSettings();
+  gs.rouletteMin=parseInt(document.getElementById('rlt-min-inp')?.value)||5;
+  gs.rouletteMax=parseInt(document.getElementById('rlt-max-inp')?.value)||100;
+  if(gs.rouletteMin>gs.rouletteMax){const t=gs.rouletteMin;gs.rouletteMin=gs.rouletteMax;gs.rouletteMax=t;}
+  gs.weeklyReward=parseInt(document.getElementById('ch-weekly-reward')?.value)||50;
+  gs.monthlyReward=parseInt(document.getElementById('ch-monthly-reward')?.value)||100;
+  save();
+}
+function renderGameSettings(){
+  const gs=_getGameSettings();
+  // toggles
+  _setTogState('tog-roulette',gs.rouletteEnabled!==false);
+  _setTogState('tog-weekly',gs.weeklyEnabled!==false);
+  _setTogState('tog-monthly',gs.monthlyEnabled!==false);
+  _setTogState('tog-level',gs.levelEnabled!==false);
+  // inputs
+  const rMin=document.getElementById('rlt-min-inp');if(rMin)rMin.value=gs.rouletteMin||5;
+  const rMax=document.getElementById('rlt-max-inp');if(rMax)rMax.value=gs.rouletteMax||100;
+  const wR=document.getElementById('ch-weekly-reward');if(wR)wR.value=gs.weeklyReward||50;
+  const mR=document.getElementById('ch-monthly-reward');if(mR)mR.value=gs.monthlyReward||100;
+}
+function _setTogState(id,on){
+  const el=document.getElementById(id);if(!el)return;
+  if(on){el.classList.add('on');}else{el.classList.remove('on');}
+}
+window.togGameSetting=togGameSetting;
+window.saveGameSettings=saveGameSettings;
 function togBdaySetting(){S.settings.birthdayBonus=S.settings.birthdayBonus===false?true:!S.settings.birthdayBonus;save();renderAdmSettings();toast(S.settings.birthdayBonus!==false?'🎂 생일 보너스 켜짐':'🔕 생일 보너스 꺼짐');}
 function saveBdaySettings(){S.settings.birthdayBonusPts=parseInt(document.getElementById('bday-pts-inp').value)||100;const msgInp=document.getElementById('bday-msg-inp');S.settings.birthdayMsg=msgInp?msgInp.value.trim()||'생일 축하해! 오늘은 네 특별한 날이야! 🎂🎉':'생일 축하해! 오늘은 네 특별한 날이야! 🎂🎉';save();toast('✅ 생일 이벤트 설정 저장됨');}
 function saveGreetingMode(userId){
@@ -16295,6 +16426,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'v1.9.36',date:'2026-04-06',items:[{type:'improve',text:'🎮 게이미피케이션 관리 — 관리자 설정에서 룰렛·챌린지·레벨 ON/OFF, 마일리지 범위 조정 가능'}]},
   {ver:'v1.9.35',date:'2026-04-06',items:[{type:'fix',text:'레벨 pill과 제목 텍스트 겹침 수정 — flex 레이아웃으로 변경'},{type:'fix',text:'월간 활동 통계가 자녀끼리 통합 표시되던 문제 수정 — 자녀별 로그 분리 필터링'}]},
   {ver:'v1.9.34',date:'2026-04-06',items:['🎰 룰렛 개선 — 스핀 중 마일리지 표시, 자녀 전용, 부모 알림, 코인 애니메이션','🎨 레벨 아이콘 — 20개 고퀄리티 SVG 아이콘으로 교체']},
   {ver:'v1.9.33',date:'2026-04-06',items:['🎮 레벨 시스템 — 활동하면 XP를 얻어 레벨업!','🏆 주간/월간 챌린지 — 한정 미션 달성하고 보상 받기','🎰 일일 보너스 룰렛 — 매일 첫 접속 시 보너스 마일리지']},
