@@ -9003,7 +9003,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0406f';
+const _APP_VERSION = 'v0406g';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -16427,6 +16427,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'v1.9.38',date:'2026-04-06',items:[{type:'fix',text:'비홈 탭(활동기록·보상·성과·나의) 헤더 스크롤 시 자연스럽게 축소 — 갑작스런 크기 변경 제거'}]},
   {ver:'v1.9.37',date:'2026-04-06',items:[{type:'improve',text:'레벨 pill을 마일리지 숫자 옆으로 이동 — 더 깔끔한 레이아웃'},{type:'improve',text:'챌린지 섹션에 라벨 추가 + hero 영역과 간격 확보'}]},
   {ver:'v1.9.36',date:'2026-04-06',items:[{type:'improve',text:'🎮 게이미피케이션 관리 — 관리자 설정에서 룰렛·챌린지·레벨 ON/OFF, 마일리지 범위 조정 가능'}]},
   {ver:'v1.9.35',date:'2026-04-06',items:[{type:'fix',text:'레벨 pill과 제목 텍스트 겹침 수정 — flex 레이아웃으로 변경'},{type:'fix',text:'월간 활동 통계가 자녀끼리 통합 표시되던 문제 수정 — 자녀별 로그 분리 필터링'}]},
@@ -18350,11 +18351,13 @@ function reallyGoTab(tab){
   if(ht) Array.from(ht.children).forEach(c=>c.style.opacity='1');
   const defaultBr2=window.innerWidth>=768?'0':'0 0 38px 38px';
   const logH=document.querySelector('.log-header-sticky');
-  if(logH){logH.classList.remove('compact');logH.style.borderRadius=defaultBr2;}
+  if(logH){logH.classList.remove('compact');logH.style.borderRadius=defaultBr2;_resetHeaderStyles(logH);}
   const rwdH=document.querySelector('.rwd-header-sticky');
-  if(rwdH){rwdH.classList.remove('compact');rwdH.style.borderRadius=defaultBr2;}
+  if(rwdH){rwdH.classList.remove('compact');rwdH.style.borderRadius=defaultBr2;_resetHeaderStyles(rwdH);}
   const histH=document.querySelector('.hist-hero');
-  if(histH){histH.classList.remove('compact');histH.style.borderRadius=defaultBr2;}
+  if(histH){histH.classList.remove('compact');histH.style.borderRadius=defaultBr2;_resetHeaderStyles(histH);}
+  const myH=document.querySelector('.my-header');
+  if(myH){myH.classList.remove('compact');myH.style.borderRadius=defaultBr2;_resetHeaderStyles(myH);}
 
   // Set tab theme
   document.body.setAttribute('data-tab', tab);
@@ -18509,11 +18512,13 @@ function swipeToTab(tab,animClass){
   const hero=document.querySelector('.hero');
   if(hero)hero.classList.remove('compact');
   const logH2=document.querySelector('.log-header-sticky');
-  if(logH2)logH2.classList.remove('compact');
+  if(logH2){logH2.classList.remove('compact');if(window._resetHeaderStyles)_resetHeaderStyles(logH2);}
   const rwdH2=document.querySelector('.rwd-header-sticky');
-  if(rwdH2)rwdH2.classList.remove('compact');
+  if(rwdH2){rwdH2.classList.remove('compact');if(window._resetHeaderStyles)_resetHeaderStyles(rwdH2);}
   const histH2=document.querySelector('.hist-hero');
-  if(histH2)histH2.classList.remove('compact');
+  if(histH2){histH2.classList.remove('compact');if(window._resetHeaderStyles)_resetHeaderStyles(histH2);}
+  const myH2=document.querySelector('.my-header');
+  if(myH2){myH2.classList.remove('compact');if(window._resetHeaderStyles)_resetHeaderStyles(myH2);}
 
   // Set tab theme
   document.body.setAttribute('data-tab', tab);
@@ -20862,6 +20867,62 @@ window._createState = _createState;
   const _unitEl=hero?hero.querySelector('.hero-unit'):null;
   const _homTop=document.querySelector('.home-top');
   const _homTopChildren=_homTop?Array.from(_homTop.children):[];
+  // 비홈 탭 헤더 인라인 스타일 초기화 (탭 전환 시)
+  function _resetHeaderStyles(hdr){
+    if(!hdr)return;
+    hdr.style.paddingTop='';hdr.style.paddingBottom='';
+    const h2=hdr.querySelector('h2');if(h2)h2.style.fontSize='';
+    const sub=hdr.querySelector('p')||hdr.querySelector('.my-header-sub');
+    if(sub){sub.style.opacity='';sub.style.maxHeight='';sub.style.margin='';sub.style.overflow='';}
+    const stats=hdr.querySelector('.hdr-stats');
+    if(stats){stats.style.marginTop='';stats.style.padding='';
+      stats.querySelectorAll('.hdr-stat-num').forEach(n=>n.style.fontSize='');
+      stats.querySelectorAll('.hdr-stat-lbl').forEach(l=>l.style.fontSize='');
+      stats.querySelectorAll('.hdr-stat-divider').forEach(d=>d.style.height='');
+    }
+  }
+  window._resetHeaderStyles=_resetHeaderStyles;
+  // 비홈 탭 헤더 스무스 축소 헬퍼
+  function _smoothHeader(hdr,ratio,brStr,cfg){
+    const r=Math.max(0,Math.min(1,ratio));
+    // padding (top/bottom)
+    const pad=cfg.padMax-(cfg.padMax-cfg.padMin)*r;
+    hdr.style.paddingTop='calc('+pad+'px + env(safe-area-inset-top))';
+    hdr.style.paddingBottom=pad+'px';
+    hdr.style.borderRadius=brStr;
+    // h2 font size
+    const h2=hdr.querySelector('h2');
+    if(h2) h2.style.fontSize=(cfg.h2Max-(cfg.h2Max-cfg.h2Min)*r)+'px';
+    // sub text (p, .my-header-sub, .hist-hero-sub) — fade out & shrink
+    const sub=hdr.querySelector('p')||hdr.querySelector('.my-header-sub');
+    if(sub){
+      sub.style.opacity=Math.max(0,1-r*2.5); // disappears by 40% scroll
+      sub.style.maxHeight=(1-Math.min(1,r*2.5))*30+'px';
+      sub.style.margin=r>0.4?'0':'';
+      sub.style.overflow='hidden';
+    }
+    // hdr-stats row — shrink smoothly
+    const stats=hdr.querySelector('.hdr-stats');
+    if(stats){
+      const mtMax=10,mtMin=6;
+      stats.style.marginTop=(mtMax-(mtMax-mtMin)*r)+'px';
+      const pMax=8,pMin=5;
+      stats.style.padding=(pMax-(pMax-pMin)*r)+'px '+(pMax+2-(2)*r)+'px';
+      // stat numbers
+      stats.querySelectorAll('.hdr-stat-num').forEach(n=>{
+        n.style.fontSize=(20-(20-16)*r)+'px';
+      });
+      stats.querySelectorAll('.hdr-stat-lbl').forEach(l=>{
+        l.style.fontSize=(10-(10-8)*r)+'px';
+      });
+      stats.querySelectorAll('.hdr-stat-divider').forEach(d=>{
+        d.style.height=(28-(28-20)*r)+'px';
+      });
+    }
+    // compact class still used for overflow/display toggles
+    if(r>0.9&&!hdr.classList.contains('compact'))hdr.classList.add('compact');
+    else if(r<0.1&&hdr.classList.contains('compact'))hdr.classList.remove('compact');
+  }
   let _uhcRaf=0;
   function updateHeaderCompact(){
     if(_uhcRaf) return;
@@ -20920,37 +20981,27 @@ window._createState = _createState;
           _homTopChildren.forEach(c=>c.style.opacity=v);
         }
       }
-      // Log (raw scrollY + hysteresis)
+      // ── 다른 탭 스무스 축소 (binary compact → progressive interpolation) ──
+      const _r=brRatioOther; // 0(top) → 1(scrolled)
+      // Log
       const logHdr = document.querySelector('.log-header-sticky');
       if(logHdr && document.getElementById('s-log')?.classList.contains('on')){
-        const _lc=logHdr.classList.contains('compact');
-        if(!_lc && scrollY > threshold) logHdr.classList.add('compact');
-        else if(_lc && scrollY < thresholdOff) logHdr.classList.remove('compact');
-        logHdr.style.borderRadius=brStrOther;
+        _smoothHeader(logHdr,_r,brStrOther,{padMax:18,padMin:10,h2Max:22,h2Min:16});
       }
-      // Reward (raw scrollY + hysteresis)
+      // Reward
       const rwdHdr = document.querySelector('.rwd-header-sticky');
       if(rwdHdr && document.getElementById('s-rwd')?.classList.contains('on')){
-        const _rc=rwdHdr.classList.contains('compact');
-        if(!_rc && scrollY > threshold) rwdHdr.classList.add('compact');
-        else if(_rc && scrollY < thresholdOff) rwdHdr.classList.remove('compact');
-        rwdHdr.style.borderRadius=brStrOther;
+        _smoothHeader(rwdHdr,_r,brStrOther,{padMax:18,padMin:10,h2Max:22,h2Min:16});
       }
-      // History/Stats (raw scrollY + hysteresis)
+      // History/Stats
       const histHdr = document.querySelector('.hist-hero');
       if(histHdr && document.getElementById('s-hist')?.classList.contains('on')){
-        const _hc=histHdr.classList.contains('compact');
-        if(!_hc && scrollY > threshold) histHdr.classList.add('compact');
-        else if(_hc && scrollY < thresholdOff) histHdr.classList.remove('compact');
-        histHdr.style.borderRadius=brStrOther;
+        _smoothHeader(histHdr,_r,brStrOther,{padMax:20,padMin:10,h2Max:22,h2Min:16});
       }
-      // My (raw scrollY + hysteresis)
+      // My
       const myHdr = document.querySelector('.my-header');
       if(myHdr && document.getElementById('s-my')?.classList.contains('on')){
-        const _mc=myHdr.classList.contains('compact');
-        if(!_mc && scrollY > threshold) myHdr.classList.add('compact');
-        else if(_mc && scrollY < thresholdOff) myHdr.classList.remove('compact');
-        myHdr.style.borderRadius=brStrOther;
+        _smoothHeader(myHdr,_r,brStrOther,{padMax:18,padMin:10,h2Max:22,h2Min:16});
       }
     });
   }
