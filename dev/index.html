@@ -4599,6 +4599,10 @@ requestAnimationFrame(function(){
 <!-- USER FLOATING MENU (for other family members) -->
 <div class="pfm-bg" id="user-fm-bg" onclick="closeUserFm()" style="display:none"></div>
 <div class="pfm-menu user-fm" id="user-fm-menu" style="display:none">
+  <div id="user-fm-avatar-header" style="display:flex;flex-direction:column;align-items:center;padding:14px 12px 10px;border-bottom:1px solid rgba(0,0,0,.06)">
+    <div id="user-fm-avatar" style="width:56px;height:56px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:32px;box-shadow:0 2px 8px rgba(0,0,0,.1)"></div>
+    <div id="user-fm-name" style="margin-top:6px;font-size:14px;font-weight:700;color:var(--tx)"></div>
+  </div>
   <div class="pfm-item" id="user-fm-msg-btn" onclick="userFmAction('read')">
     <svg class="pfm-ico" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
     <div class="pfm-txt"><div class="pfm-nm" id="user-fm-read-label">받은 메시지</div><div class="pfm-desc" id="user-fm-read-desc">새 메시지 확인</div></div>
@@ -10547,6 +10551,7 @@ function renderAll(){
   renderNavUsers();
   renderHdrStats();
   _renderHistHeroSub();
+  try{if(typeof _updatePlanBadges==='function')_updatePlanBadges();}catch(e){}
   if(typeof checkOnboarding==='function') checkOnboarding();
 }
 
@@ -11689,7 +11694,8 @@ function renderRewardGrid(){
       </div>`;
     }
 
-    return `<div class="rwd-card${r.goal?' goal':''}${sale?' on-sale':''}" data-rwdid="${r.id}">
+    return `<div class="rwd-card${r.goal?' goal':''}${sale?' on-sale':''}" data-rwdid="${r.id}" style="position:relative;overflow:hidden;--lp-gauge-color:rgba(99,102,241,.15)">
+      <div class="lp-gauge"><div class="lp-gauge-fill"></div></div>
       ${r.goal?'<div class="goal-tag"><svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="29" stroke="#EF4444" stroke-width="3.5" stroke-dasharray="5 2.5" opacity=".9"/><circle cx="32" cy="32" r="21" stroke="#EF4444" stroke-width="2.5" opacity=".65"/><text x="32" y="30" text-anchor="middle" font-size="15" font-weight="900" fill="#EF4444" font-family="Noto Sans KR,sans-serif">목표</text><text x="32" y="43" text-anchor="middle" font-size="9" font-weight="800" fill="#EF4444" font-family="sans-serif" letter-spacing="2" opacity=".7">GOAL</text></svg></div>':''}
       ${sale?`<div class="sale-ribbon">${escapeHtml(sale.label||'할인 이벤트')}</div>`:''}
       <div class="rwd-e">${escapeHtml(r.emoji)}</div><div class="rwd-nm">${escapeHtml(r.name)}</div>
@@ -11716,20 +11722,25 @@ function attachRwdLongPress(){
   grid.querySelectorAll('.rwd-card[data-rwdid]').forEach(card=>{
     const rwdId=card.dataset.rwdid;
     let lpTimer=null,didLongPress=false,startY=0,didMove=false;
+    const gauge=card.querySelector('.lp-gauge');
+    const gaugeFill=gauge?.querySelector('.lp-gauge-fill');
+    const startGauge=()=>{if(gauge&&gaugeFill){gaugeFill.style.transition='none';gaugeFill.style.width='0';gauge.offsetHeight;gauge.classList.add('active');gaugeFill.style.transition='width .45s linear';gaugeFill.style.width='100%';}};
+    const cancelGauge=()=>{if(gauge){gauge.classList.remove('active');if(gaugeFill){gaugeFill.style.transition='none';gaugeFill.style.width='0';}}};
     card.addEventListener('touchstart',(e)=>{
       didLongPress=false;didMove=false;
       startY=e.touches[0].clientY;
-      lpTimer=setTimeout(()=>{didLongPress=true;showRwdGoalChoice(rwdId,card);},500);
+      startGauge();
+      lpTimer=setTimeout(()=>{didLongPress=true;cancelGauge();if(navigator.vibrate)navigator.vibrate(30);showRwdGoalChoice(rwdId,card);},500);
     },{passive:true});
     card.addEventListener('touchmove',(e)=>{
-      if(Math.abs(e.touches[0].clientY-startY)>8){didMove=true;clearTimeout(lpTimer);}
+      if(Math.abs(e.touches[0].clientY-startY)>8){didMove=true;clearTimeout(lpTimer);cancelGauge();}
     },{passive:true});
-    card.addEventListener('touchend',()=>{clearTimeout(lpTimer);});
-    card.addEventListener('touchcancel',()=>{clearTimeout(lpTimer);});
+    card.addEventListener('touchend',()=>{clearTimeout(lpTimer);cancelGauge();});
+    card.addEventListener('touchcancel',()=>{clearTimeout(lpTimer);cancelGauge();});
     card.addEventListener('contextmenu',(e)=>e.preventDefault()); // 꾹 누르기 컨텍스트 메뉴 방지
-    card.addEventListener('mousedown',(e)=>{didLongPress=false;lpTimer=setTimeout(()=>{didLongPress=true;showRwdGoalChoice(rwdId,card);},500);});
-    card.addEventListener('mouseleave',()=>{clearTimeout(lpTimer);});
-    card.addEventListener('mouseup',()=>{clearTimeout(lpTimer);});
+    card.addEventListener('mousedown',(e)=>{didLongPress=false;startGauge();lpTimer=setTimeout(()=>{didLongPress=true;cancelGauge();if(navigator.vibrate)navigator.vibrate(30);showRwdGoalChoice(rwdId,card);},500);});
+    card.addEventListener('mouseleave',()=>{clearTimeout(lpTimer);cancelGauge();});
+    card.addEventListener('mouseup',()=>{clearTimeout(lpTimer);cancelGauge();});
     // Block click after long press
     card.addEventListener('click',(e)=>{if(didLongPress){didLongPress=false;e.preventDefault();e.stopPropagation();}},true);
   });
@@ -17125,6 +17136,14 @@ function onUserIconClick(userId){
   _familyFlowActive=true;
   const unread=getUnreadCount(userId);
   const name=MEMBERS[userId]?.name||'가족';
+  // Populate avatar header
+  const avatarEl=document.getElementById('user-fm-avatar');
+  if(avatarEl){
+    const memberInfo=MEMBERS[userId];
+    avatarEl.style.background=memberInfo?.color||'#E2E8F0';
+    avatarEl.innerHTML=getAvatarHTML(userId,56);
+  }
+  document.getElementById('user-fm-name').textContent=name;
   document.getElementById('user-fm-read-label').textContent=name+'의 메시지';
   document.getElementById('user-fm-read-desc').textContent=unread>0?`읽지 않은 메시지 ${unread}개`:'받은 메시지 확인';
   document.getElementById('user-fm-send-label').textContent=name+'에게 보내기';
