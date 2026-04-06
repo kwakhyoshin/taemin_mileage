@@ -2547,6 +2547,27 @@ button:disabled {
   height: 100%;
   filter: drop-shadow(0 0 4px rgba(255,215,0,0.8));
 }
+/* ── CHALLENGE REWARD CELEBRATION ─────────────── */
+@keyframes challengeRing {
+  0%{width:20px;height:20px;opacity:1;border-width:3px}
+  100%{width:140px;height:140px;opacity:0;border-width:1px;margin-left:-60px;margin-top:-60px}
+}
+@keyframes challengeFlash {
+  0%{opacity:1}
+  100%{opacity:0}
+}
+@keyframes challengePtsBounce {
+  0%{transform:scale(1)}
+  15%{transform:scale(1.5);color:#FFD700}
+  30%{transform:scale(0.85)}
+  45%{transform:scale(1.3);color:#FF6B35}
+  60%{transform:scale(0.95)}
+  75%{transform:scale(1.15)}
+  100%{transform:scale(1)}
+}
+.challenge-pts-anim {
+  animation: challengePtsBounce .8s cubic-bezier(.36,.07,.19,.97) forwards;
+}
 @keyframes rwd-card-bounce {
   0%{transform:scale(1)}
   30%{transform:scale(1.08)}
@@ -9003,7 +9024,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0406h';
+const _APP_VERSION = 'v0406i';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -12174,7 +12195,7 @@ function updateChallengeProgress(){
   });
 }
 
-function claimChallengeReward(chId){
+function claimChallengeReward(chId, btnEl){
   const ch=S.challenges.find(c=>c.id===chId);
   if(!ch||!ch.completed||ch.claimed)return;
   ch.claimed=true;
@@ -12183,9 +12204,12 @@ function claimChallengeReward(chId){
   hist.unshift({...ch,claimedAt:Date.now()});
   if(hist.length>50)S.challengeHistory=hist.slice(0,50);
   save();
-  renderAll();
+  // 애니메이션 먼저 실행 (renderAll 전에 소스 요소 위치 캡처)
+  flyChallengeReward(btnEl, ch.reward);
   toast(`${ch.emoji} 챌린지 완료! +${ch.reward} 마일리지 🎉`);
   confetti();
+  // 약간 딜레이 후 렌더링 (애니메이션이 시작된 후)
+  setTimeout(()=>renderAll(), 150);
 }
 window.claimChallengeReward=claimChallengeReward;
 
@@ -12217,7 +12241,7 @@ function renderChallengeCards(){
           <div style="font-size:13px;font-weight:700;color:var(--tx);margin-top:2px">${c.title}</div>
         </div>
         <div style="text-align:right">
-          ${isComplete&&!isClaimed?`<button onclick="claimChallengeReward('${c.id}')" style="padding:6px 14px;border:none;border-radius:10px;background:var(--tab-color,var(--or));color:#fff;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">+${c.reward}M 받기</button>`
+          ${isComplete&&!isClaimed?`<button onclick="claimChallengeReward('${c.id}',this)" style="padding:6px 14px;border:none;border-radius:10px;background:var(--tab-color,var(--or));color:#fff;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">+${c.reward}M 받기</button>`
           :isClaimed?'<span style="font-size:12px;color:var(--gn2);font-weight:700">✅ 완료</span>'
           :`<span style="font-size:12px;font-weight:800;color:var(--tx3)">${c.progress}/${c.target}</span>`}
         </div>
@@ -16427,6 +16451,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.40 (v0406i)',date:'2026-04-06',items:[{type:'new',text:'챌린지 보상 수령 시 화려한 축하 애니메이션 — 무지개 별 파티클, 버스트 이펙트, 스파클 트레일, 링 웨이브'}]},
   {ver:'1.9.39 (v0406h)',date:'2026-04-06',items:[{type:'fix',text:'릴리즈 노트 버전 표시 오류 수정 — vv 중복, undefined 항목, dev버전 누락'},{type:'improve',text:'릴리즈 노트에 개선(노란색) 뱃지 추가'}]},
   {ver:'1.9.38 (v0406g)',date:'2026-04-06',items:[{type:'fix',text:'비홈 탭(활동기록·보상·성과·나의) 헤더 스크롤 시 자연스럽게 축소 — 갑작스런 크기 변경 제거'}]},
   {ver:'1.9.37 (v0406f)',date:'2026-04-06',items:[{type:'improve',text:'레벨 pill을 마일리지 숫자 옆으로 이동 — 더 깔끔한 레이아웃'},{type:'improve',text:'챌린지 섹션에 라벨 추가 + hero 영역과 간격 확보'}]},
@@ -18720,6 +18745,211 @@ function _triggerHeroPtsBounce(targetId) {
   void el.offsetWidth;
   el.classList.add('hero-pts-anim');
   el.addEventListener('animationend', function() { el.classList.remove('hero-pts-anim'); }, { once: true });
+}
+
+// ── CHALLENGE REWARD CELEBRATION ANIMATION ────────────
+/**
+ * flyChallengeReward(sourceEl, amount)
+ * 챌린지 보상 수령 시 화려한 축하 애니메이션
+ * - 더 많은 별 (10-14개), 무지개 색상, 큰 사이즈
+ * - 버스트 이펙트 + 스크린 플래시 + 링 웨이브
+ * - 마일리지 카운터 큰 바운스
+ */
+function flyChallengeReward(sourceEl, amount) {
+  const currentTab = document.body.getAttribute('data-tab') || 'home';
+  let targetId = 'hero-pts';
+  if (currentTab === 'log') targetId = 'log-today-pts';
+  else if (currentTab === 'rwd') targetId = 'rwd-hdr-pts';
+  const targetEl = document.getElementById(targetId);
+  if (!targetEl) return;
+  const tRect = targetEl.getBoundingClientRect();
+  const tx = tRect.left + tRect.width / 2;
+  const ty = tRect.top + tRect.height / 2;
+
+  let sx, sy;
+  if (sourceEl) {
+    const sRect = sourceEl.getBoundingClientRect();
+    sx = sRect.left + sRect.width / 2;
+    sy = sRect.top + sRect.height / 2;
+  } else {
+    sx = window.innerWidth / 2;
+    sy = window.innerHeight * 0.65;
+  }
+
+  // ── 1) 버스트 이펙트: 버튼에서 방사형 파티클 폭발 ──
+  const burstColors = ['#FFD700','#FF6B35','#EF4444','#8B5CF6','#3B82F6','#2ECC71','#EC4899','#F59E0B'];
+  for (let i = 0; i < 16; i++) {
+    const dot = document.createElement('div');
+    const angle = (i / 16) * Math.PI * 2;
+    const dist = 50 + Math.random() * 60;
+    const sz = 4 + Math.random() * 6;
+    dot.style.cssText = 'position:fixed;pointer-events:none;z-index:100000;border-radius:50%;' +
+      'width:'+sz+'px;height:'+sz+'px;background:'+burstColors[i%burstColors.length]+';' +
+      'left:'+(sx-sz/2)+'px;top:'+(sy-sz/2)+'px;opacity:1;' +
+      'transition:all .55s cubic-bezier(.25,.46,.45,.94)';
+    document.body.appendChild(dot);
+    requestAnimationFrame(() => {
+      dot.style.left = (sx - sz/2 + Math.cos(angle)*dist) + 'px';
+      dot.style.top = (sy - sz/2 + Math.sin(angle)*dist) + 'px';
+      dot.style.opacity = '0';
+      dot.style.transform = 'scale(0.2)';
+    });
+    setTimeout(() => dot.remove(), 600);
+  }
+
+  // ── 2) 링 웨이브: 원형 확산 이펙트 ──
+  const ring = document.createElement('div');
+  ring.style.cssText = 'position:fixed;pointer-events:none;z-index:99998;border-radius:50%;' +
+    'border:3px solid rgba(255,215,0,0.8);width:20px;height:20px;' +
+    'left:'+(sx-10)+'px;top:'+(sy-10)+'px;' +
+    'animation:challengeRing .7s ease-out forwards';
+  document.body.appendChild(ring);
+  setTimeout(() => ring.remove(), 750);
+
+  // ── 3) 스크린 플래시 ──
+  const flash = document.createElement('div');
+  flash.style.cssText = 'position:fixed;inset:0;z-index:99997;pointer-events:none;' +
+    'background:radial-gradient(circle at '+sx+'px '+sy+'px,rgba(255,215,0,.35),transparent 70%);' +
+    'animation:challengeFlash .5s ease-out forwards';
+  document.body.appendChild(flash);
+  setTimeout(() => flash.remove(), 550);
+
+  // ── 4) 메인 별 파티클: 더 많고, 더 크고, 무지개 색상 ──
+  const count = 10 + Math.floor(Math.random() * 5);
+  const starColors = [
+    {g1:'#FFF176',g2:'#FFD700',g3:'#FF8F00',stroke:'#FFC107'},
+    {g1:'#F9A8D4',g2:'#EC4899',g3:'#BE185D',stroke:'#EC4899'},
+    {g1:'#C4B5FD',g2:'#8B5CF6',g3:'#6D28D9',stroke:'#8B5CF6'},
+    {g1:'#93C5FD',g2:'#3B82F6',g3:'#1D4ED8',stroke:'#3B82F6'},
+    {g1:'#6EE7B7',g2:'#10B981',g3:'#047857',stroke:'#10B981'},
+    {g1:'#FCD34D',g2:'#F59E0B',g3:'#D97706',stroke:'#F59E0B'},
+  ];
+
+  function makeStarSVG(c) {
+    const gid='csg'+Math.random().toString(36).slice(2,8);
+    return '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="'+gid+'" cx="50%" cy="30%" r="70%"><stop offset="0%" stop-color="'+c.g1+'"/><stop offset="60%" stop-color="'+c.g2+'"/><stop offset="100%" stop-color="'+c.g3+'"/></radialGradient></defs><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" fill="url(#'+gid+')" stroke="'+c.stroke+'" stroke-width="0.5"/></svg>';
+  }
+
+  const particles = [];
+  for (let i = 0; i < count; i++) {
+    const el = document.createElement('div');
+    el.className = 'coin-particle';
+    const sc = starColors[i % starColors.length];
+    el.innerHTML = makeStarSVG(sc);
+    const sz = 24 + Math.random() * 12;
+    el.style.width = sz + 'px';
+    el.style.height = sz + 'px';
+    const offX = (Math.random() - 0.5) * 50;
+    const offY = (Math.random() - 0.5) * 50;
+    el.style.left = (sx - sz/2 + offX) + 'px';
+    el.style.top  = (sy - sz/2 + offY) + 'px';
+    el.style.opacity = '1';
+    el.querySelector('svg').style.filter = 'drop-shadow(0 0 6px '+sc.g2+')';
+    document.body.appendChild(el);
+    particles.push({ el, offX, offY, sz });
+  }
+
+  // ── 5) 스파클 트레일 파티클 (별 경로에 반짝임) ──
+  function spawnSparkle(x, y, color) {
+    const sp = document.createElement('div');
+    const spSz = 3 + Math.random() * 4;
+    sp.style.cssText = 'position:fixed;pointer-events:none;z-index:99999;border-radius:50%;' +
+      'width:'+spSz+'px;height:'+spSz+'px;background:'+color+';' +
+      'left:'+(x-spSz/2)+'px;top:'+(y-spSz/2)+'px;opacity:0.9;' +
+      'box-shadow:0 0 4px '+color+';transition:all .4s ease-out';
+    document.body.appendChild(sp);
+    requestAnimationFrame(() => {
+      sp.style.opacity = '0';
+      sp.style.transform = 'scale(0.1)';
+    });
+    setTimeout(() => sp.remove(), 450);
+  }
+
+  particles.forEach(function(p, idx) {
+    const el = p.el, offX = p.offX, offY = p.offY, sz = p.sz;
+    const delay = idx * 50;
+    const duration = 900 + Math.random() * 250;
+    const midX = (sx + tx) / 2 + (Math.random() - 0.5) * 140;
+    const midY = Math.min(sy, ty) - 90 - Math.random() * 110;
+    const startX = sx + offX;
+    const startY = sy + offY;
+    let startTime = null;
+    let lastSparkle = 0;
+
+    const cx1 = startX + (midX - startX) * 0.3;
+    const cy1 = startY - 60;
+    const cx2 = midX;
+    const cy2 = midY;
+
+    const sc = starColors[idx % starColors.length];
+
+    function animate(timestamp) {
+      if (!startTime) startTime = timestamp + delay;
+      const elapsed = timestamp - startTime;
+      if (elapsed < 0) { requestAnimationFrame(animate); return; }
+      const t = Math.min(elapsed / duration, 1);
+      const u = t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2;
+      const bx = Math.pow(1-u,3)*startX + 3*Math.pow(1-u,2)*u*cx1 + 3*(1-u)*u*u*cx2 + u*u*u*tx;
+      const by = Math.pow(1-u,3)*startY + 3*Math.pow(1-u,2)*u*cy1 + 3*(1-u)*u*u*cy2 + u*u*u*ty;
+      const rot = t * 360 * (idx % 2 === 0 ? 1 : -1);
+      const scale = t < 0.7 ? 1 + Math.sin(t*Math.PI)*0.3 : Math.max(0, 1 - (t - 0.7) * 2.5);
+      const opacity = t < 0.85 ? 1 : Math.max(0, 1 - (t - 0.85) / 0.15);
+      const dx = bx - startX - sz/2;
+      const dy = by - startY - sz/2;
+      el.style.webkitTransform = 'translate3d('+dx+'px,'+dy+'px,0) scale('+scale+') rotate('+rot+'deg)';
+      el.style.transform = 'translate3d('+dx+'px,'+dy+'px,0) scale('+scale+') rotate('+rot+'deg)';
+      el.style.opacity = opacity;
+
+      if (t > 0.1 && t < 0.85 && elapsed - lastSparkle > 80) {
+        lastSparkle = elapsed;
+        spawnSparkle(bx, by, sc.g2);
+      }
+
+      if (t < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        el.remove();
+        if (idx === count - 1) {
+          _triggerChallengeBounceBig(targetId);
+        }
+      }
+    }
+    requestAnimationFrame(animate);
+  });
+}
+
+function _triggerChallengeBounceBig(targetId) {
+  const el = document.getElementById(targetId || 'hero-pts');
+  if (!el) return;
+  el.classList.remove('hero-pts-anim');
+  el.classList.remove('challenge-pts-anim');
+  void el.offsetWidth;
+  el.classList.add('challenge-pts-anim');
+  el.addEventListener('animationend', function() { el.classList.remove('challenge-pts-anim'); }, { once: true });
+
+  // 도착 시 추가 버스트
+  const tRect = el.getBoundingClientRect();
+  const cx = tRect.left + tRect.width / 2;
+  const cy = tRect.top + tRect.height / 2;
+  const burstColors = ['#FFD700','#FF6B35','#8B5CF6','#3B82F6','#2ECC71','#EC4899'];
+  for (let i = 0; i < 10; i++) {
+    const dot = document.createElement('div');
+    const angle = (i / 10) * Math.PI * 2;
+    const dist = 30 + Math.random() * 40;
+    const sz = 3 + Math.random() * 4;
+    dot.style.cssText = 'position:fixed;pointer-events:none;z-index:100000;border-radius:50%;' +
+      'width:'+sz+'px;height:'+sz+'px;background:'+burstColors[i%burstColors.length]+';' +
+      'left:'+(cx-sz/2)+'px;top:'+(cy-sz/2)+'px;opacity:1;' +
+      'transition:all .45s cubic-bezier(.25,.46,.45,.94)';
+    document.body.appendChild(dot);
+    requestAnimationFrame(() => {
+      dot.style.left = (cx - sz/2 + Math.cos(angle)*dist) + 'px';
+      dot.style.top = (cy - sz/2 + Math.sin(angle)*dist) + 'px';
+      dot.style.opacity = '0';
+      dot.style.transform = 'scale(0.2)';
+    });
+    setTimeout(() => dot.remove(), 500);
+  }
 }
 
 // ── REVERSE COIN ANIMATION (마일리지 → 보상 카드) ───────
