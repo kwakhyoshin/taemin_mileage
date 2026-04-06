@@ -502,8 +502,7 @@ body.dark .theme-pick.active .theme-pick-radio{border-color:#818CF8;background:#
 .hero.compact .hero-unit{font-size:14px;display:inline!important;opacity:1!important;visibility:visible!important}
 .hero.compact .hero-goal{max-height:0;margin-top:0;opacity:0}
 .hero.compact .streak-pill{padding:4px 10px;font-size:12px}
-.hero.compact .level-pill{padding:4px 10px;font-size:12px}
-.hero.compact .hero-pills-row{margin-bottom:2px}
+.hero.compact .level-pill{padding:3px 8px;font-size:11px;margin-bottom:4px}
 .hero.compact .prog-track{margin-top:10px}
 .hero.compact .mily-greeting-hero{display:none!important}
 .hero.compact .prog-row{margin-top:3px;font-size:13px}
@@ -3613,14 +3612,14 @@ requestAnimationFrame(function(){
     <div id="child-switcher" style="flex-shrink:0"></div>
   </div>
   <div class="hero">
-    <div class="hero-pills-row" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-      <div class="level-pill" id="level-pill" style="background:rgba(255,255,255,.2);border-radius:20px;padding:5px 12px;font-size:13px;font-weight:800;transition:all .25s;cursor:pointer;-webkit-tap-highlight-color:transparent;display:inline-flex;align-items:center" onclick="openLevelPopup()">🌱 Lv.1</div>
-      <div class="streak-pill" id="streak-pill" style="position:static;background:rgba(255,255,255,.2);border-radius:20px;padding:5px 12px;font-size:13px;font-weight:800;transition:all .25s;cursor:pointer;-webkit-tap-highlight-color:transparent"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 01-7 7 7 7 0 01-7-7c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg> 0일 연속</div>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:4px">
+      <div class="streak-pill" id="streak-pill" style="background:rgba(255,255,255,.2);border-radius:20px;padding:5px 12px;font-size:13px;font-weight:800;transition:all .25s;cursor:pointer;-webkit-tap-highlight-color:transparent"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 01-7 7 7 7 0 01-7-7c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg> 0일 연속</div>
     </div>
     <div class="hero-lbl" id="hero-lbl">나의 마일리지</div>
     <div id="child-selector"></div>
-    <div class="hero-pts-wrap" style="display:flex;align-items:flex-end;gap:6px;margin:4px 0">
+    <div class="hero-pts-wrap" style="display:flex;align-items:flex-end;gap:8px;margin:4px 0">
       <span class="hero-pts" id="hero-pts">0</span><span class="hero-unit">M</span>
+      <div class="level-pill" id="level-pill" style="background:rgba(255,255,255,.2);border-radius:14px;padding:4px 10px;font-size:12px;font-weight:800;transition:all .25s;cursor:pointer;-webkit-tap-highlight-color:transparent;display:inline-flex;align-items:center;margin-left:2px;margin-bottom:8px;white-space:nowrap" onclick="openLevelPopup()">🌱 Lv.1</div>
     </div>
     <div class="hero-goal" id="hero-goal"></div>
     <div class="prog-track"><div class="prog-fill" id="hero-bar" style="width:0%"></div></div>
@@ -3637,7 +3636,7 @@ requestAnimationFrame(function(){
     <div style="font-size:18px;font-weight:900;color:#fff;margin-bottom:4px" id="birthday-banner-title"></div>
     <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,.85)" id="birthday-banner-sub"></div>
   </div>
-  <div id="challenge-cards" style="margin:0 16px 12px"></div>
+  <div id="challenge-cards" style="margin:16px 16px 14px"></div>
   <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> 오늘 할 일</div>
   <div class="act-grid" id="home-grid"></div>
   <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> 최근 활동</div>
@@ -9004,7 +9003,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0406e';
+const _APP_VERSION = 'v0406f';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -12199,7 +12198,9 @@ function renderChallengeCards(){
   updateChallengeProgress();
   const chs=(S.challenges||[]).filter(c=>new Date(c.endDate)>=new Date());
   if(!chs.length){el.innerHTML='';return;}
-  el.innerHTML=chs.map(c=>{
+  // 컴팩트 섹션 라벨
+  let _chHdr='<div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;padding:0 2px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--tx3)" stroke-width="2.5" stroke-linecap="round" style="opacity:.7"><path d="M6 9H4.5a2.5 2.5 0 010-5H6"/><path d="M18 9h1.5a2.5 2.5 0 000-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0012 0V2z"/></svg><span style="font-size:12px;font-weight:800;color:var(--tx3);letter-spacing:.3px">진행 중인 챌린지</span></div>';
+  el.innerHTML=_chHdr+chs.map(c=>{
     const pct=Math.round(c.progress/c.target*100);
     const isComplete=c.completed;
     const isClaimed=c.claimed;
@@ -16426,6 +16427,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'v1.9.37',date:'2026-04-06',items:[{type:'improve',text:'레벨 pill을 마일리지 숫자 옆으로 이동 — 더 깔끔한 레이아웃'},{type:'improve',text:'챌린지 섹션에 라벨 추가 + hero 영역과 간격 확보'}]},
   {ver:'v1.9.36',date:'2026-04-06',items:[{type:'improve',text:'🎮 게이미피케이션 관리 — 관리자 설정에서 룰렛·챌린지·레벨 ON/OFF, 마일리지 범위 조정 가능'}]},
   {ver:'v1.9.35',date:'2026-04-06',items:[{type:'fix',text:'레벨 pill과 제목 텍스트 겹침 수정 — flex 레이아웃으로 변경'},{type:'fix',text:'월간 활동 통계가 자녀끼리 통합 표시되던 문제 수정 — 자녀별 로그 분리 필터링'}]},
   {ver:'v1.9.34',date:'2026-04-06',items:['🎰 룰렛 개선 — 스핀 중 마일리지 표시, 자녀 전용, 부모 알림, 코인 애니메이션','🎨 레벨 아이콘 — 20개 고퀄리티 SVG 아이콘으로 교체']},
