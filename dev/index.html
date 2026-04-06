@@ -417,7 +417,7 @@ body.dark .theme-pick.active .theme-pick-radio{border-color:#818CF8;background:#
 .hero-pts{font-size:58px;font-weight:900;letter-spacing:-2px;line-height:1;transition:font-size .25s}
 .hero-unit{font-size:18px;font-weight:700;opacity:.85;transition:font-size .25s}
 .hero-goal{font-size:15px;opacity:.82;margin-top:6px;font-weight:600;line-height:1.4;transition:all .25s;max-height:50px;overflow:hidden}
-.streak-pill{position:absolute;top:18px;right:18px;background:rgba(255,255,255,.2);border-radius:20px;padding:5px 12px;font-size:13px;font-weight:800;transition:all .25s;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.streak-pill{background:rgba(255,255,255,.2);border-radius:20px;padding:5px 12px;font-size:13px;font-weight:800;transition:all .25s;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .streak-pill:active{transform:scale(.95);background:rgba(255,255,255,.3)}
 .prog-track{background:rgba(255,255,255,.25);border-radius:7px;height:14px;margin-top:14px;transition:margin .25s}
 .prog-fill{background:rgba(255,255,255,.9);border-radius:7px;height:100%;transition:width .7s}
@@ -501,7 +501,9 @@ body.dark .theme-pick.active .theme-pick-radio{border-color:#818CF8;background:#
 .hero.compact .hero-pts{font-size:32px;display:inline!important;opacity:1!important;visibility:visible!important}
 .hero.compact .hero-unit{font-size:14px;display:inline!important;opacity:1!important;visibility:visible!important}
 .hero.compact .hero-goal{max-height:0;margin-top:0;opacity:0}
-.hero.compact .streak-pill{top:calc(12px + env(safe-area-inset-top));padding:4px 10px;font-size:13px}
+.hero.compact .streak-pill{padding:4px 10px;font-size:12px}
+.hero.compact .level-pill{padding:4px 10px;font-size:12px}
+.hero.compact .hero-pills-row{margin-bottom:2px}
 .hero.compact .prog-track{margin-top:10px}
 .hero.compact .mily-greeting-hero{display:none!important}
 .hero.compact .prog-row{margin-top:3px;font-size:13px}
@@ -3611,8 +3613,10 @@ requestAnimationFrame(function(){
     <div id="child-switcher" style="flex-shrink:0"></div>
   </div>
   <div class="hero">
-    <div class="level-pill" id="level-pill" style="position:absolute;top:18px;left:18px;background:rgba(255,255,255,.2);border-radius:20px;padding:5px 12px;font-size:13px;font-weight:800;transition:all .25s;cursor:pointer;-webkit-tap-highlight-color:transparent" onclick="openLevelPopup()">🌱 Lv.1</div>
-    <div class="streak-pill" id="streak-pill"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 01-7 7 7 7 0 01-7-7c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg> 0일 연속</div>
+    <div class="hero-pills-row" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <div class="level-pill" id="level-pill" style="background:rgba(255,255,255,.2);border-radius:20px;padding:5px 12px;font-size:13px;font-weight:800;transition:all .25s;cursor:pointer;-webkit-tap-highlight-color:transparent;display:inline-flex;align-items:center" onclick="openLevelPopup()">🌱 Lv.1</div>
+      <div class="streak-pill" id="streak-pill" style="position:static;background:rgba(255,255,255,.2);border-radius:20px;padding:5px 12px;font-size:13px;font-weight:800;transition:all .25s;cursor:pointer;-webkit-tap-highlight-color:transparent"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 01-7 7 7 7 0 01-7-7c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg> 0일 연속</div>
+    </div>
     <div class="hero-lbl" id="hero-lbl">나의 마일리지</div>
     <div id="child-selector"></div>
     <div class="hero-pts-wrap" style="display:flex;align-items:flex-end;gap:6px;margin:4px 0">
@@ -8945,7 +8949,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0406c';
+const _APP_VERSION = 'v0406d';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -9237,7 +9241,7 @@ function getMemberState(memberId) {
       totalDone: (isMe && !isStaleGlobal) ? (S.totalDone || 0) : 0,
       acts: (isMe && !isStaleGlobal && S.acts) ? JSON.parse(JSON.stringify(S.acts)) : (inheritActs || safeInheritActs || JSON.parse(JSON.stringify(DACTS))),
       rwds: (isMe && !isStaleGlobal && S.rwds) ? JSON.parse(JSON.stringify(S.rwds)) : (inheritRwds || safeInheritRwds || JSON.parse(JSON.stringify(DRWDS))),
-      log: (isMe && !isStaleGlobal && S.log) ? [...S.log] : [],
+      log: (isMe && !isStaleGlobal && S.log) ? S.log.filter(l=>!l.user||l.user===memberId) : [],
       actDone: (isMe && !isStaleGlobal && S.actDone) ? {...S.actDone} : {},
       moodLog: (isMe && !isStaleGlobal && S.moodLog) ? [...S.moodLog] : [],
       badges: (isMe && !isStaleGlobal && S.badges) ? {...S.badges} : {},
@@ -9306,6 +9310,10 @@ function syncMemberToGlobal(targetId) {
   S.totalDone = ms.totalDone || 0;
   S.actDone = ms.actDone ? JSON.parse(JSON.stringify(ms.actDone)) : {};
   S.log = ms.log ? JSON.parse(JSON.stringify(ms.log)) : [];
+  // 다른 자녀의 로그 항목 필터링 (공유 log에서 마이그레이션된 경우)
+  if(S.log.length>0 && mid){
+    S.log = S.log.filter(l=>!l.user || l.user===mid);
+  }
   S.moodLog = ms.moodLog ? [...ms.moodLog] : [];
   S.badges = ms.badges ? {...ms.badges} : {};
   S.badgeLog = ms.badgeLog ? [...ms.badgeLog] : [];
@@ -16287,6 +16295,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'v1.9.35',date:'2026-04-06',items:[{type:'fix',text:'레벨 pill과 제목 텍스트 겹침 수정 — flex 레이아웃으로 변경'},{type:'fix',text:'월간 활동 통계가 자녀끼리 통합 표시되던 문제 수정 — 자녀별 로그 분리 필터링'}]},
   {ver:'v1.9.34',date:'2026-04-06',items:['🎰 룰렛 개선 — 스핀 중 마일리지 표시, 자녀 전용, 부모 알림, 코인 애니메이션','🎨 레벨 아이콘 — 20개 고퀄리티 SVG 아이콘으로 교체']},
   {ver:'v1.9.33',date:'2026-04-06',items:['🎮 레벨 시스템 — 활동하면 XP를 얻어 레벨업!','🏆 주간/월간 챌린지 — 한정 미션 달성하고 보상 받기','🎰 일일 보너스 룰렛 — 매일 첫 접속 시 보너스 마일리지']},
   {ver:'1.9.32 (v0405a)',date:'2026-04-05',items:[
