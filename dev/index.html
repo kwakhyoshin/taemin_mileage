@@ -417,7 +417,9 @@ body.dark .theme-pick.active .theme-pick-radio{border-color:#818CF8;background:#
 .hero-pts{font-size:58px;font-weight:900;letter-spacing:-2px;line-height:1;transition:font-size .25s}
 .hero-unit{font-size:18px;font-weight:700;opacity:.85;transition:font-size .25s}
 .hero-goal{font-size:15px;opacity:.82;margin-top:6px;font-weight:600;line-height:1.4;transition:all .25s;max-height:50px;overflow:hidden}
-.streak-pill{background:rgba(255,255,255,.2);border-radius:20px;padding:5px 12px;font-size:13px;font-weight:800;transition:all .25s;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.streak-pill{background:rgba(255,255,255,.2);border-radius:20px;padding:5px 12px;font-size:13px;font-weight:800;transition:all .25s,top .25s;cursor:pointer;-webkit-tap-highlight-color:transparent}
+#streak-pill{position:absolute;right:20px;top:32px;z-index:3}
+.hero.compact #streak-pill{top:64px}
 .streak-pill:active{transform:scale(.95);background:rgba(255,255,255,.3)}
 .prog-track{background:rgba(255,255,255,.25);border-radius:7px;height:14px;margin-top:14px;transition:margin .25s}
 .prog-fill{background:rgba(255,255,255,.9);border-radius:7px;height:100%;transition:width .7s}
@@ -3632,12 +3634,12 @@ requestAnimationFrame(function(){
       </div>
       <p id="smart-msg" style="font-size:13px;color:rgba(255,255,255,.75);margin-top:4px;font-weight:600;line-height:1.3"></p>
     </div>
-    <div id="child-switcher" style="flex-shrink:0"></div>
   </div>
   <div class="hero">
-    <div style="display:flex;justify-content:flex-end;margin-bottom:4px">
-      <div class="streak-pill" id="streak-pill" style="background:rgba(255,255,255,.2);border-radius:20px;padding:5px 12px;font-size:13px;font-weight:800;transition:all .25s;cursor:pointer;-webkit-tap-highlight-color:transparent"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 01-7 7 7 7 0 01-7-7c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg> 오늘할일 연속 0일 완료</div>
+    <div style="display:flex;justify-content:flex-end;min-height:22px;margin-bottom:2px">
+      <div id="child-switcher" style="flex-shrink:0"></div>
     </div>
+    <div class="streak-pill" id="streak-pill" style="background:rgba(255,255,255,.2);border-radius:20px;padding:5px 12px;font-size:13px;font-weight:800;transition:all .25s,top .25s;cursor:pointer;-webkit-tap-highlight-color:transparent;position:absolute;right:20px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 01-7 7 7 7 0 01-7-7c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg> 0일 연속</div>
     <div class="hero-lbl" id="hero-lbl">나의 마일리지</div>
     <div id="child-selector"></div>
     <div class="hero-pts-wrap" style="display:flex;align-items:flex-end;gap:8px;margin:4px 0">
@@ -3659,9 +3661,10 @@ requestAnimationFrame(function(){
     <div style="font-size:18px;font-weight:900;color:#fff;margin-bottom:4px" id="birthday-banner-title"></div>
     <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,.85)" id="birthday-banner-sub"></div>
   </div>
-  <div id="challenge-cards" style="margin:16px 16px 14px"></div>
   <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> 오늘 할 일</div>
   <div class="act-grid" id="home-grid"></div>
+  <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2z"/></svg> 진행중인 챌린지</div>
+  <div id="challenge-cards" style="margin:0 16px 14px"></div>
   <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> 최근 활동</div>
   <div class="rec-list" id="rec-list"></div>
 </div>
@@ -9027,7 +9030,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0407a';
+const _APP_VERSION = 'v0407b';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -10809,7 +10812,7 @@ function renderHero(){
   const _heroPts=getActiveMileage();
   document.getElementById('hero-pts').textContent=_heroPts.toLocaleString();
   const _spEl=document.getElementById('streak-pill');
-  _spEl.innerHTML=`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 01-7 7 7 7 0 01-7-7c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg> 오늘할일 연속 ${getDisplayStreak()}일 완료`;
+  _spEl.innerHTML=`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 01-7 7 7 7 0 01-7-7c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg> ${getDisplayStreak()}일 연속`;
   _spEl.onclick=openStreakPopup;
   const g=S.rwds.find(r=>r.goal)||S.rwds[0];
   // 할인 적용된 실제 가격 계산
@@ -16554,6 +16557,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.46 (v0407b)',date:'2026-04-07',items:[{type:'fix',text:'연속 라벨을 다시 "X일 연속"으로 단축'},{type:'fix',text:'X일 연속 영역을 "OO의 마일리지" 라인과 같은 줄로 정렬, 컴팩트 시 Lv 박스 라인으로 내림'},{type:'fix',text:'자녀 전환 버튼을 hero 상단(이전 streak 위치)으로 이동'},{type:'new',text:'홈탭 진행중인 챌린지 섹션을 오늘 할 일 아래로 이동, 섹션 제목 스타일 통일'}]},
   {ver:'1.9.45 (v0407a)',date:'2026-04-07',items:[{type:'fix',text:'홈탭 인사말과 마일리지 사이 불필요한 여백 제거'},{type:'fix',text:'자녀 전환 버튼 위치 살짝 아래로 조정'},{type:'fix',text:'연속 라벨을 "오늘할일 연속 X일 완료"로 직관화'},{type:'fix',text:'활동기록/보상/성과/마이 탭 제목 크기 통일 (모바일 26px / 태블릿 28px)'}]},
   {ver:'1.9.44 (v0406m)',date:'2026-04-06',items:[{type:'fix',text:'활동기록/보상/성과 탭에서 스크롤 복귀 시 제목 크기가 원래대로 돌아오지 않던 문제 수정'}]},
   {ver:'1.9.43 (v0406l)',date:'2026-04-06',items:[{type:'new',text:'레벨제 챌린지 시스템 — 주간/월간 각 9단계 순차 해금, 난이도 쉬움→보통→어려움'},{type:'fix',text:'"오늘 할 일 모두 완료" 챌린지가 등록된 활동 전부 완료 기준으로 정확히 판정'}]},
