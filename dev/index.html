@@ -3611,6 +3611,7 @@ requestAnimationFrame(function(){
     <div id="child-switcher" style="flex-shrink:0"></div>
   </div>
   <div class="hero">
+    <div class="level-pill" id="level-pill" style="position:absolute;top:18px;left:18px;background:rgba(255,255,255,.2);border-radius:20px;padding:5px 12px;font-size:13px;font-weight:800;transition:all .25s;cursor:pointer;-webkit-tap-highlight-color:transparent" onclick="openLevelPopup()">🌱 Lv.1</div>
     <div class="streak-pill" id="streak-pill"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 01-7 7 7 7 0 01-7-7c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg> 0일 연속</div>
     <div class="hero-lbl" id="hero-lbl">나의 마일리지</div>
     <div id="child-selector"></div>
@@ -3632,6 +3633,7 @@ requestAnimationFrame(function(){
     <div style="font-size:18px;font-weight:900;color:#fff;margin-bottom:4px" id="birthday-banner-title"></div>
     <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,.85)" id="birthday-banner-sub"></div>
   </div>
+  <div id="challenge-cards" style="margin:0 16px 12px"></div>
   <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> 오늘 할 일</div>
   <div class="act-grid" id="home-grid"></div>
   <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> 최근 활동</div>
@@ -7294,6 +7296,9 @@ function postLoginInit(){
     }
   }
   _admViewChildId = getChildMemberIds()[0] || null;
+
+  // Daily bonus check
+  setTimeout(()=>{if(typeof checkDailyBonus==='function')checkDailyBonus();},2000);
 }
 
 // ── 회원 탈퇴 ──────────────────────────────────
@@ -8937,7 +8942,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0405a';
+const _APP_VERSION = 'v0406b';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -9059,6 +9064,49 @@ async function _checkLegacyMigrationPointer(){
 // 캐시된 사용자 데이터 (S.users에서 로드)
 let cachedUsers = null;
 
+// ── LEVEL SYSTEM CONSTANTS ──────────────────────────────
+const LEVEL_DEFS = [
+  {level:1, title:'마일리지 새싹', minXP:0, emoji:'🌱'},
+  {level:2, title:'열심 학생', minXP:100, emoji:'📚'},
+  {level:3, title:'습관 견습생', minXP:300, emoji:'⭐'},
+  {level:4, title:'꾸준한 도전자', minXP:600, emoji:'🔥'},
+  {level:5, title:'습관 마스터', minXP:1000, emoji:'🏆'},
+  {level:6, title:'마일리지 고수', minXP:1500, emoji:'💎'},
+  {level:7, title:'전설의 챔피언', minXP:2200, emoji:'👑'},
+  {level:8, title:'마일리지 영웅', minXP:3000, emoji:'🦸'},
+  {level:9, title:'습관 전설', minXP:4000, emoji:'🌟'},
+  {level:10, title:'최강 마스터', minXP:5500, emoji:'🐉'},
+];
+function getLevelInfo(xp){
+  let lv=LEVEL_DEFS[0];
+  for(const d of LEVEL_DEFS){if(xp>=d.minXP)lv=d;else break;}
+  const idx=LEVEL_DEFS.indexOf(lv);
+  const next=LEVEL_DEFS[idx+1]||null;
+  const pct=next?Math.round((xp-lv.minXP)/(next.minXP-lv.minXP)*100):100;
+  return{...lv,xp,nextXP:next?next.minXP:lv.minXP,pct,nextTitle:next?next.title:null,nextEmoji:next?next.emoji:null};
+}
+
+// ── CHALLENGE TEMPLATES ──────────────────────────────
+const CHALLENGE_TEMPLATES=[
+  {emoji:'📚',title:'{n}일 연속 달성하기',type:'weekly',targets:[3,4,5],reward:50,check:'streak'},
+  {emoji:'⭐',title:'활동 {n}회 완료하기',type:'weekly',targets:[10,15,20],reward:30,check:'totalActs'},
+  {emoji:'🏃',title:'오늘 할 일 모두 완료 {n}일',type:'weekly',targets:[3,4,5],reward:60,check:'allDoneDays'},
+  {emoji:'💪',title:'이번 달 활동 {n}회',type:'monthly',targets:[30,50,70],reward:100,check:'monthlyActs'},
+  {emoji:'🔥',title:'이번 달 {n}일 연속',type:'monthly',targets:[7,10,14],reward:80,check:'monthlyStreak'},
+  {emoji:'🎯',title:'이번 달 마일리지 {n} 모으기',type:'monthly',targets:[200,300,500],reward:70,check:'monthlyPts'},
+];
+
+// ── ROULETTE PRIZES ──────────────────────────────
+const ROULETTE_PRIZES=[
+  {emoji:'🎉',label:'5 마일리지',pts:5,weight:30},
+  {emoji:'⭐',label:'10 마일리지',pts:10,weight:25},
+  {emoji:'💫',label:'15 마일리지',pts:15,weight:20},
+  {emoji:'🔥',label:'20 마일리지',pts:20,weight:12},
+  {emoji:'💎',label:'30 마일리지',pts:30,weight:8},
+  {emoji:'👑',label:'50 마일리지',pts:50,weight:4},
+  {emoji:'🐉',label:'100 마일리지!',pts:100,weight:1},
+];
+
 function defaultState(){
   return {
     pts:0,streak:0,longest:0,lastDate:null,totalDone:0,
@@ -9090,6 +9138,10 @@ function defaultState(){
     familyMeta:null, // 다가족 메타 정보 {familyId, familyName, members, mode, inviteTokens, ...}
     memberData:{}, // Per-member data isolation: {[memberId]: {pts, streak, longest, lastDate, totalDone, acts, rwds, log, actDone, moodLog, badges, badgeLog}}
     birthdayBonusGiven:{}, // {memberId_YYYY-MM-DD: true} — 생일 보너스 중복 방지
+    levelData: {xp:0, level:1, xpLog:[]}, // 레벨 시스템
+    challenges: [], // 챌린지 [{id,title,emoji,type:'weekly'|'monthly',target,progress,reward,startDate,endDate,completed,claimed}]
+    challengeHistory: [], // 완료된 챌린지 기록
+    dailyBonus: {lastDate:null, history:[]}, // 일일 보너스 룰렛
   };
 }
 
@@ -10540,7 +10592,7 @@ window.getCurrentGreeting=getCurrentGreeting;
 // ── RENDER ────────────────────────────────────
 function renderAll(){
   if(_actAnimating){_actAnimating='pending';return;}
-  renderHero();renderHomeGrid();renderRecent();
+  renderHero();renderHomeGrid();renderChallengeCards();renderRecent();
   renderLogList();renderRewardGrid();renderRewardInventory();renderRewardHistory();
   renderDashboard();renderHistStats();renderHistList();renderCalendar();
   renderBadgeSummary();
@@ -10623,6 +10675,14 @@ function renderHero(){
   }
   // 마일리 인사말 렌더링
   renderMilyGreeting();
+
+  // Level pill update
+  const _lvPill=document.getElementById('level-pill');
+  if(_lvPill){
+    const _ld=S.levelData||{xp:0,level:1};
+    const _lvInfo=getLevelInfo(_ld.xp);
+    _lvPill.textContent=`${_lvInfo.emoji} Lv.${_lvInfo.level}`;
+  }
 }
 
 // ── 오늘 할일 진행 바 ──────────────────────────
@@ -11875,6 +11935,252 @@ function renderRewardHistory(){
     return '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--bdr)"><span style="font-size:20px">'+escapeHtml(l.emoji)+'</span><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--tx)">'+nameWithType+'</div><div style="font-size:13px;color:var(--tx3)">'+timeStr+'</div></div><div style="text-align:right">'+ptsHtml+'<div style="font-size:13px;color:'+ti.color+';font-weight:700">'+ti.label+'</div>'+byInfo+'</div></div>';
   }).join('')+'</div>';
 }
+
+// ── LEVEL SYSTEM FUNCTIONS ──────────────────────────────
+function showLevelUpCelebration(lvInfo){
+  if(navigator.vibrate)navigator.vibrate([50,100,50]);
+  const ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;animation:fadeIn .3s';
+  ov.innerHTML=`<div style="background:var(--card);border-radius:24px;padding:32px 28px;text-align:center;width:min(300px,85vw);animation:popIn .4s cubic-bezier(.175,.885,.32,1.275)">
+    <div style="font-size:64px;margin-bottom:8px">${lvInfo.emoji}</div>
+    <div style="font-size:22px;font-weight:900;color:var(--tx);margin-bottom:4px">레벨 업!</div>
+    <div style="font-size:16px;font-weight:700;color:var(--tab-color,var(--or))">Lv.${lvInfo.level} ${lvInfo.title}</div>
+    <div style="margin-top:12px;font-size:13px;color:var(--tx3)">총 ${lvInfo.xp} XP 달성!</div>
+    <button onclick="this.closest('div[style*=fixed]').remove()" style="margin-top:16px;padding:10px 32px;border:none;border-radius:12px;background:var(--tab-color,var(--or));color:#fff;font-size:14px;font-weight:700;cursor:pointer">멋져요! 🎉</button>
+  </div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener('click',(e)=>{if(e.target===ov)ov.remove();});
+  confetti();
+}
+window.showLevelUpCelebration=showLevelUpCelebration;
+
+function openLevelPopup(){
+  const _ld=S.levelData||{xp:0,level:1};
+  const info=getLevelInfo(_ld.xp);
+  const ov=document.createElement('div');
+  ov.className='streak-popup-overlay show';
+  ov.innerHTML=`<div class="streak-popup" style="transform:scale(1)">
+    <div style="font-size:48px;margin-bottom:8px">${info.emoji}</div>
+    <div style="font-size:20px;font-weight:900;color:var(--tx)">Lv.${info.level} ${info.title}</div>
+    <div style="margin:12px 0 8px;font-size:13px;color:var(--tx3);font-weight:700">${info.xp} / ${info.nextXP} XP</div>
+    <div style="background:var(--bdr);border-radius:6px;height:10px;overflow:hidden">
+      <div style="height:100%;border-radius:6px;background:linear-gradient(90deg,var(--tab-color,#F59E0B),#EF4444);width:${info.pct}%;transition:width .5s"></div>
+    </div>
+    ${info.nextTitle?`<div style="margin-top:8px;font-size:12px;color:var(--tx3)">다음: ${info.nextEmoji} ${info.nextTitle} (${info.nextXP} XP)</div>`:'<div style="margin-top:8px;font-size:12px;color:var(--gn2);font-weight:700">🏆 최고 레벨 달성!</div>'}
+    <button onclick="this.closest('.streak-popup-overlay').remove()" style="margin-top:16px;padding:10px 32px;border:none;border-radius:12px;background:var(--tab-color,var(--or));color:#fff;font-size:14px;font-weight:700;cursor:pointer">확인</button>
+  </div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener('click',(e)=>{if(e.target===ov)ov.remove();});
+}
+window.openLevelPopup=openLevelPopup;
+
+// ── CHALLENGE SYSTEM FUNCTIONS ──────────────────────────────
+function generateChallenges(){
+  const now=new Date();
+  const challenges=S.challenges||[];
+  // 만료된 챌린지 정리
+  const active=challenges.filter(c=>{
+    if(new Date(c.endDate)<now&&!c.completed){
+      // 만료 → 히스토리에 실패로 기록
+      return false;
+    }
+    return true;
+  });
+  // 주간 챌린지 체크 (월요일 시작)
+  const dayOfWeek=now.getDay()||7;
+  const weekStart=new Date(now);weekStart.setDate(now.getDate()-(dayOfWeek-1));weekStart.setHours(0,0,0,0);
+  const weekEnd=new Date(weekStart);weekEnd.setDate(weekStart.getDate()+6);weekEnd.setHours(23,59,59,999);
+  const hasWeekly=active.some(c=>c.type==='weekly'&&new Date(c.startDate)>=weekStart);
+  if(!hasWeekly){
+    const wTemplates=CHALLENGE_TEMPLATES.filter(t=>t.type==='weekly');
+    const wt=wTemplates[Math.floor(Math.random()*wTemplates.length)];
+    const tn=wt.targets[Math.floor(Math.random()*wt.targets.length)];
+    active.push({id:'ch_'+Date.now(),emoji:wt.emoji,title:wt.title.replace('{n}',tn),type:'weekly',target:tn,progress:0,reward:wt.reward,check:wt.check,startDate:weekStart.toISOString(),endDate:weekEnd.toISOString(),completed:false,claimed:false});
+  }
+  // 월간 챌린지 체크
+  const monthStart=new Date(now.getFullYear(),now.getMonth(),1);
+  const monthEnd=new Date(now.getFullYear(),now.getMonth()+1,0,23,59,59,999);
+  const hasMonthly=active.some(c=>c.type==='monthly'&&new Date(c.startDate)>=monthStart);
+  if(!hasMonthly){
+    const mTemplates=CHALLENGE_TEMPLATES.filter(t=>t.type==='monthly');
+    const mt=mTemplates[Math.floor(Math.random()*mTemplates.length)];
+    const mn=mt.targets[Math.floor(Math.random()*mt.targets.length)];
+    active.push({id:'ch_'+Date.now()+'m',emoji:mt.emoji,title:mt.title.replace('{n}',mn),type:'monthly',target:mn,progress:0,reward:mt.reward,check:mt.check,startDate:monthStart.toISOString(),endDate:monthEnd.toISOString(),completed:false,claimed:false});
+  }
+  S.challenges=active;
+}
+
+function updateChallengeProgress(){
+  if(!S.challenges||!S.challenges.length)return;
+  const now=new Date();
+  S.challenges.forEach(c=>{
+    if(c.completed)return;
+    if(new Date(c.endDate)<now)return;
+    const start=new Date(c.startDate);
+    let prog=0;
+    if(c.check==='streak'){prog=Math.min(c.target,S.streak||0);}
+    else if(c.check==='totalActs'){
+      // 이번 기간 내 완료 횟수
+      prog=S.log.filter(l=>new Date(l.ts)>=start&&l.pts>0).length;
+    }
+    else if(c.check==='allDoneDays'){
+      // 모든 할 일 완료한 날 수 계산
+      const days=new Set();
+      S.log.filter(l=>new Date(l.ts)>=start&&l.pts>0).forEach(l=>{
+        const d=new Date(l.ts);days.add(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`);
+      });
+      // 간소화: 활동이 있는 날 수로 근사
+      prog=days.size;
+    }
+    else if(c.check==='monthlyActs'){prog=S.log.filter(l=>new Date(l.ts)>=start&&l.pts>0).length;}
+    else if(c.check==='monthlyStreak'){prog=Math.min(c.target,S.streak||0);}
+    else if(c.check==='monthlyPts'){
+      prog=S.log.filter(l=>new Date(l.ts)>=start&&l.pts>0).reduce((s,l)=>s+l.pts,0);
+    }
+    c.progress=Math.min(prog,c.target);
+    if(c.progress>=c.target&&!c.completed){
+      c.completed=true;
+    }
+  });
+}
+
+function claimChallengeReward(chId){
+  const ch=S.challenges.find(c=>c.id===chId);
+  if(!ch||!ch.completed||ch.claimed)return;
+  ch.claimed=true;
+  S.pts+=ch.reward;
+  const hist=S.challengeHistory||(S.challengeHistory=[]);
+  hist.unshift({...ch,claimedAt:Date.now()});
+  if(hist.length>50)S.challengeHistory=hist.slice(0,50);
+  save();
+  renderAll();
+  toast(`${ch.emoji} 챌린지 완료! +${ch.reward} 마일리지 🎉`);
+  confetti();
+}
+window.claimChallengeReward=claimChallengeReward;
+
+function renderChallengeCards(){
+  const el=document.getElementById('challenge-cards');
+  if(!el)return;
+  generateChallenges();
+  updateChallengeProgress();
+  const chs=(S.challenges||[]).filter(c=>new Date(c.endDate)>=new Date());
+  if(!chs.length){el.innerHTML='';return;}
+  el.innerHTML=chs.map(c=>{
+    const pct=Math.round(c.progress/c.target*100);
+    const isComplete=c.completed;
+    const isClaimed=c.claimed;
+    const typeLabel=c.type==='weekly'?'주간':'월간';
+    const daysLeft=Math.max(0,Math.ceil((new Date(c.endDate)-new Date())/(1000*60*60*24)));
+    return `<div style="background:var(--card);border-radius:16px;padding:14px 16px;margin-bottom:8px;box-shadow:0 2px 8px rgba(0,0,0,.04);border:.5px solid var(--bdr);${isComplete&&!isClaimed?'border-color:var(--tab-color,#F59E0B);box-shadow:0 2px 12px rgba(245,158,11,.15)':''}">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <span style="font-size:24px">${c.emoji}</span>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:6px">
+            <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:10px;background:${c.type==='weekly'?'rgba(99,102,241,.12)':'rgba(236,72,153,.12)'};color:${c.type==='weekly'?'#6366F1':'#EC4899'}">${typeLabel}</span>
+            <span style="font-size:11px;color:var(--tx3);font-weight:600">${daysLeft}일 남음</span>
+          </div>
+          <div style="font-size:13px;font-weight:700;color:var(--tx);margin-top:2px">${c.title}</div>
+        </div>
+        <div style="text-align:right">
+          ${isComplete&&!isClaimed?`<button onclick="claimChallengeReward('${c.id}')" style="padding:6px 14px;border:none;border-radius:10px;background:var(--tab-color,var(--or));color:#fff;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">+${c.reward}M 받기</button>`
+          :isClaimed?'<span style="font-size:12px;color:var(--gn2);font-weight:700">✅ 완료</span>'
+          :`<span style="font-size:12px;font-weight:800;color:var(--tx3)">${c.progress}/${c.target}</span>`}
+        </div>
+      </div>
+      <div style="background:var(--bdr);border-radius:4px;height:6px;overflow:hidden">
+        <div style="height:100%;border-radius:4px;background:${isComplete?'var(--gn2)':'linear-gradient(90deg,var(--tab-color,#F59E0B),#EF4444)'};width:${pct}%;transition:width .4s"></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── DAILY BONUS ROULETTE FUNCTIONS ──────────────────────────────
+function pickRoulettePrize(){
+  const total=ROULETTE_PRIZES.reduce((s,p)=>s+p.weight,0);
+  let r=Math.random()*total;
+  for(const p of ROULETTE_PRIZES){r-=p.weight;if(r<=0)return p;}
+  return ROULETTE_PRIZES[0];
+}
+
+function checkDailyBonus(){
+  const db=S.dailyBonus||(S.dailyBonus={lastDate:null,history:[]});
+  const today=todayStr();
+  if(db.lastDate===today)return; // 오늘 이미 받음
+  // 로그인 후 1초 딜레이로 표시
+  setTimeout(()=>showDailyRoulette(),1200);
+}
+
+function showDailyRoulette(){
+  const db=S.dailyBonus||(S.dailyBonus={lastDate:null,history:[]});
+  if(db.lastDate===todayStr())return;
+  const ov=document.createElement('div');
+  ov.id='roulette-overlay';
+  ov.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;animation:fadeIn .3s';
+
+  const prizes=ROULETTE_PRIZES;
+  const slotHTML=prizes.map(p=>`<div class="rlt-item" style="padding:12px;text-align:center"><span style="font-size:28px">${p.emoji}</span><div style="font-size:11px;font-weight:700;color:var(--tx);margin-top:4px">${p.label}</div></div>`).join('');
+
+  ov.innerHTML=`<div style="background:var(--card);border-radius:24px;padding:28px 24px;text-align:center;width:min(320px,85vw);animation:popIn .4s cubic-bezier(.175,.885,.32,1.275)">
+    <div style="font-size:22px;font-weight:900;color:var(--tx);margin-bottom:4px">🎰 오늘의 보너스!</div>
+    <div style="font-size:13px;color:var(--tx3);margin-bottom:16px">매일 첫 접속 보너스를 받아보세요</div>
+    <div id="rlt-display" style="font-size:64px;height:80px;display:flex;align-items:center;justify-content:center;background:var(--bdr);border-radius:16px;margin-bottom:16px;overflow:hidden">❓</div>
+    <button id="rlt-spin-btn" onclick="spinRoulette()" style="padding:12px 40px;border:none;border-radius:14px;background:linear-gradient(135deg,#F59E0B,#EF4444);color:#fff;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 4px 12px rgba(245,158,11,.3)">돌려보기! 🎲</button>
+    <button id="rlt-close-btn" onclick="document.getElementById('roulette-overlay').remove()" style="display:none;margin-top:8px;padding:10px 32px;border:none;border-radius:12px;background:var(--tab-color,var(--or));color:#fff;font-size:14px;font-weight:700;cursor:pointer">확인</button>
+  </div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener('click',(e)=>{if(e.target===ov&&document.getElementById('rlt-close-btn').style.display!=='none')ov.remove();});
+}
+window.showDailyRoulette=showDailyRoulette;
+
+function spinRoulette(){
+  const btn=document.getElementById('rlt-spin-btn');
+  if(!btn)return;
+  btn.disabled=true;btn.style.opacity='.5';
+  const display=document.getElementById('rlt-display');
+  const prize=pickRoulettePrize();
+
+  // Slot machine animation
+  let count=0;const total=20;
+  const interval=setInterval(()=>{
+    const rp=ROULETTE_PRIZES[Math.floor(Math.random()*ROULETTE_PRIZES.length)];
+    display.textContent=rp.emoji;
+    display.style.transform=`scale(${1+Math.sin(count/3)*.1})`;
+    count++;
+    if(count>=total){
+      clearInterval(interval);
+      display.textContent=prize.emoji;
+      display.style.transform='scale(1.2)';
+      display.style.transition='transform .3s';
+      setTimeout(()=>{display.style.transform='scale(1)';},300);
+
+      // 보상 지급
+      const db=S.dailyBonus||(S.dailyBonus={lastDate:null,history:[]});
+      db.lastDate=todayStr();
+      db.history.unshift({pts:prize.pts,emoji:prize.emoji,date:todayStr()});
+      if(db.history.length>30)db.history=db.history.slice(0,30);
+      S.pts+=prize.pts;
+      // Level XP도 추가
+      const _ld=S.levelData||(S.levelData={xp:0,level:1,xpLog:[]});
+      _ld.xp+=prize.pts;
+      _ld.level=getLevelInfo(_ld.xp).level;
+      save();
+      renderAll();
+
+      // 결과 표시
+      const resultHTML=`<div style="font-size:64px">${prize.emoji}</div><div style="font-size:18px;font-weight:900;color:var(--tab-color,var(--or));margin-top:8px">+${prize.pts} 마일리지!</div>`;
+      display.innerHTML=resultHTML;
+      display.style.height='auto';
+      display.style.padding='16px';
+      btn.style.display='none';
+      document.getElementById('rlt-close-btn').style.display='';
+      if(navigator.vibrate)navigator.vibrate([50,50,50]);
+      if(prize.pts>=30)confetti();
+      toast(`🎰 오늘의 보너스: +${prize.pts} 마일리지!`);
+    }
+  },80);
+}
+window.spinRoulette=spinRoulette;
 
 // ── CALENDAR ──────────────────────────────────
 function getDateStr(y,m,d){return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;}
@@ -13247,6 +13553,20 @@ function _doActCore(id){
   S.pts+=a.pts+bonus;S.totalDone++;
   S.log.unshift({id:'l_'+Date.now(),emoji:a.emoji,name:a.name,pts:a.pts+bonus,ts:Date.now(),actId:a.id,user:currentUser});
   if(S.log.length>300)S.log=S.log.slice(0,300);
+
+  // Level XP
+  const _ld=S.levelData||(S.levelData={xp:0,level:1,xpLog:[]});
+  const _prevLv=getLevelInfo(_ld.xp).level;
+  _ld.xp+=(a.pts||10);
+  _ld.xpLog.unshift({xp:a.pts||10,ts:Date.now(),src:a.name});
+  if(_ld.xpLog.length>100)_ld.xpLog=_ld.xpLog.slice(0,100);
+  const _newLvInfo=getLevelInfo(_ld.xp);
+  _ld.level=_newLvInfo.level;
+  const _didLevelUp=_newLvInfo.level>_prevLv;
+
+  // Update challenge progress
+  updateChallengeProgress();
+
   save();
   const _curTab=getCurrentTab();
   const _actCard=_curTab==='home'?document.querySelector(`.act-card[data-actid="${id}"]`):null;
@@ -13266,6 +13586,7 @@ function _doActCore(id){
     _actCard.appendChild(_stamp);}
     _actCard.classList.add('act-completing');
     toast(`${a.emoji} ${a.name} +${a.pts} 마일리지${sm}`);
+    if(_didLevelUp)setTimeout(()=>showLevelUpCelebration(_newLvInfo),_showStamp?1700:900);
     flyCoinsToMileage(_actCard, a.pts+bonus);
     // 도장: delay(.65s)+dur(.45s)=1.1s, 카드회전: 0.8s → 총 1.5s 후 renderAll
     setTimeout(_unlockAndRender, _showStamp?1600:850);
@@ -13277,11 +13598,13 @@ function _doActCore(id){
     (_logInf2||_logItem).appendChild(_stamp2);}
     _logItem.classList.add('log-completing');
     toast(`${a.emoji} ${a.name} +${a.pts} 마일리지${sm}`);
+    if(_didLevelUp)setTimeout(()=>showLevelUpCelebration(_newLvInfo),_showStamp?1700:900);
     flyCoinsToMileage(_logItem, a.pts+bonus);
     setTimeout(_unlockAndRender, _showStamp?1200:850);
   } else {
     renderAll();
     toast(`${a.emoji} ${a.name} +${a.pts} 마일리지${sm}`);
+    if(_didLevelUp)setTimeout(()=>showLevelUpCelebration(_newLvInfo),900);
     flyCoinsToMileage(null, a.pts+bonus);
     setTimeout(()=>checkBadges(),300);
   }
@@ -15893,6 +16216,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'v1.9.33',date:'2026-04-06',items:['🎮 레벨 시스템 — 활동하면 XP를 얻어 레벨업!','🏆 주간/월간 챌린지 — 한정 미션 달성하고 보상 받기','🎰 일일 보너스 룰렛 — 매일 첫 접속 시 보너스 마일리지']},
   {ver:'1.9.32 (v0405a)',date:'2026-04-05',items:[
     {type:'improve',text:'챗봇 실행 전 확인 — 활동/보상/뱃지 추가·수정·삭제 시 "이렇게 할까요?" 확인 후 진행'},
     {type:'fix',text:'나의메뉴 플랜 배지가 챗봇 열기 전에 표시되지 않던 문제 수정'},
