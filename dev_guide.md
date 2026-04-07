@@ -2566,3 +2566,71 @@ window._currentUser_ref = function(){ return currentUser; };
   - **해결**: `/tmp/taemin_work`에 repo를 새로 clone하여 작업
   - **remote URL 주의**: `taemin-mileage`(하이픈)이 아니라 `taemin_mileage`(언더스코어)
   - **git config 필요**: clone 후 `git config user.email`/`user.name` 설정 필수
+
+---
+
+## 14. 알림장 일기 (dayHistory) — v0407zc 추가
+
+### 기능
+홈탭 "오늘 할 일" 옆 **이력보기** 버튼 → 수첩 모양 팝업이 떠서 과거 날짜의 "오늘 할 일" 도장 현황을 일기처럼 열람. 손글씨 폰트(Nanum Pen Script), 상하 페이지 넘김(스와이프/모서리 탭), 손글씨 날짜 클릭 시 달력 점프.
+
+### 데이터 구조 — 하이브리드 (옵션 A + 옵션 B)
+- **옵션 B (오늘부터 정확)**: 활동 완료/취소 시점마다 그 시점의 활동 정의 + 도장 현황을 스냅샷으로 영구 저장
+- **옵션 A (과거 폴백)**: 스냅샷이 없는 과거 60일은 `S.log` + 현재 `S.acts`로 best-effort 재구성. 활동 정의 변경 시 부정확할 수 있음
+
+### Firestore 구조 — 월별 서브컬렉션
+```
+<DATA_DOC>/dh_{memberId}/{YYYY-MM}
+{
+  month: '2026-04',
+  memberId: 'taemin',
+  updatedAt: <ms>,
+  days: {
+    '07': { acts:[{id,name,emoji,maxDay,pts}...], done:{actId:n}, allDone:bool, streak, ts },
+    '08': {...}
+  }
+}
+```
+
+### 왜 월별인가
+- **단일 문서 1 MiB 한도** (Firestore 하드 리밋): 일별 문서면 read 횟수만 늘어나고, 연도별 문서는 1MB 초과 위험. 월별이 용량/read 효율 모두 최적
+- 한 달치 ~90KB → 1 MiB 여유 충분
+- 알림장 페이지 넘김도 월 단위로 로드하면 라운드트립 1번으로 한 달 전체 사용 가능
+
+### 멤버별 분리
+- 서브컬렉션 이름이 `dh_{memberId}` — 자녀 전환 시 각자의 일기로 자동 격리
+- `_dhMemberId()` = `_globalDataOwner || currentUser`
+
+### 다중 안전장치 (실수 없이 남기기)
+1. `_doActCore` 직후 `_saveTodaySnapshot()` 호출 (활동 완료 시)
+2. `_undoActCore` 직후 동일 호출 (활동 취소 시)
+3. `renderAll()` 첫 진입 시 `_backfillRecentFromLog()` + `_saveTodaySnapshot()` (앱 시작 시 즉시 보충)
+4. **localStorage 미러**: `_LS_PREFIX + 'dh_' + memberId + '_' + monthKey` 키로 동시 저장 → Firestore 실패해도 다음 기회에 살아남음
+5. **Append-only**: undo 시에도 day 자체는 절대 삭제 안 함. done 카운트만 감소
+6. 자녀 전환 시 `_dhBackfilled=false` 리셋 → 새 멤버 기준으로 재 백필
+
+### 핵심 함수
+- `_buildTodaySnapshot()`: 현재 S 기반으로 오늘 스냅샷 생성 (홈탭 그리드와 동일한 showHome 필터)
+- `_saveTodaySnapshot()`: 메모리 + Firestore + localStorage 동시 저장 (setDoc merge)
+- `_loadMonthHistory(monthKey, memberId)`: localStorage → Firestore 순으로 월별 데이터 로드 + 캐시
+- `_getDaySnapshot(dateStr)`: 정확한 스냅샷 우선, 없으면 `_reconstructDayFromLog` 폴백
+- `_reconstructDayFromLog(dateStr)`: `S.log` + 현재 `S.acts`로 그 날 재구성. 삭제된 활동은 별도 표시
+- `_backfillRecentFromLog()`: 앱 시작 시 1회, 최근 60일 캐시 보충
+
+### UI 구성
+- `openDayDiary()` → fullscreen dim + 수첩 (`#diary-paper`)
+- 상단 스파이럴 바인딩(11개 ring) + 손글씨 날짜 + 요일 + 도장 요약
+- 활동 카드: 이모지 + 이름 + 도장 그리드(체크/공백)
+- 페이지 넘김: 우상단 `▲`(다음 날), 우하단 `▼`(이전 날), 수직 스와이프 60px 임계
+- 손글씨 날짜 클릭 → `openDiaryCalendar()` 월별 달력 모달
+- 달력 cell: 도장 수 표시, 모두 완료한 날은 주황 배경, 미래 날짜는 비활성
+
+### 한계 (사용자 안내)
+- 옵션 A 폴백으로 표시되는 페이지에는 "※ 옛 기록은 활동 구성이 달랐을 수 있어요" 안내 표시
+- 과거 60일 이전은 백필 안 됨 (필요시 한도 조정 가능)
+- 폴백 재구성은 그 시점의 maxDay/showHome/active를 알 수 없음 (시점 스냅샷 없음). 오늘 이후로는 100% 정확
+
+### 문서 크기 관리
+- 활동 30개 기준 하루 ~3KB → 한 달 ~90KB
+- 1 MiB 한도까지 여유 ~10배. 활동 폭증해도 안전
+- 만약 한 달이 1 MiB 근접하면 자동 split 로직 추가 검토 (현재 불필요)
