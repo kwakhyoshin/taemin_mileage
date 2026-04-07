@@ -501,10 +501,10 @@ body.dark .theme-pick.active .theme-pick-radio{border-color:#818CF8;background:#
 .hero.compact #child-selector{display:none!important}
 .streak-pill:active{transform:scale(.95);background:rgba(255,255,255,.3)}
 .prog-track{position:relative;background:rgba(255,255,255,.25);border-radius:7px;height:14px;margin-top:14px;transition:margin .25s;overflow:visible}
-.prog-fill{position:relative;background:rgba(255,255,255,.55);border-radius:7px;height:100%;transition:width .7s;overflow:hidden}
+.prog-fill{position:relative;background:rgba(255,255,255,.55);border-radius:7px;height:100%;transition:width .7s;overflow:hidden;z-index:2}
 .prog-fill::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(90deg,transparent 0%,transparent 30%,rgba(255,255,255,.4) 42%,#ffffff 50%,rgba(255,255,255,.4) 58%,transparent 70%,transparent 100%);background-size:220% 100%;animation:laserSlide 1.4s linear infinite;pointer-events:none}
 @keyframes laserSlide{0%{background-position:210% 0}100%{background-position:-110% 0}}
-.prog-spark{position:absolute;top:50%;width:54px;height:54px;transform:translate(-50%,-50%);pointer-events:none;transition:left .7s,opacity .3s,width .25s,height .25s;z-index:3}
+.prog-spark{position:absolute;top:50%;width:54px;height:54px;transform:translate(-50%,-50%);pointer-events:none;transition:left .7s,opacity .3s,width .25s,height .25s;z-index:1}
 .prog-spark svg{width:100%;height:100%;overflow:visible;display:block}
 .prog-spark .sp{stroke:#FFD54F;stroke-width:0.7;stroke-linecap:round;fill:none;filter:drop-shadow(0 0 1.5px #FFA726);animation:sprkFly .55s ease-out infinite;stroke-dasharray:0 14}
 .prog-spark .sp.s2{animation-delay:.08s}
@@ -9156,7 +9156,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0407v';
+const _APP_VERSION = 'v0407w';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -16971,6 +16971,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.67 (v0407w)',date:'2026-04-07',items:[{type:'fix',text:'용접 불꽃 z-index 조정 — 게이지 fill 뒤, 가이드 트랙 앞에 위치'}]},
   {ver:'1.9.66 (v0407v)',date:'2026-04-07',items:[{type:'fix',text:'용접 불꽃 중심 코어 원 제거 — 튀는 스파크만 남김'}]},
   {ver:'1.9.65 (v0407u)',date:'2026-04-07',items:[{type:'fix',text:'용접 불꽃 라인 굵기 0.7로 가늘게 — 진짜 용접 스파크 느낌'},{type:'fix',text:'중심 코어 게이지 클때만 살짝 더 크게(1.4→2.6 스케일) + 색이 빨강→핑크→보라→파랑→시안으로 계속 순환'}]},
   {ver:'1.9.64 (v0407t)',date:'2026-04-07',items:[{type:'fix',text:'레이저 흐름 방향 좌→우로 정정'},{type:'fix',text:'용접 불꽃 1.5배 확대 + 중심 코어를 게이지 끝으로 이동·축소해 덜 두드러지게'}]},
