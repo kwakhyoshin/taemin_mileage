@@ -3772,7 +3772,7 @@ requestAnimationFrame(function(){
     <div style="font-size:18px;font-weight:900;color:#fff;margin-bottom:4px" id="birthday-banner-title"></div>
     <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,.85)" id="birthday-banner-sub"></div>
   </div>
-  <div class="sec" style="display:flex;align-items:center;justify-content:space-between;padding-right:0"><span style="display:inline-flex;align-items:center"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> 오늘 할 일</span><button onclick="openDayDiary()" aria-label="이력보기" style="margin-right:16px;padding:6px 12px;border:1.5px solid #F59E0B;border-radius:18px;background:linear-gradient(135deg,#FEF3C7,#FDE68A);color:#92400E;font-family:inherit;font-size:12px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:5px;box-shadow:0 2px 6px rgba(217,142,9,.25)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>이력보기</button></div>
+  <div class="sec" style="display:flex;align-items:center;justify-content:space-between;padding-right:0"><span style="display:inline-flex;align-items:center"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> 오늘 할 일</span><button onclick="openDayDiary()" aria-label="이력보기" style="margin-right:16px;padding:5px 11px;border:1px solid var(--bdr,#E5E7EB);border-radius:14px;background:transparent;color:var(--mut,#6B7280);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:4px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>이력보기</button></div>
   <div class="act-grid" id="home-grid"></div>
   <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9H4.5a2.5 2.5 0 010-5H6"/><path d="M18 9h1.5a2.5 2.5 0 000-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0012 0V2z"/></svg> 진행중인 챌린지</div>
   <div id="challenge-cards" style="margin:0 16px 14px"></div>
@@ -9158,7 +9158,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0407zd';
+const _APP_VERSION = 'v0407ze';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -14462,27 +14462,28 @@ async function _getDaySnapshot(dateStr){
   const recon = _reconstructDayFromLog(dateStr);
   return {snapshot: recon, reconstructed: true};
 }
-// S.log에서 그 날 완료된 항목만 정확히 추출 + 현재 활동 정의로 보강
+// S.log에서 그 날 활동 기록을 추출 — 로그에 등장한 모든 actId를 행으로 구성
 function _reconstructDayFromLog(dateStr){
   const dayStart = new Date(dateStr+'T00:00:00').getTime();
   const dayEnd = dayStart + 86400000;
-  const dayLogs = (S.log||[]).filter(l=>l.ts>=dayStart && l.ts<dayEnd && l.actId);
-  let acts = (S.acts||[]).filter(a=>a.active&&a.showHome&&a.maxDay>0);
-  if(acts.length===0) acts=(S.acts||[]).filter(a=>a.active&&a.maxDay>0).slice(0,6);
-  const snapActs = acts.map(a=>({id:a.id, name:a.name, emoji:a.emoji, maxDay:a.maxDay, pts:a.pts||0}));
-  const done = {};
-  snapActs.forEach(a=>{ done[a.id] = dayLogs.filter(l=>l.actId===a.id).length; });
-  const knownIds = new Set(snapActs.map(a=>a.id));
-  const extraMap = {};
+  const mid = _dhMemberId();
+  const dayLogs = (S.log||[]).filter(l=>l.ts>=dayStart && l.ts<dayEnd && l.actId && (!l.user || l.user===mid));
+  const byId = {};
   dayLogs.forEach(l=>{
-    if(knownIds.has(l.actId)) return;
-    if(!extraMap[l.actId]) extraMap[l.actId] = {id:l.actId, name:l.name||'(삭제된 활동)', emoji:l.emoji||'📝', maxDay:1, pts:l.pts||0, _deleted:true};
-    extraMap[l.actId].maxDay = Math.max(extraMap[l.actId].maxDay, (done[l.actId]||0)+1);
-    done[l.actId] = (done[l.actId]||0)+1;
+    if(byId[l.actId]) return;
+    const cur = (S.acts||[]).find(a=>a.id===l.actId);
+    byId[l.actId] = cur
+      ? {id:cur.id, name:cur.name, emoji:cur.emoji, maxDay:cur.maxDay||1, pts:cur.pts||0}
+      : {id:l.actId, name:l.name||'(삭제된 활동)', emoji:l.emoji||'📝', maxDay:1, pts:l.pts||0, _deleted:true};
   });
-  Object.values(extraMap).forEach(e=>snapActs.push(e));
+  const done = {};
+  Object.keys(byId).forEach(id=>{
+    done[id] = dayLogs.filter(l=>l.actId===id).length;
+    if((byId[id].maxDay||1) < done[id]) byId[id].maxDay = done[id];
+  });
+  const acts = Object.values(byId);
   const allDone = Array.isArray(S.allDoneDays)&&S.allDoneDays.includes(dateStr);
-  return {acts:snapActs, done, allDone, streak:0, ts:dayStart, _reconstructed:true};
+  return {acts, done, allDone, streak:0, ts:dayStart, _reconstructed:true};
 }
 // 앱 시작 시 1회: S.log에서 최근 60일을 훑어 메모리 캐시에 폴백 데이터를 채워둠
 function _backfillRecentFromLog(){
@@ -14518,54 +14519,48 @@ function openDayDiary(){
   ov.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(15,12,40,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;animation:diaryFade .25s ease;padding:16px';
   ov.innerHTML = ''
     + '<style>'
-    + "@import url('https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&family=Caveat:wght@500;700&display=swap');"
     + '@keyframes diaryFade{from{opacity:0}to{opacity:1}}'
-    + '@keyframes diaryFlipDown{0%{opacity:0;transform:translateY(-30px) rotateX(35deg);transform-origin:top}100%{opacity:1;transform:translateY(0) rotateX(0)}}'
-    + '@keyframes diaryFlipUp{0%{opacity:0;transform:translateY(30px) rotateX(-35deg);transform-origin:bottom}100%{opacity:1;transform:translateY(0) rotateX(0)}}'
-    + '.diary-paper{font-family:"Nanum Pen Script","Caveat",cursive;background:repeating-linear-gradient(to bottom,#FFFDF7 0,#FFFDF7 31px,#E8DFC8 32px),#FFFDF7;background-size:100% 32px;border-radius:6px 6px 18px 18px;box-shadow:0 22px 60px rgba(0,0,0,.45),inset 0 0 0 1px rgba(180,150,80,.2);position:relative;width:min(360px,92vw);height:min(640px,82vh);max-height:82vh;overflow:hidden;perspective:900px}'
-    + '.diary-spiral{position:absolute;top:0;left:0;right:0;height:34px;background:linear-gradient(180deg,#3B2A1A,#5C4128 60%,#3B2A1A);display:flex;align-items:center;justify-content:space-around;padding:0 14px;box-shadow:0 3px 8px rgba(0,0,0,.35);z-index:5;border-radius:6px 6px 0 0}'
-    + '.diary-ring{width:14px;height:18px;border-radius:50%;background:radial-gradient(ellipse at 30% 30%,#E5E7EB 0%,#9CA3AF 50%,#4B5563 100%);box-shadow:inset 0 -2px 3px rgba(0,0,0,.4),0 1px 2px rgba(0,0,0,.3)}'
-    + '.diary-page{position:absolute;top:34px;left:0;right:0;bottom:0;padding:18px 18px 70px;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}'
+    + '@keyframes diaryFlipDown{0%{opacity:0;transform:translateY(-24px)}100%{opacity:1;transform:translateY(0)}}'
+    + '@keyframes diaryFlipUp{0%{opacity:0;transform:translateY(24px)}100%{opacity:1;transform:translateY(0)}}'
+    + '.diary-paper{font-family:inherit;background:repeating-linear-gradient(to bottom,#FFFDF7 0,#FFFDF7 31px,#E8DFC8 32px),#FFFDF7;background-size:100% 32px;border-radius:14px;box-shadow:0 22px 60px rgba(0,0,0,.45),inset 0 0 0 1px rgba(180,150,80,.2);position:relative;width:min(360px,92vw);height:min(640px,82vh);max-height:82vh;overflow:hidden}'
+    + '.diary-page{position:absolute;top:0;left:0;right:0;bottom:0;padding:18px 18px 70px;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}'
     + '.diary-page::-webkit-scrollbar{display:none}'
-    + '.diary-date{font-family:"Nanum Pen Script",cursive;font-size:34px;color:#1F2937;text-align:center;line-height:1;padding:8px 0 4px;cursor:pointer;letter-spacing:1px;transform:rotate(-1.5deg);text-shadow:1px 1px 0 rgba(0,0,0,.04)}'
+    + '.diary-date{font-family:inherit;font-size:18px;font-weight:800;color:#1F2937;text-align:center;line-height:1.2;padding:6px 0 2px;cursor:pointer;letter-spacing:.2px}'
     + '.diary-date:hover{color:#7C3AED}'
-    + '.diary-weekday{font-family:"Nanum Pen Script",cursive;font-size:18px;color:#6B7280;text-align:center;margin-bottom:8px;transform:rotate(.8deg)}'
-    + '.diary-summary{font-family:"Nanum Pen Script",cursive;font-size:20px;color:#92400E;text-align:center;margin-bottom:14px;transform:rotate(-.6deg)}'
-    + '.diary-warn{font-family:"Nanum Pen Script",cursive;font-size:14px;color:#9CA3AF;text-align:center;margin-bottom:8px}'
-    + '.diary-act{display:flex;align-items:center;gap:10px;padding:8px 6px;border-bottom:1px dashed rgba(150,100,40,.25)}'
-    + '.diary-act-emoji{font-size:24px;width:32px;text-align:center;flex-shrink:0}'
-    + '.diary-act-name{flex:1;font-family:"Nanum Pen Script",cursive;font-size:22px;color:#1F2937;line-height:1.1;letter-spacing:.3px}'
-    + '.diary-act-stamps{display:flex;gap:3px;flex-shrink:0}'
-    + '.diary-stamp{width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;font-family:"Nanum Pen Script",cursive;border:2px solid;flex-shrink:0}'
-    + '.diary-stamp.done{background:#FEE2E2;border-color:#DC2626;color:#991B1B;transform:rotate(-8deg)}'
-    + '.diary-stamp.empty{background:transparent;border-color:#D1D5DB;color:#D1D5DB}'
-    + '.diary-empty{font-family:"Nanum Pen Script",cursive;font-size:20px;color:#9CA3AF;text-align:center;padding:30px 0}'
-    + '.diary-corner{position:absolute;width:60px;height:60px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:"Nanum Pen Script",cursive;font-size:18px;color:#9CA3AF;z-index:6;transition:color .15s,transform .15s}'
+    + '.diary-weekday{font-family:inherit;font-size:12px;font-weight:600;color:#6B7280;text-align:center;margin-bottom:6px}'
+    + '.diary-summary{font-family:inherit;font-size:13px;font-weight:700;color:#92400E;text-align:center;margin-bottom:12px}'
+    + '.diary-warn{font-family:inherit;font-size:11px;color:#9CA3AF;text-align:center;margin-bottom:8px}'
+    + '.diary-act{display:flex;align-items:center;gap:10px;padding:9px 6px;border-bottom:1px dashed rgba(150,100,40,.25)}'
+    + '.diary-act-emoji{font-size:22px;width:30px;text-align:center;flex-shrink:0}'
+    + '.diary-act-name{flex:1;font-family:inherit;font-size:14px;font-weight:600;color:#1F2937;line-height:1.2}'
+    + '.diary-act-status{flex-shrink:0;font-family:inherit;font-size:12px;font-weight:700;color:#6B7280;min-width:48px;text-align:right}'
+    + '.diary-act-status.partial{color:#D97706}'
+    + '.diary-act-stampbox{flex-shrink:0;width:42px;height:42px;display:flex;align-items:center;justify-content:center}'
+    + '.diary-act-stampbox svg{width:42px;height:42px}'
+    + '.diary-empty{font-family:inherit;font-size:13px;color:#9CA3AF;text-align:center;padding:30px 0}'
+    + '.diary-corner{position:absolute;width:60px;height:60px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;font-size:16px;font-weight:800;color:#9CA3AF;z-index:6;transition:color .15s,transform .15s}'
     + '.diary-corner:hover{color:#7C3AED;transform:scale(1.1)}'
-    + '.diary-corner.tr{top:34px;right:0;border-radius:0 6px 0 60px;background:linear-gradient(225deg,rgba(217,142,9,.18) 0%,transparent 60%)}'
-    + '.diary-corner.br{bottom:0;right:0;border-radius:60px 0 18px 0;background:linear-gradient(315deg,rgba(217,142,9,.18) 0%,transparent 60%)}'
-    + '.diary-close{position:absolute;top:6px;right:8px;width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,.18);border:none;color:#fff;font-size:14px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:7}'
-    + '.diary-nav-hint{position:absolute;left:50%;transform:translateX(-50%);font-family:"Nanum Pen Script",cursive;font-size:11px;color:#9CA3AF;pointer-events:none;z-index:6}'
-    + '.diary-nav-hint.up{top:40px}'
+    + '.diary-corner.tr{top:0;right:0;border-radius:0 14px 0 60px;background:linear-gradient(225deg,rgba(217,142,9,.18) 0%,transparent 60%)}'
+    + '.diary-corner.br{bottom:0;right:0;border-radius:60px 0 14px 0;background:linear-gradient(315deg,rgba(217,142,9,.18) 0%,transparent 60%)}'
+    + '.diary-close{position:absolute;top:6px;right:8px;width:26px;height:26px;border-radius:50%;background:rgba(15,12,40,.35);border:none;color:#fff;font-size:14px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:7}'
+    + '.diary-nav-hint{position:absolute;left:50%;transform:translateX(-50%);font-family:inherit;font-size:10px;color:#9CA3AF;pointer-events:none;z-index:6}'
+    + '.diary-nav-hint.up{top:6px}'
     + '.diary-nav-hint.down{bottom:6px}'
     + '.diary-cal{position:absolute;inset:0;background:rgba(15,12,40,.85);display:flex;align-items:center;justify-content:center;z-index:8;animation:diaryFade .2s}'
-    + '.diary-cal-card{background:#FFFDF7;border-radius:14px;padding:18px 16px;width:min(320px,90%);box-shadow:0 12px 40px rgba(0,0,0,.5);font-family:"Nanum Pen Script",cursive}'
+    + '.diary-cal-card{background:#FFFDF7;border-radius:14px;padding:18px 16px;width:min(320px,90%);box-shadow:0 12px 40px rgba(0,0,0,.5);font-family:inherit}'
     + '.diary-cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}'
-    + '.diary-cal-title{font-size:24px;color:#1F2937}'
-    + '.diary-cal-nav{background:none;border:none;font-size:22px;color:#7C3AED;cursor:pointer;padding:4px 10px;font-family:"Nanum Pen Script",cursive}'
+    + '.diary-cal-title{font-size:16px;font-weight:800;color:#1F2937}'
+    + '.diary-cal-nav{background:none;border:none;font-size:18px;color:#7C3AED;cursor:pointer;padding:4px 10px;font-family:inherit;font-weight:800}'
     + '.diary-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}'
-    + '.diary-cal-dow{font-size:13px;color:#9CA3AF;text-align:center;padding:4px 0}'
-    + '.diary-cal-cell{aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:16px;color:#374151;cursor:pointer;border:1.5px solid transparent;position:relative;background:transparent}'
+    + '.diary-cal-dow{font-size:11px;font-weight:700;color:#9CA3AF;text-align:center;padding:4px 0}'
+    + '.diary-cal-cell{aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#374151;cursor:pointer;border:1.5px solid transparent;position:relative;background:transparent}'
     + '.diary-cal-cell.today{border-color:#F59E0B}'
     + '.diary-cal-cell.has{background:#FEF3C7}'
     + '.diary-cal-cell.alldone{background:#FED7AA;border-color:#EA580C}'
     + '.diary-cal-cell.future{color:#D1D5DB;cursor:not-allowed}'
-    + '.diary-cal-cell .cnt{font-size:10px;color:#92400E;line-height:1}'
+    + '.diary-cal-cell .cnt{font-size:9px;color:#92400E;line-height:1}'
     + '</style>'
     + '<div class="diary-paper" id="diary-paper">'
-    + '<div class="diary-spiral">'
-    + Array.from({length:11}).map(function(){return '<span class="diary-ring"></span>';}).join('')
-    + '</div>'
     + '<button class="diary-close" onclick="closeDayDiary()">✕</button>'
     + '<div class="diary-nav-hint up">▲ 위로 넘기면 다음 날</div>'
     + '<div class="diary-page" id="diary-page"></div>'
@@ -14610,24 +14605,31 @@ async function _renderDiaryPage(){
   var snapshot = res.snapshot, reconstructed = res.reconstructed;
   var d = new Date(_diaryDate+'T00:00:00');
   var wd = ['일','월','화','수','목','금','토'][d.getDay()];
-  var dateLabel = (d.getMonth()+1)+'월 '+d.getDate()+'일';
+  var dateLabel = d.getFullYear()+'년 '+(d.getMonth()+1)+'월 '+d.getDate()+'일';
   var isToday = _diaryDate===todayStr();
   var acts = snapshot.acts||[];
   var done = snapshot.done||{};
   var totalMax = acts.reduce(function(s,a){return s+(a.maxDay||0);},0);
   var totalDone = acts.reduce(function(s,a){return s+Math.min(a.maxDay||0, done[a.id]||0);},0);
   var summary = totalMax>0
-    ? (snapshot.allDone ? '🎉 '+totalDone+'/'+totalMax+' — 모두 완료!' : totalDone+'/'+totalMax+' 도장')
+    ? (snapshot.allDone ? '🎉 '+totalDone+'/'+totalMax+' — 모두 완료!' : totalDone+'/'+totalMax+' 완료')
     : '기록이 없어요';
+  var STAMP_SVG = '<svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="29" stroke="#34D399" stroke-width="3.5" stroke-dasharray="5 2.5" opacity=".9"/><circle cx="32" cy="32" r="21" stroke="#34D399" stroke-width="2.5" opacity=".7"/><text x="32" y="30" text-anchor="middle" font-size="14" font-weight="900" fill="#10B981" font-family="Noto Sans KR,sans-serif" opacity=".95">완료</text><text x="32" y="43" text-anchor="middle" font-size="9" font-weight="800" fill="#10B981" font-family="sans-serif" letter-spacing="2" opacity=".75">DONE</text></svg>';
   var actsHTML = acts.length===0
     ? '<div class="diary-empty">이 날은 활동 기록이 없어요</div>'
     : acts.map(function(a){
-        var dn = Math.min(a.maxDay||0, done[a.id]||0);
-        var stamps = Array.from({length:Math.max(1,a.maxDay||1)}).map(function(_x,i){
-          return '<span class="diary-stamp '+(i<dn?'done':'empty')+'">'+(i<dn?'✓':'')+'</span>';
-        }).join('');
+        var mx = a.maxDay||1;
+        var dn = Math.min(mx, done[a.id]||0);
         var nm = a._deleted ? '<s>'+a.name+'</s>' : a.name;
-        return '<div class="diary-act"><span class="diary-act-emoji">'+(a.emoji||'📝')+'</span><span class="diary-act-name">'+nm+'</span><span class="diary-act-stamps">'+stamps+'</span></div>';
+        var right;
+        if(dn>=mx){
+          right = '<div class="diary-act-stampbox">'+STAMP_SVG+'</div>';
+        }else if(dn>0){
+          right = '<div class="diary-act-status partial">'+dn+'/'+mx+' 수행</div>';
+        }else{
+          right = '<div class="diary-act-status">0/'+mx+'</div>';
+        }
+        return '<div class="diary-act"><span class="diary-act-emoji">'+(a.emoji||'📝')+'</span><span class="diary-act-name">'+nm+'</span>'+right+'</div>';
       }).join('');
   page.innerHTML = ''
     + '<div class="diary-date" onclick="openDiaryCalendar()" title="달력 열기">'+dateLabel+'</div>'
@@ -17456,6 +17458,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.83 (v0407ze)',date:'2026-04-07',items:[{type:'fix',text:'알림장 일기 디자인 정리 — 수첩 상단 스프링 링 제거, 전 영역 앱 기본 폰트(Pretendard)로 통일, 폰트 사이즈 정상화(과거 페이지에서 글씨가 점점 커지던 문제 해결)'},{type:'fix',text:'과거 날짜 활동 기록이 비어 있던 버그 수정 — 현재 활동 목록 대신 그 날의 로그에 등장한 모든 활동을 직접 행으로 구성하도록 재구성 로직 개선'},{type:'fix',text:'완료 표시를 홈탭과 동일한 도장 SVG로 통일 — 부분 완료(예: 1/2)는 "1/2 수행" 텍스트, 모두 완수했을 때만 도장 한 번'},{type:'fix',text:'홈탭 이력보기 버튼 디자인 톤다운 — 노란 그라디언트 제거, 회색 외곽선 ghost 스타일로 다른 섹션 헤더와 어울리도록 변경'}]},
   {ver:'1.9.82 (v0407zd)',date:'2026-04-07',items:[{type:'fix',text:'알림장 일기 스냅샷을 save() 단일 진입점에 후킹 — 활동 추가/삭제/수정/토글 등 모든 상태 변경에서 자동 갱신 (append-only로 과거 일기는 보호)'}]},
   {ver:'1.9.81 (v0407zc)',date:'2026-04-07',items:[{type:'new',text:'홈탭 오늘 할 일 옆에 이력보기 버튼 추가 — 알림장(수첩) 모양 팝업으로 과거 날짜의 오늘 할 일 도장 현황을 일기처럼 열람. 손글씨 폰트 헤더, 상하 페이지 넘김(스와이프/모서리 탭), 손글씨 날짜 클릭 시 달력 점프 지원'},{type:'new',text:'활동 이력 일기(dayHistory) 저장 시작 — 활동 완료/취소 시점마다 그 날의 활동 정의 + 도장 현황을 멤버별 월별 Firestore 서브컬렉션(<DATA_DOC>/dh_{memberId}/{YYYY-MM})에 영구 저장. localStorage 미러 + append-only 보호. 과거 60일은 S.log에서 best-effort 재구성으로 폴백 표시'}]},
   {ver:'1.9.80 (v0407zb)',date:'2026-04-07',items:[{type:'fix',text:'오늘의 보너스 룰렛 결과의 마일리지 점수가 보이지 않던 문제 수정 — 결과 영역 세로 배치/줄바꿈 방지'},{type:'feat',text:'룰렛 보너스 획득 이력을 홈탭 최근 활동에 표시'}]},
