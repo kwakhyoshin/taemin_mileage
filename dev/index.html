@@ -506,12 +506,13 @@ body.dark .theme-pick.active .theme-pick-radio{border-color:#818CF8;background:#
 @keyframes laserSlide{0%{background-position:210% 0}100%{background-position:-110% 0}}
 .prog-spark{position:absolute;top:50%;width:54px;height:54px;transform:translate(-50%,-50%);pointer-events:none;transition:left .7s,opacity .3s,width .25s,height .25s;z-index:3}
 .prog-spark svg{width:100%;height:100%;overflow:visible;display:block}
-.prog-spark .sp{stroke:#FFD54F;stroke-width:1.6;stroke-linecap:round;fill:none;filter:drop-shadow(0 0 2px #FFA726);animation:sprkFly .55s ease-out infinite;stroke-dasharray:0 14}
+.prog-spark .sp{stroke:#FFD54F;stroke-width:0.7;stroke-linecap:round;fill:none;filter:drop-shadow(0 0 1.5px #FFA726);animation:sprkFly .55s ease-out infinite;stroke-dasharray:0 14}
 .prog-spark .sp.s2{animation-delay:.08s}
 .prog-spark .sp.s3{animation-delay:.16s}
 .prog-spark .sp.s4{animation-delay:.04s;stroke:#FFEB3B}
 .prog-spark .sp.s5{animation-delay:.2s;stroke:#FFEB3B}
-.prog-spark .sp-core{fill:#FFF8C2;opacity:.55;filter:drop-shadow(0 0 3px #FFD54F);animation:sprkPulse .28s ease-in-out infinite alternate}
+.prog-spark .sp-core{opacity:.85;filter:drop-shadow(0 0 4px currentColor);animation:sprkPulse .28s ease-in-out infinite alternate,sprkHue 2.4s linear infinite}
+@keyframes sprkHue{0%{fill:#EF4444;color:#EF4444}20%{fill:#EC4899;color:#EC4899}40%{fill:#8B5CF6;color:#8B5CF6}60%{fill:#3B82F6;color:#3B82F6}80%{fill:#06B6D4;color:#06B6D4}100%{fill:#EF4444;color:#EF4444}}
 @keyframes sprkFly{0%{stroke-dasharray:0 14;opacity:0}25%{opacity:1}100%{stroke-dasharray:11 14;opacity:0}}
 @keyframes sprkPulse{0%{opacity:.65;transform:scale(.7)}100%{opacity:1;transform:scale(1.25)}}
 .prog-row{display:flex;justify-content:space-between;margin-top:5px;font-size:13px;opacity:.75;font-weight:700;transition:all .25s}
@@ -9155,7 +9156,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0407t';
+const _APP_VERSION = 'v0407u';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -14684,7 +14685,7 @@ function switchViewingChild(childId){
     const _isWide=window.innerWidth>=768;
     _hero.style.borderRadius=_isWide?'0':'0 0 38px 38px';
     const _pt=_hero.querySelector('.prog-track');
-    if(_pt){_pt.style.height='14px';_pt.style.borderRadius='7px';const _sp3=_pt.querySelector('.prog-spark');if(_sp3){_sp3.style.width='63px';_sp3.style.height='63px';}}
+    if(_pt){_pt.style.height='14px';_pt.style.borderRadius='7px';const _sp3=_pt.querySelector('.prog-spark');if(_sp3){_sp3.style.width='63px';_sp3.style.height='63px';const _c3=_sp3.querySelector('.sp-core');if(_c3)_c3.setAttribute('r','2.6');}}
     const _pe=_hero.querySelector('.hero-pts');if(_pe)_pe.style.fontSize='';
     const _le=_hero.querySelector('.hero-lbl');if(_le)_le.style.fontSize='';
     const _ue=_hero.querySelector('.hero-unit');if(_ue)_ue.style.fontSize='';
@@ -16970,6 +16971,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.65 (v0407u)',date:'2026-04-07',items:[{type:'fix',text:'용접 불꽃 라인 굵기 0.7로 가늘게 — 진짜 용접 스파크 느낌'},{type:'fix',text:'중심 코어 게이지 클때만 살짝 더 크게(1.4→2.6 스케일) + 색이 빨강→핑크→보라→파랑→시안으로 계속 순환'}]},
   {ver:'1.9.64 (v0407t)',date:'2026-04-07',items:[{type:'fix',text:'레이저 흐름 방향 좌→우로 정정'},{type:'fix',text:'용접 불꽃 1.5배 확대 + 중심 코어를 게이지 끝으로 이동·축소해 덜 두드러지게'}]},
   {ver:'1.9.63 (v0407s)',date:'2026-04-07',items:[{type:'fix',text:'마일리지 게이지 레이저 가시성 개선 — 바 색을 약간 어둡게 + 흰빛 대비 강화'},{type:'fix',text:'용접 불꽃 전반적으로 크기 확대 + 게이지 바 높이에 비례해 함께 스케일 (22~42px)'}]},
   {ver:'1.9.62 (v0407r)',date:'2026-04-07',items:[{type:'new',text:'홈탭 마일리지 게이지에 레이저 효과 — 흰색 빛이 좌→우로 흐르고, 진행 끝점에서 용접 불꽃이 튀는 듯한 SVG 애니메이션'}]},
@@ -21760,7 +21762,7 @@ window._createState = _createState;
           _progTrack.style.borderRadius=(gh/2)+'px';
           // 불꽃 크기를 게이지 높이에 비례하여 스케일 (작을때 22px, 클때 42px)
           const _sp2=_progTrack.querySelector('.prog-spark');
-          if(_sp2){const sMax=63,sMin=33;const sz=sMin+(sMax-sMin)*((gh-gaugeMin)/(gaugeMax-gaugeMin));_sp2.style.width=sz+'px';_sp2.style.height=sz+'px';}
+          if(_sp2){const sMax=63,sMin=33;const _t=(gh-gaugeMin)/(gaugeMax-gaugeMin);const sz=sMin+(sMax-sMin)*_t;_sp2.style.width=sz+'px';_sp2.style.height=sz+'px';const _core=_sp2.querySelector('.sp-core');if(_core){_core.setAttribute('r',(1.4+1.2*_t).toFixed(2));}}
         }
         // Smooth hero-pts font size: 58px → 32px (gradual, not sudden)
         if(_ptEl){
