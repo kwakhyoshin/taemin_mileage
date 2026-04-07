@@ -704,6 +704,28 @@ git add index.html && git commit -m "운영기 배포: ..." && git push
 - **수정**: `showPin()`에서 pin-wrap이 이미 보이면 `lockBodyScroll()` 호출 건너뜀
 - **교훈**: `lockBodyScroll`/`unlockBodyScroll` 쌍은 반드시 1:1 매칭. 모드 전환 시 기존 오버레이가 열려있는지 확인 필요
 
+### 버그 9: streak/연속 챌린지 게이지가 갱신되지 않음 (2026-04-07, v0407z9)
+- **증상**:
+  1. 홈탭 "오늘 할 일"을 모두 완료해도 hero 영역의 "0일 연속" 배지가 "1일 연속"으로 바뀌지 않음
+  2. 주간/월간 "X일 연속 달성하기" 챌린지 게이지가 차지 않음
+  3. 활동 취소 시에도 두 값 모두 정상 반영 안 됨
+- **헛수고 트랙(피해야 할 길)**: 이 버그를 추적하면서 z7~z8 두 차례에 걸쳐 다음 시도들을 했으나 모두 **증상만 우회**한 것이었고 근본 원인은 다른 곳에 있었음:
+  - `getDisplayStreak()`를 양육자-자녀 뷰 컨텍스트(`_globalDataOwner===vid`)에서 S 직접 읽기로 재작성 → 표시 로직만 만짐
+  - `updateChallengeProgress()`의 `if(c.completed)return;` / `if(c.claimed)return;` early-return 제거 → 진행도 재계산 가능하게 했지만 본질은 그대로
+  - 챌린지 진행도에 `getDisplayStreak()` 값까지 max로 합쳐서 표시 → 임시 우회
+- **근본 원인 (z9에서 발견)**:
+  - `isTodayAllDone()`가 `S.acts.filter(a=>a.active && isAvailableToday(a) && a.maxDay>0)` — 즉 **모든 활성 활동**을 검사
+  - 그러나 홈탭 "오늘 할 일" 그리드(`getTodayMissionProgress`, line ~11170)는 `a.active && a.showHome && isAvailableToday(a)`로 **showHome=true 활동만** 표시
+  - 결과: 사용자에게 보이지 않는 숨겨진 활동(`showHome=false`)이 한 개라도 남아 있으면 사용자는 "오늘 할 일 다 했는데"라고 생각하지만 코드는 `isTodayAllDone()=false`로 판정 → `_doActCore`의 streak 증가 블록 진입 안 됨 → S.streak도 안 오르고, 연속 챌린지도 진행 안 됨
+- **수정 (v0407z9)**:
+  - `isTodayAllDone()`와 `_isViewedTodayAllDone(ctx)` 둘 다 `getTodayMissionProgress()`와 동일한 필터(`a.showHome` 우선, 비어있으면 `slice(0,6)` fallback)를 사용하도록 통일
+  - 결과: 사용자가 보는 "오늘 할 일"을 모두 완료하면 즉시 streak +1, 연속 챌린지 게이지 +1, 활동 취소 시 모두 자동 롤백
+- **교훈**:
+  1. **사용자가 보는 화면과 코드의 판정 기준을 항상 일치시켜라.** 같은 개념("오늘 할 일")에 대해 두 개의 다른 필터링 로직이 공존하면 반드시 사고난다
+  2. 같은 데이터를 두 곳에서 필터링하면 헬퍼 함수 하나로 통합하는 것을 고려할 것 (e.g. `getTodaysActiveActs()`)
+  3. **버그 추적 시 표시 함수(getDisplayStreak)부터 의심하지 말고 데이터를 만드는 함수(_doActCore의 streak 증가 조건)부터 의심하라.** "왜 안 보이지?"가 아니라 "왜 값이 안 들어가지?"부터 추적해야 시간 낭비가 적다
+  4. 기능 추가 시 기존 함수의 시그니처와 기준을 검토할 것 — `showHome` 플래그가 추가되면서 home 그리드는 새 필터를 쓰기 시작했지만 streak 판정은 옛날 기준 그대로였음
+
 ---
 
 ## 9. 커밋 히스토리 (2026-03-29~30)
