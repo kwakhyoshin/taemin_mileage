@@ -1455,6 +1455,21 @@ body.dark .adm-child-btn.on{background:rgba(255,107,53,.15)}
 .assign-chip.on{background:var(--or);border-color:var(--or);color:#fff}
 /* MY 탭 가족 구성원 */
 .my-family-row{display:flex;gap:22px;overflow-x:auto;padding:10px 18px 14px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+/* 챌린지 진행률 바 위 무당벌레 */
+.ch-bar-wrap{position:relative;background:var(--bdr);border-radius:4px;height:6px;margin-top:18px}
+.ch-bar-fill{height:100%;border-radius:4px;transition:width .5s ease-out}
+.ch-bug{position:absolute;top:-15px;width:22px;height:18px;pointer-events:none;transition:left .5s ease-out;transform-origin:center bottom;animation:chBugBob .42s ease-in-out infinite;will-change:transform}
+.ch-bug svg{width:100%;height:100%;overflow:visible;display:block}
+.ch-bug .leg{transform-origin:12px 11px;animation:chLegWig .22s ease-in-out infinite alternate}
+.ch-bug .leg.l2,.ch-bug .leg.l5{animation-delay:.07s}
+.ch-bug .leg.l3,.ch-bug .leg.l6{animation-delay:.14s}
+.ch-bug .ant{transform-origin:12px 6px;animation:chAntWig .5s ease-in-out infinite alternate}
+.ch-bug .sweat{animation:chSweatFall 1.4s ease-in infinite;opacity:0}
+.ch-bug .sweat.s2{animation-delay:.7s}
+@keyframes chBugBob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-1.5px) rotate(3deg)}}
+@keyframes chLegWig{0%{transform:rotate(-15deg)}100%{transform:rotate(15deg)}}
+@keyframes chAntWig{0%{transform:rotate(-8deg)}100%{transform:rotate(8deg)}}
+@keyframes chSweatFall{0%{opacity:0;transform:translate(0,0) scale(.8)}15%{opacity:.95}80%{opacity:.7}100%{opacity:0;transform:translate(0,10px) scale(1.1)}}
 .my-family-row::-webkit-scrollbar{display:none}
 .my-family-member{display:flex;flex-direction:column;align-items:center;gap:5px;flex-shrink:0;cursor:pointer}
 .my-family-avatar{width:52px;height:52px;border-radius:50%;overflow:visible;border:2.5px solid var(--or);background:var(--bg2);flex-shrink:0;position:relative}
@@ -9128,7 +9143,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0407n';
+const _APP_VERSION = 'v0407o';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -12576,8 +12591,39 @@ function renderChallengeCards(){
           :`<span style="font-size:12px;font-weight:800;color:var(--tx3)">${c.progress}/${c.target}</span>`}
         </div>
       </div>
-      <div style="background:var(--bdr);border-radius:4px;height:6px;overflow:hidden">
-        <div style="height:100%;border-radius:4px;background:${isComplete?'var(--gn2)':'linear-gradient(90deg,var(--tab-color,#F59E0B),#EF4444)'};width:${pct}%;transition:width .4s"></div>
+      <div class="ch-bar-wrap">
+        <div class="ch-bar-fill" style="background:${isComplete?'var(--gn2)':'linear-gradient(90deg,var(--tab-color,#F59E0B),#EF4444)'};width:${Math.min(100,pct)}%"></div>
+        ${!isComplete?`<div class="ch-bug" style="left:calc(${Math.max(0,Math.min(100,pct))}% - 11px)">
+          <svg viewBox="0 0 24 22">
+            <ellipse class="sweat" cx="3" cy="2" rx="1.1" ry="1.6" fill="#42A5F5"/>
+            <ellipse class="sweat s2" cx="21" cy="3" rx="1.1" ry="1.6" fill="#42A5F5"/>
+            <g stroke="#1a1a1a" stroke-width="1.1" stroke-linecap="round" fill="none">
+              <line class="leg l1" x1="6" y1="11" x2="2" y2="9"/>
+              <line class="leg l2" x1="6" y1="13" x2="2" y2="15"/>
+              <line class="leg l3" x1="7" y1="15" x2="5" y2="20"/>
+              <line class="leg l4" x1="18" y1="11" x2="22" y2="9"/>
+              <line class="leg l5" x1="18" y1="13" x2="22" y2="15"/>
+              <line class="leg l6" x1="17" y1="15" x2="19" y2="20"/>
+            </g>
+            <g class="ant" stroke="#1a1a1a" stroke-width="1.1" stroke-linecap="round">
+              <line x1="10" y1="6" x2="8" y2="2"/>
+              <line x1="14" y1="6" x2="16" y2="2"/>
+              <circle cx="8" cy="2" r="1.1" fill="#1a1a1a"/>
+              <circle cx="16" cy="2" r="1.1" fill="#1a1a1a"/>
+            </g>
+            <ellipse cx="12" cy="13" rx="8" ry="6.8" fill="#E53935"/>
+            <path d="M12 6.5 a4 3.6 0 0 1 0 7.2z" fill="#1a1a1a" opacity=".15"/>
+            <line x1="12" y1="6.8" x2="12" y2="19.5" stroke="#1a1a1a" stroke-width="1"/>
+            <ellipse cx="12" cy="7" rx="4.2" ry="3.4" fill="#1a1a1a"/>
+            <circle cx="10.6" cy="6.5" r=".55" fill="#fff"/>
+            <circle cx="13.4" cy="6.5" r=".55" fill="#fff"/>
+            <circle cx="8" cy="11" r="1.2" fill="#1a1a1a"/>
+            <circle cx="16" cy="11" r="1.2" fill="#1a1a1a"/>
+            <circle cx="8" cy="15" r="1.2" fill="#1a1a1a"/>
+            <circle cx="16" cy="15" r="1.2" fill="#1a1a1a"/>
+            <circle cx="12" cy="17" r="1.1" fill="#1a1a1a"/>
+          </svg>
+        </div>`:''}
       </div>
     </div>`;
   }).join('');
@@ -16911,6 +16957,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.59 (v0407o)',date:'2026-04-07',items:[{type:'new',text:'홈탭 진행중인 챌린지 게이지 끝에 무당벌레 캐릭터 — 6개 다리 흔들흔들 + 더듬이 + 땀방울 + 위아래 바동거림 SVG 애니메이션'}]},
   {ver:'1.9.58 (v0407n)',date:'2026-04-07',items:[{type:'fix',text:'기본 보상값 조정 — 일일 룰렛 5~20, 주간 챌린지 30, 월간 챌린지 50 마일리지'},{type:'fix',text:'XP 백필 안전장치 — 기존 levelData.xp와 log 합산값 중 더 큰 값 사용 (절대 감소 안 함)'}]},
   {ver:'1.9.57 (v0407m)',date:'2026-04-07',items:[{type:'fix',text:'Lv.5 불꽃 이펙트 — 작은 불꽃 9개 → 아이콘을 감싸는 큰 불꽃 1개(3겹 그라디언트)로 단순화'},{type:'new',text:'Lv.40 끝판왕 이펙트 재설계 — 무지개 그라디언트 링 + 발광 글로우 + 황금 별 + 무한 심볼 + 8방향 스파클 합성'},{type:'new',text:'나의 메뉴 가족 목록 자녀 아이콘에 레벨 이펙트 표시, 아이콘 간격 12px → 22px'}]},
   {ver:'1.9.56 (v0407l)',date:'2026-04-07',items:[{type:'fix',text:'관리자 게이미피케이션 상세 영역을 들여쓰기 + 좌측 액센트 바로 시각적 계층화 (하위 속성 느낌)'},{type:'fix',text:'i 아이콘을 "주간 챌린지란?" 등 라벨형 칩 버튼으로 교체 (가독성·발견성 개선)'}]},
