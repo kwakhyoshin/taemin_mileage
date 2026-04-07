@@ -9156,7 +9156,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'prod'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0407x';
+const _APP_VERSION = 'v0407y';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -11114,7 +11114,7 @@ function renderHero(){
       _lvPill.style.display='none';
     }else{
       _lvPill.style.display='';
-      const _ld=S.levelData||{xp:0,level:1};
+      const _ld=getViewedLevelData();
       const _lvInfo=getLevelInfo(_ld.xp);
       _lvPill.innerHTML=`<span style="display:inline-flex;align-items:center;vertical-align:middle;width:16px;height:16px;margin-right:2px">${_lvInfo.svg||_lvInfo.emoji}</span> Lv.${_lvInfo.level}`;
     }
@@ -12391,7 +12391,7 @@ function showLevelUpCelebration(lvInfo){
 window.showLevelUpCelebration=showLevelUpCelebration;
 
 function openLevelPopup(){
-  const _ld=S.levelData||{xp:0,level:1};
+  const _ld=getViewedLevelData();
   const info=getLevelInfo(_ld.xp);
   const ov=document.createElement('div');
   ov.className='streak-popup-overlay show';
@@ -14654,6 +14654,15 @@ function getViewedMemberId(){
   }
   return currentUser;
 }
+// 단일 소스 보장: 홈탭/팝업도 family list와 동일하게 memberData에서 우선 조회
+function getViewedLevelData(){
+  try{
+    const vid=getViewedMemberId();
+    if(vid && S.memberData && S.memberData[vid] && S.memberData[vid].levelData) return S.memberData[vid].levelData;
+  }catch(e){}
+  return S.levelData||{xp:0,level:1,xpLog:[]};
+}
+window.getViewedLevelData=getViewedLevelData;
 // 현재 활성 마일리지 반환: 양육자(independent)면 선택된 자녀의 pts, 아니면 S.pts
 function getActiveMileage(){
   if(getFamilyMode()==='independent'&&isCaregiverUser()){
@@ -16971,6 +16980,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.69 (v0407y)',date:'2026-04-07',items:[{type:'fix',text:'홈탭 레벨 pill과 가족 목록 레벨 불일치 수정 — getViewedLevelData() 헬퍼로 단일 소스(memberData) 우선 조회'}]},
   {ver:'1.9.68 (v0407x)',date:'2026-04-07',items:[{type:'fix',text:'불꽃과 fill 겹치는 부분 clip-path로 잘라내기 — fill 오른쪽으로 튀는 스파크만 보임'}]},
   {ver:'1.9.67 (v0407w)',date:'2026-04-07',items:[{type:'fix',text:'용접 불꽃 z-index 조정 — 게이지 fill 뒤, 가이드 트랙 앞에 위치'}]},
   {ver:'1.9.66 (v0407v)',date:'2026-04-07',items:[{type:'fix',text:'용접 불꽃 중심 코어 원 제거 — 튀는 스파크만 남김'}]},
