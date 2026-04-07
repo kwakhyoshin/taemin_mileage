@@ -3772,7 +3772,7 @@ requestAnimationFrame(function(){
     <div style="font-size:18px;font-weight:900;color:#fff;margin-bottom:4px" id="birthday-banner-title"></div>
     <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,.85)" id="birthday-banner-sub"></div>
   </div>
-  <div class="sec" style="display:flex;align-items:center;justify-content:space-between;padding-right:0"><span style="display:inline-flex;align-items:center"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> 오늘 할 일</span><button onclick="openDayDiary()" aria-label="이력보기" style="margin-right:16px;padding:5px 11px;border:1.5px solid var(--bdr2,#CBD5E1);border-radius:14px;background:var(--bg2,#F1F5F9);color:var(--tx2,#475569);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:4px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>이력보기</button></div>
+  <div class="sec" style="display:flex;align-items:center;justify-content:space-between;padding-right:0"><span style="display:inline-flex;align-items:center;gap:7px"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>오늘 할 일</span><button onclick="openDayDiary()" aria-label="이력보기" style="margin-right:16px;padding:5px 11px;border:1.5px solid var(--bdr2,#CBD5E1);border-radius:14px;background:var(--bg2,#F1F5F9);color:var(--tx2,#475569);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:4px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>이력보기</button></div>
   <div class="act-grid" id="home-grid"></div>
   <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9H4.5a2.5 2.5 0 010-5H6"/><path d="M18 9h1.5a2.5 2.5 0 000-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0012 0V2z"/></svg> 진행중인 챌린지</div>
   <div id="challenge-cards" style="margin:0 16px 14px"></div>
@@ -9158,7 +9158,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0407zl';
+const _APP_VERSION = 'v0407zm';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -17537,6 +17537,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.91 (v0407zm)',date:'2026-04-07',items:[{type:'fix',text:'홈탭 "오늘 할 일" 제목과 아이콘이 붙어보이던 문제 수정 (이력보기 버튼 추가 시 inner span gap 누락)'}]},
   {ver:'1.9.90 (v0407zl)',date:'2026-04-07',items:[{type:'ui',text:'알림장 X 닫기 버튼 제거 — 수첩 바깥 dim 영역 탭으로 닫기 동작과 중복이라 정리'}]},
   {ver:'1.9.89 (v0407zk)',date:'2026-04-07',items:[{type:'fix',text:'알림장에서 미래 날짜로 넘기려 할 때 토스트가 dim 아래에 가려져 안 보이던 문제 — 오버레이 안에 자체 토스트(z-index 20) 표시'}]},
   {ver:'1.9.88 (v0407zj)',date:'2026-04-07',items:[{type:'fix',text:'홈탭 hero shrink 인터랙션 v0407zh 변경 롤백 (threshold 60 복귀, inline padding 보간 제거) — 제목영역이 이상하게 동작하던 문제 해결'},{type:'fix',text:'알림장 X 닫기 버튼 더 위로(top 9px) + 더 작게(22px) — 고동색 헤더 안에 정확히 들어옴'},{type:'ui',text:'알림장 화살표 ▲▼ 버튼을 수첩 우측 하단 모서리 안으로 이동, 고동색 톤으로 변경'},{type:'fix',text:'알림장 열 때 화면이 위로 밀리고 하단에 흰 영역이 잘리던 문제 — body position:fixed 락 방식 폐기, html/body overflow:hidden + touchmove 차단으로 변경 (레이아웃 시프트 없음)'}]},
