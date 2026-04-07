@@ -374,6 +374,73 @@ body.dark .my-profile-card.tier-pro{border-color:rgba(245,158,11,.3);box-shadow:
 .my-mood-badge{position:absolute;bottom:-2px;right:-4px;font-size:18px;line-height:1;z-index:2;animation:fpMoodPulse 2s ease-in-out infinite;filter:drop-shadow(0 1px 3px rgba(0,0,0,.3));pointer-events:none}
 .my-mood-particles{position:absolute;top:50%;left:50%;width:0;height:0;pointer-events:none;z-index:3;overflow:visible}
 .my-avatar-wrap img,.my-avatar-wrap svg{width:100%!important;height:100%!important;object-fit:cover;border-radius:50%;display:block}
+.my-lv-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:10px;background:linear-gradient(135deg,#FFD600,#FFA000);color:#5D4037;font-size:10px;font-weight:900;line-height:1;box-shadow:0 1px 3px rgba(245,158,11,.3);cursor:pointer;-webkit-tap-highlight-color:transparent;white-space:nowrap}
+body.dark .my-lv-badge{color:#3E2723}
+.adm-row-desc{font-size:11.5px;line-height:1.55;color:var(--tx3);padding:0 0 8px 0;font-weight:500}
+/* ── 레벨 이펙트 (프로필 아이콘 주위) ── */
+.lv-fx-wrap{position:absolute;inset:-30%;pointer-events:none;z-index:1;overflow:visible}
+.lv-fx-wrap svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+@keyframes lvSpin{to{transform:rotate(360deg)}}
+@keyframes lvSpinRev{to{transform:rotate(-360deg)}}
+@keyframes lvTwinkle{0%,100%{opacity:.3;transform:scale(.7)}50%{opacity:1;transform:scale(1.2)}}
+@keyframes lvPulse{0%,100%{transform:scale(1);opacity:.7}50%{transform:scale(1.15);opacity:1}}
+@keyframes lvFlicker{0%,100%{transform:scaleY(1) translateY(0);opacity:.9}50%{transform:scaleY(1.15) translateY(-1px);opacity:1}}
+@keyframes lvFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes lvRipple{0%{transform:scale(.6);opacity:.9}100%{transform:scale(1.4);opacity:0}}
+@keyframes lvGlowPulse{0%,100%{filter:drop-shadow(0 0 3px rgba(255,215,0,.6))}50%{filter:drop-shadow(0 0 10px rgba(255,215,0,1))}}
+@keyframes lvSway{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(6deg)}}
+@keyframes lvFall{0%{transform:translateY(-10px) rotate(0deg);opacity:0}20%{opacity:1}80%{opacity:1}100%{transform:translateY(15px) rotate(120deg);opacity:0}}
+@keyframes lvBoltFlash{0%,90%,100%{opacity:0}5%,15%{opacity:1}}
+@keyframes lvShine{0%{transform:translateX(-100%) rotate(45deg)}100%{transform:translateX(100%) rotate(45deg)}}
+@keyframes lvHueRot{0%{filter:hue-rotate(0deg)}100%{filter:hue-rotate(360deg)}}
+@keyframes lvOrbit1{0%{transform:rotate(0deg) translateX(34px) rotate(0deg)}100%{transform:rotate(360deg) translateX(34px) rotate(-360deg)}}
+@keyframes lvOrbit2{0%{transform:rotate(120deg) translateX(34px) rotate(-120deg)}100%{transform:rotate(480deg) translateX(34px) rotate(-480deg)}}
+@keyframes lvOrbit3{0%{transform:rotate(240deg) translateX(34px) rotate(-240deg)}100%{transform:rotate(600deg) translateX(34px) rotate(-600deg)}}
+@keyframes lvSlash{0%{transform:rotate(-45deg) translateX(-50%);opacity:0}30%{opacity:1}70%{opacity:1}100%{transform:rotate(-45deg) translateX(50%);opacity:0}}
+@keyframes lvScalePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
+@keyframes lvBlink{0%,80%,100%{opacity:.5}40%{opacity:1}}
+.lv-spin{animation:lvSpin 8s linear infinite;transform-origin:center}
+.lv-spinR{animation:lvSpinRev 12s linear infinite;transform-origin:center}
+.lv-tw>*{animation:lvTwinkle 1.6s ease-in-out infinite}
+.lv-tw>:nth-child(2){animation-delay:.3s}
+.lv-tw>:nth-child(3){animation-delay:.6s}
+.lv-tw>:nth-child(4){animation-delay:.9s}
+.lv-tw>:nth-child(5){animation-delay:.4s}
+.lv-tw>:nth-child(6){animation-delay:.7s}
+.lv-pulse{animation:lvPulse 2s ease-in-out infinite;transform-origin:center}
+.lv-flicker>*{animation:lvFlicker .35s ease-in-out infinite}
+.lv-flicker>:nth-child(2){animation-delay:.1s}
+.lv-flicker>:nth-child(3){animation-delay:.2s}
+.lv-float{animation:lvFloat 2.4s ease-in-out infinite}
+.lv-ripple>*{animation:lvRipple 2.2s ease-out infinite;transform-origin:center}
+.lv-ripple>:nth-child(2){animation-delay:.7s}
+.lv-ripple>:nth-child(3){animation-delay:1.4s}
+.lv-glow{animation:lvGlowPulse 2s ease-in-out infinite}
+.lv-sway{animation:lvSway 2.4s ease-in-out infinite;transform-origin:center bottom}
+.lv-fall>*{animation:lvFall 3s ease-in infinite}
+.lv-fall>:nth-child(2){animation-delay:1s}
+.lv-fall>:nth-child(3){animation-delay:2s}
+.lv-bolts>*{animation:lvBoltFlash 1.5s ease-out infinite}
+.lv-bolts>:nth-child(2){animation-delay:.5s}
+.lv-bolts>:nth-child(3){animation-delay:1s}
+.lv-hue{animation:lvHueRot 6s linear infinite}
+.lv-orb1{animation:lvOrbit1 4s linear infinite;transform-origin:center}
+.lv-orb2{animation:lvOrbit2 4s linear infinite;transform-origin:center}
+.lv-orb3{animation:lvOrbit3 4s linear infinite;transform-origin:center}
+.lv-slash{animation:lvSlash 1.6s ease-in-out infinite}
+.lv-scale{animation:lvScalePulse 1.8s ease-in-out infinite;transform-origin:center}
+.lv-blink>*{animation:lvBlink 2s ease-in-out infinite}
+.lv-blink>:nth-child(odd){animation-delay:1s}
+/* 레벨 편집기 */
+.lv-editor{display:grid;grid-template-columns:1fr;gap:8px;max-height:480px;overflow-y:auto;padding:4px 2px;border:1px solid var(--bdr,#E2E8F0);border-radius:12px;background:var(--bg2)}
+.lv-edit-row{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--card);border-radius:10px}
+.lv-edit-preview{width:48px;height:48px;border-radius:50%;background:var(--bg);position:relative;flex-shrink:0;border:2px solid var(--bdr,#E2E8F0);overflow:visible}
+.lv-edit-preview .lv-fx-wrap{inset:-30%}
+.lv-edit-preview svg.lv-icon{width:100%;height:100%;border-radius:50%;display:block;position:relative;z-index:2}
+.lv-edit-info{flex:1;min-width:0}
+.lv-edit-info .lv-edit-title{font-size:12px;font-weight:800;color:var(--tx);line-height:1.2}
+.lv-edit-info .lv-edit-sub{font-size:10.5px;color:var(--tx3);font-weight:600;margin-top:2px}
+.lv-edit-row input.num-inp{width:78px;font-size:13px}
 .my-info-text{flex:1}
 .my-name{font-size:17px;font-weight:900;color:var(--tx);line-height:1.2}
 .my-role{font-size:11px;font-weight:700;color:var(--tx3);background:var(--bg2);padding:2px 10px;border-radius:20px;display:inline-block;margin-top:4px}
@@ -4076,12 +4143,13 @@ requestAnimationFrame(function(){
         <div class="divider"></div>
         <!-- 주간 챌린지 -->
         <div class="adm-row">
-          <div class="adm-row-l"><div class="adm-row-nm">🏆 주간 챌린지</div><div class="adm-row-sub">매주 자동 생성 미션</div></div>
+          <div class="adm-row-l"><div class="adm-row-nm">🏆 주간 챌린지</div><div class="adm-row-sub">매주 월요일 자동 생성되는 한 주간의 도전 미션</div></div>
           <button class="tog" id="tog-weekly" onclick="togGameSetting('weeklyEnabled')"><div class="tog-dot"></div></button>
         </div>
+        <div class="adm-row-desc">레벨제로 운영돼요. Lv.1부터 시작해서 챌린지를 완료하고 보상을 수령하면 다음 레벨이 해금됩니다. 모든 템플릿을 한 바퀴 돌면 두 번째 사이클부터는 목표 수치가 1.5배로 늘어나 점점 어려워져요. 활동 횟수·연속 일수·완료 비율 등 다양한 조건을 자녀 본인 데이터로만 카운트합니다(다자녀 가족도 자녀별 독립 진행).</div>
         <div class="divider"></div>
         <div class="adm-row" style="flex-direction:column;align-items:stretch;gap:8px">
-          <div class="adm-row-l"><div class="adm-row-nm">주간 챌린지 보상</div><div class="adm-row-sub">완료 시 지급 마일리지</div></div>
+          <div class="adm-row-l"><div class="adm-row-nm">주간 챌린지 기본 보상</div><div class="adm-row-sub">완료 후 수령 시 지급되는 마일리지(레벨 1 기준, 레벨이 올라갈수록 증가)</div></div>
           <div style="display:flex;align-items:center;gap:8px">
             <input class="num-inp" id="ch-weekly-reward" type="number" value="50" min="1" max="500" style="width:70px" onchange="saveGameSettings()">
             <span style="font-size:12px;color:var(--tx3);font-weight:600">마일리지</span>
@@ -4090,12 +4158,13 @@ requestAnimationFrame(function(){
         <div class="divider"></div>
         <!-- 월간 챌린지 -->
         <div class="adm-row">
-          <div class="adm-row-l"><div class="adm-row-nm">📅 월간 챌린지</div><div class="adm-row-sub">매월 자동 생성 미션</div></div>
+          <div class="adm-row-l"><div class="adm-row-nm">📅 월간 챌린지</div><div class="adm-row-sub">매월 1일 자동 생성되는 한 달짜리 장기 도전 미션</div></div>
           <button class="tog" id="tog-monthly" onclick="togGameSetting('monthlyEnabled')"><div class="tog-dot"></div></button>
         </div>
+        <div class="adm-row-desc">주간 챌린지보다 목표가 크고 보상도 많아요. 마찬가지로 레벨제로 운영되며 매월 한 단계씩 해금되는 구조입니다. "한 달 누적 활동 횟수", "한 달간 연속 달성 일수", "월간 마일리지 누적량" 등 장기 습관 형성을 자극하는 미션이 출제돼요.</div>
         <div class="divider"></div>
         <div class="adm-row" style="flex-direction:column;align-items:stretch;gap:8px">
-          <div class="adm-row-l"><div class="adm-row-nm">월간 챌린지 보상</div><div class="adm-row-sub">완료 시 지급 마일리지</div></div>
+          <div class="adm-row-l"><div class="adm-row-nm">월간 챌린지 기본 보상</div><div class="adm-row-sub">완료 후 수령 시 지급되는 마일리지(레벨 1 기준, 레벨이 올라갈수록 증가)</div></div>
           <div style="display:flex;align-items:center;gap:8px">
             <input class="num-inp" id="ch-monthly-reward" type="number" value="100" min="1" max="1000" style="width:70px" onchange="saveGameSettings()">
             <span style="font-size:12px;color:var(--tx3);font-weight:600">마일리지</span>
@@ -4104,8 +4173,19 @@ requestAnimationFrame(function(){
         <div class="divider"></div>
         <!-- 레벨 시스템 -->
         <div class="adm-row">
-          <div class="adm-row-l"><div class="adm-row-nm">🎮 레벨 시스템</div><div class="adm-row-sub">누적 마일리지 기반 레벨</div></div>
+          <div class="adm-row-l"><div class="adm-row-nm">🎮 레벨 시스템</div><div class="adm-row-sub">누적 마일리지로 자동 성장하는 RPG식 레벨</div></div>
           <button class="tog" id="tog-level" onclick="togGameSetting('levelEnabled')"><div class="tog-dot"></div></button>
+        </div>
+        <div class="adm-row-desc">자녀가 활동을 완료해서 받은 누적 마일리지(XP)에 따라 Lv.1 ~ Lv.20까지 자동으로 성장합니다. 레벨이 오를 때마다 프로필 아이콘 주위에 고유한 SVG 이펙트가 나타나서 자녀에게 시각적인 보상이 주어져요.</div>
+        <div class="divider"></div>
+        <!-- 레벨별 임계값 + 이펙트 편집기 -->
+        <div class="adm-row" style="flex-direction:column;align-items:stretch;gap:0">
+          <div class="adm-row-l" style="margin-bottom:6px"><div class="adm-row-nm">📊 레벨별 상세 설정</div><div class="adm-row-sub">각 레벨에 도달하기 위한 필요 마일리지(누적 XP)와 고유 이펙트 미리보기</div></div>
+          <div id="lv-editor" class="lv-editor"></div>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button class="btn-sm" onclick="saveLevelThresholds()" style="flex:1">💾 레벨 설정 저장</button>
+            <button class="btn-sm" onclick="resetLevelThresholds()" style="background:var(--bg2);color:var(--tx2)">기본값</button>
+          </div>
         </div>
       </div>
     </div>
@@ -9030,7 +9110,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0407g';
+const _APP_VERSION = 'v0407h';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -9197,14 +9277,55 @@ const LEVEL_DEFS = [
   {level:19, title:'전설의 마스터',   minXP:36000, emoji:'🌌', svg:_LV_SVG.galaxy},
   {level:20, title:'최강 마일리지 신',minXP:50000, emoji:'🐉', svg:_LV_SVG.dragonGod},
 ];
+function _getEffectiveLevelDefs(){
+  try{
+    const gs=(typeof S!=='undefined'&&S&&S.settings&&S.settings.gamification)||{};
+    const t=gs.levelThresholds;
+    if(Array.isArray(t)&&t.length===LEVEL_DEFS.length){
+      return LEVEL_DEFS.map((d,i)=>({...d,minXP:Math.max(0,parseInt(t[i])||0)}));
+    }
+  }catch(e){}
+  return LEVEL_DEFS;
+}
 function getLevelInfo(xp){
-  let lv=LEVEL_DEFS[0];
-  for(const d of LEVEL_DEFS){if(xp>=d.minXP)lv=d;else break;}
-  const idx=LEVEL_DEFS.indexOf(lv);
-  const next=LEVEL_DEFS[idx+1]||null;
+  const defs=_getEffectiveLevelDefs();
+  let lv=defs[0];
+  for(const d of defs){if(xp>=d.minXP)lv=d;else break;}
+  const idx=defs.indexOf(lv);
+  const next=defs[idx+1]||null;
   const pct=next?Math.round((xp-lv.minXP)/(next.minXP-lv.minXP)*100):100;
   return{...lv,xp,nextXP:next?next.minXP:lv.minXP,pct,nextTitle:next?next.title:null,nextEmoji:next?next.emoji:null,nextSvg:next?next.svg:null};
 }
+// ── 레벨별 SVG 이펙트 (프로필 아이콘 주위 장식) ──
+// 각 레벨마다 고유한 애니메이션이 자녀에게 시각적 보상이 됩니다.
+const LEVEL_EFFECTS={
+  1:{name:'새싹 반짝임',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-tw"><circle cx="20" cy="22" r="2.2" fill="#8BC34A"/><circle cx="82" cy="28" r="1.8" fill="#A5D6A7"/><circle cx="14" cy="78" r="2" fill="#66BB6A"/><circle cx="86" cy="74" r="1.7" fill="#9CCC65"/></g></svg></div>'},
+  2:{name:'학습의 빛',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-tw"><circle cx="18" cy="20" r="2" fill="#42A5F5"/><circle cx="84" cy="22" r="2" fill="#64B5F6"/><circle cx="12" cy="60" r="1.7" fill="#90CAF9"/><circle cx="88" cy="62" r="1.7" fill="#42A5F5"/><circle cx="50" cy="14" r="1.5" fill="#1E88E5"/></g></svg></div>'},
+  3:{name:'반짝이는 별',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-spin" style="transform-origin:50px 50px"><path d="M50 8l1.6 4.4L56 14l-4.4 1.6L50 20l-1.6-4.4L44 14l4.4-1.6z" fill="#FFD600"/><path d="M92 50l-4.4 1.6L86 56l-1.6-4.4L80 50l4.4-1.6L86 44l1.6 4.4z" fill="#FFC107"/><path d="M50 92l-1.6-4.4L44 86l4.4-1.6L50 80l1.6 4.4L56 86l-4.4 1.6z" fill="#FFD600"/><path d="M8 50l4.4-1.6L14 44l1.6 4.4L20 50l-4.4 1.6L14 56l-1.6-4.4z" fill="#FFC107"/></g></svg></div>'},
+  4:{name:'잎사귀 흩날림',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-fall"><path d="M20 5c-4 4-4 10 0 14 4-4 4-10 0-14z" fill="#66BB6A"/><path d="M50 0c-4 4-4 10 0 14 4-4 4-10 0-14z" fill="#81C784"/><path d="M80 5c-4 4-4 10 0 14 4-4 4-10 0-14z" fill="#4CAF50"/></g></svg></div>'},
+  5:{name:'불꽃 활활',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-flicker" style="transform-origin:50px 100px"><path d="M50 100C30 95 22 75 30 60c2 8 8 10 6 0 0-12 12-18 8-30 14 6 24 22 18 38-2 8-12 24-12 32z" fill="#FF6F00" opacity=".7"/><path d="M50 100C36 96 32 80 38 70c2 6 6 6 4-2 0-8 8-14 6-22 10 4 18 18 12 30-2 6-8 18-10 24z" fill="#FF9800" opacity=".8"/><path d="M50 100c-10-2-12-12-8-20 1 4 4 4 3-1 0-6 5-10 4-16 6 4 12 14 8 22-1 4-5 12-7 15z" fill="#FFC107"/></g></svg></div>'},
+  6:{name:'수호 오라',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-ripple" style="transform-origin:50px 50px"><circle cx="50" cy="50" r="42" fill="none" stroke="#5C6BC0" stroke-width="2.5"/><circle cx="50" cy="50" r="42" fill="none" stroke="#7986CB" stroke-width="2"/><circle cx="50" cy="50" r="42" fill="none" stroke="#9FA8DA" stroke-width="1.5"/></g></svg></div>'},
+  7:{name:'에너지 번개',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-bolts"><path d="M12 28l8-14-2 10 6-2-10 18 2-12z" fill="#FFEB3B" stroke="#F57F17" stroke-width=".5"/><path d="M82 18l8-14-2 10 6-2-10 18 2-12z" fill="#FFC107" stroke="#F57F17" stroke-width=".5"/><path d="M50 4l6-10-1 8 5-2-8 14 1-10z" fill="#FFEB3B" stroke="#F57F17" stroke-width=".5"/></g></svg></div>'},
+  8:{name:'금메달 광채',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><defs><clipPath id="lvClip8"><circle cx="50" cy="50" r="46"/></clipPath></defs><g clip-path="url(#lvClip8)"><rect class="lv-slash" x="-30" y="40" width="160" height="14" fill="url(#lvShine8)" opacity=".8"/></g><defs><linearGradient id="lvShine8"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".9"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs><g class="lv-tw"><circle cx="20" cy="20" r="1.8" fill="#FFD600"/><circle cx="82" cy="22" r="1.8" fill="#FFC107"/><circle cx="78" cy="80" r="1.8" fill="#FFD600"/><circle cx="22" cy="82" r="1.8" fill="#FFC107"/></g></svg></div>'},
+  9:{name:'보석 무지개',html:'<div class="lv-fx-wrap lv-hue"><svg viewBox="0 0 100 100"><g class="lv-spin" style="transform-origin:50px 50px"><circle cx="50" cy="50" r="44" fill="none" stroke="#7C4DFF" stroke-width="2.5" stroke-dasharray="6 4"/></g><g class="lv-tw"><circle cx="50" cy="6" r="2" fill="#E91E63"/><circle cx="94" cy="50" r="2" fill="#FF9800"/><circle cx="50" cy="94" r="2" fill="#4CAF50"/><circle cx="6" cy="50" r="2" fill="#2196F3"/></g></svg></div>'},
+  10:{name:'트로피 황금광',html:'<div class="lv-fx-wrap lv-glow"><svg viewBox="0 0 100 100"><g class="lv-pulse" style="transform-origin:50px 50px"><circle cx="50" cy="50" r="46" fill="none" stroke="#FFD600" stroke-width="3" opacity=".7"/><circle cx="50" cy="50" r="42" fill="none" stroke="#FFA000" stroke-width="1.5" opacity=".5"/></g></svg></div>'},
+  11:{name:'왕관 빛살',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-spin" style="transform-origin:50px 50px"><path d="M50 0L52 14h-4z" fill="#FFD600"/><path d="M100 50L86 52v-4z" fill="#FFD600"/><path d="M50 100L48 86h4z" fill="#FFD600"/><path d="M0 50L14 48v4z" fill="#FFD600"/><path d="M85 15l-10 10-3-3z" fill="#FFC107"/><path d="M85 85l-10-10 3-3z" fill="#FFC107"/><path d="M15 85l10-10 3 3z" fill="#FFC107"/><path d="M15 15l10 10-3 3z" fill="#FFC107"/></g></svg></div>'},
+  12:{name:'영웅 망토',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-sway" style="transform-origin:50px 50px"><path d="M10 50Q30 110 50 100Q70 110 90 50Q70 80 50 78Q30 80 10 50z" fill="#E53935" opacity=".7"/><path d="M20 55Q35 95 50 90Q65 95 80 55Q65 75 50 73Q35 75 20 55z" fill="#F44336" opacity=".5"/></g></svg></div>'},
+  13:{name:'마법 오브',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g style="transform-origin:50px 50px"><circle class="lv-orb1" cx="50" cy="50" r="4" fill="#7C4DFF" filter="url(#lvBlur13)"/><circle class="lv-orb2" cx="50" cy="50" r="4" fill="#B388FF"/><circle class="lv-orb3" cx="50" cy="50" r="4" fill="#651FFF"/></g><defs><filter id="lvBlur13"><feGaussianBlur stdDeviation="1"/></filter></defs></svg></div>'},
+  14:{name:'검의 베기',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><defs><linearGradient id="lvBlade14" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#E1F5FE" stop-opacity="1"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs><g class="lv-slash" style="transform-origin:50px 50px"><path d="M-20 50Q50 30 120 50Q50 56 -20 50z" fill="url(#lvBlade14)"/></g></svg></div>'},
+  15:{name:'폭발하는 별',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-pulse" style="transform-origin:50px 50px"><path d="M50 2l5 18-3-2-2 2zM50 98l5-18-3 2-2-2zM2 50l18 5-2-3 2-2zM98 50l-18 5 2-3-2-2zM15 15l16 12-5-1 1-5zM85 85l-16-12 5 1-1 5zM85 15l-12 16 1-5 5 1zM15 85l12-16-1 5-5-1z" fill="#FFD600" stroke="#FF8F00" stroke-width=".5"/></g></svg></div>'},
+  16:{name:'장미 꽃잎',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-fall"><path d="M18 5q-6 4-3 10t9 0q-3-6-6-10z" fill="#F06292"/><path d="M50 0q-6 4-3 10t9 0q-3-6-6-10z" fill="#EC407A"/><path d="M82 5q-6 4-3 10t9 0q-3-6-6-10z" fill="#E91E63"/></g></svg></div>'},
+  17:{name:'드래곤 비늘',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-blink"><circle cx="14" cy="20" r="3" fill="#43A047"/><circle cx="86" cy="22" r="3" fill="#66BB6A"/><circle cx="10" cy="56" r="3" fill="#388E3C"/><circle cx="90" cy="58" r="3" fill="#43A047"/><circle cx="22" cy="86" r="3" fill="#66BB6A"/><circle cx="78" cy="84" r="3" fill="#2E7D32"/></g></svg></div>'},
+  18:{name:'로켓 화염',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-flicker" style="transform-origin:50px 100px"><path d="M40 100Q50 80 60 100Q55 92 50 92Q45 92 40 100z" fill="#FF5722"/><path d="M42 100Q50 86 58 100Q54 94 50 94Q46 94 42 100z" fill="#FF9800"/><path d="M44 100Q50 90 56 100Q53 96 50 96Q47 96 44 100z" fill="#FFC107"/></g><g class="lv-tw"><circle cx="20" cy="100" r="1.5" fill="#FFC107"/><circle cx="80" cy="100" r="1.5" fill="#FF9800"/><circle cx="30" cy="92" r="1.2" fill="#FFEB3B"/><circle cx="70" cy="92" r="1.2" fill="#FFEB3B"/></g></svg></div>'},
+  19:{name:'우주 궤도',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-spin" style="transform-origin:50px 50px"><ellipse cx="50" cy="50" rx="46" ry="18" fill="none" stroke="#7C4DFF" stroke-width="1.5"/></g><g class="lv-spinR" style="transform-origin:50px 50px"><ellipse cx="50" cy="50" rx="42" ry="14" fill="none" stroke="#B388FF" stroke-width="1.2" transform="rotate(60 50 50)"/></g><g class="lv-tw"><circle cx="14" cy="14" r="1" fill="#fff"/><circle cx="86" cy="20" r="1.2" fill="#fff"/><circle cx="20" cy="86" r="1" fill="#fff"/><circle cx="86" cy="82" r="1.2" fill="#fff"/></g></svg></div>'},
+  20:{name:'드래곤 신',html:'<div class="lv-fx-wrap lv-glow"><svg viewBox="0 0 100 100"><g class="lv-spin" style="transform-origin:50px 50px"><circle cx="50" cy="50" r="46" fill="none" stroke="#FFD600" stroke-width="2.5" stroke-dasharray="4 3"/></g><g class="lv-spinR" style="transform-origin:50px 50px"><circle cx="50" cy="50" r="40" fill="none" stroke="#FFA000" stroke-width="1.5" stroke-dasharray="2 4"/></g><g class="lv-flicker"><path d="M50 0l3 8-3-2-3 2z" fill="#FF6F00"/><path d="M100 50l-8 3 2-3-2-3z" fill="#FF6F00"/><path d="M50 100l3-8-3 2-3-2z" fill="#FF6F00"/><path d="M0 50l8 3-2-3 2-3z" fill="#FF6F00"/></g></svg></div>'}
+};
+function getLevelEffectHTML(level){
+  const fx=LEVEL_EFFECTS[level];
+  return fx?fx.html:'';
+}
+window.LEVEL_EFFECTS=LEVEL_EFFECTS;
+window.getLevelEffectHTML=getLevelEffectHTML;
 // 누적 마일리지 기반 XP 계산 (기존 사용자 마이그레이션)
 function _migrateLevelXP(){
   const ld=S.levelData||(S.levelData={xp:0,level:1,xpLog:[]});
@@ -15234,7 +15355,59 @@ function renderGameSettings(){
   const rMax=document.getElementById('rlt-max-inp');if(rMax)rMax.value=gs.rouletteMax||100;
   const wR=document.getElementById('ch-weekly-reward');if(wR)wR.value=gs.weeklyReward||50;
   const mR=document.getElementById('ch-monthly-reward');if(mR)mR.value=gs.monthlyReward||100;
+  renderLevelEditor();
 }
+function renderLevelEditor(){
+  const el=document.getElementById('lv-editor');if(!el)return;
+  const defs=_getEffectiveLevelDefs();
+  el.innerHTML=defs.map((d,i)=>{
+    const fx=LEVEL_EFFECTS[d.level]||{name:'-',html:''};
+    return `<div class="lv-edit-row">
+      <div class="lv-edit-preview">${fx.html}<svg class="lv-icon" viewBox="0 0 48 48">${(d.svg||'').replace(/^<svg[^>]*>|<\/svg>$/g,'')}</svg></div>
+      <div class="lv-edit-info">
+        <div class="lv-edit-title">Lv.${d.level} ${d.title}</div>
+        <div class="lv-edit-sub">이펙트: ${fx.name}</div>
+      </div>
+      <input class="num-inp" type="number" id="lv-th-${i}" value="${d.minXP}" min="0" max="9999999" step="10" ${i===0?'disabled':''}>
+      <span style="font-size:10px;color:var(--tx3);font-weight:700">XP</span>
+    </div>`;
+  }).join('');
+}
+function saveLevelThresholds(){
+  const defs=LEVEL_DEFS;
+  const arr=[];
+  for(let i=0;i<defs.length;i++){
+    const inp=document.getElementById(`lv-th-${i}`);
+    let v=parseInt(inp?.value);
+    if(isNaN(v)||v<0)v=defs[i].minXP;
+    arr.push(v);
+  }
+  arr[0]=0; // Lv.1 항상 0
+  // 오름차순 검증
+  for(let i=1;i<arr.length;i++){
+    if(arr[i]<=arr[i-1]){
+      toast(`⚠️ Lv.${i+1} 임계값은 Lv.${i}보다 커야 해요`);return;
+    }
+  }
+  const gs=_getGameSettings();
+  gs.levelThresholds=arr;
+  save();
+  // 모든 사용자 레벨 재계산
+  try{Object.values(S.users||{}).forEach(u=>{const ld=u.levelData;if(ld)ld.level=getLevelInfo(ld.xp||0).level;});if(S.levelData)S.levelData.level=getLevelInfo(S.levelData.xp||0).level;}catch(e){}
+  save();renderAll();
+  toast('✅ 레벨 임계값이 저장됐어요');
+}
+function resetLevelThresholds(){
+  if(!confirm('레벨 임계값을 기본값으로 되돌릴까요?'))return;
+  const gs=_getGameSettings();
+  delete gs.levelThresholds;
+  save();renderLevelEditor();
+  try{Object.values(S.users||{}).forEach(u=>{const ld=u.levelData;if(ld)ld.level=getLevelInfo(ld.xp||0).level;});if(S.levelData)S.levelData.level=getLevelInfo(S.levelData.xp||0).level;}catch(e){}
+  save();renderAll();
+  toast('✅ 기본값으로 되돌렸어요');
+}
+window.saveLevelThresholds=saveLevelThresholds;
+window.resetLevelThresholds=resetLevelThresholds;
 function _setTogState(id,on){
   const el=document.getElementById(id);if(!el)return;
   if(on){el.classList.add('on');}else{el.classList.remove('on');}
@@ -16381,10 +16554,44 @@ function renderMyTab(){
   // 헤더 서브타이틀 업데이트
   const myHeaderSub=document.getElementById('my-header-sub');
   if(myHeaderSub)myHeaderSub.textContent=`${name} · ${roleLabel}`;
-  // 아바타
+  // 아바타 + 레벨 이펙트 오버레이
   const avatarWrap=document.getElementById('my-avatar-wrap');
-  if(avatarWrap)avatarWrap.innerHTML=getAvatarHTML(currentUser,50);
+  if(avatarWrap){
+    let _lvFx='';
+    try{
+      const gs=S.settings?.gamification||{};
+      if(gs.levelEnabled!==false){
+        const _ms=getMemberState(currentUser);
+        const _ld=(_ms&&_ms.levelData)||S.levelData||{xp:0,level:1};
+        const _info=getLevelInfo(_ld.xp||0);
+        _lvFx=getLevelEffectHTML(_info.level)||'';
+      }
+    }catch(e){}
+    avatarWrap.innerHTML=_lvFx+getAvatarHTML(currentUser,50);
+  }
   try{updateMyAvatarMoodBadge();}catch(e){console.warn('[renderMyTab] mood badge err:',e);}
+  // 이름 옆에 레벨 배지
+  try{
+    const gs=S.settings?.gamification||{};
+    const _nameRow=nameEl?.parentElement;
+    let _lvBadge=document.getElementById('my-lv-badge');
+    if(gs.levelEnabled!==false && _nameRow){
+      const _ms=getMemberState(currentUser);
+      const _ld=(_ms&&_ms.levelData)||S.levelData||{xp:0,level:1};
+      const _info=getLevelInfo(_ld.xp||0);
+      if(!_lvBadge){
+        _lvBadge=document.createElement('span');
+        _lvBadge.id='my-lv-badge';
+        _lvBadge.className='my-lv-badge';
+        _lvBadge.onclick=()=>{try{openLevelPopup();}catch(e){}};
+        _nameRow.appendChild(_lvBadge);
+      }
+      _lvBadge.textContent=`${_info.emoji||'⭐'} Lv.${_info.level}`;
+      _lvBadge.style.display='inline-flex';
+    }else if(_lvBadge){
+      _lvBadge.style.display='none';
+    }
+  }catch(e){console.warn('[renderMyTab] lv badge err:',e);}
   // 등급 배지 업데이트 (나의메뉴 + 챗봇)
   try{_updatePlanBadges();}catch(e){console.warn('[renderMyTab] plan badge err:',e);}
   // 소셜 인증 연동 정보 표시 (프로필 카드 아래 별도 영역)
@@ -16555,6 +16762,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.52 (v0407h)',date:'2026-04-07',items:[{type:'new',text:'관리자 — 주간/월간 챌린지 상세 설명 추가, 레벨별 임계값 직접 편집 가능'},{type:'new',text:'레벨 시스템 — Lv.1~20 각각 고유한 SVG 이펙트 애니메이션 (반짝임/불꽃/오라/궤도 등 20종)'},{type:'new',text:'나의 메뉴 — 프로필 카드에 레벨 배지 + 아바타 주변 레벨 이펙트 표시'},{type:'new',text:'관리자 레벨 편집기 — 각 레벨별 이펙트 미리보기 가능'}]},
   {ver:'1.9.51 (v0407g)',date:'2026-04-07',items:[{type:'fix',text:'Lv 표시 baseline을 M 글씨 밑선과 정렬'}]},
   {ver:'1.9.50 (v0407f)',date:'2026-04-07',items:[{type:'fix',text:'진행중인 챌린지 중복 제목 제거, 트로피 아이콘으로 통일'},{type:'fix',text:'레벨 정보 박스 제거, M 글씨와 높이 정렬'}]},
   {ver:'1.9.49 (v0407e)',date:'2026-04-07',items:[{type:'fix',text:'streak-pill을 hero-pts-wrap 안으로 inline 배치 — Lv pill과 항상 같은 라인에 자동 정렬 (펼침/접힘 모두)'}]},
