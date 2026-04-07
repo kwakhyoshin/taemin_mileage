@@ -1492,11 +1492,11 @@ body.dark .adm-child-btn.on{background:rgba(255,107,53,.15)}
 .ch-bug.flyaway .wr{animation:chBugFlapR .12s linear infinite!important;opacity:.85!important}
 @keyframes chBugFlapL{0%,100%{transform:rotate(-15deg)}50%{transform:rotate(-65deg)}}
 @keyframes chBugFlapR{0%,100%{transform:rotate(15deg)}50%{transform:rotate(65deg)}}
-.ch-bug.bug-bee .wing{opacity:.85;animation:beeFlap .09s linear infinite;transform-origin:12px 9px;transform-box:view-box}
+.ch-bug.bug-bee .wing{opacity:.92;animation:beeFlap .09s linear infinite;transform-origin:12px 10px;transform-box:view-box}
 @keyframes beeFlap{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.35)}}
-.ch-bug.bug-snail{animation-duration:1.2s}
-.ch-bug.bug-snail .ant{transform-origin:7px 14px;animation:chAntWig .8s ease-in-out infinite alternate}
-.ch-bug.bug-butterfly .wing{opacity:.95;animation-duration:.4s;animation-timing-function:ease-in-out;animation-iteration-count:infinite;animation-direction:alternate;transform-origin:12px 11px;transform-box:view-box}
+.ch-bug.bug-snail{animation-duration:1.4s}
+.ch-bug.bug-snail .ant{transform-origin:12px 3px;animation:chAntWig .8s ease-in-out infinite alternate}
+.ch-bug.bug-butterfly .wing{opacity:.98;animation-duration:.4s;animation-timing-function:ease-in-out;animation-iteration-count:infinite;animation-direction:alternate;transform-origin:12px 11px;transform-box:view-box}
 .ch-bug.bug-butterfly .wing.wl{animation-name:bflyL}
 .ch-bug.bug-butterfly .wing.wr{animation-name:bflyR}
 @keyframes bflyL{0%{transform:scaleX(1)}100%{transform:scaleX(.25)}}
@@ -1504,22 +1504,36 @@ body.dark .adm-child-btn.on{background:rgba(255,107,53,.15)}
 .ch-bug.bug-grasshopper{animation:chBugHop .55s cubic-bezier(.5,0,.5,1) infinite}
 @keyframes chBugHop{0%,100%{transform:translateY(0) rotate(0)}45%{transform:translateY(-3.5px) rotate(-2deg)}50%{transform:translateY(-4px) rotate(0)}}
 .ch-bug.bug-spider .leg.l7,.ch-bug.bug-spider .leg.l8{animation:chLegWig .22s ease-in-out infinite alternate;animation-delay:.21s;transform-origin:12px 14px}
+body.dark .ch-bug{filter:drop-shadow(0 0 1.5px rgba(255,255,255,.75)) drop-shadow(0 0 3px rgba(255,255,255,.3))}
 .ch-bug.special-anim{pointer-events:none}
-@keyframes beeHoney{0%{transform:translate(-50%,-50%) scale(.3);opacity:0}30%{opacity:1;transform:translate(-50%,-30%) scale(1)}100%{transform:translate(-50%,40px) scale(.7);opacity:0}}
-.ch-bug.bee-buzz{animation:beeBuzz 2.2s ease-in-out forwards!important;z-index:50}
-@keyframes beeBuzz{0%{transform:translate(0,0) scale(1)}12%{transform:translate(28px,-26px) scale(1.1)}24%{transform:translate(-26px,-38px) scale(1.1)}38%{transform:translate(32px,-22px) scale(1.15)}52%{transform:translate(-22px,-32px) scale(1.1)}66%{transform:translate(20px,-18px) scale(1.1)}80%{transform:translate(-12px,-10px) scale(1.05)}100%{transform:translate(0,0) scale(1)}}
-.ch-bug.snail-hide{animation:snailHide 2.6s ease-in-out forwards!important}
-@keyframes snailHide{0%{transform:scale(1)}20%{transform:scale(.8,.6) translateX(6px)}55%{transform:scale(.65,.45) translateX(8px)}80%{transform:scale(.95,.9) translateX(2px)}100%{transform:scale(1)}}
-.ch-bug.bfly-dance{animation:bflyDance 1.8s ease-in-out forwards!important;z-index:50}
-@keyframes bflyDance{0%{transform:rotate(0) scale(1)}25%{transform:rotate(180deg) scale(1.2) translateY(-22px)}50%{transform:rotate(360deg) scale(1.3) translateY(-32px)}75%{transform:rotate(540deg) scale(1.2) translateY(-18px)}100%{transform:rotate(720deg) scale(1)}}
-@keyframes bflyPetal{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}30%{opacity:1}100%{opacity:0;transform:translate(calc(-50% + var(--tx)),calc(-50% + var(--ty))) scale(.5)}}
-.ch-bug .ant-parade{position:absolute;left:-90px;top:50%;transform:translateY(-50%);height:24px;display:flex;align-items:center;gap:6px;pointer-events:none;animation:antParade 2.4s linear forwards;font-size:14px;white-space:nowrap}
-@keyframes antParade{0%{transform:translate(-100px,-50%);opacity:0}10%{opacity:1}90%{opacity:1}100%{transform:translate(220px,-50%);opacity:0}}
+/* Bee sting */
+.ch-bug.bee-sting{animation:beeSting 2.4s ease-in-out forwards!important;z-index:50}
+@keyframes beeSting{0%{transform:translate(0,0)}18%{transform:translate(-10px,0) scale(1.2)}30%{transform:translate(22px,0) scale(1.3)}55%{transform:translate(22px,0) scale(1.3)}80%{transform:translate(-4px,0) scale(1.05)}100%{transform:translate(0,0) scale(1)}}
+.bee-stinger{position:absolute;left:55%;top:50%;width:34px;height:18px;pointer-events:none;transform:translateY(-50%);animation:beeStingerFly 1.1s ease-out forwards;filter:drop-shadow(0 1px 2px rgba(0,0,0,.4))}
+@keyframes beeStingerFly{0%{opacity:1;transform:translate(0,-50%) scale(.8)}100%{opacity:0;transform:translate(220px,-50%) scale(1.2)}}
+/* Snail race */
+.ch-bug.snail-race{animation:snailRace 2.9s cubic-bezier(.4,.05,.5,.95) forwards!important;z-index:50}
+@keyframes snailRace{0%{transform:translateX(0)}8%{transform:translateX(0) scale(1.15) rotate(-3deg)}22%{transform:translateX(140px) scale(1.1)}40%{transform:translateX(-160px) scale(1.1)}58%{transform:translateX(180px) scale(1.1)}74%{transform:translateX(-90px) scale(1.1)}88%{transform:translateX(40px) scale(1.05)}100%{transform:translateX(0) scale(1)}}
+.snail-wheels{position:absolute;inset:-2px;pointer-events:none;animation:snailWheelHue .35s linear infinite}
+.snail-wheels svg{width:100%;height:100%;display:block}
+@keyframes snailWheelHue{from{filter:hue-rotate(0)}to{filter:hue-rotate(360deg)}}
+/* Butterfly burn */
+.ch-bug.bfly-burn{animation:bflyBurn 2.8s cubic-bezier(.3,.05,.4,1) forwards!important;z-index:99997;position:relative}
+@keyframes bflyBurn{0%{transform:translate(0,0) scale(1)}28%{transform:translate(0,var(--bfly-ty,-280px)) scale(1.2) rotate(0)}40%{transform:translate(0,var(--bfly-ty,-280px)) scale(1.25) rotate(0)}48%{transform:translate(8px,calc(var(--bfly-ty,-280px) + 8px)) scale(1.45) rotate(15deg)}56%{transform:translate(-8px,calc(var(--bfly-ty,-280px) + 6px)) scale(1.45) rotate(-15deg)}64%{transform:translate(6px,calc(var(--bfly-ty,-280px) + 10px)) scale(1.4) rotate(10deg)}80%{transform:translate(0,calc(var(--bfly-ty,-280px) * .35)) scale(1) rotate(0)}100%{transform:translate(0,0) scale(1)}}
+@keyframes bflyFireBurst{0%{opacity:0;transform:translateX(-50%) scale(.4)}30%{opacity:1;transform:translateX(-50%) scale(1.4)}70%{opacity:1;transform:translateX(-50%) scale(1.6)}100%{opacity:0;transform:translateX(-50%) scale(2)}}
+/* Ant swarm */
+.ch-bug.ant-swarm{animation:antSwarm 3s cubic-bezier(.5,0,.5,1) forwards!important;z-index:50}
+@keyframes antSwarm{0%{transform:translate(0,0) scale(1)}10%{transform:translate(0,2px) scale(.92,1.1)}25%{transform:translate(50px,2px) scale(.9,1.12)}50%{transform:translate(-70px,2px) scale(.9,1.12)}75%{transform:translate(60px,2px) scale(.9,1.12)}90%{transform:translate(10px,1px) scale(.95,1.05)}100%{transform:translate(0,0) scale(1)}}
+.ant-crumb{position:absolute;left:50%;top:-46px;width:70px;height:56px;transform:translateX(-50%);pointer-events:none;animation:antCrumbBob .35s ease-in-out infinite alternate;filter:drop-shadow(0 4px 8px rgba(0,0,0,.35))}
+.ant-crumb svg{width:100%;height:100%;display:block}
+@keyframes antCrumbBob{0%{transform:translateX(-50%) translateY(0) rotate(-3deg)}100%{transform:translateX(-50%) translateY(-3px) rotate(3deg)}}
+/* Spider descend */
 .ch-bug.spider-descend{animation:spiderDescend 2.4s ease-in-out forwards!important;z-index:50}
 @keyframes spiderDescend{0%{transform:translate(0,0)}20%{transform:translate(0,-50px)}35%{transform:translate(0,-90px) rotate(0)}50%{transform:translate(0,-90px) rotate(20deg)}65%{transform:translate(0,-90px) rotate(-20deg)}80%{transform:translate(0,-30px)}100%{transform:translate(0,0)}}
 .spider-thread{position:absolute;left:50%;top:-100px;width:1.5px;background:rgba(0,0,0,.45);pointer-events:none;transform:translateX(-50%);height:0;animation:spiderThread 2.4s ease-in-out forwards}
 body.dark .spider-thread{background:rgba(255,255,255,.5)}
 @keyframes spiderThread{0%{height:0;opacity:0}15%{height:90px;opacity:1}80%{height:90px;opacity:1}100%{height:0;opacity:0}}
+/* Grasshopper crash */
 .ch-bug.grass-crash{animation:grassCrash 2.8s cubic-bezier(.3,.05,.4,1) forwards!important;z-index:50;transform-origin:center bottom}
 @keyframes grassCrash{0%{transform:translate(0,0) scale(1)}6%{transform:translate(0,4px) scale(1.15,.85)}10%{transform:translate(0,-30px) scale(.95,1.15)}22%{transform:translate(0,-220px) scale(1.5)}32%{transform:translate(0,-380px) scale(1.7)}36%{transform:translate(0,-420px) scale(1.85,1.5)}42%{transform:translate(0,-380px) scale(1.5,1.85)}58%{transform:translate(0,-120px) rotate(180deg) scale(1.2)}78%{transform:translate(0,30px) rotate(360deg) scale(1)}88%{transform:translate(0,8px) scale(1.1,.9)}100%{transform:translate(0,0) scale(1)}}
 #__bug_crack__{position:fixed;inset:0;z-index:99999;pointer-events:none;animation:crackFade 3.2s ease-out forwards}
@@ -9219,7 +9233,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0407zr';
+const _APP_VERSION = 'v0407zs';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -17511,21 +17525,19 @@ renderMyTab=function(){const r=_origRenderMyTab2.apply(this,arguments);try{_rend
 window.renderMyTab=renderMyTab;
 // ── 챌린지 곤충 시스템 ──────────────────────────────
 // SVG는 viewBox 0 0 24 22, head=top (CSS rotate(90deg)로 오른쪽으로 걷는 모습)
-const _BUG_SVG_LADYBUG = '<svg viewBox="0 0 24 22"><g stroke="#1a1a1a" stroke-width="1.1" stroke-linecap="round" fill="none"><line class="leg l1" x1="6" y1="11" x2="2" y2="9"/><line class="leg l2" x1="6" y1="13" x2="2" y2="15"/><line class="leg l3" x1="7" y1="15" x2="5" y2="20"/><line class="leg l4" x1="18" y1="11" x2="22" y2="9"/><line class="leg l5" x1="18" y1="13" x2="22" y2="15"/><line class="leg l6" x1="17" y1="15" x2="19" y2="20"/></g><g class="ant" stroke="#1a1a1a" stroke-width="1.1" stroke-linecap="round"><line x1="10" y1="6" x2="8" y2="2"/><line x1="14" y1="6" x2="16" y2="2"/><circle cx="8" cy="2" r="1.1" fill="#1a1a1a"/><circle cx="16" cy="2" r="1.1" fill="#1a1a1a"/></g><ellipse class="wing wl" cx="7" cy="12" rx="7.5" ry="4.5" fill="#fff" opacity=".75"/><ellipse class="wing wr" cx="17" cy="12" rx="7.5" ry="4.5" fill="#fff" opacity=".75"/><ellipse cx="12" cy="13" rx="8" ry="6.8" fill="#E53935"/><line x1="12" y1="6.8" x2="12" y2="19.5" stroke="#1a1a1a" stroke-width="1"/><ellipse cx="12" cy="7" rx="4.2" ry="3.4" fill="#1a1a1a"/><circle cx="10.6" cy="6.5" r=".55" fill="#fff"/><circle cx="13.4" cy="6.5" r=".55" fill="#fff"/><circle cx="8" cy="11" r="1.2" fill="#1a1a1a"/><circle cx="16" cy="11" r="1.2" fill="#1a1a1a"/><circle cx="8" cy="15" r="1.2" fill="#1a1a1a"/><circle cx="16" cy="15" r="1.2" fill="#1a1a1a"/><circle cx="12" cy="17" r="1.1" fill="#1a1a1a"/></svg>';
-const _BUG_SVG_BEE = '<svg viewBox="0 0 24 22"><ellipse class="wing wl" cx="8" cy="9" rx="5.5" ry="4" fill="#fff" opacity=".8"/><ellipse class="wing wr" cx="16" cy="9" rx="5.5" ry="4" fill="#fff" opacity=".8"/><ellipse cx="12" cy="14" rx="5.5" ry="6.5" fill="#FCD34D" stroke="#1a1a1a" stroke-width=".8"/><path d="M7 11 h10 M7 14 h10 M8 18 h8" stroke="#1a1a1a" stroke-width="1.6" stroke-linecap="round"/><ellipse cx="12" cy="6.5" rx="3" ry="2.6" fill="#1a1a1a"/><circle cx="10.8" cy="6.2" r=".5" fill="#fff"/><circle cx="13.2" cy="6.2" r=".5" fill="#fff"/><line class="ant" x1="10.5" y1="4.5" x2="9" y2="1.5" stroke="#1a1a1a" stroke-width="1" stroke-linecap="round"/><line class="ant" x1="13.5" y1="4.5" x2="15" y2="1.5" stroke="#1a1a1a" stroke-width="1" stroke-linecap="round"/></svg>';
-const _BUG_SVG_SNAIL = '<svg viewBox="0 0 24 22"><path d="M2 18 Q9 17 14 17 L20 17 L20 19 L2 19 Z" fill="#FCD34D" stroke="#92400E" stroke-width=".8"/><circle cx="17" cy="13" r="6" fill="#F59E0B" stroke="#92400E" stroke-width="1"/><circle cx="17" cy="13" r="4" fill="none" stroke="#92400E" stroke-width="1"/><circle cx="17" cy="13" r="2" fill="#FBBF24" stroke="#92400E" stroke-width="1"/><line class="ant" x1="5" y1="16" x2="3" y2="11" stroke="#92400E" stroke-width="1.1" stroke-linecap="round"/><line class="ant" x1="7" y1="15" x2="7" y2="9" stroke="#92400E" stroke-width="1.1" stroke-linecap="round"/><circle cx="3" cy="11" r=".9" fill="#1a1a1a"/><circle cx="7" cy="9" r=".9" fill="#1a1a1a"/><circle cx="6" cy="17" r=".5" fill="#1a1a1a"/></svg>';
-const _BUG_SVG_CATERPILLAR = '<svg viewBox="0 0 24 22"><circle cx="12" cy="20" r="2.3" fill="#10B981" stroke="#047857" stroke-width=".6"/><circle cx="12" cy="16" r="2.7" fill="#34D399" stroke="#047857" stroke-width=".6"/><circle cx="12" cy="12" r="2.7" fill="#10B981" stroke="#047857" stroke-width=".6"/><circle cx="12" cy="8" r="2.7" fill="#34D399" stroke="#047857" stroke-width=".6"/><circle cx="12" cy="4" r="2.5" fill="#10B981" stroke="#047857" stroke-width=".6"/><circle cx="11" cy="3.5" r=".4" fill="#fff"/><circle cx="13" cy="3.5" r=".4" fill="#fff"/><line class="ant" x1="11" y1="2" x2="9.5" y2="0" stroke="#047857" stroke-width=".8" stroke-linecap="round"/><line class="ant" x1="13" y1="2" x2="14.5" y2="0" stroke="#047857" stroke-width=".8" stroke-linecap="round"/></svg>';
-const _BUG_SVG_COCOON = '<svg viewBox="0 0 24 22"><line x1="12" y1="0" x2="12" y2="3" stroke="#047857" stroke-width="1"/><ellipse cx="12" cy="12" rx="5.5" ry="9" fill="#10B981" stroke="#047857" stroke-width="1"/><path d="M7 6 Q12 7.5 17 6 M7 10 Q12 11.5 17 10 M7 14 Q12 15.5 17 14 M7 18 Q12 19.5 17 18" stroke="#047857" stroke-width=".7" fill="none"/><circle cx="10" cy="11" r=".5" fill="#FBBF24"/><circle cx="14" cy="11" r=".5" fill="#FBBF24"/></svg>';
-const _BUG_SVG_BUTTERFLY = '<svg viewBox="0 0 24 22"><ellipse class="wing wl" cx="6" cy="11" rx="6.5" ry="9" fill="#F472B6" stroke="#9D174D" stroke-width=".7" opacity=".95"/><ellipse class="wing wr" cx="18" cy="11" rx="6.5" ry="9" fill="#F472B6" stroke="#9D174D" stroke-width=".7" opacity=".95"/><circle cx="6" cy="7" r="1.4" fill="#FBBF24"/><circle cx="18" cy="7" r="1.4" fill="#FBBF24"/><circle cx="6" cy="14" r="1" fill="#fff"/><circle cx="18" cy="14" r="1" fill="#fff"/><ellipse cx="12" cy="11" rx="1.4" ry="7.5" fill="#1a1a1a"/><circle cx="12" cy="3.5" r="1.7" fill="#1a1a1a"/><line class="ant" x1="11" y1="2.5" x2="9" y2="-.5" stroke="#1a1a1a" stroke-width=".9" stroke-linecap="round"/><line class="ant" x1="13" y1="2.5" x2="15" y2="-.5" stroke="#1a1a1a" stroke-width=".9" stroke-linecap="round"/></svg>';
-const _BUG_SVG_ANT = '<svg viewBox="0 0 24 22"><g stroke="#1a1a1a" stroke-width="1" stroke-linecap="round" fill="none"><line class="leg l1" x1="10" y1="11" x2="4" y2="8"/><line class="leg l2" x1="10" y1="11" x2="3" y2="12"/><line class="leg l3" x1="10" y1="11" x2="4" y2="17"/><line class="leg l4" x1="14" y1="11" x2="20" y2="8"/><line class="leg l5" x1="14" y1="11" x2="21" y2="12"/><line class="leg l6" x1="14" y1="11" x2="20" y2="17"/></g><circle cx="12" cy="4.5" r="2.7" fill="#7C2D12"/><ellipse cx="12" cy="11" rx="2.4" ry="2.8" fill="#92400E"/><ellipse cx="12" cy="17.5" rx="3.5" ry="4.2" fill="#7C2D12"/><line class="ant" x1="11" y1="2.5" x2="9" y2="-.5" stroke="#1a1a1a" stroke-width="1" stroke-linecap="round"/><line class="ant" x1="13" y1="2.5" x2="15" y2="-.5" stroke="#1a1a1a" stroke-width="1" stroke-linecap="round"/><circle cx="11" cy="4" r=".4" fill="#fff"/><circle cx="13" cy="4" r=".4" fill="#fff"/></svg>';
-const _BUG_SVG_GRASSHOPPER = '<svg viewBox="0 0 24 22"><ellipse cx="12" cy="13" rx="4.2" ry="6.5" fill="#65A30D" stroke="#3F6212" stroke-width=".7"/><path class="leg l1" d="M8 13 L4 17 L7 19" stroke="#3F6212" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path class="leg l4" d="M16 13 L20 17 L17 19" stroke="#3F6212" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/><line class="leg l2" x1="9" y1="9" x2="6" y2="8" stroke="#3F6212" stroke-width="1.1" stroke-linecap="round"/><line class="leg l5" x1="15" y1="9" x2="18" y2="8" stroke="#3F6212" stroke-width="1.1" stroke-linecap="round"/><line class="leg l3" x1="9" y1="11" x2="6" y2="11" stroke="#3F6212" stroke-width="1.1" stroke-linecap="round"/><line class="leg l6" x1="15" y1="11" x2="18" y2="11" stroke="#3F6212" stroke-width="1.1" stroke-linecap="round"/><circle cx="12" cy="6" r="3" fill="#84CC16" stroke="#3F6212" stroke-width=".7"/><circle cx="11" cy="5.5" r=".7" fill="#1a1a1a"/><circle cx="13" cy="5.5" r=".7" fill="#1a1a1a"/><circle cx="11" cy="5.4" r=".25" fill="#fff"/><circle cx="13" cy="5.4" r=".25" fill="#fff"/><line class="ant" x1="11" y1="3.5" x2="8" y2="-1" stroke="#3F6212" stroke-width=".9" stroke-linecap="round"/><line class="ant" x1="13" y1="3.5" x2="16" y2="-1" stroke="#3F6212" stroke-width=".9" stroke-linecap="round"/></svg>';
-const _BUG_SVG_SPIDER = '<svg viewBox="0 0 24 22"><g stroke="#1f2937" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round"><path class="leg l1" d="M9 11 L4 6 L2 8"/><path class="leg l2" d="M9 13 L2 12"/><path class="leg l3" d="M9 15 L4 18 L2 17"/><path class="leg l4" d="M9 16 L6 21"/><path class="leg l5" d="M15 11 L20 6 L22 8"/><path class="leg l6" d="M15 13 L22 12"/><path class="leg l7" d="M15 15 L20 18 L22 17"/><path class="leg l8" d="M15 16 L18 21"/></g><ellipse cx="12" cy="14" rx="4.8" ry="5" fill="#1f2937" stroke="#000" stroke-width=".5"/><circle cx="12" cy="8" r="3" fill="#374151"/><circle cx="10.5" cy="7" r=".7" fill="#FBBF24"/><circle cx="13.5" cy="7" r=".7" fill="#FBBF24"/><circle cx="11" cy="9" r=".5" fill="#FBBF24"/><circle cx="13" cy="9" r=".5" fill="#FBBF24"/></svg>';
+const _BUG_SVG_LADYBUG = '<svg viewBox="0 0 24 22"><g stroke="#1a1a1a" stroke-width="1.1" stroke-linecap="round" fill="none"><line class="leg l1" x1="6" y1="11" x2="2" y2="9"/><line class="leg l2" x1="6" y1="13" x2="2" y2="15"/><line class="leg l3" x1="7" y1="15" x2="5" y2="20"/><line class="leg l4" x1="18" y1="11" x2="22" y2="9"/><line class="leg l5" x1="18" y1="13" x2="22" y2="15"/><line class="leg l6" x1="17" y1="15" x2="19" y2="20"/></g><g class="ant" stroke="#1a1a1a" stroke-width="1.1" stroke-linecap="round"><line x1="10" y1="6" x2="8" y2="2"/><line x1="14" y1="6" x2="16" y2="2"/><circle cx="8" cy="2" r="1.1" fill="#1a1a1a"/><circle cx="16" cy="2" r="1.1" fill="#1a1a1a"/></g><ellipse class="wing wl" cx="7" cy="12" rx="7.5" ry="4.5" fill="#fff" stroke="#1a1a1a" stroke-width=".4" opacity=".8"/><ellipse class="wing wr" cx="17" cy="12" rx="7.5" ry="4.5" fill="#fff" stroke="#1a1a1a" stroke-width=".4" opacity=".8"/><ellipse cx="12" cy="13" rx="8" ry="6.8" fill="#E53935" stroke="#1a1a1a" stroke-width=".5"/><line x1="12" y1="6.8" x2="12" y2="19.5" stroke="#1a1a1a" stroke-width="1"/><ellipse cx="12" cy="7" rx="4.2" ry="3.4" fill="#1a1a1a"/><circle cx="10.6" cy="6.5" r=".55" fill="#fff"/><circle cx="13.4" cy="6.5" r=".55" fill="#fff"/><circle cx="8" cy="11" r="1.2" fill="#1a1a1a"/><circle cx="16" cy="11" r="1.2" fill="#1a1a1a"/><circle cx="8" cy="15" r="1.2" fill="#1a1a1a"/><circle cx="16" cy="15" r="1.2" fill="#1a1a1a"/><circle cx="12" cy="17" r="1.1" fill="#1a1a1a"/></svg>';
+const _BUG_SVG_BEE = '<svg viewBox="0 0 24 22"><ellipse class="wing wl" cx="7" cy="10" rx="5" ry="3.6" fill="#BAE6FD" stroke="#0369A1" stroke-width=".7" opacity=".92"/><ellipse class="wing wr" cx="17" cy="10" rx="5" ry="3.6" fill="#BAE6FD" stroke="#0369A1" stroke-width=".7" opacity=".92"/><ellipse cx="12" cy="14" rx="5" ry="6.2" fill="#FCD34D" stroke="#1a1a1a" stroke-width="1"/><path d="M7.2 11 h9.6 M7 14 h10 M8 17.5 h8" stroke="#1a1a1a" stroke-width="1.7" stroke-linecap="round"/><path d="M11 20 L12 22 L13 20 Z" fill="#1a1a1a"/><ellipse cx="12" cy="6" rx="3" ry="2.6" fill="#1a1a1a" stroke="#1a1a1a" stroke-width=".5"/><circle cx="10.7" cy="5.7" r=".55" fill="#fff"/><circle cx="13.3" cy="5.7" r=".55" fill="#fff"/><line class="ant" x1="10.5" y1="4" x2="9" y2="1" stroke="#1a1a1a" stroke-width="1.1" stroke-linecap="round"/><line class="ant" x1="13.5" y1="4" x2="15" y2="1" stroke="#1a1a1a" stroke-width="1.1" stroke-linecap="round"/></svg>';
+const _BUG_SVG_SNAIL = '<svg viewBox="0 0 24 22"><g transform="translate(12 17)"><circle r="4.2" fill="#F59E0B" stroke="#7C2D12" stroke-width="1.1"/><circle r="2.7" fill="none" stroke="#7C2D12" stroke-width=".9"/><circle r="1.2" fill="#FBBF24" stroke="#7C2D12" stroke-width=".5"/></g><ellipse cx="12" cy="11" rx="2.8" ry="4.5" fill="#FCD34D" stroke="#7C2D12" stroke-width=".9"/><ellipse cx="12" cy="5.5" rx="2.5" ry="2.7" fill="#FCD34D" stroke="#7C2D12" stroke-width=".9"/><circle cx="11" cy="5" r=".5" fill="#1a1a1a"/><circle cx="13" cy="5" r=".5" fill="#1a1a1a"/><path d="M11 6.5 Q12 7 13 6.5" stroke="#1a1a1a" stroke-width=".5" fill="none" stroke-linecap="round"/><line class="ant" x1="11" y1="3.2" x2="9.8" y2=".3" stroke="#7C2D12" stroke-width="1.1" stroke-linecap="round"/><line class="ant" x1="13" y1="3.2" x2="14.2" y2=".3" stroke="#7C2D12" stroke-width="1.1" stroke-linecap="round"/><circle cx="9.8" cy=".3" r=".75" fill="#1a1a1a"/><circle cx="14.2" cy=".3" r=".75" fill="#1a1a1a"/></svg>';
+const _BUG_SVG_BUTTERFLY = '<svg viewBox="0 0 24 22"><ellipse class="wing wl" cx="6" cy="11" rx="6.8" ry="9" fill="#F472B6" stroke="#831843" stroke-width=".9" opacity=".98"/><ellipse class="wing wr" cx="18" cy="11" rx="6.8" ry="9" fill="#F472B6" stroke="#831843" stroke-width=".9" opacity=".98"/><circle cx="5" cy="7" r="1.6" fill="#FBBF24"/><circle cx="19" cy="7" r="1.6" fill="#FBBF24"/><circle cx="6" cy="14" r="1.2" fill="#A78BFA"/><circle cx="18" cy="14" r="1.2" fill="#A78BFA"/><circle cx="3" cy="11" r=".9" fill="#fff"/><circle cx="21" cy="11" r=".9" fill="#fff"/><ellipse cx="12" cy="11" rx="1.4" ry="7.5" fill="#1a1a1a"/><circle cx="12" cy="3.5" r="1.7" fill="#1a1a1a"/><line class="ant" x1="11" y1="2.5" x2="9" y2="-.5" stroke="#1a1a1a" stroke-width="1" stroke-linecap="round"/><line class="ant" x1="13" y1="2.5" x2="15" y2="-.5" stroke="#1a1a1a" stroke-width="1" stroke-linecap="round"/></svg>';
+const _BUG_SVG_ANT = '<svg viewBox="0 0 24 22"><g stroke="#000" stroke-width="1.1" stroke-linecap="round" fill="none"><line class="leg l1" x1="11" y1="11" x2="4" y2="7"/><line class="leg l2" x1="11" y1="11" x2="3" y2="12"/><line class="leg l3" x1="11" y1="11" x2="4" y2="17"/><line class="leg l4" x1="13" y1="11" x2="20" y2="7"/><line class="leg l5" x1="13" y1="11" x2="21" y2="12"/><line class="leg l6" x1="13" y1="11" x2="20" y2="17"/></g><circle cx="12" cy="4.5" r="2.8" fill="#000"/><ellipse cx="12" cy="11" rx="2.5" ry="3" fill="#000"/><ellipse cx="12" cy="17.5" rx="3.6" ry="4.3" fill="#000"/><line class="ant" x1="11" y1="2.5" x2="9" y2="-.5" stroke="#000" stroke-width="1" stroke-linecap="round"/><line class="ant" x1="13" y1="2.5" x2="15" y2="-.5" stroke="#000" stroke-width="1" stroke-linecap="round"/><circle cx="11" cy="4.2" r=".4" fill="#fff"/><circle cx="13" cy="4.2" r=".4" fill="#fff"/></svg>';
+const _BUG_SVG_GRASSHOPPER = '<svg viewBox="0 0 24 22"><ellipse cx="12" cy="13" rx="4.2" ry="6.5" fill="#65A30D" stroke="#1a2e05" stroke-width=".9"/><path class="leg l1" d="M8 13 L4 17 L7 19" stroke="#1a2e05" stroke-width="1.9" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path class="leg l4" d="M16 13 L20 17 L17 19" stroke="#1a2e05" stroke-width="1.9" fill="none" stroke-linecap="round" stroke-linejoin="round"/><line class="leg l2" x1="9" y1="9" x2="6" y2="8" stroke="#1a2e05" stroke-width="1.2" stroke-linecap="round"/><line class="leg l5" x1="15" y1="9" x2="18" y2="8" stroke="#1a2e05" stroke-width="1.2" stroke-linecap="round"/><line class="leg l3" x1="9" y1="11" x2="6" y2="11" stroke="#1a2e05" stroke-width="1.2" stroke-linecap="round"/><line class="leg l6" x1="15" y1="11" x2="18" y2="11" stroke="#1a2e05" stroke-width="1.2" stroke-linecap="round"/><circle cx="12" cy="6" r="3" fill="#84CC16" stroke="#1a2e05" stroke-width=".9"/><circle cx="11" cy="5.5" r=".75" fill="#1a1a1a"/><circle cx="13" cy="5.5" r=".75" fill="#1a1a1a"/><circle cx="11" cy="5.4" r=".25" fill="#fff"/><circle cx="13" cy="5.4" r=".25" fill="#fff"/><line class="ant" x1="11" y1="3.5" x2="8" y2="-1" stroke="#1a2e05" stroke-width="1" stroke-linecap="round"/><line class="ant" x1="13" y1="3.5" x2="16" y2="-1" stroke="#1a2e05" stroke-width="1" stroke-linecap="round"/></svg>';
+const _BUG_SVG_SPIDER = '<svg viewBox="0 0 24 22"><g stroke="#1f2937" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"><path class="leg l1" d="M9 11 L4 6 L2 8"/><path class="leg l2" d="M9 13 L2 12"/><path class="leg l3" d="M9 15 L4 18 L2 17"/><path class="leg l4" d="M9 16 L6 21"/><path class="leg l5" d="M15 11 L20 6 L22 8"/><path class="leg l6" d="M15 13 L22 12"/><path class="leg l7" d="M15 15 L20 18 L22 17"/><path class="leg l8" d="M15 16 L18 21"/></g><ellipse cx="12" cy="14" rx="4.8" ry="5" fill="#1f2937" stroke="#000" stroke-width=".6"/><circle cx="12" cy="8" r="3" fill="#374151" stroke="#000" stroke-width=".5"/><circle cx="10.5" cy="7" r=".75" fill="#FBBF24"/><circle cx="13.5" cy="7" r=".75" fill="#FBBF24"/><circle cx="11" cy="9" r=".5" fill="#FBBF24"/><circle cx="13" cy="9" r=".5" fill="#FBBF24"/></svg>';
 window.BUG_TYPES={
   ladybug:{name:'무당벌레',emoji:'🐞',svg:_BUG_SVG_LADYBUG,msgs:['아얏!','앗 따거!','간지러워~','살살!','으악!','깜짝이야!','어이쿠!','그만~','헤헤','히잉...'],special:'flyaway'},
-  bee:{name:'꿀벌',emoji:'🐝',svg:_BUG_SVG_BEE,msgs:['윙윙~','꿀 줘!','쏜다~!','앵앵','으잉?','아 바빠!','꽃 어디?','부우우웅','삐졌어!','꿀단지!'],special:'beeBuzz'},
-  snail:{name:'달팽이',emoji:'🐌',svg:_BUG_SVG_SNAIL,msgs:['스르륵...','아이참...','쉬는중...','으잉?','우와~','놀라지마...','천천히...','음음...','휴...','뽀시락'],special:'snailHide'},
-  butterfly:{name:'나비',emoji:'🦋',svg:_BUG_SVG_BUTTERFLY,svgs:[_BUG_SVG_CATERPILLAR,_BUG_SVG_COCOON,_BUG_SVG_BUTTERFLY],msgs:['꼬물꼬물','아잉~','맛난 잎','쿨쿨...','자라는중','후후','곧 변해요','두근두근','반짝~','펄럭'],special:'butterflyDance'},
-  ant:{name:'개미',emoji:'🐜',svg:_BUG_SVG_ANT,msgs:['영차!','으차!','일이 많아','부지런','으응?','과자 줘','동료 어디?','도와줘~','히히','으샤!'],special:'antParade'},
+  bee:{name:'꿀벌',emoji:'🐝',svg:_BUG_SVG_BEE,msgs:['윙윙~','꿀 줘!','쏠까?','앵앵','으잉?','아 바빠!','꽃 어디?','부우우웅','삐졌다!','꿀단지!'],special:'beeSting'},
+  snail:{name:'달팽이',emoji:'🐌',svg:_BUG_SVG_SNAIL,msgs:['나 느리다고 무시해?','이래봬도 빨라!','두고봐...','속도 자랑할까?','쉭쉭','한번 보여줘?','음흠...','진짜야!','준비됐어','출발!'],special:'snailRace'},
+  butterfly:{name:'나비',emoji:'🦋',svg:_BUG_SVG_BUTTERFLY,msgs:['훨훨~','꽃잎이다','반짝~','후루룩','두근','어디로?','펄럭!','새것 같아','히힛','폭~'],special:'butterflyBurn'},
+  ant:{name:'개미',emoji:'🐜',svg:_BUG_SVG_ANT,msgs:['영차!','으차!','일이 많아','부지런','으응?','조각 줘','동료 어디?','도와줘~','히히','힘내자!'],special:'antSwarm'},
   grasshopper:{name:'메뚜기',emoji:'🦗',svg:_BUG_SVG_GRASSHOPPER,msgs:['깡총!','뛸까?','폴짝!','준비됐다','으응?','어디까지?','발이 근질','후후','풀잎 냠','으랏차!'],special:'grasshopperCrash'},
   spider:{name:'거미',emoji:'🕷️',svg:_BUG_SVG_SPIDER,msgs:['거미줄!','쪼르륵','다리 8개','으응?','왜 그래?','거꾸로!','오늘도 냠','히히','잡았다!','쉭쉭'],special:'spiderDescend'}
 };
@@ -17537,13 +17549,8 @@ window.renderChallengeBug=function(c,pct){
     let bugId=sel;
     if(sel==='random'||!ids.includes(sel))bugId=ids[window._bugHash(c.id||c.title||'')%ids.length];
     const bug=window.BUG_TYPES[bugId];
-    let svg=bug.svg;
-    if(bugId==='butterfly'){
-      const stage=pct<33?0:pct<70?1:2;
-      svg=bug.svgs[stage];
-    }
     const left=Math.max(0,Math.min(100,pct));
-    return '<div class="ch-bug bug-'+bugId+'" data-bug="'+bugId+'" onclick="bugPoke(event,this)" style="left:calc('+left+'% - 15px)">'+svg+'</div>';
+    return '<div class="ch-bug bug-'+bugId+'" data-bug="'+bugId+'" onclick="bugPoke(event,this)" style="left:calc('+left+'% - 15px)">'+bug.svg+'</div>';
   }catch(e){console.warn('[renderChallengeBug]',e);return '';}
 };
 window.bugPoke=function(ev,el){try{
@@ -17579,42 +17586,54 @@ window.bugSpecial_flyaway=function(el){
   el.classList.add('flyaway');
   setTimeout(()=>{try{el.classList.remove('flyaway');}catch(_){}} ,2700);
 };
-window.bugSpecial_beeBuzz=function(el){
-  el.classList.add('special-anim','bee-buzz');
-  const drop=document.createElement('div');
-  drop.style.cssText='position:absolute;left:50%;top:50%;width:9px;height:11px;background:radial-gradient(circle at 30% 30%,#FCD34D,#D97706);border-radius:50% 50% 50% 50% / 40% 40% 60% 60%;box-shadow:0 1px 3px rgba(217,119,6,.5);transform:translate(-50%,-50%);pointer-events:none;animation:beeHoney 1.6s ease-in forwards';
-  el.appendChild(drop);
-  setTimeout(()=>{try{drop.remove();el.classList.remove('special-anim','bee-buzz');}catch(_){}} ,2300);
+window.bugSpecial_beeSting=function(el){
+  el.classList.add('special-anim','bee-sting');
+  setTimeout(()=>{
+    try{
+      const s=document.createElement('div');
+      s.className='bee-stinger';
+      s.innerHTML='<svg viewBox="0 0 30 16"><line x1="2" y1="8" x2="20" y2="8" stroke="#1a1a1a" stroke-width="2.2" stroke-linecap="round"/><path d="M20 4 L28 8 L20 12 Z" fill="#1a1a1a"/></svg>';
+      el.appendChild(s);
+      setTimeout(()=>{try{s.remove();}catch(_){}} ,1100);
+    }catch(_){}
+  },380);
+  setTimeout(()=>{try{el.classList.remove('special-anim','bee-sting');}catch(_){}} ,2400);
 };
-window.bugSpecial_snailHide=function(el){
-  el.classList.add('special-anim','snail-hide');
-  setTimeout(()=>{try{el.classList.remove('special-anim','snail-hide');}catch(_){}} ,2700);
+window.bugSpecial_snailRace=function(el){
+  el.classList.add('special-anim','snail-race');
+  const w=document.createElement('div');
+  w.className='snail-wheels';
+  w.innerHTML='<svg viewBox="0 0 30 30"><circle cx="7" cy="23" r="4.2" fill="#1a1a1a" stroke="#fff" stroke-width=".8"/><circle cx="7" cy="23" r="1.4" fill="#FCD34D"/><line x1="7" y1="19" x2="7" y2="27" stroke="#fff" stroke-width=".5"/><line x1="3" y1="23" x2="11" y2="23" stroke="#fff" stroke-width=".5"/><circle cx="23" cy="23" r="4.2" fill="#1a1a1a" stroke="#fff" stroke-width=".8"/><circle cx="23" cy="23" r="1.4" fill="#FCD34D"/><line x1="23" y1="19" x2="23" y2="27" stroke="#fff" stroke-width=".5"/><line x1="19" y1="23" x2="27" y2="23" stroke="#fff" stroke-width=".5"/></svg>';
+  el.appendChild(w);
+  setTimeout(()=>{try{w.remove();el.classList.remove('special-anim','snail-race');}catch(_){}} ,3000);
 };
-window.bugSpecial_butterflyDance=function(el){
-  el.classList.add('special-anim','bfly-dance');
-  for(let i=0;i<10;i++){
-    const p=document.createElement('div');
-    const ang=(i/10)*Math.PI*2;
-    const x=Math.cos(ang)*36,y=Math.sin(ang)*36;
-    const colors=['#FBBF24','#F472B6','#A78BFA','#34D399','#60A5FA'];
-    p.style.cssText='position:absolute;left:50%;top:50%;width:7px;height:7px;background:'+colors[i%5]+';border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);animation:bflyPetal 1.6s ease-out forwards;--tx:'+x+'px;--ty:'+y+'px';
-    el.appendChild(p);
-    setTimeout(((pp)=>()=>{try{pp.remove();}catch(_){}})(p),1700);
-  }
-  setTimeout(()=>{try{el.classList.remove('special-anim','bfly-dance');}catch(_){}} ,1900);
+window.bugSpecial_butterflyBurn=function(el){
+  try{
+    const r=el.getBoundingClientRect();
+    const ty=Math.max(20,r.top-12);
+    el.style.setProperty('--bfly-ty',(-ty)+'px');
+  }catch(_){el.style.setProperty('--bfly-ty','-280px');}
+  el.classList.add('special-anim','bfly-burn');
+  setTimeout(()=>{
+    try{
+      const r=el.getBoundingClientRect();
+      const fire=document.createElement('div');
+      fire.className='bfly-fire';
+      fire.style.cssText='position:fixed;left:'+(r.left+r.width/2)+'px;top:6px;transform:translateX(-50%);pointer-events:none;z-index:99998;font-size:34px;animation:bflyFireBurst .9s ease-out forwards;text-shadow:0 0 12px #FBBF24,0 0 24px #F97316';
+      fire.textContent='💥✨';
+      document.body.appendChild(fire);
+      setTimeout(()=>{try{fire.remove();}catch(_){}} ,1000);
+    }catch(_){}
+  },720);
+  setTimeout(()=>{try{el.classList.remove('special-anim','bfly-burn');el.style.removeProperty('--bfly-ty');}catch(_){}} ,2800);
 };
-window.bugSpecial_antParade=function(el){
-  el.classList.add('special-anim');
-  const ov=document.createElement('div');
-  ov.className='ant-parade';
-  for(let i=0;i<6;i++){
-    const a=document.createElement('span');
-    a.textContent='🐜';
-    a.style.cssText='display:inline-block;animation:chBugBob .42s ease-in-out infinite;animation-delay:'+(i*0.06)+'s';
-    ov.appendChild(a);
-  }
-  el.appendChild(ov);
-  setTimeout(()=>{try{ov.remove();el.classList.remove('special-anim');}catch(_){}} ,2500);
+window.bugSpecial_antSwarm=function(el){
+  el.classList.add('special-anim','ant-swarm');
+  const c=document.createElement('div');
+  c.className='ant-crumb';
+  c.innerHTML='<svg viewBox="0 0 70 56"><path d="M6 32 Q10 8 32 5 Q60 9 64 34 Q56 52 30 52 Q8 50 6 32 Z" fill="#D97706" stroke="#7C2D12" stroke-width="2.2"/><circle cx="22" cy="22" r="3" fill="#7C2D12"/><circle cx="42" cy="18" r="2.5" fill="#7C2D12"/><circle cx="34" cy="36" r="2.2" fill="#7C2D12"/><circle cx="50" cy="34" r="2.5" fill="#7C2D12"/><circle cx="16" cy="38" r="1.8" fill="#7C2D12"/></svg>';
+  el.appendChild(c);
+  setTimeout(()=>{try{c.remove();el.classList.remove('special-anim','ant-swarm');}catch(_){}} ,3000);
 };
 window.bugSpecial_spiderDescend=function(el){
   el.classList.add('special-anim','spider-descend');
@@ -17633,7 +17652,7 @@ window.bugSpecial_grasshopperCrash=function(el){
       if(old)old.remove();
       const crack=document.createElement('div');
       crack.id='__bug_crack__';
-      crack.innerHTML='<svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0"><defs><filter id="cf" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation=".25"/></filter></defs><g stroke="#ffffff" stroke-width=".22" fill="none" filter="url(#cf)" opacity=".95"><line x1="50" y1="6" x2="14" y2="62"/><line x1="50" y1="6" x2="32" y2="78"/><line x1="50" y1="6" x2="48" y2="92"/><line x1="50" y1="6" x2="64" y2="86"/><line x1="50" y1="6" x2="84" y2="68"/><line x1="50" y1="6" x2="92" y2="40"/><line x1="50" y1="6" x2="8" y2="32"/><line x1="50" y1="6" x2="20" y2="20"/><line x1="50" y1="6" x2="78" y2="22"/><line x1="14" y1="62" x2="32" y2="78"/><line x1="32" y1="78" x2="48" y2="92"/><line x1="48" y1="92" x2="64" y2="86"/><line x1="64" y1="86" x2="84" y2="68"/><line x1="84" y1="68" x2="92" y2="40"/><line x1="20" y1="20" x2="14" y2="62"/><line x1="78" y1="22" x2="92" y2="40"/><line x1="20" y1="20" x2="8" y2="32"/><line x1="32" y1="78" x2="14" y2="62"/><line x1="48" y1="92" x2="32" y2="78"/><line x1="64" y1="86" x2="48" y2="92"/></g><g stroke="#ffffff" stroke-width=".15" fill="none" opacity=".7"><line x1="50" y1="6" x2="40" y2="40"/><line x1="50" y1="6" x2="60" y2="40"/><line x1="50" y1="6" x2="30" y2="50"/><line x1="50" y1="6" x2="70" y2="50"/></g><circle cx="50" cy="6" r="3" fill="#fff" opacity=".85"/><circle cx="50" cy="6" r="6" fill="none" stroke="#fff" stroke-width=".25" opacity=".55"/><circle cx="50" cy="6" r="9" fill="none" stroke="#fff" stroke-width=".18" opacity=".35"/></svg>';
+      crack.innerHTML='<svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0"><defs><filter id="cf" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation=".25"/></filter></defs><g stroke="#ffffff" stroke-width=".22" fill="none" filter="url(#cf)" opacity=".95"><line x1="50" y1="6" x2="14" y2="62"/><line x1="50" y1="6" x2="32" y2="78"/><line x1="50" y1="6" x2="48" y2="92"/><line x1="50" y1="6" x2="64" y2="86"/><line x1="50" y1="6" x2="84" y2="68"/><line x1="50" y1="6" x2="92" y2="40"/><line x1="50" y1="6" x2="8" y2="32"/><line x1="50" y1="6" x2="20" y2="20"/><line x1="50" y1="6" x2="78" y2="22"/><line x1="14" y1="62" x2="32" y2="78"/><line x1="32" y1="78" x2="48" y2="92"/><line x1="48" y1="92" x2="64" y2="86"/><line x1="64" y1="86" x2="84" y2="68"/><line x1="84" y1="68" x2="92" y2="40"/><line x1="20" y1="20" x2="14" y2="62"/><line x1="78" y1="22" x2="92" y2="40"/><line x1="20" y1="20" x2="8" y2="32"/></g><circle cx="50" cy="6" r="3" fill="#fff" opacity=".85"/><circle cx="50" cy="6" r="6" fill="none" stroke="#fff" stroke-width=".25" opacity=".55"/><circle cx="50" cy="6" r="9" fill="none" stroke="#fff" stroke-width=".18" opacity=".35"/></svg>';
       document.body.appendChild(crack);
       setTimeout(()=>{try{crack.remove();}catch(_){}} ,3200);
     }catch(_){}
@@ -17711,6 +17730,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.97 (v0407zs)',date:'2026-04-08',items:[{type:'ui',text:'챌린지 곤충 SVG 전면 리디자인 — 다크모드 가시성 개선(드롭섀도우), 꿀벌 날개 하늘색으로 라이트모드에서도 보이도록, 개미 올블랙, 달팽이 머리/껍질 방향 수정'},{type:'new',text:'곤충별 10회 클릭 특별 액션 전면 교체: 꿀벌 → 벌침 발사, 달팽이 → 껍질에 바퀴 달고 화면 레이싱, 나비 → 화면 상단으로 날아올라 폭죽에 맞고 추락, 개미 → 자기보다 큰 빵조각 옮기기'},{type:'fix',text:'나비 진화 단계(애벌레/번데기) 제거 — 항상 나비로 표시'}]},
   {ver:'1.9.96 (v0407zr)',date:'2026-04-08',items:[{type:'new',text:'챌린지 곤충 7종(무당벌레/꿀벌/달팽이/나비/개미/메뚜기/거미) — 곤충마다 10가지 클릭 반응 + 10회째 특별 액션. 나비는 진행률에 따라 애벌레→번데기→나비 진화. 메뚜기는 화면 위로 튀어 박치기 + 액정 깨짐 효과'},{type:'new',text:'나의 메뉴 → 챌린지 곤충 선택 (기본 랜덤)'}]},
   {ver:'1.9.95 (v0407zq)',date:'2026-04-07',items:[{type:'ui',text:'알림장 제목 이모지(📓) → 책 모양 SVG 아이콘으로 교체'}]},
   {ver:'1.9.94 (v0407zp)',date:'2026-04-07',items:[{type:'ui',text:'알림장(오늘 할일 이력) 디자인 모던 리뉴얼 — 앱 테마 토큰 사용으로 다크모드 자동 대응'},{type:'new',text:'무당벌레 10번 누르면 진짜로 화면 밖으로 날아갔다가 뱅그르르 돌며 제자리로 복귀'}]},
