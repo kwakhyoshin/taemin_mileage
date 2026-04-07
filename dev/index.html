@@ -9158,7 +9158,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0407z9';
+const _APP_VERSION = 'v0407za';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -14290,6 +14290,10 @@ function _undoActCore(actId){
     const _yd=new Date();_yd.setDate(_yd.getDate()-1);
     S.lastDate=S.streak>0?`${_yd.getFullYear()}-${String(_yd.getMonth()+1).padStart(2,'0')}-${String(_yd.getDate()).padStart(2,'0')}`:null;
   }
+  // allDoneDays 트래커에서 오늘 항목 제거 (모두 완료 상태가 풀렸을 때)
+  if(Array.isArray(S.allDoneDays) && !isTodayAllDone()){
+    S.allDoneDays = S.allDoneDays.filter(d=>d!==_t);
+  }
 
   // 챌린지 진행도 재계산 + 이미 수령한 챌린지 롤백 처리 (다음 레벨 해금 챌린지도 제거)
   let _chRolledBack=[];
@@ -17086,6 +17090,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.79 (v0407za)',date:'2026-04-07',items:[{type:'fix',text:'활동 취소 시 "오늘 할 일 모두 완료 X일" 챌린지(allDoneDays) 진행도가 줄어들지 않던 문제 — S.allDoneDays 트래커에서 오늘 항목 제거'}]},
   {ver:'1.9.78 (v0407z9)',date:'2026-04-07',items:[{type:'fix',text:'근본 원인 수정 — isTodayAllDone()이 홈탭 "오늘 할 일" 그리드와 동일한 필터(showHome)를 사용하도록 변경. 그동안 숨겨진 활동이 남아있어 streak/연속 챌린지 게이지가 갱신되지 않던 문제 해결.'}]},
   {ver:'1.9.77 (v0407z8)',date:'2026-04-07',items:[{type:'fix',text:'0일→1일 연속 표시: 양육자가 자녀를 보고 있을 때 S에 로드된 자녀 데이터를 우선 사용해 즉시 반영'},{type:'fix',text:'주간/월간 연속 챌린지 게이지: 표시용 streak(getDisplayStreak)을 함께 사용해 오늘 모두 완료 시 즉시 +1 반영, 활동 취소 시도 동기화'},{type:'fix',text:'나의 메뉴 PRO/FREE 등급 배지: 챗봇 진입 없이도 표시되도록 _updatePlanBadges를 window에 노출'}]},
   {ver:'1.9.76 (v0407z7)',date:'2026-04-07',items:[{type:'fix',text:'챌린지 수령 후 활동 취소 시 진행도 재계산 누락 수정 — updateChallengeProgress의 early-return 제거'},{type:'fix',text:'양육자가 자녀 홈을 볼 때 0일→1일 연속 표시가 자녀의 streak/할일 상태로 즉시 반영'}]},
