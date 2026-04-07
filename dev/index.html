@@ -9110,7 +9110,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0407h';
+const _APP_VERSION = 'v0407i';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -9276,6 +9276,26 @@ const LEVEL_DEFS = [
   {level:18, title:'우주의 챔피언',   minXP:27000, emoji:'🚀', svg:_LV_SVG.rocket},
   {level:19, title:'전설의 마스터',   minXP:36000, emoji:'🌌', svg:_LV_SVG.galaxy},
   {level:20, title:'최강 마일리지 신',minXP:50000, emoji:'🐉', svg:_LV_SVG.dragonGod},
+  {level:21, title:'별빛 기사',       minXP:52500, emoji:'⭐', svg:_LV_SVG.star},
+  {level:22, title:'달빛 수호자',     minXP:55000, emoji:'🌙', svg:_LV_SVG.crown},
+  {level:23, title:'태양의 힘',       minXP:57500, emoji:'☀️', svg:_LV_SVG.starBurst},
+  {level:24, title:'폭풍의 지배자',   minXP:60000, emoji:'⚡', svg:_LV_SVG.fire},
+  {level:25, title:'바람의 춤꾼',     minXP:62500, emoji:'🌪️', svg:_LV_SVG.leaf},
+  {level:26, title:'얼음 마법사',     minXP:65000, emoji:'❄️', svg:_LV_SVG.gem},
+  {level:27, title:'용암의 거인',     minXP:67500, emoji:'🌋', svg:_LV_SVG.fire},
+  {level:28, title:'황금 드래곤',     minXP:70000, emoji:'🐲', svg:_LV_SVG.dragon},
+  {level:29, title:'수정 기사',       minXP:72500, emoji:'💎', svg:_LV_SVG.gem},
+  {level:30, title:'불멸의 수호자',   minXP:75000, emoji:'🛡️', svg:_LV_SVG.shield},
+  {level:31, title:'시간의 지배자',   minXP:77500, emoji:'⏳', svg:_LV_SVG.medal},
+  {level:32, title:'공간 왜곡자',     minXP:80000, emoji:'🌀', svg:_LV_SVG.galaxy},
+  {level:33, title:'빛의 천사',       minXP:82500, emoji:'👼', svg:_LV_SVG.hero},
+  {level:34, title:'그림자의 왕',     minXP:85000, emoji:'🌑', svg:_LV_SVG.wizard},
+  {level:35, title:'원소 마스터',     minXP:87500, emoji:'🔮', svg:_LV_SVG.gem},
+  {level:36, title:'차원 여행자',     minXP:90000, emoji:'☄️', svg:_LV_SVG.rocket},
+  {level:37, title:'은하 파수꾼',     minXP:92500, emoji:'🌌', svg:_LV_SVG.galaxy},
+  {level:38, title:'우주의 어머니',   minXP:95000, emoji:'💫', svg:_LV_SVG.galaxy},
+  {level:39, title:'창조의 신',       minXP:97500, emoji:'✨', svg:_LV_SVG.trophy},
+  {level:40, title:'무한의 존재',     minXP:100000,emoji:'♾️', svg:_LV_SVG.dragonGod},
 ];
 function _getEffectiveLevelDefs(){
   try{
@@ -9303,7 +9323,7 @@ const LEVEL_EFFECTS={
   2:{name:'학습의 빛',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-tw"><circle cx="18" cy="20" r="2" fill="#42A5F5"/><circle cx="84" cy="22" r="2" fill="#64B5F6"/><circle cx="12" cy="60" r="1.7" fill="#90CAF9"/><circle cx="88" cy="62" r="1.7" fill="#42A5F5"/><circle cx="50" cy="14" r="1.5" fill="#1E88E5"/></g></svg></div>'},
   3:{name:'반짝이는 별',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-spin" style="transform-origin:50px 50px"><path d="M50 8l1.6 4.4L56 14l-4.4 1.6L50 20l-1.6-4.4L44 14l4.4-1.6z" fill="#FFD600"/><path d="M92 50l-4.4 1.6L86 56l-1.6-4.4L80 50l4.4-1.6L86 44l1.6 4.4z" fill="#FFC107"/><path d="M50 92l-1.6-4.4L44 86l4.4-1.6L50 80l1.6 4.4L56 86l-4.4 1.6z" fill="#FFD600"/><path d="M8 50l4.4-1.6L14 44l1.6 4.4L20 50l-4.4 1.6L14 56l-1.6-4.4z" fill="#FFC107"/></g></svg></div>'},
   4:{name:'잎사귀 흩날림',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-fall"><path d="M20 5c-4 4-4 10 0 14 4-4 4-10 0-14z" fill="#66BB6A"/><path d="M50 0c-4 4-4 10 0 14 4-4 4-10 0-14z" fill="#81C784"/><path d="M80 5c-4 4-4 10 0 14 4-4 4-10 0-14z" fill="#4CAF50"/></g></svg></div>'},
-  5:{name:'불꽃 활활',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-flicker" style="transform-origin:50px 100px"><path d="M50 100C30 95 22 75 30 60c2 8 8 10 6 0 0-12 12-18 8-30 14 6 24 22 18 38-2 8-12 24-12 32z" fill="#FF6F00" opacity=".7"/><path d="M50 100C36 96 32 80 38 70c2 6 6 6 4-2 0-8 8-14 6-22 10 4 18 18 12 30-2 6-8 18-10 24z" fill="#FF9800" opacity=".8"/><path d="M50 100c-10-2-12-12-8-20 1 4 4 4 3-1 0-6 5-10 4-16 6 4 12 14 8 22-1 4-5 12-7 15z" fill="#FFC107"/></g></svg></div>'},
+  5:{name:'불꽃 활활',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-flicker" style="transform-origin:50px 50px"><path d="M50 2 Q40 16 50 24 Q60 16 50 2z" fill="#FF6F00"/><path d="M20 10 Q15 28 32 32 Q30 16 20 10z" fill="#FF6F00"/><path d="M80 10 Q85 28 68 32 Q70 16 80 10z" fill="#FF6F00"/><path d="M6 40 Q2 58 22 58 Q20 42 6 40z" fill="#FF6F00"/><path d="M94 40 Q98 58 78 58 Q80 42 94 40z" fill="#FF6F00"/><path d="M12 72 Q8 90 26 86 Q28 74 12 72z" fill="#FF6F00"/><path d="M88 72 Q92 90 74 86 Q72 74 88 72z" fill="#FF6F00"/><path d="M35 0 Q25 12 38 20 Q42 10 35 0z" fill="#FF8F00"/><path d="M65 0 Q75 12 62 20 Q58 10 65 0z" fill="#FF8F00"/></g><g class="lv-flicker" style="animation-delay:.12s"><path d="M50 8 Q44 20 50 26 Q56 20 50 8z" fill="#FF9800"/><path d="M26 16 Q22 30 34 32 Q32 20 26 16z" fill="#FF9800"/><path d="M74 16 Q78 30 66 32 Q68 20 74 16z" fill="#FF9800"/><path d="M14 50 Q10 62 24 60 Q22 50 14 50z" fill="#FF9800"/><path d="M86 50 Q90 62 76 60 Q78 50 86 50z" fill="#FF9800"/></g><g class="lv-flicker" style="animation-delay:.22s"><path d="M50 14 Q46 22 50 28 Q54 22 50 14z" fill="#FFC107"/><path d="M38 16 Q36 26 44 28 Q42 18 38 16z" fill="#FFC107"/><path d="M62 16 Q64 26 56 28 Q58 18 62 16z" fill="#FFC107"/></g></svg></div>'},
   6:{name:'수호 오라',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-ripple" style="transform-origin:50px 50px"><circle cx="50" cy="50" r="42" fill="none" stroke="#5C6BC0" stroke-width="2.5"/><circle cx="50" cy="50" r="42" fill="none" stroke="#7986CB" stroke-width="2"/><circle cx="50" cy="50" r="42" fill="none" stroke="#9FA8DA" stroke-width="1.5"/></g></svg></div>'},
   7:{name:'에너지 번개',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-bolts"><path d="M12 28l8-14-2 10 6-2-10 18 2-12z" fill="#FFEB3B" stroke="#F57F17" stroke-width=".5"/><path d="M82 18l8-14-2 10 6-2-10 18 2-12z" fill="#FFC107" stroke="#F57F17" stroke-width=".5"/><path d="M50 4l6-10-1 8 5-2-8 14 1-10z" fill="#FFEB3B" stroke="#F57F17" stroke-width=".5"/></g></svg></div>'},
   8:{name:'금메달 광채',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><defs><clipPath id="lvClip8"><circle cx="50" cy="50" r="46"/></clipPath></defs><g clip-path="url(#lvClip8)"><rect class="lv-slash" x="-30" y="40" width="160" height="14" fill="url(#lvShine8)" opacity=".8"/></g><defs><linearGradient id="lvShine8"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".9"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs><g class="lv-tw"><circle cx="20" cy="20" r="1.8" fill="#FFD600"/><circle cx="82" cy="22" r="1.8" fill="#FFC107"/><circle cx="78" cy="80" r="1.8" fill="#FFD600"/><circle cx="22" cy="82" r="1.8" fill="#FFC107"/></g></svg></div>'},
@@ -9318,7 +9338,27 @@ const LEVEL_EFFECTS={
   17:{name:'드래곤 비늘',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-blink"><circle cx="14" cy="20" r="3" fill="#43A047"/><circle cx="86" cy="22" r="3" fill="#66BB6A"/><circle cx="10" cy="56" r="3" fill="#388E3C"/><circle cx="90" cy="58" r="3" fill="#43A047"/><circle cx="22" cy="86" r="3" fill="#66BB6A"/><circle cx="78" cy="84" r="3" fill="#2E7D32"/></g></svg></div>'},
   18:{name:'로켓 화염',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-flicker" style="transform-origin:50px 100px"><path d="M40 100Q50 80 60 100Q55 92 50 92Q45 92 40 100z" fill="#FF5722"/><path d="M42 100Q50 86 58 100Q54 94 50 94Q46 94 42 100z" fill="#FF9800"/><path d="M44 100Q50 90 56 100Q53 96 50 96Q47 96 44 100z" fill="#FFC107"/></g><g class="lv-tw"><circle cx="20" cy="100" r="1.5" fill="#FFC107"/><circle cx="80" cy="100" r="1.5" fill="#FF9800"/><circle cx="30" cy="92" r="1.2" fill="#FFEB3B"/><circle cx="70" cy="92" r="1.2" fill="#FFEB3B"/></g></svg></div>'},
   19:{name:'우주 궤도',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-spin" style="transform-origin:50px 50px"><ellipse cx="50" cy="50" rx="46" ry="18" fill="none" stroke="#7C4DFF" stroke-width="1.5"/></g><g class="lv-spinR" style="transform-origin:50px 50px"><ellipse cx="50" cy="50" rx="42" ry="14" fill="none" stroke="#B388FF" stroke-width="1.2" transform="rotate(60 50 50)"/></g><g class="lv-tw"><circle cx="14" cy="14" r="1" fill="#fff"/><circle cx="86" cy="20" r="1.2" fill="#fff"/><circle cx="20" cy="86" r="1" fill="#fff"/><circle cx="86" cy="82" r="1.2" fill="#fff"/></g></svg></div>'},
-  20:{name:'드래곤 신',html:'<div class="lv-fx-wrap lv-glow"><svg viewBox="0 0 100 100"><g class="lv-spin" style="transform-origin:50px 50px"><circle cx="50" cy="50" r="46" fill="none" stroke="#FFD600" stroke-width="2.5" stroke-dasharray="4 3"/></g><g class="lv-spinR" style="transform-origin:50px 50px"><circle cx="50" cy="50" r="40" fill="none" stroke="#FFA000" stroke-width="1.5" stroke-dasharray="2 4"/></g><g class="lv-flicker"><path d="M50 0l3 8-3-2-3 2z" fill="#FF6F00"/><path d="M100 50l-8 3 2-3-2-3z" fill="#FF6F00"/><path d="M50 100l3-8-3 2-3-2z" fill="#FF6F00"/><path d="M0 50l8 3-2-3 2-3z" fill="#FF6F00"/></g></svg></div>'}
+  20:{name:'드래곤 신',html:'<div class="lv-fx-wrap lv-glow"><svg viewBox="0 0 100 100"><g class="lv-spin" style="transform-origin:50px 50px"><circle cx="50" cy="50" r="46" fill="none" stroke="#FFD600" stroke-width="2.5" stroke-dasharray="4 3"/></g><g class="lv-spinR" style="transform-origin:50px 50px"><circle cx="50" cy="50" r="40" fill="none" stroke="#FFA000" stroke-width="1.5" stroke-dasharray="2 4"/></g><g class="lv-flicker"><path d="M50 0l3 8-3-2-3 2z" fill="#FF6F00"/><path d="M100 50l-8 3 2-3-2-3z" fill="#FF6F00"/><path d="M50 100l3-8-3 2-3-2z" fill="#FF6F00"/><path d="M0 50l8 3-2-3 2-3z" fill="#FF6F00"/></g></svg></div>'},
+  21:{name:'오로라 커튼',html:'<div class="lv-fx-wrap lv-hue"><svg viewBox="0 0 100 100"><g class="lv-sway"><path d="M5 30 Q25 20 50 32 T95 30 L95 38 Q70 28 50 40 T5 38z" fill="#80DEEA" opacity=".7"/><path d="M5 50 Q25 42 50 52 T95 50 L95 58 Q70 48 50 60 T5 58z" fill="#B388FF" opacity=".6"/><path d="M5 70 Q25 62 50 72 T95 70 L95 78 Q70 68 50 80 T5 78z" fill="#F48FB1" opacity=".6"/></g></svg></div>'},
+  22:{name:'달 위성 궤도',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-orb1" style="transform-origin:50px 50px"><circle cx="50" cy="4" r="6" fill="#E1F5FE"/><circle cx="48" cy="3" r="1" fill="#B0BEC5"/></g><g class="lv-orb2" style="transform-origin:50px 50px"><circle cx="95" cy="50" r="4" fill="#CFD8DC"/></g></svg></div>'},
+  23:{name:'태양 광선',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-pulse" style="transform-origin:50px 50px"><path d="M50 0v12M100 50h-12M50 100v-12M0 50h12M85 15l-8 8M85 85l-8-8M15 85l8-8M15 15l8 8" stroke="#FFD600" stroke-width="3" stroke-linecap="round"/></g></svg></div>'},
+  24:{name:'번개 폭풍',html:'<div class="lv-fx-wrap lv-bolts"><svg viewBox="0 0 100 100"><path d="M20 0l-8 40h10l-6 30 16-40h-10l8-30z" fill="#FFEB3B"/><path d="M80 5l-8 38h10l-6 28 16-38h-10l8-28z" fill="#FFF176"/><path d="M5 55l-5 30h8l-4 15 12-30h-8l6-15z" fill="#FFEB3B"/><path d="M90 60l-5 28h8l-4 12 12-28h-8l6-12z" fill="#FFF176"/><path d="M45 85l-4 15h6l-3 8 9-18h-6l4-5z" fill="#FFEB3B"/></svg></div>'},
+  25:{name:'회오리바람',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-spin" style="transform-origin:50px 50px" fill="none" stroke="#B3E5FC" stroke-width="2.5"><path d="M10 20 Q50 10 90 20"/><path d="M5 40 Q50 25 95 40"/><path d="M8 80 Q50 95 92 80"/><path d="M12 60 Q50 72 88 60" opacity=".6"/></g></svg></div>'},
+  26:{name:'얼음 결정',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100" stroke="#81D4FA" stroke-width="1.5" fill="none"><g class="lv-tw" style="transform-origin:15px 15px"><path d="M15 6v18M6 15h18M9 9l12 12M9 21l12-12"/></g><g class="lv-tw" style="transform-origin:85px 15px;animation-delay:.3s"><path d="M85 6v18M76 15h18M79 9l12 12M79 21l12-12"/></g><g class="lv-tw" style="transform-origin:15px 85px;animation-delay:.6s"><path d="M15 76v18M6 85h18M9 79l12 12M9 91l12-12"/></g><g class="lv-tw" style="transform-origin:85px 85px;animation-delay:.9s"><path d="M85 76v18M76 85h18M79 79l12 12M79 91l12-12"/></g></svg></div>'},
+  27:{name:'용암 방울',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-fall"><circle cx="20" cy="10" r="4" fill="#FF3D00"/><circle cx="50" cy="5" r="5" fill="#FF6F00"/><circle cx="80" cy="12" r="4" fill="#FF3D00"/><circle cx="35" cy="18" r="3" fill="#FFAB00"/><circle cx="65" cy="20" r="3" fill="#FFAB00"/></g></svg></div>'},
+  28:{name:'황금 고리',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100" fill="none"><g class="lv-spin" style="transform-origin:50px 50px"><circle cx="50" cy="50" r="48" stroke="#FFD700" stroke-width="2" stroke-dasharray="6 4"/></g><g class="lv-spinR" style="transform-origin:50px 50px"><circle cx="50" cy="50" r="42" stroke="#FFC107" stroke-width="1.5" stroke-dasharray="3 3"/></g></svg></div>'},
+  29:{name:'다이아 스파클',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100" fill="#E1F5FE"><g class="lv-tw"><path d="M50 0l3 8-3 4-3-4z"/><path d="M100 50l-8 3-4-3 4-3z"/><path d="M50 100l-3-8 3-4 3 4z"/><path d="M0 50l8-3 4 3-4 3z"/><path d="M85 15l-6 4-4-2 4-4z"/><path d="M15 85l6-4 4 2-4 4z"/></g></svg></div>'},
+  30:{name:'신성 결계',html:'<div class="lv-fx-wrap lv-ripple"><svg viewBox="0 0 100 100" fill="none" stroke="#FFF59D" stroke-width="2"><polygon points="50,4 92,28 92,72 50,96 8,72 8,28"/></svg></div>'},
+  31:{name:'시간의 궤도',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100" fill="none" stroke="#90CAF9" stroke-width="2"><circle cx="50" cy="50" r="46"/><g class="lv-spin" style="transform-origin:50px 50px"><line x1="50" y1="50" x2="50" y2="6" stroke-width="3"/></g><g class="lv-spinR" style="transform-origin:50px 50px"><line x1="50" y1="50" x2="88" y2="50" stroke-width="2"/></g></svg></div>'},
+  32:{name:'와프 링',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100" fill="none" stroke="#CE93D8" stroke-width="2"><circle cx="50" cy="50" r="46" class="lv-pulse" style="transform-origin:50px 50px"/><circle cx="50" cy="50" r="42" class="lv-pulse" style="transform-origin:50px 50px;animation-delay:.3s"/><circle cx="50" cy="50" r="38" class="lv-pulse" style="transform-origin:50px 50px;animation-delay:.6s"/></svg></div>'},
+  33:{name:'빛의 날개',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-float"><path d="M10 50 Q0 30 5 15 Q20 25 25 50 Q15 60 10 50z" fill="#FFF9C4" opacity=".8"/><path d="M90 50 Q100 30 95 15 Q80 25 75 50 Q85 60 90 50z" fill="#FFF9C4" opacity=".8"/></g></svg></div>'},
+  34:{name:'그림자 가닥',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100" fill="none" stroke="#424242" stroke-width="3"><g class="lv-spin" style="transform-origin:50px 50px"><path d="M50 5 Q65 25 50 50 Q35 75 50 95"/></g><g class="lv-spinR" style="transform-origin:50px 50px"><path d="M5 50 Q25 35 50 50 Q75 65 95 50"/></g></svg></div>'},
+  35:{name:'4원소 궤도',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-spin" style="transform-origin:50px 50px"><circle cx="50" cy="4" r="5" fill="#FF5252"/><circle cx="96" cy="50" r="5" fill="#40C4FF"/><circle cx="50" cy="96" r="5" fill="#69F0AE"/><circle cx="4" cy="50" r="5" fill="#FFEB3B"/></g></svg></div>'},
+  36:{name:'유성우',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100" stroke="#FFF" stroke-width="2" stroke-linecap="round"><g class="lv-fall"><line x1="10" y1="0" x2="0" y2="15"/><line x1="50" y1="0" x2="35" y2="18"/><line x1="90" y1="5" x2="75" y2="22"/></g></svg></div>'},
+  37:{name:'행성 궤도',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100" fill="none" stroke="#80DEEA" stroke-width="1.5"><ellipse cx="50" cy="50" rx="48" ry="20"/><ellipse cx="50" cy="50" rx="20" ry="48"/><ellipse cx="50" cy="50" rx="40" ry="40" class="lv-spin" style="transform-origin:50px 50px;stroke-dasharray:4 4"/></svg></div>'},
+  38:{name:'성운 구름',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-pulse" style="transform-origin:50px 50px"><circle cx="20" cy="20" r="14" fill="#E91E63" opacity=".5"/><circle cx="80" cy="25" r="12" fill="#3F51B5" opacity=".5"/><circle cx="75" cy="80" r="14" fill="#00BCD4" opacity=".5"/><circle cx="20" cy="78" r="12" fill="#9C27B0" opacity=".5"/></g></svg></div>'},
+  39:{name:'만다라 빛',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100" fill="#FFD54F"><g class="lv-spin" style="transform-origin:50px 50px"><path d="M50 0l2 10-2 4-2-4zM50 100l2-10-2-4-2 4zM0 50l10 2 4-2-4-2zM100 50l-10 2-4-2 4-2zM15 15l8 6 2-2-6-8zM85 15l-8 6-2-2 6-8zM15 85l8-6 2 2-6 8zM85 85l-8-6-2 2 6 8zM30 4l4 10-2 2-4-10zM70 4l-4 10 2 2 4-10zM30 96l4-10-2-2-4 10zM70 96l-4-10 2-2 4 10z"/></g></svg></div>'},
+  40:{name:'무한의 빛',html:'<div class="lv-fx-wrap lv-glow"><svg viewBox="0 0 100 100"><g class="lv-hue"><path d="M20 50 Q20 30 35 30 Q50 30 50 50 Q50 70 65 70 Q80 70 80 50 Q80 30 65 30 Q50 30 50 50 Q50 70 35 70 Q20 70 20 50z" fill="none" stroke="#FFD700" stroke-width="3"/></g><g class="lv-tw"><circle cx="10" cy="10" r="2" fill="#FFF"/><circle cx="90" cy="10" r="2" fill="#FFF"/><circle cx="10" cy="90" r="2" fill="#FFF"/><circle cx="90" cy="90" r="2" fill="#FFF"/></g></svg></div>'}
 };
 function getLevelEffectHTML(level){
   const fx=LEVEL_EFFECTS[level];
@@ -9478,7 +9518,8 @@ function getMemberState(memberId) {
       rewardInventory: isFirstChildForInv && S.rewardInventory ? JSON.parse(JSON.stringify(S.rewardInventory)) : [],
       rewardRequests: isFirstChildForInv && S.rewardRequests ? JSON.parse(JSON.stringify(S.rewardRequests)) : [],
       challenges: (isMe && !isStaleGlobal && S.challenges) ? JSON.parse(JSON.stringify(S.challenges)) : [],
-      challengeHistory: (isMe && !isStaleGlobal && S.challengeHistory) ? JSON.parse(JSON.stringify(S.challengeHistory)) : []
+      challengeHistory: (isMe && !isStaleGlobal && S.challengeHistory) ? JSON.parse(JSON.stringify(S.challengeHistory)) : [],
+      levelData: (isMe && !isStaleGlobal && S.levelData) ? JSON.parse(JSON.stringify(S.levelData)) : {xp:0,level:1,xpLog:[],_migrated:true}
     };
   }
   return S.memberData[memberId];
@@ -9553,6 +9594,13 @@ function syncMemberToGlobal(targetId) {
   S.rewardRequests = ms.rewardRequests ? JSON.parse(JSON.stringify(ms.rewardRequests)) : [];
   S.challenges = ms.challenges ? JSON.parse(JSON.stringify(ms.challenges)) : [];
   S.challengeHistory = ms.challengeHistory ? JSON.parse(JSON.stringify(ms.challengeHistory)) : [];
+  // 레거시 memberData: levelData가 없으면 새로 생성. 현재 "내 아이디"인 경우에만
+  // 기존 공유 S.levelData를 계승(마이그레이션). 다른 자녀는 0부터 시작.
+  if(!ms.levelData){
+    const isMeNow = mid===currentUser;
+    ms.levelData = (isMeNow && S.levelData && S.levelData.xp) ? JSON.parse(JSON.stringify(S.levelData)) : {xp:0,level:1,xpLog:[],_migrated:true};
+  }
+  S.levelData = JSON.parse(JSON.stringify(ms.levelData));
 }
 
 // Syncs global S back to member data before saving
@@ -9590,6 +9638,7 @@ function syncGlobalToMember(targetId) {
   ms.rewardRequests = JSON.parse(JSON.stringify(S.rewardRequests||[]));
   ms.challenges = JSON.parse(JSON.stringify(S.challenges||[]));
   ms.challengeHistory = JSON.parse(JSON.stringify(S.challengeHistory||[]));
+  ms.levelData = JSON.parse(JSON.stringify(S.levelData||{xp:0,level:1,xpLog:[],_migrated:true}));
 }
 
 // ── S-09: 입력값 검증 유틸리티 ──
@@ -12262,7 +12311,7 @@ function openLevelPopup(){
   const ov=document.createElement('div');
   ov.className='streak-popup-overlay show';
   ov.innerHTML=`<div class="streak-popup" style="transform:scale(1)">
-    <div style="width:48px;height:48px;margin:0 auto 8px">${info.svg||`<span style="font-size:48px">${info.emoji}</span>`}</div>
+    <div style="width:72px;height:72px;margin:0 auto 8px;position:relative"><div style="position:absolute;inset:12px">${info.svg||`<span style="font-size:48px">${info.emoji}</span>`}</div>${getLevelEffectHTML(info.level)||''}</div>
     <div style="font-size:20px;font-weight:900;color:var(--tx)">Lv.${info.level} ${info.title}</div>
     <div style="margin:12px 0 8px;font-size:13px;color:var(--tx3);font-weight:700">누적 ${info.xp.toLocaleString()} / ${info.nextXP.toLocaleString()} 마일리지</div>
     <div style="background:var(--bdr);border-radius:6px;height:10px;overflow:hidden">
@@ -16762,6 +16811,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.53 (v0407i)',date:'2026-04-07',items:[{type:'fix',text:'아이별 레벨 독립 관리 — levelData를 memberData에 저장해 자녀별 분리 (기존 사용자는 자동 마이그레이션)'},{type:'fix',text:'Lv.5 불꽃 이펙트 재설계 — 아이콘 전체를 감싸는 방사형 불꽃으로 변경'},{type:'new',text:'레벨 시스템 확장 — 총 40레벨/10만 마일리지, Lv.21~40 신규 SVG 이펙트 20종 추가'},{type:'new',text:'레벨 팝업에도 레벨 이펙트 표시'}]},
   {ver:'1.9.52 (v0407h)',date:'2026-04-07',items:[{type:'new',text:'관리자 — 주간/월간 챌린지 상세 설명 추가, 레벨별 임계값 직접 편집 가능'},{type:'new',text:'레벨 시스템 — Lv.1~20 각각 고유한 SVG 이펙트 애니메이션 (반짝임/불꽃/오라/궤도 등 20종)'},{type:'new',text:'나의 메뉴 — 프로필 카드에 레벨 배지 + 아바타 주변 레벨 이펙트 표시'},{type:'new',text:'관리자 레벨 편집기 — 각 레벨별 이펙트 미리보기 가능'}]},
   {ver:'1.9.51 (v0407g)',date:'2026-04-07',items:[{type:'fix',text:'Lv 표시 baseline을 M 글씨 밑선과 정렬'}]},
   {ver:'1.9.50 (v0407f)',date:'2026-04-07',items:[{type:'fix',text:'진행중인 챌린지 중복 제목 제거, 트로피 아이콘으로 통일'},{type:'fix',text:'레벨 정보 박스 제거, M 글씨와 높이 정렬'}]},
