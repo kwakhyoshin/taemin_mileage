@@ -1483,6 +1483,13 @@ body.dark .adm-child-btn.on{background:rgba(255,107,53,.15)}
 .ch-bug .ant{transform-origin:12px 6px;animation:chAntWig .5s ease-in-out infinite alternate}
 .ch-bug .sweat{animation:chSweatFall 1.4s ease-in infinite;opacity:0}
 .ch-bug .sweat.s2{animation-delay:.7s}
+.ch-bug .wing{opacity:0;transform-box:view-box;transform-origin:12px 12px}
+.ch-bug.poked{animation:chBugPoke .75s cubic-bezier(.34,1.56,.64,1) forwards}
+.ch-bug.poked .wl{animation:chBugWingL .75s ease-in-out}
+.ch-bug.poked .wr{animation:chBugWingR .75s ease-in-out}
+@keyframes chBugPoke{0%{transform:scale(1) rotate(0)}20%{transform:scale(1.45) rotate(-4deg)}40%{transform:scale(1.35) rotate(4deg)}60%{transform:scale(1.4) rotate(-3deg)}80%{transform:scale(1.15) rotate(2deg)}100%{transform:scale(1) rotate(0)}}
+@keyframes chBugWingL{0%{opacity:0;transform:rotate(0)}10%{opacity:.85}20%{transform:rotate(-60deg)}35%{transform:rotate(-25deg)}50%{transform:rotate(-65deg)}65%{transform:rotate(-20deg)}80%{transform:rotate(-55deg);opacity:.7}100%{opacity:0;transform:rotate(0)}}
+@keyframes chBugWingR{0%{opacity:0;transform:rotate(0)}10%{opacity:.85}20%{transform:rotate(60deg)}35%{transform:rotate(25deg)}50%{transform:rotate(65deg)}65%{transform:rotate(20deg)}80%{transform:rotate(55deg);opacity:.7}100%{opacity:0;transform:rotate(0)}}
 @keyframes chBugBob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-1.2px) rotate(3deg)}}
 @keyframes chLegWig{0%{transform:rotate(-15deg)}100%{transform:rotate(15deg)}}
 @keyframes chAntWig{0%{transform:rotate(-8deg)}100%{transform:rotate(8deg)}}
@@ -9160,7 +9167,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0407zn';
+const _APP_VERSION = 'v0407zo';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -12686,6 +12693,8 @@ function renderChallengeCards(){
               <circle cx="8" cy="2" r="1.1" fill="#1a1a1a"/>
               <circle cx="16" cy="2" r="1.1" fill="#1a1a1a"/>
             </g>
+            <ellipse class="wing wl" cx="7" cy="12" rx="7.5" ry="4.5" fill="#fff" opacity=".75"/>
+            <ellipse class="wing wr" cx="17" cy="12" rx="7.5" ry="4.5" fill="#fff" opacity=".75"/>
             <ellipse cx="12" cy="13" rx="8" ry="6.8" fill="#E53935"/>
             <path d="M12 6.5 a4 3.6 0 0 1 0 7.2z" fill="#1a1a1a" opacity=".15"/>
             <line x1="12" y1="6.8" x2="12" y2="19.5" stroke="#1a1a1a" stroke-width="1"/>
@@ -17471,7 +17480,7 @@ window.renderMyTab=renderMyTab;
 // 무당벌레 클릭 — 아얏! 등 메시지 순차 출력
 window._bugPokeMsgs=['\\ 아얏! /','\\ 앗 따거! /','\\ 간지러워~ /','\\ 살살! /','\\ 으악! /','\\ 깜짝이야! /','\\ 어이쿠! /','\\ 그만~ /','\\ 헤헤 /','\\ 히잉... /'];
 window._bugPokeIdx=0;
-window.bugPoke=function(ev,el){try{ev&&ev.stopPropagation&&ev.stopPropagation();if(!el)return;const msgs=window._bugPokeMsgs;const msg=msgs[window._bugPokeIdx%msgs.length];window._bugPokeIdx=(window._bugPokeIdx+1)%msgs.length;const d=document.createElement('div');d.className='bug-poke-msg';d.textContent=msg;el.appendChild(d);setTimeout(()=>{try{d.remove();}catch(_){}} ,1200);}catch(e){console.warn('[bugPoke]',e);}};
+window.bugPoke=function(ev,el){try{ev&&ev.stopPropagation&&ev.stopPropagation();if(!el)return;const msgs=window._bugPokeMsgs;const msg=msgs[window._bugPokeIdx%msgs.length];window._bugPokeIdx=(window._bugPokeIdx+1)%msgs.length;const d=document.createElement('div');d.className='bug-poke-msg';d.textContent=msg;el.appendChild(d);setTimeout(()=>{try{d.remove();}catch(_){}} ,1200);el.classList.remove('poked');void el.offsetWidth;el.classList.add('poked');setTimeout(()=>{try{el.classList.remove('poked');}catch(_){}} ,760);}catch(e){console.warn('[bugPoke]',e);}};
 
 function myTabAdminAction(){
   // 양육자(caregiver)는 항상 관리자 접근 가능 (isAdmin 플래그 없어도)
@@ -17543,6 +17552,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.93 (v0407zo)',date:'2026-04-07',items:[{type:'new',text:'무당벌레 클릭 타격감 — 순간적으로 커지며 흰 날개 펄럭펄럭 후 원래 크기로 복귀'}]},
   {ver:'1.9.92 (v0407zn)',date:'2026-04-07',items:[{type:'new',text:'챌린지 무당벌레 클릭하면 "\\ 아얏! /" 등 10가지 메시지가 순차적으로 떠오름 (아이 재미 요소)'}]},
   {ver:'1.9.91 (v0407zm)',date:'2026-04-07',items:[{type:'fix',text:'홈탭 "오늘 할 일" 제목과 아이콘이 붙어보이던 문제 수정 (이력보기 버튼 추가 시 inner span gap 누락)'}]},
   {ver:'1.9.90 (v0407zl)',date:'2026-04-07',items:[{type:'ui',text:'알림장 X 닫기 버튼 제거 — 수첩 바깥 dim 영역 탭으로 닫기 동작과 중복이라 정리'}]},
