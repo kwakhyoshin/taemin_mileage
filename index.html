@@ -504,6 +504,8 @@ body.dark .theme-pick.active .theme-pick-radio{border-color:#818CF8;background:#
 .prog-fill{position:relative;background:rgba(255,255,255,.55);border-radius:7px;height:100%;transition:width .7s;overflow:hidden;z-index:2}
 .prog-fill::before{content:'';position:absolute;top:0;bottom:0;width:55%;left:-55%;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.35) 30%,#ffffff 50%,rgba(255,255,255,.35) 70%,transparent 100%);animation:laserSlide 1.8s linear infinite;pointer-events:none}
 @keyframes laserSlide{0%{left:-55%}100%{left:100%}}
+.prog-fill.no-anim::before{animation:none !important}
+.prog-spark.no-anim .sp{animation:none !important}
 .prog-spark{position:absolute;top:50%;width:54px;height:54px;transform:translate(-50%,-50%);pointer-events:none;transition:left .7s,opacity .3s,width .25s,height .25s;z-index:1;clip-path:inset(-50% -50% -50% 50%)}
 .prog-spark svg{width:100%;height:100%;overflow:visible;display:block}
 .prog-spark .sp{stroke:#FFD54F;stroke-width:0.7;stroke-linecap:round;fill:none;filter:drop-shadow(0 0 1.5px #FFA726);animation:sprkFly .55s ease-out infinite;stroke-dasharray:0 14}
@@ -9156,7 +9158,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'prod'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0407z3';
+const _APP_VERSION = 'v0407z8';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -10155,21 +10157,64 @@ function isTodayAllDone(){
   if(todayActs.length===0)return false;
   return todayActs.every(a=>countDone(a)>=a.maxDay);
 }
+// 현재 보고 있는 멤버의 streak/lastDate/acts/actDone 컨텍스트를 가져옴 (양육자가 자녀 home을 볼 때 대응)
+function _getViewedStreakCtx(){
+  try{
+    if(getFamilyMode()==='independent'&&isCaregiverUser()){
+      const vid=getViewedMemberId();
+      // S가 이미 보고있는 멤버 데이터를 들고 있으면 S에서 직접 읽기 (실시간 반영)
+      if(vid && _globalDataOwner===vid){
+        return {streak:S.streak||0,lastDate:S.lastDate||null,acts:S.acts||[],actDone:S.actDone||{}};
+      }
+      // 아니면 memberData 스냅샷 사용
+      const ms=vid&&S.memberData?S.memberData[vid]:null;
+      if(ms){
+        return {
+          streak:ms.streak||0,
+          lastDate:ms.lastDate||null,
+          acts:ms.acts||S.acts||[],
+          actDone:ms.actDone||{}
+        };
+      }
+    }
+  }catch(_e){}
+  return {streak:S.streak||0,lastDate:S.lastDate||null,acts:S.acts||[],actDone:S.actDone||{}};
+}
+// _getViewedStreakCtx 컨텍스트 기반으로 오늘 모든 할일 완료 여부 판정
+function _isViewedTodayAllDone(ctx){
+  const todayActs=(ctx.acts||[]).filter(a=>a.active&&isAvailableToday(a)&&a.maxDay>0);
+  if(todayActs.length===0)return false;
+  const t=todayStr();
+  const ws=weekStart();
+  const ms=monthStr();
+  return todayActs.every(a=>{
+    const rec=ctx.actDone[a.id];
+    if(!rec)return false;
+    if(a.cycle==='daily'&&rec.date!==t)return false;
+    if(a.cycle==='weekly'&&rec.date<ws)return false;
+    if(a.cycle==='monthly'&&rec.date.slice(0,7)<ms)return false;
+    return (rec.count||0)>=a.maxDay;
+  });
+}
 function getDisplayStreak(){
   const t=todayStr();
   const d=new Date();d.setDate(d.getDate()-1);
   const y=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  const ctx=_getViewedStreakCtx();
+  const allDone=_isViewedTodayAllDone(ctx);
   // lastDate가 오늘이면: 현재도 모든 할일이 완료 상태인지 재검증
-  // (활동 취소, 활동 추가 등으로 상태가 바뀔 수 있음)
-  if(S.lastDate===t){
-    if(isTodayAllDone()) return S.streak;
-    // 오늘 한때 다 했지만 지금은 아님 → 오늘은 미달성, streak에서 오늘분 빼기
-    return Math.max(0, S.streak - 1);
+  if(ctx.lastDate===t){
+    if(allDone) return Math.max(1, ctx.streak);
+    // 오늘 한때 다 했지만 지금은 아님 → 0으로 표시 (취소 즉시 반영)
+    return 0;
   }
-  // lastDate가 어제면 → 어제까지의 streak 유지 (오늘 아직 미완료)
-  if(S.lastDate===y) return S.streak;
-  // 그보다 오래됨 → 연속 끊김
-  return 0;
+  // lastDate가 어제면 → 오늘 다 했다면 +1, 아직이면 어제까지의 streak 유지
+  if(ctx.lastDate===y){
+    if(allDone) return ctx.streak + 1;
+    return ctx.streak;
+  }
+  // 그보다 오래됨(또는 null) → 오늘 다 했다면 1, 아니면 0
+  return allDone ? 1 : 0;
 }
 function weekStart(){const d=new Date();d.setDate(d.getDate()-((d.getDay()||7)-1));return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 function monthStr(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;}
@@ -12511,22 +12556,20 @@ function updateChallengeProgress(){
   if(!S.challenges||!S.challenges.length)return;
   const now=new Date();
   S.challenges.forEach(c=>{
-    if(c.completed)return;
     if(new Date(c.endDate)<now)return;
     const start=new Date(c.startDate);
     let prog=0;
-    if(c.check==='streak'){prog=Math.min(c.target,S.streak||0);}
+    // 표시용 streak (오늘 모두 완료 시 즉시 +1 반영)와 S.streak 중 큰 값을 사용
+    const _effStreak = (function(){ try{ return Math.max(S.streak||0, getDisplayStreak()||0); }catch(_e){ return S.streak||0; } })();
+    // 챌린지 보상 항목(chId)은 활동 진행도에서 제외
+    if(c.check==='streak'){prog=Math.min(c.target,_effStreak);}
     else if(c.check==='totalActs'){
-      prog=S.log.filter(l=>new Date(l.ts)>=start&&l.pts>0).length;
+      prog=S.log.filter(l=>new Date(l.ts)>=start&&l.pts>0&&!l.chId).length;
     }
     else if(c.check==='allDoneDays'){
-      // 등록된 활동을 모두 완료한 날 수 계산
-      // allDoneDays 트래킹: S.allDoneDays 배열에 날짜 기록 (renderAll 시 오늘 체크)
       const tracker=S.allDoneDays||[];
-      // 이번 기간(주간) 내의 완료 날 수만 카운트
       const startStr=`${start.getFullYear()}-${String(start.getMonth()+1).padStart(2,'0')}-${String(start.getDate()).padStart(2,'0')}`;
       prog=tracker.filter(d=>d>=startStr).length;
-      // 오늘 체크: isTodayAllDone()이 true이면 오늘 날짜 추가
       const todayS=todayStr();
       if(isTodayAllDone()&&!tracker.includes(todayS)){
         tracker.push(todayS);
@@ -12534,15 +12577,14 @@ function updateChallengeProgress(){
         prog=tracker.filter(d=>d>=startStr).length;
       }
     }
-    else if(c.check==='monthlyActs'){prog=S.log.filter(l=>new Date(l.ts)>=start&&l.pts>0).length;}
-    else if(c.check==='monthlyStreak'){prog=Math.min(c.target,S.streak||0);}
+    else if(c.check==='monthlyActs'){prog=S.log.filter(l=>new Date(l.ts)>=start&&l.pts>0&&!l.chId).length;}
+    else if(c.check==='monthlyStreak'){prog=Math.min(c.target,_effStreak);}
     else if(c.check==='monthlyPts'){
-      prog=S.log.filter(l=>new Date(l.ts)>=start&&l.pts>0).reduce((s,l)=>s+l.pts,0);
+      prog=S.log.filter(l=>new Date(l.ts)>=start&&l.pts>0&&!l.chId).reduce((s,l)=>s+l.pts,0);
     }
     c.progress=Math.min(prog,c.target);
-    if(c.progress>=c.target&&!c.completed){
-      c.completed=true;
-    }
+    // 완료/미완료 상태 동기화 (진행도가 목표 미달이면 완료 해제)
+    c.completed = (c.progress>=c.target);
   });
 }
 
@@ -12550,7 +12592,13 @@ function claimChallengeReward(chId, btnEl){
   const ch=S.challenges.find(c=>c.id===chId);
   if(!ch||!ch.completed||ch.claimed)return;
   ch.claimed=true;
+  ch.claimedAt=Date.now();
   S.pts+=ch.reward;
+  // 활동기록(S.log)에도 챌린지 보상 항목 추가 — 취소 가능하도록 chId 포함
+  const _chIcon=ch.type==='weekly'?'🗓️':'🏆';
+  const _chTypeLabel=ch.type==='weekly'?'주간':'월간';
+  S.log.unshift({id:'l_'+Date.now(),emoji:_chIcon,name:`[${_chTypeLabel} 챌린지] ${ch.title}`,pts:ch.reward,ts:Date.now(),actId:null,chId:ch.id,user:_globalDataOwner||currentUser});
+  if(S.log.length>300)S.log=S.log.slice(0,300);
   const hist=S.challengeHistory||(S.challengeHistory=[]);
   hist.unshift({...ch,claimedAt:Date.now()});
   if(hist.length>50)S.challengeHistory=hist.slice(0,50);
@@ -14236,11 +14284,62 @@ function _undoActCore(actId){
     S.lastDate=S.streak>0?`${_yd.getFullYear()}-${String(_yd.getMonth()+1).padStart(2,'0')}-${String(_yd.getDate()).padStart(2,'0')}`:null;
   }
 
+  // 챌린지 진행도 재계산 + 이미 수령한 챌린지 롤백 처리 (다음 레벨 해금 챌린지도 제거)
+  let _chRolledBack=[];
+  try{
+    if(typeof updateChallengeProgress==='function'){
+      updateChallengeProgress();
+      // 1) 미수령 완료 상태(미달) 해제 + 수령 챌린지 롤백 식별
+      const _toRollback=[];
+      (S.challenges||[]).forEach(c=>{
+        if(c.progress<c.target){
+          if(c.claimed){
+            _toRollback.push(c);
+          } else if(c.completed){
+            c.completed=false;
+          }
+        }
+      });
+      // 2) 각 롤백 대상에 대해 보상 회수 + 같은 기간/타입의 상위 레벨 해금 챌린지 제거
+      _toRollback.forEach(c=>{
+        const _rwd=c.reward||0;
+        S.pts=Math.max(0,S.pts-_rwd);
+        // S.log에서 해당 챌린지 보상 항목 제거
+        const _li=S.log.findIndex(l=>l.chId===c.id&&l.pts===_rwd);
+        if(_li!==-1)S.log.splice(_li,1);
+        // challengeHistory에서도 제거
+        if(Array.isArray(S.challengeHistory)){
+          S.challengeHistory=S.challengeHistory.filter(h=>h.id!==c.id);
+        }
+        c.claimed=false;
+        c.completed=false;
+        _chRolledBack.push({title:c.title,reward:_rwd});
+        // 동일 타입+동일 기간의 상위 레벨 해금 챌린지 제거 (이전 챌린지 수령으로 해금됐던 것)
+        const _ct=c.type, _cs=c.startDate, _clv=c.trackLevel||0;
+        S.challenges=(S.challenges||[]).filter(other=>{
+          if(other===c)return true;
+          if(other.type!==_ct)return true;
+          if(other.startDate!==_cs)return true;
+          if((other.trackLevel||0)<=_clv)return true;
+          // 상위 레벨이면서 아직 수령 안 한 챌린지는 제거 (해금 롤백)
+          if(!other.claimed) return false;
+          // 상위 레벨이 이미 수령 상태라면 위 _toRollback에 포함돼 별도 처리됨
+          return true;
+        });
+      });
+    }
+  }catch(_e){}
+
   // 역방향 별 애니메이션: 마일리지 → 활동 카드 방향
   const _actCard = document.querySelector(`.act-card[data-actid="${actId}"]`);
   if(_actCard) flyCoinsFromMileage(_actCard, entry.pts);
   save();renderAll();
   toast(`↩ ${a.name} 취소됨 (-${entry.pts} 마일리지)`);
+  if(_chRolledBack.length){
+    setTimeout(()=>{
+      _chRolledBack.forEach(rb=>toast(`↩ "${rb.title}" 챌린지 롤백 (-${rb.reward} 마일리지)`));
+    },400);
+  }
 }
 
 // ── STICKER & BUBBLE MESSAGE SYSTEM ──────────────────────
@@ -16980,6 +17079,11 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.77 (v0407z8)',date:'2026-04-07',items:[{type:'fix',text:'0일→1일 연속 표시: 양육자가 자녀를 보고 있을 때 S에 로드된 자녀 데이터를 우선 사용해 즉시 반영'},{type:'fix',text:'주간/월간 연속 챌린지 게이지: 표시용 streak(getDisplayStreak)을 함께 사용해 오늘 모두 완료 시 즉시 +1 반영, 활동 취소 시도 동기화'},{type:'fix',text:'나의 메뉴 PRO/FREE 등급 배지: 챗봇 진입 없이도 표시되도록 _updatePlanBadges를 window에 노출'}]},
+  {ver:'1.9.76 (v0407z7)',date:'2026-04-07',items:[{type:'fix',text:'챌린지 수령 후 활동 취소 시 진행도 재계산 누락 수정 — updateChallengeProgress의 early-return 제거'},{type:'fix',text:'양육자가 자녀 홈을 볼 때 0일→1일 연속 표시가 자녀의 streak/할일 상태로 즉시 반영'}]},
+  {ver:'1.9.75 (v0407z6)',date:'2026-04-07',items:[{type:'fix',text:'챌린지 수령 후 활동 취소 시 이전 챌린지 진행상황으로 완전 복원 — 해금됐던 다음 레벨 챌린지도 자동 제거'}]},
+  {ver:'1.9.74 (v0407z5)',date:'2026-04-07',items:[{type:'fix',text:'다른 탭에서 홈탭으로 복귀 시 마일리지 게이지 레이저/불꽃 애니메이션이 멈추는 현상 수정 — 복귀 시 강제 재시작'},{type:'fix',text:'오늘 할일을 모두 완료한 순간 연속일수가 즉시 반영되도록 수정 (lastDate/streak 동기화 지연 방어)'}]},
+  {ver:'1.9.73 (v0407z4)',date:'2026-04-07',items:[{type:'feat',text:'챌린지 보상 마일리지가 활동기록(이력)에 표시되도록 추가 — 주간 🗓️ / 월간 🏆 아이콘'},{type:'fix',text:'활동 취소 시 진행 중/수령한 챌린지 진행도 자동 재계산 — 미달 시 보상 회수 및 이력 정리'}]},
   {ver:'1.9.72 (v0407z3)',date:'2026-04-07',items:[{type:'feat',text:'밀리 FAB 드래그 인터랙션 강화 — 드래그 시 캐릭터 1.5배 확대, 아우라 발광 강화, 랜덤 포즈(wave/happy/excited/love/think/success/surprise) 표시'}]},
   {ver:'1.9.71 (v0407z2)',date:'2026-04-07',items:[{type:'fix',text:'마일리지 게이지 레이저 흐름 속도 일정화 — background-position tile 방식에서 transform-free left 애니메이션으로 변경 (1.8s 주기 단일 패스)'}]},
   {ver:'1.9.70 (v0407z)',date:'2026-04-07',items:[{type:'new',text:'홈탭 진행중인 챌린지 아이콘 — 주간(보라 캘린더+황금별)/월간(핑크 트로피+빛나는별) 전용 SVG로 교체'}]},
@@ -18939,6 +19043,19 @@ function reallyGoTab(tab){
     hero.style.borderRadius=defaultBr;
     const progTrack=hero.querySelector('.prog-track');
     if(progTrack){progTrack.style.height='14px';progTrack.style.borderRadius='7px';}
+    // 다른 탭에서 돌아올 때 레이저/불꽃 애니메이션 재시작 (일부 브라우저에서 display 복귀 후 CSS 애니 멈춤 현상 대응)
+    if(tab==='home'){
+      try{
+        const _pf=hero.querySelector('.prog-fill');
+        const _sp=hero.querySelector('.prog-spark');
+        [_pf,_sp].forEach(_el=>{
+          if(!_el)return;
+          _el.classList.add('no-anim');
+          void _el.offsetWidth;
+          _el.classList.remove('no-anim');
+        });
+      }catch(_e){}
+    }
     const ptEl=hero.querySelector('.hero-pts');if(ptEl)ptEl.style.fontSize='';
     const lblEl=hero.querySelector('.hero-lbl');if(lblEl)lblEl.style.fontSize='';
     const unitEl=hero.querySelector('.hero-unit');if(unitEl)unitEl.style.fontSize='';
@@ -23113,6 +23230,7 @@ function _updatePlanBadges(){
   }
 }
 window._showPlanPopup=_showPlanPopup;
+window._updatePlanBadges=_updatePlanBadges;
 function _showPlanPopup(){
   const isPro=_isPro();
   const S=_getS();
