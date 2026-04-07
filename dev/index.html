@@ -504,6 +504,8 @@ body.dark .theme-pick.active .theme-pick-radio{border-color:#818CF8;background:#
 .prog-fill{position:relative;background:rgba(255,255,255,.55);border-radius:7px;height:100%;transition:width .7s;overflow:hidden;z-index:2}
 .prog-fill::before{content:'';position:absolute;top:0;bottom:0;width:55%;left:-55%;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.35) 30%,#ffffff 50%,rgba(255,255,255,.35) 70%,transparent 100%);animation:laserSlide 1.8s linear infinite;pointer-events:none}
 @keyframes laserSlide{0%{left:-55%}100%{left:100%}}
+.prog-fill.no-anim::before{animation:none !important}
+.prog-spark.no-anim .sp{animation:none !important}
 .prog-spark{position:absolute;top:50%;width:54px;height:54px;transform:translate(-50%,-50%);pointer-events:none;transition:left .7s,opacity .3s,width .25s,height .25s;z-index:1;clip-path:inset(-50% -50% -50% 50%)}
 .prog-spark svg{width:100%;height:100%;overflow:visible;display:block}
 .prog-spark .sp{stroke:#FFD54F;stroke-width:0.7;stroke-linecap:round;fill:none;filter:drop-shadow(0 0 1.5px #FFA726);animation:sprkFly .55s ease-out infinite;stroke-dasharray:0 14}
@@ -9156,7 +9158,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0407z4';
+const _APP_VERSION = 'v0407z5';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -10159,17 +10161,22 @@ function getDisplayStreak(){
   const t=todayStr();
   const d=new Date();d.setDate(d.getDate()-1);
   const y=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  const allDone=isTodayAllDone();
   // lastDate가 오늘이면: 현재도 모든 할일이 완료 상태인지 재검증
   // (활동 취소, 활동 추가 등으로 상태가 바뀔 수 있음)
   if(S.lastDate===t){
-    if(isTodayAllDone()) return S.streak;
+    // 오늘 다 했다면 최소 1일 이상 보장 (streak=0 상태가 잔존하는 경우 방어)
+    if(allDone) return Math.max(1, S.streak);
     // 오늘 한때 다 했지만 지금은 아님 → 오늘은 미달성, streak에서 오늘분 빼기
     return Math.max(0, S.streak - 1);
   }
-  // lastDate가 어제면 → 어제까지의 streak 유지 (오늘 아직 미완료)
-  if(S.lastDate===y) return S.streak;
-  // 그보다 오래됨 → 연속 끊김
-  return 0;
+  // lastDate가 어제면 → 오늘 다 했다면 +1, 아직이면 어제까지의 streak 유지
+  if(S.lastDate===y){
+    if(allDone) return S.streak + 1;
+    return S.streak;
+  }
+  // 그보다 오래됨(또는 null) → 오늘 다 했다면 1, 아니면 0
+  return allDone ? 1 : 0;
 }
 function weekStart(){const d=new Date();d.setDate(d.getDate()-((d.getDay()||7)-1));return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 function monthStr(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;}
@@ -17021,6 +17028,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.74 (v0407z5)',date:'2026-04-07',items:[{type:'fix',text:'다른 탭에서 홈탭으로 복귀 시 마일리지 게이지 레이저/불꽃 애니메이션이 멈추는 현상 수정 — 복귀 시 강제 재시작'},{type:'fix',text:'오늘 할일을 모두 완료한 순간 연속일수가 즉시 반영되도록 수정 (lastDate/streak 동기화 지연 방어)'}]},
   {ver:'1.9.73 (v0407z4)',date:'2026-04-07',items:[{type:'feat',text:'챌린지 보상 마일리지가 활동기록(이력)에 표시되도록 추가 — 주간 🗓️ / 월간 🏆 아이콘'},{type:'fix',text:'활동 취소 시 진행 중/수령한 챌린지 진행도 자동 재계산 — 미달 시 보상 회수 및 이력 정리'}]},
   {ver:'1.9.72 (v0407z3)',date:'2026-04-07',items:[{type:'feat',text:'밀리 FAB 드래그 인터랙션 강화 — 드래그 시 캐릭터 1.5배 확대, 아우라 발광 강화, 랜덤 포즈(wave/happy/excited/love/think/success/surprise) 표시'}]},
   {ver:'1.9.71 (v0407z2)',date:'2026-04-07',items:[{type:'fix',text:'마일리지 게이지 레이저 흐름 속도 일정화 — background-position tile 방식에서 transform-free left 애니메이션으로 변경 (1.8s 주기 단일 패스)'}]},
@@ -18981,6 +18989,19 @@ function reallyGoTab(tab){
     hero.style.borderRadius=defaultBr;
     const progTrack=hero.querySelector('.prog-track');
     if(progTrack){progTrack.style.height='14px';progTrack.style.borderRadius='7px';}
+    // 다른 탭에서 돌아올 때 레이저/불꽃 애니메이션 재시작 (일부 브라우저에서 display 복귀 후 CSS 애니 멈춤 현상 대응)
+    if(tab==='home'){
+      try{
+        const _pf=hero.querySelector('.prog-fill');
+        const _sp=hero.querySelector('.prog-spark');
+        [_pf,_sp].forEach(_el=>{
+          if(!_el)return;
+          _el.classList.add('no-anim');
+          void _el.offsetWidth;
+          _el.classList.remove('no-anim');
+        });
+      }catch(_e){}
+    }
     const ptEl=hero.querySelector('.hero-pts');if(ptEl)ptEl.style.fontSize='';
     const lblEl=hero.querySelector('.hero-lbl');if(lblEl)lblEl.style.fontSize='';
     const unitEl=hero.querySelector('.hero-unit');if(unitEl)unitEl.style.fontSize='';
