@@ -9158,7 +9158,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0407zk';
+const _APP_VERSION = 'v0407zl';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -14558,7 +14558,6 @@ function openDayDiary(){
     + '.diary-navbtn:hover{background:rgba(74,46,26,1);transform:scale(1.08)}'
     + '.diary-navbtn:active{transform:scale(.95)}'
     + ''
-    + '.diary-close{position:absolute;top:9px;right:10px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.4);border:1.2px solid rgba(255,234,212,.55);color:#FBEAD4;font-size:11px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;box-shadow:0 2px 4px rgba(0,0,0,.4);line-height:1;padding:0}'
     + '.diary-close:hover{background:rgba(0,0,0,.55);transform:scale(1.05)}'
     + '.diary-nav-hint{position:absolute;left:50%;transform:translateX(-50%);font-family:inherit;font-size:10px;color:#9CA3AF;pointer-events:none;z-index:6}'
     + '.diary-nav-hint.down{bottom:6px}'
@@ -14580,7 +14579,6 @@ function openDayDiary(){
     + '</style>'
     + '<div class="diary-paper" id="diary-paper">'
     + '<div class="diary-header"><span class="diary-header-title">📓 오늘 할일 이력</span></div>'
-    + '<button class="diary-close" onclick="closeDayDiary()">✕</button>'
     + '<div class="diary-stage" id="diary-stage"><div class="diary-page" id="diary-page"></div></div>'
     + '<div class="diary-nav-hint down">위/아래로 스와이프하면 날짜 이동</div>'
     + '<div class="diary-navbar">'
@@ -17539,6 +17537,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.90 (v0407zl)',date:'2026-04-07',items:[{type:'ui',text:'알림장 X 닫기 버튼 제거 — 수첩 바깥 dim 영역 탭으로 닫기 동작과 중복이라 정리'}]},
   {ver:'1.9.89 (v0407zk)',date:'2026-04-07',items:[{type:'fix',text:'알림장에서 미래 날짜로 넘기려 할 때 토스트가 dim 아래에 가려져 안 보이던 문제 — 오버레이 안에 자체 토스트(z-index 20) 표시'}]},
   {ver:'1.9.88 (v0407zj)',date:'2026-04-07',items:[{type:'fix',text:'홈탭 hero shrink 인터랙션 v0407zh 변경 롤백 (threshold 60 복귀, inline padding 보간 제거) — 제목영역이 이상하게 동작하던 문제 해결'},{type:'fix',text:'알림장 X 닫기 버튼 더 위로(top 9px) + 더 작게(22px) — 고동색 헤더 안에 정확히 들어옴'},{type:'ui',text:'알림장 화살표 ▲▼ 버튼을 수첩 우측 하단 모서리 안으로 이동, 고동색 톤으로 변경'},{type:'fix',text:'알림장 열 때 화면이 위로 밀리고 하단에 흰 영역이 잘리던 문제 — body position:fixed 락 방식 폐기, html/body overflow:hidden + touchmove 차단으로 변경 (레이아웃 시프트 없음)'}]},
   {ver:'1.9.87 (v0407zi)',date:'2026-04-07',items:[{type:'fix',text:'알림장 X 닫기 버튼 크기 축소(32→26px) 및 위치 보정 — 고동색 헤더 바 안에 정확히 정렬'},{type:'ui',text:'수첩 헤더 제목을 "알림장" → "오늘 할일 이력"으로 변경'},{type:'fix',text:'수첩 스크롤 시 dim 영역이 따라 움직이던 문제 근원적 해결 — 본문 body 자체를 position:fixed로 락하고 닫을 때 원래 스크롤 위치 복원, 수첩 안쪽 외 touchmove/wheel 모두 preventDefault'},{type:'ui',text:'위/아래 화살표 버튼을 화면 바닥이 아닌 수첩 바로 아래에 가로로 배치 (오버레이를 column flex로 변경)'}]},
