@@ -1534,12 +1534,15 @@ body.dark .spider-thread{background:rgba(255,255,255,.5)}
 @keyframes chBugHop{0%,100%{transform:translateY(0) rotate(0)}45%{transform:translateY(-3.5px) rotate(-2deg)}50%{transform:translateY(-4px) rotate(0)}}
 .ch-bug.bug-grasshopper svg{transform:rotate(0)!important}
 .ch-bug.bug-grasshopper{animation:chBugHop .55s cubic-bezier(.5,0,.5,1) infinite;width:38px;height:28px}
-/* Ant throw food at camera */
-.ch-bug.ant-throw{animation:antThrowAnim .8s ease-out forwards!important;z-index:50}
-@keyframes antThrowAnim{0%{transform:translate(0,0)}25%{transform:translate(-12px,-3px) rotate(-15deg) scale(1.1)}45%{transform:translate(18px,-10px) rotate(20deg) scale(1.35)}60%{transform:translate(18px,-10px) rotate(20deg) scale(1.35)}85%{transform:translate(0,0) rotate(0) scale(1.05)}100%{transform:translate(0,0) scale(1)}}
-.ant-food{position:fixed;left:50%;top:50%;width:60px;height:50px;transform:translate(-50%,-50%) scale(.15);pointer-events:none;z-index:99998;animation:antFoodFly 1s cubic-bezier(.25,.1,.6,1) forwards;filter:drop-shadow(0 4px 12px rgba(0,0,0,.4))}
-.ant-food svg{width:100%;height:100%;display:block}
-@keyframes antFoodFly{0%{opacity:0;transform:translate(-50%,-50%) scale(.15);filter:blur(0)}15%{opacity:1;transform:translate(-50%,-50%) scale(.5);filter:blur(0)}55%{opacity:1;transform:translate(-50%,-50%) scale(3.5);filter:blur(1.5px)}80%{opacity:.85;transform:translate(-50%,-50%) scale(7);filter:blur(8px)}100%{opacity:0;transform:translate(-50%,-50%) scale(11);filter:blur(16px)}}
+/* Ant swarm */
+#__ant_swarm__{position:fixed;inset:0;z-index:99998;pointer-events:none;overflow:hidden}
+.ant-soldier{position:absolute;left:-60px;animation-name:antMarch;animation-timing-function:linear;animation-fill-mode:forwards;filter:drop-shadow(0 2px 3px rgba(0,0,0,.45))}
+.ant-soldier svg{width:100%;height:100%;display:block;transform:rotate(90deg);overflow:visible}
+@keyframes antMarch{0%{transform:translateX(0)}100%{transform:translateX(calc(100vw + 140px))}}
+.ant-shout{position:fixed;left:50%;background:#fff;color:#1a1a1a;padding:11px 22px;border-radius:18px;font-size:19px;font-weight:900;border:3px solid #1a1a1a;box-shadow:0 6px 22px rgba(0,0,0,.45);white-space:nowrap;transform:translateX(-50%) scale(0);opacity:0;z-index:99999}
+.ant-shout.s1{top:20%;animation:antShoutPop 5s ease-out .3s forwards}
+.ant-shout.s2{top:32%;animation:antShoutPop 5s ease-out 1.3s forwards;color:#dc2626;border-color:#dc2626}
+@keyframes antShoutPop{0%{opacity:0;transform:translateX(-50%) scale(0)}8%{opacity:1;transform:translateX(-50%) scale(1.2) rotate(-3deg)}14%{transform:translateX(-50%) scale(1) rotate(2deg)}22%{transform:translateX(-50%) scale(1.05)}78%{opacity:1;transform:translateX(-50%) scale(1)}100%{opacity:0;transform:translateX(-50%) scale(.85)}}
 /* Spider dash + drop */
 .ch-bug.spider-dash{animation:spiderDash .7s ease-in forwards!important;z-index:50}
 @keyframes spiderDash{0%{transform:translate(0,0)}30%{transform:translate(-15px,0) scale(1.1)}100%{transform:translate(500px,0) scale(.9);opacity:0}}
@@ -9253,7 +9256,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0407zu';
+const _APP_VERSION = 'v0407zv';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -17554,7 +17557,7 @@ const _BUG_SVG_GRASSHOPPER = '<svg viewBox="0 0 30 22"><ellipse cx="11" cy="11" 
 const _BUG_SVG_SPIDER = '<svg viewBox="0 0 24 22"><g stroke="#1f2937" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"><path class="leg l1" d="M9 11 L4 6 L2 8"/><path class="leg l2" d="M9 13 L2 12"/><path class="leg l3" d="M9 15 L4 18 L2 17"/><path class="leg l4" d="M9 16 L6 21"/><path class="leg l5" d="M15 11 L20 6 L22 8"/><path class="leg l6" d="M15 13 L22 12"/><path class="leg l7" d="M15 15 L20 18 L22 17"/><path class="leg l8" d="M15 16 L18 21"/></g><ellipse cx="12" cy="14" rx="4.8" ry="5" fill="#1f2937" stroke="#000" stroke-width=".6"/><circle cx="12" cy="8" r="3" fill="#374151" stroke="#000" stroke-width=".5"/><circle cx="10.5" cy="7" r=".75" fill="#FBBF24"/><circle cx="13.5" cy="7" r=".75" fill="#FBBF24"/><circle cx="11" cy="9" r=".5" fill="#FBBF24"/><circle cx="13" cy="9" r=".5" fill="#FBBF24"/></svg>';
 window.BUG_TYPES={
   ladybug:{name:'무당벌레',emoji:'🐞',svg:_BUG_SVG_LADYBUG,msgs:['아얏!','앗 따거!','간지러워~','살살!','으악!','깜짝이야!','어이쿠!','그만~','헤헤','히잉...'],special:'flyaway'},
-  ant:{name:'개미',emoji:'🐜',svg:_BUG_SVG_ANT,msgs:['영차!','으차!','일이 많아','부지런','으응?','조각 줘','동료 어디?','도와줘~','히히','힘내자!'],special:'antThrow'},
+  ant:{name:'개미',emoji:'🐜',svg:_BUG_SVG_ANT,msgs:['영차!','으차!','일이 많아','부지런','으응?','조각 줘','동료 어디?','도와줘~','히히','힘내자!'],special:'antSwarm'},
   grasshopper:{name:'메뚜기',emoji:'🦗',svg:_BUG_SVG_GRASSHOPPER,msgs:['깡총!','뛸까?','폴짝!','준비됐다','으응?','어디까지?','발이 근질','후후','풀잎 냠','으랏차!'],special:'grasshopperCrash'},
   spider:{name:'거미',emoji:'🕷️',svg:_BUG_SVG_SPIDER,msgs:['거미줄!','쪼르륵','다리 8개','으응?','왜 그래?','거꾸로!','오늘도 냠','히히','잡았다!','쉭쉭'],special:'spiderWeb'}
 };
@@ -17644,29 +17647,25 @@ window.bugSpecial_butterflyBurn=function(el){
   },720);
   setTimeout(()=>{try{el.classList.remove('special-anim','bfly-burn');el.style.removeProperty('--bfly-ty');}catch(_){}} ,2800);
 };
-window.bugSpecial_antThrow=function(el){
-  el.classList.add('special-anim','ant-throw');
-  setTimeout(()=>{
-    try{
-      const food=document.createElement('div');
-      food.className='ant-food';
-      food.innerHTML='<svg viewBox="0 0 60 50"><path d="M6 28 Q10 8 30 5 Q56 8 56 32 Q50 48 28 48 Q8 48 6 28 Z" fill="#D97706" stroke="#7C2D12" stroke-width="2.5"/><circle cx="22" cy="22" r="3" fill="#7C2D12"/><circle cx="40" cy="20" r="2.5" fill="#7C2D12"/><circle cx="32" cy="36" r="2.2" fill="#7C2D12"/><circle cx="48" cy="34" r="2.2" fill="#7C2D12"/><circle cx="16" cy="38" r="1.8" fill="#7C2D12"/></svg>';
-      document.body.appendChild(food);
-      setTimeout(()=>{
-        try{
-          document.body.classList.add('screen-shake');
-          setTimeout(()=>{try{document.body.classList.remove('screen-shake');}catch(_){}} ,560);
-          const old=document.getElementById('__bug_crack__');if(old)old.remove();
-          const crack=document.createElement('div');
-          crack.id='__bug_crack__';
-          crack.innerHTML='<svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0"><defs><filter id="cf2" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation=".25"/></filter></defs><g stroke="#ffffff" stroke-width=".22" fill="none" filter="url(#cf2)" opacity=".95"><line x1="50" y1="50" x2="8" y2="8"/><line x1="50" y1="50" x2="92" y2="8"/><line x1="50" y1="50" x2="8" y2="92"/><line x1="50" y1="50" x2="92" y2="92"/><line x1="50" y1="50" x2="50" y2="2"/><line x1="50" y1="50" x2="2" y2="50"/><line x1="50" y1="50" x2="98" y2="50"/><line x1="50" y1="50" x2="50" y2="98"/><line x1="50" y1="50" x2="22" y2="4"/><line x1="50" y1="50" x2="78" y2="4"/><line x1="50" y1="50" x2="4" y2="22"/><line x1="50" y1="50" x2="96" y2="22"/><line x1="50" y1="50" x2="4" y2="78"/><line x1="50" y1="50" x2="96" y2="78"/><line x1="50" y1="50" x2="22" y2="96"/><line x1="50" y1="50" x2="78" y2="96"/><line x1="8" y1="8" x2="50" y2="2"/><line x1="50" y1="2" x2="92" y2="8"/><line x1="92" y1="8" x2="98" y2="50"/><line x1="98" y1="50" x2="92" y2="92"/><line x1="92" y1="92" x2="50" y2="98"/><line x1="50" y1="98" x2="8" y2="92"/><line x1="8" y1="92" x2="2" y2="50"/><line x1="2" y1="50" x2="8" y2="8"/></g><circle cx="50" cy="50" r="4.5" fill="#fff" opacity=".9"/><circle cx="50" cy="50" r="9" fill="none" stroke="#fff" stroke-width=".25" opacity=".55"/></svg>';
-          document.body.appendChild(crack);
-          setTimeout(()=>{try{crack.remove();food.remove();}catch(_){}} ,3000);
-        }catch(_){}
-      },950);
-    }catch(_){}
-  },380);
-  setTimeout(()=>{try{el.classList.remove('special-anim','ant-throw');}catch(_){}} ,3500);
+window.bugSpecial_antSwarm=function(el){
+  el.classList.add('special-anim');
+  el.style.visibility='hidden';
+  const old=document.getElementById('__ant_swarm__');if(old)old.remove();
+  const ov=document.createElement('div');
+  ov.id='__ant_swarm__';
+  let html='';
+  const N=38;
+  for(let i=0;i<N;i++){
+    const top=(6+Math.random()*84).toFixed(1);
+    const dly=(Math.random()*1.6).toFixed(2);
+    const sz=18+Math.floor(Math.random()*18);
+    const dur=(2.4+Math.random()*1.4).toFixed(2);
+    html+='<div class="ant-soldier" style="top:'+top+'vh;width:'+sz+'px;height:'+sz+'px;animation-delay:'+dly+'s;animation-duration:'+dur+'s">'+_BUG_SVG_ANT+'</div>';
+  }
+  html+='<div class="ant-shout s1">공격이다!</div><div class="ant-shout s2">적을 공격해라!</div>';
+  ov.innerHTML=html;
+  document.body.appendChild(ov);
+  setTimeout(()=>{try{ov.remove();el.style.visibility='';el.classList.remove('special-anim');}catch(_){}} ,5400);
 };
 window.bugSpecial_spiderWeb=function(el){
   el.classList.add('special-anim','spider-dash');
@@ -17778,6 +17777,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.0.0 (v0407zv)',date:'2026-04-08',items:[{type:'new',text:'개미 10회 클릭 특별액션 교체 — 동료 개미 38마리가 화면 좌→우로 우르르 행진하며 "공격이다!" "적을 공격해라!" 외침'}]},
   {ver:'1.9.99 (v0407zu)',date:'2026-04-08',items:[{type:'fix',text:'메뚜기 박치기 액정 깨짐 효과 리얼하게 개선 — 충돌 지점을 화면 상단 → 화면 약 40% 위치로 이동, 방사형 균열 + 보조 균열 + 충격 동심원 + 중심 섬광으로 한층 사실적, 한번에 깨지고 변하지 않도록 페이드 타이밍 조정'},{type:'fix',text:'거미 특별액션 — 거미줄이 거미 위쪽으로만 보이도록 수정(아래 삐져나옴 제거), 내려오는 속도 좀 더 느리게'}]},
   {ver:'1.9.98 (v0407zt)',date:'2026-04-08',items:[{type:'ui',text:'챌린지 곤충 4종으로 정리(무당벌레/개미/메뚜기/거미). 메뚜기는 옆모습 + 큰 뒷다리 강조'},{type:'new',text:'개미 10회 클릭 → 먹이를 사용자 쪽으로 던짐(눈앞에서 거대해지며 흐려지다 액정에 맞아 깨짐)'},{type:'new',text:'거미 10회 클릭 → 게이지바 쪽으로 쏜살같이 사라진 뒤 화면 최상단에서 거미줄 타고 내려와 "난 스파이더맨이다!" 외침'}]},
   {ver:'1.9.97 (v0407zs)',date:'2026-04-08',items:[{type:'ui',text:'챌린지 곤충 SVG 전면 리디자인 — 다크모드 가시성 개선(드롭섀도우), 꿀벌 날개 하늘색으로 라이트모드에서도 보이도록, 개미 올블랙, 달팽이 머리/껍질 방향 수정'},{type:'new',text:'곤충별 10회 클릭 특별 액션 전면 교체: 꿀벌 → 벌침 발사, 달팽이 → 껍질에 바퀴 달고 화면 레이싱, 나비 → 화면 상단으로 날아올라 폭죽에 맞고 추락, 개미 → 자기보다 큰 빵조각 옮기기'},{type:'fix',text:'나비 진화 단계(애벌레/번데기) 제거 — 항상 나비로 표시'}]},
