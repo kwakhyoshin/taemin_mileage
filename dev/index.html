@@ -9158,7 +9158,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0407za';
+const _APP_VERSION = 'v0407zb';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -12785,6 +12785,8 @@ function spinRoulette(){
       db.history.unshift({pts:prize.pts,emoji:prize.emoji,date:todayStr()});
       if(db.history.length>30)db.history=db.history.slice(0,30);
       S.pts+=prize.pts;
+      // 최근 활동에 이력 추가
+      S.log.unshift({id:'rlt_'+Date.now(),emoji:prize.emoji,name:`🎰 오늘의 보너스 룰렛`,pts:prize.pts,ts:Date.now(),actId:null,user:_globalDataOwner||currentUser});
       // Level XP도 추가
       const _ld=S.levelData||(S.levelData={xp:0,level:1,xpLog:[]});
       _ld.xp+=prize.pts;
@@ -12802,11 +12804,13 @@ function spinRoulette(){
       save();
       renderAll();
 
-      // 결과 표시
-      const resultHTML=`<div style="font-size:64px">${prize.emoji}</div><div style="font-size:22px;font-weight:900;color:var(--tab-color,var(--or));margin-top:8px">+${prize.pts} 마일리지!</div>`;
+      // 결과 표시 (세로 배치 + 컨테이너 height/overflow 해제)
+      const resultHTML=`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px"><div style="font-size:64px;line-height:1">${prize.emoji}</div><div style="font-size:22px;font-weight:900;color:var(--tab-color,var(--or));line-height:1.2;white-space:nowrap">+${prize.pts} 마일리지!</div></div>`;
       display.innerHTML=resultHTML;
       display.style.height='auto';
-      display.style.padding='16px';
+      display.style.minHeight='80px';
+      display.style.padding='20px 16px';
+      display.style.overflow='visible';
       btn.style.display='none';
       document.getElementById('rlt-close-btn').style.display='';
       if(navigator.vibrate)navigator.vibrate([50,50,50]);
@@ -17090,6 +17094,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.80 (v0407zb)',date:'2026-04-07',items:[{type:'fix',text:'오늘의 보너스 룰렛 결과의 마일리지 점수가 보이지 않던 문제 수정 — 결과 영역 세로 배치/줄바꿈 방지'},{type:'feat',text:'룰렛 보너스 획득 이력을 홈탭 최근 활동에 표시'}]},
   {ver:'1.9.79 (v0407za)',date:'2026-04-07',items:[{type:'fix',text:'활동 취소 시 "오늘 할 일 모두 완료 X일" 챌린지(allDoneDays) 진행도가 줄어들지 않던 문제 — S.allDoneDays 트래커에서 오늘 항목 제거'}]},
   {ver:'1.9.78 (v0407z9)',date:'2026-04-07',items:[{type:'fix',text:'근본 원인 수정 — isTodayAllDone()이 홈탭 "오늘 할 일" 그리드와 동일한 필터(showHome)를 사용하도록 변경. 그동안 숨겨진 활동이 남아있어 streak/연속 챌린지 게이지가 갱신되지 않던 문제 해결.'}]},
   {ver:'1.9.77 (v0407z8)',date:'2026-04-07',items:[{type:'fix',text:'0일→1일 연속 표시: 양육자가 자녀를 보고 있을 때 S에 로드된 자녀 데이터를 우선 사용해 즉시 반영'},{type:'fix',text:'주간/월간 연속 챌린지 게이지: 표시용 streak(getDisplayStreak)을 함께 사용해 오늘 모두 완료 시 즉시 +1 반영, 활동 취소 시도 동기화'},{type:'fix',text:'나의 메뉴 PRO/FREE 등급 배지: 챗봇 진입 없이도 표시되도록 _updatePlanBadges를 window에 노출'}]},
