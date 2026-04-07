@@ -1454,7 +1454,7 @@ body.dark .adm-child-btn.on{background:rgba(255,107,53,.15)}
 .assign-chip{font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;border:1.5px solid var(--bdr);background:var(--bg2);color:var(--tx3);cursor:pointer;transition:all .15s}
 .assign-chip.on{background:var(--or);border-color:var(--or);color:#fff}
 /* MY 탭 가족 구성원 */
-.my-family-row{display:flex;gap:12px;overflow-x:auto;padding:4px 16px 12px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.my-family-row{display:flex;gap:22px;overflow-x:auto;padding:10px 18px 14px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .my-family-row::-webkit-scrollbar{display:none}
 .my-family-member{display:flex;flex-direction:column;align-items:center;gap:5px;flex-shrink:0;cursor:pointer}
 .my-family-avatar{width:52px;height:52px;border-radius:50%;overflow:visible;border:2.5px solid var(--or);background:var(--bg2);flex-shrink:0;position:relative}
@@ -9128,7 +9128,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0407l';
+const _APP_VERSION = 'v0407m';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -9341,7 +9341,7 @@ const LEVEL_EFFECTS={
   2:{name:'학습의 빛',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-tw"><circle cx="18" cy="20" r="2" fill="#42A5F5"/><circle cx="84" cy="22" r="2" fill="#64B5F6"/><circle cx="12" cy="60" r="1.7" fill="#90CAF9"/><circle cx="88" cy="62" r="1.7" fill="#42A5F5"/><circle cx="50" cy="14" r="1.5" fill="#1E88E5"/></g></svg></div>'},
   3:{name:'반짝이는 별',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-spin" style="transform-origin:50px 50px"><path d="M50 8l1.6 4.4L56 14l-4.4 1.6L50 20l-1.6-4.4L44 14l4.4-1.6z" fill="#FFD600"/><path d="M92 50l-4.4 1.6L86 56l-1.6-4.4L80 50l4.4-1.6L86 44l1.6 4.4z" fill="#FFC107"/><path d="M50 92l-1.6-4.4L44 86l4.4-1.6L50 80l1.6 4.4L56 86l-4.4 1.6z" fill="#FFD600"/><path d="M8 50l4.4-1.6L14 44l1.6 4.4L20 50l-4.4 1.6L14 56l-1.6-4.4z" fill="#FFC107"/></g></svg></div>'},
   4:{name:'잎사귀 흩날림',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-fall"><path d="M20 5c-4 4-4 10 0 14 4-4 4-10 0-14z" fill="#66BB6A"/><path d="M50 0c-4 4-4 10 0 14 4-4 4-10 0-14z" fill="#81C784"/><path d="M80 5c-4 4-4 10 0 14 4-4 4-10 0-14z" fill="#4CAF50"/></g></svg></div>'},
-  5:{name:'불꽃 활활',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-flicker" style="transform-origin:50px 50px"><path d="M50 2 Q40 16 50 24 Q60 16 50 2z" fill="#FF6F00"/><path d="M20 10 Q15 28 32 32 Q30 16 20 10z" fill="#FF6F00"/><path d="M80 10 Q85 28 68 32 Q70 16 80 10z" fill="#FF6F00"/><path d="M6 40 Q2 58 22 58 Q20 42 6 40z" fill="#FF6F00"/><path d="M94 40 Q98 58 78 58 Q80 42 94 40z" fill="#FF6F00"/><path d="M12 72 Q8 90 26 86 Q28 74 12 72z" fill="#FF6F00"/><path d="M88 72 Q92 90 74 86 Q72 74 88 72z" fill="#FF6F00"/><path d="M35 0 Q25 12 38 20 Q42 10 35 0z" fill="#FF8F00"/><path d="M65 0 Q75 12 62 20 Q58 10 65 0z" fill="#FF8F00"/></g><g class="lv-flicker" style="animation-delay:.12s"><path d="M50 8 Q44 20 50 26 Q56 20 50 8z" fill="#FF9800"/><path d="M26 16 Q22 30 34 32 Q32 20 26 16z" fill="#FF9800"/><path d="M74 16 Q78 30 66 32 Q68 20 74 16z" fill="#FF9800"/><path d="M14 50 Q10 62 24 60 Q22 50 14 50z" fill="#FF9800"/><path d="M86 50 Q90 62 76 60 Q78 50 86 50z" fill="#FF9800"/></g><g class="lv-flicker" style="animation-delay:.22s"><path d="M50 14 Q46 22 50 28 Q54 22 50 14z" fill="#FFC107"/><path d="M38 16 Q36 26 44 28 Q42 18 38 16z" fill="#FFC107"/><path d="M62 16 Q64 26 56 28 Q58 18 62 16z" fill="#FFC107"/></g></svg></div>'},
+  5:{name:'불꽃 활활',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-flicker" style="transform-origin:50px 55px"><path d="M50 2 Q22 22 14 50 Q8 78 30 92 Q22 70 38 56 Q30 80 50 96 Q70 80 62 56 Q78 70 70 92 Q92 78 86 50 Q78 22 50 2z" fill="#FF6F00"/></g><g class="lv-flicker" style="transform-origin:50px 60px;animation-delay:.15s"><path d="M50 14 Q32 30 26 54 Q22 76 38 86 Q34 68 46 58 Q40 78 50 90 Q60 78 54 58 Q66 68 62 86 Q78 76 74 54 Q68 30 50 14z" fill="#FF9800"/></g><g class="lv-flicker" style="transform-origin:50px 65px;animation-delay:.3s"><path d="M50 28 Q40 40 36 58 Q34 74 44 80 Q42 68 50 62 Q58 68 56 80 Q66 74 64 58 Q60 40 50 28z" fill="#FFC107"/></g></svg></div>'},
   6:{name:'수호 오라',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-ripple" style="transform-origin:50px 50px"><circle cx="50" cy="50" r="42" fill="none" stroke="#5C6BC0" stroke-width="2.5"/><circle cx="50" cy="50" r="42" fill="none" stroke="#7986CB" stroke-width="2"/><circle cx="50" cy="50" r="42" fill="none" stroke="#9FA8DA" stroke-width="1.5"/></g></svg></div>'},
   7:{name:'에너지 번개',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-bolts"><path d="M12 28l8-14-2 10 6-2-10 18 2-12z" fill="#FFEB3B" stroke="#F57F17" stroke-width=".5"/><path d="M82 18l8-14-2 10 6-2-10 18 2-12z" fill="#FFC107" stroke="#F57F17" stroke-width=".5"/><path d="M50 4l6-10-1 8 5-2-8 14 1-10z" fill="#FFEB3B" stroke="#F57F17" stroke-width=".5"/></g></svg></div>'},
   8:{name:'금메달 광채',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><defs><clipPath id="lvClip8"><circle cx="50" cy="50" r="46"/></clipPath></defs><g clip-path="url(#lvClip8)"><rect class="lv-slash" x="-30" y="40" width="160" height="14" fill="url(#lvShine8)" opacity=".8"/></g><defs><linearGradient id="lvShine8"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".9"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs><g class="lv-tw"><circle cx="20" cy="20" r="1.8" fill="#FFD600"/><circle cx="82" cy="22" r="1.8" fill="#FFC107"/><circle cx="78" cy="80" r="1.8" fill="#FFD600"/><circle cx="22" cy="82" r="1.8" fill="#FFC107"/></g></svg></div>'},
@@ -9376,7 +9376,7 @@ const LEVEL_EFFECTS={
   37:{name:'행성 궤도',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100" fill="none" stroke="#80DEEA" stroke-width="1.5"><ellipse cx="50" cy="50" rx="48" ry="20"/><ellipse cx="50" cy="50" rx="20" ry="48"/><ellipse cx="50" cy="50" rx="40" ry="40" class="lv-spin" style="transform-origin:50px 50px;stroke-dasharray:4 4"/></svg></div>'},
   38:{name:'성운 구름',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-pulse" style="transform-origin:50px 50px"><circle cx="20" cy="20" r="14" fill="#E91E63" opacity=".5"/><circle cx="80" cy="25" r="12" fill="#3F51B5" opacity=".5"/><circle cx="75" cy="80" r="14" fill="#00BCD4" opacity=".5"/><circle cx="20" cy="78" r="12" fill="#9C27B0" opacity=".5"/></g></svg></div>'},
   39:{name:'만다라 빛',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100" fill="#FFD54F"><g class="lv-spin" style="transform-origin:50px 50px"><path d="M50 0l2 10-2 4-2-4zM50 100l2-10-2-4-2 4zM0 50l10 2 4-2-4-2zM100 50l-10 2-4-2 4-2zM15 15l8 6 2-2-6-8zM85 15l-8 6-2-2 6-8zM15 85l8-6 2 2-6 8zM85 85l-8-6-2 2 6 8zM30 4l4 10-2 2-4-10zM70 4l-4 10 2 2 4-10zM30 96l4-10-2-2-4 10zM70 96l-4-10 2-2 4 10z"/></g></svg></div>'},
-  40:{name:'무한의 빛',html:'<div class="lv-fx-wrap lv-glow"><svg viewBox="0 0 100 100"><g class="lv-hue"><path d="M20 50 Q20 30 35 30 Q50 30 50 50 Q50 70 65 70 Q80 70 80 50 Q80 30 65 30 Q50 30 50 50 Q50 70 35 70 Q20 70 20 50z" fill="none" stroke="#FFD700" stroke-width="3"/></g><g class="lv-tw"><circle cx="10" cy="10" r="2" fill="#FFF"/><circle cx="90" cy="10" r="2" fill="#FFF"/><circle cx="10" cy="90" r="2" fill="#FFF"/><circle cx="90" cy="90" r="2" fill="#FFF"/></g></svg></div>'}
+  40:{name:'무한의 빛',html:'<div class="lv-fx-wrap lv-glow"><svg viewBox="0 0 100 100"><defs><radialGradient id="lv40g" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#FFF59D" stop-opacity=".0"/><stop offset="60%" stop-color="#FFD700" stop-opacity=".0"/><stop offset="100%" stop-color="#FF6F00" stop-opacity=".55"/></radialGradient><linearGradient id="lv40r" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FF1744"/><stop offset="20%" stop-color="#FF9100"/><stop offset="40%" stop-color="#FFEA00"/><stop offset="60%" stop-color="#00E676"/><stop offset="80%" stop-color="#00B0FF"/><stop offset="100%" stop-color="#D500F9"/></linearGradient></defs><circle cx="50" cy="50" r="49" fill="url(#lv40g)"/><g class="lv-spin" style="transform-origin:50px 50px"><circle cx="50" cy="50" r="48" fill="none" stroke="url(#lv40r)" stroke-width="2.5" stroke-dasharray="8 4"/><path d="M50 0 L52 6 L50 12 L48 6z M100 50 L94 52 L88 50 L94 48z M50 100 L48 94 L50 88 L52 94z M0 50 L6 48 L12 50 L6 52z" fill="#FFD700"/></g><g class="lv-spinR" style="transform-origin:50px 50px"><circle cx="50" cy="50" r="42" fill="none" stroke="#FFF" stroke-width="1" stroke-dasharray="2 6" opacity=".7"/></g><g class="lv-pulse" style="transform-origin:50px 50px"><path d="M50 4 L52 18 L66 14 L56 26 L70 32 L54 34 L60 50 L50 38 L40 50 L46 34 L30 32 L44 26 L34 14 L48 18z" fill="#FFD700" opacity=".55"/></g><g class="lv-hue"><path d="M22 50 Q22 32 36 32 Q50 32 50 50 Q50 68 64 68 Q78 68 78 50 Q78 32 64 32 Q50 32 50 50 Q50 68 36 68 Q22 68 22 50z" fill="none" stroke="#FFEB3B" stroke-width="2.8" stroke-linecap="round"/></g><g class="lv-tw"><circle cx="14" cy="14" r="2.5" fill="#FFF"/><circle cx="86" cy="14" r="2.5" fill="#FFF"/><circle cx="14" cy="86" r="2.5" fill="#FFF"/><circle cx="86" cy="86" r="2.5" fill="#FFF"/><circle cx="50" cy="6" r="1.8" fill="#FFD700"/><circle cx="94" cy="50" r="1.8" fill="#FFD700"/><circle cx="50" cy="94" r="1.8" fill="#FFD700"/><circle cx="6" cy="50" r="1.8" fill="#FFD700"/></g></svg></div>'}
 };
 function getLevelEffectHTML(level){
   const fx=LEVEL_EFFECTS[level];
@@ -16803,18 +16803,21 @@ function renderMyTab(){
         const moodEmoji=getMoodEmoji(mid);
         // 해당 멤버로부터 온 미읽은 메시지 수
         const unreadFromMember=S.familyMessages?S.familyMessages.filter(m=>m.from===mid&&m.to===currentUser&&!m.read).length:0;
-        // 자녀 레벨 배지 (양육자는 제외)
+        // 자녀 레벨 배지/이펙트 (양육자는 제외)
         const _isChild=(m?.role==='child'||m?.displayRole==='child');
         let _lvHTML='';
+        let _lvFxHTML='';
         if(_gsLv && _isChild){
           const _msLv=S.memberData?.[mid]?.levelData;
           if(_msLv){
             const _infoLv=getLevelInfo(_msLv.xp||0);
             _lvHTML=`<div class="my-family-lv">${_infoLv.emoji||'⭐'} Lv.${_infoLv.level}</div>`;
+            _lvFxHTML=getLevelEffectHTML(_infoLv.level)||'';
           }
         }
         return `<div class="my-family-member" onclick="${clickAction}">
           <div class="my-family-avatar" data-mf-id="${mid}">
+            ${_lvFxHTML}
             ${getAvatarHTML(mid,48)}
             ${moodEmoji?`<span class="mf-mood-badge">${moodEmoji}</span>`:''}
             <div class="mf-mood-particles" data-mf-particles="${mid}"></div>
@@ -16908,6 +16911,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.57 (v0407m)',date:'2026-04-07',items:[{type:'fix',text:'Lv.5 불꽃 이펙트 — 작은 불꽃 9개 → 아이콘을 감싸는 큰 불꽃 1개(3겹 그라디언트)로 단순화'},{type:'new',text:'Lv.40 끝판왕 이펙트 재설계 — 무지개 그라디언트 링 + 발광 글로우 + 황금 별 + 무한 심볼 + 8방향 스파클 합성'},{type:'new',text:'나의 메뉴 가족 목록 자녀 아이콘에 레벨 이펙트 표시, 아이콘 간격 12px → 22px'}]},
   {ver:'1.9.56 (v0407l)',date:'2026-04-07',items:[{type:'fix',text:'관리자 게이미피케이션 상세 영역을 들여쓰기 + 좌측 액센트 바로 시각적 계층화 (하위 속성 느낌)'},{type:'fix',text:'i 아이콘을 "주간 챌린지란?" 등 라벨형 칩 버튼으로 교체 (가독성·발견성 개선)'}]},
   {ver:'1.9.55 (v0407k)',date:'2026-04-07',items:[{type:'fix',text:'자녀별 누적 XP 백필 — 레벨 시스템 도입 이전의 활동 기록(log)을 합산해 현재 레벨 자동 재계산'},{type:'fix',text:'양육자(부모) 나의 메뉴에서 본인 계정 레벨 배지/이펙트 숨김'},{type:'new',text:'나의 메뉴 가족 목록: 각 자녀 아이콘 아래에 현재 레벨 배지 표시'}]},
   {ver:'1.9.54 (v0407j)',date:'2026-04-07',items:[{type:'fix',text:'관리자 게이미피케이션 토글이 클릭 시 시각적으로 변하지 않던 버그 수정 (.tog.off 클래스 사용)'},{type:'new',text:'토글을 켰을 때만 상세 설정 펼침 — 일일/주간/월간/레벨 각 영역의 하위 설정이 토글 OFF면 자동 접힘'},{type:'new',text:'챌린지/레벨 설명을 i 버튼 + 안내 팝업으로 정리 — 인라인 long text 제거'},{type:'fix',text:'홈 화면 인사말 설정을 한 카드에 컴팩트하게 정리 — 자녀별 한 줄, 미리보기 인라인'}]},
