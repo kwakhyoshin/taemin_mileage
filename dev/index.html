@@ -3772,7 +3772,7 @@ requestAnimationFrame(function(){
     <div style="font-size:18px;font-weight:900;color:#fff;margin-bottom:4px" id="birthday-banner-title"></div>
     <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,.85)" id="birthday-banner-sub"></div>
   </div>
-  <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> 오늘 할 일</div>
+  <div class="sec" style="display:flex;align-items:center;justify-content:space-between;padding-right:0"><span style="display:inline-flex;align-items:center"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> 오늘 할 일</span><button onclick="openDayDiary()" aria-label="이력보기" style="margin-right:16px;padding:6px 12px;border:1.5px solid #F59E0B;border-radius:18px;background:linear-gradient(135deg,#FEF3C7,#FDE68A);color:#92400E;font-family:inherit;font-size:12px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:5px;box-shadow:0 2px 6px rgba(217,142,9,.25)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>이력보기</button></div>
   <div class="act-grid" id="home-grid"></div>
   <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9H4.5a2.5 2.5 0 010-5H6"/><path d="M18 9h1.5a2.5 2.5 0 000-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0012 0V2z"/></svg> 진행중인 챌린지</div>
   <div id="challenge-cards" style="margin:0 16px 14px"></div>
@@ -9158,7 +9158,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0407zb';
+const _APP_VERSION = 'v0407zc';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -11074,6 +11074,7 @@ window.getCurrentGreeting=getCurrentGreeting;
 function renderAll(){
   if(_actAnimating){_actAnimating='pending';return;}
   if(!S._lvBackfilled){try{_backfillLevelData();S._lvBackfilled=true;}catch(e){}}
+  if(!_dhBackfilled){try{_backfillRecentFromLog();_saveTodaySnapshot();}catch(_dhe){}}
   renderHero();renderHomeGrid();renderChallengeCards();renderRecent();
   renderLogList();renderRewardGrid();renderRewardInventory();renderRewardHistory();
   renderDashboard();renderHistStats();renderHistList();renderCalendar();
@@ -14214,6 +14215,8 @@ function _doActCore(id){
   updateChallengeProgress();
 
   save();
+  // 일기(알림장) 스냅샷 저장
+  try{ _saveTodaySnapshot(); }catch(_dhe){}
   const _curTab=getCurrentTab();
   const _actCard=_curTab==='home'?document.querySelector(`.act-card[data-actid="${id}"]`):null;
   const _logItem=_curTab==='log'?document.querySelector(`.log-item[data-actid="${id}"]`):null;
@@ -14349,6 +14352,8 @@ function _undoActCore(actId){
   const _actCard = document.querySelector(`.act-card[data-actid="${actId}"]`);
   if(_actCard) flyCoinsFromMileage(_actCard, entry.pts);
   save();renderAll();
+  // 일기(알림장) 스냅샷 갱신
+  try{ _saveTodaySnapshot(); }catch(_dhe){}
   toast(`↩ ${a.name} 취소됨 (-${entry.pts} 마일리지)`);
   if(_chRolledBack.length){
     setTimeout(()=>{
@@ -14357,7 +14362,364 @@ function _undoActCore(actId){
   }
 }
 
+// ── DAY HISTORY (알림장 일기) ────────────────────────────
+// 매일 "오늘 할 일" 스냅샷을 멤버별로 월별 Firestore 서브컬렉션에 영구 저장
+// 구조: <DATA_DOC>/dh_{memberId}/{YYYY-MM} = { month, updatedAt, days: { 'DD': {acts,done,allDone,streak,ts} } }
+// 메모리 캐시: _dhCache[memberId][monthKey] = { days, _loaded }
+// localStorage 미러: _LS_PREFIX + 'dh_' + memberId + '_' + monthKey
+// ⚠️ Append-only — 이미 저장된 일기는 절대 삭제 금지 (사고 방지)
+let _dhCache = {};
+let _dhBackfilled = false;
+function _dhMemberId(){ return _globalDataOwner || currentUser || 'main'; }
+function _dhMonthKey(d){ d=d||new Date(); if(typeof d==='string'){const [y,m]=d.split('-');return `${y}-${m}`;} return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
+function _dhDayKey(d){ if(typeof d==='string') return d.split('-')[2]; return String(d.getDate()).padStart(2,'0'); }
+function _dhDateStr(d){ if(typeof d==='string')return d; return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function _dhSubDocRef(memberId, monthKey){
+  try{
+    if(!_firebaseReady||!db||!DATA_DOC||!DATA_DOC.path) return null;
+    const segs = DATA_DOC.path.split('/');
+    return doc(db, ...segs, 'dh_'+memberId, monthKey);
+  }catch(_e){ return null; }
+}
+function _dhEnsureMonth(memberId, monthKey){
+  if(!_dhCache[memberId]) _dhCache[memberId]={};
+  if(!_dhCache[memberId][monthKey]) _dhCache[memberId][monthKey]={days:{},_loaded:false};
+  return _dhCache[memberId][monthKey];
+}
+// 지금 시점의 "오늘 할 일" 스냅샷을 만든다 (홈탭 그리드와 동일한 필터)
+function _buildTodaySnapshot(){
+  let acts = (S.acts||[]).filter(a=>a.active&&a.showHome&&isAvailableToday(a)&&a.maxDay>0);
+  if(acts.length===0) acts=(S.acts||[]).filter(a=>a.active&&isAvailableToday(a)&&a.maxDay>0).slice(0,6);
+  const snapActs = acts.map(a=>({id:a.id, name:a.name, emoji:a.emoji, maxDay:a.maxDay, pts:a.pts||0}));
+  const done = {};
+  acts.forEach(a=>{ done[a.id] = countDone(a); });
+  return {
+    acts: snapActs,
+    done: done,
+    allDone: isTodayAllDone(),
+    streak: S.streak||0,
+    ts: Date.now()
+  };
+}
+// 오늘 스냅샷을 메모리/Firestore/localStorage 동시 저장
+async function _saveTodaySnapshot(){
+  try{
+    const mid = _dhMemberId();
+    const today = todayStr();
+    const monthKey = _dhMonthKey(today);
+    const dayKey = _dhDayKey(today);
+    const snap = _buildTodaySnapshot();
+    const month = _dhEnsureMonth(mid, monthKey);
+    month.days[dayKey] = snap;
+    // localStorage 미러 (Firestore 실패 대비)
+    try{ localStorage.setItem(_LS_PREFIX+'dh_'+mid+'_'+monthKey, JSON.stringify({days:month.days})); }catch(_le){}
+    // Firestore 저장 — set with merge (문서 없으면 생성)
+    const ref = _dhSubDocRef(mid, monthKey);
+    if(ref){
+      try{
+        await setDoc(ref, {
+          month: monthKey,
+          memberId: mid,
+          updatedAt: Date.now(),
+          days: month.days
+        }, {merge:true});
+      }catch(fe){ console.warn('[dh] Firestore save failed', fe); }
+    }
+  }catch(e){ console.warn('[dh] _saveTodaySnapshot error', e); }
+}
+// 월별 문서 로드 (Firestore → 메모리 캐시)
+async function _loadMonthHistory(monthKey, memberId){
+  const mid = memberId || _dhMemberId();
+  const month = _dhEnsureMonth(mid, monthKey);
+  if(month._loaded) return month;
+  // localStorage 우선 (오프라인/즉시 반영)
+  try{
+    const lsRaw = localStorage.getItem(_LS_PREFIX+'dh_'+mid+'_'+monthKey);
+    if(lsRaw){ const parsed=JSON.parse(lsRaw); if(parsed&&parsed.days) Object.assign(month.days, parsed.days); }
+  }catch(_le){}
+  const ref = _dhSubDocRef(mid, monthKey);
+  if(ref){
+    try{
+      const snap = await getDoc(ref);
+      if(snap.exists()){
+        const data = snap.data();
+        if(data && data.days){
+          Object.assign(month.days, data.days);
+        }
+      }
+    }catch(fe){ console.warn('[dh] _loadMonthHistory failed', monthKey, fe); }
+  }
+  month._loaded = true;
+  return month;
+}
+// 과거 날짜 한 건의 스냅샷을 가져온다 (없으면 S.log에서 재구성 — 옵션 A 폴백)
+async function _getDaySnapshot(dateStr){
+  const mid = _dhMemberId();
+  const monthKey = _dhMonthKey(dateStr);
+  const dayKey = _dhDayKey(dateStr);
+  const month = await _loadMonthHistory(monthKey, mid);
+  if(month.days[dayKey] && !month.days[dayKey]._reconstructed) return {snapshot: month.days[dayKey], reconstructed: false};
+  if(month.days[dayKey]) return {snapshot: month.days[dayKey], reconstructed: true};
+  const recon = _reconstructDayFromLog(dateStr);
+  return {snapshot: recon, reconstructed: true};
+}
+// S.log에서 그 날 완료된 항목만 정확히 추출 + 현재 활동 정의로 보강
+function _reconstructDayFromLog(dateStr){
+  const dayStart = new Date(dateStr+'T00:00:00').getTime();
+  const dayEnd = dayStart + 86400000;
+  const dayLogs = (S.log||[]).filter(l=>l.ts>=dayStart && l.ts<dayEnd && l.actId);
+  let acts = (S.acts||[]).filter(a=>a.active&&a.showHome&&a.maxDay>0);
+  if(acts.length===0) acts=(S.acts||[]).filter(a=>a.active&&a.maxDay>0).slice(0,6);
+  const snapActs = acts.map(a=>({id:a.id, name:a.name, emoji:a.emoji, maxDay:a.maxDay, pts:a.pts||0}));
+  const done = {};
+  snapActs.forEach(a=>{ done[a.id] = dayLogs.filter(l=>l.actId===a.id).length; });
+  const knownIds = new Set(snapActs.map(a=>a.id));
+  const extraMap = {};
+  dayLogs.forEach(l=>{
+    if(knownIds.has(l.actId)) return;
+    if(!extraMap[l.actId]) extraMap[l.actId] = {id:l.actId, name:l.name||'(삭제된 활동)', emoji:l.emoji||'📝', maxDay:1, pts:l.pts||0, _deleted:true};
+    extraMap[l.actId].maxDay = Math.max(extraMap[l.actId].maxDay, (done[l.actId]||0)+1);
+    done[l.actId] = (done[l.actId]||0)+1;
+  });
+  Object.values(extraMap).forEach(e=>snapActs.push(e));
+  const allDone = Array.isArray(S.allDoneDays)&&S.allDoneDays.includes(dateStr);
+  return {acts:snapActs, done, allDone, streak:0, ts:dayStart, _reconstructed:true};
+}
+// 앱 시작 시 1회: S.log에서 최근 60일을 훑어 메모리 캐시에 폴백 데이터를 채워둠
+function _backfillRecentFromLog(){
+  if(_dhBackfilled) return;
+  _dhBackfilled = true;
+  try{
+    const mid = _dhMemberId();
+    const today = new Date();
+    for(let i=0;i<60;i++){
+      const d = new Date(today); d.setDate(d.getDate()-i);
+      const ds = _dhDateStr(d);
+      const monthKey = _dhMonthKey(ds);
+      const dayKey = _dhDayKey(ds);
+      const month = _dhEnsureMonth(mid, monthKey);
+      if(month.days[dayKey]) continue;
+      const recon = _reconstructDayFromLog(ds);
+      const total = Object.values(recon.done).reduce((s,n)=>s+n,0);
+      if(total===0 && !recon.allDone) continue;
+      month.days[dayKey] = recon;
+    }
+  }catch(e){ console.warn('[dh] backfill error', e); }
+}
+
+// ── DAY DIARY 알림장 UI ──────────────────────────────────
+let _diaryDate = null;
+let _diaryAnimating = false;
+function openDayDiary(){
+  _diaryDate = todayStr();
+  let ov = document.getElementById('diary-ov');
+  if(ov) ov.remove();
+  ov = document.createElement('div');
+  ov.id = 'diary-ov';
+  ov.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(15,12,40,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;animation:diaryFade .25s ease;padding:16px';
+  ov.innerHTML = ''
+    + '<style>'
+    + "@import url('https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&family=Caveat:wght@500;700&display=swap');"
+    + '@keyframes diaryFade{from{opacity:0}to{opacity:1}}'
+    + '@keyframes diaryFlipDown{0%{opacity:0;transform:translateY(-30px) rotateX(35deg);transform-origin:top}100%{opacity:1;transform:translateY(0) rotateX(0)}}'
+    + '@keyframes diaryFlipUp{0%{opacity:0;transform:translateY(30px) rotateX(-35deg);transform-origin:bottom}100%{opacity:1;transform:translateY(0) rotateX(0)}}'
+    + '.diary-paper{font-family:"Nanum Pen Script","Caveat",cursive;background:repeating-linear-gradient(to bottom,#FFFDF7 0,#FFFDF7 31px,#E8DFC8 32px),#FFFDF7;background-size:100% 32px;border-radius:6px 6px 18px 18px;box-shadow:0 22px 60px rgba(0,0,0,.45),inset 0 0 0 1px rgba(180,150,80,.2);position:relative;width:min(360px,92vw);height:min(640px,82vh);max-height:82vh;overflow:hidden;perspective:900px}'
+    + '.diary-spiral{position:absolute;top:0;left:0;right:0;height:34px;background:linear-gradient(180deg,#3B2A1A,#5C4128 60%,#3B2A1A);display:flex;align-items:center;justify-content:space-around;padding:0 14px;box-shadow:0 3px 8px rgba(0,0,0,.35);z-index:5;border-radius:6px 6px 0 0}'
+    + '.diary-ring{width:14px;height:18px;border-radius:50%;background:radial-gradient(ellipse at 30% 30%,#E5E7EB 0%,#9CA3AF 50%,#4B5563 100%);box-shadow:inset 0 -2px 3px rgba(0,0,0,.4),0 1px 2px rgba(0,0,0,.3)}'
+    + '.diary-page{position:absolute;top:34px;left:0;right:0;bottom:0;padding:18px 18px 70px;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}'
+    + '.diary-page::-webkit-scrollbar{display:none}'
+    + '.diary-date{font-family:"Nanum Pen Script",cursive;font-size:34px;color:#1F2937;text-align:center;line-height:1;padding:8px 0 4px;cursor:pointer;letter-spacing:1px;transform:rotate(-1.5deg);text-shadow:1px 1px 0 rgba(0,0,0,.04)}'
+    + '.diary-date:hover{color:#7C3AED}'
+    + '.diary-weekday{font-family:"Nanum Pen Script",cursive;font-size:18px;color:#6B7280;text-align:center;margin-bottom:8px;transform:rotate(.8deg)}'
+    + '.diary-summary{font-family:"Nanum Pen Script",cursive;font-size:20px;color:#92400E;text-align:center;margin-bottom:14px;transform:rotate(-.6deg)}'
+    + '.diary-warn{font-family:"Nanum Pen Script",cursive;font-size:14px;color:#9CA3AF;text-align:center;margin-bottom:8px}'
+    + '.diary-act{display:flex;align-items:center;gap:10px;padding:8px 6px;border-bottom:1px dashed rgba(150,100,40,.25)}'
+    + '.diary-act-emoji{font-size:24px;width:32px;text-align:center;flex-shrink:0}'
+    + '.diary-act-name{flex:1;font-family:"Nanum Pen Script",cursive;font-size:22px;color:#1F2937;line-height:1.1;letter-spacing:.3px}'
+    + '.diary-act-stamps{display:flex;gap:3px;flex-shrink:0}'
+    + '.diary-stamp{width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;font-family:"Nanum Pen Script",cursive;border:2px solid;flex-shrink:0}'
+    + '.diary-stamp.done{background:#FEE2E2;border-color:#DC2626;color:#991B1B;transform:rotate(-8deg)}'
+    + '.diary-stamp.empty{background:transparent;border-color:#D1D5DB;color:#D1D5DB}'
+    + '.diary-empty{font-family:"Nanum Pen Script",cursive;font-size:20px;color:#9CA3AF;text-align:center;padding:30px 0}'
+    + '.diary-corner{position:absolute;width:60px;height:60px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:"Nanum Pen Script",cursive;font-size:18px;color:#9CA3AF;z-index:6;transition:color .15s,transform .15s}'
+    + '.diary-corner:hover{color:#7C3AED;transform:scale(1.1)}'
+    + '.diary-corner.tr{top:34px;right:0;border-radius:0 6px 0 60px;background:linear-gradient(225deg,rgba(217,142,9,.18) 0%,transparent 60%)}'
+    + '.diary-corner.br{bottom:0;right:0;border-radius:60px 0 18px 0;background:linear-gradient(315deg,rgba(217,142,9,.18) 0%,transparent 60%)}'
+    + '.diary-close{position:absolute;top:6px;right:8px;width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,.18);border:none;color:#fff;font-size:14px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:7}'
+    + '.diary-nav-hint{position:absolute;left:50%;transform:translateX(-50%);font-family:"Nanum Pen Script",cursive;font-size:11px;color:#9CA3AF;pointer-events:none;z-index:6}'
+    + '.diary-nav-hint.up{top:40px}'
+    + '.diary-nav-hint.down{bottom:6px}'
+    + '.diary-cal{position:absolute;inset:0;background:rgba(15,12,40,.85);display:flex;align-items:center;justify-content:center;z-index:8;animation:diaryFade .2s}'
+    + '.diary-cal-card{background:#FFFDF7;border-radius:14px;padding:18px 16px;width:min(320px,90%);box-shadow:0 12px 40px rgba(0,0,0,.5);font-family:"Nanum Pen Script",cursive}'
+    + '.diary-cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}'
+    + '.diary-cal-title{font-size:24px;color:#1F2937}'
+    + '.diary-cal-nav{background:none;border:none;font-size:22px;color:#7C3AED;cursor:pointer;padding:4px 10px;font-family:"Nanum Pen Script",cursive}'
+    + '.diary-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}'
+    + '.diary-cal-dow{font-size:13px;color:#9CA3AF;text-align:center;padding:4px 0}'
+    + '.diary-cal-cell{aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:16px;color:#374151;cursor:pointer;border:1.5px solid transparent;position:relative;background:transparent}'
+    + '.diary-cal-cell.today{border-color:#F59E0B}'
+    + '.diary-cal-cell.has{background:#FEF3C7}'
+    + '.diary-cal-cell.alldone{background:#FED7AA;border-color:#EA580C}'
+    + '.diary-cal-cell.future{color:#D1D5DB;cursor:not-allowed}'
+    + '.diary-cal-cell .cnt{font-size:10px;color:#92400E;line-height:1}'
+    + '</style>'
+    + '<div class="diary-paper" id="diary-paper">'
+    + '<div class="diary-spiral">'
+    + Array.from({length:11}).map(function(){return '<span class="diary-ring"></span>';}).join('')
+    + '</div>'
+    + '<button class="diary-close" onclick="closeDayDiary()">✕</button>'
+    + '<div class="diary-nav-hint up">▲ 위로 넘기면 다음 날</div>'
+    + '<div class="diary-page" id="diary-page"></div>'
+    + '<div class="diary-nav-hint down">아래로 넘기면 이전 날 ▼</div>'
+    + '<div class="diary-corner tr" onclick="diaryNav(1)" title="다음 날">▲</div>'
+    + '<div class="diary-corner br" onclick="diaryNav(-1)" title="이전 날">▼</div>'
+    + '</div>';
+  document.body.appendChild(ov);
+  ov.addEventListener('click',function(e){ if(e.target===ov) closeDayDiary(); });
+  var touchStartY=null;
+  var paper = ov.querySelector('#diary-paper');
+  paper.addEventListener('touchstart',function(e){ touchStartY=e.touches[0].clientY; },{passive:true});
+  paper.addEventListener('touchend',function(e){
+    if(touchStartY===null)return;
+    var dy = e.changedTouches[0].clientY - touchStartY;
+    if(Math.abs(dy)>60){ diaryNav(dy<0 ? 1 : -1); }
+    touchStartY=null;
+  });
+  _renderDiaryPage();
+}
+window.openDayDiary = openDayDiary;
+function closeDayDiary(){ var ov=document.getElementById('diary-ov'); if(ov) ov.remove(); }
+window.closeDayDiary = closeDayDiary;
+function diaryNav(delta){
+  if(_diaryAnimating)return;
+  var cur = new Date(_diaryDate+'T00:00:00');
+  cur.setDate(cur.getDate()+delta);
+  var today = new Date(); today.setHours(0,0,0,0);
+  if(cur.getTime() > today.getTime()){ toast('미래 페이지는 아직 비어있어요'); return; }
+  _diaryDate = _dhDateStr(cur);
+  _diaryAnimating = true;
+  var page = document.getElementById('diary-page');
+  if(page){ page.style.animation = (delta>0?'diaryFlipDown':'diaryFlipUp')+' .35s ease'; setTimeout(function(){page.style.animation='';},360); }
+  setTimeout(function(){ _renderDiaryPage(); _diaryAnimating=false; }, 50);
+}
+window.diaryNav = diaryNav;
+async function _renderDiaryPage(){
+  var page = document.getElementById('diary-page');
+  if(!page)return;
+  page.innerHTML = '<div class="diary-empty">📖 페이지를 펴는 중...</div>';
+  var res = await _getDaySnapshot(_diaryDate);
+  var snapshot = res.snapshot, reconstructed = res.reconstructed;
+  var d = new Date(_diaryDate+'T00:00:00');
+  var wd = ['일','월','화','수','목','금','토'][d.getDay()];
+  var dateLabel = (d.getMonth()+1)+'월 '+d.getDate()+'일';
+  var isToday = _diaryDate===todayStr();
+  var acts = snapshot.acts||[];
+  var done = snapshot.done||{};
+  var totalMax = acts.reduce(function(s,a){return s+(a.maxDay||0);},0);
+  var totalDone = acts.reduce(function(s,a){return s+Math.min(a.maxDay||0, done[a.id]||0);},0);
+  var summary = totalMax>0
+    ? (snapshot.allDone ? '🎉 '+totalDone+'/'+totalMax+' — 모두 완료!' : totalDone+'/'+totalMax+' 도장')
+    : '기록이 없어요';
+  var actsHTML = acts.length===0
+    ? '<div class="diary-empty">이 날은 활동 기록이 없어요</div>'
+    : acts.map(function(a){
+        var dn = Math.min(a.maxDay||0, done[a.id]||0);
+        var stamps = Array.from({length:Math.max(1,a.maxDay||1)}).map(function(_x,i){
+          return '<span class="diary-stamp '+(i<dn?'done':'empty')+'">'+(i<dn?'✓':'')+'</span>';
+        }).join('');
+        var nm = a._deleted ? '<s>'+a.name+'</s>' : a.name;
+        return '<div class="diary-act"><span class="diary-act-emoji">'+(a.emoji||'📝')+'</span><span class="diary-act-name">'+nm+'</span><span class="diary-act-stamps">'+stamps+'</span></div>';
+      }).join('');
+  page.innerHTML = ''
+    + '<div class="diary-date" onclick="openDiaryCalendar()" title="달력 열기">'+dateLabel+'</div>'
+    + '<div class="diary-weekday">'+wd+'요일'+(isToday?' · 오늘':'')+'</div>'
+    + '<div class="diary-summary">'+summary+'</div>'
+    + (reconstructed?'<div class="diary-warn">※ 옛 기록은 활동 구성이 달랐을 수 있어요</div>':'')
+    + actsHTML;
+}
+let _diaryCalMonth = null;
+async function openDiaryCalendar(){
+  var ov = document.getElementById('diary-ov');
+  if(!ov)return;
+  var cal = ov.querySelector('.diary-cal');
+  if(cal) cal.remove();
+  _diaryCalMonth = _diaryDate.substring(0,7);
+  cal = document.createElement('div');
+  cal.className = 'diary-cal';
+  cal.addEventListener('click',function(e){ if(e.target===cal) cal.remove(); });
+  ov.querySelector('.diary-paper').appendChild(cal);
+  await _renderDiaryCalendar(cal);
+}
+window.openDiaryCalendar = openDiaryCalendar;
+async function _renderDiaryCalendar(cal){
+  var parts = _diaryCalMonth.split('-').map(Number);
+  var y = parts[0], m = parts[1];
+  await _loadMonthHistory(_diaryCalMonth);
+  var month = _dhEnsureMonth(_dhMemberId(), _diaryCalMonth);
+  var first = new Date(y, m-1, 1);
+  var last = new Date(y, m, 0);
+  var startDow = first.getDay();
+  var days = last.getDate();
+  var today = new Date(); today.setHours(0,0,0,0);
+  var todayMs = today.getTime();
+  var cells = '';
+  for(var i=0;i<startDow;i++) cells += '<div></div>';
+  for(var d2=1;d2<=days;d2++){
+    var dk = String(d2).padStart(2,'0');
+    var ds = y+'-'+String(m).padStart(2,'0')+'-'+dk;
+    var dayMs = new Date(y,m-1,d2).getTime();
+    var isToday = ds===todayStr();
+    var isFuture = dayMs > todayMs;
+    var snap = month.days[dk];
+    if(!snap && !isFuture){
+      var recon = _reconstructDayFromLog(ds);
+      var total = Object.values(recon.done).reduce(function(s,n){return s+n;},0);
+      if(total>0||recon.allDone) snap = recon;
+    }
+    var cls = 'diary-cal-cell';
+    var cnt = '';
+    if(isFuture){ cls += ' future'; }
+    else if(snap){
+      var td = (snap.acts||[]).reduce(function(s,a){return s+Math.min(a.maxDay||0,(snap.done||{})[a.id]||0);},0);
+      if(snap.allDone){ cls += ' alldone'; cnt = '<span class="cnt">all</span>'; }
+      else if(td>0){ cls += ' has'; cnt = '<span class="cnt">'+td+'</span>'; }
+    }
+    if(isToday) cls += ' today';
+    cells += '<div class="'+cls+'" '+(isFuture?'':'onclick="diaryJumpDate(\''+ds+'\')"')+'>'+d2+cnt+'</div>';
+  }
+  cal.innerHTML = ''
+    + '<div class="diary-cal-card">'
+    + '<div class="diary-cal-head">'
+    + '<button class="diary-cal-nav" onclick="diaryCalMonth(-1)">◀</button>'
+    + '<div class="diary-cal-title">'+y+'년 '+m+'월</div>'
+    + '<button class="diary-cal-nav" onclick="diaryCalMonth(1)">▶</button>'
+    + '</div>'
+    + '<div class="diary-cal-grid">'
+    + ['일','월','화','수','목','금','토'].map(function(w){return '<div class="diary-cal-dow">'+w+'</div>';}).join('')
+    + cells
+    + '</div>'
+    + '</div>';
+  cal.querySelector('.diary-cal-card').addEventListener('click',function(e){e.stopPropagation();});
+}
+async function diaryCalMonth(delta){
+  var parts = _diaryCalMonth.split('-').map(Number);
+  var y = parts[0], m = parts[1];
+  var d = new Date(y, m-1+delta, 1);
+  _diaryCalMonth = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+  var cal = document.querySelector('.diary-cal');
+  if(cal) await _renderDiaryCalendar(cal);
+}
+window.diaryCalMonth = diaryCalMonth;
+async function diaryJumpDate(ds){
+  _diaryDate = ds;
+  var cal = document.querySelector('.diary-cal');
+  if(cal) cal.remove();
+  _renderDiaryPage();
+}
+window.diaryJumpDate = diaryJumpDate;
+
 // ── STICKER & BUBBLE MESSAGE SYSTEM ──────────────────────
+
 const STICKER_EMOJIS=['❤️','👍','👎','😂','‼️','❓','😆','💔','🔥','⭐','💪','🎉','👏','😍','😢','😡','💩','👀','🙏','💯','🌈','🍀','✨','🫶','💕','😎','🤔','😴','🤗','😱'];
 
 function cleanExpiredStickers(){
@@ -14799,6 +15161,7 @@ function switchViewingChild(childId){
   // 해당 자녀의 memberData 초기화 (없으면)
   if(!S.memberData[childId])getMemberState(childId);
   syncMemberToGlobal(childId);
+  _dhBackfilled=false;
   applyChildTheme(childId);
 
   // compact 상태 초기화 + 스크롤 리셋 (자녀 전환 시 깨짐 방지)
@@ -17094,6 +17457,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.81 (v0407zc)',date:'2026-04-07',items:[{type:'new',text:'홈탭 오늘 할 일 옆에 이력보기 버튼 추가 — 알림장(수첩) 모양 팝업으로 과거 날짜의 오늘 할 일 도장 현황을 일기처럼 열람. 손글씨 폰트 헤더, 상하 페이지 넘김(스와이프/모서리 탭), 손글씨 날짜 클릭 시 달력 점프 지원'},{type:'new',text:'활동 이력 일기(dayHistory) 저장 시작 — 활동 완료/취소 시점마다 그 날의 활동 정의 + 도장 현황을 멤버별 월별 Firestore 서브컬렉션(<DATA_DOC>/dh_{memberId}/{YYYY-MM})에 영구 저장. localStorage 미러 + append-only 보호. 과거 60일은 S.log에서 best-effort 재구성으로 폴백 표시'}]},
   {ver:'1.9.80 (v0407zb)',date:'2026-04-07',items:[{type:'fix',text:'오늘의 보너스 룰렛 결과의 마일리지 점수가 보이지 않던 문제 수정 — 결과 영역 세로 배치/줄바꿈 방지'},{type:'feat',text:'룰렛 보너스 획득 이력을 홈탭 최근 활동에 표시'}]},
   {ver:'1.9.79 (v0407za)',date:'2026-04-07',items:[{type:'fix',text:'활동 취소 시 "오늘 할 일 모두 완료 X일" 챌린지(allDoneDays) 진행도가 줄어들지 않던 문제 — S.allDoneDays 트래커에서 오늘 항목 제거'}]},
   {ver:'1.9.78 (v0407z9)',date:'2026-04-07',items:[{type:'fix',text:'근본 원인 수정 — isTodayAllDone()이 홈탭 "오늘 할 일" 그리드와 동일한 필터(showHome)를 사용하도록 변경. 그동안 숨겨진 활동이 남아있어 streak/연속 챌린지 게이지가 갱신되지 않던 문제 해결.'}]},
