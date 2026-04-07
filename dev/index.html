@@ -9158,7 +9158,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0407zc';
+const _APP_VERSION = 'v0407zd';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -9787,6 +9787,9 @@ function save(){
       _hasDirtyLocal = false; // 저장 완료
       _lastSaveTime = Date.now(); // cooldown start
       localStorage.setItem(_LS_PREFIX+'v6_backup', sanitizeForBackup(S));
+      // 모든 상태 변경(추가/삭제/수정/완료/취소/토글)에서 일기 스냅샷도 동시 갱신
+      // — 단일 진입점이라 미래 mutation도 자동 커버 (append-only로 과거는 보호)
+      try{ if(typeof _saveTodaySnapshot==='function') _saveTodaySnapshot(); }catch(_dhe){}
       // Cloud Functions가 아직 users/taemin만 감시하므로, families에 마이그레이션된 경우
       // push 트리거 필드(pushBroadcast, rewardNotify, moodNotify, pushDevices)를 LEGACY_DOC에도 동기화
       _syncPushToLegacy();
@@ -14214,9 +14217,7 @@ function _doActCore(id){
   // Update challenge progress
   updateChallengeProgress();
 
-  save();
-  // 일기(알림장) 스냅샷 저장
-  try{ _saveTodaySnapshot(); }catch(_dhe){}
+  save(); // save() 내부에서 _saveTodaySnapshot도 자동 호출
   const _curTab=getCurrentTab();
   const _actCard=_curTab==='home'?document.querySelector(`.act-card[data-actid="${id}"]`):null;
   const _logItem=_curTab==='log'?document.querySelector(`.log-item[data-actid="${id}"]`):null;
@@ -14351,9 +14352,7 @@ function _undoActCore(actId){
   // 역방향 별 애니메이션: 마일리지 → 활동 카드 방향
   const _actCard = document.querySelector(`.act-card[data-actid="${actId}"]`);
   if(_actCard) flyCoinsFromMileage(_actCard, entry.pts);
-  save();renderAll();
-  // 일기(알림장) 스냅샷 갱신
-  try{ _saveTodaySnapshot(); }catch(_dhe){}
+  save();renderAll(); // save() 내부에서 _saveTodaySnapshot도 자동 호출
   toast(`↩ ${a.name} 취소됨 (-${entry.pts} 마일리지)`);
   if(_chRolledBack.length){
     setTimeout(()=>{
@@ -17457,6 +17456,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.82 (v0407zd)',date:'2026-04-07',items:[{type:'fix',text:'알림장 일기 스냅샷을 save() 단일 진입점에 후킹 — 활동 추가/삭제/수정/토글 등 모든 상태 변경에서 자동 갱신 (append-only로 과거 일기는 보호)'}]},
   {ver:'1.9.81 (v0407zc)',date:'2026-04-07',items:[{type:'new',text:'홈탭 오늘 할 일 옆에 이력보기 버튼 추가 — 알림장(수첩) 모양 팝업으로 과거 날짜의 오늘 할 일 도장 현황을 일기처럼 열람. 손글씨 폰트 헤더, 상하 페이지 넘김(스와이프/모서리 탭), 손글씨 날짜 클릭 시 달력 점프 지원'},{type:'new',text:'활동 이력 일기(dayHistory) 저장 시작 — 활동 완료/취소 시점마다 그 날의 활동 정의 + 도장 현황을 멤버별 월별 Firestore 서브컬렉션(<DATA_DOC>/dh_{memberId}/{YYYY-MM})에 영구 저장. localStorage 미러 + append-only 보호. 과거 60일은 S.log에서 best-effort 재구성으로 폴백 표시'}]},
   {ver:'1.9.80 (v0407zb)',date:'2026-04-07',items:[{type:'fix',text:'오늘의 보너스 룰렛 결과의 마일리지 점수가 보이지 않던 문제 수정 — 결과 영역 세로 배치/줄바꿈 방지'},{type:'feat',text:'룰렛 보너스 획득 이력을 홈탭 최근 활동에 표시'}]},
   {ver:'1.9.79 (v0407za)',date:'2026-04-07',items:[{type:'fix',text:'활동 취소 시 "오늘 할 일 모두 완료 X일" 챌린지(allDoneDays) 진행도가 줄어들지 않던 문제 — S.allDoneDays 트래커에서 오늘 항목 제거'}]},
