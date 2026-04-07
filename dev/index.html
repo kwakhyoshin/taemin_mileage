@@ -504,7 +504,7 @@ body.dark .theme-pick.active .theme-pick-radio{border-color:#818CF8;background:#
 .hero.compact .hero-unit{font-size:14px;display:inline!important;opacity:1!important;visibility:visible!important}
 .hero.compact .hero-goal{max-height:0;margin-top:0;opacity:0}
 .hero.compact .streak-pill{padding:4px 10px;font-size:12px}
-.hero.compact .level-pill{padding:3px 8px;font-size:11px;margin-bottom:4px}
+.hero.compact .level-pill{font-size:14px}
 .hero.compact .prog-track{margin-top:10px}
 .hero.compact .mily-greeting-hero{display:none!important}
 .hero.compact .prog-row{margin-top:3px;font-size:13px}
@@ -3643,7 +3643,7 @@ requestAnimationFrame(function(){
     <div id="child-selector"></div>
     <div class="hero-pts-wrap" style="display:flex;align-items:flex-end;gap:8px;margin:4px 0">
       <span class="hero-pts" id="hero-pts">0</span><span class="hero-unit">M</span>
-      <div class="level-pill" id="level-pill" style="background:rgba(255,255,255,.2);border-radius:14px;padding:4px 10px;font-size:12px;font-weight:800;transition:all .25s;cursor:pointer;-webkit-tap-highlight-color:transparent;display:inline-flex;align-items:center;margin-left:2px;margin-bottom:8px;white-space:nowrap" onclick="openLevelPopup()">🌱 Lv.1</div>
+      <div class="level-pill" id="level-pill" style="font-size:18px;font-weight:700;opacity:.85;transition:all .25s;cursor:pointer;-webkit-tap-highlight-color:transparent;display:inline-flex;align-items:center;margin-left:4px;white-space:nowrap;line-height:1" onclick="openLevelPopup()">🌱 Lv.1</div>
       <div class="streak-pill" id="streak-pill" style="background:rgba(255,255,255,.2);border-radius:20px;padding:5px 12px;font-size:13px;font-weight:800;transition:all .25s;cursor:pointer;-webkit-tap-highlight-color:transparent;margin-left:auto;margin-bottom:6px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 01-7 7 7 7 0 01-7-7c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg> 0일 연속</div>
     </div>
     <div class="hero-goal" id="hero-goal"></div>
@@ -3663,7 +3663,7 @@ requestAnimationFrame(function(){
   </div>
   <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> 오늘 할 일</div>
   <div class="act-grid" id="home-grid"></div>
-  <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2z"/></svg> 진행중인 챌린지</div>
+  <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9H4.5a2.5 2.5 0 010-5H6"/><path d="M18 9h1.5a2.5 2.5 0 000-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0012 0V2z"/></svg> 진행중인 챌린지</div>
   <div id="challenge-cards" style="margin:0 16px 14px"></div>
   <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> 최근 활동</div>
   <div class="rec-list" id="rec-list"></div>
@@ -9030,7 +9030,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0407e';
+const _APP_VERSION = 'v0407f';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -12318,12 +12318,10 @@ function renderChallengeCards(){
   updateChallengeProgress();
   const chs=(S.challenges||[]).filter(c=>new Date(c.endDate)>=new Date());
   if(!chs.length){el.innerHTML='';return;}
-  // 컴팩트 섹션 라벨
-  let _chHdr='<div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;padding:0 2px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--tx3)" stroke-width="2.5" stroke-linecap="round" style="opacity:.7"><path d="M6 9H4.5a2.5 2.5 0 010-5H6"/><path d="M18 9h1.5a2.5 2.5 0 000-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0012 0V2z"/></svg><span style="font-size:12px;font-weight:800;color:var(--tx3);letter-spacing:.3px">진행 중인 챌린지</span></div>';
   // 수령 완료(claimed)된 챌린지는 숨기고, 미완료+미수령만 표시
   const visibleChs=chs.filter(c=>!c.claimed);
   if(!visibleChs.length){el.innerHTML='';return;}
-  el.innerHTML=_chHdr+visibleChs.map(c=>{
+  el.innerHTML=visibleChs.map(c=>{
     const pct=Math.round(c.progress/c.target*100);
     const isComplete=c.completed;
     const isClaimed=c.claimed;
@@ -16557,6 +16555,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.50 (v0407f)',date:'2026-04-07',items:[{type:'fix',text:'진행중인 챌린지 중복 제목 제거, 트로피 아이콘으로 통일'},{type:'fix',text:'레벨 정보 박스 제거, M 글씨와 높이 정렬'}]},
   {ver:'1.9.49 (v0407e)',date:'2026-04-07',items:[{type:'fix',text:'streak-pill을 hero-pts-wrap 안으로 inline 배치 — Lv pill과 항상 같은 라인에 자동 정렬 (펼침/접힘 모두)'}]},
   {ver:'1.9.48 (v0407d)',date:'2026-04-07',items:[{type:'fix',text:'streak-pill 픽셀 위치 정밀 조정 — 펼침 시 Lv pill 라인, compact 시 hero-lbl 라인'}]},
   {ver:'1.9.47 (v0407c)',date:'2026-04-07',items:[{type:'fix',text:'홈탭 hero 레이아웃 재정렬 — 자녀 전환은 "OO의 마일리지" 라인, 0일 연속은 Lv 박스 라인'},{type:'fix',text:'compact 시 자녀 전환 숨기고 0일 연속만 hero-lbl 라인에 표시 (운영기와 동일)'}]},
