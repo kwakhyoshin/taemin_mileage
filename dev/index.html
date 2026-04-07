@@ -9156,7 +9156,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0407z2';
+const _APP_VERSION = 'v0407z3';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -16980,6 +16980,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.72 (v0407z3)',date:'2026-04-07',items:[{type:'feat',text:'밀리 FAB 드래그 인터랙션 강화 — 드래그 시 캐릭터 1.5배 확대, 아우라 발광 강화, 랜덤 포즈(wave/happy/excited/love/think/success/surprise) 표시'}]},
   {ver:'1.9.71 (v0407z2)',date:'2026-04-07',items:[{type:'fix',text:'마일리지 게이지 레이저 흐름 속도 일정화 — background-position tile 방식에서 transform-free left 애니메이션으로 변경 (1.8s 주기 단일 패스)'}]},
   {ver:'1.9.70 (v0407z)',date:'2026-04-07',items:[{type:'new',text:'홈탭 진행중인 챌린지 아이콘 — 주간(보라 캘린더+황금별)/월간(핑크 트로피+빛나는별) 전용 SVG로 교체'}]},
   {ver:'1.9.69 (v0407y)',date:'2026-04-07',items:[{type:'fix',text:'홈탭 레벨 pill과 가족 목록 레벨 불일치 수정 — getViewedLevelData() 헬퍼로 단일 소스(memberData) 우선 조회'}]},
@@ -22216,7 +22217,7 @@ window._createState = _createState;
 /* ── mily chatbot FAB ── */
 .mily-fab{position:fixed;bottom:140px;right:20px;width:72px;height:72px;border-radius:50%;background:transparent;border:none;cursor:pointer;z-index:950;display:none;align-items:center;justify-content:center;transition:opacity .25s;-webkit-tap-highlight-color:transparent;opacity:0;filter:drop-shadow(0 3px 8px rgba(99,102,241,.35));touch-action:none;user-select:none;-webkit-user-select:none}
 .mily-fab.visible{display:flex;opacity:1}
-.mily-fab.dragging{transition:none !important;transform:scale(1.08) !important;filter:drop-shadow(0 6px 16px rgba(99,102,241,.5))}
+.mily-fab.dragging{transition:none !important;transform:scale(1.5) !important;filter:drop-shadow(0 0 18px rgba(167,139,250,.95)) drop-shadow(0 6px 22px rgba(99,102,241,.85)) brightness(1.15)}
 .mily-fab svg{width:72px;height:72px;pointer-events:none}
 .mily-fab-badge{position:absolute;top:2px;right:2px;width:14px;height:14px;background:#EF4444;border-radius:50%;border:2px solid #fff;display:none}
 .nav-container.docked~.mily-fab{bottom:110px}
@@ -22585,6 +22586,18 @@ function _initMilyFabChar(){
     const p=getPos(e);
     const dx=p.x-startX, dy=p.y-startY;
     if(!hasMoved && Math.abs(dx)<DRAG_THRESHOLD && Math.abs(dy)<DRAG_THRESHOLD) return;
+    if(!hasMoved){
+      // 드래그 시작 — 랜덤 포즈로 변경
+      try{
+        const charEl=document.getElementById('mily-fab-char');
+        if(charEl){
+          const moods=Object.keys(_MILY_MOODS).filter(k=>k!=='sad'&&k!=='sleepy');
+          const pick=moods[Math.floor(Math.random()*moods.length)];
+          charEl.dataset.prevPose=charEl.dataset.prevPose||charEl.innerHTML;
+          charEl.innerHTML=_milySVG(_MILY_MOODS[pick]);
+        }
+      }catch(_e){}
+    }
     hasMoved=true;
     e.preventDefault();
     fab.classList.add('dragging');
@@ -22604,6 +22617,14 @@ function _initMilyFabChar(){
     if(!isDragging)return;
     isDragging=false;
     fab.classList.remove('dragging');
+    // 포즈 복원
+    try{
+      const charEl=document.getElementById('mily-fab-char');
+      if(charEl && charEl.dataset.prevPose){
+        charEl.innerHTML=charEl.dataset.prevPose;
+        delete charEl.dataset.prevPose;
+      }
+    }catch(_e){}
     if(hasMoved){
       // 위치 저장
       const r=parseInt(fab.style.right)||20;
@@ -22621,7 +22642,7 @@ function _initMilyFabChar(){
   fab.addEventListener('touchstart', onStart, {passive:true});
   fab.addEventListener('touchmove', onMove, {passive:false});
   fab.addEventListener('touchend', onEnd);
-  fab.addEventListener('touchcancel', ()=>{isDragging=false;fab.classList.remove('dragging');});
+  fab.addEventListener('touchcancel', ()=>{isDragging=false;fab.classList.remove('dragging');try{const c=document.getElementById('mily-fab-char');if(c&&c.dataset.prevPose){c.innerHTML=c.dataset.prevPose;delete c.dataset.prevPose;}}catch(_e){}});
   // 마우스 이벤트 (데스크톱 테스트용)
   fab.addEventListener('mousedown', onStart);
   document.addEventListener('mousemove', onMove);
