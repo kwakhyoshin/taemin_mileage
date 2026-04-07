@@ -1457,6 +1457,8 @@ body.dark .adm-child-btn.on{background:rgba(255,107,53,.15)}
 .mf-mood-particles{position:absolute;top:50%;left:50%;width:0;height:0;pointer-events:none;z-index:3;overflow:visible}
 .my-family-name{font-size:12px;font-weight:800;color:var(--tx);white-space:nowrap}
 .my-family-role{font-size:10px;font-weight:600;color:var(--tx3);white-space:nowrap}
+.my-family-lv{margin-top:2px;font-size:9.5px;font-weight:900;color:#5D4037;background:linear-gradient(135deg,#FFD600,#FFA000);padding:1px 6px;border-radius:8px;line-height:1.2;white-space:nowrap;box-shadow:0 1px 2px rgba(245,158,11,.25)}
+body.dark .my-family-lv{color:#3E2723}
 
 /* ── Family Popup (Toss-style genealogy) ── */
 .family-popup-bg{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.45);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);animation:fadeIn .15s}
@@ -9119,7 +9121,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0407j';
+const _APP_VERSION = 'v0407k';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -9534,6 +9536,43 @@ function getMemberState(memberId) {
   return S.memberData[memberId];
 }
 // 자녀 초기화 시 상속할 활동/보상 목록 결정
+// 레벨 XP 백필: memberData의 log로부터 누적 활동 마일리지를 합산해 levelData.xp에 채운다.
+// _migrated:true 플래그가 있거나 xp===0인데 log가 비어있지 않으면 재계산.
+function _backfillLevelData(force){
+  try{
+    if(!S.memberData)return;
+    let changed=false;
+    for(const [mid,ms] of Object.entries(S.memberData)){
+      if(!ms)continue;
+      if(!ms.levelData)ms.levelData={xp:0,level:1,xpLog:[]};
+      const ld=ms.levelData;
+      const needs = force || ld._migrated || (!ld.xp && (ms.log||[]).length>0);
+      if(!needs)continue;
+      // log 엔트리 중 actId가 있고 pts>0인 것만 합산 (보상 차감·생일보너스·룰렛은 제외)
+      let xp=0;
+      for(const entry of (ms.log||[])){
+        if(entry && entry.actId && typeof entry.pts==='number' && entry.pts>0) xp+=entry.pts;
+      }
+      if(xp>0){
+        ld.xp=xp;
+        ld.level=getLevelInfo(xp).level;
+      }
+      delete ld._migrated;
+      changed=true;
+    }
+    // 글로벌 S.levelData도 현재 뷰잉 중인 자녀의 값으로 동기화
+    if(changed){
+      try{
+        const viewMid=(typeof getViewedMemberId==='function')?getViewedMemberId():currentUser;
+        if(viewMid && S.memberData[viewMid] && S.memberData[viewMid].levelData){
+          S.levelData=JSON.parse(JSON.stringify(S.memberData[viewMid].levelData));
+        }
+      }catch(e){}
+      try{save();}catch(e){}
+    }
+  }catch(e){console.warn('[_backfillLevelData]',e);}
+}
+window._backfillLevelData=_backfillLevelData;
 function _getInheritableActs(){
   // 기존 형제의 acts가 있으면 복사
   if(S.memberData){
@@ -10947,6 +10986,7 @@ window.getCurrentGreeting=getCurrentGreeting;
 // ── RENDER ────────────────────────────────────
 function renderAll(){
   if(_actAnimating){_actAnimating='pending';return;}
+  if(!S._lvBackfilled){try{_backfillLevelData();S._lvBackfilled=true;}catch(e){}}
   renderHero();renderHomeGrid();renderChallengeCards();renderRecent();
   renderLogList();renderRewardGrid();renderRewardInventory();renderRewardHistory();
   renderDashboard();renderHistStats();renderHistList();renderCalendar();
@@ -16640,13 +16680,14 @@ function renderMyTab(){
   // 헤더 서브타이틀 업데이트
   const myHeaderSub=document.getElementById('my-header-sub');
   if(myHeaderSub)myHeaderSub.textContent=`${name} · ${roleLabel}`;
-  // 아바타 + 레벨 이펙트 오버레이
+  // 아바타 + 레벨 이펙트 오버레이 (양육자는 레벨 없음)
+  const _isParent=isCaregiverUser();
   const avatarWrap=document.getElementById('my-avatar-wrap');
   if(avatarWrap){
     let _lvFx='';
     try{
       const gs=S.settings?.gamification||{};
-      if(gs.levelEnabled!==false){
+      if(gs.levelEnabled!==false && !_isParent){
         const _ms=getMemberState(currentUser);
         const _ld=(_ms&&_ms.levelData)||S.levelData||{xp:0,level:1};
         const _info=getLevelInfo(_ld.xp||0);
@@ -16661,7 +16702,7 @@ function renderMyTab(){
     const gs=S.settings?.gamification||{};
     const _nameRow=nameEl?.parentElement;
     let _lvBadge=document.getElementById('my-lv-badge');
-    if(gs.levelEnabled!==false && _nameRow){
+    if(gs.levelEnabled!==false && _nameRow && !_isParent){
       const _ms=getMemberState(currentUser);
       const _ld=(_ms&&_ms.levelData)||S.levelData||{xp:0,level:1};
       const _info=getLevelInfo(_ld.xp||0);
@@ -16746,6 +16787,7 @@ function renderMyTab(){
     const ids=Object.keys(fm).filter(mid=>mid!==currentUser); // 나 제외
     if(ids.length>0){
       const _RLABELS2={dad:'아빠',mom:'엄마',grandpa:'할아버지',grandma:'할머니',grandpa_m:'외할아버지',grandma_m:'외할머니',child:'자녀',caregiver:'양육자',parent:'양육자'};
+      const _gsLv=(S.settings?.gamification?.levelEnabled!==false);
       familyRow.innerHTML=ids.map(mid=>{
         const m=fm[mid];
         const mName=m?.name||MEMBERS[mid]?.name||mid;
@@ -16754,6 +16796,16 @@ function renderMyTab(){
         const moodEmoji=getMoodEmoji(mid);
         // 해당 멤버로부터 온 미읽은 메시지 수
         const unreadFromMember=S.familyMessages?S.familyMessages.filter(m=>m.from===mid&&m.to===currentUser&&!m.read).length:0;
+        // 자녀 레벨 배지 (양육자는 제외)
+        const _isChild=(m?.role==='child'||m?.displayRole==='child');
+        let _lvHTML='';
+        if(_gsLv && _isChild){
+          const _msLv=S.memberData?.[mid]?.levelData;
+          if(_msLv){
+            const _infoLv=getLevelInfo(_msLv.xp||0);
+            _lvHTML=`<div class="my-family-lv">${_infoLv.emoji||'⭐'} Lv.${_infoLv.level}</div>`;
+          }
+        }
         return `<div class="my-family-member" onclick="${clickAction}">
           <div class="my-family-avatar" data-mf-id="${mid}">
             ${getAvatarHTML(mid,48)}
@@ -16763,6 +16815,7 @@ function renderMyTab(){
           </div>
           <div class="my-family-name">${mName}</div>
           <div class="my-family-role">${mRole}</div>
+          ${_lvHTML}
         </div>`;
       }).join('');
       // 기분 파티클 애니메이션 시작
@@ -16848,6 +16901,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.55 (v0407k)',date:'2026-04-07',items:[{type:'fix',text:'자녀별 누적 XP 백필 — 레벨 시스템 도입 이전의 활동 기록(log)을 합산해 현재 레벨 자동 재계산'},{type:'fix',text:'양육자(부모) 나의 메뉴에서 본인 계정 레벨 배지/이펙트 숨김'},{type:'new',text:'나의 메뉴 가족 목록: 각 자녀 아이콘 아래에 현재 레벨 배지 표시'}]},
   {ver:'1.9.54 (v0407j)',date:'2026-04-07',items:[{type:'fix',text:'관리자 게이미피케이션 토글이 클릭 시 시각적으로 변하지 않던 버그 수정 (.tog.off 클래스 사용)'},{type:'new',text:'토글을 켰을 때만 상세 설정 펼침 — 일일/주간/월간/레벨 각 영역의 하위 설정이 토글 OFF면 자동 접힘'},{type:'new',text:'챌린지/레벨 설명을 i 버튼 + 안내 팝업으로 정리 — 인라인 long text 제거'},{type:'fix',text:'홈 화면 인사말 설정을 한 카드에 컴팩트하게 정리 — 자녀별 한 줄, 미리보기 인라인'}]},
   {ver:'1.9.53 (v0407i)',date:'2026-04-07',items:[{type:'fix',text:'아이별 레벨 독립 관리 — levelData를 memberData에 저장해 자녀별 분리 (기존 사용자는 자동 마이그레이션)'},{type:'fix',text:'Lv.5 불꽃 이펙트 재설계 — 아이콘 전체를 감싸는 방사형 불꽃으로 변경'},{type:'new',text:'레벨 시스템 확장 — 총 40레벨/10만 마일리지, Lv.21~40 신규 SVG 이펙트 20종 추가'},{type:'new',text:'레벨 팝업에도 레벨 이펙트 표시'}]},
   {ver:'1.9.52 (v0407h)',date:'2026-04-07',items:[{type:'new',text:'관리자 — 주간/월간 챌린지 상세 설명 추가, 레벨별 임계값 직접 편집 가능'},{type:'new',text:'레벨 시스템 — Lv.1~20 각각 고유한 SVG 이펙트 애니메이션 (반짝임/불꽃/오라/궤도 등 20종)'},{type:'new',text:'나의 메뉴 — 프로필 카드에 레벨 배지 + 아바타 주변 레벨 이펙트 표시'},{type:'new',text:'관리자 레벨 편집기 — 각 레벨별 이펙트 미리보기 가능'}]},
