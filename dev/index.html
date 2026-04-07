@@ -9158,7 +9158,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0407z7';
+const _APP_VERSION = 'v0407z8';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -10162,6 +10162,11 @@ function _getViewedStreakCtx(){
   try{
     if(getFamilyMode()==='independent'&&isCaregiverUser()){
       const vid=getViewedMemberId();
+      // S가 이미 보고있는 멤버 데이터를 들고 있으면 S에서 직접 읽기 (실시간 반영)
+      if(vid && _globalDataOwner===vid){
+        return {streak:S.streak||0,lastDate:S.lastDate||null,acts:S.acts||[],actDone:S.actDone||{}};
+      }
+      // 아니면 memberData 스냅샷 사용
       const ms=vid&&S.memberData?S.memberData[vid]:null;
       if(ms){
         return {
@@ -12554,8 +12559,10 @@ function updateChallengeProgress(){
     if(new Date(c.endDate)<now)return;
     const start=new Date(c.startDate);
     let prog=0;
+    // 표시용 streak (오늘 모두 완료 시 즉시 +1 반영)와 S.streak 중 큰 값을 사용
+    const _effStreak = (function(){ try{ return Math.max(S.streak||0, getDisplayStreak()||0); }catch(_e){ return S.streak||0; } })();
     // 챌린지 보상 항목(chId)은 활동 진행도에서 제외
-    if(c.check==='streak'){prog=Math.min(c.target,S.streak||0);}
+    if(c.check==='streak'){prog=Math.min(c.target,_effStreak);}
     else if(c.check==='totalActs'){
       prog=S.log.filter(l=>new Date(l.ts)>=start&&l.pts>0&&!l.chId).length;
     }
@@ -12571,7 +12578,7 @@ function updateChallengeProgress(){
       }
     }
     else if(c.check==='monthlyActs'){prog=S.log.filter(l=>new Date(l.ts)>=start&&l.pts>0&&!l.chId).length;}
-    else if(c.check==='monthlyStreak'){prog=Math.min(c.target,S.streak||0);}
+    else if(c.check==='monthlyStreak'){prog=Math.min(c.target,_effStreak);}
     else if(c.check==='monthlyPts'){
       prog=S.log.filter(l=>new Date(l.ts)>=start&&l.pts>0&&!l.chId).reduce((s,l)=>s+l.pts,0);
     }
@@ -17072,6 +17079,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.77 (v0407z8)',date:'2026-04-07',items:[{type:'fix',text:'0일→1일 연속 표시: 양육자가 자녀를 보고 있을 때 S에 로드된 자녀 데이터를 우선 사용해 즉시 반영'},{type:'fix',text:'주간/월간 연속 챌린지 게이지: 표시용 streak(getDisplayStreak)을 함께 사용해 오늘 모두 완료 시 즉시 +1 반영, 활동 취소 시도 동기화'},{type:'fix',text:'나의 메뉴 PRO/FREE 등급 배지: 챗봇 진입 없이도 표시되도록 _updatePlanBadges를 window에 노출'}]},
   {ver:'1.9.76 (v0407z7)',date:'2026-04-07',items:[{type:'fix',text:'챌린지 수령 후 활동 취소 시 진행도 재계산 누락 수정 — updateChallengeProgress의 early-return 제거'},{type:'fix',text:'양육자가 자녀 홈을 볼 때 0일→1일 연속 표시가 자녀의 streak/할일 상태로 즉시 반영'}]},
   {ver:'1.9.75 (v0407z6)',date:'2026-04-07',items:[{type:'fix',text:'챌린지 수령 후 활동 취소 시 이전 챌린지 진행상황으로 완전 복원 — 해금됐던 다음 레벨 챌린지도 자동 제거'}]},
   {ver:'1.9.74 (v0407z5)',date:'2026-04-07',items:[{type:'fix',text:'다른 탭에서 홈탭으로 복귀 시 마일리지 게이지 레이저/불꽃 애니메이션이 멈추는 현상 수정 — 복귀 시 강제 재시작'},{type:'fix',text:'오늘 할일을 모두 완료한 순간 연속일수가 즉시 반영되도록 수정 (lastDate/streak 동기화 지연 방어)'}]},
@@ -23222,6 +23230,7 @@ function _updatePlanBadges(){
   }
 }
 window._showPlanPopup=_showPlanPopup;
+window._updatePlanBadges=_updatePlanBadges;
 function _showPlanPopup(){
   const isPro=_isPro();
   const S=_getS();
