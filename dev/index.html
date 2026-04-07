@@ -9158,7 +9158,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0407zj';
+const _APP_VERSION = 'v0407zk';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -14575,6 +14575,8 @@ function openDayDiary(){
     + '.diary-cal-cell.alldone{background:#FED7AA;border-color:#EA580C}'
     + '.diary-cal-cell.future{color:#D1D5DB;cursor:not-allowed}'
     + '.diary-cal-cell .cnt{font-size:9px;color:#92400E;line-height:1}'
+    + '@keyframes diaryToastIn{0%{opacity:0;transform:translate(-50%,8px)}15%{opacity:1;transform:translate(-50%,0)}80%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-4px)}}'
+    + '.diary-toast{position:absolute;left:50%;top:70px;transform:translateX(-50%);background:rgba(15,12,40,.92);color:#fff;font-family:inherit;font-size:13px;font-weight:700;padding:9px 16px;border-radius:14px;box-shadow:0 6px 18px rgba(0,0,0,.45);z-index:20;pointer-events:none;animation:diaryToastIn 1.8s ease forwards}'
     + '</style>'
     + '<div class="diary-paper" id="diary-paper">'
     + '<div class="diary-header"><span class="diary-header-title">📓 오늘 할일 이력</span></div>'
@@ -14628,7 +14630,7 @@ function diaryNav(delta){
   var cur = new Date(_diaryDate+'T00:00:00');
   cur.setDate(cur.getDate()+delta);
   var today = new Date(); today.setHours(0,0,0,0);
-  if(cur.getTime() > today.getTime()){ toast('미래 페이지는 아직 비어있어요'); return; }
+  if(cur.getTime() > today.getTime()){ _diaryFlash('미래 페이지는 아직 비어있어요'); return; }
   _diaryDate = _dhDateStr(cur);
   _diaryAnimating = true;
   var stage = document.getElementById('diary-stage');
@@ -14654,6 +14656,13 @@ function diaryNav(delta){
   }, 440);
 }
 window.diaryNav = diaryNav;
+function _diaryFlash(msg){
+  var ov=document.getElementById('diary-ov'); if(!ov)return;
+  var old=ov.querySelector('.diary-toast'); if(old) old.remove();
+  var t=document.createElement('div'); t.className='diary-toast'; t.textContent=msg;
+  ov.appendChild(t);
+  setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); }, 1900);
+}
 async function _renderDiaryPage(){
   var page = document.getElementById('diary-page');
   if(!page)return;
@@ -17530,6 +17539,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.89 (v0407zk)',date:'2026-04-07',items:[{type:'fix',text:'알림장에서 미래 날짜로 넘기려 할 때 토스트가 dim 아래에 가려져 안 보이던 문제 — 오버레이 안에 자체 토스트(z-index 20) 표시'}]},
   {ver:'1.9.88 (v0407zj)',date:'2026-04-07',items:[{type:'fix',text:'홈탭 hero shrink 인터랙션 v0407zh 변경 롤백 (threshold 60 복귀, inline padding 보간 제거) — 제목영역이 이상하게 동작하던 문제 해결'},{type:'fix',text:'알림장 X 닫기 버튼 더 위로(top 9px) + 더 작게(22px) — 고동색 헤더 안에 정확히 들어옴'},{type:'ui',text:'알림장 화살표 ▲▼ 버튼을 수첩 우측 하단 모서리 안으로 이동, 고동색 톤으로 변경'},{type:'fix',text:'알림장 열 때 화면이 위로 밀리고 하단에 흰 영역이 잘리던 문제 — body position:fixed 락 방식 폐기, html/body overflow:hidden + touchmove 차단으로 변경 (레이아웃 시프트 없음)'}]},
   {ver:'1.9.87 (v0407zi)',date:'2026-04-07',items:[{type:'fix',text:'알림장 X 닫기 버튼 크기 축소(32→26px) 및 위치 보정 — 고동색 헤더 바 안에 정확히 정렬'},{type:'ui',text:'수첩 헤더 제목을 "알림장" → "오늘 할일 이력"으로 변경'},{type:'fix',text:'수첩 스크롤 시 dim 영역이 따라 움직이던 문제 근원적 해결 — 본문 body 자체를 position:fixed로 락하고 닫을 때 원래 스크롤 위치 복원, 수첩 안쪽 외 touchmove/wheel 모두 preventDefault'},{type:'ui',text:'위/아래 화살표 버튼을 화면 바닥이 아닌 수첩 바로 아래에 가로로 배치 (오버레이를 column flex로 변경)'}]},
   {ver:'1.9.86 (v0407zh)',date:'2026-04-07',items:[{type:'fix',text:'라이트 모드에서 이력보기 버튼 외곽선이 잘 안 보이던 문제 — 보더 두께/색 강화 + 옅은 배경 추가'},{type:'fix',text:'홈탭 스크롤 시 컨텐츠가 hero 헤더가 다 줄어들기 전에 헤더 안으로 숨던 문제 — shrink threshold를 60→140으로 늘려 hero 높이 변화량보다 스크롤 거리가 항상 크도록 보장, padding을 CSS transition 없이 inline으로 직접 보간'}]},
