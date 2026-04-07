@@ -1492,6 +1492,45 @@ body.dark .adm-child-btn.on{background:rgba(255,107,53,.15)}
 .ch-bug.flyaway .wr{animation:chBugFlapR .12s linear infinite!important;opacity:.85!important}
 @keyframes chBugFlapL{0%,100%{transform:rotate(-15deg)}50%{transform:rotate(-65deg)}}
 @keyframes chBugFlapR{0%,100%{transform:rotate(15deg)}50%{transform:rotate(65deg)}}
+.ch-bug.bug-bee .wing{opacity:.85;animation:beeFlap .09s linear infinite;transform-origin:12px 9px;transform-box:view-box}
+@keyframes beeFlap{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.35)}}
+.ch-bug.bug-snail{animation-duration:1.2s}
+.ch-bug.bug-snail .ant{transform-origin:7px 14px;animation:chAntWig .8s ease-in-out infinite alternate}
+.ch-bug.bug-butterfly .wing{opacity:.95;animation-duration:.4s;animation-timing-function:ease-in-out;animation-iteration-count:infinite;animation-direction:alternate;transform-origin:12px 11px;transform-box:view-box}
+.ch-bug.bug-butterfly .wing.wl{animation-name:bflyL}
+.ch-bug.bug-butterfly .wing.wr{animation-name:bflyR}
+@keyframes bflyL{0%{transform:scaleX(1)}100%{transform:scaleX(.25)}}
+@keyframes bflyR{0%{transform:scaleX(1)}100%{transform:scaleX(.25)}}
+.ch-bug.bug-grasshopper{animation:chBugHop .55s cubic-bezier(.5,0,.5,1) infinite}
+@keyframes chBugHop{0%,100%{transform:translateY(0) rotate(0)}45%{transform:translateY(-3.5px) rotate(-2deg)}50%{transform:translateY(-4px) rotate(0)}}
+.ch-bug.bug-spider .leg.l7,.ch-bug.bug-spider .leg.l8{animation:chLegWig .22s ease-in-out infinite alternate;animation-delay:.21s;transform-origin:12px 14px}
+.ch-bug.special-anim{pointer-events:none}
+@keyframes beeHoney{0%{transform:translate(-50%,-50%) scale(.3);opacity:0}30%{opacity:1;transform:translate(-50%,-30%) scale(1)}100%{transform:translate(-50%,40px) scale(.7);opacity:0}}
+.ch-bug.bee-buzz{animation:beeBuzz 2.2s ease-in-out forwards!important;z-index:50}
+@keyframes beeBuzz{0%{transform:translate(0,0) scale(1)}12%{transform:translate(28px,-26px) scale(1.1)}24%{transform:translate(-26px,-38px) scale(1.1)}38%{transform:translate(32px,-22px) scale(1.15)}52%{transform:translate(-22px,-32px) scale(1.1)}66%{transform:translate(20px,-18px) scale(1.1)}80%{transform:translate(-12px,-10px) scale(1.05)}100%{transform:translate(0,0) scale(1)}}
+.ch-bug.snail-hide{animation:snailHide 2.6s ease-in-out forwards!important}
+@keyframes snailHide{0%{transform:scale(1)}20%{transform:scale(.8,.6) translateX(6px)}55%{transform:scale(.65,.45) translateX(8px)}80%{transform:scale(.95,.9) translateX(2px)}100%{transform:scale(1)}}
+.ch-bug.bfly-dance{animation:bflyDance 1.8s ease-in-out forwards!important;z-index:50}
+@keyframes bflyDance{0%{transform:rotate(0) scale(1)}25%{transform:rotate(180deg) scale(1.2) translateY(-22px)}50%{transform:rotate(360deg) scale(1.3) translateY(-32px)}75%{transform:rotate(540deg) scale(1.2) translateY(-18px)}100%{transform:rotate(720deg) scale(1)}}
+@keyframes bflyPetal{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}30%{opacity:1}100%{opacity:0;transform:translate(calc(-50% + var(--tx)),calc(-50% + var(--ty))) scale(.5)}}
+.ch-bug .ant-parade{position:absolute;left:-90px;top:50%;transform:translateY(-50%);height:24px;display:flex;align-items:center;gap:6px;pointer-events:none;animation:antParade 2.4s linear forwards;font-size:14px;white-space:nowrap}
+@keyframes antParade{0%{transform:translate(-100px,-50%);opacity:0}10%{opacity:1}90%{opacity:1}100%{transform:translate(220px,-50%);opacity:0}}
+.ch-bug.spider-descend{animation:spiderDescend 2.4s ease-in-out forwards!important;z-index:50}
+@keyframes spiderDescend{0%{transform:translate(0,0)}20%{transform:translate(0,-50px)}35%{transform:translate(0,-90px) rotate(0)}50%{transform:translate(0,-90px) rotate(20deg)}65%{transform:translate(0,-90px) rotate(-20deg)}80%{transform:translate(0,-30px)}100%{transform:translate(0,0)}}
+.spider-thread{position:absolute;left:50%;top:-100px;width:1.5px;background:rgba(0,0,0,.45);pointer-events:none;transform:translateX(-50%);height:0;animation:spiderThread 2.4s ease-in-out forwards}
+body.dark .spider-thread{background:rgba(255,255,255,.5)}
+@keyframes spiderThread{0%{height:0;opacity:0}15%{height:90px;opacity:1}80%{height:90px;opacity:1}100%{height:0;opacity:0}}
+.ch-bug.grass-crash{animation:grassCrash 2.8s cubic-bezier(.3,.05,.4,1) forwards!important;z-index:50;transform-origin:center bottom}
+@keyframes grassCrash{0%{transform:translate(0,0) scale(1)}6%{transform:translate(0,4px) scale(1.15,.85)}10%{transform:translate(0,-30px) scale(.95,1.15)}22%{transform:translate(0,-220px) scale(1.5)}32%{transform:translate(0,-380px) scale(1.7)}36%{transform:translate(0,-420px) scale(1.85,1.5)}42%{transform:translate(0,-380px) scale(1.5,1.85)}58%{transform:translate(0,-120px) rotate(180deg) scale(1.2)}78%{transform:translate(0,30px) rotate(360deg) scale(1)}88%{transform:translate(0,8px) scale(1.1,.9)}100%{transform:translate(0,0) scale(1)}}
+#__bug_crack__{position:fixed;inset:0;z-index:99999;pointer-events:none;animation:crackFade 3.2s ease-out forwards}
+@keyframes crackFade{0%{opacity:0}5%{opacity:1}88%{opacity:1}100%{opacity:0}}
+body.screen-shake{animation:screenShake .55s linear}
+@keyframes screenShake{0%,100%{transform:translate(0,0)}10%{transform:translate(-4px,3px)}20%{transform:translate(4px,-3px)}30%{transform:translate(-3px,4px)}40%{transform:translate(3px,-4px)}50%{transform:translate(-4px,2px)}60%{transform:translate(4px,-2px)}70%{transform:translate(-3px,3px)}80%{transform:translate(3px,-2px)}90%{transform:translate(-2px,2px)}}
+.bug-picker{display:flex;flex-wrap:wrap;gap:6px;padding:4px 2px 2px}
+.bug-pick{flex:1 1 calc(25% - 6px);min-width:60px;padding:8px 4px;border:1.5px solid var(--bdr);background:var(--bg2);border-radius:12px;font-family:inherit;font-size:11px;font-weight:700;color:var(--tx2);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;transition:all .15s}
+.bug-pick:hover{border-color:var(--bdr2)}
+.bug-pick.active{border-color:var(--tab-color,#6366F1);background:var(--card);color:var(--tx);box-shadow:0 0 0 2px var(--tab-color,#6366F1)33}
+.bug-pick .bp-emoji{font-size:18px;line-height:1}
 @keyframes chBugFlyAway{0%{transform:translate(0,0) rotate(0) scale(1)}12%{transform:translate(25px,-50px) rotate(80deg) scale(1.1)}30%{transform:translate(180px,-280px) rotate(260deg) scale(.9)}48%{transform:translate(-100px,-460px) rotate(560deg) scale(.65);opacity:.5}55%{opacity:0;transform:translate(-200px,-520px) rotate(720deg) scale(.4)}68%{opacity:0;transform:translate(-260px,-420px) rotate(900deg) scale(.5)}76%{opacity:1;transform:translate(-180px,-260px) rotate(1080deg) scale(.75)}88%{transform:translate(60px,-80px) rotate(1320deg) scale(1.1)}100%{transform:translate(0,0) rotate(1440deg) scale(1)}}
 @keyframes chBugPoke{0%{transform:scale(1) rotate(0)}20%{transform:scale(1.45) rotate(-4deg)}40%{transform:scale(1.35) rotate(4deg)}60%{transform:scale(1.4) rotate(-3deg)}80%{transform:scale(1.15) rotate(2deg)}100%{transform:scale(1) rotate(0)}}
 @keyframes chBugWingL{0%{opacity:0;transform:rotate(0)}10%{opacity:.85}20%{transform:rotate(-60deg)}35%{transform:rotate(-25deg)}50%{transform:rotate(-65deg)}65%{transform:rotate(-20deg)}80%{transform:rotate(-55deg);opacity:.7}100%{opacity:0;transform:rotate(0)}}
@@ -4524,6 +4563,13 @@ requestAnimationFrame(function(){
           <div class="theme-pick-radio"></div>
         </div>
       </div>
+    </div>
+    <div class="my-list-item" style="flex-direction:column;align-items:stretch;gap:6px;padding:16px 18px">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:2px">
+        <span class="my-list-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2 L13 4 L15 4 M12 2 L11 4 L9 4"/><ellipse cx="12" cy="13" rx="6" ry="7"/><line x1="6" y1="11" x2="2" y2="9"/><line x1="6" y1="15" x2="2" y2="17"/><line x1="18" y1="11" x2="22" y2="9"/><line x1="18" y1="15" x2="22" y2="17"/></svg></span>
+        <span class="my-list-txt">챌린지 곤충</span>
+      </div>
+      <div class="bug-picker" id="bug-picker"></div>
     </div>
     <button class="my-list-item" onclick="startTour()">
       <span class="my-list-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
@@ -9173,7 +9219,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0407zq';
+const _APP_VERSION = 'v0407zr';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -12681,39 +12727,7 @@ function renderChallengeCards(){
       </div>
       <div class="ch-bar-wrap">
         <div class="ch-bar-fill" style="background:${isComplete?'var(--gn2)':'linear-gradient(90deg,var(--tab-color,#F59E0B),#EF4444)'};width:${Math.min(100,pct)}%"></div>
-        ${!isComplete?`<div class="ch-bug" onclick="bugPoke(event,this)" style="left:calc(${Math.max(0,Math.min(100,pct))}% - 15px)">
-          <svg viewBox="0 0 24 22">
-            <ellipse class="sweat" cx="3" cy="2" rx="1.1" ry="1.6" fill="#42A5F5"/>
-            <ellipse class="sweat s2" cx="21" cy="3" rx="1.1" ry="1.6" fill="#42A5F5"/>
-            <g stroke="#1a1a1a" stroke-width="1.1" stroke-linecap="round" fill="none">
-              <line class="leg l1" x1="6" y1="11" x2="2" y2="9"/>
-              <line class="leg l2" x1="6" y1="13" x2="2" y2="15"/>
-              <line class="leg l3" x1="7" y1="15" x2="5" y2="20"/>
-              <line class="leg l4" x1="18" y1="11" x2="22" y2="9"/>
-              <line class="leg l5" x1="18" y1="13" x2="22" y2="15"/>
-              <line class="leg l6" x1="17" y1="15" x2="19" y2="20"/>
-            </g>
-            <g class="ant" stroke="#1a1a1a" stroke-width="1.1" stroke-linecap="round">
-              <line x1="10" y1="6" x2="8" y2="2"/>
-              <line x1="14" y1="6" x2="16" y2="2"/>
-              <circle cx="8" cy="2" r="1.1" fill="#1a1a1a"/>
-              <circle cx="16" cy="2" r="1.1" fill="#1a1a1a"/>
-            </g>
-            <ellipse class="wing wl" cx="7" cy="12" rx="7.5" ry="4.5" fill="#fff" opacity=".75"/>
-            <ellipse class="wing wr" cx="17" cy="12" rx="7.5" ry="4.5" fill="#fff" opacity=".75"/>
-            <ellipse cx="12" cy="13" rx="8" ry="6.8" fill="#E53935"/>
-            <path d="M12 6.5 a4 3.6 0 0 1 0 7.2z" fill="#1a1a1a" opacity=".15"/>
-            <line x1="12" y1="6.8" x2="12" y2="19.5" stroke="#1a1a1a" stroke-width="1"/>
-            <ellipse cx="12" cy="7" rx="4.2" ry="3.4" fill="#1a1a1a"/>
-            <circle cx="10.6" cy="6.5" r=".55" fill="#fff"/>
-            <circle cx="13.4" cy="6.5" r=".55" fill="#fff"/>
-            <circle cx="8" cy="11" r="1.2" fill="#1a1a1a"/>
-            <circle cx="16" cy="11" r="1.2" fill="#1a1a1a"/>
-            <circle cx="8" cy="15" r="1.2" fill="#1a1a1a"/>
-            <circle cx="16" cy="15" r="1.2" fill="#1a1a1a"/>
-            <circle cx="12" cy="17" r="1.1" fill="#1a1a1a"/>
-          </svg>
-        </div>`:''}
+        ${!isComplete?(window.renderChallengeBug?window.renderChallengeBug(c,pct):''):''}
       </div>
     </div>`;
   }).join('');
@@ -17483,12 +17497,149 @@ function renderMyTab(){
   }
   }catch(e){console.warn('[renderMyTab] family row err:',e);}
 }
+function _renderBugPicker(){
+  const wrap=document.getElementById('bug-picker');if(!wrap)return;
+  const cur=(S&&S.settings&&S.settings.challengeBug)||'random';
+  const opts=[{id:'random',name:'랜덤',emoji:'🎲'}];
+  const ids=Object.keys(window.BUG_TYPES||{});
+  ids.forEach(id=>{const b=window.BUG_TYPES[id];opts.push({id:id,name:b.name,emoji:b.emoji});});
+  wrap.innerHTML=opts.map(o=>'<button class="bug-pick'+(cur===o.id?' active':'')+'" onclick="_setChallengeBug(\''+o.id+'\')"><span class="bp-emoji">'+o.emoji+'</span><span>'+o.name+'</span></button>').join('');
+}
+window._setChallengeBug=function(id){if(!S.settings)S.settings={};S.settings.challengeBug=id;save();_renderBugPicker();try{if(typeof renderChallengeCards==='function')renderChallengeCards();}catch(_){}toast('🐞 챌린지 곤충: '+(id==='random'?'랜덤':(window.BUG_TYPES[id]&&window.BUG_TYPES[id].name)||id));};
+const _origRenderMyTab2=renderMyTab;
+renderMyTab=function(){const r=_origRenderMyTab2.apply(this,arguments);try{_renderBugPicker();}catch(_){}return r;};
 window.renderMyTab=renderMyTab;
-// 무당벌레 클릭 — 아얏! 등 메시지 순차 출력
-window._bugPokeMsgs=['\\ 아얏! /','\\ 앗 따거! /','\\ 간지러워~ /','\\ 살살! /','\\ 으악! /','\\ 깜짝이야! /','\\ 어이쿠! /','\\ 그만~ /','\\ 헤헤 /','\\ 히잉... /'];
-window._bugPokeIdx=0;
-window._bugPokeCount=0;
-window.bugPoke=function(ev,el){try{ev&&ev.stopPropagation&&ev.stopPropagation();if(!el)return;if(el.classList.contains('flyaway'))return;const msgs=window._bugPokeMsgs;const msg=msgs[window._bugPokeIdx%msgs.length];window._bugPokeIdx=(window._bugPokeIdx+1)%msgs.length;const d=document.createElement('div');d.className='bug-poke-msg';d.textContent=msg;el.appendChild(d);setTimeout(()=>{try{d.remove();}catch(_){}} ,1200);el.classList.remove('poked');void el.offsetWidth;el.classList.add('poked');setTimeout(()=>{try{el.classList.remove('poked');}catch(_){}} ,760);window._bugPokeCount=(window._bugPokeCount||0)+1;if(window._bugPokeCount>=10){window._bugPokeCount=0;setTimeout(()=>{try{el.classList.remove('poked');el.classList.add('flyaway');setTimeout(()=>{try{el.classList.remove('flyaway');}catch(_){}} ,2700);}catch(_){}} ,200);}}catch(e){console.warn('[bugPoke]',e);}};
+// ── 챌린지 곤충 시스템 ──────────────────────────────
+// SVG는 viewBox 0 0 24 22, head=top (CSS rotate(90deg)로 오른쪽으로 걷는 모습)
+const _BUG_SVG_LADYBUG = '<svg viewBox="0 0 24 22"><g stroke="#1a1a1a" stroke-width="1.1" stroke-linecap="round" fill="none"><line class="leg l1" x1="6" y1="11" x2="2" y2="9"/><line class="leg l2" x1="6" y1="13" x2="2" y2="15"/><line class="leg l3" x1="7" y1="15" x2="5" y2="20"/><line class="leg l4" x1="18" y1="11" x2="22" y2="9"/><line class="leg l5" x1="18" y1="13" x2="22" y2="15"/><line class="leg l6" x1="17" y1="15" x2="19" y2="20"/></g><g class="ant" stroke="#1a1a1a" stroke-width="1.1" stroke-linecap="round"><line x1="10" y1="6" x2="8" y2="2"/><line x1="14" y1="6" x2="16" y2="2"/><circle cx="8" cy="2" r="1.1" fill="#1a1a1a"/><circle cx="16" cy="2" r="1.1" fill="#1a1a1a"/></g><ellipse class="wing wl" cx="7" cy="12" rx="7.5" ry="4.5" fill="#fff" opacity=".75"/><ellipse class="wing wr" cx="17" cy="12" rx="7.5" ry="4.5" fill="#fff" opacity=".75"/><ellipse cx="12" cy="13" rx="8" ry="6.8" fill="#E53935"/><line x1="12" y1="6.8" x2="12" y2="19.5" stroke="#1a1a1a" stroke-width="1"/><ellipse cx="12" cy="7" rx="4.2" ry="3.4" fill="#1a1a1a"/><circle cx="10.6" cy="6.5" r=".55" fill="#fff"/><circle cx="13.4" cy="6.5" r=".55" fill="#fff"/><circle cx="8" cy="11" r="1.2" fill="#1a1a1a"/><circle cx="16" cy="11" r="1.2" fill="#1a1a1a"/><circle cx="8" cy="15" r="1.2" fill="#1a1a1a"/><circle cx="16" cy="15" r="1.2" fill="#1a1a1a"/><circle cx="12" cy="17" r="1.1" fill="#1a1a1a"/></svg>';
+const _BUG_SVG_BEE = '<svg viewBox="0 0 24 22"><ellipse class="wing wl" cx="8" cy="9" rx="5.5" ry="4" fill="#fff" opacity=".8"/><ellipse class="wing wr" cx="16" cy="9" rx="5.5" ry="4" fill="#fff" opacity=".8"/><ellipse cx="12" cy="14" rx="5.5" ry="6.5" fill="#FCD34D" stroke="#1a1a1a" stroke-width=".8"/><path d="M7 11 h10 M7 14 h10 M8 18 h8" stroke="#1a1a1a" stroke-width="1.6" stroke-linecap="round"/><ellipse cx="12" cy="6.5" rx="3" ry="2.6" fill="#1a1a1a"/><circle cx="10.8" cy="6.2" r=".5" fill="#fff"/><circle cx="13.2" cy="6.2" r=".5" fill="#fff"/><line class="ant" x1="10.5" y1="4.5" x2="9" y2="1.5" stroke="#1a1a1a" stroke-width="1" stroke-linecap="round"/><line class="ant" x1="13.5" y1="4.5" x2="15" y2="1.5" stroke="#1a1a1a" stroke-width="1" stroke-linecap="round"/></svg>';
+const _BUG_SVG_SNAIL = '<svg viewBox="0 0 24 22"><path d="M2 18 Q9 17 14 17 L20 17 L20 19 L2 19 Z" fill="#FCD34D" stroke="#92400E" stroke-width=".8"/><circle cx="17" cy="13" r="6" fill="#F59E0B" stroke="#92400E" stroke-width="1"/><circle cx="17" cy="13" r="4" fill="none" stroke="#92400E" stroke-width="1"/><circle cx="17" cy="13" r="2" fill="#FBBF24" stroke="#92400E" stroke-width="1"/><line class="ant" x1="5" y1="16" x2="3" y2="11" stroke="#92400E" stroke-width="1.1" stroke-linecap="round"/><line class="ant" x1="7" y1="15" x2="7" y2="9" stroke="#92400E" stroke-width="1.1" stroke-linecap="round"/><circle cx="3" cy="11" r=".9" fill="#1a1a1a"/><circle cx="7" cy="9" r=".9" fill="#1a1a1a"/><circle cx="6" cy="17" r=".5" fill="#1a1a1a"/></svg>';
+const _BUG_SVG_CATERPILLAR = '<svg viewBox="0 0 24 22"><circle cx="12" cy="20" r="2.3" fill="#10B981" stroke="#047857" stroke-width=".6"/><circle cx="12" cy="16" r="2.7" fill="#34D399" stroke="#047857" stroke-width=".6"/><circle cx="12" cy="12" r="2.7" fill="#10B981" stroke="#047857" stroke-width=".6"/><circle cx="12" cy="8" r="2.7" fill="#34D399" stroke="#047857" stroke-width=".6"/><circle cx="12" cy="4" r="2.5" fill="#10B981" stroke="#047857" stroke-width=".6"/><circle cx="11" cy="3.5" r=".4" fill="#fff"/><circle cx="13" cy="3.5" r=".4" fill="#fff"/><line class="ant" x1="11" y1="2" x2="9.5" y2="0" stroke="#047857" stroke-width=".8" stroke-linecap="round"/><line class="ant" x1="13" y1="2" x2="14.5" y2="0" stroke="#047857" stroke-width=".8" stroke-linecap="round"/></svg>';
+const _BUG_SVG_COCOON = '<svg viewBox="0 0 24 22"><line x1="12" y1="0" x2="12" y2="3" stroke="#047857" stroke-width="1"/><ellipse cx="12" cy="12" rx="5.5" ry="9" fill="#10B981" stroke="#047857" stroke-width="1"/><path d="M7 6 Q12 7.5 17 6 M7 10 Q12 11.5 17 10 M7 14 Q12 15.5 17 14 M7 18 Q12 19.5 17 18" stroke="#047857" stroke-width=".7" fill="none"/><circle cx="10" cy="11" r=".5" fill="#FBBF24"/><circle cx="14" cy="11" r=".5" fill="#FBBF24"/></svg>';
+const _BUG_SVG_BUTTERFLY = '<svg viewBox="0 0 24 22"><ellipse class="wing wl" cx="6" cy="11" rx="6.5" ry="9" fill="#F472B6" stroke="#9D174D" stroke-width=".7" opacity=".95"/><ellipse class="wing wr" cx="18" cy="11" rx="6.5" ry="9" fill="#F472B6" stroke="#9D174D" stroke-width=".7" opacity=".95"/><circle cx="6" cy="7" r="1.4" fill="#FBBF24"/><circle cx="18" cy="7" r="1.4" fill="#FBBF24"/><circle cx="6" cy="14" r="1" fill="#fff"/><circle cx="18" cy="14" r="1" fill="#fff"/><ellipse cx="12" cy="11" rx="1.4" ry="7.5" fill="#1a1a1a"/><circle cx="12" cy="3.5" r="1.7" fill="#1a1a1a"/><line class="ant" x1="11" y1="2.5" x2="9" y2="-.5" stroke="#1a1a1a" stroke-width=".9" stroke-linecap="round"/><line class="ant" x1="13" y1="2.5" x2="15" y2="-.5" stroke="#1a1a1a" stroke-width=".9" stroke-linecap="round"/></svg>';
+const _BUG_SVG_ANT = '<svg viewBox="0 0 24 22"><g stroke="#1a1a1a" stroke-width="1" stroke-linecap="round" fill="none"><line class="leg l1" x1="10" y1="11" x2="4" y2="8"/><line class="leg l2" x1="10" y1="11" x2="3" y2="12"/><line class="leg l3" x1="10" y1="11" x2="4" y2="17"/><line class="leg l4" x1="14" y1="11" x2="20" y2="8"/><line class="leg l5" x1="14" y1="11" x2="21" y2="12"/><line class="leg l6" x1="14" y1="11" x2="20" y2="17"/></g><circle cx="12" cy="4.5" r="2.7" fill="#7C2D12"/><ellipse cx="12" cy="11" rx="2.4" ry="2.8" fill="#92400E"/><ellipse cx="12" cy="17.5" rx="3.5" ry="4.2" fill="#7C2D12"/><line class="ant" x1="11" y1="2.5" x2="9" y2="-.5" stroke="#1a1a1a" stroke-width="1" stroke-linecap="round"/><line class="ant" x1="13" y1="2.5" x2="15" y2="-.5" stroke="#1a1a1a" stroke-width="1" stroke-linecap="round"/><circle cx="11" cy="4" r=".4" fill="#fff"/><circle cx="13" cy="4" r=".4" fill="#fff"/></svg>';
+const _BUG_SVG_GRASSHOPPER = '<svg viewBox="0 0 24 22"><ellipse cx="12" cy="13" rx="4.2" ry="6.5" fill="#65A30D" stroke="#3F6212" stroke-width=".7"/><path class="leg l1" d="M8 13 L4 17 L7 19" stroke="#3F6212" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path class="leg l4" d="M16 13 L20 17 L17 19" stroke="#3F6212" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/><line class="leg l2" x1="9" y1="9" x2="6" y2="8" stroke="#3F6212" stroke-width="1.1" stroke-linecap="round"/><line class="leg l5" x1="15" y1="9" x2="18" y2="8" stroke="#3F6212" stroke-width="1.1" stroke-linecap="round"/><line class="leg l3" x1="9" y1="11" x2="6" y2="11" stroke="#3F6212" stroke-width="1.1" stroke-linecap="round"/><line class="leg l6" x1="15" y1="11" x2="18" y2="11" stroke="#3F6212" stroke-width="1.1" stroke-linecap="round"/><circle cx="12" cy="6" r="3" fill="#84CC16" stroke="#3F6212" stroke-width=".7"/><circle cx="11" cy="5.5" r=".7" fill="#1a1a1a"/><circle cx="13" cy="5.5" r=".7" fill="#1a1a1a"/><circle cx="11" cy="5.4" r=".25" fill="#fff"/><circle cx="13" cy="5.4" r=".25" fill="#fff"/><line class="ant" x1="11" y1="3.5" x2="8" y2="-1" stroke="#3F6212" stroke-width=".9" stroke-linecap="round"/><line class="ant" x1="13" y1="3.5" x2="16" y2="-1" stroke="#3F6212" stroke-width=".9" stroke-linecap="round"/></svg>';
+const _BUG_SVG_SPIDER = '<svg viewBox="0 0 24 22"><g stroke="#1f2937" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round"><path class="leg l1" d="M9 11 L4 6 L2 8"/><path class="leg l2" d="M9 13 L2 12"/><path class="leg l3" d="M9 15 L4 18 L2 17"/><path class="leg l4" d="M9 16 L6 21"/><path class="leg l5" d="M15 11 L20 6 L22 8"/><path class="leg l6" d="M15 13 L22 12"/><path class="leg l7" d="M15 15 L20 18 L22 17"/><path class="leg l8" d="M15 16 L18 21"/></g><ellipse cx="12" cy="14" rx="4.8" ry="5" fill="#1f2937" stroke="#000" stroke-width=".5"/><circle cx="12" cy="8" r="3" fill="#374151"/><circle cx="10.5" cy="7" r=".7" fill="#FBBF24"/><circle cx="13.5" cy="7" r=".7" fill="#FBBF24"/><circle cx="11" cy="9" r=".5" fill="#FBBF24"/><circle cx="13" cy="9" r=".5" fill="#FBBF24"/></svg>';
+window.BUG_TYPES={
+  ladybug:{name:'무당벌레',emoji:'🐞',svg:_BUG_SVG_LADYBUG,msgs:['아얏!','앗 따거!','간지러워~','살살!','으악!','깜짝이야!','어이쿠!','그만~','헤헤','히잉...'],special:'flyaway'},
+  bee:{name:'꿀벌',emoji:'🐝',svg:_BUG_SVG_BEE,msgs:['윙윙~','꿀 줘!','쏜다~!','앵앵','으잉?','아 바빠!','꽃 어디?','부우우웅','삐졌어!','꿀단지!'],special:'beeBuzz'},
+  snail:{name:'달팽이',emoji:'🐌',svg:_BUG_SVG_SNAIL,msgs:['스르륵...','아이참...','쉬는중...','으잉?','우와~','놀라지마...','천천히...','음음...','휴...','뽀시락'],special:'snailHide'},
+  butterfly:{name:'나비',emoji:'🦋',svg:_BUG_SVG_BUTTERFLY,svgs:[_BUG_SVG_CATERPILLAR,_BUG_SVG_COCOON,_BUG_SVG_BUTTERFLY],msgs:['꼬물꼬물','아잉~','맛난 잎','쿨쿨...','자라는중','후후','곧 변해요','두근두근','반짝~','펄럭'],special:'butterflyDance'},
+  ant:{name:'개미',emoji:'🐜',svg:_BUG_SVG_ANT,msgs:['영차!','으차!','일이 많아','부지런','으응?','과자 줘','동료 어디?','도와줘~','히히','으샤!'],special:'antParade'},
+  grasshopper:{name:'메뚜기',emoji:'🦗',svg:_BUG_SVG_GRASSHOPPER,msgs:['깡총!','뛸까?','폴짝!','준비됐다','으응?','어디까지?','발이 근질','후후','풀잎 냠','으랏차!'],special:'grasshopperCrash'},
+  spider:{name:'거미',emoji:'🕷️',svg:_BUG_SVG_SPIDER,msgs:['거미줄!','쪼르륵','다리 8개','으응?','왜 그래?','거꾸로!','오늘도 냠','히히','잡았다!','쉭쉭'],special:'spiderDescend'}
+};
+window._bugHash=function(s){let h=0;s=String(s||'');for(let i=0;i<s.length;i++){h=((h<<5)-h+s.charCodeAt(i))|0;}return Math.abs(h);};
+window.renderChallengeBug=function(c,pct){
+  try{
+    const sel=(S&&S.settings&&S.settings.challengeBug)||'random';
+    const ids=Object.keys(window.BUG_TYPES);
+    let bugId=sel;
+    if(sel==='random'||!ids.includes(sel))bugId=ids[window._bugHash(c.id||c.title||'')%ids.length];
+    const bug=window.BUG_TYPES[bugId];
+    let svg=bug.svg;
+    if(bugId==='butterfly'){
+      const stage=pct<33?0:pct<70?1:2;
+      svg=bug.svgs[stage];
+    }
+    const left=Math.max(0,Math.min(100,pct));
+    return '<div class="ch-bug bug-'+bugId+'" data-bug="'+bugId+'" onclick="bugPoke(event,this)" style="left:calc('+left+'% - 15px)">'+svg+'</div>';
+  }catch(e){console.warn('[renderChallengeBug]',e);return '';}
+};
+window.bugPoke=function(ev,el){try{
+  ev&&ev.stopPropagation&&ev.stopPropagation();
+  if(!el||el.classList.contains('flyaway')||el.classList.contains('special-anim'))return;
+  const bugId=el.dataset.bug||'ladybug';
+  const bug=(window.BUG_TYPES||{})[bugId]||window.BUG_TYPES.ladybug;
+  const msgs=bug.msgs;
+  const i=parseInt(el.dataset.idx||'0',10)%msgs.length;
+  el.dataset.idx=String((i+1)%msgs.length);
+  const d=document.createElement('div');
+  d.className='bug-poke-msg';
+  d.textContent='\\ '+msgs[i]+' /';
+  el.appendChild(d);
+  setTimeout(()=>{try{d.remove();}catch(_){}} ,1200);
+  el.classList.remove('poked');void el.offsetWidth;el.classList.add('poked');
+  setTimeout(()=>{try{el.classList.remove('poked');}catch(_){}} ,760);
+  const cnt=parseInt(el.dataset.cnt||'0',10)+1;
+  el.dataset.cnt=String(cnt);
+  if(cnt>=10){
+    el.dataset.cnt='0';
+    setTimeout(()=>{
+      try{
+        el.classList.remove('poked');
+        const fnName='bugSpecial_'+(bug.special||'flyaway');
+        const fn=window[fnName];
+        if(fn)fn(el);else window.bugSpecial_flyaway(el);
+      }catch(_){}
+    },200);
+  }
+}catch(e){console.warn('[bugPoke]',e);}};
+window.bugSpecial_flyaway=function(el){
+  el.classList.add('flyaway');
+  setTimeout(()=>{try{el.classList.remove('flyaway');}catch(_){}} ,2700);
+};
+window.bugSpecial_beeBuzz=function(el){
+  el.classList.add('special-anim','bee-buzz');
+  const drop=document.createElement('div');
+  drop.style.cssText='position:absolute;left:50%;top:50%;width:9px;height:11px;background:radial-gradient(circle at 30% 30%,#FCD34D,#D97706);border-radius:50% 50% 50% 50% / 40% 40% 60% 60%;box-shadow:0 1px 3px rgba(217,119,6,.5);transform:translate(-50%,-50%);pointer-events:none;animation:beeHoney 1.6s ease-in forwards';
+  el.appendChild(drop);
+  setTimeout(()=>{try{drop.remove();el.classList.remove('special-anim','bee-buzz');}catch(_){}} ,2300);
+};
+window.bugSpecial_snailHide=function(el){
+  el.classList.add('special-anim','snail-hide');
+  setTimeout(()=>{try{el.classList.remove('special-anim','snail-hide');}catch(_){}} ,2700);
+};
+window.bugSpecial_butterflyDance=function(el){
+  el.classList.add('special-anim','bfly-dance');
+  for(let i=0;i<10;i++){
+    const p=document.createElement('div');
+    const ang=(i/10)*Math.PI*2;
+    const x=Math.cos(ang)*36,y=Math.sin(ang)*36;
+    const colors=['#FBBF24','#F472B6','#A78BFA','#34D399','#60A5FA'];
+    p.style.cssText='position:absolute;left:50%;top:50%;width:7px;height:7px;background:'+colors[i%5]+';border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);animation:bflyPetal 1.6s ease-out forwards;--tx:'+x+'px;--ty:'+y+'px';
+    el.appendChild(p);
+    setTimeout(((pp)=>()=>{try{pp.remove();}catch(_){}})(p),1700);
+  }
+  setTimeout(()=>{try{el.classList.remove('special-anim','bfly-dance');}catch(_){}} ,1900);
+};
+window.bugSpecial_antParade=function(el){
+  el.classList.add('special-anim');
+  const ov=document.createElement('div');
+  ov.className='ant-parade';
+  for(let i=0;i<6;i++){
+    const a=document.createElement('span');
+    a.textContent='🐜';
+    a.style.cssText='display:inline-block;animation:chBugBob .42s ease-in-out infinite;animation-delay:'+(i*0.06)+'s';
+    ov.appendChild(a);
+  }
+  el.appendChild(ov);
+  setTimeout(()=>{try{ov.remove();el.classList.remove('special-anim');}catch(_){}} ,2500);
+};
+window.bugSpecial_spiderDescend=function(el){
+  el.classList.add('special-anim','spider-descend');
+  const t=document.createElement('div');
+  t.className='spider-thread';
+  el.appendChild(t);
+  setTimeout(()=>{try{t.remove();el.classList.remove('special-anim','spider-descend');}catch(_){}} ,2500);
+};
+window.bugSpecial_grasshopperCrash=function(el){
+  el.classList.add('special-anim','grass-crash');
+  setTimeout(()=>{
+    try{
+      document.body.classList.add('screen-shake');
+      setTimeout(()=>{try{document.body.classList.remove('screen-shake');}catch(_){}} ,600);
+      const old=document.getElementById('__bug_crack__');
+      if(old)old.remove();
+      const crack=document.createElement('div');
+      crack.id='__bug_crack__';
+      crack.innerHTML='<svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0"><defs><filter id="cf" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation=".25"/></filter></defs><g stroke="#ffffff" stroke-width=".22" fill="none" filter="url(#cf)" opacity=".95"><line x1="50" y1="6" x2="14" y2="62"/><line x1="50" y1="6" x2="32" y2="78"/><line x1="50" y1="6" x2="48" y2="92"/><line x1="50" y1="6" x2="64" y2="86"/><line x1="50" y1="6" x2="84" y2="68"/><line x1="50" y1="6" x2="92" y2="40"/><line x1="50" y1="6" x2="8" y2="32"/><line x1="50" y1="6" x2="20" y2="20"/><line x1="50" y1="6" x2="78" y2="22"/><line x1="14" y1="62" x2="32" y2="78"/><line x1="32" y1="78" x2="48" y2="92"/><line x1="48" y1="92" x2="64" y2="86"/><line x1="64" y1="86" x2="84" y2="68"/><line x1="84" y1="68" x2="92" y2="40"/><line x1="20" y1="20" x2="14" y2="62"/><line x1="78" y1="22" x2="92" y2="40"/><line x1="20" y1="20" x2="8" y2="32"/><line x1="32" y1="78" x2="14" y2="62"/><line x1="48" y1="92" x2="32" y2="78"/><line x1="64" y1="86" x2="48" y2="92"/></g><g stroke="#ffffff" stroke-width=".15" fill="none" opacity=".7"><line x1="50" y1="6" x2="40" y2="40"/><line x1="50" y1="6" x2="60" y2="40"/><line x1="50" y1="6" x2="30" y2="50"/><line x1="50" y1="6" x2="70" y2="50"/></g><circle cx="50" cy="6" r="3" fill="#fff" opacity=".85"/><circle cx="50" cy="6" r="6" fill="none" stroke="#fff" stroke-width=".25" opacity=".55"/><circle cx="50" cy="6" r="9" fill="none" stroke="#fff" stroke-width=".18" opacity=".35"/></svg>';
+      document.body.appendChild(crack);
+      setTimeout(()=>{try{crack.remove();}catch(_){}} ,3200);
+    }catch(_){}
+  },680);
+  setTimeout(()=>{try{el.classList.remove('special-anim','grass-crash');}catch(_){}} ,2900);
+};
 
 function myTabAdminAction(){
   // 양육자(caregiver)는 항상 관리자 접근 가능 (isAdmin 플래그 없어도)
@@ -17560,6 +17711,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.96 (v0407zr)',date:'2026-04-08',items:[{type:'new',text:'챌린지 곤충 7종(무당벌레/꿀벌/달팽이/나비/개미/메뚜기/거미) — 곤충마다 10가지 클릭 반응 + 10회째 특별 액션. 나비는 진행률에 따라 애벌레→번데기→나비 진화. 메뚜기는 화면 위로 튀어 박치기 + 액정 깨짐 효과'},{type:'new',text:'나의 메뉴 → 챌린지 곤충 선택 (기본 랜덤)'}]},
   {ver:'1.9.95 (v0407zq)',date:'2026-04-07',items:[{type:'ui',text:'알림장 제목 이모지(📓) → 책 모양 SVG 아이콘으로 교체'}]},
   {ver:'1.9.94 (v0407zp)',date:'2026-04-07',items:[{type:'ui',text:'알림장(오늘 할일 이력) 디자인 모던 리뉴얼 — 앱 테마 토큰 사용으로 다크모드 자동 대응'},{type:'new',text:'무당벌레 10번 누르면 진짜로 화면 밖으로 날아갔다가 뱅그르르 돌며 제자리로 복귀'}]},
   {ver:'1.9.93 (v0407zo)',date:'2026-04-07',items:[{type:'new',text:'무당벌레 클릭 타격감 — 순간적으로 커지며 흰 날개 펄럭펄럭 후 원래 크기로 복귀'}]},
