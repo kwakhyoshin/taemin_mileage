@@ -377,11 +377,18 @@ body.dark .my-profile-card.tier-pro{border-color:rgba(245,158,11,.3);box-shadow:
 .my-lv-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:10px;background:linear-gradient(135deg,#FFD600,#FFA000);color:#5D4037;font-size:10px;font-weight:900;line-height:1;box-shadow:0 1px 3px rgba(245,158,11,.3);cursor:pointer;-webkit-tap-highlight-color:transparent;white-space:nowrap}
 body.dark .my-lv-badge{color:#3E2723}
 .adm-row-desc{font-size:11.5px;line-height:1.55;color:var(--tx3);padding:0 0 8px 0;font-weight:500}
-.info-btn{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;border:1.3px solid var(--tx3);background:transparent;color:var(--tx3);font-size:10px;font-weight:900;font-style:italic;font-family:Georgia,serif;margin-left:5px;cursor:pointer;vertical-align:1px;padding:0;line-height:1;-webkit-tap-highlight-color:transparent}
-.info-btn:hover{border-color:var(--tx2);color:var(--tx2)}
-.gs-detail{overflow:hidden;transition:max-height .25s ease,opacity .2s ease;max-height:600px;opacity:1}
-.gs-detail.gs-collapsed{max-height:0;opacity:0;pointer-events:none}
+.info-btn{display:inline-flex;align-items:center;gap:3px;padding:2px 8px 2px 7px;border-radius:10px;border:none;background:rgba(99,102,241,.1);color:#6366F1;font-size:10.5px;font-weight:700;margin-left:6px;cursor:pointer;line-height:1.3;-webkit-tap-highlight-color:transparent;vertical-align:1px;white-space:nowrap}
+.info-btn:hover{background:rgba(99,102,241,.18)}
+.info-btn::before{content:'?';display:inline-flex;align-items:center;justify-content:center;width:11px;height:11px;border-radius:50%;background:#6366F1;color:#fff;font-size:8px;font-weight:900;line-height:1}
+body.dark .info-btn{background:rgba(129,140,248,.18);color:#A5B4FC}
+body.dark .info-btn::before{background:#818CF8}
+.gs-detail{overflow:hidden;transition:max-height .25s ease,opacity .2s ease,margin .2s ease;max-height:1200px;opacity:1;margin-left:14px;padding-left:12px;border-left:2.5px solid rgba(99,102,241,.22);background:linear-gradient(90deg,rgba(99,102,241,.04),transparent);border-radius:0 8px 8px 0;margin-top:6px;margin-bottom:2px}
+.gs-detail .divider{display:none}
+.gs-detail .adm-row{padding-top:10px;padding-bottom:10px}
+.gs-detail .adm-row + .adm-row{border-top:1px dashed var(--bdr)}
+.gs-detail.gs-collapsed{max-height:0;opacity:0;pointer-events:none;margin-top:0;margin-bottom:0;border-left-color:transparent}
 .gs-detail.gs-collapsed + .divider{display:none}
+body.dark .gs-detail{border-left-color:rgba(129,140,248,.3);background:linear-gradient(90deg,rgba(129,140,248,.06),transparent)}
 /* ── 레벨 이펙트 (프로필 아이콘 주위) ── */
 .lv-fx-wrap{position:absolute;inset:-30%;pointer-events:none;z-index:1;overflow:visible}
 .lv-fx-wrap svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
@@ -4134,7 +4141,7 @@ requestAnimationFrame(function(){
       <div class="adm-card">
         <!-- 일일 룰렛 -->
         <div class="adm-row">
-          <div class="adm-row-l"><div class="adm-row-nm">🎰 일일 보너스 룰렛 <button class="info-btn" onclick="showGsInfo('roulette')">i</button></div><div class="adm-row-sub">매일 첫 접속 시 보너스 룰렛</div></div>
+          <div class="adm-row-l"><div class="adm-row-nm">🎰 일일 보너스 룰렛 <button class="info-btn" onclick="showGsInfo('roulette')">룰렛이란?</button></div><div class="adm-row-sub">매일 첫 접속 시 보너스 룰렛</div></div>
           <button class="tog" id="tog-roulette" onclick="togGameSetting('rouletteEnabled')"><div class="tog-dot"></div></button>
         </div>
         <div id="gs-detail-roulette" class="gs-detail">
@@ -4152,7 +4159,7 @@ requestAnimationFrame(function(){
         <div class="divider"></div>
         <!-- 주간 챌린지 -->
         <div class="adm-row">
-          <div class="adm-row-l"><div class="adm-row-nm">🏆 주간 챌린지 <button class="info-btn" onclick="showGsInfo('weekly')">i</button></div><div class="adm-row-sub">매주 월요일 자동 생성</div></div>
+          <div class="adm-row-l"><div class="adm-row-nm">🏆 주간 챌린지 <button class="info-btn" onclick="showGsInfo('weekly')">주간 챌린지란?</button></div><div class="adm-row-sub">매주 월요일 자동 생성</div></div>
           <button class="tog" id="tog-weekly" onclick="togGameSetting('weeklyEnabled')"><div class="tog-dot"></div></button>
         </div>
         <div id="gs-detail-weekly" class="gs-detail">
@@ -4168,7 +4175,7 @@ requestAnimationFrame(function(){
         <div class="divider"></div>
         <!-- 월간 챌린지 -->
         <div class="adm-row">
-          <div class="adm-row-l"><div class="adm-row-nm">📅 월간 챌린지 <button class="info-btn" onclick="showGsInfo('monthly')">i</button></div><div class="adm-row-sub">매월 1일 자동 생성</div></div>
+          <div class="adm-row-l"><div class="adm-row-nm">📅 월간 챌린지 <button class="info-btn" onclick="showGsInfo('monthly')">월간 챌린지란?</button></div><div class="adm-row-sub">매월 1일 자동 생성</div></div>
           <button class="tog" id="tog-monthly" onclick="togGameSetting('monthlyEnabled')"><div class="tog-dot"></div></button>
         </div>
         <div id="gs-detail-monthly" class="gs-detail">
@@ -4184,7 +4191,7 @@ requestAnimationFrame(function(){
         <div class="divider"></div>
         <!-- 레벨 시스템 -->
         <div class="adm-row">
-          <div class="adm-row-l"><div class="adm-row-nm">🎮 레벨 시스템 <button class="info-btn" onclick="showGsInfo('level')">i</button></div><div class="adm-row-sub">누적 마일리지로 자동 성장</div></div>
+          <div class="adm-row-l"><div class="adm-row-nm">🎮 레벨 시스템 <button class="info-btn" onclick="showGsInfo('level')">레벨 시스템이란?</button></div><div class="adm-row-sub">누적 마일리지로 자동 성장</div></div>
           <button class="tog" id="tog-level" onclick="togGameSetting('levelEnabled')"><div class="tog-dot"></div></button>
         </div>
         <div id="gs-detail-level" class="gs-detail">
@@ -9121,7 +9128,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0407k';
+const _APP_VERSION = 'v0407l';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -16901,6 +16908,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.56 (v0407l)',date:'2026-04-07',items:[{type:'fix',text:'관리자 게이미피케이션 상세 영역을 들여쓰기 + 좌측 액센트 바로 시각적 계층화 (하위 속성 느낌)'},{type:'fix',text:'i 아이콘을 "주간 챌린지란?" 등 라벨형 칩 버튼으로 교체 (가독성·발견성 개선)'}]},
   {ver:'1.9.55 (v0407k)',date:'2026-04-07',items:[{type:'fix',text:'자녀별 누적 XP 백필 — 레벨 시스템 도입 이전의 활동 기록(log)을 합산해 현재 레벨 자동 재계산'},{type:'fix',text:'양육자(부모) 나의 메뉴에서 본인 계정 레벨 배지/이펙트 숨김'},{type:'new',text:'나의 메뉴 가족 목록: 각 자녀 아이콘 아래에 현재 레벨 배지 표시'}]},
   {ver:'1.9.54 (v0407j)',date:'2026-04-07',items:[{type:'fix',text:'관리자 게이미피케이션 토글이 클릭 시 시각적으로 변하지 않던 버그 수정 (.tog.off 클래스 사용)'},{type:'new',text:'토글을 켰을 때만 상세 설정 펼침 — 일일/주간/월간/레벨 각 영역의 하위 설정이 토글 OFF면 자동 접힘'},{type:'new',text:'챌린지/레벨 설명을 i 버튼 + 안내 팝업으로 정리 — 인라인 long text 제거'},{type:'fix',text:'홈 화면 인사말 설정을 한 카드에 컴팩트하게 정리 — 자녀별 한 줄, 미리보기 인라인'}]},
   {ver:'1.9.53 (v0407i)',date:'2026-04-07',items:[{type:'fix',text:'아이별 레벨 독립 관리 — levelData를 memberData에 저장해 자녀별 분리 (기존 사용자는 자동 마이그레이션)'},{type:'fix',text:'Lv.5 불꽃 이펙트 재설계 — 아이콘 전체를 감싸는 방사형 불꽃으로 변경'},{type:'new',text:'레벨 시스템 확장 — 총 40레벨/10만 마일리지, Lv.21~40 신규 SVG 이펙트 20종 추가'},{type:'new',text:'레벨 팝업에도 레벨 이펙트 표시'}]},
