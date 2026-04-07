@@ -4151,7 +4151,7 @@ requestAnimationFrame(function(){
             <div style="display:flex;align-items:center;gap:8px">
               <input class="num-inp" id="rlt-min-inp" type="number" value="5" min="1" max="500" style="width:70px" onchange="saveGameSettings()">
               <span style="font-size:13px;font-weight:700;color:var(--tx3)">~</span>
-              <input class="num-inp" id="rlt-max-inp" type="number" value="100" min="1" max="1000" style="width:70px" onchange="saveGameSettings()">
+              <input class="num-inp" id="rlt-max-inp" type="number" value="20" min="1" max="1000" style="width:70px" onchange="saveGameSettings()">
               <span style="font-size:12px;color:var(--tx3);font-weight:600">마일리지</span>
             </div>
           </div>
@@ -4167,7 +4167,7 @@ requestAnimationFrame(function(){
           <div class="adm-row" style="flex-direction:column;align-items:stretch;gap:8px">
             <div class="adm-row-l"><div class="adm-row-nm">기본 보상</div><div class="adm-row-sub">레벨 1 기준 지급량 (레벨업할수록 증가)</div></div>
             <div style="display:flex;align-items:center;gap:8px">
-              <input class="num-inp" id="ch-weekly-reward" type="number" value="50" min="1" max="500" style="width:70px" onchange="saveGameSettings()">
+              <input class="num-inp" id="ch-weekly-reward" type="number" value="30" min="1" max="500" style="width:70px" onchange="saveGameSettings()">
               <span style="font-size:12px;color:var(--tx3);font-weight:600">마일리지</span>
             </div>
           </div>
@@ -4183,7 +4183,7 @@ requestAnimationFrame(function(){
           <div class="adm-row" style="flex-direction:column;align-items:stretch;gap:8px">
             <div class="adm-row-l"><div class="adm-row-nm">기본 보상</div><div class="adm-row-sub">레벨 1 기준 지급량 (레벨업할수록 증가)</div></div>
             <div style="display:flex;align-items:center;gap:8px">
-              <input class="num-inp" id="ch-monthly-reward" type="number" value="100" min="1" max="1000" style="width:70px" onchange="saveGameSettings()">
+              <input class="num-inp" id="ch-monthly-reward" type="number" value="50" min="1" max="1000" style="width:70px" onchange="saveGameSettings()">
               <span style="font-size:12px;color:var(--tx3);font-weight:600">마일리지</span>
             </div>
           </div>
@@ -9128,7 +9128,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0407m';
+const _APP_VERSION = 'v0407n';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -9553,19 +9553,19 @@ function _backfillLevelData(force){
       if(!ms)continue;
       if(!ms.levelData)ms.levelData={xp:0,level:1,xpLog:[]};
       const ld=ms.levelData;
-      const needs = force || ld._migrated || (!ld.xp && (ms.log||[]).length>0);
-      if(!needs)continue;
       // log 엔트리 중 actId가 있고 pts>0인 것만 합산 (보상 차감·생일보너스·룰렛은 제외)
-      let xp=0;
+      let xpFromLog=0;
       for(const entry of (ms.log||[])){
-        if(entry && entry.actId && typeof entry.pts==='number' && entry.pts>0) xp+=entry.pts;
+        if(entry && entry.actId && typeof entry.pts==='number' && entry.pts>0) xpFromLog+=entry.pts;
       }
-      if(xp>0){
-        ld.xp=xp;
-        ld.level=getLevelInfo(xp).level;
+      // 안전장치: 기존 xp와 log 합산값 중 더 큰 값 사용 (절대 감소 안 함)
+      const newXp=Math.max(ld.xp||0, xpFromLog);
+      if(newXp!==(ld.xp||0) || ld._migrated){
+        ld.xp=newXp;
+        ld.level=getLevelInfo(newXp).level;
+        delete ld._migrated;
+        changed=true;
       }
-      delete ld._migrated;
-      changed=true;
     }
     // 글로벌 S.levelData도 현재 뷰잉 중인 자녀의 값으로 동기화
     if(changed){
@@ -12587,7 +12587,7 @@ function renderChallengeCards(){
 function _getEffectiveRoulettePrizes(){
   const gs=S.settings?.gamification||{};
   const minP=gs.rouletteMin||5;
-  const maxP=gs.rouletteMax||100;
+  const maxP=gs.rouletteMax||20;
   // 기본 ROULETTE_PRIZES를 min~max 범위로 필터링/조정
   const filtered=ROULETTE_PRIZES.filter(p=>p.pts>=minP&&p.pts<=maxP);
   if(filtered.length>0)return filtered;
@@ -15445,10 +15445,10 @@ function togGameSetting(key){
 function saveGameSettings(){
   const gs=_getGameSettings();
   gs.rouletteMin=parseInt(document.getElementById('rlt-min-inp')?.value)||5;
-  gs.rouletteMax=parseInt(document.getElementById('rlt-max-inp')?.value)||100;
+  gs.rouletteMax=parseInt(document.getElementById('rlt-max-inp')?.value)||20;
   if(gs.rouletteMin>gs.rouletteMax){const t=gs.rouletteMin;gs.rouletteMin=gs.rouletteMax;gs.rouletteMax=t;}
-  gs.weeklyReward=parseInt(document.getElementById('ch-weekly-reward')?.value)||50;
-  gs.monthlyReward=parseInt(document.getElementById('ch-monthly-reward')?.value)||100;
+  gs.weeklyReward=parseInt(document.getElementById('ch-weekly-reward')?.value)||30;
+  gs.monthlyReward=parseInt(document.getElementById('ch-monthly-reward')?.value)||50;
   save();
 }
 function renderGameSettings(){
@@ -15466,9 +15466,9 @@ function renderGameSettings(){
   _setDetail('gs-detail-level',gs.levelEnabled!==false);
   // inputs
   const rMin=document.getElementById('rlt-min-inp');if(rMin)rMin.value=gs.rouletteMin||5;
-  const rMax=document.getElementById('rlt-max-inp');if(rMax)rMax.value=gs.rouletteMax||100;
-  const wR=document.getElementById('ch-weekly-reward');if(wR)wR.value=gs.weeklyReward||50;
-  const mR=document.getElementById('ch-monthly-reward');if(mR)mR.value=gs.monthlyReward||100;
+  const rMax=document.getElementById('rlt-max-inp');if(rMax)rMax.value=gs.rouletteMax||20;
+  const wR=document.getElementById('ch-weekly-reward');if(wR)wR.value=gs.weeklyReward||30;
+  const mR=document.getElementById('ch-monthly-reward');if(mR)mR.value=gs.monthlyReward||50;
   renderLevelEditor();
 }
 function renderLevelEditor(){
@@ -16911,6 +16911,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.58 (v0407n)',date:'2026-04-07',items:[{type:'fix',text:'기본 보상값 조정 — 일일 룰렛 5~20, 주간 챌린지 30, 월간 챌린지 50 마일리지'},{type:'fix',text:'XP 백필 안전장치 — 기존 levelData.xp와 log 합산값 중 더 큰 값 사용 (절대 감소 안 함)'}]},
   {ver:'1.9.57 (v0407m)',date:'2026-04-07',items:[{type:'fix',text:'Lv.5 불꽃 이펙트 — 작은 불꽃 9개 → 아이콘을 감싸는 큰 불꽃 1개(3겹 그라디언트)로 단순화'},{type:'new',text:'Lv.40 끝판왕 이펙트 재설계 — 무지개 그라디언트 링 + 발광 글로우 + 황금 별 + 무한 심볼 + 8방향 스파클 합성'},{type:'new',text:'나의 메뉴 가족 목록 자녀 아이콘에 레벨 이펙트 표시, 아이콘 간격 12px → 22px'}]},
   {ver:'1.9.56 (v0407l)',date:'2026-04-07',items:[{type:'fix',text:'관리자 게이미피케이션 상세 영역을 들여쓰기 + 좌측 액센트 바로 시각적 계층화 (하위 속성 느낌)'},{type:'fix',text:'i 아이콘을 "주간 챌린지란?" 등 라벨형 칩 버튼으로 교체 (가독성·발견성 개선)'}]},
   {ver:'1.9.55 (v0407k)',date:'2026-04-07',items:[{type:'fix',text:'자녀별 누적 XP 백필 — 레벨 시스템 도입 이전의 활동 기록(log)을 합산해 현재 레벨 자동 재계산'},{type:'fix',text:'양육자(부모) 나의 메뉴에서 본인 계정 레벨 배지/이펙트 숨김'},{type:'new',text:'나의 메뉴 가족 목록: 각 자녀 아이콘 아래에 현재 레벨 배지 표시'}]},
