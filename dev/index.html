@@ -9158,7 +9158,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0407z6';
+const _APP_VERSION = 'v0407z7';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -10157,23 +10157,56 @@ function isTodayAllDone(){
   if(todayActs.length===0)return false;
   return todayActs.every(a=>countDone(a)>=a.maxDay);
 }
+// 현재 보고 있는 멤버의 streak/lastDate/acts/actDone 컨텍스트를 가져옴 (양육자가 자녀 home을 볼 때 대응)
+function _getViewedStreakCtx(){
+  try{
+    if(getFamilyMode()==='independent'&&isCaregiverUser()){
+      const vid=getViewedMemberId();
+      const ms=vid&&S.memberData?S.memberData[vid]:null;
+      if(ms){
+        return {
+          streak:ms.streak||0,
+          lastDate:ms.lastDate||null,
+          acts:ms.acts||S.acts||[],
+          actDone:ms.actDone||{}
+        };
+      }
+    }
+  }catch(_e){}
+  return {streak:S.streak||0,lastDate:S.lastDate||null,acts:S.acts||[],actDone:S.actDone||{}};
+}
+// _getViewedStreakCtx 컨텍스트 기반으로 오늘 모든 할일 완료 여부 판정
+function _isViewedTodayAllDone(ctx){
+  const todayActs=(ctx.acts||[]).filter(a=>a.active&&isAvailableToday(a)&&a.maxDay>0);
+  if(todayActs.length===0)return false;
+  const t=todayStr();
+  const ws=weekStart();
+  const ms=monthStr();
+  return todayActs.every(a=>{
+    const rec=ctx.actDone[a.id];
+    if(!rec)return false;
+    if(a.cycle==='daily'&&rec.date!==t)return false;
+    if(a.cycle==='weekly'&&rec.date<ws)return false;
+    if(a.cycle==='monthly'&&rec.date.slice(0,7)<ms)return false;
+    return (rec.count||0)>=a.maxDay;
+  });
+}
 function getDisplayStreak(){
   const t=todayStr();
   const d=new Date();d.setDate(d.getDate()-1);
   const y=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-  const allDone=isTodayAllDone();
+  const ctx=_getViewedStreakCtx();
+  const allDone=_isViewedTodayAllDone(ctx);
   // lastDate가 오늘이면: 현재도 모든 할일이 완료 상태인지 재검증
-  // (활동 취소, 활동 추가 등으로 상태가 바뀔 수 있음)
-  if(S.lastDate===t){
-    // 오늘 다 했다면 최소 1일 이상 보장 (streak=0 상태가 잔존하는 경우 방어)
-    if(allDone) return Math.max(1, S.streak);
-    // 오늘 한때 다 했지만 지금은 아님 → 오늘은 미달성, streak에서 오늘분 빼기
-    return Math.max(0, S.streak - 1);
+  if(ctx.lastDate===t){
+    if(allDone) return Math.max(1, ctx.streak);
+    // 오늘 한때 다 했지만 지금은 아님 → 0으로 표시 (취소 즉시 반영)
+    return 0;
   }
   // lastDate가 어제면 → 오늘 다 했다면 +1, 아직이면 어제까지의 streak 유지
-  if(S.lastDate===y){
-    if(allDone) return S.streak + 1;
-    return S.streak;
+  if(ctx.lastDate===y){
+    if(allDone) return ctx.streak + 1;
+    return ctx.streak;
   }
   // 그보다 오래됨(또는 null) → 오늘 다 했다면 1, 아니면 0
   return allDone ? 1 : 0;
@@ -12518,22 +12551,18 @@ function updateChallengeProgress(){
   if(!S.challenges||!S.challenges.length)return;
   const now=new Date();
   S.challenges.forEach(c=>{
-    if(c.completed)return;
     if(new Date(c.endDate)<now)return;
     const start=new Date(c.startDate);
     let prog=0;
+    // 챌린지 보상 항목(chId)은 활동 진행도에서 제외
     if(c.check==='streak'){prog=Math.min(c.target,S.streak||0);}
     else if(c.check==='totalActs'){
-      prog=S.log.filter(l=>new Date(l.ts)>=start&&l.pts>0).length;
+      prog=S.log.filter(l=>new Date(l.ts)>=start&&l.pts>0&&!l.chId).length;
     }
     else if(c.check==='allDoneDays'){
-      // 등록된 활동을 모두 완료한 날 수 계산
-      // allDoneDays 트래킹: S.allDoneDays 배열에 날짜 기록 (renderAll 시 오늘 체크)
       const tracker=S.allDoneDays||[];
-      // 이번 기간(주간) 내의 완료 날 수만 카운트
       const startStr=`${start.getFullYear()}-${String(start.getMonth()+1).padStart(2,'0')}-${String(start.getDate()).padStart(2,'0')}`;
       prog=tracker.filter(d=>d>=startStr).length;
-      // 오늘 체크: isTodayAllDone()이 true이면 오늘 날짜 추가
       const todayS=todayStr();
       if(isTodayAllDone()&&!tracker.includes(todayS)){
         tracker.push(todayS);
@@ -12541,15 +12570,14 @@ function updateChallengeProgress(){
         prog=tracker.filter(d=>d>=startStr).length;
       }
     }
-    else if(c.check==='monthlyActs'){prog=S.log.filter(l=>new Date(l.ts)>=start&&l.pts>0).length;}
+    else if(c.check==='monthlyActs'){prog=S.log.filter(l=>new Date(l.ts)>=start&&l.pts>0&&!l.chId).length;}
     else if(c.check==='monthlyStreak'){prog=Math.min(c.target,S.streak||0);}
     else if(c.check==='monthlyPts'){
-      prog=S.log.filter(l=>new Date(l.ts)>=start&&l.pts>0).reduce((s,l)=>s+l.pts,0);
+      prog=S.log.filter(l=>new Date(l.ts)>=start&&l.pts>0&&!l.chId).reduce((s,l)=>s+l.pts,0);
     }
     c.progress=Math.min(prog,c.target);
-    if(c.progress>=c.target&&!c.completed){
-      c.completed=true;
-    }
+    // 완료/미완료 상태 동기화 (진행도가 목표 미달이면 완료 해제)
+    c.completed = (c.progress>=c.target);
   });
 }
 
@@ -17044,6 +17072,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.76 (v0407z7)',date:'2026-04-07',items:[{type:'fix',text:'챌린지 수령 후 활동 취소 시 진행도 재계산 누락 수정 — updateChallengeProgress의 early-return 제거'},{type:'fix',text:'양육자가 자녀 홈을 볼 때 0일→1일 연속 표시가 자녀의 streak/할일 상태로 즉시 반영'}]},
   {ver:'1.9.75 (v0407z6)',date:'2026-04-07',items:[{type:'fix',text:'챌린지 수령 후 활동 취소 시 이전 챌린지 진행상황으로 완전 복원 — 해금됐던 다음 레벨 챌린지도 자동 제거'}]},
   {ver:'1.9.74 (v0407z5)',date:'2026-04-07',items:[{type:'fix',text:'다른 탭에서 홈탭으로 복귀 시 마일리지 게이지 레이저/불꽃 애니메이션이 멈추는 현상 수정 — 복귀 시 강제 재시작'},{type:'fix',text:'오늘 할일을 모두 완료한 순간 연속일수가 즉시 반영되도록 수정 (lastDate/streak 동기화 지연 방어)'}]},
   {ver:'1.9.73 (v0407z4)',date:'2026-04-07',items:[{type:'feat',text:'챌린지 보상 마일리지가 활동기록(이력)에 표시되도록 추가 — 주간 🗓️ / 월간 🏆 아이콘'},{type:'fix',text:'활동 취소 시 진행 중/수령한 챌린지 진행도 자동 재계산 — 미달 시 보상 회수 및 이력 정리'}]},
