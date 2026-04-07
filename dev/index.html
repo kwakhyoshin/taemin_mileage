@@ -1473,7 +1473,9 @@ body.dark .adm-child-btn.on{background:rgba(255,107,53,.15)}
 /* 챌린지 진행률 바 위 무당벌레 */
 .ch-bar-wrap{position:relative;background:var(--bdr);border-radius:4px;height:6px;margin-top:18px}
 .ch-bar-fill{height:100%;border-radius:4px;transition:width .5s ease-out}
-.ch-bug{position:absolute;top:-12px;width:30px;height:30px;pointer-events:none;transition:left .5s ease-out;transform-origin:center center;animation:chBugBob .42s ease-in-out infinite;will-change:transform}
+.ch-bug{position:absolute;top:-12px;width:30px;height:30px;pointer-events:auto;cursor:pointer;transition:left .5s ease-out;transform-origin:center center;animation:chBugBob .42s ease-in-out infinite;will-change:transform}
+.bug-poke-msg{position:absolute;left:50%;top:-4px;transform:translate(-50%,0);font-size:13px;font-weight:900;color:#EF4444;white-space:nowrap;pointer-events:none;text-shadow:0 1px 0 #fff,0 0 4px #fff,0 0 6px #fff;animation:bugPokeRise 1.1s ease-out forwards;z-index:5}
+@keyframes bugPokeRise{0%{opacity:0;transform:translate(-50%,6px) scale(.6)}20%{opacity:1;transform:translate(-50%,-4px) scale(1.15)}40%{transform:translate(-50%,-10px) scale(1)}100%{opacity:0;transform:translate(-50%,-34px) scale(.95)}}
 .ch-bug svg{width:100%;height:100%;overflow:visible;display:block;transform:rotate(90deg)}
 .ch-bug .leg{transform-origin:12px 11px;animation:chLegWig .22s ease-in-out infinite alternate}
 .ch-bug .leg.l2,.ch-bug .leg.l5{animation-delay:.07s}
@@ -9158,7 +9160,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0407zm';
+const _APP_VERSION = 'v0407zn';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -12666,7 +12668,7 @@ function renderChallengeCards(){
       </div>
       <div class="ch-bar-wrap">
         <div class="ch-bar-fill" style="background:${isComplete?'var(--gn2)':'linear-gradient(90deg,var(--tab-color,#F59E0B),#EF4444)'};width:${Math.min(100,pct)}%"></div>
-        ${!isComplete?`<div class="ch-bug" style="left:calc(${Math.max(0,Math.min(100,pct))}% - 15px)">
+        ${!isComplete?`<div class="ch-bug" onclick="bugPoke(event,this)" style="left:calc(${Math.max(0,Math.min(100,pct))}% - 15px)">
           <svg viewBox="0 0 24 22">
             <ellipse class="sweat" cx="3" cy="2" rx="1.1" ry="1.6" fill="#42A5F5"/>
             <ellipse class="sweat s2" cx="21" cy="3" rx="1.1" ry="1.6" fill="#42A5F5"/>
@@ -17466,6 +17468,10 @@ function renderMyTab(){
   }catch(e){console.warn('[renderMyTab] family row err:',e);}
 }
 window.renderMyTab=renderMyTab;
+// 무당벌레 클릭 — 아얏! 등 메시지 순차 출력
+window._bugPokeMsgs=['\\ 아얏! /','\\ 앗 따거! /','\\ 간지러워~ /','\\ 살살! /','\\ 으악! /','\\ 깜짝이야! /','\\ 어이쿠! /','\\ 그만~ /','\\ 헤헤 /','\\ 히잉... /'];
+window._bugPokeIdx=0;
+window.bugPoke=function(ev,el){try{ev&&ev.stopPropagation&&ev.stopPropagation();if(!el)return;const msgs=window._bugPokeMsgs;const msg=msgs[window._bugPokeIdx%msgs.length];window._bugPokeIdx=(window._bugPokeIdx+1)%msgs.length;const d=document.createElement('div');d.className='bug-poke-msg';d.textContent=msg;el.appendChild(d);setTimeout(()=>{try{d.remove();}catch(_){}} ,1200);}catch(e){console.warn('[bugPoke]',e);}};
 
 function myTabAdminAction(){
   // 양육자(caregiver)는 항상 관리자 접근 가능 (isAdmin 플래그 없어도)
@@ -17537,6 +17543,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.92 (v0407zn)',date:'2026-04-07',items:[{type:'new',text:'챌린지 무당벌레 클릭하면 "\\ 아얏! /" 등 10가지 메시지가 순차적으로 떠오름 (아이 재미 요소)'}]},
   {ver:'1.9.91 (v0407zm)',date:'2026-04-07',items:[{type:'fix',text:'홈탭 "오늘 할 일" 제목과 아이콘이 붙어보이던 문제 수정 (이력보기 버튼 추가 시 inner span gap 누락)'}]},
   {ver:'1.9.90 (v0407zl)',date:'2026-04-07',items:[{type:'ui',text:'알림장 X 닫기 버튼 제거 — 수첩 바깥 dim 영역 탭으로 닫기 동작과 중복이라 정리'}]},
   {ver:'1.9.89 (v0407zk)',date:'2026-04-07',items:[{type:'fix',text:'알림장에서 미래 날짜로 넘기려 할 때 토스트가 dim 아래에 가려져 안 보이던 문제 — 오버레이 안에 자체 토스트(z-index 20) 표시'}]},
