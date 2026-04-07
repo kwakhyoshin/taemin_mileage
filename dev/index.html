@@ -373,7 +373,7 @@ body.dark .my-profile-card.tier-pro{border-color:rgba(245,158,11,.3);box-shadow:
 .my-avatar-wrap{width:50px;height:50px;border-radius:50%;overflow:visible;border:2.5px solid var(--tab-color,#475569);box-shadow:0 2px 8px rgba(0,0,0,.1);background:var(--bg2);flex-shrink:0;position:relative}
 .my-mood-badge{position:absolute;bottom:-2px;right:-4px;font-size:18px;line-height:1;z-index:2;animation:fpMoodPulse 2s ease-in-out infinite;filter:drop-shadow(0 1px 3px rgba(0,0,0,.3));pointer-events:none}
 .my-mood-particles{position:absolute;top:50%;left:50%;width:0;height:0;pointer-events:none;z-index:3;overflow:visible}
-.my-avatar-wrap img,.my-avatar-wrap svg{width:100%!important;height:100%!important;object-fit:cover;border-radius:50%;display:block}
+.my-avatar-wrap img,.my-avatar-wrap svg{width:100%!important;height:100%!important;object-fit:cover;border-radius:50%;display:block;position:relative;z-index:3}
 .my-lv-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:10px;background:linear-gradient(135deg,#FFD600,#FFA000);color:#5D4037;font-size:10px;font-weight:900;line-height:1;box-shadow:0 1px 3px rgba(245,158,11,.3);cursor:pointer;-webkit-tap-highlight-color:transparent;white-space:nowrap}
 body.dark .my-lv-badge{color:#3E2723}
 .adm-row-desc{font-size:11.5px;line-height:1.55;color:var(--tx3);padding:0 0 8px 0;font-weight:500}
@@ -470,8 +470,9 @@ body.dark .gs-detail{border-left-color:rgba(129,140,248,.3);background:linear-gr
 .my-list-item-toggle:active{background:transparent}
 /* iOS-style theme picker */
 .theme-picker{display:flex;gap:10px;justify-content:center;padding:8px 0 0}
-.theme-pick{display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;-webkit-tap-highlight-color:transparent;flex:1;max-width:110px}
-.theme-pick-preview{width:100%;height:68px;border-radius:14px;border:3px solid transparent;overflow:hidden;transition:border-color .25s,box-shadow .25s;position:relative}
+.theme-pick{display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;-webkit-tap-highlight-color:transparent;flex:1 1 0;min-width:0;max-width:110px}
+.theme-pick-preview{width:100%;height:68px;border-radius:14px;border:3px solid var(--bdr,#E2E8F0);overflow:hidden;transition:border-color .25s,box-shadow .25s;position:relative;background:var(--bg2)}
+.theme-pick-preview svg{display:block;width:100%;height:100%;border-radius:11px;overflow:hidden}
 .theme-pick.active .theme-pick-preview{border-color:#6366F1;box-shadow:0 2px 10px rgba(99,102,241,.25)}
 .theme-pick-label{font-size:11px;font-weight:700;color:var(--tx2)}
 .theme-pick-radio{width:20px;height:20px;border-radius:50%;border:2px solid #CBD5E1;display:flex;align-items:center;justify-content:center;transition:all .2s}
@@ -1563,8 +1564,8 @@ body.dark .spider-line{background:rgba(255,255,255,.65)}
 @keyframes crackFade{0%{opacity:0}1.5%{opacity:1}85%{opacity:1}100%{opacity:0}}
 body.screen-shake{animation:screenShake .55s linear}
 @keyframes screenShake{0%,100%{transform:translate(0,0)}10%{transform:translate(-4px,3px)}20%{transform:translate(4px,-3px)}30%{transform:translate(-3px,4px)}40%{transform:translate(3px,-4px)}50%{transform:translate(-4px,2px)}60%{transform:translate(4px,-2px)}70%{transform:translate(-3px,3px)}80%{transform:translate(3px,-2px)}90%{transform:translate(-2px,2px)}}
-.bug-picker{display:flex;flex-wrap:wrap;gap:6px;padding:4px 2px 2px}
-.bug-pick{flex:1 1 calc(25% - 6px);min-width:60px;padding:8px 4px;border:1.5px solid var(--bdr);background:var(--bg2);border-radius:12px;font-family:inherit;font-size:11px;font-weight:700;color:var(--tx2);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;transition:all .15s}
+.bug-picker{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;padding:4px 2px 2px}
+.bug-pick{width:100%;min-width:0;padding:8px 2px;border:1.5px solid var(--bdr);background:var(--bg2);border-radius:12px;font-family:inherit;font-size:11px;font-weight:700;color:var(--tx2);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;transition:all .15s;box-sizing:border-box}
 .bug-pick:hover{border-color:var(--bdr2)}
 .bug-pick.active{border-color:var(--tab-color,#6366F1);background:var(--card);color:var(--tx);box-shadow:0 0 0 2px var(--tab-color,#6366F1)33}
 .bug-pick .bp-emoji{font-size:18px;line-height:1}
@@ -1579,7 +1580,7 @@ body.screen-shake{animation:screenShake .55s linear}
 .my-family-row::-webkit-scrollbar{display:none}
 .my-family-member{display:flex;flex-direction:column;align-items:center;gap:5px;flex-shrink:0;cursor:pointer}
 .my-family-avatar{width:52px;height:52px;border-radius:50%;overflow:visible;border:2.5px solid var(--or);background:var(--bg2);flex-shrink:0;position:relative}
-.my-family-avatar svg,.my-family-avatar img{width:100%!important;height:100%!important;object-fit:cover;border-radius:50%;display:block}
+.my-family-avatar svg,.my-family-avatar img{width:100%!important;height:100%!important;object-fit:cover;border-radius:50%;display:block;position:relative;z-index:3}
 .mf-mood-badge{position:absolute;bottom:-2px;right:-4px;font-size:16px;line-height:1;z-index:2;animation:fpMoodPulse 2s ease-in-out infinite;filter:drop-shadow(0 1px 3px rgba(0,0,0,.3));pointer-events:none}
 .mf-unread-badge{position:absolute;top:-4px;left:-4px;min-width:18px;height:18px;background:#EF4444;color:#fff;font-size:10px;font-weight:900;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 5px;pointer-events:none;box-shadow:0 2px 6px rgba(239,68,68,.4);line-height:1;z-index:3}
 .mf-mood-particles{position:absolute;top:50%;left:50%;width:0;height:0;pointer-events:none;z-index:3;overflow:visible}
@@ -4556,20 +4557,6 @@ requestAnimationFrame(function(){
           <span class="theme-pick-label">라이트</span>
           <div class="theme-pick-radio"></div>
         </div>
-        <div class="theme-pick" data-theme="dark" onclick="window._setTheme('dark')">
-          <div class="theme-pick-preview">
-            <svg viewBox="0 0 100 72" width="100%" height="100%">
-              <rect width="100" height="72" fill="#0F172A"/>
-              <rect x="8" y="6" width="84" height="14" rx="7" fill="#1E293B"/>
-              <rect x="28" y="10" width="44" height="6" rx="3" fill="#334155" opacity=".6"/>
-              <rect x="8" y="26" width="84" height="12" rx="6" fill="#1E293B" stroke="#334155" stroke-width="1"/>
-              <rect x="8" y="42" width="84" height="12" rx="6" fill="#1E293B" stroke="#334155" stroke-width="1"/>
-              <rect x="8" y="58" width="84" height="12" rx="6" fill="#1E293B" stroke="#334155" stroke-width="1"/>
-            </svg>
-          </div>
-          <span class="theme-pick-label">다크</span>
-          <div class="theme-pick-radio"></div>
-        </div>
         <div class="theme-pick active" data-theme="system" onclick="window._setTheme('system')">
           <div class="theme-pick-preview">
             <svg viewBox="0 0 100 72" width="100%" height="100%">
@@ -4597,6 +4584,20 @@ requestAnimationFrame(function(){
             </svg>
           </div>
           <span class="theme-pick-label">시스템</span>
+          <div class="theme-pick-radio"></div>
+        </div>
+        <div class="theme-pick" data-theme="dark" onclick="window._setTheme('dark')">
+          <div class="theme-pick-preview">
+            <svg viewBox="0 0 100 72" width="100%" height="100%">
+              <rect width="100" height="72" fill="#0F172A"/>
+              <rect x="8" y="6" width="84" height="14" rx="7" fill="#1E293B"/>
+              <rect x="28" y="10" width="44" height="6" rx="3" fill="#334155" opacity=".6"/>
+              <rect x="8" y="26" width="84" height="12" rx="6" fill="#1E293B" stroke="#334155" stroke-width="1"/>
+              <rect x="8" y="42" width="84" height="12" rx="6" fill="#1E293B" stroke="#334155" stroke-width="1"/>
+              <rect x="8" y="58" width="84" height="12" rx="6" fill="#1E293B" stroke="#334155" stroke-width="1"/>
+            </svg>
+          </div>
+          <span class="theme-pick-label">다크</span>
           <div class="theme-pick-radio"></div>
         </div>
       </div>
@@ -9256,7 +9257,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0407zv';
+const _APP_VERSION = 'v0407zw';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -17777,6 +17778,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.0.1 (v0407zw)',date:'2026-04-08',items:[{type:'fix',text:'프로필 아바타 z-index 상향 — 레벨 이펙트(불꽃 등)가 사용자 아이콘을 덮는 현상 수정'},{type:'fix',text:'나의 메뉴 챌린지 곤충 선택 버튼 5칸 그리드로 동일 크기 통일 (거미만 커지던 문제 수정)'},{type:'ui',text:'화면 모드 선택 라이트→시스템→다크 순서로 재배치 + 모든 미리보기에 동일한 둥근 외곽선 적용해 셋이 같은 모양·크기로 보이도록 통일'}]},
   {ver:'2.0.0 (v0407zv)',date:'2026-04-08',items:[{type:'new',text:'개미 10회 클릭 특별액션 교체 — 동료 개미 38마리가 화면 좌→우로 우르르 행진하며 "공격이다!" "적을 공격해라!" 외침'}]},
   {ver:'1.9.99 (v0407zu)',date:'2026-04-08',items:[{type:'fix',text:'메뚜기 박치기 액정 깨짐 효과 리얼하게 개선 — 충돌 지점을 화면 상단 → 화면 약 40% 위치로 이동, 방사형 균열 + 보조 균열 + 충격 동심원 + 중심 섬광으로 한층 사실적, 한번에 깨지고 변하지 않도록 페이드 타이밍 조정'},{type:'fix',text:'거미 특별액션 — 거미줄이 거미 위쪽으로만 보이도록 수정(아래 삐져나옴 제거), 내려오는 속도 좀 더 느리게'}]},
   {ver:'1.9.98 (v0407zt)',date:'2026-04-08',items:[{type:'ui',text:'챌린지 곤충 4종으로 정리(무당벌레/개미/메뚜기/거미). 메뚜기는 옆모습 + 큰 뒷다리 강조'},{type:'new',text:'개미 10회 클릭 → 먹이를 사용자 쪽으로 던짐(눈앞에서 거대해지며 흐려지다 액정에 맞아 깨짐)'},{type:'new',text:'거미 10회 클릭 → 게이지바 쪽으로 쏜살같이 사라진 뒤 화면 최상단에서 거미줄 타고 내려와 "난 스파이더맨이다!" 외침'}]},
