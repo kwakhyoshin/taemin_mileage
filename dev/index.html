@@ -9156,7 +9156,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0407y';
+const _APP_VERSION = 'v0407z';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -12590,7 +12590,7 @@ function renderChallengeCards(){
     const diffLabel=lvNum<=3?'쉬움':lvNum<=6?'보통':'어려움';
     return `<div style="background:var(--card);border-radius:16px;padding:14px 16px;margin-bottom:8px;box-shadow:0 2px 8px rgba(0,0,0,.04);border:.5px solid var(--bdr);${isComplete&&!isClaimed?'border-color:var(--tab-color,#F59E0B);box-shadow:0 2px 12px rgba(245,158,11,.15)':''}">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-        <span style="font-size:24px">${c.emoji}</span>
+        <span style="width:32px;height:32px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center">${c.type==='weekly'?`<svg viewBox="0 0 32 32" width="32" height="32"><defs><linearGradient id="chWkG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#818CF8"/><stop offset="1" stop-color="#6366F1"/></linearGradient></defs><rect x="4" y="6" width="24" height="22" rx="4" fill="url(#chWkG)"/><rect x="4" y="6" width="24" height="6" rx="4" fill="#4F46E5"/><circle cx="9" cy="4" r="1.4" fill="#4F46E5"/><circle cx="23" cy="4" r="1.4" fill="#4F46E5"/><rect x="8.5" y="3" width="1" height="5" rx=".5" fill="#4F46E5"/><rect x="22.5" y="3" width="1" height="5" rx=".5" fill="#4F46E5"/><rect x="8" y="15" width="3" height="3" rx=".6" fill="#fff" opacity=".55"/><rect x="13" y="15" width="3" height="3" rx=".6" fill="#fff" opacity=".55"/><rect x="18" y="15" width="3" height="3" rx=".6" fill="#fff" opacity=".55"/><rect x="23" y="15" width="3" height="3" rx=".6" fill="#fff" opacity=".55"/><rect x="8" y="20" width="3" height="3" rx=".6" fill="#fff" opacity=".55"/><rect x="13" y="20" width="3" height="3" rx=".6" fill="#fff" opacity=".55"/><rect x="18" y="20" width="3" height="3" rx=".6" fill="#FDE047"/><path d="M19.5 21.5 L20.5 21.5 L21 22.4 L21.5 21.5 L22.5 21.5 L21.7 22.2 L22 23.2 L21 22.7 L20 23.2 L20.3 22.2 Z" fill="#F59E0B"/></svg>`:`<svg viewBox="0 0 32 32" width="32" height="32"><defs><linearGradient id="chMoG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F472B6"/><stop offset="1" stop-color="#DB2777"/></linearGradient><radialGradient id="chMoS" cx=".5" cy=".4" r=".6"><stop offset="0" stop-color="#FDE68A"/><stop offset="1" stop-color="#F59E0B"/></radialGradient></defs><path d="M9 6 H23 L22 18 Q22 23 16 23 Q10 23 10 18 Z" fill="url(#chMoG)"/><path d="M7 8 Q4 10 5 13 Q6 15 9 14" fill="none" stroke="#DB2777" stroke-width="2" stroke-linecap="round"/><path d="M25 8 Q28 10 27 13 Q26 15 23 14" fill="none" stroke="#DB2777" stroke-width="2" stroke-linecap="round"/><rect x="13" y="23" width="6" height="3" fill="#DB2777"/><rect x="10" y="26" width="12" height="2.5" rx="1" fill="#9D174D"/><circle cx="16" cy="13.5" r="5" fill="url(#chMoS)"/><path d="M16 9.5 L16.9 12 L19.5 12 L17.4 13.6 L18.2 16.1 L16 14.5 L13.8 16.1 L14.6 13.6 L12.5 12 L15.1 12 Z" fill="#fff" opacity=".95"/></svg>`}</span>
         <div style="flex:1;min-width:0">
           <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">
             <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:10px;background:${c.type==='weekly'?'rgba(99,102,241,.12)':'rgba(236,72,153,.12)'};color:${c.type==='weekly'?'#6366F1':'#EC4899'}">${typeLabel}</span>
@@ -16980,6 +16980,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.70 (v0407z)',date:'2026-04-07',items:[{type:'new',text:'홈탭 진행중인 챌린지 아이콘 — 주간(보라 캘린더+황금별)/월간(핑크 트로피+빛나는별) 전용 SVG로 교체'}]},
   {ver:'1.9.69 (v0407y)',date:'2026-04-07',items:[{type:'fix',text:'홈탭 레벨 pill과 가족 목록 레벨 불일치 수정 — getViewedLevelData() 헬퍼로 단일 소스(memberData) 우선 조회'}]},
   {ver:'1.9.68 (v0407x)',date:'2026-04-07',items:[{type:'fix',text:'불꽃과 fill 겹치는 부분 clip-path로 잘라내기 — fill 오른쪽으로 튀는 스파크만 보임'}]},
   {ver:'1.9.67 (v0407w)',date:'2026-04-07',items:[{type:'fix',text:'용접 불꽃 z-index 조정 — 게이지 fill 뒤, 가이드 트랙 앞에 위치'}]},
