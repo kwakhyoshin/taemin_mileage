@@ -9158,7 +9158,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0407zh';
+const _APP_VERSION = 'v0407zi';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -14510,13 +14510,14 @@ function _backfillRecentFromLog(){
 // ── DAY DIARY 알림장 UI ──────────────────────────────────
 let _diaryDate = null;
 let _diaryAnimating = false;
+let _diaryScrollY = 0;
 function openDayDiary(){
   _diaryDate = todayStr();
   let ov = document.getElementById('diary-ov');
   if(ov) ov.remove();
   ov = document.createElement('div');
   ov.id = 'diary-ov';
-  ov.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(15,12,40,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;animation:diaryFade .25s ease;padding:16px;overscroll-behavior:contain;touch-action:none';
+  ov.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(15,12,40,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;flex-direction:column;align-items:center;justify-content:center;animation:diaryFade .25s ease;padding:16px;overscroll-behavior:contain;touch-action:none';
   ov.innerHTML = ''
     + '<style>'
     + '@keyframes diaryFade{from{opacity:0}to{opacity:1}}'
@@ -14552,12 +14553,12 @@ function openDayDiary(){
     + '.diary-act-right .progress.zero{color:#9CA3AF;background:transparent;border-color:#E5E7EB;border-style:dashed}'
     + '.diary-empty{font-family:inherit;font-size:13px;color:#9CA3AF;text-align:center;padding:40px 16px;background:rgba(255,255,255,.5);border:1px dashed #D6C7A3;border-radius:12px;margin-top:8px}'
     + '.diary-empty .em{font-size:34px;display:block;margin-bottom:8px;opacity:.6}'
-    + '.diary-sidebtns{position:absolute;left:calc(50% + min(180px,46vw) + 10px);top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:12px;z-index:6}'
-    + '.diary-sidebtn{width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.5);color:#fff;font-size:16px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 4px 12px rgba(0,0,0,.3);transition:transform .15s,background .15s}'
-    + '.diary-sidebtn:hover{background:rgba(255,255,255,.32);transform:scale(1.08)}'
-    + '.diary-sidebtn:active{transform:scale(.95)}'
-    + '@media (max-width:480px){.diary-sidebtns{left:auto;right:6px;top:auto;bottom:18px;flex-direction:row;transform:none}}'
-    + '.diary-close{position:absolute;top:10px;right:10px;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.35);border:1.5px solid rgba(255,234,212,.5);color:#FBEAD4;font-size:15px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;box-shadow:0 2px 4px rgba(0,0,0,.4)}'
+    + '.diary-navbar{display:flex;gap:14px;justify-content:center;align-items:center;margin-top:14px;z-index:6}'
+    + '.diary-navbtn{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.55);color:#fff;font-size:16px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 4px 12px rgba(0,0,0,.35);transition:transform .15s,background .15s}'
+    + '.diary-navbtn:hover{background:rgba(255,255,255,.34);transform:scale(1.08)}'
+    + '.diary-navbtn:active{transform:scale(.95)}'
+    + ''
+    + '.diary-close{position:absolute;top:13px;right:12px;width:26px;height:26px;border-radius:50%;background:rgba(0,0,0,.35);border:1.5px solid rgba(255,234,212,.5);color:#FBEAD4;font-size:12px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;box-shadow:0 2px 4px rgba(0,0,0,.4);line-height:1;padding:0}'
     + '.diary-close:hover{background:rgba(0,0,0,.55);transform:scale(1.05)}'
     + '.diary-nav-hint{position:absolute;left:50%;transform:translateX(-50%);font-family:inherit;font-size:10px;color:#9CA3AF;pointer-events:none;z-index:6}'
     + '.diary-nav-hint.down{bottom:6px}'
@@ -14576,18 +14577,35 @@ function openDayDiary(){
     + '.diary-cal-cell .cnt{font-size:9px;color:#92400E;line-height:1}'
     + '</style>'
     + '<div class="diary-paper" id="diary-paper">'
-    + '<div class="diary-header"><span class="diary-header-title">📓 알림장</span></div>'
+    + '<div class="diary-header"><span class="diary-header-title">📓 오늘 할일 이력</span></div>'
     + '<button class="diary-close" onclick="closeDayDiary()">✕</button>'
     + '<div class="diary-stage" id="diary-stage"><div class="diary-page" id="diary-page"></div></div>'
     + '<div class="diary-nav-hint down">위/아래로 스와이프하면 날짜 이동</div>'
     + '</div>'
-    + '<div class="diary-sidebtns">'
-    + '<button class="diary-sidebtn" onclick="diaryNav(1)" title="다음 날" aria-label="다음 날">▲</button>'
-    + '<button class="diary-sidebtn" onclick="diaryNav(-1)" title="이전 날" aria-label="이전 날">▼</button>'
+    + '<div class="diary-navbar">'
+    + '<button class="diary-navbtn" onclick="diaryNav(1)" title="다음 날" aria-label="다음 날">▲</button>'
+    + '<button class="diary-navbtn" onclick="diaryNav(-1)" title="이전 날" aria-label="이전 날">▼</button>'
     + '</div>';
   document.body.appendChild(ov);
+  // 본문 스크롤 락 — 다이어리 열려있는 동안 페이지 자체 스크롤 차단 (dim 영역이 따라 움직이는 문제 근원적 해결)
+  try{
+    _diaryScrollY = window.scrollY || window.pageYOffset || 0;
+    document.body.style.position='fixed';
+    document.body.style.top=(-_diaryScrollY)+'px';
+    document.body.style.left='0';
+    document.body.style.right='0';
+    document.body.style.width='100%';
+  }catch(_lke){}
   ov.addEventListener('click',function(e){ if(e.target===ov) closeDayDiary(); });
-  ov.addEventListener('touchmove',function(e){ if(e.target===ov) e.preventDefault(); },{passive:false});
+  // 다이어리 페이지 안쪽이 아닌 영역의 touchmove는 완전 차단
+  ov.addEventListener('touchmove',function(e){
+    var t=e.target;
+    if(!t || !t.closest || !t.closest('#diary-page')) e.preventDefault();
+  },{passive:false});
+  ov.addEventListener('wheel',function(e){
+    var t=e.target;
+    if(!t || !t.closest || !t.closest('#diary-page')) e.preventDefault();
+  },{passive:false});
   var touchStartY=null;
   var stage = ov.querySelector('#diary-stage');
   stage.addEventListener('touchstart',function(e){ touchStartY=e.touches[0].clientY; },{passive:true});
@@ -14600,7 +14618,17 @@ function openDayDiary(){
   _renderDiaryPage();
 }
 window.openDayDiary = openDayDiary;
-function closeDayDiary(){ var ov=document.getElementById('diary-ov'); if(ov) ov.remove(); }
+function closeDayDiary(){
+  var ov=document.getElementById('diary-ov'); if(ov) ov.remove();
+  try{
+    document.body.style.position='';
+    document.body.style.top='';
+    document.body.style.left='';
+    document.body.style.right='';
+    document.body.style.width='';
+    window.scrollTo(0, _diaryScrollY||0);
+  }catch(_uke){}
+}
 window.closeDayDiary = closeDayDiary;
 function diaryNav(delta){
   if(_diaryAnimating)return;
@@ -17509,6 +17537,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.87 (v0407zi)',date:'2026-04-07',items:[{type:'fix',text:'알림장 X 닫기 버튼 크기 축소(32→26px) 및 위치 보정 — 고동색 헤더 바 안에 정확히 정렬'},{type:'ui',text:'수첩 헤더 제목을 "알림장" → "오늘 할일 이력"으로 변경'},{type:'fix',text:'수첩 스크롤 시 dim 영역이 따라 움직이던 문제 근원적 해결 — 본문 body 자체를 position:fixed로 락하고 닫을 때 원래 스크롤 위치 복원, 수첩 안쪽 외 touchmove/wheel 모두 preventDefault'},{type:'ui',text:'위/아래 화살표 버튼을 화면 바닥이 아닌 수첩 바로 아래에 가로로 배치 (오버레이를 column flex로 변경)'}]},
   {ver:'1.9.86 (v0407zh)',date:'2026-04-07',items:[{type:'fix',text:'라이트 모드에서 이력보기 버튼 외곽선이 잘 안 보이던 문제 — 보더 두께/색 강화 + 옅은 배경 추가'},{type:'fix',text:'홈탭 스크롤 시 컨텐츠가 hero 헤더가 다 줄어들기 전에 헤더 안으로 숨던 문제 — shrink threshold를 60→140으로 늘려 hero 높이 변화량보다 스크롤 거리가 항상 크도록 보장, padding을 CSS transition 없이 inline으로 직접 보간'}]},
   {ver:'1.9.85 (v0407zg)',date:'2026-04-07',items:[{type:'fix',text:'알림장 수첩 스크롤 시 바깥 dim 영역이 함께 움직이던 문제 수정 — overscroll-behavior:contain + touch-action 격리, 오버레이 자체 touchmove preventDefault'},{type:'ui',text:'수첩 우측 상하 모서리 화살표가 달력/날짜 영역과 겹쳐 보이던 문제 — 모서리 화살표 제거 후 수첩 바깥 우측에 둥근 ▲▼ 버튼 배치 (모바일에선 하단 우측에 가로로)'}]},
   {ver:'1.9.84 (v0407zf)',date:'2026-04-07',items:[{type:'fix',text:'알림장 수첩 상단에 두꺼운 고동색 헤더 바 복원 — X 닫기 버튼이 헤더 안에 명확히 자리잡고, 제목(📓 알림장) 함께 표시'},{type:'fix',text:'페이지 넘김 애니메이션을 진짜 종이 넘기듯 구현 — 이전/다음 페이지가 동시에 상하로 슬라이드 교차 (기존 페이지는 사라지고 새 페이지가 반대 방향에서 들어옴)'},{type:'ui',text:'수첩 내부 활동 카드 디자인 개선 — 둥근 카드에 이모지 타일 + 제목 + 상태 서브텍스트 + 우측 도장/진행 배지, 날짜는 노란 카드로 강조, 요약은 점선 박스로 구분'}]},
