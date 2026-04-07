@@ -9156,7 +9156,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0407z3';
+const _APP_VERSION = 'v0407z4';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -12550,7 +12550,13 @@ function claimChallengeReward(chId, btnEl){
   const ch=S.challenges.find(c=>c.id===chId);
   if(!ch||!ch.completed||ch.claimed)return;
   ch.claimed=true;
+  ch.claimedAt=Date.now();
   S.pts+=ch.reward;
+  // 활동기록(S.log)에도 챌린지 보상 항목 추가 — 취소 가능하도록 chId 포함
+  const _chIcon=ch.type==='weekly'?'🗓️':'🏆';
+  const _chTypeLabel=ch.type==='weekly'?'주간':'월간';
+  S.log.unshift({id:'l_'+Date.now(),emoji:_chIcon,name:`[${_chTypeLabel} 챌린지] ${ch.title}`,pts:ch.reward,ts:Date.now(),actId:null,chId:ch.id,user:_globalDataOwner||currentUser});
+  if(S.log.length>300)S.log=S.log.slice(0,300);
   const hist=S.challengeHistory||(S.challengeHistory=[]);
   hist.unshift({...ch,claimedAt:Date.now()});
   if(hist.length>50)S.challengeHistory=hist.slice(0,50);
@@ -14236,11 +14242,46 @@ function _undoActCore(actId){
     S.lastDate=S.streak>0?`${_yd.getFullYear()}-${String(_yd.getMonth()+1).padStart(2,'0')}-${String(_yd.getDate()).padStart(2,'0')}`:null;
   }
 
+  // 챌린지 진행도 재계산 + 이미 수령한 챌린지 롤백 처리
+  let _chRolledBack=[];
+  try{
+    if(typeof updateChallengeProgress==='function'){
+      updateChallengeProgress();
+      (S.challenges||[]).forEach(c=>{
+        if(c.progress<c.target){
+          if(c.claimed){
+            // 이미 보상받은 챌린지가 다시 미달이 됨 → 보상 회수
+            const _rwd=c.reward||0;
+            S.pts=Math.max(0,S.pts-_rwd);
+            // S.log에서 해당 챌린지 보상 항목 제거
+            const _li=S.log.findIndex(l=>l.chId===c.id&&l.pts===_rwd);
+            if(_li!==-1)S.log.splice(_li,1);
+            // challengeHistory에서도 제거
+            if(Array.isArray(S.challengeHistory)){
+              S.challengeHistory=S.challengeHistory.filter(h=>h.id!==c.id);
+            }
+            c.claimed=false;
+            c.completed=false;
+            _chRolledBack.push({title:c.title,reward:_rwd});
+          } else if(c.completed){
+            // 미수령 완료 상태였다면 완료 해제
+            c.completed=false;
+          }
+        }
+      });
+    }
+  }catch(_e){}
+
   // 역방향 별 애니메이션: 마일리지 → 활동 카드 방향
   const _actCard = document.querySelector(`.act-card[data-actid="${actId}"]`);
   if(_actCard) flyCoinsFromMileage(_actCard, entry.pts);
   save();renderAll();
   toast(`↩ ${a.name} 취소됨 (-${entry.pts} 마일리지)`);
+  if(_chRolledBack.length){
+    setTimeout(()=>{
+      _chRolledBack.forEach(rb=>toast(`↩ "${rb.title}" 챌린지 롤백 (-${rb.reward} 마일리지)`));
+    },400);
+  }
 }
 
 // ── STICKER & BUBBLE MESSAGE SYSTEM ──────────────────────
@@ -16980,6 +17021,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.73 (v0407z4)',date:'2026-04-07',items:[{type:'feat',text:'챌린지 보상 마일리지가 활동기록(이력)에 표시되도록 추가 — 주간 🗓️ / 월간 🏆 아이콘'},{type:'fix',text:'활동 취소 시 진행 중/수령한 챌린지 진행도 자동 재계산 — 미달 시 보상 회수 및 이력 정리'}]},
   {ver:'1.9.72 (v0407z3)',date:'2026-04-07',items:[{type:'feat',text:'밀리 FAB 드래그 인터랙션 강화 — 드래그 시 캐릭터 1.5배 확대, 아우라 발광 강화, 랜덤 포즈(wave/happy/excited/love/think/success/surprise) 표시'}]},
   {ver:'1.9.71 (v0407z2)',date:'2026-04-07',items:[{type:'fix',text:'마일리지 게이지 레이저 흐름 속도 일정화 — background-position tile 방식에서 transform-free left 애니메이션으로 변경 (1.8s 주기 단일 패스)'}]},
   {ver:'1.9.70 (v0407z)',date:'2026-04-07',items:[{type:'new',text:'홈탭 진행중인 챌린지 아이콘 — 주간(보라 캘린더+황금별)/월간(핑크 트로피+빛나는별) 전용 SVG로 교체'}]},
