@@ -1544,20 +1544,20 @@ body.dark .spider-thread{background:rgba(255,255,255,.5)}
 .ch-bug.spider-dash{animation:spiderDash .7s ease-in forwards!important;z-index:50}
 @keyframes spiderDash{0%{transform:translate(0,0)}30%{transform:translate(-15px,0) scale(1.1)}100%{transform:translate(500px,0) scale(.9);opacity:0}}
 #__spider_drop__{position:fixed;left:50%;top:0;width:0;height:0;z-index:99998;pointer-events:none}
-.spider-line{position:absolute;left:0;top:0;width:2px;background:rgba(0,0,0,.6);transform:translateX(-50%);height:0;animation:spiderDropLine 5.2s ease-in-out forwards}
+.spider-line{position:absolute;left:0;top:0;width:2px;background:rgba(0,0,0,.6);transform:translateX(-50%);height:0;animation:spiderDropLine 7s ease-in-out forwards}
 body.dark .spider-line{background:rgba(255,255,255,.65)}
-@keyframes spiderDropLine{0%{height:0}18%{height:50vh}82%{height:50vh}96%{height:0}100%{height:0}}
-.spider-body{position:absolute;left:0;top:-60px;width:64px;height:64px;transform:translate(-50%,0);animation:spiderDropBody 5.2s ease-in-out forwards;filter:drop-shadow(0 4px 10px rgba(0,0,0,.45))}
+@keyframes spiderDropLine{0%{height:0}28%{height:calc(50vh - 36px)}85%{height:calc(50vh - 36px)}97%{height:0}100%{height:0}}
+.spider-body{position:absolute;left:0;top:-60px;width:64px;height:64px;transform:translate(-50%,0);animation:spiderDropBody 7s ease-in-out forwards;filter:drop-shadow(0 4px 10px rgba(0,0,0,.45))}
 .spider-body svg{width:100%;height:100%;display:block;transform:rotate(0)!important;overflow:visible}
-@keyframes spiderDropBody{0%{transform:translate(-50%,-60px)}18%{transform:translate(-50%,calc(50vh - 32px)) rotate(0)}25%{transform:translate(-50%,calc(50vh - 32px)) rotate(8deg)}33%{transform:translate(-50%,calc(50vh - 32px)) rotate(-8deg)}41%{transform:translate(-50%,calc(50vh - 32px)) rotate(6deg)}49%{transform:translate(-50%,calc(50vh - 32px)) rotate(-6deg)}82%{transform:translate(-50%,calc(50vh - 32px)) rotate(0)}96%{transform:translate(-50%,-60px)}100%{transform:translate(-50%,-60px)}}
+@keyframes spiderDropBody{0%{transform:translate(-50%,-60px)}28%{transform:translate(-50%,calc(50vh - 32px)) rotate(0)}36%{transform:translate(-50%,calc(50vh - 32px)) rotate(8deg)}45%{transform:translate(-50%,calc(50vh - 32px)) rotate(-8deg)}54%{transform:translate(-50%,calc(50vh - 32px)) rotate(6deg)}63%{transform:translate(-50%,calc(50vh - 32px)) rotate(-6deg)}85%{transform:translate(-50%,calc(50vh - 32px)) rotate(0)}97%{transform:translate(-50%,-60px)}100%{transform:translate(-50%,-60px)}}
 .spider-quote{position:absolute;left:62px;top:18px;background:#fff;color:#1a1a1a;padding:8px 14px;border-radius:16px;font-size:14px;font-weight:900;white-space:nowrap;border:2.5px solid #1a1a1a;box-shadow:0 6px 18px rgba(0,0,0,.35);opacity:0;animation:spiderQuoteShow 5.2s ease-out forwards}
 .spider-quote::before{content:'';position:absolute;left:-9px;top:50%;width:11px;height:11px;background:#fff;border-left:2.5px solid #1a1a1a;border-bottom:2.5px solid #1a1a1a;transform:translateY(-50%) rotate(45deg)}
-@keyframes spiderQuoteShow{0%,22%{opacity:0;transform:scale(.6)}30%{opacity:1;transform:scale(1.18)}36%{transform:scale(1)}82%{opacity:1;transform:scale(1)}94%{opacity:0;transform:scale(.85)}100%{opacity:0}}
+@keyframes spiderQuoteShow{0%,32%{opacity:0;transform:scale(.6)}40%{opacity:1;transform:scale(1.18)}46%{transform:scale(1)}85%{opacity:1;transform:scale(1)}96%{opacity:0;transform:scale(.85)}100%{opacity:0}}
 /* Grasshopper crash */
-.ch-bug.grass-crash{animation:grassCrash 2.8s cubic-bezier(.3,.05,.4,1) forwards!important;z-index:50;transform-origin:center bottom}
-@keyframes grassCrash{0%{transform:translate(0,0) scale(1)}6%{transform:translate(0,4px) scale(1.15,.85)}10%{transform:translate(0,-30px) scale(.95,1.15)}22%{transform:translate(0,-220px) scale(1.5)}32%{transform:translate(0,-380px) scale(1.7)}36%{transform:translate(0,-420px) scale(1.85,1.5)}42%{transform:translate(0,-380px) scale(1.5,1.85)}58%{transform:translate(0,-120px) rotate(180deg) scale(1.2)}78%{transform:translate(0,30px) rotate(360deg) scale(1)}88%{transform:translate(0,8px) scale(1.1,.9)}100%{transform:translate(0,0) scale(1)}}
-#__bug_crack__{position:fixed;inset:0;z-index:99999;pointer-events:none;animation:crackFade 3.2s ease-out forwards}
-@keyframes crackFade{0%{opacity:0}5%{opacity:1}88%{opacity:1}100%{opacity:0}}
+.ch-bug.grass-crash{animation:grassCrash 3.1s cubic-bezier(.3,.05,.4,1) forwards!important;z-index:50;transform-origin:center bottom}
+@keyframes grassCrash{0%{transform:translate(0,0) scale(1)}5%{transform:translate(0,4px) scale(1.15,.85)}9%{transform:translate(0,-30px) scale(.95,1.15)}20%{transform:translate(0,calc(var(--gh-dy,-280px) * .5)) scale(1.35)}28%{transform:translate(0,calc(var(--gh-dy,-280px) * .85)) scale(1.55)}32%{transform:translate(0,var(--gh-dy,-280px)) scale(1.7,1.4)}38%{transform:translate(0,calc(var(--gh-dy,-280px) + 14px)) scale(1.55,1.7)}46%{transform:translate(0,calc(var(--gh-dy,-280px) + 24px)) rotate(40deg) scale(1.4,1.55)}62%{transform:translate(0,calc(var(--gh-dy,-280px) * .35)) rotate(220deg) scale(1.2)}80%{transform:translate(0,30px) rotate(360deg) scale(1)}90%{transform:translate(0,8px) scale(1.1,.9)}100%{transform:translate(0,0) scale(1)}}
+#__bug_crack__{position:fixed;inset:0;z-index:99999;pointer-events:none;animation:crackFade 3s linear forwards}
+@keyframes crackFade{0%{opacity:0}1.5%{opacity:1}85%{opacity:1}100%{opacity:0}}
 body.screen-shake{animation:screenShake .55s linear}
 @keyframes screenShake{0%,100%{transform:translate(0,0)}10%{transform:translate(-4px,3px)}20%{transform:translate(4px,-3px)}30%{transform:translate(-3px,4px)}40%{transform:translate(3px,-4px)}50%{transform:translate(-4px,2px)}60%{transform:translate(4px,-2px)}70%{transform:translate(-3px,3px)}80%{transform:translate(3px,-2px)}90%{transform:translate(-2px,2px)}}
 .bug-picker{display:flex;flex-wrap:wrap;gap:6px;padding:4px 2px 2px}
@@ -9253,7 +9253,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0407zt';
+const _APP_VERSION = 'v0407zu';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -17680,26 +17680,32 @@ window.bugSpecial_spiderWeb=function(el){
       document.body.appendChild(drop);
       setTimeout(()=>{
         try{drop.remove();el.style.visibility='';el.classList.remove('special-anim','spider-dash');}catch(_){}
-      },5200);
+      },7000);
     }catch(_){}
   },700);
 };
 window.bugSpecial_grasshopperCrash=function(el){
+  try{
+    const r=el.getBoundingClientRect();
+    const targetY=window.innerHeight*0.40;
+    const dy=targetY-(r.top+r.height/2);
+    el.style.setProperty('--gh-dy',dy+'px');
+  }catch(_){el.style.setProperty('--gh-dy','-280px');}
   el.classList.add('special-anim','grass-crash');
   setTimeout(()=>{
     try{
       document.body.classList.add('screen-shake');
-      setTimeout(()=>{try{document.body.classList.remove('screen-shake');}catch(_){}} ,600);
+      setTimeout(()=>{try{document.body.classList.remove('screen-shake');}catch(_){}} ,520);
       const old=document.getElementById('__bug_crack__');
       if(old)old.remove();
       const crack=document.createElement('div');
       crack.id='__bug_crack__';
-      crack.innerHTML='<svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0"><defs><filter id="cf" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation=".25"/></filter></defs><g stroke="#ffffff" stroke-width=".22" fill="none" filter="url(#cf)" opacity=".95"><line x1="50" y1="6" x2="14" y2="62"/><line x1="50" y1="6" x2="32" y2="78"/><line x1="50" y1="6" x2="48" y2="92"/><line x1="50" y1="6" x2="64" y2="86"/><line x1="50" y1="6" x2="84" y2="68"/><line x1="50" y1="6" x2="92" y2="40"/><line x1="50" y1="6" x2="8" y2="32"/><line x1="50" y1="6" x2="20" y2="20"/><line x1="50" y1="6" x2="78" y2="22"/><line x1="14" y1="62" x2="32" y2="78"/><line x1="32" y1="78" x2="48" y2="92"/><line x1="48" y1="92" x2="64" y2="86"/><line x1="64" y1="86" x2="84" y2="68"/><line x1="84" y1="68" x2="92" y2="40"/><line x1="20" y1="20" x2="14" y2="62"/><line x1="78" y1="22" x2="92" y2="40"/><line x1="20" y1="20" x2="8" y2="32"/></g><circle cx="50" cy="6" r="3" fill="#fff" opacity=".85"/><circle cx="50" cy="6" r="6" fill="none" stroke="#fff" stroke-width=".25" opacity=".55"/><circle cx="50" cy="6" r="9" fill="none" stroke="#fff" stroke-width=".18" opacity=".35"/></svg>';
+      crack.innerHTML='<svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0"><defs><radialGradient id="ghflash" cx="50%" cy="40%" r="22%"><stop offset="0%" stop-color="#fff" stop-opacity=".9"/><stop offset="35%" stop-color="#fff" stop-opacity=".35"/><stop offset="100%" stop-color="#fff" stop-opacity="0"/></radialGradient></defs><rect width="100" height="100" fill="url(#ghflash)"/><g stroke="#ffffff" stroke-width=".32" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity=".95"><path d="M50 40 L48 32 L46 22 L44 10 L42 0"/><path d="M50 40 L52 32 L56 22 L60 10 L62 0"/><path d="M50 40 L46 38 L36 36 L24 32 L10 28 L0 24"/><path d="M50 40 L54 38 L66 36 L78 34 L92 30 L100 28"/><path d="M50 40 L48 46 L44 56 L38 70 L34 86 L30 100"/><path d="M50 40 L52 46 L56 56 L62 70 L68 84 L72 100"/><path d="M50 40 L44 42 L34 46 L20 52 L8 60 L0 66"/><path d="M50 40 L56 42 L68 46 L82 50 L94 56 L100 60"/><path d="M50 40 L46 34 L40 26 L30 16 L18 8 L8 2"/><path d="M50 40 L54 34 L62 26 L72 18 L84 10 L94 4"/><path d="M50 40 L48 48 L42 60 L34 76 L20 92 L10 100"/><path d="M50 40 L52 48 L58 60 L66 76 L78 90 L86 100"/><path d="M46 22 L40 24 L36 30 M40 24 L34 18"/><path d="M56 22 L62 24 L66 30 M62 24 L68 18"/><path d="M44 56 L36 60 L32 66 M36 60 L28 56"/><path d="M56 56 L64 60 L68 66 M64 60 L72 56"/><path d="M36 36 L30 40 L26 46 M30 40 L24 36"/><path d="M66 36 L72 40 L76 46 M72 40 L78 36"/><path d="M46 46 L42 50 M54 46 L58 50"/></g><g stroke="#fff" fill="none" stroke-linecap="round"><circle cx="50" cy="40" r="2.2" stroke-width=".5" opacity=".95"/><circle cx="50" cy="40" r="5" stroke-width=".3" opacity=".75"/><circle cx="50" cy="40" r="9" stroke-width=".2" opacity=".45"/><circle cx="50" cy="40" r="14" stroke-width=".15" opacity=".25"/></g><circle cx="50" cy="40" r="1.6" fill="#fff"/></svg>';
       document.body.appendChild(crack);
-      setTimeout(()=>{try{crack.remove();}catch(_){}} ,3200);
+      setTimeout(()=>{try{crack.remove();}catch(_){}} ,3000);
     }catch(_){}
-  },680);
-  setTimeout(()=>{try{el.classList.remove('special-anim','grass-crash');}catch(_){}} ,2900);
+  },920);
+  setTimeout(()=>{try{el.classList.remove('special-anim','grass-crash');el.style.removeProperty('--gh-dy');}catch(_){}} ,3100);
 };
 
 function myTabAdminAction(){
@@ -17772,6 +17778,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.99 (v0407zu)',date:'2026-04-08',items:[{type:'fix',text:'메뚜기 박치기 액정 깨짐 효과 리얼하게 개선 — 충돌 지점을 화면 상단 → 화면 약 40% 위치로 이동, 방사형 균열 + 보조 균열 + 충격 동심원 + 중심 섬광으로 한층 사실적, 한번에 깨지고 변하지 않도록 페이드 타이밍 조정'},{type:'fix',text:'거미 특별액션 — 거미줄이 거미 위쪽으로만 보이도록 수정(아래 삐져나옴 제거), 내려오는 속도 좀 더 느리게'}]},
   {ver:'1.9.98 (v0407zt)',date:'2026-04-08',items:[{type:'ui',text:'챌린지 곤충 4종으로 정리(무당벌레/개미/메뚜기/거미). 메뚜기는 옆모습 + 큰 뒷다리 강조'},{type:'new',text:'개미 10회 클릭 → 먹이를 사용자 쪽으로 던짐(눈앞에서 거대해지며 흐려지다 액정에 맞아 깨짐)'},{type:'new',text:'거미 10회 클릭 → 게이지바 쪽으로 쏜살같이 사라진 뒤 화면 최상단에서 거미줄 타고 내려와 "난 스파이더맨이다!" 외침'}]},
   {ver:'1.9.97 (v0407zs)',date:'2026-04-08',items:[{type:'ui',text:'챌린지 곤충 SVG 전면 리디자인 — 다크모드 가시성 개선(드롭섀도우), 꿀벌 날개 하늘색으로 라이트모드에서도 보이도록, 개미 올블랙, 달팽이 머리/껍질 방향 수정'},{type:'new',text:'곤충별 10회 클릭 특별 액션 전면 교체: 꿀벌 → 벌침 발사, 달팽이 → 껍질에 바퀴 달고 화면 레이싱, 나비 → 화면 상단으로 날아올라 폭죽에 맞고 추락, 개미 → 자기보다 큰 빵조각 옮기기'},{type:'fix',text:'나비 진화 단계(애벌레/번데기) 제거 — 항상 나비로 표시'}]},
   {ver:'1.9.96 (v0407zr)',date:'2026-04-08',items:[{type:'new',text:'챌린지 곤충 7종(무당벌레/꿀벌/달팽이/나비/개미/메뚜기/거미) — 곤충마다 10가지 클릭 반응 + 10회째 특별 액션. 나비는 진행률에 따라 애벌레→번데기→나비 진화. 메뚜기는 화면 위로 튀어 박치기 + 액정 깨짐 효과'},{type:'new',text:'나의 메뉴 → 챌린지 곤충 선택 (기본 랜덤)'}]},
