@@ -501,10 +501,10 @@ body.dark .theme-pick.active .theme-pick-radio{border-color:#818CF8;background:#
 .hero.compact #child-selector{display:none!important}
 .streak-pill:active{transform:scale(.95);background:rgba(255,255,255,.3)}
 .prog-track{position:relative;background:rgba(255,255,255,.25);border-radius:7px;height:14px;margin-top:14px;transition:margin .25s;overflow:visible}
-.prog-fill{position:relative;background:rgba(255,255,255,.9);border-radius:7px;height:100%;transition:width .7s;overflow:hidden}
-.prog-fill::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(90deg,transparent 0%,transparent 35%,rgba(255,255,255,1) 50%,transparent 65%,transparent 100%);background-size:220% 100%;mix-blend-mode:overlay;animation:laserSlide 1.3s linear infinite;pointer-events:none}
+.prog-fill{position:relative;background:rgba(255,255,255,.55);border-radius:7px;height:100%;transition:width .7s;overflow:hidden}
+.prog-fill::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(90deg,transparent 0%,transparent 30%,rgba(255,255,255,.4) 42%,#ffffff 50%,rgba(255,255,255,.4) 58%,transparent 70%,transparent 100%);background-size:220% 100%;animation:laserSlide 1.4s linear infinite;pointer-events:none}
 @keyframes laserSlide{0%{background-position:-110% 0}100%{background-position:210% 0}}
-.prog-spark{position:absolute;top:50%;width:24px;height:24px;transform:translate(-50%,-50%);pointer-events:none;transition:left .7s,opacity .3s;z-index:3}
+.prog-spark{position:absolute;top:50%;width:36px;height:36px;transform:translate(-50%,-50%);pointer-events:none;transition:left .7s,opacity .3s,width .25s,height .25s;z-index:3}
 .prog-spark svg{width:100%;height:100%;overflow:visible;display:block}
 .prog-spark .sp{stroke:#FFD54F;stroke-width:1.6;stroke-linecap:round;fill:none;filter:drop-shadow(0 0 2px #FFA726);animation:sprkFly .55s ease-out infinite;stroke-dasharray:0 14}
 .prog-spark .sp.s2{animation-delay:.08s}
@@ -9155,7 +9155,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0407r';
+const _APP_VERSION = 'v0407s';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -14684,7 +14684,7 @@ function switchViewingChild(childId){
     const _isWide=window.innerWidth>=768;
     _hero.style.borderRadius=_isWide?'0':'0 0 38px 38px';
     const _pt=_hero.querySelector('.prog-track');
-    if(_pt){_pt.style.height='14px';_pt.style.borderRadius='7px';}
+    if(_pt){_pt.style.height='14px';_pt.style.borderRadius='7px';const _sp3=_pt.querySelector('.prog-spark');if(_sp3){_sp3.style.width='42px';_sp3.style.height='42px';}}
     const _pe=_hero.querySelector('.hero-pts');if(_pe)_pe.style.fontSize='';
     const _le=_hero.querySelector('.hero-lbl');if(_le)_le.style.fontSize='';
     const _ue=_hero.querySelector('.hero-unit');if(_ue)_ue.style.fontSize='';
@@ -16970,6 +16970,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.63 (v0407s)',date:'2026-04-07',items:[{type:'fix',text:'마일리지 게이지 레이저 가시성 개선 — 바 색을 약간 어둡게 + 흰빛 대비 강화'},{type:'fix',text:'용접 불꽃 전반적으로 크기 확대 + 게이지 바 높이에 비례해 함께 스케일 (22~42px)'}]},
   {ver:'1.9.62 (v0407r)',date:'2026-04-07',items:[{type:'new',text:'홈탭 마일리지 게이지에 레이저 효과 — 흰색 빛이 좌→우로 흐르고, 진행 끝점에서 용접 불꽃이 튀는 듯한 SVG 애니메이션'}]},
   {ver:'1.9.61 (v0407q)',date:'2026-04-07',items:[{type:'fix',text:'챌린지 게이지 바 굵기 원복 (6px) — 무당벌레 크기는 유지'}]},
   {ver:'1.9.60 (v0407p)',date:'2026-04-07',items:[{type:'fix',text:'챌린지 게이지 무당벌레 — 크기 키우고 90도 회전시켜 게이지 바 위에 정확히 정렬되어 채워지는 방향으로 걸어가는 모습으로 개선'}]},
@@ -21756,6 +21757,9 @@ window._createState = _createState;
           const gh=gaugeMax-(gaugeMax-gaugeMin)*brRatioHome;
           _progTrack.style.height=gh+'px';
           _progTrack.style.borderRadius=(gh/2)+'px';
+          // 불꽃 크기를 게이지 높이에 비례하여 스케일 (작을때 22px, 클때 42px)
+          const _sp2=_progTrack.querySelector('.prog-spark');
+          if(_sp2){const sMax=42,sMin=22;const sz=sMin+(sMax-sMin)*((gh-gaugeMin)/(gaugeMax-gaugeMin));_sp2.style.width=sz+'px';_sp2.style.height=sz+'px';}
         }
         // Smooth hero-pts font size: 58px → 32px (gradual, not sudden)
         if(_ptEl){
