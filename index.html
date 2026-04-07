@@ -374,6 +374,85 @@ body.dark .my-profile-card.tier-pro{border-color:rgba(245,158,11,.3);box-shadow:
 .my-mood-badge{position:absolute;bottom:-2px;right:-4px;font-size:18px;line-height:1;z-index:2;animation:fpMoodPulse 2s ease-in-out infinite;filter:drop-shadow(0 1px 3px rgba(0,0,0,.3));pointer-events:none}
 .my-mood-particles{position:absolute;top:50%;left:50%;width:0;height:0;pointer-events:none;z-index:3;overflow:visible}
 .my-avatar-wrap img,.my-avatar-wrap svg{width:100%!important;height:100%!important;object-fit:cover;border-radius:50%;display:block}
+.my-lv-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:10px;background:linear-gradient(135deg,#FFD600,#FFA000);color:#5D4037;font-size:10px;font-weight:900;line-height:1;box-shadow:0 1px 3px rgba(245,158,11,.3);cursor:pointer;-webkit-tap-highlight-color:transparent;white-space:nowrap}
+body.dark .my-lv-badge{color:#3E2723}
+.adm-row-desc{font-size:11.5px;line-height:1.55;color:var(--tx3);padding:0 0 8px 0;font-weight:500}
+.info-btn{display:inline-flex;align-items:center;gap:3px;padding:2px 8px 2px 7px;border-radius:10px;border:none;background:rgba(99,102,241,.1);color:#6366F1;font-size:10.5px;font-weight:700;margin-left:6px;cursor:pointer;line-height:1.3;-webkit-tap-highlight-color:transparent;vertical-align:1px;white-space:nowrap}
+.info-btn:hover{background:rgba(99,102,241,.18)}
+.info-btn::before{content:'?';display:inline-flex;align-items:center;justify-content:center;width:11px;height:11px;border-radius:50%;background:#6366F1;color:#fff;font-size:8px;font-weight:900;line-height:1}
+body.dark .info-btn{background:rgba(129,140,248,.18);color:#A5B4FC}
+body.dark .info-btn::before{background:#818CF8}
+.gs-detail{overflow:hidden;transition:max-height .25s ease,opacity .2s ease,margin .2s ease;max-height:1200px;opacity:1;margin-left:14px;padding-left:12px;border-left:2.5px solid rgba(99,102,241,.22);background:linear-gradient(90deg,rgba(99,102,241,.04),transparent);border-radius:0 8px 8px 0;margin-top:6px;margin-bottom:2px}
+.gs-detail .divider{display:none}
+.gs-detail .adm-row{padding-top:10px;padding-bottom:10px}
+.gs-detail .adm-row + .adm-row{border-top:1px dashed var(--bdr)}
+.gs-detail.gs-collapsed{max-height:0;opacity:0;pointer-events:none;margin-top:0;margin-bottom:0;border-left-color:transparent}
+.gs-detail.gs-collapsed + .divider{display:none}
+body.dark .gs-detail{border-left-color:rgba(129,140,248,.3);background:linear-gradient(90deg,rgba(129,140,248,.06),transparent)}
+/* ── 레벨 이펙트 (프로필 아이콘 주위) ── */
+.lv-fx-wrap{position:absolute;inset:-30%;pointer-events:none;z-index:1;overflow:visible}
+.lv-fx-wrap svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+@keyframes lvSpin{to{transform:rotate(360deg)}}
+@keyframes lvSpinRev{to{transform:rotate(-360deg)}}
+@keyframes lvTwinkle{0%,100%{opacity:.3;transform:scale(.7)}50%{opacity:1;transform:scale(1.2)}}
+@keyframes lvPulse{0%,100%{transform:scale(1);opacity:.7}50%{transform:scale(1.15);opacity:1}}
+@keyframes lvFlicker{0%,100%{transform:scaleY(1) translateY(0);opacity:.9}50%{transform:scaleY(1.15) translateY(-1px);opacity:1}}
+@keyframes lvFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes lvRipple{0%{transform:scale(.6);opacity:.9}100%{transform:scale(1.4);opacity:0}}
+@keyframes lvGlowPulse{0%,100%{filter:drop-shadow(0 0 3px rgba(255,215,0,.6))}50%{filter:drop-shadow(0 0 10px rgba(255,215,0,1))}}
+@keyframes lvSway{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(6deg)}}
+@keyframes lvFall{0%{transform:translateY(-10px) rotate(0deg);opacity:0}20%{opacity:1}80%{opacity:1}100%{transform:translateY(15px) rotate(120deg);opacity:0}}
+@keyframes lvBoltFlash{0%,90%,100%{opacity:0}5%,15%{opacity:1}}
+@keyframes lvShine{0%{transform:translateX(-100%) rotate(45deg)}100%{transform:translateX(100%) rotate(45deg)}}
+@keyframes lvHueRot{0%{filter:hue-rotate(0deg)}100%{filter:hue-rotate(360deg)}}
+@keyframes lvOrbit1{0%{transform:rotate(0deg) translateX(34px) rotate(0deg)}100%{transform:rotate(360deg) translateX(34px) rotate(-360deg)}}
+@keyframes lvOrbit2{0%{transform:rotate(120deg) translateX(34px) rotate(-120deg)}100%{transform:rotate(480deg) translateX(34px) rotate(-480deg)}}
+@keyframes lvOrbit3{0%{transform:rotate(240deg) translateX(34px) rotate(-240deg)}100%{transform:rotate(600deg) translateX(34px) rotate(-600deg)}}
+@keyframes lvSlash{0%{transform:rotate(-45deg) translateX(-50%);opacity:0}30%{opacity:1}70%{opacity:1}100%{transform:rotate(-45deg) translateX(50%);opacity:0}}
+@keyframes lvScalePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
+@keyframes lvBlink{0%,80%,100%{opacity:.5}40%{opacity:1}}
+.lv-spin{animation:lvSpin 8s linear infinite;transform-origin:center}
+.lv-spinR{animation:lvSpinRev 12s linear infinite;transform-origin:center}
+.lv-tw>*{animation:lvTwinkle 1.6s ease-in-out infinite}
+.lv-tw>:nth-child(2){animation-delay:.3s}
+.lv-tw>:nth-child(3){animation-delay:.6s}
+.lv-tw>:nth-child(4){animation-delay:.9s}
+.lv-tw>:nth-child(5){animation-delay:.4s}
+.lv-tw>:nth-child(6){animation-delay:.7s}
+.lv-pulse{animation:lvPulse 2s ease-in-out infinite;transform-origin:center}
+.lv-flicker>*{animation:lvFlicker .35s ease-in-out infinite}
+.lv-flicker>:nth-child(2){animation-delay:.1s}
+.lv-flicker>:nth-child(3){animation-delay:.2s}
+.lv-float{animation:lvFloat 2.4s ease-in-out infinite}
+.lv-ripple>*{animation:lvRipple 2.2s ease-out infinite;transform-origin:center}
+.lv-ripple>:nth-child(2){animation-delay:.7s}
+.lv-ripple>:nth-child(3){animation-delay:1.4s}
+.lv-glow{animation:lvGlowPulse 2s ease-in-out infinite}
+.lv-sway{animation:lvSway 2.4s ease-in-out infinite;transform-origin:center bottom}
+.lv-fall>*{animation:lvFall 3s ease-in infinite}
+.lv-fall>:nth-child(2){animation-delay:1s}
+.lv-fall>:nth-child(3){animation-delay:2s}
+.lv-bolts>*{animation:lvBoltFlash 1.5s ease-out infinite}
+.lv-bolts>:nth-child(2){animation-delay:.5s}
+.lv-bolts>:nth-child(3){animation-delay:1s}
+.lv-hue{animation:lvHueRot 6s linear infinite}
+.lv-orb1{animation:lvOrbit1 4s linear infinite;transform-origin:center}
+.lv-orb2{animation:lvOrbit2 4s linear infinite;transform-origin:center}
+.lv-orb3{animation:lvOrbit3 4s linear infinite;transform-origin:center}
+.lv-slash{animation:lvSlash 1.6s ease-in-out infinite}
+.lv-scale{animation:lvScalePulse 1.8s ease-in-out infinite;transform-origin:center}
+.lv-blink>*{animation:lvBlink 2s ease-in-out infinite}
+.lv-blink>:nth-child(odd){animation-delay:1s}
+/* 레벨 편집기 */
+.lv-editor{display:grid;grid-template-columns:1fr;gap:8px;max-height:480px;overflow-y:auto;padding:4px 2px;border:1px solid var(--bdr,#E2E8F0);border-radius:12px;background:var(--bg2)}
+.lv-edit-row{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--card);border-radius:10px}
+.lv-edit-preview{width:48px;height:48px;border-radius:50%;background:var(--bg);position:relative;flex-shrink:0;border:2px solid var(--bdr,#E2E8F0);overflow:visible}
+.lv-edit-preview .lv-fx-wrap{inset:-30%}
+.lv-edit-preview svg.lv-icon{width:100%;height:100%;border-radius:50%;display:block;position:relative;z-index:2}
+.lv-edit-info{flex:1;min-width:0}
+.lv-edit-info .lv-edit-title{font-size:12px;font-weight:800;color:var(--tx);line-height:1.2}
+.lv-edit-info .lv-edit-sub{font-size:10.5px;color:var(--tx3);font-weight:600;margin-top:2px}
+.lv-edit-row input.num-inp{width:78px;font-size:13px}
 .my-info-text{flex:1}
 .my-name{font-size:17px;font-weight:900;color:var(--tx);line-height:1.2}
 .my-role{font-size:11px;font-weight:700;color:var(--tx3);background:var(--bg2);padding:2px 10px;border-radius:20px;display:inline-block;margin-top:4px}
@@ -411,13 +490,15 @@ body.dark .theme-pick.active .theme-pick-radio{border-color:#818CF8;background:#
 .child-picker-name{font-size:16px;font-weight:800;color:var(--tx);flex:1}
 
 /* HERO - Sticky on scroll, full width when stuck */
-.hero{margin:0;background:linear-gradient(180deg,var(--tab-color,#6366F1),var(--tab-color2,#818CF8));border-radius:0 0 38px 38px;padding:14px 20px 22px;color:#fff;position:sticky;top:0;z-index:10;overflow:hidden;box-shadow:0 4px 20px var(--tab-shadow,rgba(99,102,241,0.3));transition:padding .25s}
+.hero{margin:0;background:linear-gradient(180deg,var(--tab-color,#6366F1),var(--tab-color2,#818CF8));border-radius:0 0 38px 38px;padding:4px 20px 22px;color:#fff;position:sticky;top:0;z-index:10;overflow:hidden;box-shadow:0 4px 20px var(--tab-shadow,rgba(99,102,241,0.3));transition:padding .25s}
 .hero::after{display:none}
 .hero-lbl{font-size:14px;font-weight:700;opacity:.85;transition:font-size .25s}
 .hero-pts{font-size:58px;font-weight:900;letter-spacing:-2px;line-height:1;transition:font-size .25s}
 .hero-unit{font-size:18px;font-weight:700;opacity:.85;transition:font-size .25s}
 .hero-goal{font-size:15px;opacity:.82;margin-top:6px;font-weight:600;line-height:1.4;transition:all .25s;max-height:50px;overflow:hidden}
-.streak-pill{position:absolute;top:18px;right:18px;background:rgba(255,255,255,.2);border-radius:20px;padding:5px 12px;font-size:13px;font-weight:800;transition:all .25s;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.streak-pill{background:rgba(255,255,255,.2);border-radius:20px;padding:5px 12px;font-size:13px;font-weight:800;transition:all .25s,top .25s;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.hero.compact #child-switcher{display:none!important}
+.hero.compact #child-selector{display:none!important}
 .streak-pill:active{transform:scale(.95);background:rgba(255,255,255,.3)}
 .prog-track{background:rgba(255,255,255,.25);border-radius:7px;height:14px;margin-top:14px;transition:margin .25s}
 .prog-fill{background:rgba(255,255,255,.9);border-radius:7px;height:100%;transition:width .7s}
@@ -501,7 +582,8 @@ body.dark .theme-pick.active .theme-pick-radio{border-color:#818CF8;background:#
 .hero.compact .hero-pts{font-size:32px;display:inline!important;opacity:1!important;visibility:visible!important}
 .hero.compact .hero-unit{font-size:14px;display:inline!important;opacity:1!important;visibility:visible!important}
 .hero.compact .hero-goal{max-height:0;margin-top:0;opacity:0}
-.hero.compact .streak-pill{top:calc(12px + env(safe-area-inset-top));padding:4px 10px;font-size:13px}
+.hero.compact .streak-pill{padding:4px 10px;font-size:12px}
+.hero.compact .level-pill{font-size:14px;margin-bottom:2px}
 .hero.compact .prog-track{margin-top:10px}
 .hero.compact .mily-greeting-hero{display:none!important}
 .hero.compact .prog-row{margin-top:3px;font-size:13px}
@@ -1372,7 +1454,7 @@ body.dark .adm-child-btn.on{background:rgba(255,107,53,.15)}
 .assign-chip{font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;border:1.5px solid var(--bdr);background:var(--bg2);color:var(--tx3);cursor:pointer;transition:all .15s}
 .assign-chip.on{background:var(--or);border-color:var(--or);color:#fff}
 /* MY 탭 가족 구성원 */
-.my-family-row{display:flex;gap:12px;overflow-x:auto;padding:4px 16px 12px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.my-family-row{display:flex;gap:22px;overflow-x:auto;padding:10px 18px 14px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .my-family-row::-webkit-scrollbar{display:none}
 .my-family-member{display:flex;flex-direction:column;align-items:center;gap:5px;flex-shrink:0;cursor:pointer}
 .my-family-avatar{width:52px;height:52px;border-radius:50%;overflow:visible;border:2.5px solid var(--or);background:var(--bg2);flex-shrink:0;position:relative}
@@ -1382,6 +1464,8 @@ body.dark .adm-child-btn.on{background:rgba(255,107,53,.15)}
 .mf-mood-particles{position:absolute;top:50%;left:50%;width:0;height:0;pointer-events:none;z-index:3;overflow:visible}
 .my-family-name{font-size:12px;font-weight:800;color:var(--tx);white-space:nowrap}
 .my-family-role{font-size:10px;font-weight:600;color:var(--tx3);white-space:nowrap}
+.my-family-lv{margin-top:2px;font-size:9.5px;font-weight:900;color:#5D4037;background:linear-gradient(135deg,#FFD600,#FFA000);padding:1px 6px;border-radius:8px;line-height:1.2;white-space:nowrap;box-shadow:0 1px 2px rgba(245,158,11,.25)}
+body.dark .my-family-lv{color:#3E2723}
 
 /* ── Family Popup (Toss-style genealogy) ── */
 .family-popup-bg{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.45);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);animation:fadeIn .15s}
@@ -1717,8 +1801,10 @@ body.dark .family-popup-avatar{border-color:rgba(255,255,255,.25)}
   .log-header-sticky{margin:0 0 16px;border-radius:0;padding:24px 28px}
   .log-header-sticky h2{font-size:28px}
   .rwd-header-sticky{border-radius:0;padding:24px 28px}
+  .rwd-header-sticky h2{font-size:28px!important}
   .hist-hero{border-radius:0;padding:26px 28px 20px}
   .hist-hero h2{font-size:28px}
+  .my-header h2{font-size:28px}
   .badge-hero{border-radius:0!important}
   #s-badge{margin-left:240px;width:calc(100vw - 240px)}
   .hist-stats-card{margin:0 24px 14px}
@@ -2545,6 +2631,27 @@ button:disabled {
   width: 100%;
   height: 100%;
   filter: drop-shadow(0 0 4px rgba(255,215,0,0.8));
+}
+/* ── CHALLENGE REWARD CELEBRATION ─────────────── */
+@keyframes challengeRing {
+  0%{width:20px;height:20px;opacity:1;border-width:3px}
+  100%{width:140px;height:140px;opacity:0;border-width:1px;margin-left:-60px;margin-top:-60px}
+}
+@keyframes challengeFlash {
+  0%{opacity:1}
+  100%{opacity:0}
+}
+@keyframes challengePtsBounce {
+  0%{transform:scale(1)}
+  15%{transform:scale(1.5);color:#FFD700}
+  30%{transform:scale(0.85)}
+  45%{transform:scale(1.3);color:#FF6B35}
+  60%{transform:scale(0.95)}
+  75%{transform:scale(1.15)}
+  100%{transform:scale(1)}
+}
+.challenge-pts-anim {
+  animation: challengePtsBounce .8s cubic-bezier(.36,.07,.19,.97) forwards;
 }
 @keyframes rwd-card-bounce {
   0%{transform:scale(1)}
@@ -3608,14 +3715,17 @@ requestAnimationFrame(function(){
       </div>
       <p id="smart-msg" style="font-size:13px;color:rgba(255,255,255,.75);margin-top:4px;font-weight:600;line-height:1.3"></p>
     </div>
-    <div id="child-switcher" style="flex-shrink:0"></div>
   </div>
   <div class="hero">
-    <div class="streak-pill" id="streak-pill"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 01-7 7 7 7 0 01-7-7c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg> 0일 연속</div>
-    <div class="hero-lbl" id="hero-lbl">나의 마일리지</div>
+    <div class="hero-lbl-row" style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+      <div class="hero-lbl" id="hero-lbl">나의 마일리지</div>
+      <div id="child-switcher" style="flex-shrink:0"></div>
+    </div>
     <div id="child-selector"></div>
-    <div class="hero-pts-wrap" style="display:flex;align-items:flex-end;gap:6px;margin:4px 0">
+    <div class="hero-pts-wrap" style="display:flex;align-items:flex-end;gap:8px;margin:4px 0">
       <span class="hero-pts" id="hero-pts">0</span><span class="hero-unit">M</span>
+      <div class="level-pill" id="level-pill" style="font-size:18px;font-weight:700;opacity:.85;transition:all .25s;cursor:pointer;-webkit-tap-highlight-color:transparent;display:inline-flex;align-items:center;margin-left:4px;white-space:nowrap;line-height:1;margin-bottom:3px" onclick="openLevelPopup()">🌱 Lv.1</div>
+      <div class="streak-pill" id="streak-pill" style="background:rgba(255,255,255,.2);border-radius:20px;padding:5px 12px;font-size:13px;font-weight:800;transition:all .25s;cursor:pointer;-webkit-tap-highlight-color:transparent;margin-left:auto;margin-bottom:6px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 01-7 7 7 7 0 01-7-7c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg> 0일 연속</div>
     </div>
     <div class="hero-goal" id="hero-goal"></div>
     <div class="prog-track"><div class="prog-fill" id="hero-bar" style="width:0%"></div></div>
@@ -3634,6 +3744,8 @@ requestAnimationFrame(function(){
   </div>
   <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> 오늘 할 일</div>
   <div class="act-grid" id="home-grid"></div>
+  <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9H4.5a2.5 2.5 0 010-5H6"/><path d="M18 9h1.5a2.5 2.5 0 000-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0012 0V2z"/></svg> 진행중인 챌린지</div>
+  <div id="challenge-cards" style="margin:0 16px 14px"></div>
   <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> 최근 활동</div>
   <div class="rec-list" id="rec-list"></div>
 </div>
@@ -3660,7 +3772,7 @@ requestAnimationFrame(function(){
 <div class="scr" id="s-rwd">
   <div class="rwd-header-sticky">
     <div style="display:flex;align-items:center;justify-content:space-between">
-      <h2 style="font-size:24px;font-weight:900;color:#fff;margin:0">보상 상점 <svg class="hdr-ico" viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg></h2>
+      <h2 style="font-size:26px;font-weight:900;color:#fff;margin:0;transition:font-size .25s">보상 상점 <svg class="hdr-ico" viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg></h2>
       <div id="rwd-child-selector" style="display:none;flex-shrink:0"><div id="rwd-child-btns"></div></div>
     </div>
     <p style="font-size:14px;color:rgba(255,255,255,.85);margin-top:2px;font-weight:600">모은 마일리지로 교환해요</p>
@@ -4022,6 +4134,78 @@ requestAnimationFrame(function(){
     <div class="adm-sec">
       <div class="adm-sec-lbl">홈 화면 인사말 변경</div>
       <div id="greetings-settings-container"></div>
+    </div>
+    <!-- ── 게이미피케이션 설정 ── -->
+    <div class="adm-sec">
+      <div class="adm-sec-lbl">🎮 게이미피케이션 설정</div>
+      <div class="adm-card">
+        <!-- 일일 룰렛 -->
+        <div class="adm-row">
+          <div class="adm-row-l"><div class="adm-row-nm">🎰 일일 보너스 룰렛 <button class="info-btn" onclick="showGsInfo('roulette')">룰렛이란?</button></div><div class="adm-row-sub">매일 첫 접속 시 보너스 룰렛</div></div>
+          <button class="tog" id="tog-roulette" onclick="togGameSetting('rouletteEnabled')"><div class="tog-dot"></div></button>
+        </div>
+        <div id="gs-detail-roulette" class="gs-detail">
+          <div class="divider"></div>
+          <div class="adm-row" style="flex-direction:column;align-items:stretch;gap:8px">
+            <div class="adm-row-l"><div class="adm-row-nm">룰렛 마일리지 범위</div><div class="adm-row-sub">최소~최대 당첨 마일리지</div></div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <input class="num-inp" id="rlt-min-inp" type="number" value="5" min="1" max="500" style="width:70px" onchange="saveGameSettings()">
+              <span style="font-size:13px;font-weight:700;color:var(--tx3)">~</span>
+              <input class="num-inp" id="rlt-max-inp" type="number" value="20" min="1" max="1000" style="width:70px" onchange="saveGameSettings()">
+              <span style="font-size:12px;color:var(--tx3);font-weight:600">마일리지</span>
+            </div>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <!-- 주간 챌린지 -->
+        <div class="adm-row">
+          <div class="adm-row-l"><div class="adm-row-nm">🏆 주간 챌린지 <button class="info-btn" onclick="showGsInfo('weekly')">주간 챌린지란?</button></div><div class="adm-row-sub">매주 월요일 자동 생성</div></div>
+          <button class="tog" id="tog-weekly" onclick="togGameSetting('weeklyEnabled')"><div class="tog-dot"></div></button>
+        </div>
+        <div id="gs-detail-weekly" class="gs-detail">
+          <div class="divider"></div>
+          <div class="adm-row" style="flex-direction:column;align-items:stretch;gap:8px">
+            <div class="adm-row-l"><div class="adm-row-nm">기본 보상</div><div class="adm-row-sub">레벨 1 기준 지급량 (레벨업할수록 증가)</div></div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <input class="num-inp" id="ch-weekly-reward" type="number" value="30" min="1" max="500" style="width:70px" onchange="saveGameSettings()">
+              <span style="font-size:12px;color:var(--tx3);font-weight:600">마일리지</span>
+            </div>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <!-- 월간 챌린지 -->
+        <div class="adm-row">
+          <div class="adm-row-l"><div class="adm-row-nm">📅 월간 챌린지 <button class="info-btn" onclick="showGsInfo('monthly')">월간 챌린지란?</button></div><div class="adm-row-sub">매월 1일 자동 생성</div></div>
+          <button class="tog" id="tog-monthly" onclick="togGameSetting('monthlyEnabled')"><div class="tog-dot"></div></button>
+        </div>
+        <div id="gs-detail-monthly" class="gs-detail">
+          <div class="divider"></div>
+          <div class="adm-row" style="flex-direction:column;align-items:stretch;gap:8px">
+            <div class="adm-row-l"><div class="adm-row-nm">기본 보상</div><div class="adm-row-sub">레벨 1 기준 지급량 (레벨업할수록 증가)</div></div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <input class="num-inp" id="ch-monthly-reward" type="number" value="50" min="1" max="1000" style="width:70px" onchange="saveGameSettings()">
+              <span style="font-size:12px;color:var(--tx3);font-weight:600">마일리지</span>
+            </div>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <!-- 레벨 시스템 -->
+        <div class="adm-row">
+          <div class="adm-row-l"><div class="adm-row-nm">🎮 레벨 시스템 <button class="info-btn" onclick="showGsInfo('level')">레벨 시스템이란?</button></div><div class="adm-row-sub">누적 마일리지로 자동 성장</div></div>
+          <button class="tog" id="tog-level" onclick="togGameSetting('levelEnabled')"><div class="tog-dot"></div></button>
+        </div>
+        <div id="gs-detail-level" class="gs-detail">
+          <div class="divider"></div>
+          <div class="adm-row" style="flex-direction:column;align-items:stretch;gap:0">
+            <div class="adm-row-l" style="margin-bottom:6px"><div class="adm-row-nm">📊 레벨별 상세 설정</div><div class="adm-row-sub">각 레벨 도달 임계값과 이펙트 미리보기</div></div>
+            <div id="lv-editor" class="lv-editor"></div>
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <button class="btn-sm" onclick="saveLevelThresholds()" style="flex:1">💾 레벨 설정 저장</button>
+              <button class="btn-sm" onclick="resetLevelThresholds()" style="background:var(--bg2);color:var(--tx2)">기본값</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
     <!-- ── 알림 테스트 ── -->
     <div class="adm-sec">
@@ -5046,6 +5230,7 @@ function _migrateLegacyToFamilyMeta(){
       rwds:JSON.parse(JSON.stringify(S.rwds||[])),
       log:JSON.parse(JSON.stringify(S.log||[])),
       actDone:JSON.parse(JSON.stringify(S.actDone||{})),
+      allDoneDays:S.allDoneDays?[...S.allDoneDays]:[],
       moodLog:S.moodLog?[...S.moodLog]:[],
       badges:S.badges?{...S.badges}:{},
       badgeLog:S.badgeLog?[...S.badgeLog]:[],
@@ -7294,6 +7479,12 @@ function postLoginInit(){
     }
   }
   _admViewChildId = getChildMemberIds()[0] || null;
+
+  // 레벨 XP 마이그레이션 (누적 마일리지 기반)
+  if(typeof _migrateLevelXP==='function')_migrateLevelXP();
+
+  // Daily bonus check
+  setTimeout(()=>{if(typeof checkDailyBonus==='function')checkDailyBonus();},2000);
 }
 
 // ── 회원 탈퇴 ──────────────────────────────────
@@ -8937,7 +9128,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'prod'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0405a';
+const _APP_VERSION = 'v0407n';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -9059,6 +9250,206 @@ async function _checkLegacyMigrationPointer(){
 // 캐시된 사용자 데이터 (S.users에서 로드)
 let cachedUsers = null;
 
+// ── LEVEL SYSTEM CONSTANTS ──────────────────────────────
+const _LV_SVG={
+  sprout:'<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="#E8F5E9"/><path d="M24 36V22" stroke="#4CAF50" stroke-width="2.5" stroke-linecap="round"/><path d="M24 22c-2-8-12-8-12-2s10 6 12 2z" fill="#66BB6A"/><path d="M24 22c2-8 12-8 12-2s-10 6-12 2z" fill="#43A047"/><circle cx="24" cy="38" r="3" fill="#795548"/></svg>',
+  book:'<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="#E3F2FD"/><rect x="12" y="10" width="24" height="28" rx="2" fill="#1565C0"/><rect x="14" y="12" width="20" height="24" rx="1" fill="#42A5F5"/><path d="M24 12v24" stroke="#1565C0" stroke-width="1"/><path d="M18 18h4M18 22h4M26 18h4M26 22h4" stroke="#E3F2FD" stroke-width="1.5" stroke-linecap="round"/></svg>',
+  star:'<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="#FFF8E1"/><path d="M24 8l4.9 9.9 10.9 1.6-7.9 7.7 1.9 10.8L24 32.8l-9.8 5.2 1.9-10.8-7.9-7.7 10.9-1.6z" fill="#FFD600" stroke="#FFA000" stroke-width="1"/></svg>',
+  leaf:'<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="#E8F5E9"/><path d="M14 34c0-16 20-24 20-24s0 20-16 24" fill="#4CAF50"/><path d="M14 34c0-16 20-24 20-24" stroke="#2E7D32" stroke-width="1.5" fill="none"/><path d="M18 30c2-6 8-12 14-16" stroke="#81C784" stroke-width="1" fill="none"/></svg>',
+  fire:'<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="#FFF3E0"/><path d="M24 8c0 0-10 10-10 18a10 10 0 0020 0c0-8-10-18-10-18z" fill="#FF9800"/><path d="M24 16c0 0-6 6-6 12a6 6 0 0012 0c0-6-6-12-6-12z" fill="#FFC107"/><path d="M24 24c0 0-3 3-3 6a3 3 0 006 0c0-3-3-6-3-6z" fill="#FFEB3B"/></svg>',
+  shield:'<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="#E8EAF6"/><path d="M24 6L8 14v10c0 10 7 18 16 20 9-2 16-10 16-20V14z" fill="#3F51B5"/><path d="M24 10l-12 6v8c0 8 5 14 12 16 7-2 12-8 12-16v-8z" fill="#5C6BC0"/><path d="M21 24l3 3 6-6" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  muscle:'<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="#FCE4EC"/><path d="M16 30c0-4 2-8 4-10s6-2 6 2-2 6-2 8 4 4 6 2 4-6 4-10" stroke="#E91E63" stroke-width="3" stroke-linecap="round" fill="none"/><circle cx="18" cy="18" r="2" fill="#E91E63"/><path d="M14 32l4-2M34 20l-2-4" stroke="#F48FB1" stroke-width="1.5" stroke-linecap="round"/></svg>',
+  medal:'<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="#FFF8E1"/><path d="M18 8l-4 16h4l2-6 4 10 4-10 2 6h4L30 8" fill="#F44336"/><circle cx="24" cy="30" r="10" fill="#FFD600" stroke="#FFA000" stroke-width="1.5"/><circle cx="24" cy="30" r="7" fill="#FFC107"/><text x="24" y="34" text-anchor="middle" font-size="10" font-weight="900" fill="#F57F17">★</text></svg>',
+  gem:'<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="#E8EAF6"/><path d="M14 18l10-10 10 10-10 20z" fill="#7C4DFF"/><path d="M14 18h20L24 38z" fill="#651FFF"/><path d="M14 18l10-10 10 10" fill="#B388FF"/><path d="M19 18l5-10 5 10" fill="#D1C4E9"/><path d="M24 18v20l-10-20h20z" fill="none" stroke="#4527A0" stroke-width=".5"/></svg>',
+  trophy:'<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="#FFF8E1"/><path d="M16 10h16v10c0 6-4 10-8 10s-8-4-8-10z" fill="#FFD600" stroke="#F9A825" stroke-width="1"/><path d="M16 14h-4c-2 0-3 2-2 4l2 4c1 2 3 2 4 0" fill="#FFC107"/><path d="M32 14h4c2 0 3 2 2 4l-2 4c-1 2-3 2-4 0" fill="#FFC107"/><rect x="20" y="30" width="8" height="4" fill="#F9A825"/><rect x="18" y="34" width="12" height="4" rx="1" fill="#F9A825"/><text x="24" y="24" text-anchor="middle" font-size="10" font-weight="900" fill="#F57F17">10</text></svg>',
+  crown:'<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="#FFF3E0"/><path d="M8 32l6-16 5 8 5-12 5 12 5-8 6 16z" fill="#FFD600"/><path d="M8 32h32v4H8z" fill="#FFA000"/><circle cx="14" cy="16" r="2" fill="#FF6F00"/><circle cx="24" cy="12" r="2" fill="#FF6F00"/><circle cx="34" cy="16" r="2" fill="#FF6F00"/></svg>',
+  hero:'<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="#E3F2FD"/><circle cx="24" cy="16" r="6" fill="#FFB74D"/><path d="M14 36c0-6 4-10 10-10s10 4 10 10" fill="#1565C0"/><path d="M18 26l6-2 6 2" fill="#F44336"/><path d="M20 28l4-10 4 10" fill="#F44336"/><path d="M30 20l6-4-4 6" fill="#F44336"/><path d="M18 20l-6-4 4 6" fill="#1565C0"/></svg>',
+  wizard:'<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="#EDE7F6"/><path d="M24 4l-10 22h20z" fill="#7B1FA2"/><circle cx="24" cy="22" r="2" fill="#FFD600"/><path d="M14 26c0 0 4 2 10 2s10-2 10-2" stroke="#7B1FA2" stroke-width="2"/><circle cx="24" cy="34" r="6" fill="#FFB74D"/><path d="M20 32c2-1 6-1 8 0" stroke="#5D4037" stroke-width="1"/></svg>',
+  sword:'<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="#ECEFF1"/><path d="M24 6v26" stroke="#78909C" stroke-width="3" stroke-linecap="round"/><path d="M24 6l3 8h-6z" fill="#B0BEC5"/><path d="M16 32h16" stroke="#795548" stroke-width="3" stroke-linecap="round"/><rect x="22" y="32" width="4" height="8" rx="1" fill="#795548"/><circle cx="24" cy="40" r="2" fill="#FFD600"/></svg>',
+  starBurst:'<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="#FFF8E1"/><circle cx="24" cy="24" r="14" fill="#FFD600"/><circle cx="24" cy="24" r="10" fill="#FFC107"/><path d="M24 6l2 8-2-2-2 2zM24 42l2-8-2 2-2-2zM6 24l8 2-2-2 2-2zM42 24l-8 2 2-2-2-2zM10 10l7 5-2-1 1-2zM38 38l-7-5 2 1-1 2zM38 10l-5 7-1-2 2-1zM10 38l5-7 1 2-2 1z" fill="#FF8F00"/></svg>',
+  queenCrown:'<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="#FCE4EC"/><path d="M10 34l4-14 5 6 5-10 5 10 5-6 4 14z" fill="#E91E63"/><path d="M10 34h28v3H10z" fill="#AD1457"/><circle cx="14" cy="20" r="2.5" fill="#F48FB1"/><circle cx="24" cy="16" r="2.5" fill="#F48FB1"/><circle cx="34" cy="20" r="2.5" fill="#F48FB1"/></svg>',
+  dragon:'<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="#E8F5E9"/><path d="M12 28c4-12 16-16 22-10-2-6-10-10-16-8-4 1-8 8-6 18z" fill="#4CAF50"/><circle cx="28" cy="20" r="2" fill="#FFD600"/><path d="M32 18c2-4 6-4 8-2" stroke="#2E7D32" stroke-width="1.5" fill="none"/><path d="M14 30c-2 2-6 2-8 0" stroke="#2E7D32" stroke-width="1.5" fill="none"/><path d="M20 34c4 4 10 4 14 0" stroke="#4CAF50" stroke-width="2" fill="none"/></svg>',
+  rocket:'<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="#E3F2FD"/><path d="M24 6c-4 8-4 20-2 28h4c2-8 2-20-2-28z" fill="#E0E0E0" stroke="#9E9E9E" stroke-width=".5"/><path d="M24 6c-2 4-3 10-3 16h6c0-6-1-12-3-16z" fill="#1565C0"/><circle cx="24" cy="18" r="3" fill="#BBDEFB"/><path d="M18 30l-4 6 6-2M30 30l4 6-6-2" fill="#F44336"/><path d="M20 36l4 6 4-6" fill="#FF9800"/><path d="M22 38l2 4 2-4" fill="#FFC107"/></svg>',
+  galaxy:'<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="#1A237E"/><ellipse cx="24" cy="24" rx="18" ry="8" fill="none" stroke="#7C4DFF" stroke-width="1.5" transform="rotate(-30 24 24)"/><ellipse cx="24" cy="24" rx="14" ry="6" fill="none" stroke="#B388FF" stroke-width="1" transform="rotate(20 24 24)"/><circle cx="24" cy="24" r="4" fill="#FFD600"/><circle cx="16" cy="16" r="1" fill="#fff"/><circle cx="34" cy="14" r="1.5" fill="#fff"/><circle cx="32" cy="34" r="1" fill="#fff"/><circle cx="12" cy="30" r="1.2" fill="#fff"/><circle cx="36" cy="24" r=".8" fill="#B388FF"/></svg>',
+  dragonGod:'<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="#FFF8E1"/><circle cx="24" cy="24" r="18" fill="none" stroke="#FFD600" stroke-width="2" stroke-dasharray="3 2"/><path d="M24 6l-2 6 4-2-2 4 4-2-2 6h-4l-2-6-4 2 2-4-4 2 2-6" fill="#FF6F00" transform="rotate(0 24 24)"/><circle cx="24" cy="24" r="10" fill="#FFD600"/><circle cx="24" cy="24" r="7" fill="#FFC107"/><text x="24" y="28" text-anchor="middle" font-size="12" font-weight="900" fill="#E65100">神</text></svg>'
+};
+const LEVEL_DEFS = [
+  {level:1,  title:'마일리지 새싹',   minXP:0,     emoji:'🌱', svg:_LV_SVG.sprout},
+  {level:2,  title:'열심 학생',       minXP:50,    emoji:'📚', svg:_LV_SVG.book},
+  {level:3,  title:'습관 견습생',     minXP:150,   emoji:'⭐', svg:_LV_SVG.star},
+  {level:4,  title:'작은 도전자',     minXP:300,   emoji:'🌿', svg:_LV_SVG.leaf},
+  {level:5,  title:'꾸준한 노력가',   minXP:500,   emoji:'🔥', svg:_LV_SVG.fire},
+  {level:6,  title:'습관 수호자',     minXP:800,   emoji:'🛡️', svg:_LV_SVG.shield},
+  {level:7,  title:'성실한 실천가',   minXP:1200,  emoji:'💪', svg:_LV_SVG.muscle},
+  {level:8,  title:'마일리지 장인',   minXP:1700,  emoji:'🏅', svg:_LV_SVG.medal},
+  {level:9,  title:'습관 달인',       minXP:2300,  emoji:'💎', svg:_LV_SVG.gem},
+  {level:10, title:'마일리지 고수',   minXP:3000,  emoji:'🏆', svg:_LV_SVG.trophy},
+  {level:11, title:'전설의 도전자',   minXP:4000,  emoji:'👑', svg:_LV_SVG.crown},
+  {level:12, title:'습관 영웅',       minXP:5200,  emoji:'🦸', svg:_LV_SVG.hero},
+  {level:13, title:'마일리지 현자',   minXP:6800,  emoji:'🧙', svg:_LV_SVG.wizard},
+  {level:14, title:'불굴의 전사',     minXP:8800,  emoji:'⚔️', svg:_LV_SVG.sword},
+  {level:15, title:'습관 전설',       minXP:11500, emoji:'🌟', svg:_LV_SVG.starBurst},
+  {level:16, title:'마일리지 왕',     minXP:15000, emoji:'👸', svg:_LV_SVG.queenCrown},
+  {level:17, title:'초월의 경지',     minXP:20000, emoji:'🐲', svg:_LV_SVG.dragon},
+  {level:18, title:'우주의 챔피언',   minXP:27000, emoji:'🚀', svg:_LV_SVG.rocket},
+  {level:19, title:'전설의 마스터',   minXP:36000, emoji:'🌌', svg:_LV_SVG.galaxy},
+  {level:20, title:'최강 마일리지 신',minXP:50000, emoji:'🐉', svg:_LV_SVG.dragonGod},
+  {level:21, title:'별빛 기사',       minXP:52500, emoji:'⭐', svg:_LV_SVG.star},
+  {level:22, title:'달빛 수호자',     minXP:55000, emoji:'🌙', svg:_LV_SVG.crown},
+  {level:23, title:'태양의 힘',       minXP:57500, emoji:'☀️', svg:_LV_SVG.starBurst},
+  {level:24, title:'폭풍의 지배자',   minXP:60000, emoji:'⚡', svg:_LV_SVG.fire},
+  {level:25, title:'바람의 춤꾼',     minXP:62500, emoji:'🌪️', svg:_LV_SVG.leaf},
+  {level:26, title:'얼음 마법사',     minXP:65000, emoji:'❄️', svg:_LV_SVG.gem},
+  {level:27, title:'용암의 거인',     minXP:67500, emoji:'🌋', svg:_LV_SVG.fire},
+  {level:28, title:'황금 드래곤',     minXP:70000, emoji:'🐲', svg:_LV_SVG.dragon},
+  {level:29, title:'수정 기사',       minXP:72500, emoji:'💎', svg:_LV_SVG.gem},
+  {level:30, title:'불멸의 수호자',   minXP:75000, emoji:'🛡️', svg:_LV_SVG.shield},
+  {level:31, title:'시간의 지배자',   minXP:77500, emoji:'⏳', svg:_LV_SVG.medal},
+  {level:32, title:'공간 왜곡자',     minXP:80000, emoji:'🌀', svg:_LV_SVG.galaxy},
+  {level:33, title:'빛의 천사',       minXP:82500, emoji:'👼', svg:_LV_SVG.hero},
+  {level:34, title:'그림자의 왕',     minXP:85000, emoji:'🌑', svg:_LV_SVG.wizard},
+  {level:35, title:'원소 마스터',     minXP:87500, emoji:'🔮', svg:_LV_SVG.gem},
+  {level:36, title:'차원 여행자',     minXP:90000, emoji:'☄️', svg:_LV_SVG.rocket},
+  {level:37, title:'은하 파수꾼',     minXP:92500, emoji:'🌌', svg:_LV_SVG.galaxy},
+  {level:38, title:'우주의 어머니',   minXP:95000, emoji:'💫', svg:_LV_SVG.galaxy},
+  {level:39, title:'창조의 신',       minXP:97500, emoji:'✨', svg:_LV_SVG.trophy},
+  {level:40, title:'무한의 존재',     minXP:100000,emoji:'♾️', svg:_LV_SVG.dragonGod},
+];
+function _getEffectiveLevelDefs(){
+  try{
+    const gs=(typeof S!=='undefined'&&S&&S.settings&&S.settings.gamification)||{};
+    const t=gs.levelThresholds;
+    if(Array.isArray(t)&&t.length===LEVEL_DEFS.length){
+      return LEVEL_DEFS.map((d,i)=>({...d,minXP:Math.max(0,parseInt(t[i])||0)}));
+    }
+  }catch(e){}
+  return LEVEL_DEFS;
+}
+function getLevelInfo(xp){
+  const defs=_getEffectiveLevelDefs();
+  let lv=defs[0];
+  for(const d of defs){if(xp>=d.minXP)lv=d;else break;}
+  const idx=defs.indexOf(lv);
+  const next=defs[idx+1]||null;
+  const pct=next?Math.round((xp-lv.minXP)/(next.minXP-lv.minXP)*100):100;
+  return{...lv,xp,nextXP:next?next.minXP:lv.minXP,pct,nextTitle:next?next.title:null,nextEmoji:next?next.emoji:null,nextSvg:next?next.svg:null};
+}
+// ── 레벨별 SVG 이펙트 (프로필 아이콘 주위 장식) ──
+// 각 레벨마다 고유한 애니메이션이 자녀에게 시각적 보상이 됩니다.
+const LEVEL_EFFECTS={
+  1:{name:'새싹 반짝임',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-tw"><circle cx="20" cy="22" r="2.2" fill="#8BC34A"/><circle cx="82" cy="28" r="1.8" fill="#A5D6A7"/><circle cx="14" cy="78" r="2" fill="#66BB6A"/><circle cx="86" cy="74" r="1.7" fill="#9CCC65"/></g></svg></div>'},
+  2:{name:'학습의 빛',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-tw"><circle cx="18" cy="20" r="2" fill="#42A5F5"/><circle cx="84" cy="22" r="2" fill="#64B5F6"/><circle cx="12" cy="60" r="1.7" fill="#90CAF9"/><circle cx="88" cy="62" r="1.7" fill="#42A5F5"/><circle cx="50" cy="14" r="1.5" fill="#1E88E5"/></g></svg></div>'},
+  3:{name:'반짝이는 별',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-spin" style="transform-origin:50px 50px"><path d="M50 8l1.6 4.4L56 14l-4.4 1.6L50 20l-1.6-4.4L44 14l4.4-1.6z" fill="#FFD600"/><path d="M92 50l-4.4 1.6L86 56l-1.6-4.4L80 50l4.4-1.6L86 44l1.6 4.4z" fill="#FFC107"/><path d="M50 92l-1.6-4.4L44 86l4.4-1.6L50 80l1.6 4.4L56 86l-4.4 1.6z" fill="#FFD600"/><path d="M8 50l4.4-1.6L14 44l1.6 4.4L20 50l-4.4 1.6L14 56l-1.6-4.4z" fill="#FFC107"/></g></svg></div>'},
+  4:{name:'잎사귀 흩날림',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-fall"><path d="M20 5c-4 4-4 10 0 14 4-4 4-10 0-14z" fill="#66BB6A"/><path d="M50 0c-4 4-4 10 0 14 4-4 4-10 0-14z" fill="#81C784"/><path d="M80 5c-4 4-4 10 0 14 4-4 4-10 0-14z" fill="#4CAF50"/></g></svg></div>'},
+  5:{name:'불꽃 활활',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-flicker" style="transform-origin:50px 55px"><path d="M50 2 Q22 22 14 50 Q8 78 30 92 Q22 70 38 56 Q30 80 50 96 Q70 80 62 56 Q78 70 70 92 Q92 78 86 50 Q78 22 50 2z" fill="#FF6F00"/></g><g class="lv-flicker" style="transform-origin:50px 60px;animation-delay:.15s"><path d="M50 14 Q32 30 26 54 Q22 76 38 86 Q34 68 46 58 Q40 78 50 90 Q60 78 54 58 Q66 68 62 86 Q78 76 74 54 Q68 30 50 14z" fill="#FF9800"/></g><g class="lv-flicker" style="transform-origin:50px 65px;animation-delay:.3s"><path d="M50 28 Q40 40 36 58 Q34 74 44 80 Q42 68 50 62 Q58 68 56 80 Q66 74 64 58 Q60 40 50 28z" fill="#FFC107"/></g></svg></div>'},
+  6:{name:'수호 오라',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-ripple" style="transform-origin:50px 50px"><circle cx="50" cy="50" r="42" fill="none" stroke="#5C6BC0" stroke-width="2.5"/><circle cx="50" cy="50" r="42" fill="none" stroke="#7986CB" stroke-width="2"/><circle cx="50" cy="50" r="42" fill="none" stroke="#9FA8DA" stroke-width="1.5"/></g></svg></div>'},
+  7:{name:'에너지 번개',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-bolts"><path d="M12 28l8-14-2 10 6-2-10 18 2-12z" fill="#FFEB3B" stroke="#F57F17" stroke-width=".5"/><path d="M82 18l8-14-2 10 6-2-10 18 2-12z" fill="#FFC107" stroke="#F57F17" stroke-width=".5"/><path d="M50 4l6-10-1 8 5-2-8 14 1-10z" fill="#FFEB3B" stroke="#F57F17" stroke-width=".5"/></g></svg></div>'},
+  8:{name:'금메달 광채',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><defs><clipPath id="lvClip8"><circle cx="50" cy="50" r="46"/></clipPath></defs><g clip-path="url(#lvClip8)"><rect class="lv-slash" x="-30" y="40" width="160" height="14" fill="url(#lvShine8)" opacity=".8"/></g><defs><linearGradient id="lvShine8"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".9"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs><g class="lv-tw"><circle cx="20" cy="20" r="1.8" fill="#FFD600"/><circle cx="82" cy="22" r="1.8" fill="#FFC107"/><circle cx="78" cy="80" r="1.8" fill="#FFD600"/><circle cx="22" cy="82" r="1.8" fill="#FFC107"/></g></svg></div>'},
+  9:{name:'보석 무지개',html:'<div class="lv-fx-wrap lv-hue"><svg viewBox="0 0 100 100"><g class="lv-spin" style="transform-origin:50px 50px"><circle cx="50" cy="50" r="44" fill="none" stroke="#7C4DFF" stroke-width="2.5" stroke-dasharray="6 4"/></g><g class="lv-tw"><circle cx="50" cy="6" r="2" fill="#E91E63"/><circle cx="94" cy="50" r="2" fill="#FF9800"/><circle cx="50" cy="94" r="2" fill="#4CAF50"/><circle cx="6" cy="50" r="2" fill="#2196F3"/></g></svg></div>'},
+  10:{name:'트로피 황금광',html:'<div class="lv-fx-wrap lv-glow"><svg viewBox="0 0 100 100"><g class="lv-pulse" style="transform-origin:50px 50px"><circle cx="50" cy="50" r="46" fill="none" stroke="#FFD600" stroke-width="3" opacity=".7"/><circle cx="50" cy="50" r="42" fill="none" stroke="#FFA000" stroke-width="1.5" opacity=".5"/></g></svg></div>'},
+  11:{name:'왕관 빛살',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-spin" style="transform-origin:50px 50px"><path d="M50 0L52 14h-4z" fill="#FFD600"/><path d="M100 50L86 52v-4z" fill="#FFD600"/><path d="M50 100L48 86h4z" fill="#FFD600"/><path d="M0 50L14 48v4z" fill="#FFD600"/><path d="M85 15l-10 10-3-3z" fill="#FFC107"/><path d="M85 85l-10-10 3-3z" fill="#FFC107"/><path d="M15 85l10-10 3 3z" fill="#FFC107"/><path d="M15 15l10 10-3 3z" fill="#FFC107"/></g></svg></div>'},
+  12:{name:'영웅 망토',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-sway" style="transform-origin:50px 50px"><path d="M10 50Q30 110 50 100Q70 110 90 50Q70 80 50 78Q30 80 10 50z" fill="#E53935" opacity=".7"/><path d="M20 55Q35 95 50 90Q65 95 80 55Q65 75 50 73Q35 75 20 55z" fill="#F44336" opacity=".5"/></g></svg></div>'},
+  13:{name:'마법 오브',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g style="transform-origin:50px 50px"><circle class="lv-orb1" cx="50" cy="50" r="4" fill="#7C4DFF" filter="url(#lvBlur13)"/><circle class="lv-orb2" cx="50" cy="50" r="4" fill="#B388FF"/><circle class="lv-orb3" cx="50" cy="50" r="4" fill="#651FFF"/></g><defs><filter id="lvBlur13"><feGaussianBlur stdDeviation="1"/></filter></defs></svg></div>'},
+  14:{name:'검의 베기',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><defs><linearGradient id="lvBlade14" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#E1F5FE" stop-opacity="1"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs><g class="lv-slash" style="transform-origin:50px 50px"><path d="M-20 50Q50 30 120 50Q50 56 -20 50z" fill="url(#lvBlade14)"/></g></svg></div>'},
+  15:{name:'폭발하는 별',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-pulse" style="transform-origin:50px 50px"><path d="M50 2l5 18-3-2-2 2zM50 98l5-18-3 2-2-2zM2 50l18 5-2-3 2-2zM98 50l-18 5 2-3-2-2zM15 15l16 12-5-1 1-5zM85 85l-16-12 5 1-1 5zM85 15l-12 16 1-5 5 1zM15 85l12-16-1 5-5-1z" fill="#FFD600" stroke="#FF8F00" stroke-width=".5"/></g></svg></div>'},
+  16:{name:'장미 꽃잎',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-fall"><path d="M18 5q-6 4-3 10t9 0q-3-6-6-10z" fill="#F06292"/><path d="M50 0q-6 4-3 10t9 0q-3-6-6-10z" fill="#EC407A"/><path d="M82 5q-6 4-3 10t9 0q-3-6-6-10z" fill="#E91E63"/></g></svg></div>'},
+  17:{name:'드래곤 비늘',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-blink"><circle cx="14" cy="20" r="3" fill="#43A047"/><circle cx="86" cy="22" r="3" fill="#66BB6A"/><circle cx="10" cy="56" r="3" fill="#388E3C"/><circle cx="90" cy="58" r="3" fill="#43A047"/><circle cx="22" cy="86" r="3" fill="#66BB6A"/><circle cx="78" cy="84" r="3" fill="#2E7D32"/></g></svg></div>'},
+  18:{name:'로켓 화염',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-flicker" style="transform-origin:50px 100px"><path d="M40 100Q50 80 60 100Q55 92 50 92Q45 92 40 100z" fill="#FF5722"/><path d="M42 100Q50 86 58 100Q54 94 50 94Q46 94 42 100z" fill="#FF9800"/><path d="M44 100Q50 90 56 100Q53 96 50 96Q47 96 44 100z" fill="#FFC107"/></g><g class="lv-tw"><circle cx="20" cy="100" r="1.5" fill="#FFC107"/><circle cx="80" cy="100" r="1.5" fill="#FF9800"/><circle cx="30" cy="92" r="1.2" fill="#FFEB3B"/><circle cx="70" cy="92" r="1.2" fill="#FFEB3B"/></g></svg></div>'},
+  19:{name:'우주 궤도',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-spin" style="transform-origin:50px 50px"><ellipse cx="50" cy="50" rx="46" ry="18" fill="none" stroke="#7C4DFF" stroke-width="1.5"/></g><g class="lv-spinR" style="transform-origin:50px 50px"><ellipse cx="50" cy="50" rx="42" ry="14" fill="none" stroke="#B388FF" stroke-width="1.2" transform="rotate(60 50 50)"/></g><g class="lv-tw"><circle cx="14" cy="14" r="1" fill="#fff"/><circle cx="86" cy="20" r="1.2" fill="#fff"/><circle cx="20" cy="86" r="1" fill="#fff"/><circle cx="86" cy="82" r="1.2" fill="#fff"/></g></svg></div>'},
+  20:{name:'드래곤 신',html:'<div class="lv-fx-wrap lv-glow"><svg viewBox="0 0 100 100"><g class="lv-spin" style="transform-origin:50px 50px"><circle cx="50" cy="50" r="46" fill="none" stroke="#FFD600" stroke-width="2.5" stroke-dasharray="4 3"/></g><g class="lv-spinR" style="transform-origin:50px 50px"><circle cx="50" cy="50" r="40" fill="none" stroke="#FFA000" stroke-width="1.5" stroke-dasharray="2 4"/></g><g class="lv-flicker"><path d="M50 0l3 8-3-2-3 2z" fill="#FF6F00"/><path d="M100 50l-8 3 2-3-2-3z" fill="#FF6F00"/><path d="M50 100l3-8-3 2-3-2z" fill="#FF6F00"/><path d="M0 50l8 3-2-3 2-3z" fill="#FF6F00"/></g></svg></div>'},
+  21:{name:'오로라 커튼',html:'<div class="lv-fx-wrap lv-hue"><svg viewBox="0 0 100 100"><g class="lv-sway"><path d="M5 30 Q25 20 50 32 T95 30 L95 38 Q70 28 50 40 T5 38z" fill="#80DEEA" opacity=".7"/><path d="M5 50 Q25 42 50 52 T95 50 L95 58 Q70 48 50 60 T5 58z" fill="#B388FF" opacity=".6"/><path d="M5 70 Q25 62 50 72 T95 70 L95 78 Q70 68 50 80 T5 78z" fill="#F48FB1" opacity=".6"/></g></svg></div>'},
+  22:{name:'달 위성 궤도',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-orb1" style="transform-origin:50px 50px"><circle cx="50" cy="4" r="6" fill="#E1F5FE"/><circle cx="48" cy="3" r="1" fill="#B0BEC5"/></g><g class="lv-orb2" style="transform-origin:50px 50px"><circle cx="95" cy="50" r="4" fill="#CFD8DC"/></g></svg></div>'},
+  23:{name:'태양 광선',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-pulse" style="transform-origin:50px 50px"><path d="M50 0v12M100 50h-12M50 100v-12M0 50h12M85 15l-8 8M85 85l-8-8M15 85l8-8M15 15l8 8" stroke="#FFD600" stroke-width="3" stroke-linecap="round"/></g></svg></div>'},
+  24:{name:'번개 폭풍',html:'<div class="lv-fx-wrap lv-bolts"><svg viewBox="0 0 100 100"><path d="M20 0l-8 40h10l-6 30 16-40h-10l8-30z" fill="#FFEB3B"/><path d="M80 5l-8 38h10l-6 28 16-38h-10l8-28z" fill="#FFF176"/><path d="M5 55l-5 30h8l-4 15 12-30h-8l6-15z" fill="#FFEB3B"/><path d="M90 60l-5 28h8l-4 12 12-28h-8l6-12z" fill="#FFF176"/><path d="M45 85l-4 15h6l-3 8 9-18h-6l4-5z" fill="#FFEB3B"/></svg></div>'},
+  25:{name:'회오리바람',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-spin" style="transform-origin:50px 50px" fill="none" stroke="#B3E5FC" stroke-width="2.5"><path d="M10 20 Q50 10 90 20"/><path d="M5 40 Q50 25 95 40"/><path d="M8 80 Q50 95 92 80"/><path d="M12 60 Q50 72 88 60" opacity=".6"/></g></svg></div>'},
+  26:{name:'얼음 결정',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100" stroke="#81D4FA" stroke-width="1.5" fill="none"><g class="lv-tw" style="transform-origin:15px 15px"><path d="M15 6v18M6 15h18M9 9l12 12M9 21l12-12"/></g><g class="lv-tw" style="transform-origin:85px 15px;animation-delay:.3s"><path d="M85 6v18M76 15h18M79 9l12 12M79 21l12-12"/></g><g class="lv-tw" style="transform-origin:15px 85px;animation-delay:.6s"><path d="M15 76v18M6 85h18M9 79l12 12M9 91l12-12"/></g><g class="lv-tw" style="transform-origin:85px 85px;animation-delay:.9s"><path d="M85 76v18M76 85h18M79 79l12 12M79 91l12-12"/></g></svg></div>'},
+  27:{name:'용암 방울',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-fall"><circle cx="20" cy="10" r="4" fill="#FF3D00"/><circle cx="50" cy="5" r="5" fill="#FF6F00"/><circle cx="80" cy="12" r="4" fill="#FF3D00"/><circle cx="35" cy="18" r="3" fill="#FFAB00"/><circle cx="65" cy="20" r="3" fill="#FFAB00"/></g></svg></div>'},
+  28:{name:'황금 고리',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100" fill="none"><g class="lv-spin" style="transform-origin:50px 50px"><circle cx="50" cy="50" r="48" stroke="#FFD700" stroke-width="2" stroke-dasharray="6 4"/></g><g class="lv-spinR" style="transform-origin:50px 50px"><circle cx="50" cy="50" r="42" stroke="#FFC107" stroke-width="1.5" stroke-dasharray="3 3"/></g></svg></div>'},
+  29:{name:'다이아 스파클',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100" fill="#E1F5FE"><g class="lv-tw"><path d="M50 0l3 8-3 4-3-4z"/><path d="M100 50l-8 3-4-3 4-3z"/><path d="M50 100l-3-8 3-4 3 4z"/><path d="M0 50l8-3 4 3-4 3z"/><path d="M85 15l-6 4-4-2 4-4z"/><path d="M15 85l6-4 4 2-4 4z"/></g></svg></div>'},
+  30:{name:'신성 결계',html:'<div class="lv-fx-wrap lv-ripple"><svg viewBox="0 0 100 100" fill="none" stroke="#FFF59D" stroke-width="2"><polygon points="50,4 92,28 92,72 50,96 8,72 8,28"/></svg></div>'},
+  31:{name:'시간의 궤도',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100" fill="none" stroke="#90CAF9" stroke-width="2"><circle cx="50" cy="50" r="46"/><g class="lv-spin" style="transform-origin:50px 50px"><line x1="50" y1="50" x2="50" y2="6" stroke-width="3"/></g><g class="lv-spinR" style="transform-origin:50px 50px"><line x1="50" y1="50" x2="88" y2="50" stroke-width="2"/></g></svg></div>'},
+  32:{name:'와프 링',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100" fill="none" stroke="#CE93D8" stroke-width="2"><circle cx="50" cy="50" r="46" class="lv-pulse" style="transform-origin:50px 50px"/><circle cx="50" cy="50" r="42" class="lv-pulse" style="transform-origin:50px 50px;animation-delay:.3s"/><circle cx="50" cy="50" r="38" class="lv-pulse" style="transform-origin:50px 50px;animation-delay:.6s"/></svg></div>'},
+  33:{name:'빛의 날개',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-float"><path d="M10 50 Q0 30 5 15 Q20 25 25 50 Q15 60 10 50z" fill="#FFF9C4" opacity=".8"/><path d="M90 50 Q100 30 95 15 Q80 25 75 50 Q85 60 90 50z" fill="#FFF9C4" opacity=".8"/></g></svg></div>'},
+  34:{name:'그림자 가닥',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100" fill="none" stroke="#424242" stroke-width="3"><g class="lv-spin" style="transform-origin:50px 50px"><path d="M50 5 Q65 25 50 50 Q35 75 50 95"/></g><g class="lv-spinR" style="transform-origin:50px 50px"><path d="M5 50 Q25 35 50 50 Q75 65 95 50"/></g></svg></div>'},
+  35:{name:'4원소 궤도',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-spin" style="transform-origin:50px 50px"><circle cx="50" cy="4" r="5" fill="#FF5252"/><circle cx="96" cy="50" r="5" fill="#40C4FF"/><circle cx="50" cy="96" r="5" fill="#69F0AE"/><circle cx="4" cy="50" r="5" fill="#FFEB3B"/></g></svg></div>'},
+  36:{name:'유성우',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100" stroke="#FFF" stroke-width="2" stroke-linecap="round"><g class="lv-fall"><line x1="10" y1="0" x2="0" y2="15"/><line x1="50" y1="0" x2="35" y2="18"/><line x1="90" y1="5" x2="75" y2="22"/></g></svg></div>'},
+  37:{name:'행성 궤도',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100" fill="none" stroke="#80DEEA" stroke-width="1.5"><ellipse cx="50" cy="50" rx="48" ry="20"/><ellipse cx="50" cy="50" rx="20" ry="48"/><ellipse cx="50" cy="50" rx="40" ry="40" class="lv-spin" style="transform-origin:50px 50px;stroke-dasharray:4 4"/></svg></div>'},
+  38:{name:'성운 구름',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-pulse" style="transform-origin:50px 50px"><circle cx="20" cy="20" r="14" fill="#E91E63" opacity=".5"/><circle cx="80" cy="25" r="12" fill="#3F51B5" opacity=".5"/><circle cx="75" cy="80" r="14" fill="#00BCD4" opacity=".5"/><circle cx="20" cy="78" r="12" fill="#9C27B0" opacity=".5"/></g></svg></div>'},
+  39:{name:'만다라 빛',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100" fill="#FFD54F"><g class="lv-spin" style="transform-origin:50px 50px"><path d="M50 0l2 10-2 4-2-4zM50 100l2-10-2-4-2 4zM0 50l10 2 4-2-4-2zM100 50l-10 2-4-2 4-2zM15 15l8 6 2-2-6-8zM85 15l-8 6-2-2 6-8zM15 85l8-6 2 2-6 8zM85 85l-8-6-2 2 6 8zM30 4l4 10-2 2-4-10zM70 4l-4 10 2 2 4-10zM30 96l4-10-2-2-4 10zM70 96l-4-10 2-2 4 10z"/></g></svg></div>'},
+  40:{name:'무한의 빛',html:'<div class="lv-fx-wrap lv-glow"><svg viewBox="0 0 100 100"><defs><radialGradient id="lv40g" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#FFF59D" stop-opacity=".0"/><stop offset="60%" stop-color="#FFD700" stop-opacity=".0"/><stop offset="100%" stop-color="#FF6F00" stop-opacity=".55"/></radialGradient><linearGradient id="lv40r" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FF1744"/><stop offset="20%" stop-color="#FF9100"/><stop offset="40%" stop-color="#FFEA00"/><stop offset="60%" stop-color="#00E676"/><stop offset="80%" stop-color="#00B0FF"/><stop offset="100%" stop-color="#D500F9"/></linearGradient></defs><circle cx="50" cy="50" r="49" fill="url(#lv40g)"/><g class="lv-spin" style="transform-origin:50px 50px"><circle cx="50" cy="50" r="48" fill="none" stroke="url(#lv40r)" stroke-width="2.5" stroke-dasharray="8 4"/><path d="M50 0 L52 6 L50 12 L48 6z M100 50 L94 52 L88 50 L94 48z M50 100 L48 94 L50 88 L52 94z M0 50 L6 48 L12 50 L6 52z" fill="#FFD700"/></g><g class="lv-spinR" style="transform-origin:50px 50px"><circle cx="50" cy="50" r="42" fill="none" stroke="#FFF" stroke-width="1" stroke-dasharray="2 6" opacity=".7"/></g><g class="lv-pulse" style="transform-origin:50px 50px"><path d="M50 4 L52 18 L66 14 L56 26 L70 32 L54 34 L60 50 L50 38 L40 50 L46 34 L30 32 L44 26 L34 14 L48 18z" fill="#FFD700" opacity=".55"/></g><g class="lv-hue"><path d="M22 50 Q22 32 36 32 Q50 32 50 50 Q50 68 64 68 Q78 68 78 50 Q78 32 64 32 Q50 32 50 50 Q50 68 36 68 Q22 68 22 50z" fill="none" stroke="#FFEB3B" stroke-width="2.8" stroke-linecap="round"/></g><g class="lv-tw"><circle cx="14" cy="14" r="2.5" fill="#FFF"/><circle cx="86" cy="14" r="2.5" fill="#FFF"/><circle cx="14" cy="86" r="2.5" fill="#FFF"/><circle cx="86" cy="86" r="2.5" fill="#FFF"/><circle cx="50" cy="6" r="1.8" fill="#FFD700"/><circle cx="94" cy="50" r="1.8" fill="#FFD700"/><circle cx="50" cy="94" r="1.8" fill="#FFD700"/><circle cx="6" cy="50" r="1.8" fill="#FFD700"/></g></svg></div>'}
+};
+function getLevelEffectHTML(level){
+  const fx=LEVEL_EFFECTS[level];
+  return fx?fx.html:'';
+}
+window.LEVEL_EFFECTS=LEVEL_EFFECTS;
+window.getLevelEffectHTML=getLevelEffectHTML;
+// 누적 마일리지 기반 XP 계산 (기존 사용자 마이그레이션)
+function _migrateLevelXP(){
+  const ld=S.levelData||(S.levelData={xp:0,level:1,xpLog:[]});
+  if(ld._migrated)return; // 이미 마이그레이션 완료
+  // log에서 누적 획득 마일리지 합산 (pts > 0인 것만)
+  const totalEarned=(S.log||[]).reduce((sum,l)=>sum+(l.pts>0?l.pts:0),0);
+  // totalDone * 평균pts로 보정 (log가 300개 제한이므로 실제보다 적을 수 있음)
+  const logCount=(S.log||[]).filter(l=>l.pts>0).length;
+  const td=S.totalDone||0;
+  let estimatedXP=totalEarned;
+  if(td>logCount&&logCount>0){
+    // 로그 제한으로 잘린 경우: 평균 pts로 나머지 추정
+    const avgPts=totalEarned/logCount;
+    estimatedXP=Math.round(avgPts*td);
+  }
+  if(estimatedXP>ld.xp){
+    ld.xp=estimatedXP;
+    ld.level=getLevelInfo(ld.xp).level;
+  }
+  ld._migrated=true;
+}
+
+// ── CHALLENGE TEMPLATES ──────────────────────────────
+// ── 레벨제 챌린지 템플릿 ─────────────────────────────
+// 주간/월간 각각 독립 레벨 트랙. level 1부터 순차 해금.
+// 같은 기간(주/월) 내에서 현재 레벨의 챌린지를 완료→보상 수령해야 다음 레벨 해금.
+const WEEKLY_CHALLENGE_LEVELS=[
+  // Lv1 ~ Lv3: 쉬움
+  {level:1,emoji:'⭐',title:'활동 5회 완료하기',target:5,reward:20,check:'totalActs'},
+  {level:2,emoji:'📚',title:'2일 연속 달성하기',target:2,reward:30,check:'streak'},
+  {level:3,emoji:'🏃',title:'오늘 할 일 모두 완료 1일',target:1,reward:30,check:'allDoneDays'},
+  // Lv4 ~ Lv6: 보통
+  {level:4,emoji:'⭐',title:'활동 10회 완료하기',target:10,reward:40,check:'totalActs'},
+  {level:5,emoji:'📚',title:'3일 연속 달성하기',target:3,reward:50,check:'streak'},
+  {level:6,emoji:'🏃',title:'오늘 할 일 모두 완료 3일',target:3,reward:50,check:'allDoneDays'},
+  // Lv7 ~ Lv9: 어려움
+  {level:7,emoji:'💪',title:'활동 20회 완료하기',target:20,reward:60,check:'totalActs'},
+  {level:8,emoji:'🔥',title:'5일 연속 달성하기',target:5,reward:80,check:'streak'},
+  {level:9,emoji:'🏆',title:'오늘 할 일 모두 완료 5일',target:5,reward:100,check:'allDoneDays'},
+];
+const MONTHLY_CHALLENGE_LEVELS=[
+  // Lv1 ~ Lv3: 쉬움
+  {level:1,emoji:'💪',title:'이번 달 활동 15회',target:15,reward:30,check:'monthlyActs'},
+  {level:2,emoji:'🔥',title:'이번 달 3일 연속',target:3,reward:40,check:'monthlyStreak'},
+  {level:3,emoji:'🎯',title:'이번 달 마일리지 100 모으기',target:100,reward:40,check:'monthlyPts'},
+  // Lv4 ~ Lv6: 보통
+  {level:4,emoji:'💪',title:'이번 달 활동 30회',target:30,reward:60,check:'monthlyActs'},
+  {level:5,emoji:'🔥',title:'이번 달 7일 연속',target:7,reward:70,check:'monthlyStreak'},
+  {level:6,emoji:'🎯',title:'이번 달 마일리지 300 모으기',target:300,reward:70,check:'monthlyPts'},
+  // Lv7 ~ Lv9: 어려움
+  {level:7,emoji:'💪',title:'이번 달 활동 60회',target:60,reward:100,check:'monthlyActs'},
+  {level:8,emoji:'🔥',title:'이번 달 14일 연속',target:14,reward:120,check:'monthlyStreak'},
+  {level:9,emoji:'🏆',title:'이번 달 마일리지 500 모으기',target:500,reward:150,check:'monthlyPts'},
+];
+
+// ── ROULETTE PRIZES ──────────────────────────────
+const ROULETTE_PRIZES=[
+  {emoji:'🎉',label:'5 마일리지',pts:5,weight:30},
+  {emoji:'⭐',label:'10 마일리지',pts:10,weight:25},
+  {emoji:'💫',label:'15 마일리지',pts:15,weight:20},
+  {emoji:'🔥',label:'20 마일리지',pts:20,weight:12},
+  {emoji:'💎',label:'30 마일리지',pts:30,weight:8},
+  {emoji:'👑',label:'50 마일리지',pts:50,weight:4},
+  {emoji:'🐉',label:'100 마일리지!',pts:100,weight:1},
+];
+
 function defaultState(){
   return {
     pts:0,streak:0,longest:0,lastDate:null,totalDone:0,
@@ -9070,6 +9461,7 @@ function defaultState(){
     badgeLog:[], // {id, badgeId, badgeName, badgeEmoji, pts, ts}
     settings:{streakBonus:true,streakBonusPts:100,pinHash:'',msgMode:'auto',customMsg:'',birthdayBonus:true,birthdayBonusPts:100,birthdayMsg:'생일 축하해! 오늘은 네 특별한 날이야! 🎂🎉'},
     actDone:{},
+    allDoneDays:[], // 등록된 활동을 모두 완료한 날짜 배열 ['2026-04-06',...]
     dark:false,
     greeting:'안녕하세요! 👋', // deprecated, kept for backwards compat
     greetings:{
@@ -9090,6 +9482,10 @@ function defaultState(){
     familyMeta:null, // 다가족 메타 정보 {familyId, familyName, members, mode, inviteTokens, ...}
     memberData:{}, // Per-member data isolation: {[memberId]: {pts, streak, longest, lastDate, totalDone, acts, rwds, log, actDone, moodLog, badges, badgeLog}}
     birthdayBonusGiven:{}, // {memberId_YYYY-MM-DD: true} — 생일 보너스 중복 방지
+    levelData: {xp:0, level:1, xpLog:[]}, // 레벨 시스템
+    challenges: [], // 챌린지 [{id,title,emoji,type:'weekly'|'monthly',target,progress,reward,startDate,endDate,completed,claimed}]
+    challengeHistory: [], // 완료된 챌린지 기록
+    dailyBonus: {lastDate:null, history:[]}, // 일일 보너스 룰렛
   };
 }
 
@@ -9129,20 +9525,61 @@ function getMemberState(memberId) {
       totalDone: (isMe && !isStaleGlobal) ? (S.totalDone || 0) : 0,
       acts: (isMe && !isStaleGlobal && S.acts) ? JSON.parse(JSON.stringify(S.acts)) : (inheritActs || safeInheritActs || JSON.parse(JSON.stringify(DACTS))),
       rwds: (isMe && !isStaleGlobal && S.rwds) ? JSON.parse(JSON.stringify(S.rwds)) : (inheritRwds || safeInheritRwds || JSON.parse(JSON.stringify(DRWDS))),
-      log: (isMe && !isStaleGlobal && S.log) ? [...S.log] : [],
+      log: (isMe && !isStaleGlobal && S.log) ? S.log.filter(l=>!l.user||l.user===memberId) : [],
       actDone: (isMe && !isStaleGlobal && S.actDone) ? {...S.actDone} : {},
+      allDoneDays: (isMe && !isStaleGlobal && S.allDoneDays) ? [...S.allDoneDays] : [],
       moodLog: (isMe && !isStaleGlobal && S.moodLog) ? [...S.moodLog] : [],
       badges: (isMe && !isStaleGlobal && S.badges) ? {...S.badges} : {},
       badgeLog: (isMe && !isStaleGlobal && S.badgeLog) ? [...S.badgeLog] : [],
       rewardLog: (isMe && !isStaleGlobal) && S.rewardLog ? [...S.rewardLog] : [],
       stickers: (isMe && !isStaleGlobal) && S.stickers ? [...S.stickers] : [],
       rewardInventory: isFirstChildForInv && S.rewardInventory ? JSON.parse(JSON.stringify(S.rewardInventory)) : [],
-      rewardRequests: isFirstChildForInv && S.rewardRequests ? JSON.parse(JSON.stringify(S.rewardRequests)) : []
+      rewardRequests: isFirstChildForInv && S.rewardRequests ? JSON.parse(JSON.stringify(S.rewardRequests)) : [],
+      challenges: (isMe && !isStaleGlobal && S.challenges) ? JSON.parse(JSON.stringify(S.challenges)) : [],
+      challengeHistory: (isMe && !isStaleGlobal && S.challengeHistory) ? JSON.parse(JSON.stringify(S.challengeHistory)) : [],
+      levelData: (isMe && !isStaleGlobal && S.levelData) ? JSON.parse(JSON.stringify(S.levelData)) : {xp:0,level:1,xpLog:[],_migrated:true}
     };
   }
   return S.memberData[memberId];
 }
 // 자녀 초기화 시 상속할 활동/보상 목록 결정
+// 레벨 XP 백필: memberData의 log로부터 누적 활동 마일리지를 합산해 levelData.xp에 채운다.
+// _migrated:true 플래그가 있거나 xp===0인데 log가 비어있지 않으면 재계산.
+function _backfillLevelData(force){
+  try{
+    if(!S.memberData)return;
+    let changed=false;
+    for(const [mid,ms] of Object.entries(S.memberData)){
+      if(!ms)continue;
+      if(!ms.levelData)ms.levelData={xp:0,level:1,xpLog:[]};
+      const ld=ms.levelData;
+      // log 엔트리 중 actId가 있고 pts>0인 것만 합산 (보상 차감·생일보너스·룰렛은 제외)
+      let xpFromLog=0;
+      for(const entry of (ms.log||[])){
+        if(entry && entry.actId && typeof entry.pts==='number' && entry.pts>0) xpFromLog+=entry.pts;
+      }
+      // 안전장치: 기존 xp와 log 합산값 중 더 큰 값 사용 (절대 감소 안 함)
+      const newXp=Math.max(ld.xp||0, xpFromLog);
+      if(newXp!==(ld.xp||0) || ld._migrated){
+        ld.xp=newXp;
+        ld.level=getLevelInfo(newXp).level;
+        delete ld._migrated;
+        changed=true;
+      }
+    }
+    // 글로벌 S.levelData도 현재 뷰잉 중인 자녀의 값으로 동기화
+    if(changed){
+      try{
+        const viewMid=(typeof getViewedMemberId==='function')?getViewedMemberId():currentUser;
+        if(viewMid && S.memberData[viewMid] && S.memberData[viewMid].levelData){
+          S.levelData=JSON.parse(JSON.stringify(S.memberData[viewMid].levelData));
+        }
+      }catch(e){}
+      try{save();}catch(e){}
+    }
+  }catch(e){console.warn('[_backfillLevelData]',e);}
+}
+window._backfillLevelData=_backfillLevelData;
 function _getInheritableActs(){
   // 기존 형제의 acts가 있으면 복사
   if(S.memberData){
@@ -9197,7 +9634,10 @@ function syncMemberToGlobal(targetId) {
   S.lastDate = ms.lastDate || null;
   S.totalDone = ms.totalDone || 0;
   S.actDone = ms.actDone ? JSON.parse(JSON.stringify(ms.actDone)) : {};
+  S.allDoneDays = ms.allDoneDays ? [...ms.allDoneDays] : [];
   S.log = ms.log ? JSON.parse(JSON.stringify(ms.log)) : [];
+  // ※ memberData는 이미 자녀별로 분리되어 있으므로 여기서 user 필터링하지 않음
+  //   (양육자가 대신 기록한 활동의 user 필드가 caregiver ID일 수 있어 필터링하면 사라짐)
   S.moodLog = ms.moodLog ? [...ms.moodLog] : [];
   S.badges = ms.badges ? {...ms.badges} : {};
   S.badgeLog = ms.badgeLog ? [...ms.badgeLog] : [];
@@ -9207,6 +9647,15 @@ function syncMemberToGlobal(targetId) {
   S.rewardLog = ms.rewardLog ? [...ms.rewardLog] : [];
   S.rewardInventory = ms.rewardInventory ? JSON.parse(JSON.stringify(ms.rewardInventory)) : [];
   S.rewardRequests = ms.rewardRequests ? JSON.parse(JSON.stringify(ms.rewardRequests)) : [];
+  S.challenges = ms.challenges ? JSON.parse(JSON.stringify(ms.challenges)) : [];
+  S.challengeHistory = ms.challengeHistory ? JSON.parse(JSON.stringify(ms.challengeHistory)) : [];
+  // 레거시 memberData: levelData가 없으면 새로 생성. 현재 "내 아이디"인 경우에만
+  // 기존 공유 S.levelData를 계승(마이그레이션). 다른 자녀는 0부터 시작.
+  if(!ms.levelData){
+    const isMeNow = mid===currentUser;
+    ms.levelData = (isMeNow && S.levelData && S.levelData.xp) ? JSON.parse(JSON.stringify(S.levelData)) : {xp:0,level:1,xpLog:[],_migrated:true};
+  }
+  S.levelData = JSON.parse(JSON.stringify(ms.levelData));
 }
 
 // Syncs global S back to member data before saving
@@ -9234,6 +9683,7 @@ function syncGlobalToMember(targetId) {
   ms.rwds = JSON.parse(JSON.stringify(S.rwds||[]));
   ms.log = JSON.parse(JSON.stringify(S.log||[]));
   ms.actDone = JSON.parse(JSON.stringify(S.actDone||{}));
+  ms.allDoneDays = S.allDoneDays ? [...S.allDoneDays] : [];
   ms.moodLog = S.moodLog ? [...S.moodLog] : [];
   ms.badges = S.badges ? {...S.badges} : {};
   ms.badgeLog = S.badgeLog ? [...S.badgeLog] : [];
@@ -9241,6 +9691,9 @@ function syncGlobalToMember(targetId) {
   ms.rewardLog = S.rewardLog ? [...S.rewardLog] : [];
   ms.rewardInventory = JSON.parse(JSON.stringify(S.rewardInventory||[]));
   ms.rewardRequests = JSON.parse(JSON.stringify(S.rewardRequests||[]));
+  ms.challenges = JSON.parse(JSON.stringify(S.challenges||[]));
+  ms.challengeHistory = JSON.parse(JSON.stringify(S.challengeHistory||[]));
+  ms.levelData = JSON.parse(JSON.stringify(S.levelData||{xp:0,level:1,xpLog:[],_migrated:true}));
 }
 
 // ── S-09: 입력값 검증 유틸리티 ──
@@ -10540,7 +10993,8 @@ window.getCurrentGreeting=getCurrentGreeting;
 // ── RENDER ────────────────────────────────────
 function renderAll(){
   if(_actAnimating){_actAnimating='pending';return;}
-  renderHero();renderHomeGrid();renderRecent();
+  if(!S._lvBackfilled){try{_backfillLevelData();S._lvBackfilled=true;}catch(e){}}
+  renderHero();renderHomeGrid();renderChallengeCards();renderRecent();
   renderLogList();renderRewardGrid();renderRewardInventory();renderRewardHistory();
   renderDashboard();renderHistStats();renderHistList();renderCalendar();
   renderBadgeSummary();
@@ -10623,6 +11077,19 @@ function renderHero(){
   }
   // 마일리 인사말 렌더링
   renderMilyGreeting();
+
+  // Level pill update
+  const _lvPill=document.getElementById('level-pill');
+  if(_lvPill){
+    if(S.settings?.gamification?.levelEnabled===false){
+      _lvPill.style.display='none';
+    }else{
+      _lvPill.style.display='';
+      const _ld=S.levelData||{xp:0,level:1};
+      const _lvInfo=getLevelInfo(_ld.xp);
+      _lvPill.innerHTML=`<span style="display:inline-flex;align-items:center;vertical-align:middle;width:16px;height:16px;margin-right:2px">${_lvInfo.svg||_lvInfo.emoji}</span> Lv.${_lvInfo.level}`;
+    }
+  }
 }
 
 // ── 오늘 할일 진행 바 ──────────────────────────
@@ -11875,6 +12342,367 @@ function renderRewardHistory(){
     return '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--bdr)"><span style="font-size:20px">'+escapeHtml(l.emoji)+'</span><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--tx)">'+nameWithType+'</div><div style="font-size:13px;color:var(--tx3)">'+timeStr+'</div></div><div style="text-align:right">'+ptsHtml+'<div style="font-size:13px;color:'+ti.color+';font-weight:700">'+ti.label+'</div>'+byInfo+'</div></div>';
   }).join('')+'</div>';
 }
+
+// ── LEVEL SYSTEM FUNCTIONS ──────────────────────────────
+function showLevelUpCelebration(lvInfo){
+  if(navigator.vibrate)navigator.vibrate([50,100,50]);
+  const ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;animation:fadeIn .3s';
+  ov.innerHTML=`<div style="background:var(--card);border-radius:24px;padding:32px 28px;text-align:center;width:min(300px,85vw);animation:popIn .4s cubic-bezier(.175,.885,.32,1.275)">
+    <div style="width:64px;height:64px;margin:0 auto 8px">${lvInfo.svg||`<span style="font-size:64px">${lvInfo.emoji}</span>`}</div>
+    <div style="font-size:22px;font-weight:900;color:var(--tx);margin-bottom:4px">레벨 업!</div>
+    <div style="font-size:16px;font-weight:700;color:var(--tab-color,var(--or))">Lv.${lvInfo.level} ${lvInfo.title}</div>
+    <div style="margin-top:12px;font-size:13px;color:var(--tx3)">누적 ${lvInfo.xp.toLocaleString()} 마일리지 달성!</div>
+    <button onclick="this.closest('div[style*=fixed]').remove()" style="margin-top:16px;padding:10px 32px;border:none;border-radius:12px;background:var(--tab-color,var(--or));color:#fff;font-size:14px;font-weight:700;cursor:pointer">멋져요! 🎉</button>
+  </div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener('click',(e)=>{if(e.target===ov)ov.remove();});
+  confetti();
+}
+window.showLevelUpCelebration=showLevelUpCelebration;
+
+function openLevelPopup(){
+  const _ld=S.levelData||{xp:0,level:1};
+  const info=getLevelInfo(_ld.xp);
+  const ov=document.createElement('div');
+  ov.className='streak-popup-overlay show';
+  ov.innerHTML=`<div class="streak-popup" style="transform:scale(1)">
+    <div style="width:72px;height:72px;margin:0 auto 8px;position:relative"><div style="position:absolute;inset:12px">${info.svg||`<span style="font-size:48px">${info.emoji}</span>`}</div>${getLevelEffectHTML(info.level)||''}</div>
+    <div style="font-size:20px;font-weight:900;color:var(--tx)">Lv.${info.level} ${info.title}</div>
+    <div style="margin:12px 0 8px;font-size:13px;color:var(--tx3);font-weight:700">누적 ${info.xp.toLocaleString()} / ${info.nextXP.toLocaleString()} 마일리지</div>
+    <div style="background:var(--bdr);border-radius:6px;height:10px;overflow:hidden">
+      <div style="height:100%;border-radius:6px;background:linear-gradient(90deg,var(--tab-color,#F59E0B),#EF4444);width:${info.pct}%;transition:width .5s"></div>
+    </div>
+    ${info.nextTitle?`<div style="margin-top:8px;font-size:12px;color:var(--tx3);display:flex;align-items:center;justify-content:center;gap:4px">다음: <span style="display:inline-flex;width:16px;height:16px">${info.nextSvg||info.nextEmoji}</span> Lv.${info.level+1} ${info.nextTitle} (${info.nextXP.toLocaleString()})</div>`:'<div style="margin-top:8px;font-size:12px;color:var(--gn2);font-weight:700">🏆 최고 레벨 달성!</div>'}
+    <div style="margin-top:10px;font-size:11px;color:var(--tx3);opacity:.7">활동 총 ${(S.totalDone||0)}회 완료</div>
+    <button onclick="this.closest('.streak-popup-overlay').remove()" style="margin-top:14px;padding:10px 32px;border:none;border-radius:12px;background:var(--tab-color,var(--or));color:#fff;font-size:14px;font-weight:700;cursor:pointer">확인</button>
+  </div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener('click',(e)=>{if(e.target===ov)ov.remove();});
+}
+window.openLevelPopup=openLevelPopup;
+
+// ── CHALLENGE SYSTEM FUNCTIONS ──────────────────────────────
+
+// 현재 주간/월간 레벨 계산 — challengeHistory에서 해당 기간 내 claimed 수 기반
+function _getChallengeLevel(type){
+  const hist=S.challengeHistory||[];
+  // 해당 타입에서 보상 수령(claimed)된 챌린지 총 수 = 현재 레벨
+  const claimedCount=hist.filter(h=>h.type===type&&h.claimed).length;
+  return claimedCount; // 0이면 아직 아무것도 안 함 → level 1 부여
+}
+
+function generateChallenges(){
+  const now=new Date();
+  const gs=S.settings?.gamification||{};
+  const challenges=S.challenges||[];
+  // 만료된 미완료 챌린지 정리 (완료+미수령은 유지)
+  const active=challenges.filter(c=>{
+    if(new Date(c.endDate)<now&&!c.completed) return false;
+    return true;
+  });
+
+  // ── 주간 챌린지 (레벨제) ──
+  if(gs.weeklyEnabled!==false){
+    const dayOfWeek=now.getDay()||7;
+    const weekStart=new Date(now);weekStart.setDate(now.getDate()-(dayOfWeek-1));weekStart.setHours(0,0,0,0);
+    const weekEnd=new Date(weekStart);weekEnd.setDate(weekStart.getDate()+6);weekEnd.setHours(23,59,59,999);
+    // 이번 주 활성 주간 챌린지가 있고, 아직 미수령이면 새로 만들지 않음
+    const thisWeekCh=active.find(c=>c.type==='weekly'&&new Date(c.startDate)>=weekStart);
+    if(!thisWeekCh){
+      const wLv=_getChallengeLevel('weekly');
+      const tmpl=WEEKLY_CHALLENGE_LEVELS[wLv % WEEKLY_CHALLENGE_LEVELS.length];
+      const cycle=Math.floor(wLv / WEEKLY_CHALLENGE_LEVELS.length); // 전체 순회 횟수
+      const rewardBonus=cycle*10; // 순회할수록 보상 약간 증가
+      active.push({
+        id:'ch_'+Date.now(),emoji:tmpl.emoji,title:tmpl.title,type:'weekly',
+        target:tmpl.target,progress:0,reward:(gs.weeklyReward||tmpl.reward)+rewardBonus,
+        check:tmpl.check,level:tmpl.level,trackLevel:wLv+1,
+        startDate:weekStart.toISOString(),endDate:weekEnd.toISOString(),
+        completed:false,claimed:false
+      });
+    } else if(thisWeekCh.claimed){
+      // 이번 주 챌린지를 이미 수령했으면 다음 레벨 챌린지 추가
+      const wLv=_getChallengeLevel('weekly');
+      const tmpl=WEEKLY_CHALLENGE_LEVELS[wLv % WEEKLY_CHALLENGE_LEVELS.length];
+      const cycle=Math.floor(wLv / WEEKLY_CHALLENGE_LEVELS.length);
+      const rewardBonus=cycle*10;
+      // 이번 주에 아직 미수령 챌린지가 없을 때만
+      const hasUnclaimed=active.some(c=>c.type==='weekly'&&new Date(c.startDate)>=weekStart&&!c.claimed);
+      if(!hasUnclaimed){
+        active.push({
+          id:'ch_'+Date.now(),emoji:tmpl.emoji,title:tmpl.title,type:'weekly',
+          target:tmpl.target,progress:0,reward:(gs.weeklyReward||tmpl.reward)+rewardBonus,
+          check:tmpl.check,level:tmpl.level,trackLevel:wLv+1,
+          startDate:weekStart.toISOString(),endDate:weekEnd.toISOString(),
+          completed:false,claimed:false
+        });
+      }
+    }
+  }
+
+  // ── 월간 챌린지 (레벨제) ──
+  if(gs.monthlyEnabled!==false){
+    const monthStart=new Date(now.getFullYear(),now.getMonth(),1);
+    const monthEnd=new Date(now.getFullYear(),now.getMonth()+1,0,23,59,59,999);
+    const thisMonthCh=active.find(c=>c.type==='monthly'&&new Date(c.startDate)>=monthStart);
+    if(!thisMonthCh){
+      const mLv=_getChallengeLevel('monthly');
+      const tmpl=MONTHLY_CHALLENGE_LEVELS[mLv % MONTHLY_CHALLENGE_LEVELS.length];
+      const cycle=Math.floor(mLv / MONTHLY_CHALLENGE_LEVELS.length);
+      const rewardBonus=cycle*20;
+      active.push({
+        id:'ch_'+Date.now()+'m',emoji:tmpl.emoji,title:tmpl.title,type:'monthly',
+        target:tmpl.target,progress:0,reward:(gs.monthlyReward||tmpl.reward)+rewardBonus,
+        check:tmpl.check,level:tmpl.level,trackLevel:mLv+1,
+        startDate:monthStart.toISOString(),endDate:monthEnd.toISOString(),
+        completed:false,claimed:false
+      });
+    } else if(thisMonthCh.claimed){
+      const mLv=_getChallengeLevel('monthly');
+      const tmpl=MONTHLY_CHALLENGE_LEVELS[mLv % MONTHLY_CHALLENGE_LEVELS.length];
+      const cycle=Math.floor(mLv / MONTHLY_CHALLENGE_LEVELS.length);
+      const rewardBonus=cycle*20;
+      const hasUnclaimed=active.some(c=>c.type==='monthly'&&new Date(c.startDate)>=monthStart&&!c.claimed);
+      if(!hasUnclaimed){
+        active.push({
+          id:'ch_'+Date.now()+'m',emoji:tmpl.emoji,title:tmpl.title,type:'monthly',
+          target:tmpl.target,progress:0,reward:(gs.monthlyReward||tmpl.reward)+rewardBonus,
+          check:tmpl.check,level:tmpl.level,trackLevel:mLv+1,
+          startDate:monthStart.toISOString(),endDate:monthEnd.toISOString(),
+          completed:false,claimed:false
+        });
+      }
+    }
+  }
+  S.challenges=active;
+}
+
+function updateChallengeProgress(){
+  if(!S.challenges||!S.challenges.length)return;
+  const now=new Date();
+  S.challenges.forEach(c=>{
+    if(c.completed)return;
+    if(new Date(c.endDate)<now)return;
+    const start=new Date(c.startDate);
+    let prog=0;
+    if(c.check==='streak'){prog=Math.min(c.target,S.streak||0);}
+    else if(c.check==='totalActs'){
+      prog=S.log.filter(l=>new Date(l.ts)>=start&&l.pts>0).length;
+    }
+    else if(c.check==='allDoneDays'){
+      // 등록된 활동을 모두 완료한 날 수 계산
+      // allDoneDays 트래킹: S.allDoneDays 배열에 날짜 기록 (renderAll 시 오늘 체크)
+      const tracker=S.allDoneDays||[];
+      // 이번 기간(주간) 내의 완료 날 수만 카운트
+      const startStr=`${start.getFullYear()}-${String(start.getMonth()+1).padStart(2,'0')}-${String(start.getDate()).padStart(2,'0')}`;
+      prog=tracker.filter(d=>d>=startStr).length;
+      // 오늘 체크: isTodayAllDone()이 true이면 오늘 날짜 추가
+      const todayS=todayStr();
+      if(isTodayAllDone()&&!tracker.includes(todayS)){
+        tracker.push(todayS);
+        S.allDoneDays=tracker;
+        prog=tracker.filter(d=>d>=startStr).length;
+      }
+    }
+    else if(c.check==='monthlyActs'){prog=S.log.filter(l=>new Date(l.ts)>=start&&l.pts>0).length;}
+    else if(c.check==='monthlyStreak'){prog=Math.min(c.target,S.streak||0);}
+    else if(c.check==='monthlyPts'){
+      prog=S.log.filter(l=>new Date(l.ts)>=start&&l.pts>0).reduce((s,l)=>s+l.pts,0);
+    }
+    c.progress=Math.min(prog,c.target);
+    if(c.progress>=c.target&&!c.completed){
+      c.completed=true;
+    }
+  });
+}
+
+function claimChallengeReward(chId, btnEl){
+  const ch=S.challenges.find(c=>c.id===chId);
+  if(!ch||!ch.completed||ch.claimed)return;
+  ch.claimed=true;
+  S.pts+=ch.reward;
+  const hist=S.challengeHistory||(S.challengeHistory=[]);
+  hist.unshift({...ch,claimedAt:Date.now()});
+  if(hist.length>50)S.challengeHistory=hist.slice(0,50);
+  save();
+  // 애니메이션 먼저 실행 (renderAll 전에 소스 요소 위치 캡처)
+  flyChallengeReward(btnEl, ch.reward);
+  toast(`${ch.emoji} 챌린지 완료! +${ch.reward} 마일리지 🎉`);
+  confetti();
+  // 약간 딜레이 후 렌더링 (애니메이션이 시작된 후)
+  setTimeout(()=>renderAll(), 150);
+}
+window.claimChallengeReward=claimChallengeReward;
+
+function renderChallengeCards(){
+  const el=document.getElementById('challenge-cards');
+  if(!el)return;
+  const _gs=S.settings?.gamification||{};
+  if(_gs.weeklyEnabled===false&&_gs.monthlyEnabled===false){el.innerHTML='';return;}
+  generateChallenges();
+  updateChallengeProgress();
+  const chs=(S.challenges||[]).filter(c=>new Date(c.endDate)>=new Date());
+  if(!chs.length){el.innerHTML='';return;}
+  // 수령 완료(claimed)된 챌린지는 숨기고, 미완료+미수령만 표시
+  const visibleChs=chs.filter(c=>!c.claimed);
+  if(!visibleChs.length){el.innerHTML='';return;}
+  el.innerHTML=visibleChs.map(c=>{
+    const pct=Math.round(c.progress/c.target*100);
+    const isComplete=c.completed;
+    const isClaimed=c.claimed;
+    const typeLabel=c.type==='weekly'?'주간':'월간';
+    const daysLeft=Math.max(0,Math.ceil((new Date(c.endDate)-new Date())/(1000*60*60*24)));
+    // 레벨 표시: trackLevel이 있으면 표시
+    const lvLabel=c.trackLevel?`Lv.${c.trackLevel}`:'';
+    // 난이도 색상 (레벨 기준)
+    const lvNum=c.level||1;
+    const diffColor=lvNum<=3?'#10B981':lvNum<=6?'#F59E0B':'#EF4444'; // 쉬움(초록)/보통(노랑)/어려움(빨강)
+    const diffLabel=lvNum<=3?'쉬움':lvNum<=6?'보통':'어려움';
+    return `<div style="background:var(--card);border-radius:16px;padding:14px 16px;margin-bottom:8px;box-shadow:0 2px 8px rgba(0,0,0,.04);border:.5px solid var(--bdr);${isComplete&&!isClaimed?'border-color:var(--tab-color,#F59E0B);box-shadow:0 2px 12px rgba(245,158,11,.15)':''}">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <span style="font-size:24px">${c.emoji}</span>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">
+            <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:10px;background:${c.type==='weekly'?'rgba(99,102,241,.12)':'rgba(236,72,153,.12)'};color:${c.type==='weekly'?'#6366F1':'#EC4899'}">${typeLabel}</span>
+            ${lvLabel?`<span style="font-size:10px;font-weight:800;padding:2px 7px;border-radius:10px;background:${diffColor}18;color:${diffColor}">${lvLabel} ${diffLabel}</span>`:''}
+            <span style="font-size:11px;color:var(--tx3);font-weight:600">${daysLeft}일 남음</span>
+          </div>
+          <div style="font-size:13px;font-weight:700;color:var(--tx);margin-top:2px">${c.title}</div>
+        </div>
+        <div style="text-align:right">
+          ${isComplete&&!isClaimed?`<button onclick="claimChallengeReward('${c.id}',this)" style="padding:6px 14px;border:none;border-radius:10px;background:var(--tab-color,var(--or));color:#fff;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">+${c.reward}M 받기</button>`
+          :isClaimed?'<span style="font-size:12px;color:var(--gn2);font-weight:700">✅ 완료</span>'
+          :`<span style="font-size:12px;font-weight:800;color:var(--tx3)">${c.progress}/${c.target}</span>`}
+        </div>
+      </div>
+      <div style="background:var(--bdr);border-radius:4px;height:6px;overflow:hidden">
+        <div style="height:100%;border-radius:4px;background:${isComplete?'var(--gn2)':'linear-gradient(90deg,var(--tab-color,#F59E0B),#EF4444)'};width:${pct}%;transition:width .4s"></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── DAILY BONUS ROULETTE FUNCTIONS ──────────────────────────────
+function _getEffectiveRoulettePrizes(){
+  const gs=S.settings?.gamification||{};
+  const minP=gs.rouletteMin||5;
+  const maxP=gs.rouletteMax||20;
+  // 기본 ROULETTE_PRIZES를 min~max 범위로 필터링/조정
+  const filtered=ROULETTE_PRIZES.filter(p=>p.pts>=minP&&p.pts<=maxP);
+  if(filtered.length>0)return filtered;
+  // 범위 내에 기본 상품이 없으면 동적 생성
+  const range=maxP-minP;
+  const steps=[0,.15,.3,.5,.7,.85,1];
+  const emojis=['🎉','⭐','💫','🔥','💎','👑','🐉'];
+  const weights=[30,25,20,12,8,4,1];
+  return steps.map((s,i)=>{
+    const pts=Math.round(minP+range*s);
+    return{emoji:emojis[i]||'⭐',label:`${pts} 마일리지`,pts,weight:weights[i]||5};
+  }).filter((p,i,arr)=>i===0||p.pts!==arr[i-1].pts);
+}
+function pickRoulettePrize(){
+  const prizes=_getEffectiveRoulettePrizes();
+  const total=prizes.reduce((s,p)=>s+p.weight,0);
+  let r=Math.random()*total;
+  for(const p of prizes){r-=p.weight;if(r<=0)return p;}
+  return prizes[0];
+}
+
+function checkDailyBonus(){
+  // 양육자는 룰렛 표시하지 않음 (자녀 전용)
+  if(isCaregiverUser())return;
+  // 관리자가 룰렛 비활성화한 경우
+  if(S.settings?.gamification?.rouletteEnabled===false)return;
+  const db=S.dailyBonus||(S.dailyBonus={lastDate:null,history:[]});
+  const today=todayStr();
+  if(db.lastDate===today)return; // 오늘 이미 받음
+  // 로그인 후 1초 딜레이로 표시
+  setTimeout(()=>showDailyRoulette(),1200);
+}
+
+function showDailyRoulette(){
+  const db=S.dailyBonus||(S.dailyBonus={lastDate:null,history:[]});
+  if(db.lastDate===todayStr())return;
+  const ov=document.createElement('div');
+  ov.id='roulette-overlay';
+  ov.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;animation:fadeIn .3s';
+
+  const prizes=_getEffectiveRoulettePrizes();
+  const slotHTML=prizes.map(p=>`<div class="rlt-item" style="padding:12px;text-align:center"><span style="font-size:28px">${p.emoji}</span><div style="font-size:11px;font-weight:700;color:var(--tx);margin-top:4px">${p.label}</div></div>`).join('');
+
+  ov.innerHTML=`<div style="background:var(--card);border-radius:24px;padding:28px 24px;text-align:center;width:min(320px,85vw);animation:popIn .4s cubic-bezier(.175,.885,.32,1.275)">
+    <div style="font-size:22px;font-weight:900;color:var(--tx);margin-bottom:4px">🎰 오늘의 보너스!</div>
+    <div style="font-size:13px;color:var(--tx3);margin-bottom:16px">매일 첫 접속 보너스를 받아보세요</div>
+    <div id="rlt-display" style="font-size:64px;height:80px;display:flex;align-items:center;justify-content:center;background:var(--bdr);border-radius:16px;margin-bottom:16px;overflow:hidden">❓</div>
+    <button id="rlt-spin-btn" onclick="spinRoulette()" style="padding:12px 40px;border:none;border-radius:14px;background:linear-gradient(135deg,#F59E0B,#EF4444);color:#fff;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 4px 12px rgba(245,158,11,.3)">돌려보기! 🎲</button>
+    <button id="rlt-close-btn" onclick="document.getElementById('roulette-overlay').remove()" style="display:none;margin-top:8px;padding:10px 32px;border:none;border-radius:12px;background:var(--tab-color,var(--or));color:#fff;font-size:14px;font-weight:700;cursor:pointer">확인</button>
+  </div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener('click',(e)=>{if(e.target===ov&&document.getElementById('rlt-close-btn').style.display!=='none')ov.remove();});
+}
+window.showDailyRoulette=showDailyRoulette;
+
+function spinRoulette(){
+  const btn=document.getElementById('rlt-spin-btn');
+  if(!btn)return;
+  btn.disabled=true;btn.style.opacity='.5';
+  const display=document.getElementById('rlt-display');
+  const prize=pickRoulettePrize();
+
+  // Slot machine animation
+  let count=0;const total=20;
+  const interval=setInterval(()=>{
+    const _ep=_getEffectiveRoulettePrizes();const rp=_ep[Math.floor(Math.random()*_ep.length)];
+    display.innerHTML=`<div style="font-size:48px">${rp.emoji}</div><div style="font-size:14px;font-weight:800;color:var(--tx3);margin-top:2px">${rp.label}</div>`;
+    display.style.transform=`scale(${1+Math.sin(count/3)*.1})`;
+    count++;
+    if(count>=total){
+      clearInterval(interval);
+      display.innerHTML=`<div style="font-size:48px">${prize.emoji}</div><div style="font-size:14px;font-weight:800;color:var(--tx3);margin-top:2px">${prize.label}</div>`;
+      display.style.transform='scale(1.2)';
+      display.style.transition='transform .3s';
+      setTimeout(()=>{display.style.transform='scale(1)';},300);
+
+      // 보상 지급
+      const db=S.dailyBonus||(S.dailyBonus={lastDate:null,history:[]});
+      db.lastDate=todayStr();
+      db.history.unshift({pts:prize.pts,emoji:prize.emoji,date:todayStr()});
+      if(db.history.length>30)db.history=db.history.slice(0,30);
+      S.pts+=prize.pts;
+      // Level XP도 추가
+      const _ld=S.levelData||(S.levelData={xp:0,level:1,xpLog:[]});
+      _ld.xp+=prize.pts;
+      _ld.level=getLevelInfo(_ld.xp).level;
+
+      // 부모에게 푸시 알림 (familyMessages에 시스템 메시지 추가)
+      const childName=MEMBERS[currentUser]?.name||'자녀';
+      if(!S.familyMessages)S.familyMessages=[];
+      const _caregiverIds=Object.entries(S.familyMeta?.members||{}).filter(([k,v])=>v.role==='caregiver').map(([k])=>k);
+      _caregiverIds.forEach(pid=>{
+        S.familyMessages.push({from:currentUser,to:pid,text:`🎰 ${childName}이(가) 오늘의 보너스 룰렛에서 +${prize.pts} 마일리지를 획득했어요!`,emotion:'star',ts:Date.now(),read:false,type:'roulette_bonus'});
+      });
+      if(S.familyMessages.length>500)S.familyMessages=S.familyMessages.slice(-500);
+
+      save();
+      renderAll();
+
+      // 결과 표시
+      const resultHTML=`<div style="font-size:64px">${prize.emoji}</div><div style="font-size:22px;font-weight:900;color:var(--tab-color,var(--or));margin-top:8px">+${prize.pts} 마일리지!</div>`;
+      display.innerHTML=resultHTML;
+      display.style.height='auto';
+      display.style.padding='16px';
+      btn.style.display='none';
+      document.getElementById('rlt-close-btn').style.display='';
+      if(navigator.vibrate)navigator.vibrate([50,50,50]);
+      if(prize.pts>=30)confetti();
+      // 코인 날아가는 애니메이션 (display 요소에서 hero-pts로)
+      flyCoinsToMileage(display, prize.pts);
+      toast(`🎰 오늘의 보너스: +${prize.pts} 마일리지!`);
+    }
+  },80);
+}
+window.spinRoulette=spinRoulette;
 
 // ── CALENDAR ──────────────────────────────────
 function getDateStr(y,m,d){return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;}
@@ -13179,6 +14007,8 @@ function renderAdmSettings(){
   const bdayDetail=document.getElementById('bday-settings-detail');if(bdayDetail)bdayDetail.style.display=bdayOn?'':'none';
   const bdayPts=document.getElementById('bday-pts-inp');if(bdayPts)bdayPts.value=S.settings.birthdayBonusPts||100;
   const bdayMsg=document.getElementById('bday-msg-inp');if(bdayMsg&&!bdayMsg.matches(':focus'))bdayMsg.value=S.settings.birthdayMsg||'생일 축하해! 오늘은 네 특별한 날이야! 🎂🎉';
+  // 게이미피케이션 설정 렌더링
+  renderGameSettings();
   // 다자녀 모드 섹션 렌더링
   renderAdmModeSection();
   // 자녀 선택기 렌더링
@@ -13187,25 +14017,28 @@ function renderAdmSettings(){
   // Render per-user greeting settings
   const container=document.getElementById('greetings-settings-container');
   if(container){
-    let html='';
-    Object.entries(MEMBERS).forEach(([userId,member])=>{
+    const entries=Object.entries(MEMBERS);
+    let html='<div class="adm-card">';
+    entries.forEach(([userId,member],idx)=>{
       const gr=S.greetings?.[userId]||{mode:'auto',messages:[],custom:'',currentIdx:0};
-      html+=`<div class="adm-card" style="margin-bottom:12px">
-        <div style="font-size:15px;font-weight:800;color:var(--tx);padding:14px 14px 0">${escapeHtml(member.name)}</div>
-        <div class="adm-row" style="flex-wrap:nowrap">
-          <div class="adm-row-l" style="flex-shrink:0"><div class="adm-row-nm">모드</div></div>
-          <select id="greeting-mode-${userId}" onchange="saveGreetingMode('${userId}')" style="padding:8px 12px;border:1.5px solid var(--bdr);border-radius:9px;font-size:14px;font-weight:700;background:var(--bg);color:var(--tx);font-family:inherit;flex-shrink:0">
+      const preview=gr.mode==='auto'?getCurrentGreeting(userId):(gr.custom||'(수동 입력 없음)');
+      html+=`${idx>0?'<div class="divider"></div>':''}
+        <div class="adm-row" style="flex-wrap:nowrap;gap:8px">
+          <div class="adm-row-l" style="flex:1;min-width:0">
+            <div class="adm-row-nm">${escapeHtml(member.name)}</div>
+            <div class="adm-row-sub" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">"${escapeHtml(preview)}"</div>
+          </div>
+          <select id="greeting-mode-${userId}" onchange="saveGreetingMode('${userId}')" style="padding:6px 8px;border:1.5px solid var(--bdr);border-radius:8px;font-size:12px;font-weight:700;background:var(--bg);color:var(--tx);font-family:inherit;flex-shrink:0">
             <option value="auto" ${gr.mode==='auto'?'selected':''}>자동</option>
             <option value="manual" ${gr.mode==='manual'?'selected':''}>수동</option>
           </select>
         </div>
-        <div id="greeting-manual-${userId}" style="display:${gr.mode==='manual'?'block':'none'};padding:0 14px 12px">
-          <input class="txt-inp" id="greeting-custom-${userId}" type="text" placeholder="인사말을 입력하세요" maxlength="50" value="${gr.custom||''}" inputmode="text" lang="ko" style="width:100%;box-sizing:border-box;margin-bottom:8px">
+        <div id="greeting-manual-${userId}" style="display:${gr.mode==='manual'?'flex':'none'};gap:6px;padding:0 0 4px">
+          <input class="txt-inp" id="greeting-custom-${userId}" type="text" placeholder="인사말 입력" maxlength="50" value="${escapeHtml(gr.custom||'')}" inputmode="text" lang="ko" style="flex:1;min-width:0">
           <button class="btn-sm" onclick="saveGreetingCustom('${userId}')">저장</button>
-        </div>
-        ${gr.mode==='auto'?`<div style="font-size:13px;color:var(--tx3);padding:0 14px 12px;word-break:keep-all;overflow-wrap:break-word;line-height:1.5">현재: "${getCurrentGreeting(userId)}"</div>`:''}
-      </div>`;
+        </div>`;
     });
+    html+='</div>';
     container.innerHTML=html;
   }
 
@@ -13245,8 +14078,22 @@ function _doActCore(id){
   }
 
   S.pts+=a.pts+bonus;S.totalDone++;
-  S.log.unshift({id:'l_'+Date.now(),emoji:a.emoji,name:a.name,pts:a.pts+bonus,ts:Date.now(),actId:a.id,user:currentUser});
+  S.log.unshift({id:'l_'+Date.now(),emoji:a.emoji,name:a.name,pts:a.pts+bonus,ts:Date.now(),actId:a.id,user:_globalDataOwner||currentUser});
   if(S.log.length>300)S.log=S.log.slice(0,300);
+
+  // Level XP
+  const _ld=S.levelData||(S.levelData={xp:0,level:1,xpLog:[]});
+  const _prevLv=getLevelInfo(_ld.xp).level;
+  _ld.xp+=(a.pts||10);
+  _ld.xpLog.unshift({xp:a.pts||10,ts:Date.now(),src:a.name});
+  if(_ld.xpLog.length>100)_ld.xpLog=_ld.xpLog.slice(0,100);
+  const _newLvInfo=getLevelInfo(_ld.xp);
+  _ld.level=_newLvInfo.level;
+  const _didLevelUp=_newLvInfo.level>_prevLv;
+
+  // Update challenge progress
+  updateChallengeProgress();
+
   save();
   const _curTab=getCurrentTab();
   const _actCard=_curTab==='home'?document.querySelector(`.act-card[data-actid="${id}"]`):null;
@@ -13266,6 +14113,7 @@ function _doActCore(id){
     _actCard.appendChild(_stamp);}
     _actCard.classList.add('act-completing');
     toast(`${a.emoji} ${a.name} +${a.pts} 마일리지${sm}`);
+    if(_didLevelUp)setTimeout(()=>showLevelUpCelebration(_newLvInfo),_showStamp?1700:900);
     flyCoinsToMileage(_actCard, a.pts+bonus);
     // 도장: delay(.65s)+dur(.45s)=1.1s, 카드회전: 0.8s → 총 1.5s 후 renderAll
     setTimeout(_unlockAndRender, _showStamp?1600:850);
@@ -13277,11 +14125,13 @@ function _doActCore(id){
     (_logInf2||_logItem).appendChild(_stamp2);}
     _logItem.classList.add('log-completing');
     toast(`${a.emoji} ${a.name} +${a.pts} 마일리지${sm}`);
+    if(_didLevelUp)setTimeout(()=>showLevelUpCelebration(_newLvInfo),_showStamp?1700:900);
     flyCoinsToMileage(_logItem, a.pts+bonus);
     setTimeout(_unlockAndRender, _showStamp?1200:850);
   } else {
     renderAll();
     toast(`${a.emoji} ${a.name} +${a.pts} 마일리지${sm}`);
+    if(_didLevelUp)setTimeout(()=>showLevelUpCelebration(_newLvInfo),900);
     flyCoinsToMileage(null, a.pts+bonus);
     setTimeout(()=>checkBadges(),300);
   }
@@ -14165,7 +15015,7 @@ function giveBonus(){
     save();renderAll();renderMilesTargetInfo();toast(`⭐ ${MEMBERS[targetId]?.name||'자녀'}에게 +${v} 마일리지 지급!`);confetti();flyCoinsToMileage(null,v);
     return;
   }
-  S.pts+=v;S.log.unshift({id:'l_'+Date.now(),emoji:'⭐',name:`보너스 +${v} 마일리지`,pts:v,ts:Date.now(),actId:null,user:currentUser});
+  S.pts+=v;S.log.unshift({id:'l_'+Date.now(),emoji:'⭐',name:`보너스 +${v} 마일리지`,pts:v,ts:Date.now(),actId:null,user:_globalDataOwner||currentUser});
   save();renderAll();toast(`⭐ 보너스 +${v} 마일리지 지급!`);confetti();flyCoinsToMileage(null,v);
 }
 function deductPts(){
@@ -14186,7 +15036,7 @@ function deductPts(){
   }
   if(!confirm(`${v} 마일리지를 차감할까요?`))return;
   S.pts=Math.max(0,S.pts-v);
-  S.log.unshift({id:'l_'+Date.now(),emoji:'📉',name:`차감 -${v} 마일리지`,pts:-v,ts:Date.now(),actId:null,user:currentUser});
+  S.log.unshift({id:'l_'+Date.now(),emoji:'📉',name:`차감 -${v} 마일리지`,pts:-v,ts:Date.now(),actId:null,user:_globalDataOwner||currentUser});
   save();renderAll();toast(`📉 ${v} 마일리지 차감됨`);
 }
 
@@ -14579,6 +15429,124 @@ function delRwd(id){if(!confirm('이 보상을 삭제할까요?'))return;const c
 function toggleRwdClosed(id){const _ms=_getAdmMemberData();const _rwds=(_ms&&_ms.rwds)?_ms.rwds:S.rwds;const r=_rwds.find(x=>x.id===id);if(!r)return;r.closed=!r.closed;if(_globalDataOwner===(_admViewChildId||getViewedMemberId())){const sr=S.rwds.find(x=>x.id===id);if(sr)sr.closed=r.closed;}save();renderAll();toast(r.closed?'⛔ 보상이 종료됐어요':'✅ 보상이 다시 운영돼요');}
 function togSetting(k){if(k==='streak')S.settings.streakBonus=!S.settings.streakBonus;save();renderAdmSettings();toast(S.settings.streakBonus?'✅ 연속 보너스 켜짐':'🔕 꺼짐');}
 function saveSettings(){S.settings.streakBonusPts=parseInt(document.getElementById('bonus-pts-inp').value)||100;save();}
+// ── 게이미피케이션 설정 ──
+function _getGameSettings(){
+  if(!S.settings.gamification)S.settings.gamification={};
+  return S.settings.gamification;
+}
+function togGameSetting(key){
+  const gs=_getGameSettings();
+  gs[key]=gs[key]===false?true:!(gs[key]!==false);
+  save();renderGameSettings();
+  const labels={rouletteEnabled:'일일 룰렛',weeklyEnabled:'주간 챌린지',monthlyEnabled:'월간 챌린지',levelEnabled:'레벨 시스템'};
+  toast(gs[key]!==false?`✅ ${labels[key]||key} 켜짐`:`🔕 ${labels[key]||key} 꺼짐`);
+  if(key==='levelEnabled')renderAll();
+}
+function saveGameSettings(){
+  const gs=_getGameSettings();
+  gs.rouletteMin=parseInt(document.getElementById('rlt-min-inp')?.value)||5;
+  gs.rouletteMax=parseInt(document.getElementById('rlt-max-inp')?.value)||20;
+  if(gs.rouletteMin>gs.rouletteMax){const t=gs.rouletteMin;gs.rouletteMin=gs.rouletteMax;gs.rouletteMax=t;}
+  gs.weeklyReward=parseInt(document.getElementById('ch-weekly-reward')?.value)||30;
+  gs.monthlyReward=parseInt(document.getElementById('ch-monthly-reward')?.value)||50;
+  save();
+}
+function renderGameSettings(){
+  const gs=_getGameSettings();
+  // toggles
+  _setTogState('tog-roulette',gs.rouletteEnabled!==false);
+  _setTogState('tog-weekly',gs.weeklyEnabled!==false);
+  _setTogState('tog-monthly',gs.monthlyEnabled!==false);
+  _setTogState('tog-level',gs.levelEnabled!==false);
+  // 토글 상태에 따라 상세 영역 펼침/접힘
+  const _setDetail=(id,on)=>{const el=document.getElementById(id);if(!el)return;if(on)el.classList.remove('gs-collapsed');else el.classList.add('gs-collapsed');};
+  _setDetail('gs-detail-roulette',gs.rouletteEnabled!==false);
+  _setDetail('gs-detail-weekly',gs.weeklyEnabled!==false);
+  _setDetail('gs-detail-monthly',gs.monthlyEnabled!==false);
+  _setDetail('gs-detail-level',gs.levelEnabled!==false);
+  // inputs
+  const rMin=document.getElementById('rlt-min-inp');if(rMin)rMin.value=gs.rouletteMin||5;
+  const rMax=document.getElementById('rlt-max-inp');if(rMax)rMax.value=gs.rouletteMax||20;
+  const wR=document.getElementById('ch-weekly-reward');if(wR)wR.value=gs.weeklyReward||30;
+  const mR=document.getElementById('ch-monthly-reward');if(mR)mR.value=gs.monthlyReward||50;
+  renderLevelEditor();
+}
+function renderLevelEditor(){
+  const el=document.getElementById('lv-editor');if(!el)return;
+  const defs=_getEffectiveLevelDefs();
+  el.innerHTML=defs.map((d,i)=>{
+    const fx=LEVEL_EFFECTS[d.level]||{name:'-',html:''};
+    return `<div class="lv-edit-row">
+      <div class="lv-edit-preview">${fx.html}<svg class="lv-icon" viewBox="0 0 48 48">${(d.svg||'').replace(/^<svg[^>]*>|<\/svg>$/g,'')}</svg></div>
+      <div class="lv-edit-info">
+        <div class="lv-edit-title">Lv.${d.level} ${d.title}</div>
+        <div class="lv-edit-sub">이펙트: ${fx.name}</div>
+      </div>
+      <input class="num-inp" type="number" id="lv-th-${i}" value="${d.minXP}" min="0" max="9999999" step="10" ${i===0?'disabled':''}>
+      <span style="font-size:10px;color:var(--tx3);font-weight:700">XP</span>
+    </div>`;
+  }).join('');
+}
+function saveLevelThresholds(){
+  const defs=LEVEL_DEFS;
+  const arr=[];
+  for(let i=0;i<defs.length;i++){
+    const inp=document.getElementById(`lv-th-${i}`);
+    let v=parseInt(inp?.value);
+    if(isNaN(v)||v<0)v=defs[i].minXP;
+    arr.push(v);
+  }
+  arr[0]=0; // Lv.1 항상 0
+  // 오름차순 검증
+  for(let i=1;i<arr.length;i++){
+    if(arr[i]<=arr[i-1]){
+      toast(`⚠️ Lv.${i+1} 임계값은 Lv.${i}보다 커야 해요`);return;
+    }
+  }
+  const gs=_getGameSettings();
+  gs.levelThresholds=arr;
+  save();
+  // 모든 사용자 레벨 재계산
+  try{Object.values(S.users||{}).forEach(u=>{const ld=u.levelData;if(ld)ld.level=getLevelInfo(ld.xp||0).level;});if(S.levelData)S.levelData.level=getLevelInfo(S.levelData.xp||0).level;}catch(e){}
+  save();renderAll();
+  toast('✅ 레벨 임계값이 저장됐어요');
+}
+function resetLevelThresholds(){
+  if(!confirm('레벨 임계값을 기본값으로 되돌릴까요?'))return;
+  const gs=_getGameSettings();
+  delete gs.levelThresholds;
+  save();renderLevelEditor();
+  try{Object.values(S.users||{}).forEach(u=>{const ld=u.levelData;if(ld)ld.level=getLevelInfo(ld.xp||0).level;});if(S.levelData)S.levelData.level=getLevelInfo(S.levelData.xp||0).level;}catch(e){}
+  save();renderAll();
+  toast('✅ 기본값으로 되돌렸어요');
+}
+window.saveLevelThresholds=saveLevelThresholds;
+window.resetLevelThresholds=resetLevelThresholds;
+function _setTogState(id,on){
+  const el=document.getElementById(id);if(!el)return;
+  if(on){el.classList.remove('off');}else{el.classList.add('off');}
+}
+function showGsInfo(key){
+  const info={
+    roulette:{t:'🎰 일일 보너스 룰렛',d:'매일 첫 접속 시 자녀에게 보너스 마일리지 룰렛을 제공해요. 최소~최대 범위 안에서 무작위로 당첨돼서 매일 출석에 작은 재미를 더해줍니다.'},
+    weekly:{t:'🏆 주간 챌린지',d:'매주 월요일에 자동 생성되는 한 주간의 도전 미션입니다. Lv.1부터 시작해 챌린지를 완료하고 보상을 수령하면 다음 레벨이 해금돼요. 모든 템플릿을 한 바퀴 돌면 두 번째 사이클부터는 목표 수치가 1.5배로 늘어나 점점 어려워져요. 활동 횟수·연속 일수·완료 비율 등 다양한 조건을 자녀 본인 데이터로만 카운트합니다(다자녀 가족도 자녀별 독립 진행).'},
+    monthly:{t:'📅 월간 챌린지',d:'매월 1일에 자동 생성되는 한 달짜리 장기 도전 미션입니다. 주간보다 목표가 크고 보상도 많아요. 마찬가지로 레벨제로 운영되며 매월 한 단계씩 해금됩니다. "한 달 누적 활동 횟수", "연속 달성 일수", "월간 마일리지 누적량" 등 장기 습관 형성을 자극하는 미션이 출제돼요.'},
+    level:{t:'🎮 레벨 시스템',d:'자녀가 활동을 완료해서 받은 누적 마일리지(XP)에 따라 Lv.1부터 Lv.40까지 자동으로 성장합니다. 레벨이 오를 때마다 프로필 아이콘 주위에 고유한 SVG 이펙트(40종)가 나타나서 자녀에게 시각적인 보상이 주어져요.'}
+  };
+  const i=info[key];if(!i)return;
+  const ov=document.createElement('div');
+  ov.className='streak-popup-overlay show';
+  ov.innerHTML=`<div class="streak-popup" style="transform:scale(1);max-width:340px;text-align:left">
+    <div style="font-size:18px;font-weight:900;color:var(--tx);margin-bottom:10px;text-align:center">${i.t}</div>
+    <div style="font-size:13.5px;line-height:1.65;color:var(--tx2);font-weight:500;word-break:keep-all">${i.d}</div>
+    <div style="text-align:center"><button onclick="this.closest('.streak-popup-overlay').remove()" style="margin-top:14px;padding:10px 32px;border:none;border-radius:12px;background:var(--tab-color,var(--or));color:#fff;font-size:14px;font-weight:700;cursor:pointer">확인</button></div>
+  </div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener('click',(e)=>{if(e.target===ov)ov.remove();});
+}
+window.showGsInfo=showGsInfo;
+window.togGameSetting=togGameSetting;
+window.saveGameSettings=saveGameSettings;
 function togBdaySetting(){S.settings.birthdayBonus=S.settings.birthdayBonus===false?true:!S.settings.birthdayBonus;save();renderAdmSettings();toast(S.settings.birthdayBonus!==false?'🎂 생일 보너스 켜짐':'🔕 생일 보너스 꺼짐');}
 function saveBdaySettings(){S.settings.birthdayBonusPts=parseInt(document.getElementById('bday-pts-inp').value)||100;const msgInp=document.getElementById('bday-msg-inp');S.settings.birthdayMsg=msgInp?msgInp.value.trim()||'생일 축하해! 오늘은 네 특별한 날이야! 🎂🎉':'생일 축하해! 오늘은 네 특별한 날이야! 🎂🎉';save();toast('✅ 생일 이벤트 설정 저장됨');}
 function saveGreetingMode(userId){
@@ -15719,10 +16687,45 @@ function renderMyTab(){
   // 헤더 서브타이틀 업데이트
   const myHeaderSub=document.getElementById('my-header-sub');
   if(myHeaderSub)myHeaderSub.textContent=`${name} · ${roleLabel}`;
-  // 아바타
+  // 아바타 + 레벨 이펙트 오버레이 (양육자는 레벨 없음)
+  const _isParent=isCaregiverUser();
   const avatarWrap=document.getElementById('my-avatar-wrap');
-  if(avatarWrap)avatarWrap.innerHTML=getAvatarHTML(currentUser,50);
+  if(avatarWrap){
+    let _lvFx='';
+    try{
+      const gs=S.settings?.gamification||{};
+      if(gs.levelEnabled!==false && !_isParent){
+        const _ms=getMemberState(currentUser);
+        const _ld=(_ms&&_ms.levelData)||S.levelData||{xp:0,level:1};
+        const _info=getLevelInfo(_ld.xp||0);
+        _lvFx=getLevelEffectHTML(_info.level)||'';
+      }
+    }catch(e){}
+    avatarWrap.innerHTML=_lvFx+getAvatarHTML(currentUser,50);
+  }
   try{updateMyAvatarMoodBadge();}catch(e){console.warn('[renderMyTab] mood badge err:',e);}
+  // 이름 옆에 레벨 배지
+  try{
+    const gs=S.settings?.gamification||{};
+    const _nameRow=nameEl?.parentElement;
+    let _lvBadge=document.getElementById('my-lv-badge');
+    if(gs.levelEnabled!==false && _nameRow && !_isParent){
+      const _ms=getMemberState(currentUser);
+      const _ld=(_ms&&_ms.levelData)||S.levelData||{xp:0,level:1};
+      const _info=getLevelInfo(_ld.xp||0);
+      if(!_lvBadge){
+        _lvBadge=document.createElement('span');
+        _lvBadge.id='my-lv-badge';
+        _lvBadge.className='my-lv-badge';
+        _lvBadge.onclick=()=>{try{openLevelPopup();}catch(e){}};
+        _nameRow.appendChild(_lvBadge);
+      }
+      _lvBadge.textContent=`${_info.emoji||'⭐'} Lv.${_info.level}`;
+      _lvBadge.style.display='inline-flex';
+    }else if(_lvBadge){
+      _lvBadge.style.display='none';
+    }
+  }catch(e){console.warn('[renderMyTab] lv badge err:',e);}
   // 등급 배지 업데이트 (나의메뉴 + 챗봇)
   try{_updatePlanBadges();}catch(e){console.warn('[renderMyTab] plan badge err:',e);}
   // 소셜 인증 연동 정보 표시 (프로필 카드 아래 별도 영역)
@@ -15791,6 +16794,7 @@ function renderMyTab(){
     const ids=Object.keys(fm).filter(mid=>mid!==currentUser); // 나 제외
     if(ids.length>0){
       const _RLABELS2={dad:'아빠',mom:'엄마',grandpa:'할아버지',grandma:'할머니',grandpa_m:'외할아버지',grandma_m:'외할머니',child:'자녀',caregiver:'양육자',parent:'양육자'};
+      const _gsLv=(S.settings?.gamification?.levelEnabled!==false);
       familyRow.innerHTML=ids.map(mid=>{
         const m=fm[mid];
         const mName=m?.name||MEMBERS[mid]?.name||mid;
@@ -15799,8 +16803,21 @@ function renderMyTab(){
         const moodEmoji=getMoodEmoji(mid);
         // 해당 멤버로부터 온 미읽은 메시지 수
         const unreadFromMember=S.familyMessages?S.familyMessages.filter(m=>m.from===mid&&m.to===currentUser&&!m.read).length:0;
+        // 자녀 레벨 배지/이펙트 (양육자는 제외)
+        const _isChild=(m?.role==='child'||m?.displayRole==='child');
+        let _lvHTML='';
+        let _lvFxHTML='';
+        if(_gsLv && _isChild){
+          const _msLv=S.memberData?.[mid]?.levelData;
+          if(_msLv){
+            const _infoLv=getLevelInfo(_msLv.xp||0);
+            _lvHTML=`<div class="my-family-lv">${_infoLv.emoji||'⭐'} Lv.${_infoLv.level}</div>`;
+            _lvFxHTML=getLevelEffectHTML(_infoLv.level)||'';
+          }
+        }
         return `<div class="my-family-member" onclick="${clickAction}">
           <div class="my-family-avatar" data-mf-id="${mid}">
+            ${_lvFxHTML}
             ${getAvatarHTML(mid,48)}
             ${moodEmoji?`<span class="mf-mood-badge">${moodEmoji}</span>`:''}
             <div class="mf-mood-particles" data-mf-particles="${mid}"></div>
@@ -15808,6 +16825,7 @@ function renderMyTab(){
           </div>
           <div class="my-family-name">${mName}</div>
           <div class="my-family-role">${mRole}</div>
+          ${_lvHTML}
         </div>`;
       }).join('');
       // 기분 파티클 애니메이션 시작
@@ -15893,6 +16911,32 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.58 (v0407n)',date:'2026-04-07',items:[{type:'fix',text:'기본 보상값 조정 — 일일 룰렛 5~20, 주간 챌린지 30, 월간 챌린지 50 마일리지'},{type:'fix',text:'XP 백필 안전장치 — 기존 levelData.xp와 log 합산값 중 더 큰 값 사용 (절대 감소 안 함)'}]},
+  {ver:'1.9.57 (v0407m)',date:'2026-04-07',items:[{type:'fix',text:'Lv.5 불꽃 이펙트 — 작은 불꽃 9개 → 아이콘을 감싸는 큰 불꽃 1개(3겹 그라디언트)로 단순화'},{type:'new',text:'Lv.40 끝판왕 이펙트 재설계 — 무지개 그라디언트 링 + 발광 글로우 + 황금 별 + 무한 심볼 + 8방향 스파클 합성'},{type:'new',text:'나의 메뉴 가족 목록 자녀 아이콘에 레벨 이펙트 표시, 아이콘 간격 12px → 22px'}]},
+  {ver:'1.9.56 (v0407l)',date:'2026-04-07',items:[{type:'fix',text:'관리자 게이미피케이션 상세 영역을 들여쓰기 + 좌측 액센트 바로 시각적 계층화 (하위 속성 느낌)'},{type:'fix',text:'i 아이콘을 "주간 챌린지란?" 등 라벨형 칩 버튼으로 교체 (가독성·발견성 개선)'}]},
+  {ver:'1.9.55 (v0407k)',date:'2026-04-07',items:[{type:'fix',text:'자녀별 누적 XP 백필 — 레벨 시스템 도입 이전의 활동 기록(log)을 합산해 현재 레벨 자동 재계산'},{type:'fix',text:'양육자(부모) 나의 메뉴에서 본인 계정 레벨 배지/이펙트 숨김'},{type:'new',text:'나의 메뉴 가족 목록: 각 자녀 아이콘 아래에 현재 레벨 배지 표시'}]},
+  {ver:'1.9.54 (v0407j)',date:'2026-04-07',items:[{type:'fix',text:'관리자 게이미피케이션 토글이 클릭 시 시각적으로 변하지 않던 버그 수정 (.tog.off 클래스 사용)'},{type:'new',text:'토글을 켰을 때만 상세 설정 펼침 — 일일/주간/월간/레벨 각 영역의 하위 설정이 토글 OFF면 자동 접힘'},{type:'new',text:'챌린지/레벨 설명을 i 버튼 + 안내 팝업으로 정리 — 인라인 long text 제거'},{type:'fix',text:'홈 화면 인사말 설정을 한 카드에 컴팩트하게 정리 — 자녀별 한 줄, 미리보기 인라인'}]},
+  {ver:'1.9.53 (v0407i)',date:'2026-04-07',items:[{type:'fix',text:'아이별 레벨 독립 관리 — levelData를 memberData에 저장해 자녀별 분리 (기존 사용자는 자동 마이그레이션)'},{type:'fix',text:'Lv.5 불꽃 이펙트 재설계 — 아이콘 전체를 감싸는 방사형 불꽃으로 변경'},{type:'new',text:'레벨 시스템 확장 — 총 40레벨/10만 마일리지, Lv.21~40 신규 SVG 이펙트 20종 추가'},{type:'new',text:'레벨 팝업에도 레벨 이펙트 표시'}]},
+  {ver:'1.9.52 (v0407h)',date:'2026-04-07',items:[{type:'new',text:'관리자 — 주간/월간 챌린지 상세 설명 추가, 레벨별 임계값 직접 편집 가능'},{type:'new',text:'레벨 시스템 — Lv.1~20 각각 고유한 SVG 이펙트 애니메이션 (반짝임/불꽃/오라/궤도 등 20종)'},{type:'new',text:'나의 메뉴 — 프로필 카드에 레벨 배지 + 아바타 주변 레벨 이펙트 표시'},{type:'new',text:'관리자 레벨 편집기 — 각 레벨별 이펙트 미리보기 가능'}]},
+  {ver:'1.9.51 (v0407g)',date:'2026-04-07',items:[{type:'fix',text:'Lv 표시 baseline을 M 글씨 밑선과 정렬'}]},
+  {ver:'1.9.50 (v0407f)',date:'2026-04-07',items:[{type:'fix',text:'진행중인 챌린지 중복 제목 제거, 트로피 아이콘으로 통일'},{type:'fix',text:'레벨 정보 박스 제거, M 글씨와 높이 정렬'}]},
+  {ver:'1.9.49 (v0407e)',date:'2026-04-07',items:[{type:'fix',text:'streak-pill을 hero-pts-wrap 안으로 inline 배치 — Lv pill과 항상 같은 라인에 자동 정렬 (펼침/접힘 모두)'}]},
+  {ver:'1.9.48 (v0407d)',date:'2026-04-07',items:[{type:'fix',text:'streak-pill 픽셀 위치 정밀 조정 — 펼침 시 Lv pill 라인, compact 시 hero-lbl 라인'}]},
+  {ver:'1.9.47 (v0407c)',date:'2026-04-07',items:[{type:'fix',text:'홈탭 hero 레이아웃 재정렬 — 자녀 전환은 "OO의 마일리지" 라인, 0일 연속은 Lv 박스 라인'},{type:'fix',text:'compact 시 자녀 전환 숨기고 0일 연속만 hero-lbl 라인에 표시 (운영기와 동일)'}]},
+  {ver:'1.9.46 (v0407b)',date:'2026-04-07',items:[{type:'fix',text:'연속 라벨을 다시 "X일 연속"으로 단축'},{type:'fix',text:'X일 연속 영역을 "OO의 마일리지" 라인과 같은 줄로 정렬, 컴팩트 시 Lv 박스 라인으로 내림'},{type:'fix',text:'자녀 전환 버튼을 hero 상단(이전 streak 위치)으로 이동'},{type:'new',text:'홈탭 진행중인 챌린지 섹션을 오늘 할 일 아래로 이동, 섹션 제목 스타일 통일'}]},
+  {ver:'1.9.45 (v0407a)',date:'2026-04-07',items:[{type:'fix',text:'홈탭 인사말과 마일리지 사이 불필요한 여백 제거'},{type:'fix',text:'자녀 전환 버튼 위치 살짝 아래로 조정'},{type:'fix',text:'연속 라벨을 "오늘할일 연속 X일 완료"로 직관화'},{type:'fix',text:'활동기록/보상/성과/마이 탭 제목 크기 통일 (모바일 26px / 태블릿 28px)'}]},
+  {ver:'1.9.44 (v0406m)',date:'2026-04-06',items:[{type:'fix',text:'활동기록/보상/성과 탭에서 스크롤 복귀 시 제목 크기가 원래대로 돌아오지 않던 문제 수정'}]},
+  {ver:'1.9.43 (v0406l)',date:'2026-04-06',items:[{type:'new',text:'레벨제 챌린지 시스템 — 주간/월간 각 9단계 순차 해금, 난이도 쉬움→보통→어려움'},{type:'fix',text:'"오늘 할 일 모두 완료" 챌린지가 등록된 활동 전부 완료 기준으로 정확히 판정'}]},
+  {ver:'1.9.42 (v0406k)',date:'2026-04-06',items:[{type:'fix',text:'양육자가 대신 기록한 활동이 자녀 전환 시 사라지던 문제 수정'},{type:'fix',text:'활동 취소 시 "취소할 기록이 없어요" 오류 수정'}]},
+  {ver:'1.9.41 (v0406j)',date:'2026-04-06',items:[{type:'fix',text:'다자녀 가족에서 주간/월간 챌린지가 자녀별로 분리되지 않던 문제 수정 — 자녀별 독립 챌린지 데이터'}]},
+  {ver:'1.9.40 (v0406i)',date:'2026-04-06',items:[{type:'new',text:'챌린지 보상 수령 시 화려한 축하 애니메이션 — 무지개 별 파티클, 버스트 이펙트, 스파클 트레일, 링 웨이브'}]},
+  {ver:'1.9.39 (v0406h)',date:'2026-04-06',items:[{type:'fix',text:'릴리즈 노트 버전 표시 오류 수정 — vv 중복, undefined 항목, dev버전 누락'},{type:'improve',text:'릴리즈 노트에 개선(노란색) 뱃지 추가'}]},
+  {ver:'1.9.38 (v0406g)',date:'2026-04-06',items:[{type:'fix',text:'비홈 탭(활동기록·보상·성과·나의) 헤더 스크롤 시 자연스럽게 축소 — 갑작스런 크기 변경 제거'}]},
+  {ver:'1.9.37 (v0406f)',date:'2026-04-06',items:[{type:'improve',text:'레벨 pill을 마일리지 숫자 옆으로 이동 — 더 깔끔한 레이아웃'},{type:'improve',text:'챌린지 섹션에 라벨 추가 + hero 영역과 간격 확보'}]},
+  {ver:'1.9.36 (v0406e)',date:'2026-04-06',items:[{type:'new',text:'게이미피케이션 관리 — 관리자 설정에서 룰렛·챌린지·레벨 ON/OFF, 마일리지 범위 조정 가능'}]},
+  {ver:'1.9.35 (v0406d)',date:'2026-04-06',items:[{type:'fix',text:'레벨 pill과 제목 텍스트 겹침 수정 — flex 레이아웃으로 변경'},{type:'fix',text:'월간 활동 통계가 자녀끼리 통합 표시되던 문제 수정 — 자녀별 로그 분리 필터링'}]},
+  {ver:'1.9.34 (v0406c)',date:'2026-04-06',items:[{type:'new',text:'룰렛 개선 — 스핀 중 마일리지 표시, 자녀 전용, 부모 알림, 코인 애니메이션'},{type:'new',text:'레벨 아이콘 — 20개 고퀄리티 SVG 아이콘으로 교체'}]},
+  {ver:'1.9.33 (v0406b)',date:'2026-04-06',items:[{type:'new',text:'레벨 시스템 — 활동하면 XP를 얻어 레벨업!'},{type:'new',text:'주간/월간 챌린지 — 한정 미션 달성하고 보상 받기'},{type:'new',text:'일일 보너스 룰렛 — 매일 첫 접속 시 보너스 마일리지'}]},
   {ver:'1.9.32 (v0405a)',date:'2026-04-05',items:[
     {type:'improve',text:'챗봇 실행 전 확인 — 활동/보상/뱃지 추가·수정·삭제 시 "이렇게 할까요?" 확인 후 진행'},
     {type:'fix',text:'나의메뉴 플랜 배지가 챗봇 열기 전에 표시되지 않던 문제 수정'},
@@ -16293,16 +17337,24 @@ function openChangelog(){
       const dateStr=release.date;
       const isLatest=idx===0;
       const items=release.items.map(it=>{
-        const badge=it.type==='new'
-          ?'<span style="flex-shrink:0;display:inline-block;background:#6366F1;color:#fff;font-size:10px;font-weight:800;padding:1px 6px;border-radius:8px;white-space:nowrap;margin-top:3px">신규</span>'
-          :'<span style="flex-shrink:0;display:inline-block;background:#10B981;color:#fff;font-size:10px;font-weight:800;padding:1px 6px;border-radius:8px;white-space:nowrap;margin-top:3px">수정</span>';
-        return `<div style="display:flex;align-items:flex-start;gap:6px;padding:6px 0;font-size:13px;color:var(--tx2);line-height:1.5">${badge}<span>${it.text}</span></div>`;
+        // 문자열 또는 {type,text} 객체 모두 지원
+        const isStr=typeof it==='string';
+        const txt=isStr?it:it.text;
+        const tp=isStr?'new':it.type;
+        const badgeColors={new:'#6366F1',improve:'#F59E0B',fix:'#10B981'};
+        const badgeLabels={new:'신규',improve:'개선',fix:'수정'};
+        const bg=badgeColors[tp]||'#6366F1';
+        const lbl=badgeLabels[tp]||'신규';
+        const badge=`<span style="flex-shrink:0;display:inline-block;background:${bg};color:#fff;font-size:10px;font-weight:800;padding:1px 6px;border-radius:8px;white-space:nowrap;margin-top:3px">${lbl}</span>`;
+        return `<div style="display:flex;align-items:flex-start;gap:6px;padding:6px 0;font-size:13px;color:var(--tx2);line-height:1.5">${badge}<span>${txt}</span></div>`;
       }).join('');
       const latestTag=isLatest?'<span style="display:inline-block;background:#F43F5E;color:#fff;font-size:9px;font-weight:800;padding:1px 5px;border-radius:6px;margin-left:4px;vertical-align:middle">최신</span>':'';
       const separator=idx>0?'<div style="border-top:1px solid var(--bd);margin-bottom:16px"></div>':'';
+      // ver가 v로 시작하면 그대로, 아니면 v 접두어 추가
+      const verStr=release.ver.startsWith('v')?release.ver:'v'+release.ver;
       return `${separator}<div style="margin-bottom:20px">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-          <span style="font-size:16px;font-weight:800;color:var(--tx)">v${release.ver}</span>${latestTag}
+          <span style="font-size:16px;font-weight:800;color:var(--tx)">${verStr}</span>${latestTag}
           <span style="font-size:12px;color:var(--tx3)">${dateStr}</span>
         </div>
         ${items}
@@ -16328,12 +17380,13 @@ function _showChangelogPopupIfNew(){
   const latest=APP_CHANGELOG[0];
   if(!latest)return;
   setTimeout(()=>{
-    const newCount=latest.items.filter(i=>i.type==='new').length;
-    const fixCount=latest.items.filter(i=>i.type==='fix').length;
+    const newCount=latest.items.filter(i=>typeof i==='string'||i.type==='new'||i.type==='improve').length;
+    const fixCount=latest.items.filter(i=>typeof i!=='string'&&i.type==='fix').length;
     let desc=[];
-    if(newCount)desc.push(`신규 기능 ${newCount}건`);
-    if(fixCount)desc.push(`버그 수정 ${fixCount}건`);
-    const msg=`v${latest.ver} 업데이트! ${desc.join(', ')}`;
+    if(newCount)desc.push(`신규/개선 ${newCount}건`);
+    if(fixCount)desc.push(`수정 ${fixCount}건`);
+    const _vStr=latest.ver.startsWith('v')?latest.ver:'v'+latest.ver;
+    const msg=`${_vStr} 업데이트! ${desc.join(', ')}`;
     // 풀 배너
     const banner=document.createElement('div');
     banner.id='changelog-banner';
@@ -17811,11 +18864,13 @@ function reallyGoTab(tab){
   if(ht) Array.from(ht.children).forEach(c=>c.style.opacity='1');
   const defaultBr2=window.innerWidth>=768?'0':'0 0 38px 38px';
   const logH=document.querySelector('.log-header-sticky');
-  if(logH){logH.classList.remove('compact');logH.style.borderRadius=defaultBr2;}
+  if(logH){logH.classList.remove('compact');logH.style.borderRadius=defaultBr2;_resetHeaderStyles(logH);}
   const rwdH=document.querySelector('.rwd-header-sticky');
-  if(rwdH){rwdH.classList.remove('compact');rwdH.style.borderRadius=defaultBr2;}
+  if(rwdH){rwdH.classList.remove('compact');rwdH.style.borderRadius=defaultBr2;_resetHeaderStyles(rwdH);}
   const histH=document.querySelector('.hist-hero');
-  if(histH){histH.classList.remove('compact');histH.style.borderRadius=defaultBr2;}
+  if(histH){histH.classList.remove('compact');histH.style.borderRadius=defaultBr2;_resetHeaderStyles(histH);}
+  const myH=document.querySelector('.my-header');
+  if(myH){myH.classList.remove('compact');myH.style.borderRadius=defaultBr2;_resetHeaderStyles(myH);}
 
   // Set tab theme
   document.body.setAttribute('data-tab', tab);
@@ -17970,11 +19025,13 @@ function swipeToTab(tab,animClass){
   const hero=document.querySelector('.hero');
   if(hero)hero.classList.remove('compact');
   const logH2=document.querySelector('.log-header-sticky');
-  if(logH2)logH2.classList.remove('compact');
+  if(logH2){logH2.classList.remove('compact');if(window._resetHeaderStyles)_resetHeaderStyles(logH2);}
   const rwdH2=document.querySelector('.rwd-header-sticky');
-  if(rwdH2)rwdH2.classList.remove('compact');
+  if(rwdH2){rwdH2.classList.remove('compact');if(window._resetHeaderStyles)_resetHeaderStyles(rwdH2);}
   const histH2=document.querySelector('.hist-hero');
-  if(histH2)histH2.classList.remove('compact');
+  if(histH2){histH2.classList.remove('compact');if(window._resetHeaderStyles)_resetHeaderStyles(histH2);}
+  const myH2=document.querySelector('.my-header');
+  if(myH2){myH2.classList.remove('compact');if(window._resetHeaderStyles)_resetHeaderStyles(myH2);}
 
   // Set tab theme
   document.body.setAttribute('data-tab', tab);
@@ -18166,6 +19223,211 @@ function _triggerHeroPtsBounce(targetId) {
   void el.offsetWidth;
   el.classList.add('hero-pts-anim');
   el.addEventListener('animationend', function() { el.classList.remove('hero-pts-anim'); }, { once: true });
+}
+
+// ── CHALLENGE REWARD CELEBRATION ANIMATION ────────────
+/**
+ * flyChallengeReward(sourceEl, amount)
+ * 챌린지 보상 수령 시 화려한 축하 애니메이션
+ * - 더 많은 별 (10-14개), 무지개 색상, 큰 사이즈
+ * - 버스트 이펙트 + 스크린 플래시 + 링 웨이브
+ * - 마일리지 카운터 큰 바운스
+ */
+function flyChallengeReward(sourceEl, amount) {
+  const currentTab = document.body.getAttribute('data-tab') || 'home';
+  let targetId = 'hero-pts';
+  if (currentTab === 'log') targetId = 'log-today-pts';
+  else if (currentTab === 'rwd') targetId = 'rwd-hdr-pts';
+  const targetEl = document.getElementById(targetId);
+  if (!targetEl) return;
+  const tRect = targetEl.getBoundingClientRect();
+  const tx = tRect.left + tRect.width / 2;
+  const ty = tRect.top + tRect.height / 2;
+
+  let sx, sy;
+  if (sourceEl) {
+    const sRect = sourceEl.getBoundingClientRect();
+    sx = sRect.left + sRect.width / 2;
+    sy = sRect.top + sRect.height / 2;
+  } else {
+    sx = window.innerWidth / 2;
+    sy = window.innerHeight * 0.65;
+  }
+
+  // ── 1) 버스트 이펙트: 버튼에서 방사형 파티클 폭발 ──
+  const burstColors = ['#FFD700','#FF6B35','#EF4444','#8B5CF6','#3B82F6','#2ECC71','#EC4899','#F59E0B'];
+  for (let i = 0; i < 16; i++) {
+    const dot = document.createElement('div');
+    const angle = (i / 16) * Math.PI * 2;
+    const dist = 50 + Math.random() * 60;
+    const sz = 4 + Math.random() * 6;
+    dot.style.cssText = 'position:fixed;pointer-events:none;z-index:100000;border-radius:50%;' +
+      'width:'+sz+'px;height:'+sz+'px;background:'+burstColors[i%burstColors.length]+';' +
+      'left:'+(sx-sz/2)+'px;top:'+(sy-sz/2)+'px;opacity:1;' +
+      'transition:all .55s cubic-bezier(.25,.46,.45,.94)';
+    document.body.appendChild(dot);
+    requestAnimationFrame(() => {
+      dot.style.left = (sx - sz/2 + Math.cos(angle)*dist) + 'px';
+      dot.style.top = (sy - sz/2 + Math.sin(angle)*dist) + 'px';
+      dot.style.opacity = '0';
+      dot.style.transform = 'scale(0.2)';
+    });
+    setTimeout(() => dot.remove(), 600);
+  }
+
+  // ── 2) 링 웨이브: 원형 확산 이펙트 ──
+  const ring = document.createElement('div');
+  ring.style.cssText = 'position:fixed;pointer-events:none;z-index:99998;border-radius:50%;' +
+    'border:3px solid rgba(255,215,0,0.8);width:20px;height:20px;' +
+    'left:'+(sx-10)+'px;top:'+(sy-10)+'px;' +
+    'animation:challengeRing .7s ease-out forwards';
+  document.body.appendChild(ring);
+  setTimeout(() => ring.remove(), 750);
+
+  // ── 3) 스크린 플래시 ──
+  const flash = document.createElement('div');
+  flash.style.cssText = 'position:fixed;inset:0;z-index:99997;pointer-events:none;' +
+    'background:radial-gradient(circle at '+sx+'px '+sy+'px,rgba(255,215,0,.35),transparent 70%);' +
+    'animation:challengeFlash .5s ease-out forwards';
+  document.body.appendChild(flash);
+  setTimeout(() => flash.remove(), 550);
+
+  // ── 4) 메인 별 파티클: 더 많고, 더 크고, 무지개 색상 ──
+  const count = 10 + Math.floor(Math.random() * 5);
+  const starColors = [
+    {g1:'#FFF176',g2:'#FFD700',g3:'#FF8F00',stroke:'#FFC107'},
+    {g1:'#F9A8D4',g2:'#EC4899',g3:'#BE185D',stroke:'#EC4899'},
+    {g1:'#C4B5FD',g2:'#8B5CF6',g3:'#6D28D9',stroke:'#8B5CF6'},
+    {g1:'#93C5FD',g2:'#3B82F6',g3:'#1D4ED8',stroke:'#3B82F6'},
+    {g1:'#6EE7B7',g2:'#10B981',g3:'#047857',stroke:'#10B981'},
+    {g1:'#FCD34D',g2:'#F59E0B',g3:'#D97706',stroke:'#F59E0B'},
+  ];
+
+  function makeStarSVG(c) {
+    const gid='csg'+Math.random().toString(36).slice(2,8);
+    return '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="'+gid+'" cx="50%" cy="30%" r="70%"><stop offset="0%" stop-color="'+c.g1+'"/><stop offset="60%" stop-color="'+c.g2+'"/><stop offset="100%" stop-color="'+c.g3+'"/></radialGradient></defs><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" fill="url(#'+gid+')" stroke="'+c.stroke+'" stroke-width="0.5"/></svg>';
+  }
+
+  const particles = [];
+  for (let i = 0; i < count; i++) {
+    const el = document.createElement('div');
+    el.className = 'coin-particle';
+    const sc = starColors[i % starColors.length];
+    el.innerHTML = makeStarSVG(sc);
+    const sz = 24 + Math.random() * 12;
+    el.style.width = sz + 'px';
+    el.style.height = sz + 'px';
+    const offX = (Math.random() - 0.5) * 50;
+    const offY = (Math.random() - 0.5) * 50;
+    el.style.left = (sx - sz/2 + offX) + 'px';
+    el.style.top  = (sy - sz/2 + offY) + 'px';
+    el.style.opacity = '1';
+    el.querySelector('svg').style.filter = 'drop-shadow(0 0 6px '+sc.g2+')';
+    document.body.appendChild(el);
+    particles.push({ el, offX, offY, sz });
+  }
+
+  // ── 5) 스파클 트레일 파티클 (별 경로에 반짝임) ──
+  function spawnSparkle(x, y, color) {
+    const sp = document.createElement('div');
+    const spSz = 3 + Math.random() * 4;
+    sp.style.cssText = 'position:fixed;pointer-events:none;z-index:99999;border-radius:50%;' +
+      'width:'+spSz+'px;height:'+spSz+'px;background:'+color+';' +
+      'left:'+(x-spSz/2)+'px;top:'+(y-spSz/2)+'px;opacity:0.9;' +
+      'box-shadow:0 0 4px '+color+';transition:all .4s ease-out';
+    document.body.appendChild(sp);
+    requestAnimationFrame(() => {
+      sp.style.opacity = '0';
+      sp.style.transform = 'scale(0.1)';
+    });
+    setTimeout(() => sp.remove(), 450);
+  }
+
+  particles.forEach(function(p, idx) {
+    const el = p.el, offX = p.offX, offY = p.offY, sz = p.sz;
+    const delay = idx * 50;
+    const duration = 900 + Math.random() * 250;
+    const midX = (sx + tx) / 2 + (Math.random() - 0.5) * 140;
+    const midY = Math.min(sy, ty) - 90 - Math.random() * 110;
+    const startX = sx + offX;
+    const startY = sy + offY;
+    let startTime = null;
+    let lastSparkle = 0;
+
+    const cx1 = startX + (midX - startX) * 0.3;
+    const cy1 = startY - 60;
+    const cx2 = midX;
+    const cy2 = midY;
+
+    const sc = starColors[idx % starColors.length];
+
+    function animate(timestamp) {
+      if (!startTime) startTime = timestamp + delay;
+      const elapsed = timestamp - startTime;
+      if (elapsed < 0) { requestAnimationFrame(animate); return; }
+      const t = Math.min(elapsed / duration, 1);
+      const u = t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2;
+      const bx = Math.pow(1-u,3)*startX + 3*Math.pow(1-u,2)*u*cx1 + 3*(1-u)*u*u*cx2 + u*u*u*tx;
+      const by = Math.pow(1-u,3)*startY + 3*Math.pow(1-u,2)*u*cy1 + 3*(1-u)*u*u*cy2 + u*u*u*ty;
+      const rot = t * 360 * (idx % 2 === 0 ? 1 : -1);
+      const scale = t < 0.7 ? 1 + Math.sin(t*Math.PI)*0.3 : Math.max(0, 1 - (t - 0.7) * 2.5);
+      const opacity = t < 0.85 ? 1 : Math.max(0, 1 - (t - 0.85) / 0.15);
+      const dx = bx - startX - sz/2;
+      const dy = by - startY - sz/2;
+      el.style.webkitTransform = 'translate3d('+dx+'px,'+dy+'px,0) scale('+scale+') rotate('+rot+'deg)';
+      el.style.transform = 'translate3d('+dx+'px,'+dy+'px,0) scale('+scale+') rotate('+rot+'deg)';
+      el.style.opacity = opacity;
+
+      if (t > 0.1 && t < 0.85 && elapsed - lastSparkle > 80) {
+        lastSparkle = elapsed;
+        spawnSparkle(bx, by, sc.g2);
+      }
+
+      if (t < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        el.remove();
+        if (idx === count - 1) {
+          _triggerChallengeBounceBig(targetId);
+        }
+      }
+    }
+    requestAnimationFrame(animate);
+  });
+}
+
+function _triggerChallengeBounceBig(targetId) {
+  const el = document.getElementById(targetId || 'hero-pts');
+  if (!el) return;
+  el.classList.remove('hero-pts-anim');
+  el.classList.remove('challenge-pts-anim');
+  void el.offsetWidth;
+  el.classList.add('challenge-pts-anim');
+  el.addEventListener('animationend', function() { el.classList.remove('challenge-pts-anim'); }, { once: true });
+
+  // 도착 시 추가 버스트
+  const tRect = el.getBoundingClientRect();
+  const cx = tRect.left + tRect.width / 2;
+  const cy = tRect.top + tRect.height / 2;
+  const burstColors = ['#FFD700','#FF6B35','#8B5CF6','#3B82F6','#2ECC71','#EC4899'];
+  for (let i = 0; i < 10; i++) {
+    const dot = document.createElement('div');
+    const angle = (i / 10) * Math.PI * 2;
+    const dist = 30 + Math.random() * 40;
+    const sz = 3 + Math.random() * 4;
+    dot.style.cssText = 'position:fixed;pointer-events:none;z-index:100000;border-radius:50%;' +
+      'width:'+sz+'px;height:'+sz+'px;background:'+burstColors[i%burstColors.length]+';' +
+      'left:'+(cx-sz/2)+'px;top:'+(cy-sz/2)+'px;opacity:1;' +
+      'transition:all .45s cubic-bezier(.25,.46,.45,.94)';
+    document.body.appendChild(dot);
+    requestAnimationFrame(() => {
+      dot.style.left = (cx - sz/2 + Math.cos(angle)*dist) + 'px';
+      dot.style.top = (cy - sz/2 + Math.sin(angle)*dist) + 'px';
+      dot.style.opacity = '0';
+      dot.style.transform = 'scale(0.2)';
+    });
+    setTimeout(() => dot.remove(), 500);
+  }
 }
 
 // ── REVERSE COIN ANIMATION (마일리지 → 보상 카드) ───────
@@ -20323,6 +21585,78 @@ window._createState = _createState;
   const _unitEl=hero?hero.querySelector('.hero-unit'):null;
   const _homTop=document.querySelector('.home-top');
   const _homTopChildren=_homTop?Array.from(_homTop.children):[];
+  // 비홈 탭 헤더 인라인 스타일 초기화 (탭 전환 시)
+  function _resetHeaderStyles(hdr){
+    if(!hdr)return;
+    hdr.style.paddingTop='';hdr.style.paddingBottom='';
+    const h2=hdr.querySelector('h2');if(h2)h2.style.fontSize='';
+    const sub=hdr.querySelector('p')||hdr.querySelector('.my-header-sub');
+    if(sub){sub.style.opacity='';sub.style.maxHeight='';sub.style.margin='';sub.style.overflow='';}
+    const stats=hdr.querySelector('.hdr-stats');
+    if(stats){stats.style.marginTop='';stats.style.padding='';
+      stats.querySelectorAll('.hdr-stat-num').forEach(n=>n.style.fontSize='');
+      stats.querySelectorAll('.hdr-stat-lbl').forEach(l=>l.style.fontSize='');
+      stats.querySelectorAll('.hdr-stat-divider').forEach(d=>d.style.height='');
+    }
+  }
+  window._resetHeaderStyles=_resetHeaderStyles;
+  // 비홈 탭 헤더 스무스 축소 헬퍼
+  function _smoothHeader(hdr,ratio,brStr,cfg){
+    const r=Math.max(0,Math.min(1,ratio));
+    // ratio≈0(맨 위): 인라인 스타일 전부 제거 → CSS 기본값 복원 (크기 불일치 방지)
+    if(r<0.01){
+      hdr.style.paddingTop='';hdr.style.paddingBottom='';hdr.style.borderRadius='';
+      const h2=hdr.querySelector('h2');if(h2)h2.style.fontSize='';
+      const sub=hdr.querySelector('p')||hdr.querySelector('.my-header-sub');
+      if(sub){sub.style.opacity='';sub.style.maxHeight='';sub.style.margin='';sub.style.overflow='';}
+      const stats=hdr.querySelector('.hdr-stats');
+      if(stats){
+        stats.style.marginTop='';stats.style.padding='';
+        stats.querySelectorAll('.hdr-stat-num').forEach(n=>{n.style.fontSize='';});
+        stats.querySelectorAll('.hdr-stat-lbl').forEach(l=>{l.style.fontSize='';});
+        stats.querySelectorAll('.hdr-stat-divider').forEach(d=>{d.style.height='';});
+      }
+      if(hdr.classList.contains('compact'))hdr.classList.remove('compact');
+      return;
+    }
+    // padding (top/bottom)
+    const pad=cfg.padMax-(cfg.padMax-cfg.padMin)*r;
+    hdr.style.paddingTop='calc('+pad+'px + env(safe-area-inset-top))';
+    hdr.style.paddingBottom=pad+'px';
+    hdr.style.borderRadius=brStr;
+    // h2 font size
+    const h2=hdr.querySelector('h2');
+    if(h2) h2.style.fontSize=(cfg.h2Max-(cfg.h2Max-cfg.h2Min)*r)+'px';
+    // sub text (p, .my-header-sub, .hist-hero-sub) — fade out & shrink
+    const sub=hdr.querySelector('p')||hdr.querySelector('.my-header-sub');
+    if(sub){
+      sub.style.opacity=Math.max(0,1-r*2.5); // disappears by 40% scroll
+      sub.style.maxHeight=(1-Math.min(1,r*2.5))*30+'px';
+      sub.style.margin=r>0.4?'0':'';
+      sub.style.overflow='hidden';
+    }
+    // hdr-stats row — shrink smoothly
+    const stats=hdr.querySelector('.hdr-stats');
+    if(stats){
+      const mtMax=10,mtMin=6;
+      stats.style.marginTop=(mtMax-(mtMax-mtMin)*r)+'px';
+      const pMax=8,pMin=5;
+      stats.style.padding=(pMax-(pMax-pMin)*r)+'px '+(pMax+2-(2)*r)+'px';
+      // stat numbers
+      stats.querySelectorAll('.hdr-stat-num').forEach(n=>{
+        n.style.fontSize=(20-(20-16)*r)+'px';
+      });
+      stats.querySelectorAll('.hdr-stat-lbl').forEach(l=>{
+        l.style.fontSize=(10-(10-8)*r)+'px';
+      });
+      stats.querySelectorAll('.hdr-stat-divider').forEach(d=>{
+        d.style.height=(28-(28-20)*r)+'px';
+      });
+    }
+    // compact class still used for overflow/display toggles
+    if(r>0.9&&!hdr.classList.contains('compact'))hdr.classList.add('compact');
+    else if(r<0.1&&hdr.classList.contains('compact'))hdr.classList.remove('compact');
+  }
   let _uhcRaf=0;
   function updateHeaderCompact(){
     if(_uhcRaf) return;
@@ -20381,37 +21715,29 @@ window._createState = _createState;
           _homTopChildren.forEach(c=>c.style.opacity=v);
         }
       }
-      // Log (raw scrollY + hysteresis)
+      // ── 다른 탭 스무스 축소 (binary compact → progressive interpolation) ──
+      const _r=brRatioOther; // 0(top) → 1(scrolled)
+      // h2 기본 크기: CSS에서 26px (모바일), 28px (태블릿 ≥768px)
+      const _h2Default=isWide?28:26;
+      // Log
       const logHdr = document.querySelector('.log-header-sticky');
       if(logHdr && document.getElementById('s-log')?.classList.contains('on')){
-        const _lc=logHdr.classList.contains('compact');
-        if(!_lc && scrollY > threshold) logHdr.classList.add('compact');
-        else if(_lc && scrollY < thresholdOff) logHdr.classList.remove('compact');
-        logHdr.style.borderRadius=brStrOther;
+        _smoothHeader(logHdr,_r,brStrOther,{padMax:18,padMin:10,h2Max:_h2Default,h2Min:16});
       }
-      // Reward (raw scrollY + hysteresis)
+      // Reward — rwd h2 기본 24px(인라인)
       const rwdHdr = document.querySelector('.rwd-header-sticky');
       if(rwdHdr && document.getElementById('s-rwd')?.classList.contains('on')){
-        const _rc=rwdHdr.classList.contains('compact');
-        if(!_rc && scrollY > threshold) rwdHdr.classList.add('compact');
-        else if(_rc && scrollY < thresholdOff) rwdHdr.classList.remove('compact');
-        rwdHdr.style.borderRadius=brStrOther;
+        _smoothHeader(rwdHdr,_r,brStrOther,{padMax:18,padMin:10,h2Max:_h2Default,h2Min:16});
       }
-      // History/Stats (raw scrollY + hysteresis)
+      // History/Stats
       const histHdr = document.querySelector('.hist-hero');
       if(histHdr && document.getElementById('s-hist')?.classList.contains('on')){
-        const _hc=histHdr.classList.contains('compact');
-        if(!_hc && scrollY > threshold) histHdr.classList.add('compact');
-        else if(_hc && scrollY < thresholdOff) histHdr.classList.remove('compact');
-        histHdr.style.borderRadius=brStrOther;
+        _smoothHeader(histHdr,_r,brStrOther,{padMax:20,padMin:10,h2Max:_h2Default,h2Min:16});
       }
-      // My (raw scrollY + hysteresis)
+      // My
       const myHdr = document.querySelector('.my-header');
       if(myHdr && document.getElementById('s-my')?.classList.contains('on')){
-        const _mc=myHdr.classList.contains('compact');
-        if(!_mc && scrollY > threshold) myHdr.classList.add('compact');
-        else if(_mc && scrollY < thresholdOff) myHdr.classList.remove('compact');
-        myHdr.style.borderRadius=brStrOther;
+        _smoothHeader(myHdr,_r,brStrOther,{padMax:18,padMin:10,h2Max:_h2Default,h2Min:16});
       }
     });
   }
