@@ -1038,6 +1038,69 @@ account: {
 
 ## 변경 이력 (Change Log)
 
+### 2026-04-07 세션 — 게임화 UX + 무당벌레 + 레이저/용접불꽃 + 챌린지 SVG + 레벨 sync
+
+**적용 범위: 개발기 (v0407j~z) + 운영기 (v0407n, v0407x, v0407y, v0407z)**
+
+#### 주요 변경사항
+
+1. **관리자 게임화 UX 수정 (v0407j~l, 1.9.54~56)**
+   - 토글 버튼 시각 버그 fix: CSS가 `.tog.off`를 쓰는데 JS는 `.on`을 토글하던 문제 → `.off` 토글로 변경
+   - 토글 켠 경우에만 상세 설정이 펼쳐지며 하위 관리 영역으로 보이도록 UX 개편 (`.gs-detail`에 `margin-left:14px + padding-left:12px + 좌측 accent border + gradient`)
+   - 작은 `i` 아이콘을 "주간 챌린지란?" 등 레이블 pill 스타일 `.info-btn`으로 교체
+   - 인사말 설정 섹션 공간 효율 개편 (자녀별 1행)
+
+2. **레벨 XP 과거 이력 backfill (v0407k, 1.9.55)**
+   - 증상: 태민이가 높은 마일리지에도 Lv.1로 표시
+   - 원인: `levelData.xp`가 v0406b 이후 `doAct()`에서만 증가, 과거 누적분 미반영
+   - 수정: `_backfillLevelData()` 추가 — `ms.log`의 `actId`가 있고 `pts>0`인 엔트리만 합산, `Math.max(기존xp, log합산)`으로 설정 (절대 감소 안 함). `S._lvBackfilled` 플래그로 세션당 1회만 실행
+
+3. **Lv.5/40 이펙트 재디자인 + 가족목록 자녀 이펙트 (v0407m, 1.9.57)**
+   - Lv.5 불꽃: 9개 작은 혀 → 아이콘을 감싸는 3-layer 큰 불꽃 1개
+   - Lv.40 끝판왕: 무지개 ring + radial glow + 황금별 + hue-rotating infinity + 8 sparkle 복합
+   - 나의 메뉴 가족 목록: `.my-family-row` gap 12→22px, 자녀 아이콘 아래 `my-family-lv` 뱃지 + `getLevelEffectHTML` 이펙트 적용. 부모 본인은 뱃지/이펙트 숨김
+
+4. **기본값 변경 + 운영 반영 (v0407n, 1.9.58)**
+   - 룰렛 최대 100→20, 주간 리워드 50→30, 월간 리워드 100→50
+   - HTML input default, fallback literal, `saveGameSettings()`, `renderGameSettings()` 모두 업데이트
+   - 운영기 배포 (PROD v0407n)
+
+5. **홈탭 챌린지 진행바 무당벌레 (v0407o~q, 1.9.59~61)**
+   - SVG 무당벌레 추가: 6개 다리 `chLegWig` + 더듬이 `chAntWig` + 땀방울 `chSweatFall` + `chBugBob` 애니메이션
+   - 90° 회전(svg transform)으로 머리가 채워지는 방향(오른쪽) 향하게
+   - 30×30px 크기, 게이지 바(6px) 위에 `top:-12px`로 중앙 정렬
+
+6. **마일리지 게이지 레이저 + 용접 불꽃 (v0407r~x, 1.9.62~68)**
+   - `.prog-fill::before` pseudo로 흰색 그라디언트 shimmer를 좌→우로 무한 슬라이드 (`laserSlide` 1.4s linear)
+   - 초기 방향 반전 버그 fix: `background-position` 키프레임을 210%→-110%로 수정
+   - `.prog-fill` 배경 `rgba(255,255,255,.55)`로 살짝 어둡게 해 shimmer 가시성 확보
+   - `.prog-spark`: SVG 5갈래 스파크 라인 (stroke-width 0.7), `sprkFly` stroke-dasharray 애니메이션
+   - JS에서 게이지 높이에 비례해 spark 크기 자동 스케일 (33~63px)
+   - `z-index`: fill(2) > spark(1) > 트랙 배경 — 불꽃이 가이드 바 앞, fill 뒤
+   - 반투명 fill 뒤 비침 문제: `clip-path:inset(-50% -50% -50% 50%)`로 겹치는 영역 클리핑
+   - 중심 코어 원은 최종 제거 (튀는 스파크만 남김)
+   - 운영기 배포 (PROD v0407x)
+
+7. **홈탭 Lv.pill과 가족목록 레벨 불일치 fix (v0407y, 1.9.69)**
+   - 원인: 홈탭은 `S.levelData`(글로벌), 가족목록은 `S.memberData[mid].levelData`(멤버별) 각각 읽어 sync 타이밍/다른 기기 업데이트 시 불일치 가능
+   - 수정: `getViewedLevelData()` 헬퍼 추가 — `getViewedMemberId()`로 현재 보는 자녀 ID를 얻어 `memberData[viewMid].levelData`를 우선 반환. 홈탭 `#level-pill`과 `openLevelPopup()` 모두 헬퍼 사용 → 단일 소스 통일
+   - 운영기 배포 (PROD v0407y)
+
+8. **챌린지 카드 주간/월간 전용 SVG 아이콘 (v0407z, 1.9.70)**
+   - 고정 `⭐`/`💪` 이모지를 타입별 SVG로 교체
+   - 주간: 인디고 캘린더 + 상단 헤더바 + 6개 날짜 셀 + 마지막 칸 황금별
+   - 월간: 핑크 트로피 + 손잡이 + 받침대 + 가운데 황금 빛나는 별
+   - `c.emoji` 데이터는 유지, 렌더링만 `c.type` 분기
+   - 운영기 배포 (PROD v0407z)
+
+#### 교훈
+- **단일 소스 원칙**: per-member 데이터와 글로벌 `S.*`가 공존할 때는 읽기 시점에 헬퍼로 single source of truth를 강제해야 sync 타이밍 버그를 방지할 수 있다.
+- **반투명 배경 + z-index**: 뒤에 둔 요소가 반투명 앞 요소를 통해 비치는 경우, `clip-path`로 겹치는 영역을 잘라내는 방식이 가장 깔끔하다.
+- **애니메이션 transform 충돌**: 위치 centering과 keyframe transform이 같은 element에서 충돌하면, 내부 SVG 또는 wrapper에 회전을 분리하거나 keyframe에 모든 transform을 포함시켜야 한다.
+- **CSS 토글 클래스 방향**: CSS에 `.tog.off{...}` 규칙이 있다면 JS도 반드시 `.off` 클래스를 토글해야 한다. 반대 방향(`.on` 토글)으로 작성하면 CSS가 무시되어 시각 버그 발생.
+
+---
+
 ### 2026-04-03 세션 — 챗봇 가족초대 수정 + 오류 로깅 + 초대 링크 버튼 + 운영 반영
 
 **적용 범위: 개발기 (DEV v0403v) + 운영기 (v0403v)**
