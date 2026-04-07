@@ -377,6 +377,11 @@ body.dark .my-profile-card.tier-pro{border-color:rgba(245,158,11,.3);box-shadow:
 .my-lv-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:10px;background:linear-gradient(135deg,#FFD600,#FFA000);color:#5D4037;font-size:10px;font-weight:900;line-height:1;box-shadow:0 1px 3px rgba(245,158,11,.3);cursor:pointer;-webkit-tap-highlight-color:transparent;white-space:nowrap}
 body.dark .my-lv-badge{color:#3E2723}
 .adm-row-desc{font-size:11.5px;line-height:1.55;color:var(--tx3);padding:0 0 8px 0;font-weight:500}
+.info-btn{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;border:1.3px solid var(--tx3);background:transparent;color:var(--tx3);font-size:10px;font-weight:900;font-style:italic;font-family:Georgia,serif;margin-left:5px;cursor:pointer;vertical-align:1px;padding:0;line-height:1;-webkit-tap-highlight-color:transparent}
+.info-btn:hover{border-color:var(--tx2);color:var(--tx2)}
+.gs-detail{overflow:hidden;transition:max-height .25s ease,opacity .2s ease;max-height:600px;opacity:1}
+.gs-detail.gs-collapsed{max-height:0;opacity:0;pointer-events:none}
+.gs-detail.gs-collapsed + .divider{display:none}
 /* ── 레벨 이펙트 (프로필 아이콘 주위) ── */
 .lv-fx-wrap{position:absolute;inset:-30%;pointer-events:none;z-index:1;overflow:visible}
 .lv-fx-wrap svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
@@ -4127,64 +4132,68 @@ requestAnimationFrame(function(){
       <div class="adm-card">
         <!-- 일일 룰렛 -->
         <div class="adm-row">
-          <div class="adm-row-l"><div class="adm-row-nm">🎰 일일 보너스 룰렛</div><div class="adm-row-sub">매일 첫 접속 시 보너스 룰렛</div></div>
+          <div class="adm-row-l"><div class="adm-row-nm">🎰 일일 보너스 룰렛 <button class="info-btn" onclick="showGsInfo('roulette')">i</button></div><div class="adm-row-sub">매일 첫 접속 시 보너스 룰렛</div></div>
           <button class="tog" id="tog-roulette" onclick="togGameSetting('rouletteEnabled')"><div class="tog-dot"></div></button>
         </div>
-        <div class="divider"></div>
-        <div class="adm-row" style="flex-direction:column;align-items:stretch;gap:8px">
-          <div class="adm-row-l"><div class="adm-row-nm">룰렛 마일리지 범위</div><div class="adm-row-sub">최소~최대 당첨 마일리지</div></div>
-          <div style="display:flex;align-items:center;gap:8px">
-            <input class="num-inp" id="rlt-min-inp" type="number" value="5" min="1" max="500" style="width:70px" onchange="saveGameSettings()">
-            <span style="font-size:13px;font-weight:700;color:var(--tx3)">~</span>
-            <input class="num-inp" id="rlt-max-inp" type="number" value="100" min="1" max="1000" style="width:70px" onchange="saveGameSettings()">
-            <span style="font-size:12px;color:var(--tx3);font-weight:600">마일리지</span>
+        <div id="gs-detail-roulette" class="gs-detail">
+          <div class="divider"></div>
+          <div class="adm-row" style="flex-direction:column;align-items:stretch;gap:8px">
+            <div class="adm-row-l"><div class="adm-row-nm">룰렛 마일리지 범위</div><div class="adm-row-sub">최소~최대 당첨 마일리지</div></div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <input class="num-inp" id="rlt-min-inp" type="number" value="5" min="1" max="500" style="width:70px" onchange="saveGameSettings()">
+              <span style="font-size:13px;font-weight:700;color:var(--tx3)">~</span>
+              <input class="num-inp" id="rlt-max-inp" type="number" value="100" min="1" max="1000" style="width:70px" onchange="saveGameSettings()">
+              <span style="font-size:12px;color:var(--tx3);font-weight:600">마일리지</span>
+            </div>
           </div>
         </div>
         <div class="divider"></div>
         <!-- 주간 챌린지 -->
         <div class="adm-row">
-          <div class="adm-row-l"><div class="adm-row-nm">🏆 주간 챌린지</div><div class="adm-row-sub">매주 월요일 자동 생성되는 한 주간의 도전 미션</div></div>
+          <div class="adm-row-l"><div class="adm-row-nm">🏆 주간 챌린지 <button class="info-btn" onclick="showGsInfo('weekly')">i</button></div><div class="adm-row-sub">매주 월요일 자동 생성</div></div>
           <button class="tog" id="tog-weekly" onclick="togGameSetting('weeklyEnabled')"><div class="tog-dot"></div></button>
         </div>
-        <div class="adm-row-desc">레벨제로 운영돼요. Lv.1부터 시작해서 챌린지를 완료하고 보상을 수령하면 다음 레벨이 해금됩니다. 모든 템플릿을 한 바퀴 돌면 두 번째 사이클부터는 목표 수치가 1.5배로 늘어나 점점 어려워져요. 활동 횟수·연속 일수·완료 비율 등 다양한 조건을 자녀 본인 데이터로만 카운트합니다(다자녀 가족도 자녀별 독립 진행).</div>
-        <div class="divider"></div>
-        <div class="adm-row" style="flex-direction:column;align-items:stretch;gap:8px">
-          <div class="adm-row-l"><div class="adm-row-nm">주간 챌린지 기본 보상</div><div class="adm-row-sub">완료 후 수령 시 지급되는 마일리지(레벨 1 기준, 레벨이 올라갈수록 증가)</div></div>
-          <div style="display:flex;align-items:center;gap:8px">
-            <input class="num-inp" id="ch-weekly-reward" type="number" value="50" min="1" max="500" style="width:70px" onchange="saveGameSettings()">
-            <span style="font-size:12px;color:var(--tx3);font-weight:600">마일리지</span>
+        <div id="gs-detail-weekly" class="gs-detail">
+          <div class="divider"></div>
+          <div class="adm-row" style="flex-direction:column;align-items:stretch;gap:8px">
+            <div class="adm-row-l"><div class="adm-row-nm">기본 보상</div><div class="adm-row-sub">레벨 1 기준 지급량 (레벨업할수록 증가)</div></div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <input class="num-inp" id="ch-weekly-reward" type="number" value="50" min="1" max="500" style="width:70px" onchange="saveGameSettings()">
+              <span style="font-size:12px;color:var(--tx3);font-weight:600">마일리지</span>
+            </div>
           </div>
         </div>
         <div class="divider"></div>
         <!-- 월간 챌린지 -->
         <div class="adm-row">
-          <div class="adm-row-l"><div class="adm-row-nm">📅 월간 챌린지</div><div class="adm-row-sub">매월 1일 자동 생성되는 한 달짜리 장기 도전 미션</div></div>
+          <div class="adm-row-l"><div class="adm-row-nm">📅 월간 챌린지 <button class="info-btn" onclick="showGsInfo('monthly')">i</button></div><div class="adm-row-sub">매월 1일 자동 생성</div></div>
           <button class="tog" id="tog-monthly" onclick="togGameSetting('monthlyEnabled')"><div class="tog-dot"></div></button>
         </div>
-        <div class="adm-row-desc">주간 챌린지보다 목표가 크고 보상도 많아요. 마찬가지로 레벨제로 운영되며 매월 한 단계씩 해금되는 구조입니다. "한 달 누적 활동 횟수", "한 달간 연속 달성 일수", "월간 마일리지 누적량" 등 장기 습관 형성을 자극하는 미션이 출제돼요.</div>
-        <div class="divider"></div>
-        <div class="adm-row" style="flex-direction:column;align-items:stretch;gap:8px">
-          <div class="adm-row-l"><div class="adm-row-nm">월간 챌린지 기본 보상</div><div class="adm-row-sub">완료 후 수령 시 지급되는 마일리지(레벨 1 기준, 레벨이 올라갈수록 증가)</div></div>
-          <div style="display:flex;align-items:center;gap:8px">
-            <input class="num-inp" id="ch-monthly-reward" type="number" value="100" min="1" max="1000" style="width:70px" onchange="saveGameSettings()">
-            <span style="font-size:12px;color:var(--tx3);font-weight:600">마일리지</span>
+        <div id="gs-detail-monthly" class="gs-detail">
+          <div class="divider"></div>
+          <div class="adm-row" style="flex-direction:column;align-items:stretch;gap:8px">
+            <div class="adm-row-l"><div class="adm-row-nm">기본 보상</div><div class="adm-row-sub">레벨 1 기준 지급량 (레벨업할수록 증가)</div></div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <input class="num-inp" id="ch-monthly-reward" type="number" value="100" min="1" max="1000" style="width:70px" onchange="saveGameSettings()">
+              <span style="font-size:12px;color:var(--tx3);font-weight:600">마일리지</span>
+            </div>
           </div>
         </div>
         <div class="divider"></div>
         <!-- 레벨 시스템 -->
         <div class="adm-row">
-          <div class="adm-row-l"><div class="adm-row-nm">🎮 레벨 시스템</div><div class="adm-row-sub">누적 마일리지로 자동 성장하는 RPG식 레벨</div></div>
+          <div class="adm-row-l"><div class="adm-row-nm">🎮 레벨 시스템 <button class="info-btn" onclick="showGsInfo('level')">i</button></div><div class="adm-row-sub">누적 마일리지로 자동 성장</div></div>
           <button class="tog" id="tog-level" onclick="togGameSetting('levelEnabled')"><div class="tog-dot"></div></button>
         </div>
-        <div class="adm-row-desc">자녀가 활동을 완료해서 받은 누적 마일리지(XP)에 따라 Lv.1 ~ Lv.20까지 자동으로 성장합니다. 레벨이 오를 때마다 프로필 아이콘 주위에 고유한 SVG 이펙트가 나타나서 자녀에게 시각적인 보상이 주어져요.</div>
-        <div class="divider"></div>
-        <!-- 레벨별 임계값 + 이펙트 편집기 -->
-        <div class="adm-row" style="flex-direction:column;align-items:stretch;gap:0">
-          <div class="adm-row-l" style="margin-bottom:6px"><div class="adm-row-nm">📊 레벨별 상세 설정</div><div class="adm-row-sub">각 레벨에 도달하기 위한 필요 마일리지(누적 XP)와 고유 이펙트 미리보기</div></div>
-          <div id="lv-editor" class="lv-editor"></div>
-          <div style="display:flex;gap:8px;margin-top:8px">
-            <button class="btn-sm" onclick="saveLevelThresholds()" style="flex:1">💾 레벨 설정 저장</button>
-            <button class="btn-sm" onclick="resetLevelThresholds()" style="background:var(--bg2);color:var(--tx2)">기본값</button>
+        <div id="gs-detail-level" class="gs-detail">
+          <div class="divider"></div>
+          <div class="adm-row" style="flex-direction:column;align-items:stretch;gap:0">
+            <div class="adm-row-l" style="margin-bottom:6px"><div class="adm-row-nm">📊 레벨별 상세 설정</div><div class="adm-row-sub">각 레벨 도달 임계값과 이펙트 미리보기</div></div>
+            <div id="lv-editor" class="lv-editor"></div>
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <button class="btn-sm" onclick="saveLevelThresholds()" style="flex:1">💾 레벨 설정 저장</button>
+              <button class="btn-sm" onclick="resetLevelThresholds()" style="background:var(--bg2);color:var(--tx2)">기본값</button>
+            </div>
           </div>
         </div>
       </div>
@@ -9110,7 +9119,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0407i';
+const _APP_VERSION = 'v0407j';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -13961,25 +13970,28 @@ function renderAdmSettings(){
   // Render per-user greeting settings
   const container=document.getElementById('greetings-settings-container');
   if(container){
-    let html='';
-    Object.entries(MEMBERS).forEach(([userId,member])=>{
+    const entries=Object.entries(MEMBERS);
+    let html='<div class="adm-card">';
+    entries.forEach(([userId,member],idx)=>{
       const gr=S.greetings?.[userId]||{mode:'auto',messages:[],custom:'',currentIdx:0};
-      html+=`<div class="adm-card" style="margin-bottom:12px">
-        <div style="font-size:15px;font-weight:800;color:var(--tx);padding:14px 14px 0">${escapeHtml(member.name)}</div>
-        <div class="adm-row" style="flex-wrap:nowrap">
-          <div class="adm-row-l" style="flex-shrink:0"><div class="adm-row-nm">모드</div></div>
-          <select id="greeting-mode-${userId}" onchange="saveGreetingMode('${userId}')" style="padding:8px 12px;border:1.5px solid var(--bdr);border-radius:9px;font-size:14px;font-weight:700;background:var(--bg);color:var(--tx);font-family:inherit;flex-shrink:0">
+      const preview=gr.mode==='auto'?getCurrentGreeting(userId):(gr.custom||'(수동 입력 없음)');
+      html+=`${idx>0?'<div class="divider"></div>':''}
+        <div class="adm-row" style="flex-wrap:nowrap;gap:8px">
+          <div class="adm-row-l" style="flex:1;min-width:0">
+            <div class="adm-row-nm">${escapeHtml(member.name)}</div>
+            <div class="adm-row-sub" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">"${escapeHtml(preview)}"</div>
+          </div>
+          <select id="greeting-mode-${userId}" onchange="saveGreetingMode('${userId}')" style="padding:6px 8px;border:1.5px solid var(--bdr);border-radius:8px;font-size:12px;font-weight:700;background:var(--bg);color:var(--tx);font-family:inherit;flex-shrink:0">
             <option value="auto" ${gr.mode==='auto'?'selected':''}>자동</option>
             <option value="manual" ${gr.mode==='manual'?'selected':''}>수동</option>
           </select>
         </div>
-        <div id="greeting-manual-${userId}" style="display:${gr.mode==='manual'?'block':'none'};padding:0 14px 12px">
-          <input class="txt-inp" id="greeting-custom-${userId}" type="text" placeholder="인사말을 입력하세요" maxlength="50" value="${gr.custom||''}" inputmode="text" lang="ko" style="width:100%;box-sizing:border-box;margin-bottom:8px">
+        <div id="greeting-manual-${userId}" style="display:${gr.mode==='manual'?'flex':'none'};gap:6px;padding:0 0 4px">
+          <input class="txt-inp" id="greeting-custom-${userId}" type="text" placeholder="인사말 입력" maxlength="50" value="${escapeHtml(gr.custom||'')}" inputmode="text" lang="ko" style="flex:1;min-width:0">
           <button class="btn-sm" onclick="saveGreetingCustom('${userId}')">저장</button>
-        </div>
-        ${gr.mode==='auto'?`<div style="font-size:13px;color:var(--tx3);padding:0 14px 12px;word-break:keep-all;overflow-wrap:break-word;line-height:1.5">현재: "${getCurrentGreeting(userId)}"</div>`:''}
-      </div>`;
+        </div>`;
     });
+    html+='</div>';
     container.innerHTML=html;
   }
 
@@ -15399,6 +15411,12 @@ function renderGameSettings(){
   _setTogState('tog-weekly',gs.weeklyEnabled!==false);
   _setTogState('tog-monthly',gs.monthlyEnabled!==false);
   _setTogState('tog-level',gs.levelEnabled!==false);
+  // 토글 상태에 따라 상세 영역 펼침/접힘
+  const _setDetail=(id,on)=>{const el=document.getElementById(id);if(!el)return;if(on)el.classList.remove('gs-collapsed');else el.classList.add('gs-collapsed');};
+  _setDetail('gs-detail-roulette',gs.rouletteEnabled!==false);
+  _setDetail('gs-detail-weekly',gs.weeklyEnabled!==false);
+  _setDetail('gs-detail-monthly',gs.monthlyEnabled!==false);
+  _setDetail('gs-detail-level',gs.levelEnabled!==false);
   // inputs
   const rMin=document.getElementById('rlt-min-inp');if(rMin)rMin.value=gs.rouletteMin||5;
   const rMax=document.getElementById('rlt-max-inp');if(rMax)rMax.value=gs.rouletteMax||100;
@@ -15459,8 +15477,27 @@ window.saveLevelThresholds=saveLevelThresholds;
 window.resetLevelThresholds=resetLevelThresholds;
 function _setTogState(id,on){
   const el=document.getElementById(id);if(!el)return;
-  if(on){el.classList.add('on');}else{el.classList.remove('on');}
+  if(on){el.classList.remove('off');}else{el.classList.add('off');}
 }
+function showGsInfo(key){
+  const info={
+    roulette:{t:'🎰 일일 보너스 룰렛',d:'매일 첫 접속 시 자녀에게 보너스 마일리지 룰렛을 제공해요. 최소~최대 범위 안에서 무작위로 당첨돼서 매일 출석에 작은 재미를 더해줍니다.'},
+    weekly:{t:'🏆 주간 챌린지',d:'매주 월요일에 자동 생성되는 한 주간의 도전 미션입니다. Lv.1부터 시작해 챌린지를 완료하고 보상을 수령하면 다음 레벨이 해금돼요. 모든 템플릿을 한 바퀴 돌면 두 번째 사이클부터는 목표 수치가 1.5배로 늘어나 점점 어려워져요. 활동 횟수·연속 일수·완료 비율 등 다양한 조건을 자녀 본인 데이터로만 카운트합니다(다자녀 가족도 자녀별 독립 진행).'},
+    monthly:{t:'📅 월간 챌린지',d:'매월 1일에 자동 생성되는 한 달짜리 장기 도전 미션입니다. 주간보다 목표가 크고 보상도 많아요. 마찬가지로 레벨제로 운영되며 매월 한 단계씩 해금됩니다. "한 달 누적 활동 횟수", "연속 달성 일수", "월간 마일리지 누적량" 등 장기 습관 형성을 자극하는 미션이 출제돼요.'},
+    level:{t:'🎮 레벨 시스템',d:'자녀가 활동을 완료해서 받은 누적 마일리지(XP)에 따라 Lv.1부터 Lv.40까지 자동으로 성장합니다. 레벨이 오를 때마다 프로필 아이콘 주위에 고유한 SVG 이펙트(40종)가 나타나서 자녀에게 시각적인 보상이 주어져요.'}
+  };
+  const i=info[key];if(!i)return;
+  const ov=document.createElement('div');
+  ov.className='streak-popup-overlay show';
+  ov.innerHTML=`<div class="streak-popup" style="transform:scale(1);max-width:340px;text-align:left">
+    <div style="font-size:18px;font-weight:900;color:var(--tx);margin-bottom:10px;text-align:center">${i.t}</div>
+    <div style="font-size:13.5px;line-height:1.65;color:var(--tx2);font-weight:500;word-break:keep-all">${i.d}</div>
+    <div style="text-align:center"><button onclick="this.closest('.streak-popup-overlay').remove()" style="margin-top:14px;padding:10px 32px;border:none;border-radius:12px;background:var(--tab-color,var(--or));color:#fff;font-size:14px;font-weight:700;cursor:pointer">확인</button></div>
+  </div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener('click',(e)=>{if(e.target===ov)ov.remove();});
+}
+window.showGsInfo=showGsInfo;
 window.togGameSetting=togGameSetting;
 window.saveGameSettings=saveGameSettings;
 function togBdaySetting(){S.settings.birthdayBonus=S.settings.birthdayBonus===false?true:!S.settings.birthdayBonus;save();renderAdmSettings();toast(S.settings.birthdayBonus!==false?'🎂 생일 보너스 켜짐':'🔕 생일 보너스 꺼짐');}
@@ -16811,6 +16848,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.54 (v0407j)',date:'2026-04-07',items:[{type:'fix',text:'관리자 게이미피케이션 토글이 클릭 시 시각적으로 변하지 않던 버그 수정 (.tog.off 클래스 사용)'},{type:'new',text:'토글을 켰을 때만 상세 설정 펼침 — 일일/주간/월간/레벨 각 영역의 하위 설정이 토글 OFF면 자동 접힘'},{type:'new',text:'챌린지/레벨 설명을 i 버튼 + 안내 팝업으로 정리 — 인라인 long text 제거'},{type:'fix',text:'홈 화면 인사말 설정을 한 카드에 컴팩트하게 정리 — 자녀별 한 줄, 미리보기 인라인'}]},
   {ver:'1.9.53 (v0407i)',date:'2026-04-07',items:[{type:'fix',text:'아이별 레벨 독립 관리 — levelData를 memberData에 저장해 자녀별 분리 (기존 사용자는 자동 마이그레이션)'},{type:'fix',text:'Lv.5 불꽃 이펙트 재설계 — 아이콘 전체를 감싸는 방사형 불꽃으로 변경'},{type:'new',text:'레벨 시스템 확장 — 총 40레벨/10만 마일리지, Lv.21~40 신규 SVG 이펙트 20종 추가'},{type:'new',text:'레벨 팝업에도 레벨 이펙트 표시'}]},
   {ver:'1.9.52 (v0407h)',date:'2026-04-07',items:[{type:'new',text:'관리자 — 주간/월간 챌린지 상세 설명 추가, 레벨별 임계값 직접 편집 가능'},{type:'new',text:'레벨 시스템 — Lv.1~20 각각 고유한 SVG 이펙트 애니메이션 (반짝임/불꽃/오라/궤도 등 20종)'},{type:'new',text:'나의 메뉴 — 프로필 카드에 레벨 배지 + 아바타 주변 레벨 이펙트 표시'},{type:'new',text:'관리자 레벨 편집기 — 각 레벨별 이펙트 미리보기 가능'}]},
   {ver:'1.9.51 (v0407g)',date:'2026-04-07',items:[{type:'fix',text:'Lv 표시 baseline을 M 글씨 밑선과 정렬'}]},
