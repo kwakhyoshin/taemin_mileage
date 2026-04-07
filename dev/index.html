@@ -351,7 +351,7 @@ body.dark .dtog-in{transform:translateX(20px)}
 .home-top::after{display:none}
 .home-top h1{font-size:24px;font-weight:900;color:rgba(255,255,255,.68)}
 /* 자녀 전환기 (양육자 전용) */
-#child-switcher{display:none;align-items:center;margin-top:10px}
+#child-switcher{display:none;align-items:center}
 .child-sw-toggle{display:flex;background:rgba(255,255,255,.2);border-radius:999px;padding:1.5px;gap:0}
 .child-sw-btn{background:none;border:none;color:rgba(255,255,255,.8);font-size:11px;font-weight:700;padding:2px 9px;border-radius:999px;cursor:pointer;white-space:nowrap;transition:background .2s,color .2s;font-family:inherit;line-height:1.2}
 .child-sw-btn.on{background:rgba(255,255,255,.95);color:#5B21B6}
@@ -418,8 +418,10 @@ body.dark .theme-pick.active .theme-pick-radio{border-color:#818CF8;background:#
 .hero-unit{font-size:18px;font-weight:700;opacity:.85;transition:font-size .25s}
 .hero-goal{font-size:15px;opacity:.82;margin-top:6px;font-weight:600;line-height:1.4;transition:all .25s;max-height:50px;overflow:hidden}
 .streak-pill{background:rgba(255,255,255,.2);border-radius:20px;padding:5px 12px;font-size:13px;font-weight:800;transition:all .25s,top .25s;cursor:pointer;-webkit-tap-highlight-color:transparent}
-#streak-pill{position:absolute;right:20px;top:32px;z-index:3}
-.hero.compact #streak-pill{top:64px}
+#streak-pill{position:absolute;right:20px;top:54px;z-index:3}
+.hero.compact #streak-pill{top:calc(14px + env(safe-area-inset-top))}
+.hero.compact #child-switcher{display:none!important}
+.hero.compact #child-selector{display:none!important}
 .streak-pill:active{transform:scale(.95);background:rgba(255,255,255,.3)}
 .prog-track{background:rgba(255,255,255,.25);border-radius:7px;height:14px;margin-top:14px;transition:margin .25s}
 .prog-fill{background:rgba(255,255,255,.9);border-radius:7px;height:100%;transition:width .7s}
@@ -3636,11 +3638,11 @@ requestAnimationFrame(function(){
     </div>
   </div>
   <div class="hero">
-    <div style="display:flex;justify-content:flex-end;min-height:22px;margin-bottom:2px">
+    <div class="streak-pill" id="streak-pill" style="background:rgba(255,255,255,.2);border-radius:20px;padding:5px 12px;font-size:13px;font-weight:800;transition:all .25s,top .25s;cursor:pointer;-webkit-tap-highlight-color:transparent;position:absolute;right:20px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 01-7 7 7 7 0 01-7-7c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg> 0일 연속</div>
+    <div class="hero-lbl-row" style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+      <div class="hero-lbl" id="hero-lbl">나의 마일리지</div>
       <div id="child-switcher" style="flex-shrink:0"></div>
     </div>
-    <div class="streak-pill" id="streak-pill" style="background:rgba(255,255,255,.2);border-radius:20px;padding:5px 12px;font-size:13px;font-weight:800;transition:all .25s,top .25s;cursor:pointer;-webkit-tap-highlight-color:transparent;position:absolute;right:20px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 01-7 7 7 7 0 01-7-7c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg> 0일 연속</div>
-    <div class="hero-lbl" id="hero-lbl">나의 마일리지</div>
     <div id="child-selector"></div>
     <div class="hero-pts-wrap" style="display:flex;align-items:flex-end;gap:8px;margin:4px 0">
       <span class="hero-pts" id="hero-pts">0</span><span class="hero-unit">M</span>
@@ -9030,7 +9032,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0407b';
+const _APP_VERSION = 'v0407c';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -16557,6 +16559,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.47 (v0407c)',date:'2026-04-07',items:[{type:'fix',text:'홈탭 hero 레이아웃 재정렬 — 자녀 전환은 "OO의 마일리지" 라인, 0일 연속은 Lv 박스 라인'},{type:'fix',text:'compact 시 자녀 전환 숨기고 0일 연속만 hero-lbl 라인에 표시 (운영기와 동일)'}]},
   {ver:'1.9.46 (v0407b)',date:'2026-04-07',items:[{type:'fix',text:'연속 라벨을 다시 "X일 연속"으로 단축'},{type:'fix',text:'X일 연속 영역을 "OO의 마일리지" 라인과 같은 줄로 정렬, 컴팩트 시 Lv 박스 라인으로 내림'},{type:'fix',text:'자녀 전환 버튼을 hero 상단(이전 streak 위치)으로 이동'},{type:'new',text:'홈탭 진행중인 챌린지 섹션을 오늘 할 일 아래로 이동, 섹션 제목 스타일 통일'}]},
   {ver:'1.9.45 (v0407a)',date:'2026-04-07',items:[{type:'fix',text:'홈탭 인사말과 마일리지 사이 불필요한 여백 제거'},{type:'fix',text:'자녀 전환 버튼 위치 살짝 아래로 조정'},{type:'fix',text:'연속 라벨을 "오늘할일 연속 X일 완료"로 직관화'},{type:'fix',text:'활동기록/보상/성과/마이 탭 제목 크기 통일 (모바일 26px / 태블릿 28px)'}]},
   {ver:'1.9.44 (v0406m)',date:'2026-04-06',items:[{type:'fix',text:'활동기록/보상/성과 탭에서 스크롤 복귀 시 제목 크기가 원래대로 돌아오지 않던 문제 수정'}]},
