@@ -3772,7 +3772,7 @@ requestAnimationFrame(function(){
     <div style="font-size:18px;font-weight:900;color:#fff;margin-bottom:4px" id="birthday-banner-title"></div>
     <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,.85)" id="birthday-banner-sub"></div>
   </div>
-  <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> 오늘 할 일</div>
+  <div class="sec" style="display:flex;align-items:center;justify-content:space-between;padding-right:0"><span style="display:inline-flex;align-items:center;gap:7px"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>오늘 할 일</span><button onclick="openDayDiary()" aria-label="이력보기" style="margin-right:16px;padding:5px 11px;border:1.5px solid var(--bdr2,#CBD5E1);border-radius:14px;background:var(--bg2,#F1F5F9);color:var(--tx2,#475569);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:4px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>이력보기</button></div>
   <div class="act-grid" id="home-grid"></div>
   <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9H4.5a2.5 2.5 0 010-5H6"/><path d="M18 9h1.5a2.5 2.5 0 000-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0012 0V2z"/></svg> 진행중인 챌린지</div>
   <div id="challenge-cards" style="margin:0 16px 14px"></div>
@@ -9158,7 +9158,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'prod'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0407zb';
+const _APP_VERSION = 'v0407zm';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -9787,6 +9787,9 @@ function save(){
       _hasDirtyLocal = false; // 저장 완료
       _lastSaveTime = Date.now(); // cooldown start
       localStorage.setItem(_LS_PREFIX+'v6_backup', sanitizeForBackup(S));
+      // 모든 상태 변경(추가/삭제/수정/완료/취소/토글)에서 일기 스냅샷도 동시 갱신
+      // — 단일 진입점이라 미래 mutation도 자동 커버 (append-only로 과거는 보호)
+      try{ if(typeof _saveTodaySnapshot==='function') _saveTodaySnapshot(); }catch(_dhe){}
       // Cloud Functions가 아직 users/taemin만 감시하므로, families에 마이그레이션된 경우
       // push 트리거 필드(pushBroadcast, rewardNotify, moodNotify, pushDevices)를 LEGACY_DOC에도 동기화
       _syncPushToLegacy();
@@ -11074,6 +11077,7 @@ window.getCurrentGreeting=getCurrentGreeting;
 function renderAll(){
   if(_actAnimating){_actAnimating='pending';return;}
   if(!S._lvBackfilled){try{_backfillLevelData();S._lvBackfilled=true;}catch(e){}}
+  if(!_dhBackfilled){try{_backfillRecentFromLog();_saveTodaySnapshot();}catch(_dhe){}}
   renderHero();renderHomeGrid();renderChallengeCards();renderRecent();
   renderLogList();renderRewardGrid();renderRewardInventory();renderRewardHistory();
   renderDashboard();renderHistStats();renderHistList();renderCalendar();
@@ -14213,7 +14217,7 @@ function _doActCore(id){
   // Update challenge progress
   updateChallengeProgress();
 
-  save();
+  save(); // save() 내부에서 _saveTodaySnapshot도 자동 호출
   const _curTab=getCurrentTab();
   const _actCard=_curTab==='home'?document.querySelector(`.act-card[data-actid="${id}"]`):null;
   const _logItem=_curTab==='log'?document.querySelector(`.log-item[data-actid="${id}"]`):null;
@@ -14348,7 +14352,7 @@ function _undoActCore(actId){
   // 역방향 별 애니메이션: 마일리지 → 활동 카드 방향
   const _actCard = document.querySelector(`.act-card[data-actid="${actId}"]`);
   if(_actCard) flyCoinsFromMileage(_actCard, entry.pts);
-  save();renderAll();
+  save();renderAll(); // save() 내부에서 _saveTodaySnapshot도 자동 호출
   toast(`↩ ${a.name} 취소됨 (-${entry.pts} 마일리지)`);
   if(_chRolledBack.length){
     setTimeout(()=>{
@@ -14357,7 +14361,445 @@ function _undoActCore(actId){
   }
 }
 
+// ── DAY HISTORY (알림장 일기) ────────────────────────────
+// 매일 "오늘 할 일" 스냅샷을 멤버별로 월별 Firestore 서브컬렉션에 영구 저장
+// 구조: <DATA_DOC>/dh_{memberId}/{YYYY-MM} = { month, updatedAt, days: { 'DD': {acts,done,allDone,streak,ts} } }
+// 메모리 캐시: _dhCache[memberId][monthKey] = { days, _loaded }
+// localStorage 미러: _LS_PREFIX + 'dh_' + memberId + '_' + monthKey
+// ⚠️ Append-only — 이미 저장된 일기는 절대 삭제 금지 (사고 방지)
+let _dhCache = {};
+let _dhBackfilled = false;
+function _dhMemberId(){ return _globalDataOwner || currentUser || 'main'; }
+function _dhMonthKey(d){ d=d||new Date(); if(typeof d==='string'){const [y,m]=d.split('-');return `${y}-${m}`;} return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
+function _dhDayKey(d){ if(typeof d==='string') return d.split('-')[2]; return String(d.getDate()).padStart(2,'0'); }
+function _dhDateStr(d){ if(typeof d==='string')return d; return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function _dhSubDocRef(memberId, monthKey){
+  try{
+    if(!_firebaseReady||!db||!DATA_DOC||!DATA_DOC.path) return null;
+    const segs = DATA_DOC.path.split('/');
+    return doc(db, ...segs, 'dh_'+memberId, monthKey);
+  }catch(_e){ return null; }
+}
+function _dhEnsureMonth(memberId, monthKey){
+  if(!_dhCache[memberId]) _dhCache[memberId]={};
+  if(!_dhCache[memberId][monthKey]) _dhCache[memberId][monthKey]={days:{},_loaded:false};
+  return _dhCache[memberId][monthKey];
+}
+// 지금 시점의 "오늘 할 일" 스냅샷을 만든다 (홈탭 그리드와 동일한 필터)
+function _buildTodaySnapshot(){
+  let acts = (S.acts||[]).filter(a=>a.active&&a.showHome&&isAvailableToday(a)&&a.maxDay>0);
+  if(acts.length===0) acts=(S.acts||[]).filter(a=>a.active&&isAvailableToday(a)&&a.maxDay>0).slice(0,6);
+  const snapActs = acts.map(a=>({id:a.id, name:a.name, emoji:a.emoji, maxDay:a.maxDay, pts:a.pts||0}));
+  const done = {};
+  acts.forEach(a=>{ done[a.id] = countDone(a); });
+  return {
+    acts: snapActs,
+    done: done,
+    allDone: isTodayAllDone(),
+    streak: S.streak||0,
+    ts: Date.now()
+  };
+}
+// 오늘 스냅샷을 메모리/Firestore/localStorage 동시 저장
+async function _saveTodaySnapshot(){
+  try{
+    const mid = _dhMemberId();
+    const today = todayStr();
+    const monthKey = _dhMonthKey(today);
+    const dayKey = _dhDayKey(today);
+    const snap = _buildTodaySnapshot();
+    const month = _dhEnsureMonth(mid, monthKey);
+    month.days[dayKey] = snap;
+    // localStorage 미러 (Firestore 실패 대비)
+    try{ localStorage.setItem(_LS_PREFIX+'dh_'+mid+'_'+monthKey, JSON.stringify({days:month.days})); }catch(_le){}
+    // Firestore 저장 — set with merge (문서 없으면 생성)
+    const ref = _dhSubDocRef(mid, monthKey);
+    if(ref){
+      try{
+        await setDoc(ref, {
+          month: monthKey,
+          memberId: mid,
+          updatedAt: Date.now(),
+          days: month.days
+        }, {merge:true});
+      }catch(fe){ console.warn('[dh] Firestore save failed', fe); }
+    }
+  }catch(e){ console.warn('[dh] _saveTodaySnapshot error', e); }
+}
+// 월별 문서 로드 (Firestore → 메모리 캐시)
+async function _loadMonthHistory(monthKey, memberId){
+  const mid = memberId || _dhMemberId();
+  const month = _dhEnsureMonth(mid, monthKey);
+  if(month._loaded) return month;
+  // localStorage 우선 (오프라인/즉시 반영)
+  try{
+    const lsRaw = localStorage.getItem(_LS_PREFIX+'dh_'+mid+'_'+monthKey);
+    if(lsRaw){ const parsed=JSON.parse(lsRaw); if(parsed&&parsed.days) Object.assign(month.days, parsed.days); }
+  }catch(_le){}
+  const ref = _dhSubDocRef(mid, monthKey);
+  if(ref){
+    try{
+      const snap = await getDoc(ref);
+      if(snap.exists()){
+        const data = snap.data();
+        if(data && data.days){
+          Object.assign(month.days, data.days);
+        }
+      }
+    }catch(fe){ console.warn('[dh] _loadMonthHistory failed', monthKey, fe); }
+  }
+  month._loaded = true;
+  return month;
+}
+// 과거 날짜 한 건의 스냅샷을 가져온다 (없으면 S.log에서 재구성 — 옵션 A 폴백)
+async function _getDaySnapshot(dateStr){
+  const mid = _dhMemberId();
+  const monthKey = _dhMonthKey(dateStr);
+  const dayKey = _dhDayKey(dateStr);
+  const month = await _loadMonthHistory(monthKey, mid);
+  if(month.days[dayKey] && !month.days[dayKey]._reconstructed) return {snapshot: month.days[dayKey], reconstructed: false};
+  if(month.days[dayKey]) return {snapshot: month.days[dayKey], reconstructed: true};
+  const recon = _reconstructDayFromLog(dateStr);
+  return {snapshot: recon, reconstructed: true};
+}
+// S.log에서 그 날 활동 기록을 추출 — 로그에 등장한 모든 actId를 행으로 구성
+function _reconstructDayFromLog(dateStr){
+  const dayStart = new Date(dateStr+'T00:00:00').getTime();
+  const dayEnd = dayStart + 86400000;
+  const mid = _dhMemberId();
+  const dayLogs = (S.log||[]).filter(l=>l.ts>=dayStart && l.ts<dayEnd && l.actId && (!l.user || l.user===mid));
+  const byId = {};
+  dayLogs.forEach(l=>{
+    if(byId[l.actId]) return;
+    const cur = (S.acts||[]).find(a=>a.id===l.actId);
+    byId[l.actId] = cur
+      ? {id:cur.id, name:cur.name, emoji:cur.emoji, maxDay:cur.maxDay||1, pts:cur.pts||0}
+      : {id:l.actId, name:l.name||'(삭제된 활동)', emoji:l.emoji||'📝', maxDay:1, pts:l.pts||0, _deleted:true};
+  });
+  const done = {};
+  Object.keys(byId).forEach(id=>{
+    done[id] = dayLogs.filter(l=>l.actId===id).length;
+    if((byId[id].maxDay||1) < done[id]) byId[id].maxDay = done[id];
+  });
+  const acts = Object.values(byId);
+  const allDone = Array.isArray(S.allDoneDays)&&S.allDoneDays.includes(dateStr);
+  return {acts, done, allDone, streak:0, ts:dayStart, _reconstructed:true};
+}
+// 앱 시작 시 1회: S.log에서 최근 60일을 훑어 메모리 캐시에 폴백 데이터를 채워둠
+function _backfillRecentFromLog(){
+  if(_dhBackfilled) return;
+  _dhBackfilled = true;
+  try{
+    const mid = _dhMemberId();
+    const today = new Date();
+    for(let i=0;i<60;i++){
+      const d = new Date(today); d.setDate(d.getDate()-i);
+      const ds = _dhDateStr(d);
+      const monthKey = _dhMonthKey(ds);
+      const dayKey = _dhDayKey(ds);
+      const month = _dhEnsureMonth(mid, monthKey);
+      if(month.days[dayKey]) continue;
+      const recon = _reconstructDayFromLog(ds);
+      const total = Object.values(recon.done).reduce((s,n)=>s+n,0);
+      if(total===0 && !recon.allDone) continue;
+      month.days[dayKey] = recon;
+    }
+  }catch(e){ console.warn('[dh] backfill error', e); }
+}
+
+// ── DAY DIARY 알림장 UI ──────────────────────────────────
+let _diaryDate = null;
+let _diaryAnimating = false;
+let _diaryScrollY = 0;
+function openDayDiary(){
+  _diaryDate = todayStr();
+  let ov = document.getElementById('diary-ov');
+  if(ov) ov.remove();
+  ov = document.createElement('div');
+  ov.id = 'diary-ov';
+  ov.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(15,12,40,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;animation:diaryFade .25s ease;padding:16px;overscroll-behavior:contain;touch-action:none';
+  ov.innerHTML = ''
+    + '<style>'
+    + '@keyframes diaryFade{from{opacity:0}to{opacity:1}}'
+    + '@keyframes diaryFlipInDown{0%{opacity:0;transform:translateY(-100%)}100%{opacity:1;transform:translateY(0)}}'
+    + '@keyframes diaryFlipOutUp{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-100%)}}'
+    + '@keyframes diaryFlipInUp{0%{opacity:0;transform:translateY(100%)}100%{opacity:1;transform:translateY(0)}}'
+    + '@keyframes diaryFlipOutDown{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(100%)}}'
+    + '.diary-paper{font-family:inherit;background:repeating-linear-gradient(to bottom,#FFFDF7 0,#FFFDF7 31px,#E8DFC8 32px),#FFFDF7;background-size:100% 32px;border-radius:14px;box-shadow:0 22px 60px rgba(0,0,0,.45),inset 0 0 0 1px rgba(180,150,80,.2);position:relative;width:min(360px,92vw);height:min(640px,82vh);max-height:82vh;overflow:hidden}'
+    + '.diary-header{position:absolute;top:0;left:0;right:0;height:52px;background:linear-gradient(180deg,#4A2E1A 0%,#6B3F24 50%,#3D2613 100%);border-radius:14px 14px 0 0;box-shadow:0 3px 8px rgba(0,0,0,.35),inset 0 -2px 4px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.1);z-index:5;display:flex;align-items:center;justify-content:center;padding:0 52px}'
+    + '.diary-header-title{font-family:inherit;font-size:14px;font-weight:800;color:#FBEAD4;letter-spacing:1px;text-shadow:0 1px 2px rgba(0,0,0,.5);display:inline-flex;align-items:center;gap:6px}'
+    + '.diary-stage{position:absolute;top:52px;left:0;right:0;bottom:0;overflow:hidden;overscroll-behavior:contain;touch-action:pan-y}'
+    + '.diary-page{position:absolute;top:0;left:0;right:0;bottom:0;padding:16px 16px 24px;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;overscroll-behavior:contain;background:repeating-linear-gradient(to bottom,#FFFDF7 0,#FFFDF7 31px,#E8DFC8 32px),#FFFDF7;background-size:100% 32px}'
+    + '.diary-page::-webkit-scrollbar{display:none}'
+    + '.diary-datecard{display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#FEF3C7,#FDE68A);border:1.5px solid #F59E0B;border-radius:12px;padding:10px 14px;margin-bottom:12px;cursor:pointer;box-shadow:0 2px 6px rgba(217,142,9,.2)}'
+    + '.diary-datecard:hover{transform:translateY(-1px);box-shadow:0 4px 10px rgba(217,142,9,.28)}'
+    + '.diary-datecard-left{display:flex;flex-direction:column;gap:2px}'
+    + '.diary-date{font-family:inherit;font-size:17px;font-weight:800;color:#7C2D12;line-height:1.1;letter-spacing:.2px}'
+    + '.diary-weekday{font-family:inherit;font-size:11px;font-weight:700;color:#92400E;opacity:.85}'
+    + '.diary-datecard-cal{font-size:20px;opacity:.8}'
+    + '.diary-summary{display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;font-size:13px;font-weight:800;color:#92400E;background:#FFF7E6;border:1px dashed #F59E0B;border-radius:10px;padding:8px 12px;margin-bottom:12px}'
+    + '.diary-summary.alldone{background:linear-gradient(135deg,#FED7AA,#FDBA74);border-style:solid;color:#9A3412}'
+    + '.diary-warn{font-family:inherit;font-size:11px;color:#9CA3AF;text-align:center;margin-bottom:10px;font-style:italic}'
+    + '.diary-act{display:flex;align-items:center;gap:12px;padding:10px 12px;background:rgba(255,255,255,.65);border:1px solid rgba(180,140,60,.2);border-radius:12px;margin-bottom:8px;box-shadow:0 1px 2px rgba(0,0,0,.03)}'
+    + '.diary-act-emoji{font-size:24px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:#FFFDF7;border-radius:10px;flex-shrink:0;box-shadow:inset 0 0 0 1px rgba(150,100,40,.15)}'
+    + '.diary-act-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}'
+    + '.diary-act-name{font-family:inherit;font-size:14px;font-weight:700;color:#1F2937;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'
+    + '.diary-act-sub{font-family:inherit;font-size:11px;font-weight:600;color:#9CA3AF}'
+    + '.diary-act-sub.partial{color:#D97706}'
+    + '.diary-act-sub.done{color:#059669}'
+    + '.diary-act-right{flex-shrink:0;width:48px;height:48px;display:flex;align-items:center;justify-content:center}'
+    + '.diary-act-right svg{width:48px;height:48px}'
+    + '.diary-act-right .progress{font-family:inherit;font-size:13px;font-weight:800;color:#D97706;background:#FEF3C7;border:1.5px solid #F59E0B;border-radius:50%;width:44px;height:44px;display:flex;align-items:center;justify-content:center;line-height:1}'
+    + '.diary-act-right .progress.zero{color:#9CA3AF;background:transparent;border-color:#E5E7EB;border-style:dashed}'
+    + '.diary-empty{font-family:inherit;font-size:13px;color:#9CA3AF;text-align:center;padding:40px 16px;background:rgba(255,255,255,.5);border:1px dashed #D6C7A3;border-radius:12px;margin-top:8px}'
+    + '.diary-empty .em{font-size:34px;display:block;margin-bottom:8px;opacity:.6}'
+    + '.diary-navbar{position:absolute;bottom:10px;right:10px;display:flex;gap:8px;align-items:center;z-index:6}'
+    + '.diary-navbtn{width:36px;height:36px;border-radius:50%;background:rgba(74,46,26,.85);border:1.5px solid rgba(251,234,212,.55);color:#FBEAD4;font-size:13px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 8px rgba(0,0,0,.35);transition:transform .15s,background .15s}'
+    + '.diary-navbtn:hover{background:rgba(74,46,26,1);transform:scale(1.08)}'
+    + '.diary-navbtn:active{transform:scale(.95)}'
+    + ''
+    + '.diary-close:hover{background:rgba(0,0,0,.55);transform:scale(1.05)}'
+    + '.diary-nav-hint{position:absolute;left:50%;transform:translateX(-50%);font-family:inherit;font-size:10px;color:#9CA3AF;pointer-events:none;z-index:6}'
+    + '.diary-nav-hint.down{bottom:6px}'
+    + '.diary-cal{position:absolute;inset:0;background:rgba(15,12,40,.85);display:flex;align-items:center;justify-content:center;z-index:8;animation:diaryFade .2s}'
+    + '.diary-cal-card{background:#FFFDF7;border-radius:14px;padding:18px 16px;width:min(320px,90%);box-shadow:0 12px 40px rgba(0,0,0,.5);font-family:inherit}'
+    + '.diary-cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}'
+    + '.diary-cal-title{font-size:16px;font-weight:800;color:#1F2937}'
+    + '.diary-cal-nav{background:none;border:none;font-size:18px;color:#7C3AED;cursor:pointer;padding:4px 10px;font-family:inherit;font-weight:800}'
+    + '.diary-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}'
+    + '.diary-cal-dow{font-size:11px;font-weight:700;color:#9CA3AF;text-align:center;padding:4px 0}'
+    + '.diary-cal-cell{aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#374151;cursor:pointer;border:1.5px solid transparent;position:relative;background:transparent}'
+    + '.diary-cal-cell.today{border-color:#F59E0B}'
+    + '.diary-cal-cell.has{background:#FEF3C7}'
+    + '.diary-cal-cell.alldone{background:#FED7AA;border-color:#EA580C}'
+    + '.diary-cal-cell.future{color:#D1D5DB;cursor:not-allowed}'
+    + '.diary-cal-cell .cnt{font-size:9px;color:#92400E;line-height:1}'
+    + '@keyframes diaryToastIn{0%{opacity:0;transform:translate(-50%,8px)}15%{opacity:1;transform:translate(-50%,0)}80%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-4px)}}'
+    + '.diary-toast{position:absolute;left:50%;top:70px;transform:translateX(-50%);background:rgba(15,12,40,.92);color:#fff;font-family:inherit;font-size:13px;font-weight:700;padding:9px 16px;border-radius:14px;box-shadow:0 6px 18px rgba(0,0,0,.45);z-index:20;pointer-events:none;animation:diaryToastIn 1.8s ease forwards}'
+    + '</style>'
+    + '<div class="diary-paper" id="diary-paper">'
+    + '<div class="diary-header"><span class="diary-header-title">📓 오늘 할일 이력</span></div>'
+    + '<div class="diary-stage" id="diary-stage"><div class="diary-page" id="diary-page"></div></div>'
+    + '<div class="diary-nav-hint down">위/아래로 스와이프하면 날짜 이동</div>'
+    + '<div class="diary-navbar">'
+    + '<button class="diary-navbtn" onclick="diaryNav(1)" title="다음 날" aria-label="다음 날">▲</button>'
+    + '<button class="diary-navbtn" onclick="diaryNav(-1)" title="이전 날" aria-label="이전 날">▼</button>'
+    + '</div>'
+    + '</div>';
+  document.body.appendChild(ov);
+  // 본문 스크롤 락 — overflow:hidden + touchmove 차단 (position:fixed는 레이아웃 시프트 유발해서 사용 안 함)
+  try{
+    _diaryScrollY = window.scrollY || window.pageYOffset || 0;
+    document.documentElement.style.overflow='hidden';
+    document.body.style.overflow='hidden';
+  }catch(_lke){}
+  ov.addEventListener('click',function(e){ if(e.target===ov) closeDayDiary(); });
+  // 다이어리 페이지 안쪽이 아닌 영역의 touchmove는 완전 차단
+  ov.addEventListener('touchmove',function(e){
+    var t=e.target;
+    if(!t || !t.closest || !t.closest('#diary-page')) e.preventDefault();
+  },{passive:false});
+  ov.addEventListener('wheel',function(e){
+    var t=e.target;
+    if(!t || !t.closest || !t.closest('#diary-page')) e.preventDefault();
+  },{passive:false});
+  var touchStartY=null;
+  var stage = ov.querySelector('#diary-stage');
+  stage.addEventListener('touchstart',function(e){ touchStartY=e.touches[0].clientY; },{passive:true});
+  stage.addEventListener('touchend',function(e){
+    if(touchStartY===null)return;
+    var dy = e.changedTouches[0].clientY - touchStartY;
+    if(Math.abs(dy)>60){ diaryNav(dy<0 ? 1 : -1); }
+    touchStartY=null;
+  });
+  _renderDiaryPage();
+}
+window.openDayDiary = openDayDiary;
+function closeDayDiary(){
+  var ov=document.getElementById('diary-ov'); if(ov) ov.remove();
+  try{
+    document.documentElement.style.overflow='';
+    document.body.style.overflow='';
+  }catch(_uke){}
+}
+window.closeDayDiary = closeDayDiary;
+function diaryNav(delta){
+  if(_diaryAnimating)return;
+  var cur = new Date(_diaryDate+'T00:00:00');
+  cur.setDate(cur.getDate()+delta);
+  var today = new Date(); today.setHours(0,0,0,0);
+  if(cur.getTime() > today.getTime()){ _diaryFlash('미래 페이지는 아직 비어있어요'); return; }
+  _diaryDate = _dhDateStr(cur);
+  _diaryAnimating = true;
+  var stage = document.getElementById('diary-stage');
+  var oldPage = document.getElementById('diary-page');
+  if(!stage || !oldPage){ _renderDiaryPage(); _diaryAnimating=false; return; }
+  // delta<0 = 과거로(이전 날) → 새 페이지가 위에서 내려오고 현재 페이지는 아래로 사라짐
+  // delta>0 = 미래로(다음 날) → 새 페이지가 아래에서 올라오고 현재 페이지는 위로 사라짐
+  var outAnim = delta<0 ? 'diaryFlipOutDown' : 'diaryFlipOutUp';
+  var inAnim  = delta<0 ? 'diaryFlipInDown'  : 'diaryFlipInUp';
+  oldPage.id = '';
+  oldPage.style.animation = outAnim+' .42s cubic-bezier(.4,.0,.2,1) forwards';
+  oldPage.style.zIndex = '1';
+  var newPage = document.createElement('div');
+  newPage.className = 'diary-page';
+  newPage.id = 'diary-page';
+  newPage.style.zIndex = '2';
+  newPage.style.animation = inAnim+' .42s cubic-bezier(.4,.0,.2,1)';
+  stage.appendChild(newPage);
+  _renderDiaryPage();
+  setTimeout(function(){
+    if(oldPage && oldPage.parentNode) oldPage.parentNode.removeChild(oldPage);
+    _diaryAnimating = false;
+  }, 440);
+}
+window.diaryNav = diaryNav;
+function _diaryFlash(msg){
+  var ov=document.getElementById('diary-ov'); if(!ov)return;
+  var old=ov.querySelector('.diary-toast'); if(old) old.remove();
+  var t=document.createElement('div'); t.className='diary-toast'; t.textContent=msg;
+  ov.appendChild(t);
+  setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); }, 1900);
+}
+async function _renderDiaryPage(){
+  var page = document.getElementById('diary-page');
+  if(!page)return;
+  page.innerHTML = '<div class="diary-empty"><span class="em">📖</span>페이지를 펴는 중...</div>';
+  var res = await _getDaySnapshot(_diaryDate);
+  if(page !== document.getElementById('diary-page')) return; // 페이지가 이미 교체됨
+  var snapshot = res.snapshot, reconstructed = res.reconstructed;
+  var d = new Date(_diaryDate+'T00:00:00');
+  var wd = ['일','월','화','수','목','금','토'][d.getDay()];
+  var dateLabel = d.getFullYear()+'년 '+(d.getMonth()+1)+'월 '+d.getDate()+'일';
+  var isToday = _diaryDate===todayStr();
+  var acts = snapshot.acts||[];
+  var done = snapshot.done||{};
+  var totalMax = acts.reduce(function(s,a){return s+(a.maxDay||0);},0);
+  var totalDone = acts.reduce(function(s,a){return s+Math.min(a.maxDay||0, done[a.id]||0);},0);
+  var summaryHTML;
+  if(totalMax===0){
+    summaryHTML = '<div class="diary-summary">📭 이 날은 기록이 없어요</div>';
+  }else if(snapshot.allDone){
+    summaryHTML = '<div class="diary-summary alldone">🎉 모두 완료! '+totalDone+'/'+totalMax+' 도장</div>';
+  }else{
+    summaryHTML = '<div class="diary-summary">🔖 '+totalDone+'/'+totalMax+' 도장</div>';
+  }
+  var STAMP_SVG = '<svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="29" stroke="#34D399" stroke-width="3.5" stroke-dasharray="5 2.5" opacity=".9"/><circle cx="32" cy="32" r="21" stroke="#34D399" stroke-width="2.5" opacity=".7"/><text x="32" y="30" text-anchor="middle" font-size="14" font-weight="900" fill="#10B981" font-family="Noto Sans KR,sans-serif" opacity=".95">완료</text><text x="32" y="43" text-anchor="middle" font-size="9" font-weight="800" fill="#10B981" font-family="sans-serif" letter-spacing="2" opacity=".75">DONE</text></svg>';
+  var actsHTML = acts.length===0
+    ? '<div class="diary-empty"><span class="em">📭</span>이 날은 활동 기록이 없어요</div>'
+    : acts.map(function(a){
+        var mx = a.maxDay||1;
+        var dn = Math.min(mx, done[a.id]||0);
+        var nm = a._deleted ? '<s>'+a.name+'</s>' : a.name;
+        var subCls, subText, rightHTML;
+        if(dn>=mx){
+          subCls='done'; subText='✓ 완료';
+          rightHTML = '<div class="diary-act-right">'+STAMP_SVG+'</div>';
+        }else if(dn>0){
+          subCls='partial'; subText=dn+'/'+mx+' 수행';
+          rightHTML = '<div class="diary-act-right"><div class="progress">'+dn+'/'+mx+'</div></div>';
+        }else{
+          subCls=''; subText='0/'+mx;
+          rightHTML = '<div class="diary-act-right"><div class="progress zero">0/'+mx+'</div></div>';
+        }
+        return '<div class="diary-act">'
+          + '<div class="diary-act-emoji">'+(a.emoji||'📝')+'</div>'
+          + '<div class="diary-act-body"><div class="diary-act-name">'+nm+'</div><div class="diary-act-sub '+subCls+'">'+subText+'</div></div>'
+          + rightHTML
+          + '</div>';
+      }).join('');
+  page.innerHTML = ''
+    + '<div class="diary-datecard" onclick="openDiaryCalendar()" title="달력 열기">'
+    + '<div class="diary-datecard-left"><div class="diary-date">'+dateLabel+'</div><div class="diary-weekday">'+wd+'요일'+(isToday?' · 오늘':'')+'</div></div>'
+    + '<div class="diary-datecard-cal">📅</div>'
+    + '</div>'
+    + summaryHTML
+    + (reconstructed?'<div class="diary-warn">※ 옛 기록은 활동 구성이 달랐을 수 있어요</div>':'')
+    + actsHTML;
+}
+let _diaryCalMonth = null;
+async function openDiaryCalendar(){
+  var ov = document.getElementById('diary-ov');
+  if(!ov)return;
+  var cal = ov.querySelector('.diary-cal');
+  if(cal) cal.remove();
+  _diaryCalMonth = _diaryDate.substring(0,7);
+  cal = document.createElement('div');
+  cal.className = 'diary-cal';
+  cal.addEventListener('click',function(e){ if(e.target===cal) cal.remove(); });
+  ov.querySelector('.diary-paper').appendChild(cal);
+  await _renderDiaryCalendar(cal);
+}
+window.openDiaryCalendar = openDiaryCalendar;
+async function _renderDiaryCalendar(cal){
+  var parts = _diaryCalMonth.split('-').map(Number);
+  var y = parts[0], m = parts[1];
+  await _loadMonthHistory(_diaryCalMonth);
+  var month = _dhEnsureMonth(_dhMemberId(), _diaryCalMonth);
+  var first = new Date(y, m-1, 1);
+  var last = new Date(y, m, 0);
+  var startDow = first.getDay();
+  var days = last.getDate();
+  var today = new Date(); today.setHours(0,0,0,0);
+  var todayMs = today.getTime();
+  var cells = '';
+  for(var i=0;i<startDow;i++) cells += '<div></div>';
+  for(var d2=1;d2<=days;d2++){
+    var dk = String(d2).padStart(2,'0');
+    var ds = y+'-'+String(m).padStart(2,'0')+'-'+dk;
+    var dayMs = new Date(y,m-1,d2).getTime();
+    var isToday = ds===todayStr();
+    var isFuture = dayMs > todayMs;
+    var snap = month.days[dk];
+    if(!snap && !isFuture){
+      var recon = _reconstructDayFromLog(ds);
+      var total = Object.values(recon.done).reduce(function(s,n){return s+n;},0);
+      if(total>0||recon.allDone) snap = recon;
+    }
+    var cls = 'diary-cal-cell';
+    var cnt = '';
+    if(isFuture){ cls += ' future'; }
+    else if(snap){
+      var td = (snap.acts||[]).reduce(function(s,a){return s+Math.min(a.maxDay||0,(snap.done||{})[a.id]||0);},0);
+      if(snap.allDone){ cls += ' alldone'; cnt = '<span class="cnt">all</span>'; }
+      else if(td>0){ cls += ' has'; cnt = '<span class="cnt">'+td+'</span>'; }
+    }
+    if(isToday) cls += ' today';
+    cells += '<div class="'+cls+'" '+(isFuture?'':'onclick="diaryJumpDate(\''+ds+'\')"')+'>'+d2+cnt+'</div>';
+  }
+  cal.innerHTML = ''
+    + '<div class="diary-cal-card">'
+    + '<div class="diary-cal-head">'
+    + '<button class="diary-cal-nav" onclick="diaryCalMonth(-1)">◀</button>'
+    + '<div class="diary-cal-title">'+y+'년 '+m+'월</div>'
+    + '<button class="diary-cal-nav" onclick="diaryCalMonth(1)">▶</button>'
+    + '</div>'
+    + '<div class="diary-cal-grid">'
+    + ['일','월','화','수','목','금','토'].map(function(w){return '<div class="diary-cal-dow">'+w+'</div>';}).join('')
+    + cells
+    + '</div>'
+    + '</div>';
+  cal.querySelector('.diary-cal-card').addEventListener('click',function(e){e.stopPropagation();});
+}
+async function diaryCalMonth(delta){
+  var parts = _diaryCalMonth.split('-').map(Number);
+  var y = parts[0], m = parts[1];
+  var d = new Date(y, m-1+delta, 1);
+  _diaryCalMonth = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+  var cal = document.querySelector('.diary-cal');
+  if(cal) await _renderDiaryCalendar(cal);
+}
+window.diaryCalMonth = diaryCalMonth;
+async function diaryJumpDate(ds){
+  _diaryDate = ds;
+  var cal = document.querySelector('.diary-cal');
+  if(cal) cal.remove();
+  _renderDiaryPage();
+}
+window.diaryJumpDate = diaryJumpDate;
+
 // ── STICKER & BUBBLE MESSAGE SYSTEM ──────────────────────
+
 const STICKER_EMOJIS=['❤️','👍','👎','😂','‼️','❓','😆','💔','🔥','⭐','💪','🎉','👏','😍','😢','😡','💩','👀','🙏','💯','🌈','🍀','✨','🫶','💕','😎','🤔','😴','🤗','😱'];
 
 function cleanExpiredStickers(){
@@ -14799,6 +15241,7 @@ function switchViewingChild(childId){
   // 해당 자녀의 memberData 초기화 (없으면)
   if(!S.memberData[childId])getMemberState(childId);
   syncMemberToGlobal(childId);
+  _dhBackfilled=false;
   applyChildTheme(childId);
 
   // compact 상태 초기화 + 스크롤 리셋 (자녀 전환 시 깨짐 방지)
@@ -17094,6 +17537,17 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'1.9.91 (v0407zm)',date:'2026-04-07',items:[{type:'fix',text:'홈탭 "오늘 할 일" 제목과 아이콘이 붙어보이던 문제 수정 (이력보기 버튼 추가 시 inner span gap 누락)'}]},
+  {ver:'1.9.90 (v0407zl)',date:'2026-04-07',items:[{type:'ui',text:'알림장 X 닫기 버튼 제거 — 수첩 바깥 dim 영역 탭으로 닫기 동작과 중복이라 정리'}]},
+  {ver:'1.9.89 (v0407zk)',date:'2026-04-07',items:[{type:'fix',text:'알림장에서 미래 날짜로 넘기려 할 때 토스트가 dim 아래에 가려져 안 보이던 문제 — 오버레이 안에 자체 토스트(z-index 20) 표시'}]},
+  {ver:'1.9.88 (v0407zj)',date:'2026-04-07',items:[{type:'fix',text:'홈탭 hero shrink 인터랙션 v0407zh 변경 롤백 (threshold 60 복귀, inline padding 보간 제거) — 제목영역이 이상하게 동작하던 문제 해결'},{type:'fix',text:'알림장 X 닫기 버튼 더 위로(top 9px) + 더 작게(22px) — 고동색 헤더 안에 정확히 들어옴'},{type:'ui',text:'알림장 화살표 ▲▼ 버튼을 수첩 우측 하단 모서리 안으로 이동, 고동색 톤으로 변경'},{type:'fix',text:'알림장 열 때 화면이 위로 밀리고 하단에 흰 영역이 잘리던 문제 — body position:fixed 락 방식 폐기, html/body overflow:hidden + touchmove 차단으로 변경 (레이아웃 시프트 없음)'}]},
+  {ver:'1.9.87 (v0407zi)',date:'2026-04-07',items:[{type:'fix',text:'알림장 X 닫기 버튼 크기 축소(32→26px) 및 위치 보정 — 고동색 헤더 바 안에 정확히 정렬'},{type:'ui',text:'수첩 헤더 제목을 "알림장" → "오늘 할일 이력"으로 변경'},{type:'fix',text:'수첩 스크롤 시 dim 영역이 따라 움직이던 문제 근원적 해결 — 본문 body 자체를 position:fixed로 락하고 닫을 때 원래 스크롤 위치 복원, 수첩 안쪽 외 touchmove/wheel 모두 preventDefault'},{type:'ui',text:'위/아래 화살표 버튼을 화면 바닥이 아닌 수첩 바로 아래에 가로로 배치 (오버레이를 column flex로 변경)'}]},
+  {ver:'1.9.86 (v0407zh)',date:'2026-04-07',items:[{type:'fix',text:'라이트 모드에서 이력보기 버튼 외곽선이 잘 안 보이던 문제 — 보더 두께/색 강화 + 옅은 배경 추가'},{type:'fix',text:'홈탭 스크롤 시 컨텐츠가 hero 헤더가 다 줄어들기 전에 헤더 안으로 숨던 문제 — shrink threshold를 60→140으로 늘려 hero 높이 변화량보다 스크롤 거리가 항상 크도록 보장, padding을 CSS transition 없이 inline으로 직접 보간'}]},
+  {ver:'1.9.85 (v0407zg)',date:'2026-04-07',items:[{type:'fix',text:'알림장 수첩 스크롤 시 바깥 dim 영역이 함께 움직이던 문제 수정 — overscroll-behavior:contain + touch-action 격리, 오버레이 자체 touchmove preventDefault'},{type:'ui',text:'수첩 우측 상하 모서리 화살표가 달력/날짜 영역과 겹쳐 보이던 문제 — 모서리 화살표 제거 후 수첩 바깥 우측에 둥근 ▲▼ 버튼 배치 (모바일에선 하단 우측에 가로로)'}]},
+  {ver:'1.9.84 (v0407zf)',date:'2026-04-07',items:[{type:'fix',text:'알림장 수첩 상단에 두꺼운 고동색 헤더 바 복원 — X 닫기 버튼이 헤더 안에 명확히 자리잡고, 제목(📓 알림장) 함께 표시'},{type:'fix',text:'페이지 넘김 애니메이션을 진짜 종이 넘기듯 구현 — 이전/다음 페이지가 동시에 상하로 슬라이드 교차 (기존 페이지는 사라지고 새 페이지가 반대 방향에서 들어옴)'},{type:'ui',text:'수첩 내부 활동 카드 디자인 개선 — 둥근 카드에 이모지 타일 + 제목 + 상태 서브텍스트 + 우측 도장/진행 배지, 날짜는 노란 카드로 강조, 요약은 점선 박스로 구분'}]},
+  {ver:'1.9.83 (v0407ze)',date:'2026-04-07',items:[{type:'fix',text:'알림장 일기 디자인 정리 — 수첩 상단 스프링 링 제거, 전 영역 앱 기본 폰트(Pretendard)로 통일, 폰트 사이즈 정상화(과거 페이지에서 글씨가 점점 커지던 문제 해결)'},{type:'fix',text:'과거 날짜 활동 기록이 비어 있던 버그 수정 — 현재 활동 목록 대신 그 날의 로그에 등장한 모든 활동을 직접 행으로 구성하도록 재구성 로직 개선'},{type:'fix',text:'완료 표시를 홈탭과 동일한 도장 SVG로 통일 — 부분 완료(예: 1/2)는 "1/2 수행" 텍스트, 모두 완수했을 때만 도장 한 번'},{type:'fix',text:'홈탭 이력보기 버튼 디자인 톤다운 — 노란 그라디언트 제거, 회색 외곽선 ghost 스타일로 다른 섹션 헤더와 어울리도록 변경'}]},
+  {ver:'1.9.82 (v0407zd)',date:'2026-04-07',items:[{type:'fix',text:'알림장 일기 스냅샷을 save() 단일 진입점에 후킹 — 활동 추가/삭제/수정/토글 등 모든 상태 변경에서 자동 갱신 (append-only로 과거 일기는 보호)'}]},
+  {ver:'1.9.81 (v0407zc)',date:'2026-04-07',items:[{type:'new',text:'홈탭 오늘 할 일 옆에 이력보기 버튼 추가 — 알림장(수첩) 모양 팝업으로 과거 날짜의 오늘 할 일 도장 현황을 일기처럼 열람. 손글씨 폰트 헤더, 상하 페이지 넘김(스와이프/모서리 탭), 손글씨 날짜 클릭 시 달력 점프 지원'},{type:'new',text:'활동 이력 일기(dayHistory) 저장 시작 — 활동 완료/취소 시점마다 그 날의 활동 정의 + 도장 현황을 멤버별 월별 Firestore 서브컬렉션(<DATA_DOC>/dh_{memberId}/{YYYY-MM})에 영구 저장. localStorage 미러 + append-only 보호. 과거 60일은 S.log에서 best-effort 재구성으로 폴백 표시'}]},
   {ver:'1.9.80 (v0407zb)',date:'2026-04-07',items:[{type:'fix',text:'오늘의 보너스 룰렛 결과의 마일리지 점수가 보이지 않던 문제 수정 — 결과 영역 세로 배치/줄바꿈 방지'},{type:'feat',text:'룰렛 보너스 획득 이력을 홈탭 최근 활동에 표시'}]},
   {ver:'1.9.79 (v0407za)',date:'2026-04-07',items:[{type:'fix',text:'활동 취소 시 "오늘 할 일 모두 완료 X일" 챌린지(allDoneDays) 진행도가 줄어들지 않던 문제 — S.allDoneDays 트래커에서 오늘 항목 제거'}]},
   {ver:'1.9.78 (v0407z9)',date:'2026-04-07',items:[{type:'fix',text:'근본 원인 수정 — isTodayAllDone()이 홈탭 "오늘 할 일" 그리드와 동일한 필터(showHome)를 사용하도록 변경. 그동안 숨겨진 활동이 남아있어 streak/연속 챌린지 게이지가 갱신되지 않던 문제 해결.'}]},
