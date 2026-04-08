@@ -9350,7 +9350,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0408z4';
+const _APP_VERSION = 'v0408z5';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -9453,6 +9453,16 @@ async function _initFirebase(){
     }
     LEGACY_DOC = doc(db, 'users', _ENV==='dev'?'taemin_dev':'taemin');
     DATA_DOC = LEGACY_DOC;
+    // iPhone PWA 콜드스타트 대응: 첫 onAuthStateChanged 이벤트까지 대기 (최대 3초)
+    // 이렇게 해야 auth.currentUser가 복구된 후 Firestore 읽기가 진행되어 permission-denied 방지
+    try{
+      await new Promise(function(resolve){
+        let done=false;
+        const unsub=onAuthStateChanged(fbAuth,function(){ if(done)return; done=true; try{unsub&&unsub();}catch(_){}; resolve(); });
+        setTimeout(function(){ if(done)return; done=true; try{unsub&&unsub();}catch(_){}; resolve(); },3000);
+      });
+      console.log('[mile.ly] Auth restored:', fbAuth.currentUser?fbAuth.currentUser.uid:'(none)');
+    }catch(_awErr){ console.warn('[mile.ly] auth wait failed',_awErr); }
     _firebaseReady = true;
     console.log('[mile.ly] Firebase loaded OK (with Auth)');
     // 시스템 전체 설정 로드 (AI 한도 + 신기능 소개 팝업)
