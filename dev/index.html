@@ -9352,7 +9352,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0408v';
+const _APP_VERSION = 'v0408w';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -14873,19 +14873,32 @@ async function _getDaySnapshot(dateStr){
   const recon = _reconstructDayFromLog(dateStr);
   return {snapshot: recon, reconstructed: true};
 }
-// S.log에서 그 날 활동 기록을 추출 — 로그에 등장한 모든 actId를 행으로 구성
+// S.log에서 그 날 활동 기록을 추출 — 로그에 등장한 actId + 그날 존재했던 현재 활동 합산
 function _reconstructDayFromLog(dateStr){
   const dayStart = new Date(dateStr+'T00:00:00').getTime();
   const dayEnd = dayStart + 86400000;
   const mid = _dhMemberId();
   const dayLogs = (S.log||[]).filter(l=>l.ts>=dayStart && l.ts<dayEnd && l.actId && (!l.user || l.user===mid));
   const byId = {};
+  // 1) 그 날 로그에 등장한 활동 (삭제된 활동 포함)
   dayLogs.forEach(l=>{
     if(byId[l.actId]) return;
     const cur = (S.acts||[]).find(a=>a.id===l.actId);
     byId[l.actId] = cur
       ? {id:cur.id, name:cur.name, emoji:cur.emoji, maxDay:cur.maxDay||1, pts:cur.pts||0}
       : {id:l.actId, name:l.name||'(삭제된 활동)', emoji:l.emoji||'📝', maxDay:1, pts:l.pts||0, _deleted:true};
+  });
+  // 2) 그 날 존재했던 현재 활동도 추가 (미완료 항목까지 표시되도록)
+  //    id가 'a_<timestamp>' 형식이므로 timestamp를 파싱해 dayEnd 이후 생성된 활동은 제외
+  (S.acts||[]).forEach(a=>{
+    if(byId[a.id]) return;
+    if(a.active===false) return;
+    if(!a.showHome) return; // 홈에 노출되는 오늘 할일만
+    if((a.maxDay||0)<=0) return;
+    const m=/^a_(\d{10,16})/.exec(a.id||'');
+    const createdMs=m?parseInt(m[1]):0;
+    if(createdMs && createdMs>=dayEnd) return; // 그 날 이후 생성된 활동 제외
+    byId[a.id] = {id:a.id, name:a.name, emoji:a.emoji, maxDay:a.maxDay||1, pts:a.pts||0};
   });
   const done = {};
   Object.keys(byId).forEach(id=>{
@@ -18947,6 +18960,9 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.2.5 (v0408w)',date:'2026-04-08',items:[
+    {type:'fix',text:'이력보기에서 과거 날짜 조회 시 "5/5 완료"처럼 미완료 활동이 누락되어 잘못 표시되던 문제 수정. 스냅샷이 없어 로그로 재구성할 때, 그 날 존재했던 현재 활동(showHome)도 함께 합산하여 "5/10" 같은 정확한 진행률을 표시'},
+  ]},
   {ver:'2.2.4 (v0408v)',date:'2026-04-08',items:[
     {type:'improve',text:'Lv.5 불꽃 이펙트를 180° 뒤집어 아래에서 위로 타오르는 형태로 변경'},
     {type:'fix',text:'홈탭 제목영역 레벨 아이콘 탭 시 열리는 팝업에서 레벨 아이콘이 애니메이션 이펙트에 가려지던 문제 수정 (아이콘 z-index를 이펙트보다 위로 조정)'},
