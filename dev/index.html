@@ -4397,6 +4397,14 @@ requestAnimationFrame(function(){
         </div>
       </div>
     </div>
+    <!-- ── 신규 기능 소개 팝업 관리 ── -->
+    <div class="adm-sec">
+      <div class="adm-sec-lbl">신규 기능 소개 팝업</div>
+      <div class="adm-card">
+        <div style="padding:4px 2px;font-size:12px;color:var(--tx3);line-height:1.5;margin-bottom:4px">기능별로 배너 종료일을 설정하면 해당 날짜까지만 팝업이 노출돼요. 미설정 시 본 기록이 있을 때까지 상시 노출돼요.</div>
+        <div id="fi-admin-list"></div>
+      </div>
+    </div>
     <!-- ── 앱 캐시 ── -->
     <div class="adm-sec">
       <div class="adm-sec-lbl">앱 캐시</div>
@@ -4680,9 +4688,12 @@ requestAnimationFrame(function(){
     <div class="sheet-body" style="padding:0">
       <div id="fi-slides" style="position:relative"></div>
       <div style="display:flex;align-items:center;justify-content:center;gap:8px;padding:4px 0 12px" id="fi-dots"></div>
-      <div style="display:flex;gap:8px;padding:0 20px 20px">
+      <div style="display:flex;gap:8px;padding:0 20px 8px">
         <button id="fi-prev" class="btn-sm" style="flex:1;padding:14px 0;border-radius:14px;font-size:14px;font-weight:700;border:1px solid var(--bd);background:var(--cd);color:var(--tx);cursor:pointer" onclick="_fiPrev()">이전</button>
         <button id="fi-next" class="btn-primary" style="flex:2;padding:14px 0;border-radius:14px;font-size:15px;font-weight:800;border:none;color:#fff;background:linear-gradient(135deg,#6366F1,#8B5CF6);cursor:pointer" onclick="_fiNext()">다음</button>
+      </div>
+      <div style="padding:0 20px 16px;text-align:center">
+        <button type="button" onclick="_fiDismissToday()" style="background:none;border:none;color:var(--tx3);font-size:12px;font-weight:600;text-decoration:underline;cursor:pointer;padding:6px 10px">오늘 하루 띄우지 않기</button>
       </div>
     </div>
   </div>
@@ -6735,7 +6746,7 @@ async function saveFamilyToFirestore(){
             renderNavUsers();
             try{_updatePlanBadges();}catch(e){}
             console.log('🔄 다른 기기에서 데이터가 업데이트됐어요');
-          }else{const _sd=snap.data();if(_sd.familyMessages&&JSON.stringify(_sd.familyMessages)!==JSON.stringify(S.familyMessages)){S.familyMessages=_sd.familyMessages;checkNewMessages();_updateFamilyBtnBadge();}}
+          }else{const _sd=snap.data();if(_sd.familyMessages&&JSON.stringify(_sd.familyMessages)!==JSON.stringify(S.familyMessages)){S.familyMessages=_sd.familyMessages;checkNewMessages();_updateFamilyBtnBadge();}if(_sd.actVerifyRequests&&JSON.stringify(_sd.actVerifyRequests)!==JSON.stringify(S.actVerifyRequests)){S.actVerifyRequests=_sd.actVerifyRequests;try{_updateFamilyBtnBadge();}catch(_){}}if(_sd.rewardRequests&&JSON.stringify(_sd.rewardRequests)!==JSON.stringify(S.rewardRequests)){S.rewardRequests=_sd.rewardRequests;}}
         });
         console.log('[saveFamilyToFirestore] New listener on', docPath);
       }catch(_e){ console.warn('New family listener failed:', _e); }
@@ -7457,7 +7468,7 @@ async function doLogin(idField, pwdField, errField){
                 await save();
                 // 리스너를 새 DATA_DOC으로 재연결
                 if(_dataListenerUnsub){try{_dataListenerUnsub();}catch(_e){}}
-                try{_dataListenerUnsub=onSnapshot(DATA_DOC,(snap)=>{if(!snap.exists())return;if(_isSaving)return;if(Date.now()-_lastSaveTime<2000)return;const _ij=JSON.stringify(snap.data());if(_ij===_lastSavedJSON||_ij===JSON.stringify(S))return;if(!_hasDirtyLocal){S=Object.assign(defaultState(),snap.data());_lastSavedJSON=_ij;rebuildMembersFromFamily();renderAll();checkNewMessages();renderNavUsers();}else{const _sd=snap.data();if(_sd.familyMessages&&JSON.stringify(_sd.familyMessages)!==JSON.stringify(S.familyMessages)){S.familyMessages=_sd.familyMessages;checkNewMessages();_updateFamilyBtnBadge();}}});}catch(_e){}
+                try{_dataListenerUnsub=onSnapshot(DATA_DOC,(snap)=>{if(!snap.exists())return;if(_isSaving)return;if(Date.now()-_lastSaveTime<2000)return;const _ij=JSON.stringify(snap.data());if(_ij===_lastSavedJSON||_ij===JSON.stringify(S))return;if(!_hasDirtyLocal){S=Object.assign(defaultState(),snap.data());_lastSavedJSON=_ij;rebuildMembersFromFamily();renderAll();checkNewMessages();renderNavUsers();}else{const _sd=snap.data();if(_sd.familyMessages&&JSON.stringify(_sd.familyMessages)!==JSON.stringify(S.familyMessages)){S.familyMessages=_sd.familyMessages;checkNewMessages();_updateFamilyBtnBadge();}if(_sd.actVerifyRequests&&JSON.stringify(_sd.actVerifyRequests)!==JSON.stringify(S.actVerifyRequests)){S.actVerifyRequests=_sd.actVerifyRequests;try{_updateFamilyBtnBadge();}catch(_){}}if(_sd.rewardRequests&&JSON.stringify(_sd.rewardRequests)!==JSON.stringify(S.rewardRequests)){S.rewardRequests=_sd.rewardRequests;}}});}catch(_e){}
                 currentUser = otherMid;
                 localStorage.setItem(_LS_PREFIX+'current_user', otherMid);
                 syncMemberToGlobal();
@@ -8717,7 +8728,7 @@ async function _loginToFamily(familyId, memberId, authUid, provider, email, prof
   // 3단계: 리스너 연결 (실패해도 무시)
   try{
     if(_dataListenerUnsub){try{_dataListenerUnsub();}catch(_e){}}
-    _dataListenerUnsub=onSnapshot(DATA_DOC,(snap)=>{if(!snap.exists())return;if(_isSaving)return;if(Date.now()-_lastSaveTime<2000)return;const _ij=JSON.stringify(snap.data());if(_ij===_lastSavedJSON||_ij===JSON.stringify(S))return;if(!_hasDirtyLocal){S=Object.assign(defaultState(),snap.data());_lastSavedJSON=_ij;rebuildMembersFromFamily();renderAll();checkNewMessages();renderNavUsers();}else{const _sd=snap.data();if(_sd.familyMessages&&JSON.stringify(_sd.familyMessages)!==JSON.stringify(S.familyMessages)){S.familyMessages=_sd.familyMessages;checkNewMessages();_updateFamilyBtnBadge();}}});
+    _dataListenerUnsub=onSnapshot(DATA_DOC,(snap)=>{if(!snap.exists())return;if(_isSaving)return;if(Date.now()-_lastSaveTime<2000)return;const _ij=JSON.stringify(snap.data());if(_ij===_lastSavedJSON||_ij===JSON.stringify(S))return;if(!_hasDirtyLocal){S=Object.assign(defaultState(),snap.data());_lastSavedJSON=_ij;rebuildMembersFromFamily();renderAll();checkNewMessages();renderNavUsers();}else{const _sd=snap.data();if(_sd.familyMessages&&JSON.stringify(_sd.familyMessages)!==JSON.stringify(S.familyMessages)){S.familyMessages=_sd.familyMessages;checkNewMessages();_updateFamilyBtnBadge();}if(_sd.actVerifyRequests&&JSON.stringify(_sd.actVerifyRequests)!==JSON.stringify(S.actVerifyRequests)){S.actVerifyRequests=_sd.actVerifyRequests;try{_updateFamilyBtnBadge();}catch(_){}}if(_sd.rewardRequests&&JSON.stringify(_sd.rewardRequests)!==JSON.stringify(S.rewardRequests)){S.rewardRequests=_sd.rewardRequests;}}});
   }catch(_e){console.warn('Snapshot listener failed:',_e);}
 }
 
@@ -9352,7 +9363,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0408x';
+const _APP_VERSION = 'v0408y';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -18963,6 +18974,11 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.2.7 (v0408y)',date:'2026-04-08',items:[
+    {type:'fix',text:'부모 알림 뱃지 버그 수정: AI 검수 에스컬레이션/보상 승인 요청 팝업을 닫아도 승인/거절하지 않은 pending 요청은 familyMessages read 상태를 유지하여 가족 뱃지/나의 메뉴 아이 아이콘 뱃지/메시지 리스트에서 사라지지 않도록 함. 또한 Firestore 리스너가 로컬 dirty 상태에서도 actVerifyRequests/rewardRequests를 동기화하도록 개선'},
+    {type:'new',text:'신규 기능 소개 팝업에 "오늘 하루 띄우지 않기" 버튼 추가'},
+    {type:'new',text:'관리자 페이지 → 설정 → "신규 기능 소개 팝업" 섹션 추가. 기능별 배너 종료일 설정/해제, 미리보기, 본 기록 초기화 지원'},
+  ]},
   {ver:'2.2.6 (v0408x)',date:'2026-04-08',items:[
     {type:'improve',text:'AI 검수 일일 제한 정책 변경: 프리 등급은 하루 20회, PRO 등급은 무제한. 할당량 표시도 PRO에서는 ∞로 표기'},
   ]},
@@ -19535,9 +19551,87 @@ function _updateChangelogBadge(){
 // ============ 신규 기능 소개 팝업 (Feature Intro) ============
 // 기능별로 1회만 노출. localStorage 키: taemin_v6_feature_intro_seen (JSON: {featureId:true})
 const _FI_LS_KEY=_LS_PREFIX+'feature_intro_seen';
+const _FI_LS_TODAY_KEY=_LS_PREFIX+'feature_intro_today';
 function _fiGetSeen(){try{return JSON.parse(localStorage.getItem(_FI_LS_KEY)||'{}');}catch(_){return{};}}
 function _fiMarkSeen(id){const s=_fiGetSeen();s[id]=true;localStorage.setItem(_FI_LS_KEY,JSON.stringify(s));}
 function _fiHasSeen(id){return !!_fiGetSeen()[id];}
+function _fiTodayStr(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function _fiGetTodayMap(){try{return JSON.parse(localStorage.getItem(_FI_LS_TODAY_KEY)||'{}');}catch(_){return{};}}
+function _fiIsDismissedToday(id){const m=_fiGetTodayMap();return m[id]===_fiTodayStr();}
+function _fiDismissToday(){
+  if(!_fiCurrentId)return _fiClose();
+  const m=_fiGetTodayMap();m[_fiCurrentId]=_fiTodayStr();
+  try{localStorage.setItem(_FI_LS_TODAY_KEY,JSON.stringify(m));}catch(_){}
+  const el=document.getElementById('m-feature-intro');
+  if(el)el.classList.remove('open');
+  _fiCurrentId=null;_fiIdx=0;
+  try{toast('오늘 하루 동안 이 안내를 표시하지 않을게요');}catch(_){}
+}
+window._fiDismissToday=_fiDismissToday;
+// 관리자 설정: 기능별 종료일 (S.featureIntroConfig = {id:{endDate:'YYYY-MM-DD'}})
+function _fiGetEndDate(id){try{return (S.featureIntroConfig&&S.featureIntroConfig[id]&&S.featureIntroConfig[id].endDate)||'';}catch(_){return'';}}
+function _fiIsActive(id){
+  const end=_fiGetEndDate(id);
+  if(!end)return true; // 종료일 미설정 → 계속 노출
+  return _fiTodayStr()<=end;
+}
+function _fiSetEndDate(id,dateStr){
+  if(!S.featureIntroConfig)S.featureIntroConfig={};
+  if(!S.featureIntroConfig[id])S.featureIntroConfig[id]={};
+  S.featureIntroConfig[id].endDate=dateStr||'';
+  save();
+  try{_fiRefreshAdminInputs();}catch(_){}
+  toast(dateStr?('배너 종료일을 '+dateStr+'(으)로 설정했어요'):'배너 종료일이 해제되었어요');
+}
+window._fiSetEndDate=_fiSetEndDate;
+function _fiRefreshAdminInputs(){
+  Object.keys(_FEATURE_INTROS).forEach(id=>{
+    const inp=document.getElementById('fi-admin-end-'+id);
+    if(inp)inp.value=_fiGetEndDate(id)||'';
+    const st=document.getElementById('fi-admin-status-'+id);
+    if(st){
+      const end=_fiGetEndDate(id);
+      if(!end){st.textContent='상시 노출';st.style.color='var(--tx3)';}
+      else if(_fiTodayStr()>end){st.textContent='종료됨 ('+end+')';st.style.color='#9CA3AF';}
+      else{st.textContent='~'+end+'까지 노출';st.style.color='#10B981';}
+    }
+  });
+}
+window._fiRefreshAdminInputs=_fiRefreshAdminInputs;
+function _fiRenderAdminList(){
+  const root=document.getElementById('fi-admin-list');
+  if(!root)return;
+  const ids=Object.keys(_FEATURE_INTROS);
+  root.innerHTML=ids.map(id=>{
+    const intro=_FEATURE_INTROS[id];
+    const firstTitle=(intro.slides&&intro.slides[0]&&intro.slides[0].title)||id;
+    return `<div style="padding:10px 0;border-bottom:1px solid var(--bd)">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px">
+        <div style="font-size:13px;font-weight:800;color:var(--tx)">${escapeHtml(firstTitle)}</div>
+        <div id="fi-admin-status-${id}" style="font-size:11px;font-weight:700"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <input type="date" id="fi-admin-end-${id}" style="flex:1;padding:8px 10px;border:1px solid var(--bd);border-radius:10px;background:var(--cd);color:var(--tx);font-size:13px">
+        <button class="btn-sm" onclick="_fiSetEndDate('${id}',document.getElementById('fi-admin-end-${id}').value)">저장</button>
+        <button class="btn-sm" onclick="_fiSetEndDate('${id}','')">해제</button>
+      </div>
+      <div style="margin-top:6px;display:flex;gap:6px">
+        <button class="btn-sm" style="font-size:11px" onclick="showFeatureIntro('${id}')">미리보기</button>
+        <button class="btn-sm" style="font-size:11px" onclick="_fiResetSeen('${id}')">본 기록 초기화</button>
+      </div>
+    </div>`;
+  }).join('');
+  _fiRefreshAdminInputs();
+}
+window._fiRenderAdminList=_fiRenderAdminList;
+function _fiResetSeen(id){
+  const s=_fiGetSeen();delete s[id];
+  try{localStorage.setItem(_FI_LS_KEY,JSON.stringify(s));}catch(_){}
+  const t=_fiGetTodayMap();delete t[id];
+  try{localStorage.setItem(_FI_LS_TODAY_KEY,JSON.stringify(t));}catch(_){}
+  toast('본 기록이 초기화되었어요 (이 기기)');
+}
+window._fiResetSeen=_fiResetSeen;
 
 // 슬라이드 정의: {title, desc, svg}
 const _FEATURE_INTROS={
@@ -19745,16 +19839,18 @@ function showFeatureIntro(id){
 function _maybeShowFeatureIntros(){
   if(!currentUser)return;
   // AI 검수 기능 소개 (v1) — 아이만 대상 (caregiver는 스킵)
-  if(!_fiHasSeen('ai-verify-v1')){
-    try{
-      const isChild=!(typeof isCaregiverUser==='function'&&isCaregiverUser());
-      if(isChild){
-        setTimeout(()=>showFeatureIntro('ai-verify-v1'),800);
-      }else{
-        _fiMarkSeen('ai-verify-v1'); // 보호자는 노출 없이 본 것으로 처리
-      }
-    }catch(_){}
-  }
+  const _id='ai-verify-v1';
+  if(_fiHasSeen(_id))return;
+  if(!_fiIsActive(_id)){_fiMarkSeen(_id);return;} // 관리자 종료일 지남
+  if(_fiIsDismissedToday(_id))return;             // 사용자가 오늘 하루 띄우지 않기 선택
+  try{
+    const isChild=!(typeof isCaregiverUser==='function'&&isCaregiverUser());
+    if(isChild){
+      setTimeout(()=>showFeatureIntro(_id),800);
+    }else{
+      _fiMarkSeen(_id); // 보호자는 노출 없이 본 것으로 처리
+    }
+  }catch(_){}
 }
 window.showFeatureIntro=showFeatureIntro;
 window._fiPrev=_fiPrev;window._fiNext=_fiNext;window._fiClose=_fiClose;
@@ -20534,10 +20630,23 @@ window.sendFamilyMsg=sendFamilyMsg;
 
 function closeRecvMsg(){
   // 현재 보고 있는 메시지를 읽음 처리
+  // 단, 승인 대기 중인 요청(reward_request/activity_verify_request)은 뱃지/리스트 유지를 위해 read 유지
   if(_currentRecvMsg&&!_currentRecvMsg.read){
-    _currentRecvMsg.read=true;
-    save();
+    const _m=_currentRecvMsg;
+    let _stillPending=false;
+    if(_m.type==='reward_request'&&_m.requestId){
+      const _r=S.rewardRequests?S.rewardRequests.find(r=>r.id===_m.requestId):null;
+      _stillPending=!!(_r&&_r.status==='pending');
+    }else if(_m.type==='activity_verify_request'&&_m.requestId){
+      const _r=S.actVerifyRequests?S.actVerifyRequests.find(r=>r.id===_m.requestId):null;
+      _stillPending=!!(_r&&_r.status==='pending');
+    }
+    if(!_stillPending){
+      _m.read=true;
+      save();
+    }
     renderNavUsers();
+    try{_updateFamilyBtnBadge();}catch(_){}
   }
   _currentRecvMsg=null;
   document.getElementById('recv-msg-bg').style.display='none';
@@ -20792,8 +20901,16 @@ function readMsgFromList(fromId,msgIdx){
   const msgs=S.familyMessages?S.familyMessages.filter(m=>m.from===fromId&&m.to===currentUser):[];
   if(!msgs[msgIdx])return;
   const m=msgs[msgIdx];
-  m.read=true;
-  save();
+  // 승인 대기 중인 요청은 read 유지 (뱃지/리스트에서 사라지지 않도록)
+  let _pending=false;
+  if(m.type==='reward_request'&&m.requestId){
+    const _r=S.rewardRequests?S.rewardRequests.find(r=>r.id===m.requestId):null;
+    _pending=!!(_r&&_r.status==='pending');
+  }else if(m.type==='activity_verify_request'&&m.requestId){
+    const _r=S.actVerifyRequests?S.actVerifyRequests.find(r=>r.id===m.requestId):null;
+    _pending=!!(_r&&_r.status==='pending');
+  }
+  if(!_pending){m.read=true;save();}
   renderNavUsers();
 
   // Show detail view inside the same popup
@@ -21327,7 +21444,7 @@ function reallyGoTab(tab){
     themeMeta.content=isDark?'#1E293B':(TAB_COLORS[tab]||'#6366F1');
   }
 }
-function admTab(i){[0,1,2,3,4].forEach(j=>{document.getElementById('at-'+j).classList.toggle('on',j===i);document.getElementById('adm-p'+j).style.display=j===i?'block':'none';});if(i===2){renderAdmChildSelector();renderBadgeMgrList();}if(i===3){renderFamilyManager();renderNewMemberRoleSelect();renderAdmMemberPhotos();}if(i===4){showCacheInfo();showPushDebug();try{_refreshAiVerifyCntBadge();}catch(_){}}}
+function admTab(i){[0,1,2,3,4].forEach(j=>{document.getElementById('at-'+j).classList.toggle('on',j===i);document.getElementById('adm-p'+j).style.display=j===i?'block':'none';});if(i===2){renderAdmChildSelector();renderBadgeMgrList();}if(i===3){renderFamilyManager();renderNewMemberRoleSelect();renderAdmMemberPhotos();}if(i===4){showCacheInfo();showPushDebug();try{_refreshAiVerifyCntBadge();}catch(_){}try{_fiRenderAdminList();}catch(_){}}}
 function toggleAdvSettings(){
   const body=document.getElementById('adv-settings-body');
   const btn=document.getElementById('adv-settings-btn');
