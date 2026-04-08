@@ -9352,7 +9352,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0408t';
+const _APP_VERSION = 'v0408u';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -18947,6 +18947,9 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.2.3 (v0408u)',date:'2026-04-08',items:[
+    {type:'improve',text:'AI 검수 소개 팝업 디자인 개선 — 세련된 SVG 일러스트(그림자/그라데이션/필터), eyebrow 라벨, PRO 배지, 마지막 슬라이드에 "Pro 전용 기능" 안내 배너 추가'},
+  ]},
   {ver:'2.2.2 (v0408t)',date:'2026-04-08',items:[
     {type:'new',text:'신규 기능 소개 팝업 시스템 추가. 앱 진입 시 "AI 검수 기능" 소개 팝업이 3장 슬라이드(SVG 일러스트 포함)로 뜨고, 한 번 본 기능은 다시 노출되지 않음'},
   ]},
@@ -19513,105 +19516,148 @@ function _fiHasSeen(id){return !!_fiGetSeen()[id];}
 // 슬라이드 정의: {title, desc, svg}
 const _FEATURE_INTROS={
   'ai-verify-v1':{
-    title:'🤖 AI 검수 기능 출시!',
+    tier:'pro',
     slides:[
       {
-        title:'AI가 활동을 먼저 확인해요',
-        desc:'이제 활동을 완료하면 AI가 먼저 검수해드려요. 부모님이 자리에 없어도 바로 포인트를 받을 수 있어요!',
-        svg:`<svg viewBox="0 0 280 180" xmlns="http://www.w3.org/2000/svg">
+        eyebrow:'Smart Verification',
+        title:'AI가 먼저 확인해드려요',
+        desc:'활동을 완료하면 AI가 내용을 확인하고 자동으로 마일리지를 적립해요. 부모님이 바쁘셔도 기다리지 않아도 돼요.',
+        svg:`<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <linearGradient id="fi1bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#EEF2FF"/><stop offset="1" stop-color="#F5F3FF"/></linearGradient>
-            <linearGradient id="fi1ai" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6366F1"/><stop offset="1" stop-color="#8B5CF6"/></linearGradient>
+            <linearGradient id="s1bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F5F3FF"/><stop offset="1" stop-color="#FFFFFF"/></linearGradient>
+            <linearGradient id="s1ai" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6366F1"/><stop offset="1" stop-color="#A855F7"/></linearGradient>
+            <linearGradient id="s1card" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#FAFAFA"/></linearGradient>
+            <filter id="s1sh" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur in="SourceAlpha" stdDeviation="4"/><feOffset dy="2"/><feComponentTransfer><feFuncA type="linear" slope="0.12"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <radialGradient id="s1glow" cx="0.5" cy="0.5" r="0.6"><stop offset="0" stop-color="#A855F7" stop-opacity="0.35"/><stop offset="1" stop-color="#A855F7" stop-opacity="0"/></radialGradient>
           </defs>
-          <rect width="280" height="180" fill="url(#fi1bg)"/>
-          <!-- 활동 카드 -->
-          <rect x="24" y="48" width="110" height="84" rx="14" fill="#fff" stroke="#E5E7EB" stroke-width="1.5"/>
-          <circle cx="50" cy="76" r="14" fill="#FEF3C7"/>
-          <text x="50" y="81" font-size="16" text-anchor="middle">📖</text>
-          <rect x="72" y="68" width="52" height="6" rx="3" fill="#374151"/>
-          <rect x="72" y="80" width="40" height="5" rx="2.5" fill="#D1D5DB"/>
-          <rect x="36" y="104" width="86" height="18" rx="9" fill="#6366F1"/>
-          <text x="79" y="117" font-size="10" fill="#fff" text-anchor="middle" font-weight="700">완료하기</text>
-          <!-- 화살표 -->
-          <path d="M144 90 L168 90" stroke="#9CA3AF" stroke-width="2.5" stroke-linecap="round"/>
-          <path d="M162 84 L170 90 L162 96" stroke="#9CA3AF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-          <!-- AI 로봇 -->
-          <rect x="180" y="54" width="76" height="76" rx="18" fill="url(#fi1ai)"/>
-          <circle cx="202" cy="82" r="6" fill="#fff"/>
-          <circle cx="234" cy="82" r="6" fill="#fff"/>
-          <circle cx="202" cy="82" r="2.5" fill="#1F2937"/>
-          <circle cx="234" cy="82" r="2.5" fill="#1F2937"/>
-          <rect x="206" y="100" width="24" height="4" rx="2" fill="#fff"/>
-          <rect x="212" y="44" width="12" height="10" rx="2" fill="url(#fi1ai)"/>
-          <circle cx="218" cy="42" r="4" fill="#FCD34D"/>
-          <!-- 별 -->
-          <text x="168" y="44" font-size="14">✨</text>
-          <text x="256" y="44" font-size="14">✨</text>
+          <rect width="320" height="200" fill="url(#s1bg)"/>
+          <!-- ambient glow behind AI -->
+          <circle cx="224" cy="100" r="72" fill="url(#s1glow)"/>
+          <!-- activity card -->
+          <g filter="url(#s1sh)">
+            <rect x="40" y="52" width="128" height="96" rx="18" fill="url(#s1card)" stroke="#EEF2FF" stroke-width="1"/>
+          </g>
+          <rect x="56" y="68" width="32" height="32" rx="10" fill="#EEF2FF"/>
+          <path d="M64 84 L72 76 L80 84 L80 92 L64 92 Z" fill="#6366F1"/>
+          <rect x="68" y="84" width="8" height="8" fill="#fff"/>
+          <rect x="96" y="72" width="58" height="6" rx="3" fill="#111827"/>
+          <rect x="96" y="84" width="42" height="5" rx="2.5" fill="#D1D5DB"/>
+          <rect x="96" y="93" width="34" height="5" rx="2.5" fill="#E5E7EB"/>
+          <line x1="56" y1="112" x2="152" y2="112" stroke="#F3F4F6" stroke-width="1"/>
+          <rect x="56" y="122" width="96" height="14" rx="7" fill="#6366F1"/>
+          <text x="104" y="132" font-size="9" font-family="-apple-system,system-ui,sans-serif" fill="#fff" text-anchor="middle" font-weight="700">활동 완료</text>
+          <!-- connector dots -->
+          <circle cx="178" cy="100" r="1.8" fill="#C4B5FD"/>
+          <circle cx="186" cy="100" r="1.8" fill="#C4B5FD"/>
+          <circle cx="194" cy="100" r="1.8" fill="#A78BFA"/>
+          <circle cx="202" cy="100" r="1.8" fill="#8B5CF6"/>
+          <!-- AI orb -->
+          <g filter="url(#s1sh)">
+            <circle cx="236" cy="100" r="44" fill="url(#s1ai)"/>
+          </g>
+          <circle cx="236" cy="100" r="44" fill="none" stroke="#fff" stroke-width="1" stroke-opacity="0.3"/>
+          <circle cx="236" cy="100" r="36" fill="none" stroke="#fff" stroke-width="0.8" stroke-opacity="0.2"/>
+          <!-- AI face (minimal) -->
+          <circle cx="224" cy="96" r="3" fill="#fff"/>
+          <circle cx="248" cy="96" r="3" fill="#fff"/>
+          <path d="M224 112 Q236 118 248 112" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <!-- sparkles -->
+          <path d="M288 56 L290 62 L296 64 L290 66 L288 72 L286 66 L280 64 L286 62 Z" fill="#FCD34D"/>
+          <path d="M196 40 L197 44 L201 45 L197 46 L196 50 L195 46 L191 45 L195 44 Z" fill="#C4B5FD"/>
         </svg>`
       },
       {
-        title:'사진 또는 목소리로 인증',
-        desc:'카메라로 결과물을 찍거나, 목소리로 녹음해서 제출하면 AI가 내용을 확인해요. 간단하죠?',
-        svg:`<svg viewBox="0 0 280 180" xmlns="http://www.w3.org/2000/svg">
+        eyebrow:'Two Ways to Verify',
+        title:'사진 또는 목소리로 간편하게',
+        desc:'카메라로 결과물을 찍거나, 목소리로 읽어서 제출해요. AI가 내용을 이해하고 활동이 잘 됐는지 꼼꼼히 확인해드려요.',
+        svg:`<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <linearGradient id="fi2bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ECFEFF"/><stop offset="1" stop-color="#F0F9FF"/></linearGradient>
+            <linearGradient id="s2bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ECFEFF"/><stop offset="1" stop-color="#FFFFFF"/></linearGradient>
+            <linearGradient id="s2cam" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3B82F6"/><stop offset="1" stop-color="#06B6D4"/></linearGradient>
+            <linearGradient id="s2mic" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#EC4899"/><stop offset="1" stop-color="#F43F5E"/></linearGradient>
+            <linearGradient id="s2card" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#FAFAFA"/></linearGradient>
+            <filter id="s2sh" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur in="SourceAlpha" stdDeviation="4"/><feOffset dy="2"/><feComponentTransfer><feFuncA type="linear" slope="0.1"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
           </defs>
-          <rect width="280" height="180" fill="url(#fi2bg)"/>
-          <!-- 사진 카드 -->
-          <rect x="28" y="38" width="104" height="104" rx="18" fill="#fff" stroke="#E5E7EB" stroke-width="1.5"/>
-          <circle cx="80" cy="72" r="22" fill="#DBEAFE"/>
-          <rect x="66" y="62" width="28" height="20" rx="4" fill="#3B82F6"/>
-          <circle cx="80" cy="72" r="6" fill="#fff"/>
-          <circle cx="80" cy="72" r="3" fill="#3B82F6"/>
-          <rect x="88" y="60" width="6" height="3" rx="1" fill="#fff"/>
-          <text x="80" y="116" font-size="11" fill="#1F2937" text-anchor="middle" font-weight="700">사진 인증</text>
-          <text x="80" y="130" font-size="9" fill="#6B7280" text-anchor="middle">결과물 촬영</text>
-          <!-- 마이크 카드 -->
-          <rect x="148" y="38" width="104" height="104" rx="18" fill="#fff" stroke="#E5E7EB" stroke-width="1.5"/>
-          <circle cx="200" cy="72" r="22" fill="#FCE7F3"/>
-          <rect x="194" y="58" width="12" height="20" rx="6" fill="#EC4899"/>
-          <path d="M186 74 Q186 90 200 90 Q214 90 214 74" stroke="#EC4899" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-          <line x1="200" y1="90" x2="200" y2="96" stroke="#EC4899" stroke-width="2.5" stroke-linecap="round"/>
-          <text x="200" y="116" font-size="11" fill="#1F2937" text-anchor="middle" font-weight="700">음성 인증</text>
-          <text x="200" y="130" font-size="9" fill="#6B7280" text-anchor="middle">목소리 녹음</text>
-          <!-- 물결 -->
-          <circle cx="200" cy="72" r="30" fill="none" stroke="#EC4899" stroke-width="1" opacity=".3"/>
-          <circle cx="200" cy="72" r="36" fill="none" stroke="#EC4899" stroke-width="1" opacity=".15"/>
+          <rect width="320" height="200" fill="url(#s2bg)"/>
+          <!-- camera card -->
+          <g filter="url(#s2sh)">
+            <rect x="36" y="40" width="120" height="120" rx="22" fill="url(#s2card)" stroke="#E0F2FE" stroke-width="1"/>
+          </g>
+          <circle cx="96" cy="86" r="32" fill="#EFF6FF"/>
+          <circle cx="96" cy="86" r="32" fill="none" stroke="#DBEAFE" stroke-width="1"/>
+          <rect x="80" y="74" width="32" height="26" rx="6" fill="url(#s2cam)"/>
+          <rect x="86" y="70" width="12" height="6" rx="2" fill="url(#s2cam)"/>
+          <circle cx="96" cy="88" r="8" fill="#fff"/>
+          <circle cx="96" cy="88" r="5" fill="#3B82F6"/>
+          <circle cx="96" cy="88" r="2" fill="#1E3A8A"/>
+          <circle cx="106" cy="79" r="1.5" fill="#fff"/>
+          <rect x="56" y="128" width="80" height="6" rx="3" fill="#111827"/>
+          <rect x="68" y="140" width="56" height="4" rx="2" fill="#D1D5DB"/>
+          <text x="96" y="132" font-size="0" fill="transparent">사진</text>
+          <!-- mic card -->
+          <g filter="url(#s2sh)">
+            <rect x="164" y="40" width="120" height="120" rx="22" fill="url(#s2card)" stroke="#FCE7F3" stroke-width="1"/>
+          </g>
+          <circle cx="224" cy="86" r="32" fill="#FDF2F8"/>
+          <circle cx="224" cy="86" r="32" fill="none" stroke="#FBCFE8" stroke-width="1"/>
+          <!-- sound waves -->
+          <path d="M204 82 L204 90" stroke="#F9A8D4" stroke-width="2" stroke-linecap="round"/>
+          <path d="M208 78 L208 94" stroke="#F472B6" stroke-width="2" stroke-linecap="round"/>
+          <path d="M240 78 L240 94" stroke="#F472B6" stroke-width="2" stroke-linecap="round"/>
+          <path d="M244 82 L244 90" stroke="#F9A8D4" stroke-width="2" stroke-linecap="round"/>
+          <rect x="216" y="70" width="16" height="26" rx="8" fill="url(#s2mic)"/>
+          <path d="M212 88 Q212 102 224 102 Q236 102 236 88" stroke="url(#s2mic)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <line x1="224" y1="102" x2="224" y2="108" stroke="url(#s2mic)" stroke-width="2.5" stroke-linecap="round"/>
+          <rect x="220" y="108" width="8" height="2" rx="1" fill="url(#s2mic)"/>
+          <rect x="184" y="128" width="80" height="6" rx="3" fill="#111827"/>
+          <rect x="196" y="140" width="56" height="4" rx="2" fill="#D1D5DB"/>
         </svg>`
       },
       {
-        title:'즉시 포인트 또는 부모님 확인',
-        desc:'AI가 확실하면 바로 포인트 적립! 애매하면 부모님께 확인 요청이 자동으로 전달돼요. 하루 30회까지 사용할 수 있어요.',
-        svg:`<svg viewBox="0 0 280 180" xmlns="http://www.w3.org/2000/svg">
+        eyebrow:'Smart Decision',
+        title:'확실하면 즉시, 애매하면 부모님께',
+        desc:'AI가 확실하다고 판단하면 바로 마일리지가 적립돼요. 조금이라도 애매하면 부모님께 자동으로 확인 요청이 전달돼요. 하루 30회까지 사용할 수 있어요.',
+        svg:`<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <linearGradient id="fi3bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F0FDF4"/><stop offset="1" stop-color="#FEFCE8"/></linearGradient>
-            <linearGradient id="fi3ok" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#10B981"/><stop offset="1" stop-color="#059669"/></linearGradient>
-            <linearGradient id="fi3q" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F59E0B"/><stop offset="1" stop-color="#D97706"/></linearGradient>
+            <linearGradient id="s3bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F5F3FF"/><stop offset="1" stop-color="#FFFFFF"/></linearGradient>
+            <linearGradient id="s3ai" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6366F1"/><stop offset="1" stop-color="#8B5CF6"/></linearGradient>
+            <linearGradient id="s3ok" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#10B981"/><stop offset="1" stop-color="#059669"/></linearGradient>
+            <linearGradient id="s3q" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F59E0B"/><stop offset="1" stop-color="#F97316"/></linearGradient>
+            <linearGradient id="s3card" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#FAFAFA"/></linearGradient>
+            <filter id="s3sh" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur in="SourceAlpha" stdDeviation="4"/><feOffset dy="2"/><feComponentTransfer><feFuncA type="linear" slope="0.1"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
           </defs>
-          <rect width="280" height="180" fill="url(#fi3bg)"/>
-          <!-- AI 중앙 -->
-          <circle cx="140" cy="46" r="20" fill="#6366F1"/>
-          <circle cx="134" cy="44" r="3" fill="#fff"/>
-          <circle cx="146" cy="44" r="3" fill="#fff"/>
-          <rect x="134" y="52" width="12" height="3" rx="1.5" fill="#fff"/>
-          <text x="140" y="26" font-size="10" fill="#6366F1" text-anchor="middle" font-weight="800">AI 검수</text>
-          <!-- 분기 라인 -->
-          <path d="M140 66 Q140 82 78 96" stroke="#10B981" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-          <path d="M140 66 Q140 82 202 96" stroke="#F59E0B" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-          <!-- 즉시 승인 박스 -->
-          <rect x="14" y="96" width="128" height="68" rx="14" fill="#fff" stroke="#10B981" stroke-width="1.5"/>
-          <circle cx="38" cy="122" r="14" fill="url(#fi3ok)"/>
-          <path d="M31 122 L36 127 L45 117" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-          <text x="58" y="118" font-size="11" fill="#065F46" font-weight="800">즉시 승인</text>
-          <text x="58" y="132" font-size="9" fill="#047857">포인트 바로 적립</text>
-          <text x="58" y="146" font-size="9" fill="#047857">⚡ 빠름</text>
-          <!-- 부모 확인 박스 -->
-          <rect x="138" y="96" width="128" height="68" rx="14" fill="#fff" stroke="#F59E0B" stroke-width="1.5"/>
-          <circle cx="162" cy="122" r="14" fill="url(#fi3q)"/>
-          <text x="162" y="128" font-size="16" fill="#fff" text-anchor="middle" font-weight="800">?</text>
-          <text x="182" y="118" font-size="11" fill="#92400E" font-weight="800">부모 확인</text>
-          <text x="182" y="132" font-size="9" fill="#B45309">자동으로 전달</text>
-          <text x="182" y="146" font-size="9" fill="#B45309">👨‍👩 가족 알림</text>
+          <rect width="320" height="200" fill="url(#s3bg)"/>
+          <!-- AI hub at top center -->
+          <g filter="url(#s3sh)">
+            <circle cx="160" cy="42" r="24" fill="url(#s3ai)"/>
+          </g>
+          <circle cx="160" cy="42" r="24" fill="none" stroke="#fff" stroke-opacity="0.3" stroke-width="1"/>
+          <circle cx="153" cy="40" r="2.5" fill="#fff"/>
+          <circle cx="167" cy="40" r="2.5" fill="#fff"/>
+          <path d="M153 48 Q160 52 167 48" stroke="#fff" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          <!-- branch paths (dashed) -->
+          <path d="M148 62 Q96 72 76 98" stroke="#10B981" stroke-width="2" fill="none" stroke-linecap="round" stroke-dasharray="4 4"/>
+          <path d="M172 62 Q224 72 244 98" stroke="#F59E0B" stroke-width="2" fill="none" stroke-linecap="round" stroke-dasharray="4 4"/>
+          <!-- instant approval card -->
+          <g filter="url(#s3sh)">
+            <rect x="20" y="98" width="124" height="80" rx="18" fill="url(#s3card)" stroke="#D1FAE5" stroke-width="1"/>
+          </g>
+          <circle cx="44" cy="128" r="18" fill="url(#s3ok)"/>
+          <path d="M35 128 L41 134 L53 120" stroke="#fff" stroke-width="2.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <text x="68" y="122" font-size="12" font-family="-apple-system,system-ui,sans-serif" fill="#065F46" font-weight="800">즉시 적립</text>
+          <text x="68" y="136" font-size="9" font-family="-apple-system,system-ui,sans-serif" fill="#047857">바로 마일리지</text>
+          <rect x="68" y="146" width="52" height="14" rx="7" fill="#D1FAE5"/>
+          <text x="94" y="156" font-size="8" font-family="-apple-system,system-ui,sans-serif" fill="#065F46" text-anchor="middle" font-weight="700">AUTO</text>
+          <!-- parent review card -->
+          <g filter="url(#s3sh)">
+            <rect x="176" y="98" width="124" height="80" rx="18" fill="url(#s3card)" stroke="#FEF3C7" stroke-width="1"/>
+          </g>
+          <circle cx="200" cy="128" r="18" fill="url(#s3q)"/>
+          <text x="200" y="134" font-size="18" font-family="-apple-system,system-ui,sans-serif" fill="#fff" text-anchor="middle" font-weight="900">?</text>
+          <text x="224" y="122" font-size="12" font-family="-apple-system,system-ui,sans-serif" fill="#92400E" font-weight="800">부모님 확인</text>
+          <text x="224" y="136" font-size="9" font-family="-apple-system,system-ui,sans-serif" fill="#B45309">자동으로 전달</text>
+          <rect x="224" y="146" width="52" height="14" rx="7" fill="#FEF3C7"/>
+          <text x="250" y="156" font-size="8" font-family="-apple-system,system-ui,sans-serif" fill="#92400E" text-anchor="middle" font-weight="700">NOTIFY</text>
         </svg>`
       }
     ]
@@ -19622,13 +19668,25 @@ let _fiCurrentId=null,_fiIdx=0;
 function _fiRender(){
   const intro=_FEATURE_INTROS[_fiCurrentId];if(!intro)return;
   const slides=intro.slides,n=slides.length,s=slides[_fiIdx];
+  const isLast=_fiIdx===n-1;
+  const proBadge=intro.tier==='pro'?`<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;background:linear-gradient(135deg,#0F172A,#1E293B);color:#FCD34D;font-size:10px;font-weight:900;letter-spacing:.6px;margin-left:6px;box-shadow:0 1px 3px rgba(0,0,0,.12)"><svg width="9" height="9" viewBox="0 0 24 24" fill="#FCD34D"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8 5.8 21.3l2.4-7.4L2 9.4h7.6z"/></svg>PRO</span>`:'';
+  const eyebrow=s.eyebrow||'NEW FEATURE';
+  const proNotice=(isLast&&intro.tier==='pro')?`<div style="margin-top:12px;padding:12px 14px;border-radius:14px;background:linear-gradient(135deg,#FEF3C7,#FDE68A);border:1px solid #FCD34D;display:flex;align-items:flex-start;gap:10px">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="#D97706" style="flex-shrink:0;margin-top:1px"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8 5.8 21.3l2.4-7.4L2 9.4h7.6z"/></svg>
+    <div style="font-size:12px;line-height:1.55;color:#78350F"><b style="color:#451A03;font-weight:900">Pro 전용 기능</b>이에요. 현재 베타 기간 동안 모든 사용자가 사용할 수 있으며, 정식 출시 시 Pro 등급 사용자에게만 제공될 예정이에요.</div>
+  </div>`:'';
   const wrap=document.getElementById('fi-slides');
   if(wrap){
-    wrap.innerHTML=`<div style="padding:20px 20px 8px">
-      <div style="font-size:11px;font-weight:800;color:#8B5CF6;letter-spacing:.5px;margin-bottom:4px">NEW · ${_fiIdx+1} / ${n}</div>
-      <div style="font-size:19px;font-weight:900;color:var(--tx);margin-bottom:14px;line-height:1.3">${s.title}</div>
-      <div style="border-radius:16px;overflow:hidden;background:#F9FAFB;margin-bottom:14px">${s.svg}</div>
-      <div style="font-size:13.5px;color:var(--tx2);line-height:1.6;margin-bottom:8px">${s.desc}</div>
+    wrap.innerHTML=`<div style="padding:24px 22px 10px">
+      <div style="display:flex;align-items:center;margin-bottom:10px">
+        <span style="font-size:10.5px;font-weight:800;color:#8B5CF6;letter-spacing:.8px;text-transform:uppercase">${eyebrow}</span>
+        ${proBadge}
+        <span style="margin-left:auto;font-size:11px;font-weight:700;color:var(--tx3)">${_fiIdx+1} / ${n}</span>
+      </div>
+      <div style="font-size:20px;font-weight:900;color:var(--tx);margin-bottom:16px;line-height:1.3;letter-spacing:-0.3px">${s.title}</div>
+      <div style="border-radius:20px;overflow:hidden;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.04)">${s.svg}</div>
+      <div style="font-size:13.5px;color:var(--tx2);line-height:1.65">${s.desc}</div>
+      ${proNotice}
     </div>`;
   }
   const dots=document.getElementById('fi-dots');
