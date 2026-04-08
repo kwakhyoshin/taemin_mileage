@@ -4748,6 +4748,15 @@ requestAnimationFrame(function(){
         <input id="act-maxday" type="number" value="1" min="0" max="99" placeholder="1">
       </div>
       <div class="field">
+        <label>완료 조건</label>
+        <div style="font-size:13px;color:var(--tx3);margin-bottom:6px" id="verify-mode-hint">누르면 바로 마일리지가 적립돼요</div>
+        <div class="sel-row" id="verify-mode-row">
+          <div class="sel-btn on" data-v="auto" onclick="pickVerifyMode(this)">자동</div>
+          <div class="sel-btn" data-v="parent" onclick="pickVerifyMode(this)">부모 승인</div>
+          <div class="sel-btn" data-v="ai" onclick="pickVerifyMode(this)">🤖 AI 검수 <span style="font-size:9px;background:linear-gradient(135deg,#f59e0b,#f97316);color:#fff;padding:1px 5px;border-radius:5px;margin-left:2px;font-weight:800;letter-spacing:.3px">PRO</span></div>
+        </div>
+      </div>
+      <div class="field">
         <label>완료 횟수 초기화 주기</label>
         <div style="font-size:13px;color:var(--tx3);margin-bottom:6px">언제 완료 횟수가 리셋될까요?</div>
         <div class="sel-row" id="cycle-row">
@@ -4783,6 +4792,22 @@ requestAnimationFrame(function(){
     <div class="sheet-foot">
       <button class="s-btn canc" onclick="closeModal('m-act')">취소</button>
       <button class="s-btn conf" id="act-save-btn" onclick="saveActivity()">저장하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: 완료 조건 PRO 안내 스텁 (PR 2/3에서 실제 기능 구현 예정) -->
+<div class="overlay" id="m-verify-pro">
+  <div class="sheet" style="max-width:340px">
+    <div class="sheet-body" style="text-align:center;padding:28px 24px 12px">
+      <div style="font-size:52px;margin-bottom:10px" id="m-verify-pro-icon">🤖✨</div>
+      <div style="font-size:18px;font-weight:800;margin-bottom:10px" id="m-verify-pro-title">곧 출시될 기능이에요</div>
+      <div style="font-size:14px;color:var(--tx2);line-height:1.6" id="m-verify-pro-desc">
+        활동 완료 검수 기능을 준비 중이에요.<br>조금만 기다려주세요!
+      </div>
+    </div>
+    <div class="sheet-foot">
+      <button class="s-btn conf" onclick="closeModal('m-verify-pro')">알겠어요</button>
     </div>
   </div>
 </div>
@@ -9255,7 +9280,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0408a';
+const _APP_VERSION = 'v0408b';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -17008,10 +17033,42 @@ function openActForm(id){
   document.querySelectorAll('#act-days-row .day-btn').forEach(b=>{
     b.classList.toggle('on',hasDays&&a.days.includes(parseInt(b.dataset.d)));
   });
+  // 완료 조건 (verifyMode) — 기본 'auto'. 기존 활동은 verifyMode 없으므로 'auto'로 폴백
+  const vm=(a&&a.verifyMode)?a.verifyMode:'auto';
+  document.querySelectorAll('#verify-mode-row .sel-btn').forEach(b=>b.classList.toggle('on',b.dataset.v===vm));
+  const vmHint=document.getElementById('verify-mode-hint');
+  if(vmHint){
+    vmHint.textContent=vm==='parent'?'부모가 확인한 뒤에 마일리지가 적립돼요 (곧 출시)':vm==='ai'?'AI가 사진을 보고 판정해줘요 (곧 출시)':'누르면 바로 마일리지가 적립돼요';
+  }
   document.getElementById('act-save-btn').textContent=a?'저장하기':'추가하기';
   // 자녀 다중선택 체크박스 (자녀 2명 이상 + 새 활동 추가 시)
   _renderFormChildChecks('act',id);
   openModal('m-act');
+}
+// 완료 조건 라디오 선택 (PR 1: UI 스캐폴드 — auto만 실제 동작, parent/ai는 스텁)
+function pickVerifyMode(btn){
+  const v=btn.dataset.v;
+  if(v==='ai'||v==='parent'){
+    // 스텁: "곧 출시" 모달 표시, 선택은 유지하지 않음
+    const icon=document.getElementById('m-verify-pro-icon');
+    const title=document.getElementById('m-verify-pro-title');
+    const desc=document.getElementById('m-verify-pro-desc');
+    if(v==='ai'){
+      if(icon)icon.textContent='🤖✨';
+      if(title)title.textContent='AI 검수는 곧 출시돼요';
+      if(desc)desc.innerHTML='활동을 완료하면 AI가 사진을 보고<br>통과/반려를 대신 판정해줄 거예요.<br><span style="color:var(--tx3);font-size:12px">(PRO 전용 기능)</span>';
+    }else{
+      if(icon)icon.textContent='👨‍👩‍👧';
+      if(title)title.textContent='부모 승인은 곧 출시돼요';
+      if(desc)desc.innerHTML='아이가 완료 버튼을 누르면<br>부모님이 확인한 뒤에 마일리지가 적립돼요.';
+    }
+    openModal('m-verify-pro');
+    return;
+  }
+  document.querySelectorAll('#verify-mode-row .sel-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  const hint=document.getElementById('verify-mode-hint');
+  if(hint)hint.textContent='누르면 바로 마일리지가 적립돼요';
 }
 function pickCycle(btn){
   document.querySelectorAll('#cycle-row .sel-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');
@@ -17080,7 +17137,9 @@ function saveActivity(){
     document.querySelectorAll('#act-days-row .day-btn.on').forEach(b=>days.push(parseInt(b.dataset.d)));
     if(days.length===0||days.length===7)days=null; // 전체 선택이면 null
   }
-  const actData={emoji,name,desc,pts,maxDay,cycle,days};
+  // 완료 조건 — PR 1 UI 스캐폴드. parent/ai 선택 시 스텁 모달로 auto로 되돌아감
+  const verifyMode=document.querySelector('#verify-mode-row .sel-btn.on')?.dataset.v||'auto';
+  const actData={emoji,name,desc,pts,maxDay,cycle,days,verifyMode};
   const targetKids=_getFormCheckedChildren('act');
   const curAdm=_admViewChildId||getViewedMemberId();
   // 관리자가 보고 있는 자녀의 acts (memberData에서 직접 수정)
@@ -17776,6 +17835,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.0.6 (v0408b)',date:'2026-04-08',items:[{type:'feat',text:'[AI 검수 Step 1 — PR 1/3] 활동 만들기 화면에 "완료 조건" 섹션 추가 (자동/부모 승인/🤖 AI 검수 라디오 3종). 현재는 UI 스캐폴드 단계 — 자동만 동작하고 나머지는 "곧 출시" 안내 모달 표시'}]},
   {ver:'2.0.5 (v0408a)',date:'2026-04-08',items:[{type:'fix',text:'챌린지 곤충 땀방울 제거'}]},
   {ver:'2.0.4 (v0407zz)',date:'2026-04-08',items:[{type:'fix',text:'챌린지 곤충 땀방울을 무당벌레 캐릭터(걷기 애니) 스타일로 재구현 — 회전되지 않는 별도 오버레이로 머리 위에 하늘색 물방울이 똑똑 떨어지는 모양'}]},
   {ver:'2.0.3 (v0407zy)',date:'2026-04-08',items:[{type:'fix',text:'챌린지 곤충 땀방울이 실제로 안 보이던 문제 수정 — SVG에 sweat 요소 추가 + 가시성·애니메이션 강화'}]},
@@ -21918,7 +21978,7 @@ Object.assign(window, {
   giveBonus, deductPts, togAct, togActHome, delAct, delRwd,
   togSetting, saveSettings, togBdaySetting, saveBdaySettings, saveGreetingMode, saveGreetingCustom,
   resetToday, resetAll, backupData, restoreData,
-  openActForm, saveActivity, pickCycle, toggleDaysMode, toggleDay,
+  openActForm, saveActivity, pickCycle, pickVerifyMode, toggleDaysMode, toggleDay,
   openRwdForm, saveReward, setGoalT, setRwdSale, initActDrag, initRwdDrag,
   openEP, closeEP, epSearch, pickE, showEpCat, switchEpCat,
   setPeriod, pk, startChangePIN, lockAdmin,
