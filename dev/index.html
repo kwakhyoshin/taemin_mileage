@@ -3874,12 +3874,7 @@ requestAnimationFrame(function(){
 <div class="scr" id="s-log">
   <div class="log-header-sticky">
     <div style="display:flex;align-items:center;justify-content:space-between">
-      <h2 style="margin:0;display:flex;align-items:center;gap:8px">활동 기록하기 <svg class="hdr-ico" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><path d="M9 15l2 2 4-4"/></svg>
-        <span id="log-edit-actions" style="display:none;gap:6px;margin-left:4px">
-          <button id="log-edit-toggle-btn" onclick="toggleLogEditMode()" style="background:rgba(255,255,255,.22);color:#fff;border:0;border-radius:14px;padding:5px 12px;font-size:12px;font-weight:800;cursor:pointer;backdrop-filter:blur(8px)">편집</button>
-          <button onclick="openActForm()" style="background:#fff;color:#6366F1;border:0;border-radius:14px;padding:5px 12px;font-size:12px;font-weight:800;cursor:pointer">+ 추가</button>
-        </span>
-      </h2>
+      <h2 style="margin:0">활동 기록하기 <svg class="hdr-ico" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><path d="M9 15l2 2 4-4"/></svg></h2>
       <div id="log-child-selector" style="display:none;flex-shrink:0"><div id="log-child-btns"></div></div>
     </div>
     <p>탭해서 마일리지를 받아요</p>
@@ -3889,7 +3884,7 @@ requestAnimationFrame(function(){
       <div class="hdr-stat"><div class="hdr-stat-num" id="log-today-pts">0</div><div class="hdr-stat-lbl">보유 마일리지</div></div>
     </div>
   </div>
-  <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg> 모든 활동</div>
+  <div class="sec" style="display:flex;align-items:center;justify-content:space-between"><span><svg class="sec-ico" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg> 모든 활동</span><span id="log-edit-actions" style="display:none;gap:6px"><button id="log-edit-toggle-btn" onclick="toggleLogEditMode()" style="background:var(--cd);color:var(--tx);border:1px solid var(--bd);border-radius:14px;padding:5px 12px;font-size:12px;font-weight:800;cursor:pointer">편집</button><button onclick="openActForm()" style="background:#6366F1;color:#fff;border:0;border-radius:14px;padding:5px 12px;font-size:12px;font-weight:800;cursor:pointer">+ 추가</button></span></div>
   <div class="log-wrap" id="log-list"></div>
 </div>
 
@@ -3897,12 +3892,7 @@ requestAnimationFrame(function(){
 <div class="scr" id="s-rwd">
   <div class="rwd-header-sticky">
     <div style="display:flex;align-items:center;justify-content:space-between">
-      <h2 style="font-size:26px;font-weight:900;color:#fff;margin:0;transition:font-size .25s;display:flex;align-items:center;gap:8px">보상 상점 <svg class="hdr-ico" viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg>
-        <span id="rwd-edit-actions" style="display:none;gap:6px;margin-left:4px">
-          <button id="rwd-edit-toggle-btn" onclick="toggleRwdEditMode()" style="background:rgba(255,255,255,.22);color:#fff;border:0;border-radius:14px;padding:5px 12px;font-size:12px;font-weight:800;cursor:pointer;backdrop-filter:blur(8px)">편집</button>
-          <button onclick="openRwdForm()" style="background:#fff;color:#EC4899;border:0;border-radius:14px;padding:5px 12px;font-size:12px;font-weight:800;cursor:pointer">+ 추가</button>
-        </span>
-      </h2>
+      <h2 style="font-size:26px;font-weight:900;color:#fff;margin:0;transition:font-size .25s">보상 상점 <svg class="hdr-ico" viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg></h2>
       <div id="rwd-child-selector" style="display:none;flex-shrink:0"><div id="rwd-child-btns"></div></div>
     </div>
     <p style="font-size:14px;color:rgba(255,255,255,.85);margin-top:2px;font-weight:600">모은 마일리지로 교환해요</p>
@@ -3914,7 +3904,7 @@ requestAnimationFrame(function(){
       <div class="hdr-stat"><div class="hdr-stat-num" id="rwd-hdr-owned">0</div><div class="hdr-stat-lbl">보유 보상</div></div>
     </div>
   </div>
-  <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg> 교환 가능한 보상</div>
+  <div class="sec" style="display:flex;align-items:center;justify-content:space-between"><span><svg class="sec-ico" viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg> 교환 가능한 보상</span><span id="rwd-edit-actions" style="display:none;gap:6px"><button id="rwd-edit-toggle-btn" onclick="toggleRwdEditMode()" style="background:var(--cd);color:var(--tx);border:1px solid var(--bd);border-radius:14px;padding:5px 12px;font-size:12px;font-weight:800;cursor:pointer">편집</button><button onclick="openRwdForm()" style="background:#EC4899;color:#fff;border:0;border-radius:14px;padding:5px 12px;font-size:12px;font-weight:800;cursor:pointer">+ 추가</button></span></div>
   <div class="rwd-grid" id="rwd-grid"></div>
   <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg> 보유 보상 목록</div>
   <div id="rwd-inventory"></div>
@@ -9290,7 +9280,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0408c';
+const _APP_VERSION = 'v0408d';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -18033,6 +18023,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.0.8 (v0408d)',date:'2026-04-08',items:[{type:'fix',text:'부모용 [편집][+ 추가] 버튼을 히어로 헤더에서 컨텐츠 영역의 섹션 제목("모든 활동"/"교환 가능한 보상") 우측으로 이동'}]},
   {ver:'2.0.7 (v0408c)',date:'2026-04-08',items:[{type:'feat',text:'부모 계정에서 활동/보상 탭 헤더에 [편집][+ 추가] 버튼 추가. 편집 모드에서 드래그로 순서 변경 + 항목 탭 시 관리자 화면과 동일한 편집창이 떠요. (관리자 화면을 거치지 않고 바로 활동/보상 관리 가능)'}]},
   {ver:'2.0.6 (v0408b)',date:'2026-04-08',items:[{type:'feat',text:'[AI 검수 Step 1 — PR 1/3] 활동 만들기 화면에 "완료 조건" 섹션 추가 (자동/부모 승인/🤖 AI 검수 라디오 3종). 현재는 UI 스캐폴드 단계 — 자동만 동작하고 나머지는 "곧 출시" 안내 모달 표시'}]},
   {ver:'2.0.5 (v0408a)',date:'2026-04-08',items:[{type:'fix',text:'챌린지 곤충 땀방울 제거'}]},
