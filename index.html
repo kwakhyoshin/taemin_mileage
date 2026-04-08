@@ -3884,7 +3884,7 @@ requestAnimationFrame(function(){
       <div class="hdr-stat"><div class="hdr-stat-num" id="log-today-pts">0</div><div class="hdr-stat-lbl">보유 마일리지</div></div>
     </div>
   </div>
-  <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg> 모든 활동</div>
+  <div class="sec" style="display:flex;align-items:center;justify-content:space-between"><span><svg class="sec-ico" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg> 모든 활동</span><span id="log-edit-actions" style="display:none;gap:8px;align-items:center"><button id="log-edit-toggle-btn" onclick="toggleLogEditMode()" title="편집" aria-label="편집" style="display:inline-flex;align-items:center;gap:5px;background:var(--cd);color:var(--tx);border:1px solid var(--bd);border-radius:999px;padding:6px 12px;font-size:12px;font-weight:800;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.04)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>편집</button><button onclick="openActForm()" title="추가" aria-label="추가" style="display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,#6366F1,#8B5CF6);color:#fff;border:0;border-radius:999px;padding:6px 13px 6px 11px;font-size:12px;font-weight:800;cursor:pointer;box-shadow:0 2px 6px rgba(99,102,241,.35)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>추가</button></span></div>
   <div class="log-wrap" id="log-list"></div>
 </div>
 
@@ -3904,7 +3904,7 @@ requestAnimationFrame(function(){
       <div class="hdr-stat"><div class="hdr-stat-num" id="rwd-hdr-owned">0</div><div class="hdr-stat-lbl">보유 보상</div></div>
     </div>
   </div>
-  <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg> 교환 가능한 보상</div>
+  <div class="sec" style="display:flex;align-items:center;justify-content:space-between"><span><svg class="sec-ico" viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg> 교환 가능한 보상</span><span id="rwd-edit-actions" style="display:none;gap:8px;align-items:center"><button id="rwd-edit-toggle-btn" onclick="toggleRwdEditMode()" title="편집" aria-label="편집" style="display:inline-flex;align-items:center;gap:5px;background:var(--cd);color:var(--tx);border:1px solid var(--bd);border-radius:999px;padding:6px 12px;font-size:12px;font-weight:800;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.04)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>편집</button><button onclick="openRwdForm()" title="추가" aria-label="추가" style="display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,#EC4899,#F472B6);color:#fff;border:0;border-radius:999px;padding:6px 13px 6px 11px;font-size:12px;font-weight:800;cursor:pointer;box-shadow:0 2px 6px rgba(236,72,153,.35)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>추가</button></span></div>
   <div class="rwd-grid" id="rwd-grid"></div>
   <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg> 보유 보상 목록</div>
   <div id="rwd-inventory"></div>
@@ -4390,6 +4390,11 @@ requestAnimationFrame(function(){
           <div class="adm-row-l"><div class="adm-row-nm">활동 이력 초기화</div><div class="adm-row-sub">마일리지·활동기록·보상이력 초기화 (계정 유지)</div></div>
           <button class="btn-sm rd" onclick="resetAll()">삭제</button>
         </div>
+        <div class="divider"></div>
+        <div class="adm-row">
+          <div class="adm-row-l"><div class="adm-row-nm">AI 검수 일일 카운터 리셋</div><div class="adm-row-sub">오늘 사용한 AI 검수 횟수를 0으로 초기화 <span id="ai-verify-cnt-badge" style="color:var(--tx2);font-weight:700"></span></div></div>
+          <button class="btn-sm" onclick="resetAiVerifyDaily()">리셋</button>
+        </div>
       </div>
     </div>
     <!-- ── 앱 캐시 ── -->
@@ -4748,6 +4753,24 @@ requestAnimationFrame(function(){
         <input id="act-maxday" type="number" value="1" min="0" max="99" placeholder="1">
       </div>
       <div class="field">
+        <label>완료 조건</label>
+        <div style="font-size:13px;color:var(--tx3);margin-bottom:6px" id="verify-mode-hint">누르면 바로 마일리지가 적립돼요</div>
+        <div class="sel-row" id="verify-mode-row">
+          <div class="sel-btn on" data-v="auto" onclick="pickVerifyMode(this)">자동</div>
+          <div class="sel-btn" data-v="parent" onclick="pickVerifyMode(this)">부모 승인</div>
+          <div class="sel-btn" data-v="ai" onclick="pickVerifyMode(this)"><svg viewBox="0 0 32 32" width="18" height="18" style="vertical-align:-4px;margin-right:3px" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="milyBtnG" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#818CF8"/><stop offset="50%" stop-color="#C084FC"/><stop offset="100%" stop-color="#F472B6"/></linearGradient></defs><circle cx="16" cy="17" r="11" fill="url(#milyBtnG)"/><circle cx="12" cy="16" r="1.8" fill="#fff"/><circle cx="20" cy="16" r="1.8" fill="#fff"/><path d="M11.5 20.5 Q16 24 20.5 20.5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" fill="none"/><path d="M16 3 l1.2 2.8 2.8 0.4 -2 2 0.5 2.8 -2.5 -1.4 -2.5 1.4 0.5 -2.8 -2 -2 2.8 -0.4z" fill="url(#milyBtnG)"/></svg>AI 검수 <span style="font-size:9px;background:linear-gradient(135deg,#f59e0b,#f97316);color:#fff;padding:1px 5px;border-radius:5px;margin-left:2px;font-weight:800;letter-spacing:.3px">PRO</span></div>
+        </div>
+        <div id="verify-ai-prompt-wrap" style="display:none;margin-top:8px">
+          <label style="font-size:12px;color:var(--tx3);font-weight:700">AI 검증 방식</label>
+          <div class="sel-row" id="verify-media-row" style="margin:4px 0 8px">
+            <div class="sel-btn on" data-media="photo" onclick="pickVerifyMedia(this)">📷 사진</div>
+            <div class="sel-btn" data-media="voice" onclick="pickVerifyMedia(this)">🎤 음성</div>
+          </div>
+          <label style="font-size:12px;color:var(--tx3);font-weight:700">AI 검증 지시문</label>
+          <textarea id="verify-ai-prompt" rows="2" placeholder="예: 양치 직후의 깨끗한 입 안 사진인지 확인해줘" style="width:100%;padding:10px;border:1px solid var(--bd);border-radius:10px;background:var(--cd);color:var(--tx);font-size:13px;font-family:inherit;resize:vertical"></textarea>
+        </div>
+      </div>
+      <div class="field">
         <label>완료 횟수 초기화 주기</label>
         <div style="font-size:13px;color:var(--tx3);margin-bottom:6px">언제 완료 횟수가 리셋될까요?</div>
         <div class="sel-row" id="cycle-row">
@@ -4783,6 +4806,66 @@ requestAnimationFrame(function(){
     <div class="sheet-foot">
       <button class="s-btn canc" onclick="closeModal('m-act')">취소</button>
       <button class="s-btn conf" id="act-save-btn" onclick="saveActivity()">저장하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: 완료 조건 PRO 안내 스텁 (PR 2/3에서 실제 기능 구현 예정) -->
+<div class="overlay" id="m-verify-pro">
+  <div class="sheet" style="max-width:340px">
+    <div class="sheet-body" style="text-align:center;padding:28px 24px 12px">
+      <div style="font-size:52px;margin-bottom:10px" id="m-verify-pro-icon">🤖✨</div>
+      <div style="font-size:18px;font-weight:800;margin-bottom:10px" id="m-verify-pro-title">곧 출시될 기능이에요</div>
+      <div style="font-size:14px;color:var(--tx2);line-height:1.6" id="m-verify-pro-desc">
+        활동 완료 검수 기능을 준비 중이에요.<br>조금만 기다려주세요!
+      </div>
+    </div>
+    <div class="sheet-foot">
+      <button class="s-btn conf" onclick="closeModal('m-verify-pro')">알겠어요</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: AI 검수 (v0408f) -->
+<div class="overlay" id="m-ai-verify" style="justify-content:center">
+  <div class="sheet">
+    <div class="sheet-head" style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--bd)">
+      <div style="font-size:16px;font-weight:800">🤖 AI 검수</div>
+      <div id="m-ai-verify-quota" style="font-size:12px;color:var(--tx3);font-weight:700">🤖 -</div>
+    </div>
+    <div class="sheet-body" style="padding:18px">
+      <div id="m-ai-verify-bubble" style="background:var(--cd);padding:12px 14px;border-radius:14px;font-size:14px;line-height:1.5;margin-bottom:14px">사진을 보여주세요!</div>
+      <div id="m-ai-verify-stage-pick" style="text-align:center">
+        <label for="m-ai-verify-file" style="display:inline-block;cursor:pointer;background:#6366F1;color:#fff;padding:14px 22px;border-radius:14px;font-weight:800;font-size:15px">📷 사진 찍기</label>
+        <input type="file" id="m-ai-verify-file" accept="image/*" capture="environment" style="display:none" onchange="_aiVerifyOnFile(event)">
+      </div>
+      <div id="m-ai-verify-stage-pick-voice" style="display:none;text-align:center">
+        <div style="font-size:13px;color:var(--tx3);margin-bottom:10px">최대 10초까지 녹음할 수 있어요</div>
+        <button id="m-ai-verify-rec-btn" onclick="_aiVerifyToggleRecord()" style="display:inline-flex;align-items:center;gap:8px;background:#EF4444;color:#fff;padding:14px 24px;border:0;border-radius:999px;font-weight:800;font-size:15px;cursor:pointer;box-shadow:0 4px 12px rgba(239,68,68,.35)">
+          <span id="m-ai-verify-rec-dot" style="width:12px;height:12px;border-radius:50%;background:#fff;display:inline-block"></span>
+          <span id="m-ai-verify-rec-label">녹음 시작</span>
+        </button>
+        <div id="m-ai-verify-rec-timer" style="font-size:12px;color:var(--tx3);margin-top:8px;font-weight:700">00:00 / 00:10</div>
+      </div>
+      <div id="m-ai-verify-stage-preview" style="display:none;text-align:center">
+        <img id="m-ai-verify-img" style="display:none;max-width:100%;max-height:240px;border-radius:12px;margin-bottom:10px">
+        <div id="m-ai-verify-voice-info" style="display:none;background:var(--cd);padding:16px;border-radius:12px;margin-bottom:10px;font-size:14px;color:var(--tx2);font-weight:700">🎤 녹음 완료 (<span id="m-ai-verify-voice-dur">-</span>초)</div>
+        <audio id="m-ai-verify-audio" style="display:none"></audio>
+        <div style="display:flex;gap:8px">
+          <button onclick="_aiVerifyRetake()" style="flex:1;padding:12px;background:var(--cd);color:var(--tx);border:1px solid var(--bd);border-radius:12px;font-weight:800;cursor:pointer">다시</button>
+          <button id="m-ai-verify-submit-btn" onclick="_aiVerifySubmit()" style="flex:1;padding:12px;background:#22C55E;color:#fff;border:0;border-radius:12px;font-weight:800;cursor:pointer">검수 받기</button>
+        </div>
+      </div>
+      <div id="m-ai-verify-stage-loading" style="display:none;text-align:center;padding:24px 0">
+        <div style="font-size:36px;margin-bottom:8px">🤖</div>
+        <div style="font-size:14px;color:var(--tx2)">마일리가 확인하고 있어요...</div>
+      </div>
+      <div id="m-ai-verify-stage-result" style="display:none;text-align:center">
+        <div id="m-ai-verify-result-icon" style="font-size:48px;margin-bottom:8px"></div>
+        <div id="m-ai-verify-result-title" style="font-size:18px;font-weight:800;margin-bottom:6px"></div>
+        <div id="m-ai-verify-result-comment" style="font-size:14px;color:var(--tx2);margin-bottom:14px;line-height:1.5"></div>
+        <button onclick="closeModal('m-ai-verify');_aiVerifyOnModalClose()" style="width:100%;padding:12px;background:#6366F1;color:#fff;border:0;border-radius:12px;font-weight:800;cursor:pointer">닫기</button>
+      </div>
     </div>
   </div>
 </div>
@@ -9255,7 +9338,48 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'prod'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0408a';
+const _APP_VERSION = 'v0408s';
+// ── 화면 디버그 패널 (dev만) ──────────────────────────────
+if(_ENV==='dev'){(function(){
+  const panel=document.createElement('div');
+  panel.id='dbg-panel';
+  panel.style.cssText='position:fixed;left:8px;right:8px;top:env(safe-area-inset-top,8px);max-height:40vh;background:rgba(0,0,0,.88);color:#0f0;font:11px/1.35 ui-monospace,Menlo,monospace;padding:8px 10px 8px;border-radius:8px;z-index:99999;overflow:auto;display:none;white-space:pre-wrap;word-break:break-all;margin-top:8px';
+  const tgl=document.createElement('button');
+  tgl.textContent='🐛';
+  tgl.style.cssText='position:fixed;right:8px;top:calc(env(safe-area-inset-top,8px) + 8px);width:36px;height:36px;border-radius:999px;border:0;background:#111;color:#0f0;font-size:18px;z-index:100000;box-shadow:0 2px 8px rgba(0,0,0,.4)';
+  tgl.onclick=()=>{panel.style.display=panel.style.display==='none'?'block':'none';};
+  const clr=document.createElement('button');
+  clr.textContent='✕';
+  clr.style.cssText='position:absolute;right:6px;top:4px;background:transparent;border:0;color:#f88;font-size:14px';
+  clr.onclick=(e)=>{e.stopPropagation();panel.querySelectorAll('.dbg-line').forEach(x=>x.remove());};
+  panel.appendChild(clr);
+  const add=(type,args)=>{
+    try{
+      const line=document.createElement('div');
+      line.className='dbg-line';
+      const colors={log:'#0f0',info:'#6cf',warn:'#fc6',error:'#f66'};
+      line.style.color=colors[type]||'#0f0';
+      const t=new Date().toTimeString().slice(0,8);
+      const msg=Array.from(args).map(a=>{
+        if(a instanceof Error)return a.name+': '+a.message+(a.stack?'\n'+a.stack.split('\n').slice(0,3).join('\n'):'');
+        if(typeof a==='object'){try{return JSON.stringify(a);}catch(_){return String(a);}}
+        return String(a);
+      }).join(' ');
+      line.textContent='['+t+'] '+msg;
+      panel.appendChild(line);
+      panel.scrollTop=panel.scrollHeight;
+    }catch(_){}
+  };
+  ['log','info','warn','error'].forEach(k=>{
+    const orig=console[k].bind(console);
+    console[k]=function(){try{add(k,arguments);}catch(_){}orig.apply(console,arguments);};
+  });
+  window.addEventListener('error',(ev)=>add('error',['[window.error]',ev.message,ev.filename+':'+ev.lineno]));
+  window.addEventListener('unhandledrejection',(ev)=>add('error',['[unhandledrejection]',ev.reason&&(ev.reason.message||ev.reason)]));
+  document.addEventListener('DOMContentLoaded',()=>{document.body.appendChild(panel);document.body.appendChild(tgl);});
+  if(document.body){document.body.appendChild(panel);document.body.appendChild(tgl);}
+  window._dbgPanel={show:()=>{panel.style.display='block';},hide:()=>{panel.style.display='none';}};
+})();}
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -11774,6 +11898,47 @@ function renderHomeGrid(){
 
 function renderLogList(){
   const el=document.getElementById('log-list');
+  // 부모 전용 [편집][+추가] 버튼 표시 토글
+  const _logBtns=document.getElementById('log-edit-actions');
+  if(_logBtns)_logBtns.style.display=isCaregiverUser()?'inline-flex':'none';
+  // 부모 편집 모드: 관리자 화면과 동일한 manage-item 리스트로 렌더
+  if(_logEditMode&&isCaregiverUser()){
+    const _admMs=_getAdmMemberData();
+    const _editActs=(_admMs&&_admMs.acts)?_admMs.acts:S.acts;
+    const _toggleBtn=document.getElementById('log-edit-toggle-btn');
+    if(_toggleBtn){_toggleBtn.textContent='완료';_toggleBtn.style.background='rgba(52,211,153,.95)';}
+    if(!_editActs.length){
+      el.innerHTML='<div style="padding:60px 20px;text-align:center;color:var(--tx3);font-size:14px">활동이 없어요.<br>+ 추가 버튼으로 만들어보세요</div>';
+      return;
+    }
+    el.innerHTML='<div style="padding:8px 0">'+_editActs.map(a=>{
+      return `<div class="manage-item" data-edit-actid="${a.id}" style="padding:12px 14px;margin:0 14px 8px;background:var(--cd);border-radius:14px;cursor:pointer">
+        <div class="drag-handle" style="touch-action:none"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="4" y1="8" x2="20" y2="8"/><line x1="4" y1="16" x2="20" y2="16"/></svg></div>
+        <div class="m-emoji">${escapeHtml(a.emoji)}</div>
+        <div class="m-info" style="flex:1;min-width:0">
+          <div class="m-nm" style="font-size:15px">${escapeHtml(a.name)}</div>
+          <div style="display:flex;gap:4px;margin-top:4px;flex-wrap:wrap">
+            <span class="adm-pill">${a.pts}M · ${a.maxDay===0?'무제한':a.maxDay+'회/'+(CYCLE_LABEL[a.cycle]||a.cycle)}</span>
+            ${!a.active?'<span class="adm-pill adm-pill-off">비활성</span>':''}
+          </div>
+        </div>
+        <div style="display:flex;gap:4px;flex-shrink:0">
+          <button class="icon-btn" onclick="event.stopPropagation();openActForm('${a.id}')" style="width:36px;height:36px;min-width:36px;min-height:36px"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg></button>
+        </div>
+      </div>`;
+    }).join('')+'</div>';
+    el.querySelectorAll('.manage-item[data-edit-actid]').forEach(it=>{
+      it.addEventListener('click',(e)=>{
+        if(e.target.closest('.drag-handle'))return;
+        if(e.target.closest('.icon-btn'))return;
+        openActForm(it.dataset.editActid);
+      });
+    });
+    initLogEditDrag();
+    return;
+  }
+  const _toggleBtn=document.getElementById('log-edit-toggle-btn');
+  if(_toggleBtn){_toggleBtn.textContent='편집';_toggleBtn.style.background='rgba(255,255,255,.22)';}
   const acts=S.acts.filter(a=>{
     if(!a.active||!isAvailableToday(a))return false;
     return true;
@@ -11795,6 +11960,7 @@ function renderLogList(){
     const cycleLabel=CYCLE_LABEL[a.cycle]||a.cycle;
     const countLabel=max>0?`${done}/${max}회`:'';
     const stickerHTML=renderStickersForLog(a.id);
+    const _pendingVerify=_hasPendingActVerify(a.id);
     const _isDone=exhausted||(max===0&&done>0);
     const _stampHTML=_isDone?'<div class="log-done-stamp"><svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="29" stroke="#34D399" stroke-width="3.5" stroke-dasharray="5 2.5" opacity=".9"/><circle cx="32" cy="32" r="21" stroke="#34D399" stroke-width="2.5" opacity=".7"/><text x="32" y="30" text-anchor="middle" font-size="14" font-weight="900" fill="#10B981" font-family="Noto Sans KR,sans-serif" opacity=".95">완료</text><text x="32" y="43" text-anchor="middle" font-size="9" font-weight="800" fill="#10B981" font-family="sans-serif" letter-spacing="2" opacity=".75">DONE</text></svg></div>':'';
     const _lgColor=exhausted?'rgba(16,185,129,.12)':cls.includes('partial')?'rgba(245,158,11,.12)':'rgba(99,102,241,.12)';
@@ -11811,6 +11977,7 @@ function renderLogList(){
         <div class="log-meta">
           <span class="chip ${cc}">${cycleLabel}</span>
           ${countLabel?`<span class="chip c-yw">${countLabel}</span>`:''}
+          ${_pendingVerify?`<span class="chip" style="background:#FDE68A;color:#78350F">⏳ 승인 대기</span>`:''}
           ${timer?`<span class="log-timer"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-1px;margin-right:2px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${timer}</span>`:''}
         </div>
         ${_stampHTML}
@@ -12324,6 +12491,49 @@ window.renderBadgeViewHistory=renderBadgeViewHistory;
 
 function renderRewardGrid(){
   const rg=document.getElementById('rwd-grid');
+  // 부모 전용 [편집][+추가] 버튼 표시 토글
+  const _rwdBtns=document.getElementById('rwd-edit-actions');
+  if(_rwdBtns)_rwdBtns.style.display=isCaregiverUser()?'inline-flex':'none';
+  // 부모 편집 모드: 관리자 화면과 동일한 manage-item 리스트로 렌더
+  if(_rwdEditMode&&isCaregiverUser()){
+    const _admMs=_getAdmMemberData();
+    const _editRwds=(_admMs&&_admMs.rwds)?_admMs.rwds:S.rwds;
+    const _toggleBtn=document.getElementById('rwd-edit-toggle-btn');
+    if(_toggleBtn){_toggleBtn.textContent='완료';_toggleBtn.style.background='rgba(52,211,153,.95)';}
+    if(!_editRwds.length){
+      rg.innerHTML='<div style="padding:60px 20px;text-align:center;color:var(--tx3);font-size:14px;grid-column:1/-1">보상이 없어요.<br>+ 추가 버튼으로 만들어보세요</div>';
+      return;
+    }
+    rg.innerHTML='<div style="padding:8px 0;grid-column:1/-1">'+_editRwds.map(r=>{
+      const hasSale=r.sale&&r.sale.percent&&(!r.sale.endDate||new Date(r.sale.endDate+'T23:59:59')>=new Date());
+      return `<div class="manage-item" data-edit-rwdid="${r.id}" style="padding:12px 14px;margin:0 14px 8px;background:var(--cd);border-radius:14px;cursor:pointer">
+        <div class="drag-handle" style="touch-action:none"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="4" y1="8" x2="20" y2="8"/><line x1="4" y1="16" x2="20" y2="16"/></svg></div>
+        <div class="m-emoji">${escapeHtml(r.emoji)}</div>
+        <div class="m-info" style="flex:1;min-width:0">
+          <div class="m-nm" style="font-size:15px">${escapeHtml(r.name)}${r.goal?' 🎯':''}</div>
+          <div style="display:flex;gap:4px;margin-top:4px;flex-wrap:wrap">
+            <span class="adm-pill">${r.pts.toLocaleString()}M</span>
+            <span class="adm-pill ${r.closed?'adm-pill-rd':'adm-pill-gn'}">${r.closed?'종료':'운영중'}</span>
+            ${hasSale?`<span class="adm-pill adm-pill-rd">${r.sale.percent}% 할인</span>`:''}
+          </div>
+        </div>
+        <div style="display:flex;gap:4px;flex-shrink:0">
+          <button class="icon-btn" onclick="event.stopPropagation();openRwdForm('${r.id}')" style="width:36px;height:36px;min-width:36px;min-height:36px"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg></button>
+        </div>
+      </div>`;
+    }).join('')+'</div>';
+    rg.querySelectorAll('.manage-item[data-edit-rwdid]').forEach(it=>{
+      it.addEventListener('click',(e)=>{
+        if(e.target.closest('.drag-handle'))return;
+        if(e.target.closest('.icon-btn'))return;
+        openRwdForm(it.dataset.editRwdid);
+      });
+    });
+    initRwdEditDrag();
+    return;
+  }
+  const _toggleBtn=document.getElementById('rwd-edit-toggle-btn');
+  if(_toggleBtn){_toggleBtn.textContent='편집';_toggleBtn.style.background='rgba(255,255,255,.22)';}
   const rwds=S.rwds;
   // Empty state
   if(rwds.length===0){rg.innerHTML=renderEmptyState('rwds');return;}
@@ -14053,6 +14263,110 @@ function renderAdmActList(){
   initActDrag();
 }
 
+// ── 부모 인라인 편집 모드 (활동/보상 탭) ────────────────────────
+let _logEditMode=false;
+let _rwdEditMode=false;
+function toggleLogEditMode(){
+  if(!isCaregiverUser())return;
+  _logEditMode=!_logEditMode;
+  renderLogList();
+}
+function toggleRwdEditMode(){
+  if(!isCaregiverUser())return;
+  _rwdEditMode=!_rwdEditMode;
+  renderRewardGrid();
+}
+let _logEditDragIdx=null;
+function initLogEditDrag(){
+  const container=document.getElementById('log-list');
+  if(!container)return;
+  const items=container.querySelectorAll('.manage-item');
+  items.forEach((item,idx)=>{
+    const handle=item.querySelector('.drag-handle');
+    if(!handle)return;
+    handle.addEventListener('touchstart',function(e){
+      e.preventDefault();_logEditDragIdx=idx;item.classList.add('dragging');
+    },{passive:false});
+    handle.addEventListener('touchmove',function(e){
+      e.preventDefault();
+      const touch=e.touches[0];
+      container.querySelectorAll('.manage-item').forEach(el=>el.classList.remove('drag-over'));
+      const target=document.elementFromPoint(touch.clientX,touch.clientY);
+      const targetItem=target?.closest('.manage-item');
+      if(targetItem&&targetItem!==item)targetItem.classList.add('drag-over');
+    },{passive:false});
+    handle.addEventListener('touchend',function(e){
+      const touch=e.changedTouches[0];
+      item.classList.remove('dragging');
+      container.querySelectorAll('.manage-item').forEach(el=>el.classList.remove('drag-over'));
+      const target=document.elementFromPoint(touch.clientX,touch.clientY);
+      const targetItem=target?.closest('.manage-item');
+      if(targetItem&&targetItem!==item){
+        const items2=container.querySelectorAll('.manage-item');
+        let targetIdx=-1;
+        items2.forEach((el,i)=>{if(el===targetItem)targetIdx=i;});
+        if(targetIdx>=0&&_logEditDragIdx!==null&&_logEditDragIdx!==targetIdx){
+          const curAdm=_admViewChildId||getViewedMemberId();
+          const _ms=getMemberState(curAdm);
+          const _acts=(_ms&&_ms.acts)?_ms.acts:S.acts;
+          const moved=_acts.splice(_logEditDragIdx,1)[0];
+          _acts.splice(targetIdx,0,moved);
+          if(_globalDataOwner===curAdm&&_acts!==S.acts){S.acts=[..._acts];}
+          save();renderLogList();renderHomeGrid();
+          try{if(typeof renderAdmActList==='function')renderAdmActList();}catch(_){}
+          toast('📋 순서가 변경됐어요');
+        }
+      }
+      _logEditDragIdx=null;
+    });
+  });
+}
+let _rwdEditDragIdx=null;
+function initRwdEditDrag(){
+  const container=document.getElementById('rwd-grid');
+  if(!container)return;
+  const items=container.querySelectorAll('.manage-item');
+  items.forEach((item,idx)=>{
+    const handle=item.querySelector('.drag-handle');
+    if(!handle)return;
+    handle.addEventListener('touchstart',function(e){
+      e.preventDefault();_rwdEditDragIdx=idx;item.classList.add('dragging');
+    },{passive:false});
+    handle.addEventListener('touchmove',function(e){
+      e.preventDefault();
+      const touch=e.touches[0];
+      container.querySelectorAll('.manage-item').forEach(el=>el.classList.remove('drag-over'));
+      const target=document.elementFromPoint(touch.clientX,touch.clientY);
+      const targetItem=target?.closest('.manage-item');
+      if(targetItem&&targetItem!==item)targetItem.classList.add('drag-over');
+    },{passive:false});
+    handle.addEventListener('touchend',function(e){
+      const touch=e.changedTouches[0];
+      item.classList.remove('dragging');
+      container.querySelectorAll('.manage-item').forEach(el=>el.classList.remove('drag-over'));
+      const target=document.elementFromPoint(touch.clientX,touch.clientY);
+      const targetItem=target?.closest('.manage-item');
+      if(targetItem&&targetItem!==item){
+        const items2=container.querySelectorAll('.manage-item');
+        let targetIdx=-1;
+        items2.forEach((el,i)=>{if(el===targetItem)targetIdx=i;});
+        if(targetIdx>=0&&_rwdEditDragIdx!==null&&_rwdEditDragIdx!==targetIdx){
+          const curAdm=_admViewChildId||getViewedMemberId();
+          const _ms=getMemberState(curAdm);
+          const _rwds=(_ms&&_ms.rwds)?_ms.rwds:S.rwds;
+          const moved=_rwds.splice(_rwdEditDragIdx,1)[0];
+          _rwds.splice(targetIdx,0,moved);
+          if(_globalDataOwner===curAdm&&_rwds!==S.rwds){S.rwds=[..._rwds];}
+          save();renderRewardGrid();
+          try{if(typeof renderAdmRwdList==='function')renderAdmRwdList();}catch(_){}
+          toast('🎁 보상 순서가 변경됐어요');
+        }
+      }
+      _rwdEditDragIdx=null;
+    });
+  });
+}
+
 // ── ACTIVITY DRAG & DROP ────────────────────────
 let _dragIdx=null;
 function initActDrag(){
@@ -14249,9 +14563,25 @@ function doAct(id){
   }
   _doActCore(id);
 }
+// v0408e: 부모 승인 대기 요청 조회 헬퍼
+function _hasPendingActVerify(actId){
+  if(!S.actVerifyRequests)return false;
+  const _owner=_globalDataOwner||currentUser;
+  return S.actVerifyRequests.some(r=>r.actId===actId&&r.status==='pending'&&r.forChild===_owner);
+}
 function _doActCore(id){
   const a=S.acts.find(x=>x.id===id);
   if(!a||!canDo(a))return;
+  // v0408e: 부모 승인 모드 — 실제 완료 대신 요청 생성
+  if(a.verifyMode==='parent'){
+    requestActivityVerify(a);
+    return;
+  }
+  // v0408f: AI 검수 모드 — 사진 촬영 모달 오픈
+  if(a.verifyMode==='ai'){
+    openAiVerifyModal(a);
+    return;
+  }
   markDone(a);
 
   // streak — 오늘 할 일을 모두 완료한 경우에만 연속일수 증가
@@ -15693,6 +16023,721 @@ window.refundReward=refundReward;
 window.approveRewardRequest=approveRewardRequest;
 window.rejectRewardRequest=rejectRewardRequest;
 
+// ── ACTIVITY VERIFY (부모 승인) — v0408e ───────────────────────────
+function requestActivityVerify(a){
+  if(_hasPendingActVerify(a.id)){
+    toast('이미 승인 대기 중인 요청이 있어요');
+    return;
+  }
+  if(!S.actVerifyRequests)S.actVerifyRequests=[];
+  if(!S.familyMessages)S.familyMessages=[];
+  const _isCaregiver=isCaregiverUser();
+  const _reqChildId=(_isCaregiver&&viewingChildId)?viewingChildId:(_globalDataOwner||currentUser);
+  const _effectiveFrom=_reqChildId;
+  const adminMembers=[];
+  if(S.familyMeta?.members){
+    for(const [mid,m] of Object.entries(S.familyMeta.members)){
+      const isChild=m.type==='child'||m.role==='child';
+      if(isChild)continue;
+      const isCg=m.type==='caregiver'||m.type==='parent'||m.role==='caregiver'||m.role==='parent';
+      if(m.isAdmin||isCg){
+        if(!_isCaregiver&&mid===currentUser)continue;
+        adminMembers.push(mid);
+      }
+    }
+  }
+  const reqId='avr_'+Date.now();
+  S.actVerifyRequests.push({
+    id:reqId,
+    actId:a.id,
+    actName:a.name,
+    actEmoji:a.emoji,
+    actPts:a.pts,
+    fromUser:_effectiveFrom,
+    forChild:_reqChildId,
+    toUsers:adminMembers,
+    status:'pending',
+    requestedAt:Date.now(),
+    approvedBy:null,
+    approvedAt:null
+  });
+  const _childName=MEMBERS[_reqChildId]?.name||_reqChildId;
+  const _msgText=`✋ ${_childName}이(가) "${a.name}" 활동 완료 승인을 요청했어요!`;
+  for(const adminId of adminMembers){
+    S.familyMessages.push({
+      from:_effectiveFrom,
+      to:adminId,
+      text:_msgText,
+      ts:Date.now(),
+      read:false,
+      type:'activity_verify_request',
+      requestId:reqId,
+      actId:a.id
+    });
+  }
+  save();renderAll();
+  toast(`📲 "${a.name}" 승인 요청을 보냈어요!`);
+  setTimeout(()=>{try{checkNewMessages();_updateFamilyBtnBadge();}catch(e){}},600);
+}
+
+function approveActivityVerifyRequest(reqId,approver){
+  if(!S.actVerifyRequests)return;
+  const req=S.actVerifyRequests.find(x=>x.id===reqId);
+  if(!req||req.status!=='pending')return;
+  const a=S.acts.find(x=>x.id===req.actId);
+  if(!a){toast('활동을 찾을 수 없어요');return;}
+  req.status='approved';
+  req.approvedBy=approver;
+  req.approvedAt=Date.now();
+  // 자녀 데이터 기준으로 실제 완료 크레딧 — memberData 분리 모드 고려
+  const _childId=req.forChild||req.fromUser;
+  const _applyCredit=(target)=>{
+    if(!target)return;
+    if(!target.actDone)target.actDone={};
+    const t=todayStr();
+    const rec=target.actDone[a.id];
+    let cur=0;
+    if(rec){
+      if(a.cycle==='daily'&&rec.date===t)cur=rec.count||0;
+      else if(a.cycle==='weekly'&&rec.date>=weekStart())cur=rec.count||0;
+      else if(a.cycle==='monthly'&&rec.date.slice(0,7)===monthStr())cur=rec.count||0;
+      else if(a.cycle==='none')cur=rec.count||0;
+    }
+    target.actDone[a.id]={date:t,count:cur+1};
+    target.pts=(target.pts||0)+(a.pts||0);
+    target.totalDone=(target.totalDone||0)+1;
+    if(!target.log)target.log=[];
+    target.log.unshift({id:'l_'+Date.now(),emoji:a.emoji,name:a.name,pts:a.pts,ts:Date.now(),actId:a.id,user:_childId,verifyBy:approver});
+    if(target.log.length>300)target.log=target.log.slice(0,300);
+  };
+  // 현재 뷰가 해당 자녀면 S에 직접 반영
+  if((_globalDataOwner||currentUser)===_childId){
+    _applyCredit(S);
+  }
+  // 독립모드 memberData도 반영
+  if(S.memberData&&S.memberData[_childId]){
+    _applyCredit(S.memberData[_childId]);
+  }
+  // 메시지
+  if(!S.familyMessages)S.familyMessages=[];
+  const approverName=MEMBERS[approver]?.name||approver;
+  S.familyMessages.push({
+    from:approver,
+    to:req.fromUser,
+    text:`✅ ${approverName}가 "${req.actName}" 활동을 승인했어요! (+${req.actPts} 마일리지)`,
+    ts:Date.now(),
+    read:false,
+    type:'activity_verify_approval',
+    requestId:reqId
+  });
+  save();renderAll();
+  toast(`✅ "${req.actName}" 승인 완료!`);
+}
+
+function rejectActivityVerifyRequest(reqId,rejector){
+  if(!S.actVerifyRequests)return;
+  const req=S.actVerifyRequests.find(x=>x.id===reqId);
+  if(!req||req.status!=='pending')return;
+  req.status='rejected';
+  req.approvedBy=rejector;
+  req.approvedAt=Date.now();
+  if(!S.familyMessages)S.familyMessages=[];
+  const rejectorName=MEMBERS[rejector]?.name||rejector;
+  S.familyMessages.push({
+    from:rejector,
+    to:req.fromUser,
+    text:`❌ ${rejectorName}가 "${req.actName}" 활동을 반려했어요.`,
+    ts:Date.now(),
+    read:false,
+    type:'activity_verify_rejection',
+    requestId:reqId
+  });
+  save();renderAll();
+  toast(`❌ "${req.actName}" 반려됨.`);
+}
+window.requestActivityVerify=requestActivityVerify;
+window.approveActivityVerifyRequest=approveActivityVerifyRequest;
+window.rejectActivityVerifyRequest=rejectActivityVerifyRequest;
+
+// ── AI VERIFY (v0408f) ────────────────────────────────────────────
+// v0408g: /api/verify 는 아직 Vercel 배포 전 → 기존 /api/proxy (Anthropic 포워더) 재사용
+const AI_VERIFY_ENDPOINT='https://mily-proxy.vercel.app/api/proxy';
+const AI_VERIFY_DAILY_LIMIT=30;
+let _aiVerifyCtx=null; // {act, media, imageDataUrl, imageMime, audioDataUrl, audioMime}
+const AI_VOICE_ENDPOINT='https://mily-proxy.vercel.app/api/audio';
+const AI_VOICE_MAX_SECONDS=10;
+let _aiVoiceRecorder=null;
+let _aiVoiceChunks=[];
+let _aiVoiceTimer=null;
+let _aiVoiceStartTs=0;
+let _aiVoiceMime='audio/webm';
+
+function _aiVerifyTodayKey(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function _aiVerifyGetCount(){
+  if(!S.aiVerifyDaily)return 0;
+  const k=_aiVerifyTodayKey();
+  return (S.aiVerifyDaily[k]||0);
+}
+function _aiVerifyIncCount(){
+  if(!S.aiVerifyDaily)S.aiVerifyDaily={};
+  const k=_aiVerifyTodayKey();
+  S.aiVerifyDaily[k]=(S.aiVerifyDaily[k]||0)+1;
+}
+
+function openAiVerifyModal(a){
+  if(!a)return;
+  const media=(a.verifyConfig&&a.verifyConfig.media==='voice')?'voice':'photo';
+  _aiVerifyCtx={act:a,media,imageDataUrl:null,imageMime:null,audioDataUrl:null,audioMime:null};
+  // Reset stages
+  document.getElementById('m-ai-verify-stage-pick').style.display=(media==='photo')?'block':'none';
+  document.getElementById('m-ai-verify-stage-pick-voice').style.display=(media==='voice')?'block':'none';
+  document.getElementById('m-ai-verify-stage-preview').style.display='none';
+  document.getElementById('m-ai-verify-stage-loading').style.display='none';
+  document.getElementById('m-ai-verify-stage-result').style.display='none';
+  document.getElementById('m-ai-verify-img').style.display=(media==='photo')?'block':'none';
+  const _vi=document.getElementById('m-ai-verify-voice-info');if(_vi)_vi.style.display='none';
+  const fileEl=document.getElementById('m-ai-verify-file');
+  if(fileEl)fileEl.value='';
+  // Reset record button label
+  const recLbl=document.getElementById('m-ai-verify-rec-label');
+  if(recLbl)recLbl.textContent='녹음 시작';
+  const recDot=document.getElementById('m-ai-verify-rec-dot');
+  if(recDot)recDot.style.animation='';
+  const recTimer=document.getElementById('m-ai-verify-rec-timer');
+  if(recTimer)recTimer.textContent='00:00 / 00:'+String(AI_VOICE_MAX_SECONDS).padStart(2,'0');
+  // Title
+  const head=document.querySelector('#m-ai-verify .sheet-head > div:first-child');
+  if(head)head.textContent=(media==='voice')?'🎤 AI 음성 검수':'🤖 AI 검수';
+  // Bubble + quota
+  const _prompt=(a.verifyConfig&&a.verifyConfig.prompt)?a.verifyConfig.prompt
+    :(media==='voice'?`"${a.name}"을(를) 기쁜 목소리로 외쳐줘!`:`"${a.name}"을(를) 잘 했는지 사진으로 보여줘!`);
+  document.getElementById('m-ai-verify-bubble').textContent=_prompt;
+  const cnt=_aiVerifyGetCount();
+  const q=document.getElementById('m-ai-verify-quota');
+  if(q){
+    q.textContent='🤖 '+cnt+'/'+AI_VERIFY_DAILY_LIMIT;
+    q.style.color=(cnt>=AI_VERIFY_DAILY_LIMIT)?'#9CA3AF':(cnt>=AI_VERIFY_DAILY_LIMIT*0.8?'#F59E0B':'var(--tx3)');
+  }
+  openModal('m-ai-verify');
+}
+
+// v0408j: 녹음 토글
+async function _aiVerifyToggleRecord(){
+  console.log('[voice] toggle called, ctx=',!!_aiVerifyCtx,'state=',_aiVoiceRecorder&&_aiVoiceRecorder.state);
+  if(window._dbgPanel)window._dbgPanel.show();
+  if(!_aiVerifyCtx)return;
+  if(_aiVoiceRecorder&&_aiVoiceRecorder.state==='recording'){
+    console.log('[voice] stopping');
+    try{_aiVoiceRecorder.stop();}catch(e){console.error('[voice] stop err',e);}
+    return;
+  }
+  // 시작
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
+    console.error('[voice] no mediaDevices');
+    toast('이 기기는 마이크를 지원하지 않아요');return;
+  }
+  let stream;
+  try{
+    console.log('[voice] requesting mic...');
+    stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    console.log('[voice] mic granted, tracks=',stream.getAudioTracks().length);
+  }
+  catch(e){console.error('[voice] getUserMedia fail',e);toast('마이크 권한이 필요해요: '+(e.message||e.name));return;}
+  // 지원 mime 선택
+  let mime='audio/webm';
+  if(window.MediaRecorder){
+    const cands=['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/aac','audio/ogg'];
+    for(const c of cands){if(MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(c)){mime=c;break;}}
+  }
+  _aiVoiceMime=mime.split(';')[0];
+  console.log('[voice] chosen mime=',mime,'-> _aiVoiceMime=',_aiVoiceMime);
+  _aiVoiceChunks=[];
+  try{_aiVoiceRecorder=new MediaRecorder(stream,{mimeType:mime});console.log('[voice] MediaRecorder ok');}
+  catch(e){console.warn('[voice] MediaRecorder with mime fail, fallback',e);_aiVoiceRecorder=new MediaRecorder(stream);_aiVoiceMime='audio/webm';}
+  _aiVoiceRecorder.ondataavailable=(ev)=>{console.log('[voice] chunk',ev.data&&ev.data.size);if(ev.data&&ev.data.size>0)_aiVoiceChunks.push(ev.data);};
+  _aiVoiceRecorder.onerror=(ev)=>{console.error('[voice] recorder error',ev.error||ev);};
+  _aiVoiceRecorder.onstop=async()=>{
+    console.log('[voice] onstop, chunks=',_aiVoiceChunks.length);
+    try{stream.getTracks().forEach(t=>t.stop());}catch(e){}
+    if(_aiVoiceTimer){clearInterval(_aiVoiceTimer);_aiVoiceTimer=null;}
+    const blob=new Blob(_aiVoiceChunks,{type:_aiVoiceMime});
+    console.log('[voice] raw blob size=',blob.size,'type=',_aiVoiceMime);
+    if(blob.size<500){toast('녹음이 너무 짧아요');_aiVerifyResetVoiceUI();return;}
+    // v0408k: webm/mp4는 Gemini가 직접 지원하지 않음 → AudioContext로 디코드 후 WAV로 재인코딩
+    // v0408l: iOS Safari는 user gesture 밖에서 AudioContext가 suspended → resume() 추가, decodeAudioData callback fallback
+    try{
+      const arrBuf=await blob.arrayBuffer();
+      console.log('[voice] arrBuf bytes=',arrBuf.byteLength);
+      const AC=window.AudioContext||window.webkitAudioContext;
+      if(!AC){console.error('[voice] no AudioContext');toast('이 기기는 AudioContext 미지원');_aiVerifyResetVoiceUI();return;}
+      const ac=new AC();
+      console.log('[voice] AC state=',ac.state,'sr=',ac.sampleRate);
+      try{if(ac.state==='suspended'){await ac.resume();console.log('[voice] AC resumed ->',ac.state);}}catch(er){console.warn('[voice] AC resume fail',er);}
+      let decoded;
+      try{
+        decoded=await ac.decodeAudioData(arrBuf.slice(0));
+        console.log('[voice] decode promise ok');
+      }catch(e1){
+        console.warn('[voice] decode promise fail, trying callback',e1);
+        // 구형 Safari callback-style fallback
+        decoded=await new Promise((res,rej)=>{
+          try{ac.decodeAudioData(arrBuf.slice(0),res,rej);}catch(e2){rej(e2);}
+        });
+        console.log('[voice] decode callback ok');
+      }
+      console.log('[voice] decoded ch=',decoded.numberOfChannels,'sr=',decoded.sampleRate,'len=',decoded.length);
+      // 모노, 16kHz로 다운샘플 (Gemini 음성 인식에 충분, 용량 절감)
+      const targetRate=16000;
+      const srcRate=decoded.sampleRate;
+      const srcCh=decoded.numberOfChannels;
+      // 모노로 합치기
+      let monoSrc;
+      if(srcCh===1){monoSrc=decoded.getChannelData(0);}
+      else{
+        const L=decoded.getChannelData(0),R=decoded.getChannelData(1);
+        monoSrc=new Float32Array(L.length);
+        for(let i=0;i<L.length;i++)monoSrc[i]=(L[i]+R[i])*0.5;
+      }
+      // 선형 보간 다운샘플링
+      const ratio=srcRate/targetRate;
+      const outLen=Math.floor(monoSrc.length/ratio);
+      const pcm=new Float32Array(outLen);
+      for(let i=0;i<outLen;i++){
+        const idx=i*ratio;
+        const i0=Math.floor(idx),i1=Math.min(i0+1,monoSrc.length-1);
+        const t=idx-i0;
+        pcm[i]=monoSrc[i0]*(1-t)+monoSrc[i1]*t;
+      }
+      try{ac.close();}catch(e){}
+      // WAV 헤더 작성 (16-bit PCM, mono, 16kHz)
+      const bytesPerSample=2;
+      const dataSize=pcm.length*bytesPerSample;
+      const buf=new ArrayBuffer(44+dataSize);
+      const dv=new DataView(buf);
+      const w=(o,s)=>{for(let i=0;i<s.length;i++)dv.setUint8(o+i,s.charCodeAt(i));};
+      w(0,'RIFF');dv.setUint32(4,36+dataSize,true);w(8,'WAVE');
+      w(12,'fmt ');dv.setUint32(16,16,true);dv.setUint16(20,1,true);
+      dv.setUint16(22,1,true);dv.setUint32(24,targetRate,true);
+      dv.setUint32(28,targetRate*bytesPerSample,true);
+      dv.setUint16(32,bytesPerSample,true);dv.setUint16(34,16,true);
+      w(36,'data');dv.setUint32(40,dataSize,true);
+      let off=44;
+      for(let i=0;i<pcm.length;i++){
+        let s=Math.max(-1,Math.min(1,pcm[i]));
+        dv.setInt16(off,s<0?s*0x8000:s*0x7FFF,true);
+        off+=2;
+      }
+      const wavBlob=new Blob([buf],{type:'audio/wav'});
+      const durSec=(outLen/targetRate).toFixed(1);
+      console.log('[voice] WAV encoded',{srcRate,srcCh,outLen,bytes:wavBlob.size,durSec});
+      // iOS PWA는 WAV 재생 호환성 이슈 → 재생 UI 없이 "녹음 완료 N초" 텍스트로 대체
+      const info=document.getElementById('m-ai-verify-voice-info');
+      const durEl=document.getElementById('m-ai-verify-voice-dur');
+      if(info)info.style.display='block';
+      if(durEl)durEl.textContent=durSec;
+      // 업로드용 base64 변환
+      const fr=new FileReader();
+      fr.onload=()=>{
+        _aiVerifyCtx.audioDataUrl=fr.result;
+        _aiVerifyCtx.audioMime='audio/wav';
+        console.log('[voice] upload b64 len=',fr.result.length);
+        document.getElementById('m-ai-verify-stage-pick-voice').style.display='none';
+        document.getElementById('m-ai-verify-stage-preview').style.display='block';
+      };
+      fr.onerror=(e)=>{console.error('[voice] FileReader error',e);toast('녹음 변환 실패');_aiVerifyResetVoiceUI();};
+      fr.readAsDataURL(wavBlob);
+    }catch(e){
+      console.error('[voice] WAV encode fail',e);
+      toast('녹음 변환 실패: '+(e.message||e));
+      _aiVerifyResetVoiceUI();
+    }
+  };
+  _aiVoiceRecorder.start();
+  _aiVoiceStartTs=Date.now();
+  document.getElementById('m-ai-verify-rec-label').textContent='녹음 중지';
+  const dot=document.getElementById('m-ai-verify-rec-dot');
+  if(dot)dot.style.animation='pulse 1s ease-in-out infinite';
+  _aiVoiceTimer=setInterval(()=>{
+    const sec=Math.floor((Date.now()-_aiVoiceStartTs)/1000);
+    const t=document.getElementById('m-ai-verify-rec-timer');
+    if(t)t.textContent=String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0')+' / 00:'+String(AI_VOICE_MAX_SECONDS).padStart(2,'0');
+    if(sec>=AI_VOICE_MAX_SECONDS){
+      try{_aiVoiceRecorder.stop();}catch(e){}
+    }
+  },200);
+}
+function _aiVerifyResetVoiceUI(){
+  document.getElementById('m-ai-verify-rec-label').textContent='녹음 시작';
+  const dot=document.getElementById('m-ai-verify-rec-dot');
+  if(dot)dot.style.animation='';
+  const t=document.getElementById('m-ai-verify-rec-timer');
+  if(t)t.textContent='00:00 / 00:'+String(AI_VOICE_MAX_SECONDS).padStart(2,'0');
+}
+window._aiVerifyToggleRecord=_aiVerifyToggleRecord;
+
+function _aiVerifyOnFile(ev){
+  const f=ev.target.files&&ev.target.files[0];
+  if(!f||!_aiVerifyCtx)return;
+  if(f.size>10*1024*1024){toast('사진이 너무 커요 (10MB 이하)');return;}
+  // Resize via canvas to max 1024
+  const reader=new FileReader();
+  reader.onload=function(e){
+    const img=new Image();
+    img.onload=function(){
+      const max=1024;
+      let w=img.width,h=img.height;
+      if(w>max||h>max){
+        if(w>=h){h=Math.round(h*max/w);w=max;}
+        else{w=Math.round(w*max/h);h=max;}
+      }
+      const c=document.createElement('canvas');
+      c.width=w;c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
+      const dataUrl=c.toDataURL('image/jpeg',0.85);
+      _aiVerifyCtx.imageDataUrl=dataUrl;
+      _aiVerifyCtx.imageMime='image/jpeg';
+      document.getElementById('m-ai-verify-img').src=dataUrl;
+      document.getElementById('m-ai-verify-stage-pick').style.display='none';
+      document.getElementById('m-ai-verify-stage-preview').style.display='block';
+    };
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(f);
+}
+
+function _aiVerifyRetake(){
+  if(!_aiVerifyCtx)return;
+  _aiVerifyCtx.imageDataUrl=null;
+  _aiVerifyCtx.audioDataUrl=null;
+  document.getElementById('m-ai-verify-stage-preview').style.display='none';
+  if(_aiVerifyCtx.media==='voice'){
+    document.getElementById('m-ai-verify-stage-pick-voice').style.display='block';
+    _aiVerifyResetVoiceUI();
+  }else{
+    document.getElementById('m-ai-verify-stage-pick').style.display='block';
+    const fileEl=document.getElementById('m-ai-verify-file');
+    if(fileEl)fileEl.value='';
+  }
+}
+
+async function _aiVerifyGetIdToken(){
+  try{
+    if(typeof fbAuth!=='undefined'&&fbAuth&&fbAuth.currentUser){
+      return await fbAuth.currentUser.getIdToken();
+    }
+  }catch(e){console.warn('[aiVerify] getIdToken failed',e);}
+  return null;
+}
+
+async function _aiVerifySubmit(){
+  if(!_aiVerifyCtx){return;}
+  const isVoice=_aiVerifyCtx.media==='voice';
+  if(isVoice && !_aiVerifyCtx.audioDataUrl){toast('먼저 녹음해 주세요');return;}
+  if(!isVoice && !_aiVerifyCtx.imageDataUrl){toast('먼저 사진을 찍어주세요');return;}
+  const a=_aiVerifyCtx.act;
+  const _prompt=(a.verifyConfig&&a.verifyConfig.prompt)?a.verifyConfig.prompt
+    :(isVoice?`"${a.name}" 활동을 기쁜 목소리로 외쳤는지 판정해줘`:`"${a.name}" 활동을 올바르게 수행했는지 판정해줘`);
+  // 한도 체크 (클라이언트 선체크)
+  if(_aiVerifyGetCount()>=AI_VERIFY_DAILY_LIMIT){
+    _aiVerifyHandleOverLimit(a);
+    return;
+  }
+  document.getElementById('m-ai-verify-stage-preview').style.display='none';
+  document.getElementById('m-ai-verify-stage-loading').style.display='block';
+
+  // ── 음성 분기: Gemini /api/audio ──────────────────────
+  if(isVoice){
+    const audioB64=(_aiVerifyCtx.audioDataUrl||'').split(',')[1]||'';
+    const audioMime=_aiVerifyCtx.audioMime||'audio/webm';
+    const sysPromptV=`당신은 어린이 활동 검수봇 "마일리"입니다. 부모가 정한 검증 기준에 따라 아이의 음성을 듣고 통과/반려를 판정합니다.\n\n규칙:\n1. 반드시 JSON으로만 응답: {"result":"pass|reject|uncertain","comment":"...","confidence":0.0~1.0}\n2. comment는 한국어 30자 이내, 친근한 말투. 아이가 상처받지 않게.\n3. 단어 자체가 아니라 *목소리 톤·감정·에너지*를 핵심 기준으로 판정. 같은 말도 비꼬거나 짜증난 톤이면 reject.\n4. 음성이 너무 짧거나, 잡음이 심하거나, 무관한 내용이면 "uncertain".\n5. 외모/신체/억양/사투리/발음 평가 금지. 오로지 톤·감정만.\n6. 미묘한 경계는 "uncertain"으로.\n7. JSON 외 다른 텍스트 절대 출력 금지.`;
+    const userPromptV=`검증 기준: ${_prompt}\n\n위 기준을 톤·감정 중심으로 판단해서 JSON 한 개만 출력해줘.`;
+    let resp=null,data=null,err=null;
+    try{
+      resp=await fetch(AI_VOICE_ENDPOINT,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({audioBase64:audioB64,mimeType:audioMime,prompt:userPromptV,systemPrompt:sysPromptV,maxOutputTokens:512})
+      });
+      data=await resp.json();
+    }catch(e){err=e;}
+    if(err||!resp||!resp.ok||!data||data.error){
+      console.error('[aiVerify-voice] fail',{err,status:resp&&resp.status,data});
+      document.getElementById('m-ai-verify-stage-loading').style.display='none';
+      document.getElementById('m-ai-verify-stage-preview').style.display='block';
+      let _em=err?err.message:(data&&data.error&&(data.error.message||data.error))||(resp?('HTTP '+resp.status):'unknown');
+      // Gemini raw 에러 메시지까지 끌어내기
+      try{const ge=data&&data.raw&&data.raw.error;if(ge&&(ge.message||ge.status))_em=(ge.status||'')+' '+(ge.message||'');}catch(_){}
+      toast('AI 음성 검수 실패: '+_em);
+      return;
+    }
+    let result='uncertain',comment='',confidence=0;
+    let rawText=(data.text||'').trim();
+    console.log('[aiVerify-voice] raw text',rawText);
+    // 마크다운 코드펜스 제거 (```json ... ```)
+    rawText=rawText.replace(/^```(?:json)?\s*/i,'').replace(/\s*```\s*$/,'').trim();
+    try{
+      const m=rawText.match(/\{[\s\S]*\}/);
+      const parsed=m?JSON.parse(m[0]):JSON.parse(rawText);
+      result=parsed.result||'uncertain';
+      comment=parsed.comment||'';
+      confidence=parsed.confidence||0;
+    }catch(pe){
+      console.warn('[aiVerify-voice] parse fail',pe,data);
+      // 빈 응답이면 포맷 미지원 가능성 높음
+      if(!rawText){
+        document.getElementById('m-ai-verify-stage-loading').style.display='none';
+        document.getElementById('m-ai-verify-stage-preview').style.display='block';
+        toast('AI 음성 검수 실패: 빈 응답 (오디오를 읽지 못했어요)');
+        return;
+      }
+      result='uncertain';comment='판정 결과를 읽지 못했어요';
+    }
+    _aiVerifyIncCount();
+    if(result==='pass'){
+      _aiVerifyApplyPass(a,comment);
+      _aiVerifyShowResult('🎉','통과!',comment||'기쁜 목소리예요!');
+    }else if(result==='reject'){
+      _aiVerifyApplyReject(a,comment);
+      _aiVerifyShowResult('😅','다시 해볼까?',comment||'조금 더 밝게 외쳐볼래?');
+    }else{
+      _aiVerifyEscalateToParent(a,'uncertain',comment);
+      _aiVerifyShowResult('👨‍👩','엄마아빠가 확인할게요',comment||'마일리가 확실하지 않아서 부모님께 보냈어요');
+    }
+    return;
+  }
+  // ── 사진 분기: 기존 Claude /api/proxy ─────────────────
+  const imageBase64=(_aiVerifyCtx.imageDataUrl||'').split(',')[1]||'';
+  const imageMime=_aiVerifyCtx.imageMime||'image/jpeg';
+  // /api/proxy 는 Anthropic Messages API를 그대로 포워드 → 멀티모달 메시지 구성
+  const systemPrompt=`당신은 어린이 활동 검수봇 "마일리"입니다. 부모가 정한 검증 기준에 따라 사진을 보고 통과/반려를 판정합니다.\n\n규칙:\n1. 반드시 JSON으로만 응답합니다: {"result":"pass|reject|uncertain","comment":"...","confidence":0.0~1.0}\n2. comment는 한국어 30자 이내, 친근한 말투. 아이가 상처받지 않게 작성.\n3. 판정 기준이 모호하거나 사진 품질이 낮으면 "uncertain".\n4. 절대 평가하지 않을 항목: 외모, 신체, 옷차림, 표정, 인종, 체형.\n5. 검증 기준과 사진이 명백히 무관하면 "uncertain"으로 응답하고 comment에 "사진을 다시 찍어줘" 안내.\n6. 이분법적으로 단순 판단. 미묘한 판단은 "uncertain".\n7. JSON 외 다른 텍스트는 절대 출력하지 않습니다.`;
+  const userContent=[
+    {type:'image',source:{type:'base64',media_type:imageMime,data:imageBase64}},
+    {type:'text',text:`검증 기준: ${_prompt}\n\n위 사진이 기준을 충족하는지 판정해서 JSON 한 개만 출력해줘.`}
+  ];
+  const reqBody={
+    model:'claude-haiku-4-5-20251001',
+    system:systemPrompt,
+    messages:[{role:'user',content:userContent}],
+    max_tokens:256
+  };
+  let resp=null,data=null,err=null;
+  try{
+    resp=await fetch(AI_VERIFY_ENDPOINT,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(reqBody)
+    });
+    data=await resp.json();
+  }catch(e){err=e;}
+  if(err||!resp||!resp.ok||!data||data.error){
+    console.error('[aiVerify] call failed',{err,status:resp&&resp.status,data});
+    document.getElementById('m-ai-verify-stage-loading').style.display='none';
+    document.getElementById('m-ai-verify-stage-preview').style.display='block';
+    const _em=err?err.message:(data&&data.error&&(data.error.message||data.error))||(resp?('HTTP '+resp.status):'unknown');
+    toast('AI 검수 호출 실패: '+_em);
+    return;
+  }
+  // Anthropic 응답에서 텍스트 추출 → JSON 파싱
+  let result='uncertain',comment='',confidence=0;
+  try{
+    const textBlock=(data.content||[]).find(b=>b.type==='text');
+    const raw=textBlock?textBlock.text:'';
+    const m=raw.match(/\{[\s\S]*\}/);
+    const parsed=m?JSON.parse(m[0]):JSON.parse(raw);
+    result=parsed.result||'uncertain';
+    comment=parsed.comment||'';
+    confidence=parsed.confidence||0;
+  }catch(pe){
+    console.warn('[aiVerify] parse fail',pe,data);
+    result='uncertain';
+    comment='판정 결과를 읽지 못했어요';
+  }
+  if(result==='over-limit'){_aiVerifyHandleOverLimit(a);return;}
+  _aiVerifyIncCount();
+  if(result==='pass'){
+    _aiVerifyApplyPass(a,comment);
+    _aiVerifyShowResult('🎉','통과!',comment||'잘 했어요!');
+  }else if(result==='reject'){
+    _aiVerifyApplyReject(a,comment);
+    _aiVerifyShowResult('😅','다시 도전해볼까?',comment||'기준에 조금 못 미쳤어요');
+  }else{
+    // uncertain → 부모 승인 큐로 이관
+    _aiVerifyEscalateToParent(a,'uncertain',comment);
+    _aiVerifyShowResult('👨‍👩','엄마아빠가 확인할게요',comment||'마일리가 확실하지 않아서 부모님께 보냈어요');
+  }
+}
+
+function _aiVerifyShowResult(icon,title,comment){
+  document.getElementById('m-ai-verify-stage-loading').style.display='none';
+  document.getElementById('m-ai-verify-stage-preview').style.display='none';
+  document.getElementById('m-ai-verify-stage-pick').style.display='none';
+  document.getElementById('m-ai-verify-result-icon').textContent=icon;
+  document.getElementById('m-ai-verify-result-title').textContent=title;
+  document.getElementById('m-ai-verify-result-comment').textContent=comment;
+  document.getElementById('m-ai-verify-stage-result').style.display='block';
+  // Update quota chip
+  const cnt=_aiVerifyGetCount();
+  const q=document.getElementById('m-ai-verify-quota');
+  if(q)q.textContent='🤖 '+cnt+'/'+AI_VERIFY_DAILY_LIMIT;
+}
+
+function _aiVerifyApplyPass(a,comment){
+  // 정상 완료 크레딧 (markDone + pts + log entry with verify info)
+  markDone(a);
+  S.pts+=a.pts;
+  S.totalDone++;
+  if(!S.log)S.log=[];
+  S.log.unshift({
+    id:'l_'+Date.now(),emoji:a.emoji,name:a.name,pts:a.pts,ts:Date.now(),actId:a.id,
+    user:_globalDataOwner||currentUser,
+    status:'approved',
+    verify:{mode:'ai',result:'pass',aiResult:'pass',parentResult:null,comment,by:'ai'}
+  });
+  if(S.log.length>300)S.log=S.log.slice(0,300);
+  // Level XP
+  const _ld=S.levelData||(S.levelData={xp:0,level:1,xpLog:[]});
+  _ld.xp+=(a.pts||10);
+  _ld.xpLog.unshift({xp:a.pts||10,ts:Date.now(),src:a.name});
+  if(_ld.xpLog.length>100)_ld.xpLog=_ld.xpLog.slice(0,100);
+  _ld.level=getLevelInfo(_ld.xp).level;
+  try{updateChallengeProgress();}catch(e){}
+  save();renderAll();
+}
+
+function _aiVerifyApplyReject(a,comment){
+  // v0408h: markDone/S.log 푸시 제거 — 반려는 "완료"로 취급하지 않음.
+  // (재시도 방지는 일일 AI 카운터 _aiVerifyIncCount로 대체)
+  // 반려 이력은 별도 S.aiVerifyRejects에 보존 (추후 칩 표시용)
+  if(!S.aiVerifyRejects)S.aiVerifyRejects=[];
+  S.aiVerifyRejects.unshift({
+    id:'avr_'+Date.now(),actId:a.id,actName:a.name,actEmoji:a.emoji,
+    ts:Date.now(),user:_globalDataOwner||currentUser,
+    comment,verify:{mode:'ai',result:'reject',by:'ai'}
+  });
+  if(S.aiVerifyRejects.length>200)S.aiVerifyRejects=S.aiVerifyRejects.slice(0,200);
+  save();renderAll();
+}
+
+function _aiVerifyEscalateToParent(a,reason,aiComment){
+  // 기존 activity_verify_request 메커니즘 재사용 + AI 메타데이터 첨부
+  const hadPending=_hasPendingActVerify(a.id);
+  if(!hadPending){
+    requestActivityVerify(a);
+    // 마지막 요청에 AI 메타 추가
+    const last=S.actVerifyRequests&&S.actVerifyRequests[S.actVerifyRequests.length-1];
+    if(last){
+      last.reason=reason;
+      last.aiResult=(reason==='uncertain')?'uncertain':null;
+      last.aiComment=aiComment||null;
+      // mediaDataUrl은 크기 문제로 Firestore에 저장하면 무거움 → 메모리에만 보존, 부모가 같은 세션에서 보면 OK
+      if(_aiVerifyCtx&&_aiVerifyCtx.imageDataUrl){
+        last.mediaDataUrl=_aiVerifyCtx.imageDataUrl.length<300000?_aiVerifyCtx.imageDataUrl:null;
+      }
+      save();
+    }
+  }else{
+    // v0408s: 이미 pending 상태여도 재차 시도한 경우 가족 메시지를 다시 쌓아서 부모에게 재알림
+    try{
+      if(!S.familyMessages)S.familyMessages=[];
+      const _isCaregiver=(typeof isCaregiverUser==='function')?isCaregiverUser():false;
+      const _reqChildId=(_isCaregiver&&typeof viewingChildId!=='undefined'&&viewingChildId)?viewingChildId:(_globalDataOwner||currentUser);
+      const adminMembers=[];
+      if(S.familyMeta&&S.familyMeta.members){
+        for(const [mid,m] of Object.entries(S.familyMeta.members)){
+          const isChild=m.type==='child'||m.role==='child';
+          if(isChild)continue;
+          const isCg=m.type==='caregiver'||m.type==='parent'||m.role==='caregiver'||m.role==='parent';
+          if(m.isAdmin||isCg){
+            if(!_isCaregiver&&mid===currentUser)continue;
+            adminMembers.push(mid);
+          }
+        }
+      }
+      // adminMembers가 비어있으면 fallback: child가 아닌 모든 멤버
+      if(adminMembers.length===0&&S.familyMeta&&S.familyMeta.members){
+        for(const [mid,m] of Object.entries(S.familyMeta.members)){
+          if(m.type==='child'||m.role==='child')continue;
+          if(!_isCaregiver&&mid===currentUser)continue;
+          adminMembers.push(mid);
+        }
+      }
+      const pendingReq=S.actVerifyRequests&&S.actVerifyRequests.find(r=>r.actId===a.id&&r.status==='pending');
+      const _childName=(typeof MEMBERS!=='undefined'&&MEMBERS[_reqChildId]&&MEMBERS[_reqChildId].name)||_reqChildId;
+      const _msgText=`🤖 ${_childName}이(가) "${a.name}" AI 검수 재요청을 보냈어요!`;
+      for(const adminId of adminMembers){
+        S.familyMessages.push({
+          from:_reqChildId,to:adminId,text:_msgText,ts:Date.now(),read:false,
+          type:'activity_verify_request',requestId:pendingReq?pendingReq.id:null,actId:a.id
+        });
+      }
+      if(pendingReq){
+        pendingReq.reason=reason;
+        pendingReq.aiResult=(reason==='uncertain')?'uncertain':null;
+        pendingReq.aiComment=aiComment||pendingReq.aiComment||null;
+      }
+      save();
+    }catch(e){console.warn('[aiVerify] re-escalate fail',e);}
+  }
+  // v0408s: 즉시 뱃지 갱신 (setTimeout 지연 없이)
+  try{if(typeof checkNewMessages==='function')checkNewMessages();}catch(_){}
+  try{if(typeof _updateFamilyBtnBadge==='function')_updateFamilyBtnBadge();}catch(_){}
+  // AI 모달 닫힐 때도 한 번 더 갱신되도록 플래그 세팅
+  _aiVerifyPendingBadgeRefresh=true;
+}
+var _aiVerifyPendingBadgeRefresh=false;
+function _aiVerifyOnModalClose(){
+  if(!_aiVerifyPendingBadgeRefresh)return;
+  _aiVerifyPendingBadgeRefresh=false;
+  try{if(typeof checkNewMessages==='function')checkNewMessages();}catch(_){}
+  try{if(typeof _updateFamilyBtnBadge==='function')_updateFamilyBtnBadge();}catch(_){}
+  try{if(typeof renderAll==='function')renderAll();}catch(_){}
+  try{if(typeof _updateFamilyBtnBadge==='function')_updateFamilyBtnBadge();}catch(_){}
+}
+window._aiVerifyOnModalClose=_aiVerifyOnModalClose;
+
+function _aiVerifyHandleOverLimit(a){
+  document.getElementById('m-ai-verify-stage-loading').style.display='none';
+  document.getElementById('m-ai-verify-stage-preview').style.display='none';
+  _aiVerifyEscalateToParent(a,'over-limit',null);
+  _aiVerifyShowResult('⏳','오늘 AI 검수는 다 썼어요','엄마아빠가 확인해 주실 거예요');
+}
+
+// v0408h: 이전 버전에서 AI reject가 markDone + S.log(pts:0)로 잘못 저장된 기록 정리
+function _migV0408hCleanupRejects(){
+  if(S.migV0408h)return;
+  let touched=false;
+  if(Array.isArray(S.log)){
+    for(let i=S.log.length-1;i>=0;i--){
+      const l=S.log[i];
+      if(l&&l.verify&&l.verify.result==='reject'&&l.pts===0){
+        // 별도 저장소로 이동
+        if(!S.aiVerifyRejects)S.aiVerifyRejects=[];
+        const a=S.acts&&S.acts.find(x=>x.id===l.actId);
+        S.aiVerifyRejects.unshift({
+          id:'avr_'+(l.ts||Date.now()),actId:l.actId,
+          actName:a?a.name:(l.name||''),actEmoji:a?a.emoji:(l.emoji||''),
+          ts:l.ts||Date.now(),user:l.user||null,
+          comment:(l.verify&&l.verify.comment)||'',
+          verify:l.verify
+        });
+        S.log.splice(i,1);
+        // markDone 롤백
+        if(a&&typeof unmarkDone==='function'){try{unmarkDone(a);}catch(e){}}
+        touched=true;
+      }
+    }
+  }
+  S.migV0408h=true;
+  if(touched){try{save();}catch(e){}}
+}
+try{setTimeout(_migV0408hCleanupRejects,1500);}catch(e){}
+window._migV0408hCleanupRejects=_migV0408hCleanupRejects;
+
+window.openAiVerifyModal=openAiVerifyModal;
+window._aiVerifyOnFile=_aiVerifyOnFile;
+window._aiVerifyRetake=_aiVerifyRetake;
+window._aiVerifySubmit=_aiVerifySubmit;
+
 // ADMIN
 function giveBonus(){
   const v=parseInt(document.getElementById('bonus-inp').value)||0;if(v<=0)return;
@@ -16946,6 +17991,26 @@ function restoreData(input){
 function resetAll(){
   showPin('reset_all','<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" style=\"vertical-align:-4px;margin-right:4px\"><rect x=\"3\" y=\"11\" width=\"18\" height=\"11\" rx=\"2\"/><path d=\"M7 11V7a5 5 0 0110 0v4\"/></svg> 관리자 인증','⚠️ 전체 데이터 삭제를 위해<br>PIN 4자리를 입력하세요');
 }
+function resetAiVerifyDaily(){
+  const k=todayStr();
+  const before=(S.aiVerifyDaily&&S.aiVerifyDaily[k])||0;
+  if(before===0){toast('이미 0회예요');return;}
+  if(!confirm('오늘 AI 검수 카운터를 리셋할까요?\n현재 '+before+'/'+AI_VERIFY_DAILY_LIMIT+'회 → 0/'+AI_VERIFY_DAILY_LIMIT+'회'))return;
+  if(!S.aiVerifyDaily)S.aiVerifyDaily={};
+  S.aiVerifyDaily[k]=0;
+  save();
+  try{_refreshAiVerifyCntBadge();}catch(_){}
+  toast('AI 검수 카운터 리셋 완료 ('+before+'→0)');
+}
+function _refreshAiVerifyCntBadge(){
+  const b=document.getElementById('ai-verify-cnt-badge');
+  if(!b)return;
+  const k=todayStr();
+  const c=(S.aiVerifyDaily&&S.aiVerifyDaily[k])||0;
+  b.textContent='(오늘 '+c+'/'+AI_VERIFY_DAILY_LIMIT+'회)';
+}
+window.resetAiVerifyDaily=resetAiVerifyDaily;
+window._refreshAiVerifyCntBadge=_refreshAiVerifyCntBadge;
 function doResetAll(){
   if(!confirm('정말 활동 이력을 모두 삭제할까요?\n(가족·계정 정보는 유지됩니다)\n되돌릴 수 없어요!'))return;
   // 보존해야 할 데이터: 가족구성, 계정정보, 사진, 푸시, 설정
@@ -17008,11 +18073,98 @@ function openActForm(id){
   document.querySelectorAll('#act-days-row .day-btn').forEach(b=>{
     b.classList.toggle('on',hasDays&&a.days.includes(parseInt(b.dataset.d)));
   });
+  // 완료 조건 (verifyMode) — 기본 'auto'. 기존 활동은 verifyMode 없으므로 'auto'로 폴백
+  const vm=(a&&a.verifyMode)?a.verifyMode:'auto';
+  document.querySelectorAll('#verify-mode-row .sel-btn').forEach(b=>b.classList.toggle('on',b.dataset.v===vm));
+  const vmHint=document.getElementById('verify-mode-hint');
+  if(vmHint){
+    vmHint.textContent=vm==='parent'?'부모님 승인 후 마일리지가 적립돼요':vm==='ai'?'AI가 사진을 보고 통과/반려를 판정해요':'누르면 바로 마일리지가 적립돼요';
+  }
+  const _vapw=document.getElementById('verify-ai-prompt-wrap');
+  const _vap=document.getElementById('verify-ai-prompt');
+  if(_vapw)_vapw.style.display=(vm==='ai')?'block':'none';
+  if(_vap)_vap.value=(a&&a.verifyConfig&&a.verifyConfig.prompt)?a.verifyConfig.prompt:'';
+  // v0408j: 검증 미디어 (사진/음성) 토글 복원
+  const _curMedia=(a&&a.verifyConfig&&a.verifyConfig.media==='voice')?'voice':'photo';
+  document.querySelectorAll('#verify-media-row .sel-btn').forEach(b=>b.classList.toggle('on',b.dataset.media===_curMedia));
+  if(_vap){
+    _vap.placeholder=(_curMedia==='voice')?'예: 짜증내지 않고 기쁜 목소리로 외치는지 확인해줘':'예: 양치 직후의 깨끗한 입 안 사진인지 확인해줘';
+  }
   document.getElementById('act-save-btn').textContent=a?'저장하기':'추가하기';
   // 자녀 다중선택 체크박스 (자녀 2명 이상 + 새 활동 추가 시)
   _renderFormChildChecks('act',id);
   openModal('m-act');
 }
+// 완료 조건 라디오 선택 (v0408f: auto + parent + ai 모두 정상 동작)
+function pickVerifyMode(btn){
+  const v=btn.dataset.v;
+  document.querySelectorAll('#verify-mode-row .sel-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  const hint=document.getElementById('verify-mode-hint');
+  if(hint){
+    if(v==='parent')hint.textContent='부모님 승인 후 마일리지가 적립돼요';
+    else if(v==='ai')hint.textContent='AI가 사진을 보고 통과/반려를 판정해요';
+    else hint.textContent='누르면 바로 마일리지가 적립돼요';
+  }
+  const promptWrap=document.getElementById('verify-ai-prompt-wrap');
+  if(promptWrap)promptWrap.style.display=(v==='ai')?'block':'none';
+  // v0408i: AI 선택 시 활동명 기반으로 검증 지시문 자동 추천 (비어 있을 때만)
+  if(v==='ai'){
+    const ta=document.getElementById('verify-ai-prompt');
+    const nameEl=document.getElementById('act-name');
+    const curMedia=document.querySelector('#verify-media-row .sel-btn.on')?.dataset.media||'photo';
+    if(ta&&nameEl&&!ta.value.trim()&&nameEl.value.trim()){
+      _aiSuggestVerifyPrompt(nameEl.value.trim(),ta,curMedia);
+    }
+  }
+}
+// v0408j: 검증 미디어(사진/음성) 토글
+function pickVerifyMedia(btn){
+  const m=btn.dataset.media;
+  document.querySelectorAll('#verify-media-row .sel-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  const ta=document.getElementById('verify-ai-prompt');
+  if(ta){
+    ta.placeholder=(m==='voice')?'예: 짜증내지 않고 기쁜 목소리로 외치는지 확인해줘':'예: 양치 직후의 깨끗한 입 안 사진인지 확인해줘';
+    // 비어 있으면 자동 추천 (활동명이 있을 때만)
+    const nameEl=document.getElementById('act-name');
+    if(!ta.value.trim()&&nameEl&&nameEl.value.trim()){
+      _aiSuggestVerifyPrompt(nameEl.value.trim(),ta,m);
+    }
+  }
+}
+window.pickVerifyMedia=pickVerifyMedia;
+// v0408i: AI로 검증 지시문 자동 생성
+let _aiSuggestInflight=false;
+async function _aiSuggestVerifyPrompt(actName,ta,media){
+  if(_aiSuggestInflight)return;
+  _aiSuggestInflight=true;
+  const _orig=ta.placeholder;
+  ta.placeholder='마일리가 추천 지시문을 작성하는 중...';
+  const _media=media||'photo';
+  const _sysPhoto='너는 어린이 활동 인증 사진 검증용 프롬프트 작성 도우미야. 활동 이름을 받으면, 부모가 아이의 수행을 사진으로 확인할 수 있도록 "어떤 사진을 찍어야 하고 무엇을 확인해야 하는지"를 한국어 1~2문장(공백 포함 60자 이내)으로 작성해줘. 설명이나 따옴표 없이 지시문 본문만 출력해.';
+  const _sysVoice='너는 어린이 활동 인증 음성 검증용 프롬프트 작성 도우미야. 활동 이름을 받으면, 부모가 아이의 *목소리 톤·감정·에너지*를 듣고 확인할 수 있도록 "어떤 말을 어떤 톤으로 말해야 하는지, 무엇을 확인해야 하는지"를 한국어 1~2문장(공백 포함 60자 이내)으로 작성해줘. 단어 자체보다 톤·감정 기준을 명시해. 설명이나 따옴표 없이 지시문 본문만 출력해.';
+  try{
+    const body={
+      model:'claude-haiku-4-5-20251001',
+      system:(_media==='voice')?_sysVoice:_sysPhoto,
+      messages:[{role:'user',content:[{type:'text',text:`활동 이름: "${actName}"\n검증 방식: ${_media==='voice'?'음성':'사진'}\n\n검증 지시문을 작성해줘.`}]}],
+      max_tokens:120
+    };
+    const r=await fetch('https://mily-proxy.vercel.app/api/proxy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    if(!r.ok)throw new Error('http '+r.status);
+    const d=await r.json();
+    let txt=(d&&d.content&&d.content[0]&&d.content[0].text||'').trim();
+    txt=txt.replace(/^["'`「『]+|["'`」』]+$/g,'').trim();
+    if(txt&&!ta.value.trim())ta.value=txt;
+  }catch(e){
+    console.warn('[ai-suggest] fail',e);
+  }finally{
+    ta.placeholder=_orig;
+    _aiSuggestInflight=false;
+  }
+}
+window._aiSuggestVerifyPrompt=_aiSuggestVerifyPrompt;
 function pickCycle(btn){
   document.querySelectorAll('#cycle-row .sel-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');
   // 매일 주기일 때만 요일 선택 표시
@@ -17048,10 +18200,10 @@ function _renderFormChildChecks(prefix,editId){
   container.innerHTML=kids.map(id=>{
     const nm=MEMBERS[id]?.name||S.familyMeta?.members?.[id]?.name||id;
     const checked=editId?id===currentAdm:true; // 새 항목이면 전체 선택, 수정이면 현재 자녀만
-    return `<label style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--bg2);border-radius:10px;cursor:pointer;font-size:14px;font-weight:700;border:2px solid ${checked?'var(--tab-color,#6366F1)':'transparent'}" onclick="this.querySelector('input').checked=!this.querySelector('input').checked;this.style.borderColor=this.querySelector('input').checked?'var(--tab-color,#6366F1)':'transparent'">
+    return `<label data-checked="${checked?'1':'0'}" style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--bg2);border-radius:10px;cursor:pointer;font-size:14px;font-weight:700;border:2px solid ${checked?'var(--tab-color,#6366F1)':'transparent'}" onclick="(function(lb){const i=lb.querySelector('input');i.checked=!i.checked;const on=i.checked;lb.dataset.checked=on?'1':'0';lb.style.borderColor=on?'var(--tab-color,#6366F1)':'transparent';const box=lb.querySelector('.chk-box');if(box){box.style.background=on?'var(--tab-color,#6366F1)':'var(--bdr)';const sv=box.querySelector('svg');if(sv)sv.style.display=on?'block':'none';}})(this)">
       <input type="checkbox" value="${id}" ${checked?'checked':''} style="display:none" class="${prefix}-child-chk">
-      <span style="width:20px;height:20px;border-radius:50%;background:${checked?'var(--tab-color,#6366F1)':'var(--bdr)'};display:flex;align-items:center;justify-content:center;transition:all .2s">
-        ${checked?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>':''}
+      <span class="chk-box" style="width:20px;height:20px;border-radius:50%;background:${checked?'var(--tab-color,#6366F1)':'var(--bdr)'};display:flex;align-items:center;justify-content:center;transition:all .2s">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="display:${checked?'block':'none'}"><polyline points="20 6 9 17 4 12"/></svg>
       </span>
       ${nm}
     </label>`;
@@ -17080,7 +18232,12 @@ function saveActivity(){
     document.querySelectorAll('#act-days-row .day-btn.on').forEach(b=>days.push(parseInt(b.dataset.d)));
     if(days.length===0||days.length===7)days=null; // 전체 선택이면 null
   }
-  const actData={emoji,name,desc,pts,maxDay,cycle,days};
+  // 완료 조건 — PR 1 UI 스캐폴드. parent/ai 선택 시 스텁 모달로 auto로 되돌아감
+  const verifyMode=document.querySelector('#verify-mode-row .sel-btn.on')?.dataset.v||'auto';
+  const _aiPrompt=(document.getElementById('verify-ai-prompt')?.value||'').trim();
+  const _aiMedia=document.querySelector('#verify-media-row .sel-btn.on')?.dataset.media||'photo';
+  const verifyConfig=(verifyMode==='ai')?{media:_aiMedia,prompt:_aiPrompt}:null;
+  const actData={emoji,name,desc,pts,maxDay,cycle,days,verifyMode,verifyConfig};
   const targetKids=_getFormCheckedChildren('act');
   const curAdm=_admViewChildId||getViewedMemberId();
   // 관리자가 보고 있는 자녀의 acts (memberData에서 직접 수정)
@@ -17776,10 +18933,53 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.2.1 (v0408s)',date:'2026-04-08',items:[
+    {type:'fix',text:'AI 검수 여러 번 시도 후 "부모에게 확인 요청"으로 전환했을 때 가족 아이콘에 알림 뱃지가 안 뜨던 버그 수정. 이미 pending 상태여도 familyMessages에 재알림을 push하고, 뱃지 갱신을 즉시+모달 닫힐 때 한 번 더 수행'},
+  ]},
+  {ver:'2.2.0 (v0408r)',date:'2026-04-08',items:[
+    {type:'feat',text:'관리자 페이지 → 설정 → 데이터 관리에 "AI 검수 일일 카운터 리셋" 버튼 추가. 오늘 남은 횟수도 표시'},
+  ]},
+  {ver:'2.1.9 (v0408q)',date:'2026-04-08',items:[
+    {type:'chore',text:'AI 검수 일일 제한 20회 → 30회로 상향'},
+  ]},
+  {ver:'2.1.8 (v0408p)',date:'2026-04-08',items:[
+    {type:'fix',text:'AI 음성 검수: Gemini 응답의 ```json 코드펜스 때문에 파싱 실패하던 버그 수정 (코드펜스 strip 추가, maxOutputTokens 256→512)'},
+    {type:'fix',text:'AI 음성 검수: iOS Safari가 WAV data/blob URL을 <audio>에서 재생 거부(code 4) → 재생 플레이어 대신 "🎤 녹음 완료 N초" 텍스트로 교체. 검수 자체는 정상 동작'},
+    {type:'fix',text:'AI 검수 모달이 화면 우측에 공백이 생기던 문제 수정 (justify-content:center 추가, max-width:380px 제거)'},
+  ]},
+  {ver:'2.1.7 (v0408m)',date:'2026-04-08',items:[
+    {type:'chore',text:'(dev only) 화면 디버그 패널 추가 — 우측 하단 🐛 버튼으로 토글, console.log/error를 화면에 표시. AI 음성 검수 각 단계에 상세 로그 instrumentation 추가 (원격 디버깅용)'},
+  ]},
+  {ver:'2.1.6 (v0408l)',date:'2026-04-08',items:[
+    {type:'fix',text:'AI 음성 검수 녹음 후 오디오 플레이어가 "오류" 표시되던 문제 수정 — 큰 base64 data URL 대신 URL.createObjectURL 사용, iOS Safari용 AudioContext.resume() 및 decodeAudioData callback fallback 추가'},
+  ]},
+  {ver:'2.1.5 (v0408k)',date:'2026-04-08',items:[
+    {type:'fix',text:'AI 음성 검수가 오디오를 읽지 못하던 문제 수정 — MediaRecorder의 webm/mp4 결과를 AudioContext로 디코드 후 16kHz 모노 WAV로 재인코딩해서 Gemini에 전달 (Gemini는 webm 비공식 지원이라 빈 응답 발생)'},
+    {type:'fix',text:'AI 음성 검수 실패 시 Gemini 실제 에러 메시지와 raw 텍스트를 토스트·콘솔에 노출 (디버깅 개선)'},
+  ]},
+  {ver:'2.1.4 (v0408j)',date:'2026-04-08',items:[
+    {type:'feat',text:'AI 검수 음성 모드 추가 — 활동 편집에서 📷 사진 / 🎤 음성 토글, 음성 선택 시 MediaRecorder로 최대 10초 녹음 후 Gemini 2.5 Flash가 *목소리 톤·감정*을 판정 (단어가 아닌 톤 기준). 예: "기쁜 목소리로 학교 가기" 같은 활동에 사용 가능'},
+    {type:'feat',text:'mily-proxy에 /api/audio 엔드포인트 신설 — Gemini 2.5 Flash 오디오 inline_data 포워딩, GEMINI_API_KEY 환경변수 사용'},
+    {type:'feat',text:'AI 검수 자동 추천 지시문이 사진/음성 모드별로 다르게 생성됨 (음성은 톤·감정 기준 명시)'},
+  ]},
+  {ver:'2.1.3 (v0408i)',date:'2026-04-08',items:[
+    {type:'feat',text:'AI 검수 버튼 아이콘을 🤖 이모지에서 마일리 캐릭터 SVG로 교체'},
+    {type:'feat',text:'활동기록/보상 탭의 편집·추가 버튼을 연필 SVG + 플러스 아이콘의 알약형 그라데이션 버튼으로 리디자인'},
+    {type:'feat',text:'활동 편집 자녀 다중선택 체크박스의 체크 표시가 토글 시 즉시 보이도록 수정 (온클릭에서 SVG/배경 직접 갱신)'},
+    {type:'feat',text:'AI 검수 선택 시 활동명 기반으로 검증 지시문을 마일리가 자동 추천 (비어 있을 때만, Claude Haiku 4.5 호출)'},
+    {type:'fix',text:'AI 검수 에스컬레이션 시 부모 알림 뱃지는 기존 requestActivityVerify → familyMessages 경로로 이미 전달됨을 재확인'},
+  ]},
+  {ver:'2.1.2 (v0408h)',date:'2026-04-08',items:[{type:'fix',text:'AI 검수 반려 시 활동이 "완료"로 잘못 표시되고 취소도 안 되던 문제 수정. _aiVerifyApplyReject가 markDone을 호출하던 로직 제거 — 반려는 완료로 취급하지 않고 S.aiVerifyRejects 별도 저장소에 이력만 보존합니다. 이미 잘못 저장된 기존 데이터는 부팅 시 1회 자동 마이그레이션(_migV0408hCleanupRejects)으로 S.log에서 제거하고 unmarkDone 롤백 후 aiVerifyRejects로 이동시켜요.'}]},
+  {ver:'2.1.1 (v0408g)',date:'2026-04-08',items:[{type:'fix',text:'AI 검수 "호출 실패 load fail" 수정 — /api/verify 엔드포인트가 Vercel에 아직 배포되지 않아 404가 떠서 실패하던 문제. 기존 /api/proxy(챗봇용 Anthropic 포워더)를 재사용해 멀티모달 메시지로 직접 Claude Haiku 4.5를 호출하도록 변경. 시스템 프롬프트에 JSON 출력 강제 규칙을 포함하고, 응답 텍스트에서 JSON 블록을 추출해 파싱합니다.'}]},
+  {ver:'2.1.0 (v0408f)',date:'2026-04-08',items:[{type:'new',text:'[AI 검수 Step 2 — PR B] 🤖 AI 검수 모드 정상 작동 개시. 활동 만들기에서 "🤖 AI 검수"를 선택하면 검증 지시문 입력란이 나타나요. 아이가 활동을 탭하면 카메라 모달이 열리고, 사진을 찍어 [검수 받기]를 누르면 Vercel /api/verify로 전송되어 Claude Haiku 4.5가 통과/반려/uncertain을 판정합니다. 통과 시 즉시 마일리지 적립, 반려 시 기록만 남기고 카운트 +1, uncertain/한도 초과 시 부모 승인 큐로 자동 이관(PR A 메커니즘 재사용). 일일 한도 20회 클라이언트 카운터 + 우상단 잔여 표시.'}]},
+  {ver:'2.0.9 (v0408e)',date:'2026-04-08',items:[{type:'new',text:'[AI 검수 Step 2 — PR A/B] "부모 승인" 검수 모드 정상 작동 개시. 활동 만들기에서 "부모 승인"을 선택하면, 아이가 해당 활동을 탭했을 때 바로 마일리지가 적립되지 않고 부모에게 승인 요청 메시지가 발송돼요. 부모가 가족 메시지 팝업에서 [승인]/[반려]를 누르면 그 시점에 마일리지가 적립/반려 처리됩니다. 승인 대기 중인 활동은 목록에 "⏳ 승인 대기" 칩이 표시돼요. (승인 메커니즘은 기존 보상 사용 요청과 동일)'}]},
+  {ver:'2.0.8 (v0408d)',date:'2026-04-08',items:[{type:'fix',text:'부모용 [편집][+ 추가] 버튼을 히어로 헤더에서 컨텐츠 영역의 섹션 제목("모든 활동"/"교환 가능한 보상") 우측으로 이동'}]},
+  {ver:'2.0.7 (v0408c)',date:'2026-04-08',items:[{type:'feat',text:'부모 계정에서 활동/보상 탭 헤더에 [편집][+ 추가] 버튼 추가. 편집 모드에서 드래그로 순서 변경 + 항목 탭 시 관리자 화면과 동일한 편집창이 떠요. (관리자 화면을 거치지 않고 바로 활동/보상 관리 가능)'}]},
+  {ver:'2.0.6 (v0408b)',date:'2026-04-08',items:[{type:'feat',text:'[AI 검수 Step 1 — PR 1/3] 활동 만들기 화면에 "완료 조건" 섹션 추가 (자동/부모 승인/🤖 AI 검수 라디오 3종). 현재는 UI 스캐폴드 단계 — 자동만 동작하고 나머지는 "곧 출시" 안내 모달 표시'}]},
   {ver:'2.0.5 (v0408a)',date:'2026-04-08',items:[{type:'fix',text:'챌린지 곤충 땀방울 제거'}]},
   {ver:'2.0.4 (v0407zz)',date:'2026-04-08',items:[{type:'fix',text:'챌린지 곤충 땀방울을 무당벌레 캐릭터(걷기 애니) 스타일로 재구현 — 회전되지 않는 별도 오버레이로 머리 위에 하늘색 물방울이 똑똑 떨어지는 모양'}]},
   {ver:'2.0.3 (v0407zy)',date:'2026-04-08',items:[{type:'fix',text:'챌린지 곤충 땀방울이 실제로 안 보이던 문제 수정 — SVG에 sweat 요소 추가 + 가시성·애니메이션 강화'}]},
-  {ver:'2.0.2 (v0407zx)',date:'2026-04-08',items:[{type:'fix',text:'다크모드에서 챌린지 곤충 선택 버튼 활성 표시 가시성 개선'}]},
+  {ver:'2.0.2 (v0407zx)',date:'2026-04-08',items:[{type:'fix',text:'다크모드에서 챌린지 곤충 선택 버튼 활성 표시 가시성 개선 — 밝은 외곽선·배경 하이라이트 추가'}]},
   {ver:'2.0.1 (v0407zw)',date:'2026-04-08',items:[{type:'fix',text:'프로필 아바타 z-index 상향 — 레벨 이펙트(불꽃 등)가 사용자 아이콘을 덮는 현상 수정'},{type:'fix',text:'나의 메뉴 챌린지 곤충 선택 버튼 5칸 그리드로 동일 크기 통일 (거미만 커지던 문제 수정)'},{type:'ui',text:'화면 모드 선택 라이트→시스템→다크 순서로 재배치 + 모든 미리보기에 동일한 둥근 외곽선 적용해 셋이 같은 모양·크기로 보이도록 통일'}]},
   {ver:'2.0.0 (v0407zv)',date:'2026-04-08',items:[{type:'new',text:'개미 10회 클릭 특별액션 교체 — 동료 개미 38마리가 화면 좌→우로 우르르 행진하며 "공격이다!" "적을 공격해라!" 외침'}]},
   {ver:'1.9.99 (v0407zu)',date:'2026-04-08',items:[{type:'fix',text:'메뚜기 박치기 액정 깨짐 효과 리얼하게 개선 — 충돌 지점을 화면 상단 → 화면 약 40% 위치로 이동, 방사형 균열 + 보조 균열 + 충격 동심원 + 중심 섬광으로 한층 사실적, 한번에 깨지고 변하지 않도록 페이드 타이밍 조정'},{type:'fix',text:'거미 특별액션 — 거미줄이 거미 위쪽으로만 보이도록 수정(아래 삐져나옴 제거), 내려오는 속도 좀 더 느리게'}]},
@@ -19274,6 +20474,13 @@ function openMsgList(fromId,fromFamily){
           else if(req.status==='approved')statusTag='<span style="font-size:13px;background:#86EFAC;color:#14532D;padding:2px 6px;border-radius:6px;font-weight:800;margin-left:4px;white-space:nowrap">승인됨</span>';
           else if(req.status==='rejected')statusTag='<span style="font-size:13px;background:#D4D4D8;color:#3F3F46;padding:2px 6px;border-radius:6px;font-weight:800;margin-left:4px;white-space:nowrap">거절됨</span>';
         }
+      }else if(m.type==='activity_verify_request'&&m.requestId){
+        const req=S.actVerifyRequests?S.actVerifyRequests.find(r=>r.id===m.requestId):null;
+        if(req){
+          if(req.status==='pending')statusTag='<span style="font-size:13px;background:#FDE68A;color:#78350F;padding:2px 6px;border-radius:6px;font-weight:800;margin-left:4px;white-space:nowrap">승인대기</span>';
+          else if(req.status==='approved')statusTag='<span style="font-size:13px;background:#BFDBFE;color:#1E3A8A;padding:2px 6px;border-radius:6px;font-weight:800;margin-left:4px;white-space:nowrap">승인됨</span>';
+          else if(req.status==='rejected')statusTag='<span style="font-size:13px;background:#D4D4D8;color:#3F3F46;padding:2px 6px;border-radius:6px;font-weight:800;margin-left:4px;white-space:nowrap">반려됨</span>';
+        }
       }
       return `<div class="msglist-item" onclick="readMsgFromList('${fromId}',${msgs.length-1-i})">
         <div class="msglist-item-dot${m.read?' read':''}"></div>
@@ -19329,14 +20536,22 @@ function readMsgFromList(fromId,msgIdx){
   const timeStr=date.getFullYear()+'.'+(date.getMonth()+1)+'.'+date.getDate()+' '+(date.getHours()>=12?'오후':'오전')+' '+(date.getHours()>12?date.getHours()-12:date.getHours()||12)+':'+String(date.getMinutes()).padStart(2,'0');
 
   let actionsHTML='';
-  if(m.type==='reward_request'&&m.requestId){
-    const req=S.rewardRequests?S.rewardRequests.find(r=>r.id===m.requestId):null;
-    if(req&&req.status==='pending'){
-      actionsHTML=`<div class="msglist-detail-actions">
-        <button style="flex:1;padding:12px;background:#22C55E;color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;min-height:48px;-webkit-tap-highlight-color:transparent;touch-action:manipulation" onclick="handleRewardFromList(${m.ts},'approve')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><polyline points="20 6 9 17 4 12"/></svg> 승인</button>
-        <button style="flex:1;padding:12px;background:#EF4444;color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;min-height:48px;-webkit-tap-highlight-color:transparent;touch-action:manipulation" onclick="handleRewardFromList(${m.ts},'reject')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> 거절</button>
-      </div>`;
+  const _showApproveBtns=(()=>{
+    if(m.type==='reward_request'&&m.requestId){
+      const req=S.rewardRequests?S.rewardRequests.find(r=>r.id===m.requestId):null;
+      return req&&req.status==='pending';
     }
+    if(m.type==='activity_verify_request'&&m.requestId){
+      const req=S.actVerifyRequests?S.actVerifyRequests.find(r=>r.id===m.requestId):null;
+      return req&&req.status==='pending';
+    }
+    return false;
+  })();
+  if(_showApproveBtns){
+    actionsHTML=`<div class="msglist-detail-actions">
+      <button style="flex:1;padding:12px;background:#22C55E;color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;min-height:48px;-webkit-tap-highlight-color:transparent;touch-action:manipulation" onclick="handleRewardFromList(${m.ts},'approve')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><polyline points="20 6 9 17 4 12"/></svg> 승인</button>
+      <button style="flex:1;padding:12px;background:#EF4444;color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;min-height:48px;-webkit-tap-highlight-color:transparent;touch-action:manipulation" onclick="handleRewardFromList(${m.ts},'reject')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> 반려</button>
+    </div>`;
   }
 
   detail.innerHTML=`
@@ -19424,16 +20639,14 @@ function showReceivedMsg(fromId,text,emotion,msgObj){
   }else{
     emotionEl.style.display='none';
   }
-  // Show approve/reject buttons for reward_request messages
+  // Show approve/reject buttons for reward_request/activity_verify_request messages
   const actionsEl=document.getElementById('recv-msg-actions');
   if(msgObj&&msgObj.type==='reward_request'&&msgObj.requestId){
-    // Check if request is still pending
     const req=S.rewardRequests?S.rewardRequests.find(r=>r.id===msgObj.requestId):null;
-    if(req&&req.status==='pending'){
-      actionsEl.style.display='flex';
-    }else{
-      actionsEl.style.display='none';
-    }
+    actionsEl.style.display=(req&&req.status==='pending')?'flex':'none';
+  }else if(msgObj&&msgObj.type==='activity_verify_request'&&msgObj.requestId){
+    const req=S.actVerifyRequests?S.actVerifyRequests.find(r=>r.id===msgObj.requestId):null;
+    actionsEl.style.display=(req&&req.status==='pending')?'flex':'none';
   }else{
     actionsEl.style.display='none';
   }
@@ -19449,17 +20662,19 @@ window.showReceivedMsg=showReceivedMsg;
 
 function handleRewardAction(action){
   if(!_currentRecvMsg||!_currentRecvMsg.requestId)return;
-  // 먼저 읽음 처리
   if(!_currentRecvMsg.read)_currentRecvMsg.read=true;
   const reqId=_currentRecvMsg.requestId;
-  _currentRecvMsg=null; // closeRecvMsg에서 중복 save 방지
+  const _type=_currentRecvMsg.type;
+  _currentRecvMsg=null;
   document.getElementById('recv-msg-bg').style.display='none';
   document.getElementById('recv-msg-pop').style.display='none';
-  unlockBodyScroll(); // 팝업 닫을 때 스크롤 잠금 해제 필수
-  if(action==='approve'){
-    approveRewardRequest(reqId,currentUser);
+  unlockBodyScroll();
+  if(_type==='activity_verify_request'){
+    if(action==='approve')approveActivityVerifyRequest(reqId,currentUser);
+    else rejectActivityVerifyRequest(reqId,currentUser);
   }else{
-    rejectRewardRequest(reqId,currentUser);
+    if(action==='approve')approveRewardRequest(reqId,currentUser);
+    else rejectRewardRequest(reqId,currentUser);
   }
 }
 window.handleRewardAction=handleRewardAction;
@@ -19469,12 +20684,14 @@ function handleRewardFromList(msgTs,action){
   if(!msg||!msg.requestId){toast('요청 정보를 찾을 수 없어요');return;}
   if(!msg.read)msg.read=true;
   const reqId=msg.requestId;
-  // Close message list popup
+  const _type=msg.type;
   closeMsgList();
-  if(action==='approve'){
-    approveRewardRequest(reqId,currentUser);
+  if(_type==='activity_verify_request'){
+    if(action==='approve')approveActivityVerifyRequest(reqId,currentUser);
+    else rejectActivityVerifyRequest(reqId,currentUser);
   }else{
-    rejectRewardRequest(reqId,currentUser);
+    if(action==='approve')approveRewardRequest(reqId,currentUser);
+    else rejectRewardRequest(reqId,currentUser);
   }
 }
 window.handleRewardFromList=handleRewardFromList;
@@ -19837,7 +21054,7 @@ function reallyGoTab(tab){
     themeMeta.content=isDark?'#1E293B':(TAB_COLORS[tab]||'#6366F1');
   }
 }
-function admTab(i){[0,1,2,3,4].forEach(j=>{document.getElementById('at-'+j).classList.toggle('on',j===i);document.getElementById('adm-p'+j).style.display=j===i?'block':'none';});if(i===2){renderAdmChildSelector();renderBadgeMgrList();}if(i===3){renderFamilyManager();renderNewMemberRoleSelect();renderAdmMemberPhotos();}if(i===4){showCacheInfo();showPushDebug();}}
+function admTab(i){[0,1,2,3,4].forEach(j=>{document.getElementById('at-'+j).classList.toggle('on',j===i);document.getElementById('adm-p'+j).style.display=j===i?'block':'none';});if(i===2){renderAdmChildSelector();renderBadgeMgrList();}if(i===3){renderFamilyManager();renderNewMemberRoleSelect();renderAdmMemberPhotos();}if(i===4){showCacheInfo();showPushDebug();try{_refreshAiVerifyCntBadge();}catch(_){}}}
 function toggleAdvSettings(){
   const body=document.getElementById('adv-settings-body');
   const btn=document.getElementById('adv-settings-btn');
@@ -21918,7 +23135,8 @@ Object.assign(window, {
   giveBonus, deductPts, togAct, togActHome, delAct, delRwd,
   togSetting, saveSettings, togBdaySetting, saveBdaySettings, saveGreetingMode, saveGreetingCustom,
   resetToday, resetAll, backupData, restoreData,
-  openActForm, saveActivity, pickCycle, toggleDaysMode, toggleDay,
+  openActForm, saveActivity, pickCycle, pickVerifyMode, toggleDaysMode, toggleDay,
+  toggleLogEditMode, toggleRwdEditMode,
   openRwdForm, saveReward, setGoalT, setRwdSale, initActDrag, initRwdDrag,
   openEP, closeEP, epSearch, pickE, showEpCat, switchEpCat,
   setPeriod, pk, startChangePIN, lockAdmin,
