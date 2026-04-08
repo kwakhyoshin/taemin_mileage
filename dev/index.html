@@ -4674,6 +4674,20 @@ requestAnimationFrame(function(){
   </div>
 </div>
 
+<!-- FEATURE INTRO POPUP (신규 기능 소개) -->
+<div class="overlay" id="m-feature-intro" style="z-index:650;justify-content:center">
+  <div class="sheet" style="max-width:380px;width:92%;border-radius:24px;max-height:86vh;padding:0;overflow:hidden">
+    <div class="sheet-body" style="padding:0">
+      <div id="fi-slides" style="position:relative"></div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:8px;padding:4px 0 12px" id="fi-dots"></div>
+      <div style="display:flex;gap:8px;padding:0 20px 20px">
+        <button id="fi-prev" class="btn-sm" style="flex:1;padding:14px 0;border-radius:14px;font-size:14px;font-weight:700;border:1px solid var(--bd);background:var(--cd);color:var(--tx);cursor:pointer" onclick="_fiPrev()">이전</button>
+        <button id="fi-next" class="btn-primary" style="flex:2;padding:14px 0;border-radius:14px;font-size:15px;font-weight:800;border:none;color:#fff;background:linear-gradient(135deg,#6366F1,#8B5CF6);cursor:pointer" onclick="_fiNext()">다음</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- CHILD PICKER BOTTOM SHEET -->
 <div class="overlay" id="m-child-picker">
   <div class="sheet">
@@ -9338,7 +9352,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0408s';
+const _APP_VERSION = 'v0408t';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -18933,6 +18947,9 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.2.2 (v0408t)',date:'2026-04-08',items:[
+    {type:'new',text:'신규 기능 소개 팝업 시스템 추가. 앱 진입 시 "AI 검수 기능" 소개 팝업이 3장 슬라이드(SVG 일러스트 포함)로 뜨고, 한 번 본 기능은 다시 노출되지 않음'},
+  ]},
   {ver:'2.2.1 (v0408s)',date:'2026-04-08',items:[
     {type:'fix',text:'AI 검수 여러 번 시도 후 "부모에게 확인 요청"으로 전환했을 때 가족 아이콘에 알림 뱃지가 안 뜨던 버그 수정. 이미 pending 상태여도 familyMessages에 재알림을 push하고, 뱃지 갱신을 즉시+모달 닫힐 때 한 번 더 수행'},
   ]},
@@ -19486,6 +19503,178 @@ function _updateChangelogBadge(){
   const badge=document.getElementById('changelog-badge');
   if(badge)badge.style.display=_hasNewChangelog()?'inline-block':'none';
 }
+// ============ 신규 기능 소개 팝업 (Feature Intro) ============
+// 기능별로 1회만 노출. localStorage 키: taemin_v6_feature_intro_seen (JSON: {featureId:true})
+const _FI_LS_KEY=_LS_PREFIX+'feature_intro_seen';
+function _fiGetSeen(){try{return JSON.parse(localStorage.getItem(_FI_LS_KEY)||'{}');}catch(_){return{};}}
+function _fiMarkSeen(id){const s=_fiGetSeen();s[id]=true;localStorage.setItem(_FI_LS_KEY,JSON.stringify(s));}
+function _fiHasSeen(id){return !!_fiGetSeen()[id];}
+
+// 슬라이드 정의: {title, desc, svg}
+const _FEATURE_INTROS={
+  'ai-verify-v1':{
+    title:'🤖 AI 검수 기능 출시!',
+    slides:[
+      {
+        title:'AI가 활동을 먼저 확인해요',
+        desc:'이제 활동을 완료하면 AI가 먼저 검수해드려요. 부모님이 자리에 없어도 바로 포인트를 받을 수 있어요!',
+        svg:`<svg viewBox="0 0 280 180" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="fi1bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#EEF2FF"/><stop offset="1" stop-color="#F5F3FF"/></linearGradient>
+            <linearGradient id="fi1ai" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6366F1"/><stop offset="1" stop-color="#8B5CF6"/></linearGradient>
+          </defs>
+          <rect width="280" height="180" fill="url(#fi1bg)"/>
+          <!-- 활동 카드 -->
+          <rect x="24" y="48" width="110" height="84" rx="14" fill="#fff" stroke="#E5E7EB" stroke-width="1.5"/>
+          <circle cx="50" cy="76" r="14" fill="#FEF3C7"/>
+          <text x="50" y="81" font-size="16" text-anchor="middle">📖</text>
+          <rect x="72" y="68" width="52" height="6" rx="3" fill="#374151"/>
+          <rect x="72" y="80" width="40" height="5" rx="2.5" fill="#D1D5DB"/>
+          <rect x="36" y="104" width="86" height="18" rx="9" fill="#6366F1"/>
+          <text x="79" y="117" font-size="10" fill="#fff" text-anchor="middle" font-weight="700">완료하기</text>
+          <!-- 화살표 -->
+          <path d="M144 90 L168 90" stroke="#9CA3AF" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M162 84 L170 90 L162 96" stroke="#9CA3AF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <!-- AI 로봇 -->
+          <rect x="180" y="54" width="76" height="76" rx="18" fill="url(#fi1ai)"/>
+          <circle cx="202" cy="82" r="6" fill="#fff"/>
+          <circle cx="234" cy="82" r="6" fill="#fff"/>
+          <circle cx="202" cy="82" r="2.5" fill="#1F2937"/>
+          <circle cx="234" cy="82" r="2.5" fill="#1F2937"/>
+          <rect x="206" y="100" width="24" height="4" rx="2" fill="#fff"/>
+          <rect x="212" y="44" width="12" height="10" rx="2" fill="url(#fi1ai)"/>
+          <circle cx="218" cy="42" r="4" fill="#FCD34D"/>
+          <!-- 별 -->
+          <text x="168" y="44" font-size="14">✨</text>
+          <text x="256" y="44" font-size="14">✨</text>
+        </svg>`
+      },
+      {
+        title:'사진 또는 목소리로 인증',
+        desc:'카메라로 결과물을 찍거나, 목소리로 녹음해서 제출하면 AI가 내용을 확인해요. 간단하죠?',
+        svg:`<svg viewBox="0 0 280 180" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="fi2bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ECFEFF"/><stop offset="1" stop-color="#F0F9FF"/></linearGradient>
+          </defs>
+          <rect width="280" height="180" fill="url(#fi2bg)"/>
+          <!-- 사진 카드 -->
+          <rect x="28" y="38" width="104" height="104" rx="18" fill="#fff" stroke="#E5E7EB" stroke-width="1.5"/>
+          <circle cx="80" cy="72" r="22" fill="#DBEAFE"/>
+          <rect x="66" y="62" width="28" height="20" rx="4" fill="#3B82F6"/>
+          <circle cx="80" cy="72" r="6" fill="#fff"/>
+          <circle cx="80" cy="72" r="3" fill="#3B82F6"/>
+          <rect x="88" y="60" width="6" height="3" rx="1" fill="#fff"/>
+          <text x="80" y="116" font-size="11" fill="#1F2937" text-anchor="middle" font-weight="700">사진 인증</text>
+          <text x="80" y="130" font-size="9" fill="#6B7280" text-anchor="middle">결과물 촬영</text>
+          <!-- 마이크 카드 -->
+          <rect x="148" y="38" width="104" height="104" rx="18" fill="#fff" stroke="#E5E7EB" stroke-width="1.5"/>
+          <circle cx="200" cy="72" r="22" fill="#FCE7F3"/>
+          <rect x="194" y="58" width="12" height="20" rx="6" fill="#EC4899"/>
+          <path d="M186 74 Q186 90 200 90 Q214 90 214 74" stroke="#EC4899" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <line x1="200" y1="90" x2="200" y2="96" stroke="#EC4899" stroke-width="2.5" stroke-linecap="round"/>
+          <text x="200" y="116" font-size="11" fill="#1F2937" text-anchor="middle" font-weight="700">음성 인증</text>
+          <text x="200" y="130" font-size="9" fill="#6B7280" text-anchor="middle">목소리 녹음</text>
+          <!-- 물결 -->
+          <circle cx="200" cy="72" r="30" fill="none" stroke="#EC4899" stroke-width="1" opacity=".3"/>
+          <circle cx="200" cy="72" r="36" fill="none" stroke="#EC4899" stroke-width="1" opacity=".15"/>
+        </svg>`
+      },
+      {
+        title:'즉시 포인트 또는 부모님 확인',
+        desc:'AI가 확실하면 바로 포인트 적립! 애매하면 부모님께 확인 요청이 자동으로 전달돼요. 하루 30회까지 사용할 수 있어요.',
+        svg:`<svg viewBox="0 0 280 180" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="fi3bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F0FDF4"/><stop offset="1" stop-color="#FEFCE8"/></linearGradient>
+            <linearGradient id="fi3ok" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#10B981"/><stop offset="1" stop-color="#059669"/></linearGradient>
+            <linearGradient id="fi3q" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F59E0B"/><stop offset="1" stop-color="#D97706"/></linearGradient>
+          </defs>
+          <rect width="280" height="180" fill="url(#fi3bg)"/>
+          <!-- AI 중앙 -->
+          <circle cx="140" cy="46" r="20" fill="#6366F1"/>
+          <circle cx="134" cy="44" r="3" fill="#fff"/>
+          <circle cx="146" cy="44" r="3" fill="#fff"/>
+          <rect x="134" y="52" width="12" height="3" rx="1.5" fill="#fff"/>
+          <text x="140" y="26" font-size="10" fill="#6366F1" text-anchor="middle" font-weight="800">AI 검수</text>
+          <!-- 분기 라인 -->
+          <path d="M140 66 Q140 82 78 96" stroke="#10B981" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <path d="M140 66 Q140 82 202 96" stroke="#F59E0B" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <!-- 즉시 승인 박스 -->
+          <rect x="14" y="96" width="128" height="68" rx="14" fill="#fff" stroke="#10B981" stroke-width="1.5"/>
+          <circle cx="38" cy="122" r="14" fill="url(#fi3ok)"/>
+          <path d="M31 122 L36 127 L45 117" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <text x="58" y="118" font-size="11" fill="#065F46" font-weight="800">즉시 승인</text>
+          <text x="58" y="132" font-size="9" fill="#047857">포인트 바로 적립</text>
+          <text x="58" y="146" font-size="9" fill="#047857">⚡ 빠름</text>
+          <!-- 부모 확인 박스 -->
+          <rect x="138" y="96" width="128" height="68" rx="14" fill="#fff" stroke="#F59E0B" stroke-width="1.5"/>
+          <circle cx="162" cy="122" r="14" fill="url(#fi3q)"/>
+          <text x="162" y="128" font-size="16" fill="#fff" text-anchor="middle" font-weight="800">?</text>
+          <text x="182" y="118" font-size="11" fill="#92400E" font-weight="800">부모 확인</text>
+          <text x="182" y="132" font-size="9" fill="#B45309">자동으로 전달</text>
+          <text x="182" y="146" font-size="9" fill="#B45309">👨‍👩 가족 알림</text>
+        </svg>`
+      }
+    ]
+  }
+};
+
+let _fiCurrentId=null,_fiIdx=0;
+function _fiRender(){
+  const intro=_FEATURE_INTROS[_fiCurrentId];if(!intro)return;
+  const slides=intro.slides,n=slides.length,s=slides[_fiIdx];
+  const wrap=document.getElementById('fi-slides');
+  if(wrap){
+    wrap.innerHTML=`<div style="padding:20px 20px 8px">
+      <div style="font-size:11px;font-weight:800;color:#8B5CF6;letter-spacing:.5px;margin-bottom:4px">NEW · ${_fiIdx+1} / ${n}</div>
+      <div style="font-size:19px;font-weight:900;color:var(--tx);margin-bottom:14px;line-height:1.3">${s.title}</div>
+      <div style="border-radius:16px;overflow:hidden;background:#F9FAFB;margin-bottom:14px">${s.svg}</div>
+      <div style="font-size:13.5px;color:var(--tx2);line-height:1.6;margin-bottom:8px">${s.desc}</div>
+    </div>`;
+  }
+  const dots=document.getElementById('fi-dots');
+  if(dots){
+    dots.innerHTML=slides.map((_,i)=>`<span style="width:${i===_fiIdx?20:8}px;height:8px;border-radius:4px;background:${i===_fiIdx?'#6366F1':'#E5E7EB'};transition:all .25s"></span>`).join('');
+  }
+  const prev=document.getElementById('fi-prev'),next=document.getElementById('fi-next');
+  if(prev)prev.style.visibility=_fiIdx===0?'hidden':'visible';
+  if(next)next.textContent=_fiIdx===n-1?'시작하기 🚀':'다음';
+}
+function _fiPrev(){if(_fiIdx>0){_fiIdx--;_fiRender();}}
+function _fiNext(){
+  const intro=_FEATURE_INTROS[_fiCurrentId];if(!intro)return;
+  if(_fiIdx<intro.slides.length-1){_fiIdx++;_fiRender();}
+  else{_fiClose();}
+}
+function _fiClose(){
+  if(_fiCurrentId)_fiMarkSeen(_fiCurrentId);
+  const el=document.getElementById('m-feature-intro');
+  if(el)el.classList.remove('open');
+  _fiCurrentId=null;_fiIdx=0;
+}
+function showFeatureIntro(id){
+  if(!_FEATURE_INTROS[id])return;
+  _fiCurrentId=id;_fiIdx=0;
+  _fiRender();
+  const el=document.getElementById('m-feature-intro');
+  if(el)el.classList.add('open');
+}
+function _maybeShowFeatureIntros(){
+  if(!currentUser)return;
+  // AI 검수 기능 소개 (v1) — 아이만 대상 (caregiver는 스킵)
+  if(!_fiHasSeen('ai-verify-v1')){
+    try{
+      const isChild=!(typeof isCaregiverUser==='function'&&isCaregiverUser());
+      if(isChild){
+        setTimeout(()=>showFeatureIntro('ai-verify-v1'),800);
+      }else{
+        _fiMarkSeen('ai-verify-v1'); // 보호자는 노출 없이 본 것으로 처리
+      }
+    }catch(_){}
+  }
+}
+window.showFeatureIntro=showFeatureIntro;
+window._fiPrev=_fiPrev;window._fiNext=_fiNext;window._fiClose=_fiClose;
+
 // 로그인 후 새 업데이트 알림 팝업
 function _showChangelogPopupIfNew(){
   if(!_hasNewChangelog()||!currentUser)return;
@@ -23523,6 +23712,7 @@ window._createState = _createState;
   // 업데이트 내역 배지 + 알림 배너
   _updateChangelogBadge();
   _showChangelogPopupIfNew();
+  try{_maybeShowFeatureIntros();}catch(_){}
 
   // 날씨/미세먼지 데이터 가져오기
   fetchWeather();
