@@ -9318,7 +9318,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0408g';
+const _APP_VERSION = 'v0408h';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -16296,16 +16296,16 @@ function _aiVerifyApplyPass(a,comment){
 }
 
 function _aiVerifyApplyReject(a,comment){
-  // 활동 기록은 rejected 상태로 보존, 마일리지 X. 카운트 +1 (재시도 방지).
-  markDone(a);
-  if(!S.log)S.log=[];
-  S.log.unshift({
-    id:'l_'+Date.now(),emoji:a.emoji,name:a.name,pts:0,ts:Date.now(),actId:a.id,
-    user:_globalDataOwner||currentUser,
-    status:'rejected',
-    verify:{mode:'ai',result:'reject',aiResult:'reject',parentResult:null,comment,by:'ai'}
+  // v0408h: markDone/S.log 푸시 제거 — 반려는 "완료"로 취급하지 않음.
+  // (재시도 방지는 일일 AI 카운터 _aiVerifyIncCount로 대체)
+  // 반려 이력은 별도 S.aiVerifyRejects에 보존 (추후 칩 표시용)
+  if(!S.aiVerifyRejects)S.aiVerifyRejects=[];
+  S.aiVerifyRejects.unshift({
+    id:'avr_'+Date.now(),actId:a.id,actName:a.name,actEmoji:a.emoji,
+    ts:Date.now(),user:_globalDataOwner||currentUser,
+    comment,verify:{mode:'ai',result:'reject',by:'ai'}
   });
-  if(S.log.length>300)S.log=S.log.slice(0,300);
+  if(S.aiVerifyRejects.length>200)S.aiVerifyRejects=S.aiVerifyRejects.slice(0,200);
   save();renderAll();
 }
 
@@ -16334,6 +16334,37 @@ function _aiVerifyHandleOverLimit(a){
   _aiVerifyEscalateToParent(a,'over-limit',null);
   _aiVerifyShowResult('⏳','오늘 AI 검수는 다 썼어요','엄마아빠가 확인해 주실 거예요');
 }
+
+// v0408h: 이전 버전에서 AI reject가 markDone + S.log(pts:0)로 잘못 저장된 기록 정리
+function _migV0408hCleanupRejects(){
+  if(S.migV0408h)return;
+  let touched=false;
+  if(Array.isArray(S.log)){
+    for(let i=S.log.length-1;i>=0;i--){
+      const l=S.log[i];
+      if(l&&l.verify&&l.verify.result==='reject'&&l.pts===0){
+        // 별도 저장소로 이동
+        if(!S.aiVerifyRejects)S.aiVerifyRejects=[];
+        const a=S.acts&&S.acts.find(x=>x.id===l.actId);
+        S.aiVerifyRejects.unshift({
+          id:'avr_'+(l.ts||Date.now()),actId:l.actId,
+          actName:a?a.name:(l.name||''),actEmoji:a?a.emoji:(l.emoji||''),
+          ts:l.ts||Date.now(),user:l.user||null,
+          comment:(l.verify&&l.verify.comment)||'',
+          verify:l.verify
+        });
+        S.log.splice(i,1);
+        // markDone 롤백
+        if(a&&typeof unmarkDone==='function'){try{unmarkDone(a);}catch(e){}}
+        touched=true;
+      }
+    }
+  }
+  S.migV0408h=true;
+  if(touched){try{save();}catch(e){}}
+}
+try{setTimeout(_migV0408hCleanupRejects,1500);}catch(e){}
+window._migV0408hCleanupRejects=_migV0408hCleanupRejects;
 
 window.openAiVerifyModal=openAiVerifyModal;
 window._aiVerifyOnFile=_aiVerifyOnFile;
@@ -18452,6 +18483,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.1.2 (v0408h)',date:'2026-04-08',items:[{type:'fix',text:'AI 검수 반려 시 활동이 "완료"로 잘못 표시되고 취소도 안 되던 문제 수정. _aiVerifyApplyReject가 markDone을 호출하던 로직 제거 — 반려는 완료로 취급하지 않고 S.aiVerifyRejects 별도 저장소에 이력만 보존합니다. 이미 잘못 저장된 기존 데이터는 부팅 시 1회 자동 마이그레이션(_migV0408hCleanupRejects)으로 S.log에서 제거하고 unmarkDone 롤백 후 aiVerifyRejects로 이동시켜요.'}]},
   {ver:'2.1.1 (v0408g)',date:'2026-04-08',items:[{type:'fix',text:'AI 검수 "호출 실패 load fail" 수정 — /api/verify 엔드포인트가 Vercel에 아직 배포되지 않아 404가 떠서 실패하던 문제. 기존 /api/proxy(챗봇용 Anthropic 포워더)를 재사용해 멀티모달 메시지로 직접 Claude Haiku 4.5를 호출하도록 변경. 시스템 프롬프트에 JSON 출력 강제 규칙을 포함하고, 응답 텍스트에서 JSON 블록을 추출해 파싱합니다.'}]},
   {ver:'2.1.0 (v0408f)',date:'2026-04-08',items:[{type:'new',text:'[AI 검수 Step 2 — PR B] 🤖 AI 검수 모드 정상 작동 개시. 활동 만들기에서 "🤖 AI 검수"를 선택하면 검증 지시문 입력란이 나타나요. 아이가 활동을 탭하면 카메라 모달이 열리고, 사진을 찍어 [검수 받기]를 누르면 Vercel /api/verify로 전송되어 Claude Haiku 4.5가 통과/반려/uncertain을 판정합니다. 통과 시 즉시 마일리지 적립, 반려 시 기록만 남기고 카운트 +1, uncertain/한도 초과 시 부모 승인 큐로 자동 이관(PR A 메커니즘 재사용). 일일 한도 20회 클라이언트 카운터 + 우상단 잔여 표시.'}]},
   {ver:'2.0.9 (v0408e)',date:'2026-04-08',items:[{type:'new',text:'[AI 검수 Step 2 — PR A/B] "부모 승인" 검수 모드 정상 작동 개시. 활동 만들기에서 "부모 승인"을 선택하면, 아이가 해당 활동을 탭했을 때 바로 마일리지가 적립되지 않고 부모에게 승인 요청 메시지가 발송돼요. 부모가 가족 메시지 팝업에서 [승인]/[반려]를 누르면 그 시점에 마일리지가 적립/반려 처리됩니다. 승인 대기 중인 활동은 목록에 "⏳ 승인 대기" 칩이 표시돼요. (승인 메커니즘은 기존 보상 사용 요청과 동일)'}]},
