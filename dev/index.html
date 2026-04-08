@@ -9332,7 +9332,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0408k';
+const _APP_VERSION = 'v0408l';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -16205,11 +16205,21 @@ async function _aiVerifyToggleRecord(){
     const blob=new Blob(_aiVoiceChunks,{type:_aiVoiceMime});
     if(blob.size<500){toast('녹음이 너무 짧아요');_aiVerifyResetVoiceUI();return;}
     // v0408k: webm/mp4는 Gemini가 직접 지원하지 않음 → AudioContext로 디코드 후 WAV로 재인코딩
+    // v0408l: iOS Safari는 user gesture 밖에서 AudioContext가 suspended → resume() 추가, decodeAudioData callback fallback
     try{
       const arrBuf=await blob.arrayBuffer();
       const AC=window.AudioContext||window.webkitAudioContext;
       const ac=new AC();
-      const decoded=await ac.decodeAudioData(arrBuf.slice(0));
+      try{if(ac.state==='suspended')await ac.resume();}catch(_){}
+      let decoded;
+      try{
+        decoded=await ac.decodeAudioData(arrBuf.slice(0));
+      }catch(e1){
+        // 구형 Safari callback-style fallback
+        decoded=await new Promise((res,rej)=>{
+          try{ac.decodeAudioData(arrBuf.slice(0),res,rej);}catch(e2){rej(e2);}
+        });
+      }
       // 모노, 16kHz로 다운샘플 (Gemini 음성 인식에 충분, 용량 절감)
       const targetRate=16000;
       const srcRate=decoded.sampleRate;
@@ -16252,15 +16262,25 @@ async function _aiVerifyToggleRecord(){
         off+=2;
       }
       const wavBlob=new Blob([buf],{type:'audio/wav'});
+      console.log('[voice] WAV encoded',{srcRate,srcCh,outLen,bytes:wavBlob.size});
+      // 재생용은 object URL (큰 데이터 URL은 일부 브라우저에서 audio element 오류)
+      const objUrl=URL.createObjectURL(wavBlob);
+      const au=document.getElementById('m-ai-verify-audio');
+      // 이전 object URL 해제
+      try{if(_aiVerifyCtx._prevObjUrl)URL.revokeObjectURL(_aiVerifyCtx._prevObjUrl);}catch(_){}
+      _aiVerifyCtx._prevObjUrl=objUrl;
+      au.src=objUrl;
+      au.load();
+      au.onerror=(ev)=>{console.error('[voice] audio element error',au.error,ev);};
+      // 업로드용은 별도로 base64 변환
       const fr=new FileReader();
       fr.onload=()=>{
-        _aiVerifyCtx.audioDataUrl=fr.result;
+        _aiVerifyCtx.audioDataUrl=fr.result; // data:audio/wav;base64,...
         _aiVerifyCtx.audioMime='audio/wav';
-        const au=document.getElementById('m-ai-verify-audio');
-        au.src=fr.result;
         document.getElementById('m-ai-verify-stage-pick-voice').style.display='none';
         document.getElementById('m-ai-verify-stage-preview').style.display='block';
       };
+      fr.onerror=(e)=>{console.error('[voice] FileReader error',e);toast('녹음 변환 실패');_aiVerifyResetVoiceUI();};
       fr.readAsDataURL(wavBlob);
     }catch(e){
       console.error('[voice] WAV encode fail',e);
@@ -18769,6 +18789,9 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.1.6 (v0408l)',date:'2026-04-08',items:[
+    {type:'fix',text:'AI 음성 검수 녹음 후 오디오 플레이어가 "오류" 표시되던 문제 수정 — 큰 base64 data URL 대신 URL.createObjectURL 사용, iOS Safari용 AudioContext.resume() 및 decodeAudioData callback fallback 추가'},
+  ]},
   {ver:'2.1.5 (v0408k)',date:'2026-04-08',items:[
     {type:'fix',text:'AI 음성 검수가 오디오를 읽지 못하던 문제 수정 — MediaRecorder의 webm/mp4 결과를 AudioContext로 디코드 후 16kHz 모노 WAV로 재인코딩해서 Gemini에 전달 (Gemini는 webm 비공식 지원이라 빈 응답 발생)'},
     {type:'fix',text:'AI 음성 검수 실패 시 Gemini 실제 에러 메시지와 raw 텍스트를 토스트·콘솔에 노출 (디버깅 개선)'},
