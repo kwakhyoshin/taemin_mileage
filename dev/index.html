@@ -9352,7 +9352,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0408u';
+const _APP_VERSION = 'v0408v';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -9606,7 +9606,7 @@ const LEVEL_EFFECTS={
   2:{name:'학습의 빛',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-tw"><circle cx="18" cy="20" r="2" fill="#42A5F5"/><circle cx="84" cy="22" r="2" fill="#64B5F6"/><circle cx="12" cy="60" r="1.7" fill="#90CAF9"/><circle cx="88" cy="62" r="1.7" fill="#42A5F5"/><circle cx="50" cy="14" r="1.5" fill="#1E88E5"/></g></svg></div>'},
   3:{name:'반짝이는 별',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-spin" style="transform-origin:50px 50px"><path d="M50 8l1.6 4.4L56 14l-4.4 1.6L50 20l-1.6-4.4L44 14l4.4-1.6z" fill="#FFD600"/><path d="M92 50l-4.4 1.6L86 56l-1.6-4.4L80 50l4.4-1.6L86 44l1.6 4.4z" fill="#FFC107"/><path d="M50 92l-1.6-4.4L44 86l4.4-1.6L50 80l1.6 4.4L56 86l-4.4 1.6z" fill="#FFD600"/><path d="M8 50l4.4-1.6L14 44l1.6 4.4L20 50l-4.4 1.6L14 56l-1.6-4.4z" fill="#FFC107"/></g></svg></div>'},
   4:{name:'잎사귀 흩날림',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-fall"><path d="M20 5c-4 4-4 10 0 14 4-4 4-10 0-14z" fill="#66BB6A"/><path d="M50 0c-4 4-4 10 0 14 4-4 4-10 0-14z" fill="#81C784"/><path d="M80 5c-4 4-4 10 0 14 4-4 4-10 0-14z" fill="#4CAF50"/></g></svg></div>'},
-  5:{name:'불꽃 활활',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-flicker" style="transform-origin:50px 55px"><path d="M50 2 Q22 22 14 50 Q8 78 30 92 Q22 70 38 56 Q30 80 50 96 Q70 80 62 56 Q78 70 70 92 Q92 78 86 50 Q78 22 50 2z" fill="#FF6F00"/></g><g class="lv-flicker" style="transform-origin:50px 60px;animation-delay:.15s"><path d="M50 14 Q32 30 26 54 Q22 76 38 86 Q34 68 46 58 Q40 78 50 90 Q60 78 54 58 Q66 68 62 86 Q78 76 74 54 Q68 30 50 14z" fill="#FF9800"/></g><g class="lv-flicker" style="transform-origin:50px 65px;animation-delay:.3s"><path d="M50 28 Q40 40 36 58 Q34 74 44 80 Q42 68 50 62 Q58 68 56 80 Q66 74 64 58 Q60 40 50 28z" fill="#FFC107"/></g></svg></div>'},
+  5:{name:'불꽃 활활',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g transform="rotate(180 50 50)"><g class="lv-flicker" style="transform-origin:50px 55px"><path d="M50 2 Q22 22 14 50 Q8 78 30 92 Q22 70 38 56 Q30 80 50 96 Q70 80 62 56 Q78 70 70 92 Q92 78 86 50 Q78 22 50 2z" fill="#FF6F00"/></g><g class="lv-flicker" style="transform-origin:50px 60px;animation-delay:.15s"><path d="M50 14 Q32 30 26 54 Q22 76 38 86 Q34 68 46 58 Q40 78 50 90 Q60 78 54 58 Q66 68 62 86 Q78 76 74 54 Q68 30 50 14z" fill="#FF9800"/></g><g class="lv-flicker" style="transform-origin:50px 65px;animation-delay:.3s"><path d="M50 28 Q40 40 36 58 Q34 74 44 80 Q42 68 50 62 Q58 68 56 80 Q66 74 64 58 Q60 40 50 28z" fill="#FFC107"/></g></g></svg></div>'},
   6:{name:'수호 오라',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-ripple" style="transform-origin:50px 50px"><circle cx="50" cy="50" r="42" fill="none" stroke="#5C6BC0" stroke-width="2.5"/><circle cx="50" cy="50" r="42" fill="none" stroke="#7986CB" stroke-width="2"/><circle cx="50" cy="50" r="42" fill="none" stroke="#9FA8DA" stroke-width="1.5"/></g></svg></div>'},
   7:{name:'에너지 번개',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-bolts"><path d="M12 28l8-14-2 10 6-2-10 18 2-12z" fill="#FFEB3B" stroke="#F57F17" stroke-width=".5"/><path d="M82 18l8-14-2 10 6-2-10 18 2-12z" fill="#FFC107" stroke="#F57F17" stroke-width=".5"/><path d="M50 4l6-10-1 8 5-2-8 14 1-10z" fill="#FFEB3B" stroke="#F57F17" stroke-width=".5"/></g></svg></div>'},
   8:{name:'금메달 광채',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><defs><clipPath id="lvClip8"><circle cx="50" cy="50" r="46"/></clipPath></defs><g clip-path="url(#lvClip8)"><rect class="lv-slash" x="-30" y="40" width="160" height="14" fill="url(#lvShine8)" opacity=".8"/></g><defs><linearGradient id="lvShine8"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".9"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs><g class="lv-tw"><circle cx="20" cy="20" r="1.8" fill="#FFD600"/><circle cx="82" cy="22" r="1.8" fill="#FFC107"/><circle cx="78" cy="80" r="1.8" fill="#FFD600"/><circle cx="22" cy="82" r="1.8" fill="#FFC107"/></g></svg></div>'},
@@ -12773,7 +12773,7 @@ function openLevelPopup(){
   const ov=document.createElement('div');
   ov.className='streak-popup-overlay show';
   ov.innerHTML=`<div class="streak-popup" style="transform:scale(1)">
-    <div style="width:72px;height:72px;margin:0 auto 8px;position:relative"><div style="position:absolute;inset:12px">${info.svg||`<span style="font-size:48px">${info.emoji}</span>`}</div>${getLevelEffectHTML(info.level)||''}</div>
+    <div style="width:72px;height:72px;margin:0 auto 8px;position:relative">${getLevelEffectHTML(info.level)||''}<div style="position:absolute;inset:12px;z-index:2">${info.svg||`<span style="font-size:48px">${info.emoji}</span>`}</div></div>
     <div style="font-size:20px;font-weight:900;color:var(--tx)">Lv.${info.level} ${info.title}</div>
     <div style="margin:12px 0 8px;font-size:13px;color:var(--tx3);font-weight:700">누적 ${info.xp.toLocaleString()} / ${info.nextXP.toLocaleString()} 마일리지</div>
     <div style="background:var(--bdr);border-radius:6px;height:10px;overflow:hidden">
@@ -18947,6 +18947,10 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.2.4 (v0408v)',date:'2026-04-08',items:[
+    {type:'improve',text:'Lv.5 불꽃 이펙트를 180° 뒤집어 아래에서 위로 타오르는 형태로 변경'},
+    {type:'fix',text:'홈탭 제목영역 레벨 아이콘 탭 시 열리는 팝업에서 레벨 아이콘이 애니메이션 이펙트에 가려지던 문제 수정 (아이콘 z-index를 이펙트보다 위로 조정)'},
+  ]},
   {ver:'2.2.3 (v0408u)',date:'2026-04-08',items:[
     {type:'improve',text:'AI 검수 소개 팝업 디자인 개선 — 세련된 SVG 일러스트(그림자/그라데이션/필터), eyebrow 라벨, PRO 배지, 마지막 슬라이드에 "Pro 전용 기능" 안내 배너 추가'},
   ]},
