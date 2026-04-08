@@ -9350,7 +9350,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0408z3';
+const _APP_VERSION = 'v0408z4';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -23811,12 +23811,14 @@ window._createState = _createState;
       S = defaultState();
     }
   }catch(e){
+    console.error('[mile.ly][DEBUG] Firebase load failed', {code:e&&e.code, message:e&&e.message, name:e&&e.name, stack:e&&e.stack, _firebaseReady, DATA_DOC_path:(DATA_DOC&&DATA_DOC.path), LEGACY_DOC_path:(LEGACY_DOC&&LEGACY_DOC.path), auth_uid:(fbAuth&&fbAuth.currentUser&&fbAuth.currentUser.uid)});
+    try{ window._lastFirebaseError={code:e&&e.code,message:e&&e.message,name:e&&e.name,DATA_DOC_path:(DATA_DOC&&DATA_DOC.path),LEGACY_DOC_path:(LEGACY_DOC&&LEGACY_DOC.path),_firebaseReady,auth_uid:(fbAuth&&fbAuth.currentUser&&fbAuth.currentUser.uid)}; }catch(_){}
     console.warn('Firebase load failed, trying localStorage backup', e);
     try{
       const backup = localStorage.getItem(_LS_PREFIX+'v6_backup');
       if(backup) S = Object.assign(defaultState(), JSON.parse(backup));
     }catch(e2){}
-    toast('⚠️ 오프라인 모드 — 인터넷 연결을 확인해주세요');
+    toast('⚠️ 오프라인 모드 — '+(e&&e.code?'['+e.code+'] ':'')+(e&&e.message?e.message.substring(0,80):'인터넷 연결을 확인해주세요'));
   }
 
   // ── 레거시 → familyMeta 마이그레이션 (1회성) ──
