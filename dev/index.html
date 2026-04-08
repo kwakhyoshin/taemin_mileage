@@ -4822,8 +4822,8 @@ requestAnimationFrame(function(){
 </div>
 
 <!-- MODAL: AI 검수 (v0408f) -->
-<div class="overlay" id="m-ai-verify">
-  <div class="sheet" style="max-width:380px">
+<div class="overlay" id="m-ai-verify" style="justify-content:center">
+  <div class="sheet">
     <div class="sheet-head" style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--bd)">
       <div style="font-size:16px;font-weight:800">🤖 AI 검수</div>
       <div id="m-ai-verify-quota" style="font-size:12px;color:var(--tx3);font-weight:700">🤖 -</div>
@@ -4844,7 +4844,8 @@ requestAnimationFrame(function(){
       </div>
       <div id="m-ai-verify-stage-preview" style="display:none;text-align:center">
         <img id="m-ai-verify-img" style="display:none;max-width:100%;max-height:240px;border-radius:12px;margin-bottom:10px">
-        <audio id="m-ai-verify-audio" style="display:none;width:100%;margin-bottom:10px" controls></audio>
+        <div id="m-ai-verify-voice-info" style="display:none;background:var(--cd);padding:16px;border-radius:12px;margin-bottom:10px;font-size:14px;color:var(--tx2);font-weight:700">🎤 녹음 완료 (<span id="m-ai-verify-voice-dur">-</span>초)</div>
+        <audio id="m-ai-verify-audio" style="display:none"></audio>
         <div style="display:flex;gap:8px">
           <button onclick="_aiVerifyRetake()" style="flex:1;padding:12px;background:var(--cd);color:var(--tx);border:1px solid var(--bd);border-radius:12px;font-weight:800;cursor:pointer">다시</button>
           <button id="m-ai-verify-submit-btn" onclick="_aiVerifySubmit()" style="flex:1;padding:12px;background:#22C55E;color:#fff;border:0;border-radius:12px;font-weight:800;cursor:pointer">검수 받기</button>
@@ -9332,7 +9333,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0408o';
+const _APP_VERSION = 'v0408p';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -16189,7 +16190,7 @@ function openAiVerifyModal(a){
   document.getElementById('m-ai-verify-stage-loading').style.display='none';
   document.getElementById('m-ai-verify-stage-result').style.display='none';
   document.getElementById('m-ai-verify-img').style.display=(media==='photo')?'block':'none';
-  document.getElementById('m-ai-verify-audio').style.display=(media==='voice')?'block':'none';
+  const _vi=document.getElementById('m-ai-verify-voice-info');if(_vi)_vi.style.display='none';
   const fileEl=document.getElementById('m-ai-verify-file');
   if(fileEl)fileEl.value='';
   // Reset record button label
@@ -16322,21 +16323,19 @@ async function _aiVerifyToggleRecord(){
         off+=2;
       }
       const wavBlob=new Blob([buf],{type:'audio/wav'});
-      console.log('[voice] WAV encoded',{srcRate,srcCh,outLen,bytes:wavBlob.size});
-      const au=document.getElementById('m-ai-verify-audio');
-      au.setAttribute('playsinline','');
-      au.onerror=(ev)=>{
-        const er=au.error||{};
-        console.error('[voice] audio element error code='+er.code+' msg='+(er.message||'')+' src='+(au.src||'').slice(0,60));
-      };
-      // iOS PWA blob: 호환성 이슈로 data URL 사용
+      const durSec=(outLen/targetRate).toFixed(1);
+      console.log('[voice] WAV encoded',{srcRate,srcCh,outLen,bytes:wavBlob.size,durSec});
+      // iOS PWA는 WAV 재생 호환성 이슈 → 재생 UI 없이 "녹음 완료 N초" 텍스트로 대체
+      const info=document.getElementById('m-ai-verify-voice-info');
+      const durEl=document.getElementById('m-ai-verify-voice-dur');
+      if(info)info.style.display='block';
+      if(durEl)durEl.textContent=durSec;
+      // 업로드용 base64 변환
       const fr=new FileReader();
       fr.onload=()=>{
-        const dataUrl=fr.result;
-        _aiVerifyCtx.audioDataUrl=dataUrl;
+        _aiVerifyCtx.audioDataUrl=fr.result;
         _aiVerifyCtx.audioMime='audio/wav';
-        try{au.src=dataUrl;au.load();console.log('[voice] audio src set (data url len='+dataUrl.length+')');}
-        catch(e){console.error('[voice] au.src set fail',e);}
+        console.log('[voice] upload b64 len=',fr.result.length);
         document.getElementById('m-ai-verify-stage-pick-voice').style.display='none';
         document.getElementById('m-ai-verify-stage-preview').style.display='block';
       };
@@ -16452,7 +16451,7 @@ async function _aiVerifySubmit(){
       resp=await fetch(AI_VOICE_ENDPOINT,{
         method:'POST',
         headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({audioBase64:audioB64,mimeType:audioMime,prompt:userPromptV,systemPrompt:sysPromptV,maxOutputTokens:256})
+        body:JSON.stringify({audioBase64:audioB64,mimeType:audioMime,prompt:userPromptV,systemPrompt:sysPromptV,maxOutputTokens:512})
       });
       data=await resp.json();
     }catch(e){err=e;}
@@ -16467,8 +16466,10 @@ async function _aiVerifySubmit(){
       return;
     }
     let result='uncertain',comment='',confidence=0;
-    const rawText=(data.text||'').trim();
+    let rawText=(data.text||'').trim();
     console.log('[aiVerify-voice] raw text',rawText);
+    // 마크다운 코드펜스 제거 (```json ... ```)
+    rawText=rawText.replace(/^```(?:json)?\s*/i,'').replace(/\s*```\s*$/,'').trim();
     try{
       const m=rawText.match(/\{[\s\S]*\}/);
       const parsed=m?JSON.parse(m[0]):JSON.parse(rawText);
@@ -18849,6 +18850,11 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.1.8 (v0408p)',date:'2026-04-08',items:[
+    {type:'fix',text:'AI 음성 검수: Gemini 응답의 ```json 코드펜스 때문에 파싱 실패하던 버그 수정 (코드펜스 strip 추가, maxOutputTokens 256→512)'},
+    {type:'fix',text:'AI 음성 검수: iOS Safari가 WAV data/blob URL을 <audio>에서 재생 거부(code 4) → 재생 플레이어 대신 "🎤 녹음 완료 N초" 텍스트로 교체. 검수 자체는 정상 동작'},
+    {type:'fix',text:'AI 검수 모달이 화면 우측에 공백이 생기던 문제 수정 (justify-content:center 추가, max-width:380px 제거)'},
+  ]},
   {ver:'2.1.7 (v0408m)',date:'2026-04-08',items:[
     {type:'chore',text:'(dev only) 화면 디버그 패널 추가 — 우측 하단 🐛 버튼으로 토글, console.log/error를 화면에 표시. AI 음성 검수 각 단계에 상세 로그 instrumentation 추가 (원격 디버깅용)'},
   ]},
