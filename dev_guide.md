@@ -662,6 +662,76 @@ git add index.html && git commit -m "운영기 배포: ..." && git push
 
 ## 8. 과거 사고 사례 및 교훈
 
+### 사고 5: iPhone PWA 콜드스타트 auth race (2026-04-08, v0408z5)
+- **증상**: iPhone PWA 콜드스타트 시 `permission-denied` 에러 연속 발생 → "오프라인 모드" toast. Mac Chrome에서는 정상 동작.
+- **디버그**: v0408z4에서 `console.error` + `window._lastFirebaseError`로 진단 로그 추가. 스크린샷에서 `auth_uid: null` 확인 — Firebase auth 세션이 복구되지 않은 상태에서 `getDoc(DATA_DOC)`이 발사됨.
+- **근본 원인**: `_initFirebase()`가 `getAuth()` 호출 직후 `_firebaseReady=true`로 만들고 끝남. iPhone PWA는 Mac Chrome보다 auth 세션 복구가 느리거나 비동기 타이밍이 달라서, `_firebaseReady=true` 직후 발사되는 `getDoc(DATA_DOC)` 시점에 `auth.currentUser`가 아직 null. Firestore rules의 `request.auth != null` 검사에 걸려 permission-denied.
+- **해결 (v0408z5)**: `_firebaseReady=true` 직전에 첫 `onAuthStateChanged` 이벤트를 await (최대 3초 timeout). auth.currentUser가 복구된 (또는 확실히 없는) 상태에서 Firestore 읽기가 진행되도록 보장.
+  ```javascript
+  await new Promise(function(resolve){
+    let done=false;
+    const unsub=onAuthStateChanged(fbAuth,function(){ if(done)return; done=true; try{unsub&&unsub();}catch(_){}; resolve(); });
+    setTimeout(function(){ if(done)return; done=true; try{unsub&&unsub();}catch(_){}; resolve(); },3000);
+  });
+  ```
+- **교훈**:
+  1. Firebase SDK 모듈 로드 완료(`getAuth` 리턴) ≠ 인증 세션 복구 완료. `currentUser`는 첫 `onAuthStateChanged` 이벤트 후에야 신뢰 가능.
+  2. 모바일 Safari/PWA는 데스크톱 Chrome보다 SDK 초기화 타이밍이 느리고 다르다. "Mac에서 잘 되는데" 가 안전을 보장하지 않음.
+  3. 진단이 막힐 때는 디버그 객체를 toast/error로 노출시켜 폰 화면에서 직접 읽을 수 있게 한다 (`window._lastFirebaseError`, error code를 toast에 포함).
+
+### 사고 6: Firestore 규칙으로 로그인 봉쇄 (2026-04-08)
+- **증상**: 사고 5 해결 직후 새 Firestore 규칙 게시. PWA 재진입 시 저장된 아이디/비번이 "틀렸다"고 거부됨. 실제로는 비번이 맞는데도 거부.
+- **원인**: 새 규칙에서 `match /families/{familyId}/{document=**} { allow read, write: if request.auth != null; }` 로 read도 인증을 요구. 그런데 `doLogin()`은 **로그인 화면(미인증 상태)**에서 `families/{familyId}` 문서를 읽어 `S.users`(아이디/비번 해시 맵)를 가져와 로컬로 비교하는 구조. 인증 전이라 read가 거부됨 → `S.users`가 빈 객체 → 어떤 아이디를 넣어도 매칭 실패 → "비번 틀림".
+- **해결**: `families`/`users`/`emailVerify`/`userRegistry`는 **read 공개 + write 인증 필요**로 변경. App Check (reCAPTCHA Enterprise)가 외부 무단 접근을 1차 차단 + 비밀번호는 salted SHA-512 해시로만 저장되므로 노출돼도 즉시 악용 불가.
+  ```
+  match /families/{familyId}/{document=**} {
+    allow read: if true;
+    allow write: if request.auth != null;
+  }
+  ```
+- **교훈**:
+  1. Firestore 규칙 강화 전에 **미인증 상태에서 읽는 컬렉션이 있는지** 코드 grep 필수. mile.ly의 경우 로그인 자체가 families 문서 read에 의존.
+  2. 보안 모델은 App Check + 해시 저장으로 다층 방어. 규칙에 모든 책임을 떠넘기면 핵심 기능이 깨질 수 있다.
+  3. 규칙 배포는 즉시 효력 → 사용자 차단 가능. 작은 변경이라도 운영 사용자에게 영향. 변경 후 즉시 로그인 테스트.
+
+### Firestore 규칙 표준 (2026-04-08 기준, 절대 변경 시 검증 필수)
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /system/{docId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    match /families/{familyId}/{document=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    match /users/{userId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    match /emailVerify/{docId} {
+      allow read, write: if true;
+    }
+    match /userRegistry/{docId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    match /chatErrors/{docId} {
+      allow read, write: if request.auth != null;
+    }
+    match /chatQueries/{docId} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
+```
+주의:
+- `families/{familyId}/{document=**}` — `{document=**}` 재귀 와일드카드 필수. 빠지면 `families/{id}/dh_{member}/{month}` 서브컬렉션이 막혀 알림장 저장 실패.
+- `system/{docId}` 누락 시 시스템 관리자 페이지(admin.html)의 AI 한도/팝업 설정 로드/저장 실패.
+- `families` read 공개 제거 금지 → 사고 6 재발.
+
 ### 사고 1: dev/index.html 롤백 (2025-03-29)
 - **원인**: git worktree의 오래된 코드가 main의 dev/index.html 덮어씀
 - **피해**: 47커밋 분량의 작업 소실
