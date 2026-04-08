@@ -3884,7 +3884,7 @@ requestAnimationFrame(function(){
       <div class="hdr-stat"><div class="hdr-stat-num" id="log-today-pts">0</div><div class="hdr-stat-lbl">보유 마일리지</div></div>
     </div>
   </div>
-  <div class="sec" style="display:flex;align-items:center;justify-content:space-between"><span><svg class="sec-ico" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg> 모든 활동</span><span id="log-edit-actions" style="display:none;gap:8px;align-items:center"><button id="log-edit-toggle-btn" onclick="toggleLogEditMode()" title="편집" aria-label="편집" style="display:inline-flex;align-items:center;gap:5px;background:var(--cd);color:var(--tx);border:1px solid var(--bd);border-radius:999px;padding:6px 12px;font-size:12px;font-weight:800;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.04)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>편집</button><button onclick="openActForm()" title="추가" aria-label="추가" style="display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,#6366F1,#8B5CF6);color:#fff;border:0;border-radius:999px;padding:6px 13px 6px 11px;font-size:12px;font-weight:800;cursor:pointer;box-shadow:0 2px 6px rgba(99,102,241,.35)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>추가</button></span></div>
+  <div class="sec" style="display:flex;align-items:center;justify-content:space-between"><span><svg class="sec-ico" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg> 모든 활동</span><span id="log-edit-actions" style="display:none;gap:8px;align-items:center"><button id="log-edit-toggle-btn" onclick="toggleLogEditMode()" title="편집" aria-label="편집" style="display:inline-flex;align-items:center;gap:5px;background:var(--cd);color:var(--tx);border:1px solid var(--bd);border-radius:999px;padding:6px 12px;font-size:12px;font-weight:800;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.04)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>편집</button><button id="log-add-btn" onclick="openActForm()" title="추가" aria-label="추가" style="display:none;align-items:center;gap:4px;background:linear-gradient(135deg,#6366F1,#8B5CF6);color:#fff;border:0;border-radius:999px;padding:6px 13px 6px 11px;font-size:12px;font-weight:800;cursor:pointer;box-shadow:0 2px 6px rgba(99,102,241,.35)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>추가</button></span></div>
   <div class="log-wrap" id="log-list"></div>
 </div>
 
@@ -3904,7 +3904,7 @@ requestAnimationFrame(function(){
       <div class="hdr-stat"><div class="hdr-stat-num" id="rwd-hdr-owned">0</div><div class="hdr-stat-lbl">보유 보상</div></div>
     </div>
   </div>
-  <div class="sec" style="display:flex;align-items:center;justify-content:space-between"><span><svg class="sec-ico" viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg> 교환 가능한 보상</span><span id="rwd-edit-actions" style="display:none;gap:8px;align-items:center"><button id="rwd-edit-toggle-btn" onclick="toggleRwdEditMode()" title="편집" aria-label="편집" style="display:inline-flex;align-items:center;gap:5px;background:var(--cd);color:var(--tx);border:1px solid var(--bd);border-radius:999px;padding:6px 12px;font-size:12px;font-weight:800;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.04)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>편집</button><button onclick="openRwdForm()" title="추가" aria-label="추가" style="display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,#EC4899,#F472B6);color:#fff;border:0;border-radius:999px;padding:6px 13px 6px 11px;font-size:12px;font-weight:800;cursor:pointer;box-shadow:0 2px 6px rgba(236,72,153,.35)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>추가</button></span></div>
+  <div class="sec" style="display:flex;align-items:center;justify-content:space-between"><span><svg class="sec-ico" viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg> 교환 가능한 보상</span><span id="rwd-edit-actions" style="display:none;gap:8px;align-items:center"><button id="rwd-edit-toggle-btn" onclick="toggleRwdEditMode()" title="편집" aria-label="편집" style="display:inline-flex;align-items:center;gap:5px;background:var(--cd);color:var(--tx);border:1px solid var(--bd);border-radius:999px;padding:6px 12px;font-size:12px;font-weight:800;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.04)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>편집</button><button id="rwd-add-btn" onclick="openRwdForm()" title="추가" aria-label="추가" style="display:none;align-items:center;gap:4px;background:linear-gradient(135deg,#EC4899,#F472B6);color:#fff;border:0;border-radius:999px;padding:6px 13px 6px 11px;font-size:12px;font-weight:800;cursor:pointer;box-shadow:0 2px 6px rgba(236,72,153,.35)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>추가</button></span></div>
   <div class="rwd-grid" id="rwd-grid"></div>
   <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg> 보유 보상 목록</div>
   <div id="rwd-inventory"></div>
@@ -4390,11 +4390,6 @@ requestAnimationFrame(function(){
           <div class="adm-row-l"><div class="adm-row-nm">활동 이력 초기화</div><div class="adm-row-sub">마일리지·활동기록·보상이력 초기화 (계정 유지)</div></div>
           <button class="btn-sm rd" onclick="resetAll()">삭제</button>
         </div>
-        <div class="divider"></div>
-        <div class="adm-row">
-          <div class="adm-row-l"><div class="adm-row-nm">AI 검수 일일 카운터 리셋</div><div class="adm-row-sub">오늘 사용한 AI 검수 횟수를 0으로 초기화 <span id="ai-verify-cnt-badge" style="color:var(--tx2);font-weight:700"></span></div></div>
-          <button class="btn-sm" onclick="resetAiVerifyDaily()">리셋</button>
-        </div>
       </div>
     </div>
     <!-- ── 앱 캐시 ── -->
@@ -4670,6 +4665,23 @@ requestAnimationFrame(function(){
       </div>
       <div id="changelog-list" style="padding:8px 0 16px;max-height:60vh;overflow-y:auto;-webkit-overflow-scrolling:touch"></div>
       <button class="btn-primary" onclick="closeChangelog()" style="width:100%;padding:14px;border-radius:14px;font-size:15px;font-weight:700;border:none;color:#fff;background:var(--ac,#6366F1);cursor:pointer">확인</button>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURE INTRO POPUP (신규 기능 소개) -->
+<div class="overlay" id="m-feature-intro" style="z-index:650;justify-content:center">
+  <div class="sheet" style="max-width:380px;width:92%;border-radius:24px;max-height:86vh;padding:0;overflow:hidden">
+    <div class="sheet-body" style="padding:0">
+      <div id="fi-slides" style="position:relative"></div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:8px;padding:4px 0 12px" id="fi-dots"></div>
+      <div style="display:flex;gap:8px;padding:0 20px 8px">
+        <button id="fi-prev" class="btn-sm" style="flex:1;padding:14px 0;border-radius:14px;font-size:14px;font-weight:700;border:1px solid var(--bd);background:var(--cd);color:var(--tx);cursor:pointer" onclick="_fiPrev()">이전</button>
+        <button id="fi-next" class="btn-primary" style="flex:2;padding:14px 0;border-radius:14px;font-size:15px;font-weight:800;border:none;color:#fff;background:linear-gradient(135deg,#6366F1,#8B5CF6);cursor:pointer" onclick="_fiNext()">다음</button>
+      </div>
+      <div style="padding:0 20px 16px;text-align:center">
+        <button type="button" onclick="_fiDismissToday()" style="background:none;border:none;color:var(--tx3);font-size:12px;font-weight:600;text-decoration:underline;cursor:pointer;padding:6px 10px">오늘 하루 띄우지 않기</button>
+      </div>
     </div>
   </div>
 </div>
@@ -6721,7 +6733,7 @@ async function saveFamilyToFirestore(){
             renderNavUsers();
             try{_updatePlanBadges();}catch(e){}
             console.log('🔄 다른 기기에서 데이터가 업데이트됐어요');
-          }else{const _sd=snap.data();if(_sd.familyMessages&&JSON.stringify(_sd.familyMessages)!==JSON.stringify(S.familyMessages)){S.familyMessages=_sd.familyMessages;checkNewMessages();_updateFamilyBtnBadge();}}
+          }else{const _sd=snap.data();if(_sd.familyMessages&&JSON.stringify(_sd.familyMessages)!==JSON.stringify(S.familyMessages)){S.familyMessages=_sd.familyMessages;checkNewMessages();_updateFamilyBtnBadge();}if(_sd.actVerifyRequests&&JSON.stringify(_sd.actVerifyRequests)!==JSON.stringify(S.actVerifyRequests)){S.actVerifyRequests=_sd.actVerifyRequests;try{_updateFamilyBtnBadge();}catch(_){}}if(_sd.rewardRequests&&JSON.stringify(_sd.rewardRequests)!==JSON.stringify(S.rewardRequests)){S.rewardRequests=_sd.rewardRequests;}}
         });
         console.log('[saveFamilyToFirestore] New listener on', docPath);
       }catch(_e){ console.warn('New family listener failed:', _e); }
@@ -7443,7 +7455,7 @@ async function doLogin(idField, pwdField, errField){
                 await save();
                 // 리스너를 새 DATA_DOC으로 재연결
                 if(_dataListenerUnsub){try{_dataListenerUnsub();}catch(_e){}}
-                try{_dataListenerUnsub=onSnapshot(DATA_DOC,(snap)=>{if(!snap.exists())return;if(_isSaving)return;if(Date.now()-_lastSaveTime<2000)return;const _ij=JSON.stringify(snap.data());if(_ij===_lastSavedJSON||_ij===JSON.stringify(S))return;if(!_hasDirtyLocal){S=Object.assign(defaultState(),snap.data());_lastSavedJSON=_ij;rebuildMembersFromFamily();renderAll();checkNewMessages();renderNavUsers();}else{const _sd=snap.data();if(_sd.familyMessages&&JSON.stringify(_sd.familyMessages)!==JSON.stringify(S.familyMessages)){S.familyMessages=_sd.familyMessages;checkNewMessages();_updateFamilyBtnBadge();}}});}catch(_e){}
+                try{_dataListenerUnsub=onSnapshot(DATA_DOC,(snap)=>{if(!snap.exists())return;if(_isSaving)return;if(Date.now()-_lastSaveTime<2000)return;const _ij=JSON.stringify(snap.data());if(_ij===_lastSavedJSON||_ij===JSON.stringify(S))return;if(!_hasDirtyLocal){S=Object.assign(defaultState(),snap.data());_lastSavedJSON=_ij;rebuildMembersFromFamily();renderAll();checkNewMessages();renderNavUsers();}else{const _sd=snap.data();if(_sd.familyMessages&&JSON.stringify(_sd.familyMessages)!==JSON.stringify(S.familyMessages)){S.familyMessages=_sd.familyMessages;checkNewMessages();_updateFamilyBtnBadge();}if(_sd.actVerifyRequests&&JSON.stringify(_sd.actVerifyRequests)!==JSON.stringify(S.actVerifyRequests)){S.actVerifyRequests=_sd.actVerifyRequests;try{_updateFamilyBtnBadge();}catch(_){}}if(_sd.rewardRequests&&JSON.stringify(_sd.rewardRequests)!==JSON.stringify(S.rewardRequests)){S.rewardRequests=_sd.rewardRequests;}}});}catch(_e){}
                 currentUser = otherMid;
                 localStorage.setItem(_LS_PREFIX+'current_user', otherMid);
                 syncMemberToGlobal();
@@ -8703,7 +8715,7 @@ async function _loginToFamily(familyId, memberId, authUid, provider, email, prof
   // 3단계: 리스너 연결 (실패해도 무시)
   try{
     if(_dataListenerUnsub){try{_dataListenerUnsub();}catch(_e){}}
-    _dataListenerUnsub=onSnapshot(DATA_DOC,(snap)=>{if(!snap.exists())return;if(_isSaving)return;if(Date.now()-_lastSaveTime<2000)return;const _ij=JSON.stringify(snap.data());if(_ij===_lastSavedJSON||_ij===JSON.stringify(S))return;if(!_hasDirtyLocal){S=Object.assign(defaultState(),snap.data());_lastSavedJSON=_ij;rebuildMembersFromFamily();renderAll();checkNewMessages();renderNavUsers();}else{const _sd=snap.data();if(_sd.familyMessages&&JSON.stringify(_sd.familyMessages)!==JSON.stringify(S.familyMessages)){S.familyMessages=_sd.familyMessages;checkNewMessages();_updateFamilyBtnBadge();}}});
+    _dataListenerUnsub=onSnapshot(DATA_DOC,(snap)=>{if(!snap.exists())return;if(_isSaving)return;if(Date.now()-_lastSaveTime<2000)return;const _ij=JSON.stringify(snap.data());if(_ij===_lastSavedJSON||_ij===JSON.stringify(S))return;if(!_hasDirtyLocal){S=Object.assign(defaultState(),snap.data());_lastSavedJSON=_ij;rebuildMembersFromFamily();renderAll();checkNewMessages();renderNavUsers();}else{const _sd=snap.data();if(_sd.familyMessages&&JSON.stringify(_sd.familyMessages)!==JSON.stringify(S.familyMessages)){S.familyMessages=_sd.familyMessages;checkNewMessages();_updateFamilyBtnBadge();}if(_sd.actVerifyRequests&&JSON.stringify(_sd.actVerifyRequests)!==JSON.stringify(S.actVerifyRequests)){S.actVerifyRequests=_sd.actVerifyRequests;try{_updateFamilyBtnBadge();}catch(_){}}if(_sd.rewardRequests&&JSON.stringify(_sd.rewardRequests)!==JSON.stringify(S.rewardRequests)){S.rewardRequests=_sd.rewardRequests;}}});
   }catch(_e){console.warn('Snapshot listener failed:',_e);}
 }
 
@@ -9337,8 +9349,8 @@ const BADGES = [
 ];
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
-const _ENV = 'prod'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0408s';
+const _ENV='prod'; // 'prod' = 운영, 'dev' = 개발
+const _APP_VERSION = 'v0408z2';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -9443,6 +9455,13 @@ async function _initFirebase(){
     DATA_DOC = LEGACY_DOC;
     _firebaseReady = true;
     console.log('[mile.ly] Firebase loaded OK (with Auth)');
+    // 시스템 전체 설정 로드 (AI 한도 + 신기능 소개 팝업)
+    try{
+      const _cfgName=(_ENV==='dev'?'config_dev':'config_prod');
+      getDoc(doc(db,'system',_cfgName)).then(function(snap){
+        if(snap&&snap.exists())window._SYSTEM_CONFIG=snap.data();
+      }).catch(function(e){console.warn('[mile.ly] system config load failed:',e);});
+    }catch(_){}
 
     // onAuthStateChanged 리스너 설치 — 소셜 로그인 결과 안정적 수신
     _setupAuthListener();
@@ -9592,7 +9611,7 @@ const LEVEL_EFFECTS={
   2:{name:'학습의 빛',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-tw"><circle cx="18" cy="20" r="2" fill="#42A5F5"/><circle cx="84" cy="22" r="2" fill="#64B5F6"/><circle cx="12" cy="60" r="1.7" fill="#90CAF9"/><circle cx="88" cy="62" r="1.7" fill="#42A5F5"/><circle cx="50" cy="14" r="1.5" fill="#1E88E5"/></g></svg></div>'},
   3:{name:'반짝이는 별',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-spin" style="transform-origin:50px 50px"><path d="M50 8l1.6 4.4L56 14l-4.4 1.6L50 20l-1.6-4.4L44 14l4.4-1.6z" fill="#FFD600"/><path d="M92 50l-4.4 1.6L86 56l-1.6-4.4L80 50l4.4-1.6L86 44l1.6 4.4z" fill="#FFC107"/><path d="M50 92l-1.6-4.4L44 86l4.4-1.6L50 80l1.6 4.4L56 86l-4.4 1.6z" fill="#FFD600"/><path d="M8 50l4.4-1.6L14 44l1.6 4.4L20 50l-4.4 1.6L14 56l-1.6-4.4z" fill="#FFC107"/></g></svg></div>'},
   4:{name:'잎사귀 흩날림',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-fall"><path d="M20 5c-4 4-4 10 0 14 4-4 4-10 0-14z" fill="#66BB6A"/><path d="M50 0c-4 4-4 10 0 14 4-4 4-10 0-14z" fill="#81C784"/><path d="M80 5c-4 4-4 10 0 14 4-4 4-10 0-14z" fill="#4CAF50"/></g></svg></div>'},
-  5:{name:'불꽃 활활',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-flicker" style="transform-origin:50px 55px"><path d="M50 2 Q22 22 14 50 Q8 78 30 92 Q22 70 38 56 Q30 80 50 96 Q70 80 62 56 Q78 70 70 92 Q92 78 86 50 Q78 22 50 2z" fill="#FF6F00"/></g><g class="lv-flicker" style="transform-origin:50px 60px;animation-delay:.15s"><path d="M50 14 Q32 30 26 54 Q22 76 38 86 Q34 68 46 58 Q40 78 50 90 Q60 78 54 58 Q66 68 62 86 Q78 76 74 54 Q68 30 50 14z" fill="#FF9800"/></g><g class="lv-flicker" style="transform-origin:50px 65px;animation-delay:.3s"><path d="M50 28 Q40 40 36 58 Q34 74 44 80 Q42 68 50 62 Q58 68 56 80 Q66 74 64 58 Q60 40 50 28z" fill="#FFC107"/></g></svg></div>'},
+  5:{name:'불꽃 활활',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g transform="rotate(180 50 50)"><g class="lv-flicker" style="transform-origin:50px 55px"><path d="M50 2 Q22 22 14 50 Q8 78 30 92 Q22 70 38 56 Q30 80 50 96 Q70 80 62 56 Q78 70 70 92 Q92 78 86 50 Q78 22 50 2z" fill="#FF6F00"/></g><g class="lv-flicker" style="transform-origin:50px 60px;animation-delay:.15s"><path d="M50 14 Q32 30 26 54 Q22 76 38 86 Q34 68 46 58 Q40 78 50 90 Q60 78 54 58 Q66 68 62 86 Q78 76 74 54 Q68 30 50 14z" fill="#FF9800"/></g><g class="lv-flicker" style="transform-origin:50px 65px;animation-delay:.3s"><path d="M50 28 Q40 40 36 58 Q34 74 44 80 Q42 68 50 62 Q58 68 56 80 Q66 74 64 58 Q60 40 50 28z" fill="#FFC107"/></g></g></svg></div>'},
   6:{name:'수호 오라',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-ripple" style="transform-origin:50px 50px"><circle cx="50" cy="50" r="42" fill="none" stroke="#5C6BC0" stroke-width="2.5"/><circle cx="50" cy="50" r="42" fill="none" stroke="#7986CB" stroke-width="2"/><circle cx="50" cy="50" r="42" fill="none" stroke="#9FA8DA" stroke-width="1.5"/></g></svg></div>'},
   7:{name:'에너지 번개',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><g class="lv-bolts"><path d="M12 28l8-14-2 10 6-2-10 18 2-12z" fill="#FFEB3B" stroke="#F57F17" stroke-width=".5"/><path d="M82 18l8-14-2 10 6-2-10 18 2-12z" fill="#FFC107" stroke="#F57F17" stroke-width=".5"/><path d="M50 4l6-10-1 8 5-2-8 14 1-10z" fill="#FFEB3B" stroke="#F57F17" stroke-width=".5"/></g></svg></div>'},
   8:{name:'금메달 광채',html:'<div class="lv-fx-wrap"><svg viewBox="0 0 100 100"><defs><clipPath id="lvClip8"><circle cx="50" cy="50" r="46"/></clipPath></defs><g clip-path="url(#lvClip8)"><rect class="lv-slash" x="-30" y="40" width="160" height="14" fill="url(#lvShine8)" opacity=".8"/></g><defs><linearGradient id="lvShine8"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".9"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs><g class="lv-tw"><circle cx="20" cy="20" r="1.8" fill="#FFD600"/><circle cx="82" cy="22" r="1.8" fill="#FFC107"/><circle cx="78" cy="80" r="1.8" fill="#FFD600"/><circle cx="22" cy="82" r="1.8" fill="#FFC107"/></g></svg></div>'},
@@ -11907,6 +11926,8 @@ function renderLogList(){
     const _editActs=(_admMs&&_admMs.acts)?_admMs.acts:S.acts;
     const _toggleBtn=document.getElementById('log-edit-toggle-btn');
     if(_toggleBtn){_toggleBtn.textContent='완료';_toggleBtn.style.background='rgba(52,211,153,.95)';}
+    const _addBtn=document.getElementById('log-add-btn');
+    if(_addBtn)_addBtn.style.display='inline-flex';
     if(!_editActs.length){
       el.innerHTML='<div style="padding:60px 20px;text-align:center;color:var(--tx3);font-size:14px">활동이 없어요.<br>+ 추가 버튼으로 만들어보세요</div>';
       return;
@@ -11924,6 +11945,7 @@ function renderLogList(){
         </div>
         <div style="display:flex;gap:4px;flex-shrink:0">
           <button class="icon-btn" onclick="event.stopPropagation();openActForm('${a.id}')" style="width:36px;height:36px;min-width:36px;min-height:36px"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg></button>
+          <button class="icon-btn del" onclick="event.stopPropagation();delAct('${a.id}')" style="width:36px;height:36px;min-width:36px;min-height:36px;color:#EF4444"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>
         </div>
       </div>`;
     }).join('')+'</div>';
@@ -11939,6 +11961,8 @@ function renderLogList(){
   }
   const _toggleBtn=document.getElementById('log-edit-toggle-btn');
   if(_toggleBtn){_toggleBtn.textContent='편집';_toggleBtn.style.background='rgba(255,255,255,.22)';}
+  const _addBtnOff=document.getElementById('log-add-btn');
+  if(_addBtnOff)_addBtnOff.style.display='none';
   const acts=S.acts.filter(a=>{
     if(!a.active||!isAvailableToday(a))return false;
     return true;
@@ -12500,6 +12524,8 @@ function renderRewardGrid(){
     const _editRwds=(_admMs&&_admMs.rwds)?_admMs.rwds:S.rwds;
     const _toggleBtn=document.getElementById('rwd-edit-toggle-btn');
     if(_toggleBtn){_toggleBtn.textContent='완료';_toggleBtn.style.background='rgba(52,211,153,.95)';}
+    const _addBtn=document.getElementById('rwd-add-btn');
+    if(_addBtn)_addBtn.style.display='inline-flex';
     if(!_editRwds.length){
       rg.innerHTML='<div style="padding:60px 20px;text-align:center;color:var(--tx3);font-size:14px;grid-column:1/-1">보상이 없어요.<br>+ 추가 버튼으로 만들어보세요</div>';
       return;
@@ -12519,6 +12545,7 @@ function renderRewardGrid(){
         </div>
         <div style="display:flex;gap:4px;flex-shrink:0">
           <button class="icon-btn" onclick="event.stopPropagation();openRwdForm('${r.id}')" style="width:36px;height:36px;min-width:36px;min-height:36px"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg></button>
+          <button class="icon-btn del" onclick="event.stopPropagation();delRwd('${r.id}')" style="width:36px;height:36px;min-width:36px;min-height:36px;color:#EF4444"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>
         </div>
       </div>`;
     }).join('')+'</div>';
@@ -12534,6 +12561,8 @@ function renderRewardGrid(){
   }
   const _toggleBtn=document.getElementById('rwd-edit-toggle-btn');
   if(_toggleBtn){_toggleBtn.textContent='편집';_toggleBtn.style.background='rgba(255,255,255,.22)';}
+  const _addBtnOff=document.getElementById('rwd-add-btn');
+  if(_addBtnOff)_addBtnOff.style.display='none';
   const rwds=S.rwds;
   // Empty state
   if(rwds.length===0){rg.innerHTML=renderEmptyState('rwds');return;}
@@ -12759,7 +12788,7 @@ function openLevelPopup(){
   const ov=document.createElement('div');
   ov.className='streak-popup-overlay show';
   ov.innerHTML=`<div class="streak-popup" style="transform:scale(1)">
-    <div style="width:72px;height:72px;margin:0 auto 8px;position:relative"><div style="position:absolute;inset:12px">${info.svg||`<span style="font-size:48px">${info.emoji}</span>`}</div>${getLevelEffectHTML(info.level)||''}</div>
+    <div style="width:72px;height:72px;margin:0 auto 8px;position:relative">${getLevelEffectHTML(info.level)||''}<div style="position:absolute;inset:12px;z-index:2">${info.svg||`<span style="font-size:48px">${info.emoji}</span>`}</div></div>
     <div style="font-size:20px;font-weight:900;color:var(--tx)">Lv.${info.level} ${info.title}</div>
     <div style="margin:12px 0 8px;font-size:13px;color:var(--tx3);font-weight:700">누적 ${info.xp.toLocaleString()} / ${info.nextXP.toLocaleString()} 마일리지</div>
     <div style="background:var(--bdr);border-radius:6px;height:10px;overflow:hidden">
@@ -14859,19 +14888,32 @@ async function _getDaySnapshot(dateStr){
   const recon = _reconstructDayFromLog(dateStr);
   return {snapshot: recon, reconstructed: true};
 }
-// S.log에서 그 날 활동 기록을 추출 — 로그에 등장한 모든 actId를 행으로 구성
+// S.log에서 그 날 활동 기록을 추출 — 로그에 등장한 actId + 그날 존재했던 현재 활동 합산
 function _reconstructDayFromLog(dateStr){
   const dayStart = new Date(dateStr+'T00:00:00').getTime();
   const dayEnd = dayStart + 86400000;
   const mid = _dhMemberId();
   const dayLogs = (S.log||[]).filter(l=>l.ts>=dayStart && l.ts<dayEnd && l.actId && (!l.user || l.user===mid));
   const byId = {};
+  // 1) 그 날 로그에 등장한 활동 (삭제된 활동 포함)
   dayLogs.forEach(l=>{
     if(byId[l.actId]) return;
     const cur = (S.acts||[]).find(a=>a.id===l.actId);
     byId[l.actId] = cur
       ? {id:cur.id, name:cur.name, emoji:cur.emoji, maxDay:cur.maxDay||1, pts:cur.pts||0}
       : {id:l.actId, name:l.name||'(삭제된 활동)', emoji:l.emoji||'📝', maxDay:1, pts:l.pts||0, _deleted:true};
+  });
+  // 2) 그 날 존재했던 현재 활동도 추가 (미완료 항목까지 표시되도록)
+  //    id가 'a_<timestamp>' 형식이므로 timestamp를 파싱해 dayEnd 이후 생성된 활동은 제외
+  (S.acts||[]).forEach(a=>{
+    if(byId[a.id]) return;
+    if(a.active===false) return;
+    if(!a.showHome) return; // 홈에 노출되는 오늘 할일만
+    if((a.maxDay||0)<=0) return;
+    const m=/^a_(\d{10,16})/.exec(a.id||'');
+    const createdMs=m?parseInt(m[1]):0;
+    if(createdMs && createdMs>=dayEnd) return; // 그 날 이후 생성된 활동 제외
+    byId[a.id] = {id:a.id, name:a.name, emoji:a.emoji, maxDay:a.maxDay||1, pts:a.pts||0};
   });
   const done = {};
   Object.keys(byId).forEach(id=>{
@@ -16162,7 +16204,9 @@ window.rejectActivityVerifyRequest=rejectActivityVerifyRequest;
 // ── AI VERIFY (v0408f) ────────────────────────────────────────────
 // v0408g: /api/verify 는 아직 Vercel 배포 전 → 기존 /api/proxy (Anthropic 포워더) 재사용
 const AI_VERIFY_ENDPOINT='https://mily-proxy.vercel.app/api/proxy';
-const AI_VERIFY_DAILY_LIMIT=30;
+const AI_VERIFY_DAILY_LIMIT=20;
+function _aiVerifyLimit(){try{const cfg=(window._SYSTEM_CONFIG&&window._SYSTEM_CONFIG.aiVerify)||{};let isPro=false;try{isPro=(S&&S.familyMeta&&S.familyMeta.plan==='pro');}catch(_){}if(!isPro){try{if(typeof _isPro==='function')isPro=_isPro();}catch(_){}}if(isPro){const p=(cfg.proDailyLimit!=null?cfg.proDailyLimit:0);return (p===0||p==null)?Infinity:p;}const f=(cfg.freeDailyLimit!=null?cfg.freeDailyLimit:AI_VERIFY_DAILY_LIMIT);return (f===0)?Infinity:f;}catch(_){return AI_VERIFY_DAILY_LIMIT;}}
+function _aiVerifyLimitLabel(){const L=_aiVerifyLimit();return L===Infinity?'∞':String(L);}
 let _aiVerifyCtx=null; // {act, media, imageDataUrl, imageMime, audioDataUrl, audioMime}
 const AI_VOICE_ENDPOINT='https://mily-proxy.vercel.app/api/audio';
 const AI_VOICE_MAX_SECONDS=10;
@@ -16215,8 +16259,9 @@ function openAiVerifyModal(a){
   const cnt=_aiVerifyGetCount();
   const q=document.getElementById('m-ai-verify-quota');
   if(q){
-    q.textContent='🤖 '+cnt+'/'+AI_VERIFY_DAILY_LIMIT;
-    q.style.color=(cnt>=AI_VERIFY_DAILY_LIMIT)?'#9CA3AF':(cnt>=AI_VERIFY_DAILY_LIMIT*0.8?'#F59E0B':'var(--tx3)');
+    const _L=_aiVerifyLimit();
+    q.textContent='🤖 '+cnt+'/'+_aiVerifyLimitLabel();
+    q.style.color=(cnt>=_L)?'#9CA3AF':(_L!==Infinity&&cnt>=_L*0.8?'#F59E0B':'var(--tx3)');
   }
   openModal('m-ai-verify');
 }
@@ -16438,7 +16483,7 @@ async function _aiVerifySubmit(){
   const _prompt=(a.verifyConfig&&a.verifyConfig.prompt)?a.verifyConfig.prompt
     :(isVoice?`"${a.name}" 활동을 기쁜 목소리로 외쳤는지 판정해줘`:`"${a.name}" 활동을 올바르게 수행했는지 판정해줘`);
   // 한도 체크 (클라이언트 선체크)
-  if(_aiVerifyGetCount()>=AI_VERIFY_DAILY_LIMIT){
+  if(_aiVerifyGetCount()>=_aiVerifyLimit()){
     _aiVerifyHandleOverLimit(a);
     return;
   }
@@ -16578,7 +16623,7 @@ function _aiVerifyShowResult(icon,title,comment){
   // Update quota chip
   const cnt=_aiVerifyGetCount();
   const q=document.getElementById('m-ai-verify-quota');
-  if(q)q.textContent='🤖 '+cnt+'/'+AI_VERIFY_DAILY_LIMIT;
+  if(q)q.textContent='🤖 '+cnt+'/'+_aiVerifyLimitLabel();
 }
 
 function _aiVerifyApplyPass(a,comment){
@@ -17995,7 +18040,7 @@ function resetAiVerifyDaily(){
   const k=todayStr();
   const before=(S.aiVerifyDaily&&S.aiVerifyDaily[k])||0;
   if(before===0){toast('이미 0회예요');return;}
-  if(!confirm('오늘 AI 검수 카운터를 리셋할까요?\n현재 '+before+'/'+AI_VERIFY_DAILY_LIMIT+'회 → 0/'+AI_VERIFY_DAILY_LIMIT+'회'))return;
+  if(!confirm('오늘 AI 검수 카운터를 리셋할까요?\n현재 '+before+'/'+_aiVerifyLimitLabel()+'회 → 0/'+_aiVerifyLimitLabel()+'회'))return;
   if(!S.aiVerifyDaily)S.aiVerifyDaily={};
   S.aiVerifyDaily[k]=0;
   save();
@@ -18007,7 +18052,7 @@ function _refreshAiVerifyCntBadge(){
   if(!b)return;
   const k=todayStr();
   const c=(S.aiVerifyDaily&&S.aiVerifyDaily[k])||0;
-  b.textContent='(오늘 '+c+'/'+AI_VERIFY_DAILY_LIMIT+'회)';
+  b.textContent='(오늘 '+c+'/'+_aiVerifyLimitLabel()+'회)';
 }
 window.resetAiVerifyDaily=resetAiVerifyDaily;
 window._refreshAiVerifyCntBadge=_refreshAiVerifyCntBadge;
@@ -18933,6 +18978,32 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.2.8 (v0408z)',date:'2026-04-08',items:[
+    {type:'improve',text:'활동기록/보상 탭: 편집 버튼만 기본 노출, 편집 모드에서만 "추가" 버튼이 나타남. 편집 모드 목록 항목에 삭제 버튼 추가'},
+    {type:'new',text:'시스템 관리자 페이지(admin.html)에 "AI 검수 일일 한도 (FREE/PRO)" 및 "신규 기능 소개 팝업" 시스템 전체 관리 섹션 추가. 앱은 system/config_{env} 문서에서 설정을 읽어옴'},
+    {type:'fix',text:'일반 관리자 페이지에서 AI 검수 일일 카운터 리셋/신규 기능 소개 팝업 관리 섹션 제거 (시스템 관리자 페이지로 이동)'},
+  ]},
+  {ver:'2.2.7 (v0408y)',date:'2026-04-08',items:[
+    {type:'fix',text:'부모 알림 뱃지 버그 수정: AI 검수 에스컬레이션/보상 승인 요청 팝업을 닫아도 승인/거절하지 않은 pending 요청은 familyMessages read 상태를 유지하여 가족 뱃지/나의 메뉴 아이 아이콘 뱃지/메시지 리스트에서 사라지지 않도록 함. 또한 Firestore 리스너가 로컬 dirty 상태에서도 actVerifyRequests/rewardRequests를 동기화하도록 개선'},
+    {type:'new',text:'신규 기능 소개 팝업에 "오늘 하루 띄우지 않기" 버튼 추가'},
+    {type:'new',text:'관리자 페이지 → 설정 → "신규 기능 소개 팝업" 섹션 추가. 기능별 배너 종료일 설정/해제, 미리보기, 본 기록 초기화 지원'},
+  ]},
+  {ver:'2.2.6 (v0408x)',date:'2026-04-08',items:[
+    {type:'improve',text:'AI 검수 일일 제한 정책 변경: 프리 등급은 하루 20회, PRO 등급은 무제한. 할당량 표시도 PRO에서는 ∞로 표기'},
+  ]},
+  {ver:'2.2.5 (v0408w)',date:'2026-04-08',items:[
+    {type:'fix',text:'이력보기에서 과거 날짜 조회 시 "5/5 완료"처럼 미완료 활동이 누락되어 잘못 표시되던 문제 수정. 스냅샷이 없어 로그로 재구성할 때, 그 날 존재했던 현재 활동(showHome)도 함께 합산하여 "5/10" 같은 정확한 진행률을 표시'},
+  ]},
+  {ver:'2.2.4 (v0408v)',date:'2026-04-08',items:[
+    {type:'improve',text:'Lv.5 불꽃 이펙트를 180° 뒤집어 아래에서 위로 타오르는 형태로 변경'},
+    {type:'fix',text:'홈탭 제목영역 레벨 아이콘 탭 시 열리는 팝업에서 레벨 아이콘이 애니메이션 이펙트에 가려지던 문제 수정 (아이콘 z-index를 이펙트보다 위로 조정)'},
+  ]},
+  {ver:'2.2.3 (v0408u)',date:'2026-04-08',items:[
+    {type:'improve',text:'AI 검수 소개 팝업 디자인 개선 — 세련된 SVG 일러스트(그림자/그라데이션/필터), eyebrow 라벨, PRO 배지, 마지막 슬라이드에 "Pro 전용 기능" 안내 배너 추가'},
+  ]},
+  {ver:'2.2.2 (v0408t)',date:'2026-04-08',items:[
+    {type:'new',text:'신규 기능 소개 팝업 시스템 추가. 앱 진입 시 "AI 검수 기능" 소개 팝업이 3장 슬라이드(SVG 일러스트 포함)로 뜨고, 한 번 본 기능은 다시 노출되지 않음'},
+  ]},
   {ver:'2.2.1 (v0408s)',date:'2026-04-08',items:[
     {type:'fix',text:'AI 검수 여러 번 시도 후 "부모에게 확인 요청"으로 전환했을 때 가족 아이콘에 알림 뱃지가 안 뜨던 버그 수정. 이미 pending 상태여도 familyMessages에 재알림을 push하고, 뱃지 갱신을 즉시+모달 닫힐 때 한 번 더 수행'},
   ]},
@@ -19486,6 +19557,313 @@ function _updateChangelogBadge(){
   const badge=document.getElementById('changelog-badge');
   if(badge)badge.style.display=_hasNewChangelog()?'inline-block':'none';
 }
+// ============ 신규 기능 소개 팝업 (Feature Intro) ============
+// 기능별로 1회만 노출. localStorage 키: taemin_v6_feature_intro_seen (JSON: {featureId:true})
+const _FI_LS_KEY=_LS_PREFIX+'feature_intro_seen';
+const _FI_LS_TODAY_KEY=_LS_PREFIX+'feature_intro_today';
+function _fiGetSeen(){try{return JSON.parse(localStorage.getItem(_FI_LS_KEY)||'{}');}catch(_){return{};}}
+function _fiMarkSeen(id){const s=_fiGetSeen();s[id]=true;localStorage.setItem(_FI_LS_KEY,JSON.stringify(s));}
+function _fiHasSeen(id){return !!_fiGetSeen()[id];}
+function _fiTodayStr(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function _fiGetTodayMap(){try{return JSON.parse(localStorage.getItem(_FI_LS_TODAY_KEY)||'{}');}catch(_){return{};}}
+function _fiIsDismissedToday(id){const m=_fiGetTodayMap();return m[id]===_fiTodayStr();}
+function _fiDismissToday(){
+  if(!_fiCurrentId)return _fiClose();
+  const m=_fiGetTodayMap();m[_fiCurrentId]=_fiTodayStr();
+  try{localStorage.setItem(_FI_LS_TODAY_KEY,JSON.stringify(m));}catch(_){}
+  const el=document.getElementById('m-feature-intro');
+  if(el)el.classList.remove('open');
+  _fiCurrentId=null;_fiIdx=0;
+  try{toast('오늘 하루 동안 이 안내를 표시하지 않을게요');}catch(_){}
+}
+window._fiDismissToday=_fiDismissToday;
+// 관리자 설정: 기능별 종료일 (S.featureIntroConfig = {id:{endDate:'YYYY-MM-DD'}})
+function _fiGetEndDate(id){try{const sys=(window._SYSTEM_CONFIG&&window._SYSTEM_CONFIG.featureIntro)||null;if(sys&&sys[id]&&sys[id].endDate)return sys[id].endDate;return (S.featureIntroConfig&&S.featureIntroConfig[id]&&S.featureIntroConfig[id].endDate)||'';}catch(_){return'';}}
+function _fiIsActive(id){
+  const end=_fiGetEndDate(id);
+  if(!end)return true; // 종료일 미설정 → 계속 노출
+  return _fiTodayStr()<=end;
+}
+function _fiSetEndDate(id,dateStr){
+  if(!S.featureIntroConfig)S.featureIntroConfig={};
+  if(!S.featureIntroConfig[id])S.featureIntroConfig[id]={};
+  S.featureIntroConfig[id].endDate=dateStr||'';
+  save();
+  try{_fiRefreshAdminInputs();}catch(_){}
+  toast(dateStr?('배너 종료일을 '+dateStr+'(으)로 설정했어요'):'배너 종료일이 해제되었어요');
+}
+window._fiSetEndDate=_fiSetEndDate;
+function _fiRefreshAdminInputs(){
+  Object.keys(_FEATURE_INTROS).forEach(id=>{
+    const inp=document.getElementById('fi-admin-end-'+id);
+    if(inp)inp.value=_fiGetEndDate(id)||'';
+    const st=document.getElementById('fi-admin-status-'+id);
+    if(st){
+      const end=_fiGetEndDate(id);
+      if(!end){st.textContent='상시 노출';st.style.color='var(--tx3)';}
+      else if(_fiTodayStr()>end){st.textContent='종료됨 ('+end+')';st.style.color='#9CA3AF';}
+      else{st.textContent='~'+end+'까지 노출';st.style.color='#10B981';}
+    }
+  });
+}
+window._fiRefreshAdminInputs=_fiRefreshAdminInputs;
+function _fiRenderAdminList(){
+  const root=document.getElementById('fi-admin-list');
+  if(!root)return;
+  const ids=Object.keys(_FEATURE_INTROS);
+  root.innerHTML=ids.map(id=>{
+    const intro=_FEATURE_INTROS[id];
+    const firstTitle=(intro.slides&&intro.slides[0]&&intro.slides[0].title)||id;
+    return `<div style="padding:10px 0;border-bottom:1px solid var(--bd)">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px">
+        <div style="font-size:13px;font-weight:800;color:var(--tx)">${escapeHtml(firstTitle)}</div>
+        <div id="fi-admin-status-${id}" style="font-size:11px;font-weight:700"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <input type="date" id="fi-admin-end-${id}" style="flex:1;padding:8px 10px;border:1px solid var(--bd);border-radius:10px;background:var(--cd);color:var(--tx);font-size:13px">
+        <button class="btn-sm" onclick="_fiSetEndDate('${id}',document.getElementById('fi-admin-end-${id}').value)">저장</button>
+        <button class="btn-sm" onclick="_fiSetEndDate('${id}','')">해제</button>
+      </div>
+      <div style="margin-top:6px;display:flex;gap:6px">
+        <button class="btn-sm" style="font-size:11px" onclick="showFeatureIntro('${id}')">미리보기</button>
+        <button class="btn-sm" style="font-size:11px" onclick="_fiResetSeen('${id}')">본 기록 초기화</button>
+      </div>
+    </div>`;
+  }).join('');
+  _fiRefreshAdminInputs();
+}
+window._fiRenderAdminList=_fiRenderAdminList;
+function _fiResetSeen(id){
+  const s=_fiGetSeen();delete s[id];
+  try{localStorage.setItem(_FI_LS_KEY,JSON.stringify(s));}catch(_){}
+  const t=_fiGetTodayMap();delete t[id];
+  try{localStorage.setItem(_FI_LS_TODAY_KEY,JSON.stringify(t));}catch(_){}
+  toast('본 기록이 초기화되었어요 (이 기기)');
+}
+window._fiResetSeen=_fiResetSeen;
+
+// 슬라이드 정의: {title, desc, svg}
+const _FEATURE_INTROS={
+  'ai-verify-v1':{
+    tier:'pro',
+    slides:[
+      {
+        eyebrow:'Smart Verification',
+        title:'AI가 먼저 확인해드려요',
+        desc:'활동을 완료하면 AI가 내용을 확인하고 자동으로 마일리지를 적립해요. 부모님이 바쁘셔도 기다리지 않아도 돼요.',
+        svg:`<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="s1bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F5F3FF"/><stop offset="1" stop-color="#FFFFFF"/></linearGradient>
+            <linearGradient id="s1ai" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6366F1"/><stop offset="1" stop-color="#A855F7"/></linearGradient>
+            <linearGradient id="s1card" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#FAFAFA"/></linearGradient>
+            <filter id="s1sh" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur in="SourceAlpha" stdDeviation="4"/><feOffset dy="2"/><feComponentTransfer><feFuncA type="linear" slope="0.12"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <radialGradient id="s1glow" cx="0.5" cy="0.5" r="0.6"><stop offset="0" stop-color="#A855F7" stop-opacity="0.35"/><stop offset="1" stop-color="#A855F7" stop-opacity="0"/></radialGradient>
+          </defs>
+          <rect width="320" height="200" fill="url(#s1bg)"/>
+          <!-- ambient glow behind AI -->
+          <circle cx="224" cy="100" r="72" fill="url(#s1glow)"/>
+          <!-- activity card -->
+          <g filter="url(#s1sh)">
+            <rect x="40" y="52" width="128" height="96" rx="18" fill="url(#s1card)" stroke="#EEF2FF" stroke-width="1"/>
+          </g>
+          <rect x="56" y="68" width="32" height="32" rx="10" fill="#EEF2FF"/>
+          <path d="M64 84 L72 76 L80 84 L80 92 L64 92 Z" fill="#6366F1"/>
+          <rect x="68" y="84" width="8" height="8" fill="#fff"/>
+          <rect x="96" y="72" width="58" height="6" rx="3" fill="#111827"/>
+          <rect x="96" y="84" width="42" height="5" rx="2.5" fill="#D1D5DB"/>
+          <rect x="96" y="93" width="34" height="5" rx="2.5" fill="#E5E7EB"/>
+          <line x1="56" y1="112" x2="152" y2="112" stroke="#F3F4F6" stroke-width="1"/>
+          <rect x="56" y="122" width="96" height="14" rx="7" fill="#6366F1"/>
+          <text x="104" y="132" font-size="9" font-family="-apple-system,system-ui,sans-serif" fill="#fff" text-anchor="middle" font-weight="700">활동 완료</text>
+          <!-- connector dots -->
+          <circle cx="178" cy="100" r="1.8" fill="#C4B5FD"/>
+          <circle cx="186" cy="100" r="1.8" fill="#C4B5FD"/>
+          <circle cx="194" cy="100" r="1.8" fill="#A78BFA"/>
+          <circle cx="202" cy="100" r="1.8" fill="#8B5CF6"/>
+          <!-- AI orb -->
+          <g filter="url(#s1sh)">
+            <circle cx="236" cy="100" r="44" fill="url(#s1ai)"/>
+          </g>
+          <circle cx="236" cy="100" r="44" fill="none" stroke="#fff" stroke-width="1" stroke-opacity="0.3"/>
+          <circle cx="236" cy="100" r="36" fill="none" stroke="#fff" stroke-width="0.8" stroke-opacity="0.2"/>
+          <!-- AI face (minimal) -->
+          <circle cx="224" cy="96" r="3" fill="#fff"/>
+          <circle cx="248" cy="96" r="3" fill="#fff"/>
+          <path d="M224 112 Q236 118 248 112" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <!-- sparkles -->
+          <path d="M288 56 L290 62 L296 64 L290 66 L288 72 L286 66 L280 64 L286 62 Z" fill="#FCD34D"/>
+          <path d="M196 40 L197 44 L201 45 L197 46 L196 50 L195 46 L191 45 L195 44 Z" fill="#C4B5FD"/>
+        </svg>`
+      },
+      {
+        eyebrow:'Two Ways to Verify',
+        title:'사진 또는 목소리로 간편하게',
+        desc:'카메라로 결과물을 찍거나, 목소리로 읽어서 제출해요. AI가 내용을 이해하고 활동이 잘 됐는지 꼼꼼히 확인해드려요.',
+        svg:`<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="s2bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ECFEFF"/><stop offset="1" stop-color="#FFFFFF"/></linearGradient>
+            <linearGradient id="s2cam" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3B82F6"/><stop offset="1" stop-color="#06B6D4"/></linearGradient>
+            <linearGradient id="s2mic" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#EC4899"/><stop offset="1" stop-color="#F43F5E"/></linearGradient>
+            <linearGradient id="s2card" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#FAFAFA"/></linearGradient>
+            <filter id="s2sh" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur in="SourceAlpha" stdDeviation="4"/><feOffset dy="2"/><feComponentTransfer><feFuncA type="linear" slope="0.1"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          </defs>
+          <rect width="320" height="200" fill="url(#s2bg)"/>
+          <!-- camera card -->
+          <g filter="url(#s2sh)">
+            <rect x="36" y="40" width="120" height="120" rx="22" fill="url(#s2card)" stroke="#E0F2FE" stroke-width="1"/>
+          </g>
+          <circle cx="96" cy="86" r="32" fill="#EFF6FF"/>
+          <circle cx="96" cy="86" r="32" fill="none" stroke="#DBEAFE" stroke-width="1"/>
+          <rect x="80" y="74" width="32" height="26" rx="6" fill="url(#s2cam)"/>
+          <rect x="86" y="70" width="12" height="6" rx="2" fill="url(#s2cam)"/>
+          <circle cx="96" cy="88" r="8" fill="#fff"/>
+          <circle cx="96" cy="88" r="5" fill="#3B82F6"/>
+          <circle cx="96" cy="88" r="2" fill="#1E3A8A"/>
+          <circle cx="106" cy="79" r="1.5" fill="#fff"/>
+          <rect x="56" y="128" width="80" height="6" rx="3" fill="#111827"/>
+          <rect x="68" y="140" width="56" height="4" rx="2" fill="#D1D5DB"/>
+          <text x="96" y="132" font-size="0" fill="transparent">사진</text>
+          <!-- mic card -->
+          <g filter="url(#s2sh)">
+            <rect x="164" y="40" width="120" height="120" rx="22" fill="url(#s2card)" stroke="#FCE7F3" stroke-width="1"/>
+          </g>
+          <circle cx="224" cy="86" r="32" fill="#FDF2F8"/>
+          <circle cx="224" cy="86" r="32" fill="none" stroke="#FBCFE8" stroke-width="1"/>
+          <!-- sound waves -->
+          <path d="M204 82 L204 90" stroke="#F9A8D4" stroke-width="2" stroke-linecap="round"/>
+          <path d="M208 78 L208 94" stroke="#F472B6" stroke-width="2" stroke-linecap="round"/>
+          <path d="M240 78 L240 94" stroke="#F472B6" stroke-width="2" stroke-linecap="round"/>
+          <path d="M244 82 L244 90" stroke="#F9A8D4" stroke-width="2" stroke-linecap="round"/>
+          <rect x="216" y="70" width="16" height="26" rx="8" fill="url(#s2mic)"/>
+          <path d="M212 88 Q212 102 224 102 Q236 102 236 88" stroke="url(#s2mic)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <line x1="224" y1="102" x2="224" y2="108" stroke="url(#s2mic)" stroke-width="2.5" stroke-linecap="round"/>
+          <rect x="220" y="108" width="8" height="2" rx="1" fill="url(#s2mic)"/>
+          <rect x="184" y="128" width="80" height="6" rx="3" fill="#111827"/>
+          <rect x="196" y="140" width="56" height="4" rx="2" fill="#D1D5DB"/>
+        </svg>`
+      },
+      {
+        eyebrow:'Smart Decision',
+        title:'확실하면 즉시, 애매하면 부모님께',
+        desc:'AI가 확실하다고 판단하면 바로 마일리지가 적립돼요. 조금이라도 애매하면 부모님께 자동으로 확인 요청이 전달돼요. 프리 등급은 하루 20회, PRO 등급은 무제한으로 사용할 수 있어요.',
+        svg:`<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="s3bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F5F3FF"/><stop offset="1" stop-color="#FFFFFF"/></linearGradient>
+            <linearGradient id="s3ai" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6366F1"/><stop offset="1" stop-color="#8B5CF6"/></linearGradient>
+            <linearGradient id="s3ok" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#10B981"/><stop offset="1" stop-color="#059669"/></linearGradient>
+            <linearGradient id="s3q" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F59E0B"/><stop offset="1" stop-color="#F97316"/></linearGradient>
+            <linearGradient id="s3card" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#FAFAFA"/></linearGradient>
+            <filter id="s3sh" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur in="SourceAlpha" stdDeviation="4"/><feOffset dy="2"/><feComponentTransfer><feFuncA type="linear" slope="0.1"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          </defs>
+          <rect width="320" height="200" fill="url(#s3bg)"/>
+          <!-- AI hub at top center -->
+          <g filter="url(#s3sh)">
+            <circle cx="160" cy="42" r="24" fill="url(#s3ai)"/>
+          </g>
+          <circle cx="160" cy="42" r="24" fill="none" stroke="#fff" stroke-opacity="0.3" stroke-width="1"/>
+          <circle cx="153" cy="40" r="2.5" fill="#fff"/>
+          <circle cx="167" cy="40" r="2.5" fill="#fff"/>
+          <path d="M153 48 Q160 52 167 48" stroke="#fff" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          <!-- branch paths (dashed) -->
+          <path d="M148 62 Q96 72 76 98" stroke="#10B981" stroke-width="2" fill="none" stroke-linecap="round" stroke-dasharray="4 4"/>
+          <path d="M172 62 Q224 72 244 98" stroke="#F59E0B" stroke-width="2" fill="none" stroke-linecap="round" stroke-dasharray="4 4"/>
+          <!-- instant approval card -->
+          <g filter="url(#s3sh)">
+            <rect x="20" y="98" width="124" height="80" rx="18" fill="url(#s3card)" stroke="#D1FAE5" stroke-width="1"/>
+          </g>
+          <circle cx="44" cy="128" r="18" fill="url(#s3ok)"/>
+          <path d="M35 128 L41 134 L53 120" stroke="#fff" stroke-width="2.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <text x="68" y="122" font-size="12" font-family="-apple-system,system-ui,sans-serif" fill="#065F46" font-weight="800">즉시 적립</text>
+          <text x="68" y="136" font-size="9" font-family="-apple-system,system-ui,sans-serif" fill="#047857">바로 마일리지</text>
+          <rect x="68" y="146" width="52" height="14" rx="7" fill="#D1FAE5"/>
+          <text x="94" y="156" font-size="8" font-family="-apple-system,system-ui,sans-serif" fill="#065F46" text-anchor="middle" font-weight="700">AUTO</text>
+          <!-- parent review card -->
+          <g filter="url(#s3sh)">
+            <rect x="176" y="98" width="124" height="80" rx="18" fill="url(#s3card)" stroke="#FEF3C7" stroke-width="1"/>
+          </g>
+          <circle cx="200" cy="128" r="18" fill="url(#s3q)"/>
+          <text x="200" y="134" font-size="18" font-family="-apple-system,system-ui,sans-serif" fill="#fff" text-anchor="middle" font-weight="900">?</text>
+          <text x="224" y="122" font-size="12" font-family="-apple-system,system-ui,sans-serif" fill="#92400E" font-weight="800">부모님 확인</text>
+          <text x="224" y="136" font-size="9" font-family="-apple-system,system-ui,sans-serif" fill="#B45309">자동으로 전달</text>
+          <rect x="224" y="146" width="52" height="14" rx="7" fill="#FEF3C7"/>
+          <text x="250" y="156" font-size="8" font-family="-apple-system,system-ui,sans-serif" fill="#92400E" text-anchor="middle" font-weight="700">NOTIFY</text>
+        </svg>`
+      }
+    ]
+  }
+};
+
+let _fiCurrentId=null,_fiIdx=0;
+function _fiRender(){
+  const intro=_FEATURE_INTROS[_fiCurrentId];if(!intro)return;
+  const slides=intro.slides,n=slides.length,s=slides[_fiIdx];
+  const isLast=_fiIdx===n-1;
+  const proBadge=intro.tier==='pro'?`<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;background:linear-gradient(135deg,#0F172A,#1E293B);color:#FCD34D;font-size:10px;font-weight:900;letter-spacing:.6px;margin-left:6px;box-shadow:0 1px 3px rgba(0,0,0,.12)"><svg width="9" height="9" viewBox="0 0 24 24" fill="#FCD34D"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8 5.8 21.3l2.4-7.4L2 9.4h7.6z"/></svg>PRO</span>`:'';
+  const eyebrow=s.eyebrow||'NEW FEATURE';
+  const proNotice=(isLast&&intro.tier==='pro')?`<div style="margin-top:12px;padding:12px 14px;border-radius:14px;background:linear-gradient(135deg,#FEF3C7,#FDE68A);border:1px solid #FCD34D;display:flex;align-items:flex-start;gap:10px">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="#D97706" style="flex-shrink:0;margin-top:1px"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8 5.8 21.3l2.4-7.4L2 9.4h7.6z"/></svg>
+    <div style="font-size:12px;line-height:1.55;color:#78350F"><b style="color:#451A03;font-weight:900">Pro 전용 기능</b>이에요. 현재 베타 기간 동안 모든 사용자가 사용할 수 있으며, 정식 출시 시 Pro 등급 사용자에게만 제공될 예정이에요.</div>
+  </div>`:'';
+  const wrap=document.getElementById('fi-slides');
+  if(wrap){
+    wrap.innerHTML=`<div style="padding:24px 22px 10px">
+      <div style="display:flex;align-items:center;margin-bottom:10px">
+        <span style="font-size:10.5px;font-weight:800;color:#8B5CF6;letter-spacing:.8px;text-transform:uppercase">${eyebrow}</span>
+        ${proBadge}
+        <span style="margin-left:auto;font-size:11px;font-weight:700;color:var(--tx3)">${_fiIdx+1} / ${n}</span>
+      </div>
+      <div style="font-size:20px;font-weight:900;color:var(--tx);margin-bottom:16px;line-height:1.3;letter-spacing:-0.3px">${s.title}</div>
+      <div style="border-radius:20px;overflow:hidden;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.04)">${s.svg}</div>
+      <div style="font-size:13.5px;color:var(--tx2);line-height:1.65">${s.desc}</div>
+      ${proNotice}
+    </div>`;
+  }
+  const dots=document.getElementById('fi-dots');
+  if(dots){
+    dots.innerHTML=slides.map((_,i)=>`<span style="width:${i===_fiIdx?20:8}px;height:8px;border-radius:4px;background:${i===_fiIdx?'#6366F1':'#E5E7EB'};transition:all .25s"></span>`).join('');
+  }
+  const prev=document.getElementById('fi-prev'),next=document.getElementById('fi-next');
+  if(prev)prev.style.visibility=_fiIdx===0?'hidden':'visible';
+  if(next)next.textContent=_fiIdx===n-1?'시작하기 🚀':'다음';
+}
+function _fiPrev(){if(_fiIdx>0){_fiIdx--;_fiRender();}}
+function _fiNext(){
+  const intro=_FEATURE_INTROS[_fiCurrentId];if(!intro)return;
+  if(_fiIdx<intro.slides.length-1){_fiIdx++;_fiRender();}
+  else{_fiClose();}
+}
+function _fiClose(){
+  if(_fiCurrentId)_fiMarkSeen(_fiCurrentId);
+  const el=document.getElementById('m-feature-intro');
+  if(el)el.classList.remove('open');
+  _fiCurrentId=null;_fiIdx=0;
+}
+function showFeatureIntro(id){
+  if(!_FEATURE_INTROS[id])return;
+  _fiCurrentId=id;_fiIdx=0;
+  _fiRender();
+  const el=document.getElementById('m-feature-intro');
+  if(el)el.classList.add('open');
+}
+function _maybeShowFeatureIntros(){
+  if(!currentUser)return;
+  // AI 검수 기능 소개 (v1) — 아이만 대상 (caregiver는 스킵)
+  const _id='ai-verify-v1';
+  if(_fiHasSeen(_id))return;
+  if(!_fiIsActive(_id)){_fiMarkSeen(_id);return;} // 관리자 종료일 지남
+  if(_fiIsDismissedToday(_id))return;             // 사용자가 오늘 하루 띄우지 않기 선택
+  try{
+    const isChild=!(typeof isCaregiverUser==='function'&&isCaregiverUser());
+    if(isChild){
+      setTimeout(()=>showFeatureIntro(_id),800);
+    }else{
+      _fiMarkSeen(_id); // 보호자는 노출 없이 본 것으로 처리
+    }
+  }catch(_){}
+}
+window.showFeatureIntro=showFeatureIntro;
+window._fiPrev=_fiPrev;window._fiNext=_fiNext;window._fiClose=_fiClose;
+
 // 로그인 후 새 업데이트 알림 팝업
 function _showChangelogPopupIfNew(){
   if(!_hasNewChangelog()||!currentUser)return;
@@ -20261,10 +20639,23 @@ window.sendFamilyMsg=sendFamilyMsg;
 
 function closeRecvMsg(){
   // 현재 보고 있는 메시지를 읽음 처리
+  // 단, 승인 대기 중인 요청(reward_request/activity_verify_request)은 뱃지/리스트 유지를 위해 read 유지
   if(_currentRecvMsg&&!_currentRecvMsg.read){
-    _currentRecvMsg.read=true;
-    save();
+    const _m=_currentRecvMsg;
+    let _stillPending=false;
+    if(_m.type==='reward_request'&&_m.requestId){
+      const _r=S.rewardRequests?S.rewardRequests.find(r=>r.id===_m.requestId):null;
+      _stillPending=!!(_r&&_r.status==='pending');
+    }else if(_m.type==='activity_verify_request'&&_m.requestId){
+      const _r=S.actVerifyRequests?S.actVerifyRequests.find(r=>r.id===_m.requestId):null;
+      _stillPending=!!(_r&&_r.status==='pending');
+    }
+    if(!_stillPending){
+      _m.read=true;
+      save();
+    }
     renderNavUsers();
+    try{_updateFamilyBtnBadge();}catch(_){}
   }
   _currentRecvMsg=null;
   document.getElementById('recv-msg-bg').style.display='none';
@@ -20519,8 +20910,16 @@ function readMsgFromList(fromId,msgIdx){
   const msgs=S.familyMessages?S.familyMessages.filter(m=>m.from===fromId&&m.to===currentUser):[];
   if(!msgs[msgIdx])return;
   const m=msgs[msgIdx];
-  m.read=true;
-  save();
+  // 승인 대기 중인 요청은 read 유지 (뱃지/리스트에서 사라지지 않도록)
+  let _pending=false;
+  if(m.type==='reward_request'&&m.requestId){
+    const _r=S.rewardRequests?S.rewardRequests.find(r=>r.id===m.requestId):null;
+    _pending=!!(_r&&_r.status==='pending');
+  }else if(m.type==='activity_verify_request'&&m.requestId){
+    const _r=S.actVerifyRequests?S.actVerifyRequests.find(r=>r.id===m.requestId):null;
+    _pending=!!(_r&&_r.status==='pending');
+  }
+  if(!_pending){m.read=true;save();}
   renderNavUsers();
 
   // Show detail view inside the same popup
@@ -21054,7 +21453,7 @@ function reallyGoTab(tab){
     themeMeta.content=isDark?'#1E293B':(TAB_COLORS[tab]||'#6366F1');
   }
 }
-function admTab(i){[0,1,2,3,4].forEach(j=>{document.getElementById('at-'+j).classList.toggle('on',j===i);document.getElementById('adm-p'+j).style.display=j===i?'block':'none';});if(i===2){renderAdmChildSelector();renderBadgeMgrList();}if(i===3){renderFamilyManager();renderNewMemberRoleSelect();renderAdmMemberPhotos();}if(i===4){showCacheInfo();showPushDebug();try{_refreshAiVerifyCntBadge();}catch(_){}}}
+function admTab(i){[0,1,2,3,4].forEach(j=>{document.getElementById('at-'+j).classList.toggle('on',j===i);document.getElementById('adm-p'+j).style.display=j===i?'block':'none';});if(i===2){renderAdmChildSelector();renderBadgeMgrList();}if(i===3){renderFamilyManager();renderNewMemberRoleSelect();renderAdmMemberPhotos();}if(i===4){showCacheInfo();showPushDebug();}}
 function toggleAdvSettings(){
   const body=document.getElementById('adv-settings-body');
   const btn=document.getElementById('adv-settings-btn');
@@ -23523,6 +23922,7 @@ window._createState = _createState;
   // 업데이트 내역 배지 + 알림 배너
   _updateChangelogBadge();
   _showChangelogPopupIfNew();
+  try{_maybeShowFeatureIntros();}catch(_){}
 
   // 날씨/미세먼지 데이터 가져오기
   fetchWeather();
