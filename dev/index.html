@@ -9350,7 +9350,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0408z';
+const _APP_VERSION = 'v0408z2';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -16205,7 +16205,7 @@ window.rejectActivityVerifyRequest=rejectActivityVerifyRequest;
 // v0408g: /api/verify 는 아직 Vercel 배포 전 → 기존 /api/proxy (Anthropic 포워더) 재사용
 const AI_VERIFY_ENDPOINT='https://mily-proxy.vercel.app/api/proxy';
 const AI_VERIFY_DAILY_LIMIT=20;
-function _aiVerifyLimit(){try{const cfg=(window._SYSTEM_CONFIG&&window._SYSTEM_CONFIG.aiVerify)||{};const isPro=(typeof _isPro==='function'&&_isPro());if(isPro){const p=(cfg.proDailyLimit!=null?cfg.proDailyLimit:0);return (p===0||p==null)?Infinity:p;}const f=(cfg.freeDailyLimit!=null?cfg.freeDailyLimit:AI_VERIFY_DAILY_LIMIT);return (f===0)?Infinity:f;}catch(_){return AI_VERIFY_DAILY_LIMIT;}}
+function _aiVerifyLimit(){try{const cfg=(window._SYSTEM_CONFIG&&window._SYSTEM_CONFIG.aiVerify)||{};let isPro=false;try{isPro=(S&&S.familyMeta&&S.familyMeta.plan==='pro');}catch(_){}if(!isPro){try{if(typeof _isPro==='function')isPro=_isPro();}catch(_){}}if(isPro){const p=(cfg.proDailyLimit!=null?cfg.proDailyLimit:0);return (p===0||p==null)?Infinity:p;}const f=(cfg.freeDailyLimit!=null?cfg.freeDailyLimit:AI_VERIFY_DAILY_LIMIT);return (f===0)?Infinity:f;}catch(_){return AI_VERIFY_DAILY_LIMIT;}}
 function _aiVerifyLimitLabel(){const L=_aiVerifyLimit();return L===Infinity?'∞':String(L);}
 let _aiVerifyCtx=null; // {act, media, imageDataUrl, imageMime, audioDataUrl, audioMime}
 const AI_VOICE_ENDPOINT='https://mily-proxy.vercel.app/api/audio';
