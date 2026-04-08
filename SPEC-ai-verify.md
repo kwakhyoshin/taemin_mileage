@@ -45,33 +45,46 @@ activity = {
 ```
 logEntry = {
   ...기존 필드,
+  status: 'pending' | 'approved' | 'rejected' | 'cancelled',
   verify: {
     mode: 'ai' | 'parent',
-    result: 'pass' | 'reject' | 'uncertain',
-    comment: string,             // AI 또는 부모가 남긴 한 줄 평
+    result: 'pass' | 'reject' | 'uncertain' | 'over-limit',
+    aiResult: 'pass' | 'reject' | 'uncertain' | null,   // AI 1차 결과 (있으면)
+    parentResult: 'pass' | 'reject' | null,             // 부모 최종 결정 (있으면)
+    comment: string,             // 최종 표시될 한 줄 평
     by: 'ai' | 'parent',         // 최종 판정 주체
-    aiRaw: { ... } | null        // AI 응답 원본 (디버깅용, 선택)
+    aiRaw: { ... } | null        // AI 응답 원본 (디버깅 옵션 ON일 때만)
   } | null
 }
 ```
 
-활동 카드 하단 표시 형식:
-- AI 통과: `🤖 AI 검수: 치아가 깨끗함 ✓`
-- AI 반려: `🤖 AI 검수: 음식물이 보임 ✗`
-- 부모 통과(AI 한도 초과 또는 uncertain): `👨‍👩 부모 검수: 통과`
+**상태 전이**:
+- AI `pass` → `status: approved`, `verify.by: 'ai'`, 마일리지 적립
+- AI `reject` → `status: cancelled`, 활동 카드에서 사라지거나 토스트만 표시. 카운트는 +1.
+- AI `uncertain` → `status: pending`, 부모 승인 큐로 자동 이관 → 부모 결정 후 `approved` 또는 `rejected`
+- 한도 초과 → AI 호출 X, `status: pending`, 부모 승인 큐로 직행
+
+**활동 카드 표시 (섹션 4.5에서 상세)**:
+- 활동명 옆 **상태 칩** + 클릭 시 상세 모달
 
 ### 3.3 일일 카운터
 
 ```
 Firestore: users/taemin/aiVerify/{YYYY-MM-DD}
 {
-  count: number,            // 호출 횟수 (성공/실패 무관)
-  limit: 20,                // 일일 한도 (기본 20)
+  count: number,            // AI 호출 횟수 (pass/reject/uncertain 모두 포함)
   updatedAt: timestamp
+}
+
+system/config (시스템 관리자 전용)
+{
+  aiVerifyDailyLimit: 20,   // 글로벌 기본값
+  userOverrides: { 'taemin': 30, ... }   // 사용자별 오버라이드 (선택)
 }
 ```
 
-자정(KST) 기준 새 문서 생성. 과거 문서는 유지하여 통계용으로 활용.
+- 자정(KST) 기준 새 문서 생성. 과거 문서는 유지하여 통계용으로 활용.
+- **한도 조정 권한**: 부모 사용자는 조정 불가. 시스템 관리자 페이지에서만 조정 가능.
 
 ### 3.4 부모 승인 큐 (기존 재사용)
 
@@ -80,12 +93,13 @@ Firestore: users/taemin/aiVerify/{YYYY-MM-DD}
 ```
 approvalRequest = {
   type: 'reward' | 'activity-verify',     // 신규 'activity-verify'
-  activityId: string,                     // type='activity-verify'일 때
-  logEntryId: string,                     // 어느 로그를 검수할지
+  activityId: string,
+  logEntryId: string,
   mediaUrl: string,                       // 임시 업로드된 사진 URL (24h TTL)
   verifyPrompt: string,                   // 원래 검증 지시문 (참고용)
-  aiResult: 'uncertain' | null,           // AI가 uncertain 판정 시 표시
-  reason: 'over-limit' | 'uncertain',     // 부모 승인 큐로 넘어온 사유
+  aiResult: 'uncertain' | null,           // AI uncertain 판정 시 표시
+  aiComment: string | null,
+  reason: 'over-limit' | 'uncertain',
   createdAt, status, ...
 }
 ```
@@ -116,10 +130,10 @@ approvalRequest = {
 3. 큰 카메라 버튼 1개 (`<input type=file accept=image/* capture=environment>`)
 4. 사진 캡처 → 미리보기 → "검수 받기" 버튼
 5. "검수 받기" 누르면 백엔드 호출 → 로딩 ("마일리가 확인중이에요...")
-6. 결과:
+6. 결과 분기:
    - **pass**: 마일리지 적립 + 통과 애니메이션 + 코멘트 표시
-   - **reject**: 친근한 사유 + "다시 찍기" 버튼 (재시도 시 카운트 추가 +1)
-   - **uncertain**: "엄마아빠가 한 번 더 봐줄게요" → 부모 승인 큐로 자동 이관
+   - **reject**: **활동 자체 취소** (기록 남지 않음). 친근한 사유 토스트만 잠깐 표시 후 사라짐. **카운트는 +1** (무한 재시도 방지)
+   - **uncertain**: "엄마아빠가 한 번 더 봐줄게요" → 활동을 `pending`으로 두고 부모 승인 큐로 이관
    - **한도 초과**: AI 호출 없이 즉시 부모 승인 큐로 이관 + "오늘은 엄마아빠가 확인해 주실 거예요"
 
 ### 4.3 아이: 잔여 한도 표시
@@ -129,30 +143,62 @@ approvalRequest = {
 ### 4.4 부모: 검수 대기 처리
 
 1. 푸시 알림 ("태민이가 양치하기 활동을 완료했어요. 확인해주세요.")
-2. 앱 진입 → "활동 검수 대기" 카드
-3. 카드 내용: 활동명, 아이가 올린 사진, 원래 검증 지시문, AI 결과(있으면)
+2. 앱 진입 → "활동 검수 대기" 카드 (또는 **활동 목록의 노란 ⏳ 칩 클릭**으로도 진입 가능 — 섹션 4.5)
+3. 카드 내용: 활동명, 아이가 올린 사진, 원래 검증 지시문, AI 결과·코멘트(있으면)
 4. 버튼: ✅ 통과 / ❌ 반려(사유 입력) / 자세히 보기
-5. 처리 결과는 활동 로그에 `by:'parent'`로 기록.
+5. 처리 결과는 활동 로그에 `verify.by:'parent'`로 기록.
+
+### 4.5 활동 카드 검수 결과 표시 (칩 + 모달 하이브리드)
+
+활동 목록의 각 항목은 활동명 옆에 **상태 칩**을 둔다. 칩은 시각적으로 한눈에 스캔 가능한 색상으로 구분한다.
+
+```
+┌─────────────────────────────────────────┐
+│ 🪥 양치하기              [🤖 통과 ✓]    │  ← 칩
+│ 오전 8:15 · +10 · 치아가 깨끗해요        │  ← 통과 시 미니 코멘트 (회색 작게)
+└─────────────────────────────────────────┘
+```
+
+**칩 종류**:
+- `🤖 통과` (초록) — AI 통과
+- `⏳ 검수 대기` (노란, 깜빡임) — uncertain 또는 한도 초과로 부모 승인 대기
+- `👨‍👩 통과` (파랑) — 부모가 검수 통과
+- `👨‍👩 반려` (회색) — 부모가 반려 (이력 보존)
+- AI 반려는 활동 자체가 취소되므로 **칩 없이 카드가 사라짐**
+
+**클릭 동작**:
+- **통과/반려된 칩** → 상세 모달 (검증 지시문, AI/부모 코멘트 전문, 검수 사진 미리보기, 사후 오버라이드 버튼)
+- **⏳ 검수 대기 칩** → **즉시 검수 모달이 열림** (부모가 그 자리에서 통과/반려 처리 가능). 부모 승인 메뉴를 따로 안 거쳐도 됨.
+
+**미니 코멘트 줄**:
+- AI/부모 통과 시에만 활동 시간 옆에 코멘트 첫 20자를 회색 작은 글씨로 함께 표시 → 부모가 칩을 누르지 않아도 흐름 따라가며 볼 수 있음.
 
 ---
 
 ## 5. 백엔드 API
 
-mile.ly는 현재 단일 HTML + Firestore 직결 구조이므로, AI 키 보호를 위해 **첫 서버사이드 함수**가 필요하다.
+### 5.1 인프라 선택 — Vercel Edge Function (기존 mily-proxy 재사용)
 
-### 5.1 인프라 선택
+**중요**: Cloudflare Workers는 사용 불가. 과거 `mily-proxy.workers.dev`에서 Anthropic API 호출 시 403 "Request not allowed" 오류 발생. 원인은 Anthropic API도 Cloudflare 뒤에 있어 **CF→CF 라우팅 충돌** (debug에서 HKG colo + `server: cloudflare` 헤더로 확인). 현재 챗봇(밀리)이 사용 중인 **Vercel Edge Function 프록시** `https://mily-proxy.vercel.app`로 마이그레이션되어 안정 운영 중. 이 사고는 `dev_guide.md`의 "챗봇 프록시 마이그레이션 (Cloudflare Worker → Vercel Edge Function)" 섹션에 기록됨.
 
-- **1순위**: Cloudflare Workers (무료 한도 충분, 콜드스타트 거의 없음)
-- **2순위**: Firebase Cloud Functions (Firestore와 연동 쉬움)
+**Step 1 인프라**:
+- 기존 `mily-proxy` 저장소(Vercel)에 **`api/verify.js` 신규 추가**
+- 도메인: `https://mily-proxy.vercel.app/api/verify`
+- 시크릿: 챗봇과 동일하게 Vercel 환경변수 `ANTHROPIC_API_KEY` 재사용
+- CSP: 이미 `connect-src`에 `https://mily-proxy.vercel.app` 허용됨 → 추가 작업 불필요
+- Firestore: 클라이언트가 직접 쓰는 기존 구조 유지. 단, **카운터 증가와 PRO 검사는 서버에서 수행**해야 우회 불가능 → Firebase Admin SDK(REST)로 서버에서 카운터 문서 read/write
 
-Step 1은 Cloudflare Workers + Firebase Admin SDK 조합 권장.
+**왜 챗봇용 `/api/proxy`와 분리하는가**:
+- 일일 카운터·PRO 검사·시스템 프롬프트 가드를 서버사이드에서 강제해야 함 → 비즈니스 로직 분리
+- 챗봇 프록시 변경이 검증 기능에 영향 주지 않도록 격리
 
 ### 5.2 엔드포인트
 
 ```
-POST /verify
+POST https://mily-proxy.vercel.app/api/verify
 Headers:
   Authorization: Bearer <Firebase ID Token>
+  Content-Type: application/json
 Body:
   {
     activityId: string,
@@ -163,26 +209,28 @@ Body:
   }
 Response:
   {
-    result: 'pass' | 'reject' | 'uncertain',
-    comment: string,            // 한 줄 코멘트 (한국어, 30자 이내)
+    result: 'pass' | 'reject' | 'uncertain' | 'over-limit',
+    comment: string,            // 한 줄 코멘트 (한국어, 30자 이내). over-limit이면 안내 문구
     confidence: number,         // 0~1
     countToday: number,         // 처리 후 카운트
-    limit: number
+    limit: number               // system/config에서 가져온 한도
   }
 ```
 
 ### 5.3 처리 순서
 
-1. Firebase ID Token 검증 → userId 추출
+1. Firebase ID Token 검증 → userId 추출 (Firebase Admin SDK / REST)
 2. Firestore에서 사용자 PRO 등급 확인. 비PRO면 403.
-3. 오늘 카운터 조회. `count >= limit`이면 200 + `{result:'over-limit'}` 반환 (호출 안 함, 카운트도 증가 안 함). 클라이언트가 부모 승인 큐로 이관.
-4. Anthropic API 호출 (Claude Haiku 4.5 멀티모달):
+3. `system/config`에서 한도 로드 (사용자별 오버라이드 우선, 없으면 글로벌)
+4. 오늘 카운터 조회.
+   - `count >= limit`이면 200 + `{result:'over-limit'}` 반환 (Anthropic 호출 X, 카운트 증가 X). 클라이언트가 부모 승인 큐로 이관.
+5. Anthropic API 호출 (Claude Haiku 4.5 멀티모달) — Vercel Edge에서 fetch
    - System: AI 검수봇 역할 안내, **이분법적 판정 강제**, **민감 콘텐츠 가드**, JSON으로만 응답.
    - User: 검증 지시문 + 이미지
-5. 응답 파싱 → `pass/reject/uncertain` + comment + confidence
-6. 카운트 +1 (성공/실패 무관)
-7. Firestore 활동 로그에 `verify` 필드 기록
-8. 클라이언트에 결과 반환
+6. 응답 파싱 → `pass/reject/uncertain` + comment + confidence
+7. 카운트 +1 (pass/reject/uncertain 모두 포함, over-limit 제외)
+8. Firestore 활동 로그에 `verify` 필드 기록 (서버에서 직접 쓰기)
+9. 클라이언트에 결과 반환
 
 ### 5.4 시스템 프롬프트 (초안)
 
@@ -197,14 +245,16 @@ Response:
 4. 절대 평가하지 않을 항목: 외모, 신체, 옷차림, 표정, 인종, 체형.
 5. 사진에 사람 얼굴이 크게 잡혀도 그것 자체는 평가 대상이 아님. 검증 기준에만 집중.
 6. 검증 기준과 사진이 명백히 무관하면 "uncertain"으로 응답하고 comment에 "사진을 다시 찍어줘" 안내.
+7. Haiku 4.5의 한계를 고려해 이분법적으로 단순 판단. 미묘한 판단은 "uncertain".
 ```
 
 ### 5.5 보안·비용 가드
 
-- Firebase ID Token 필수.
-- 사용자별 1초당 1회 rate limit (Workers KV 또는 Durable Objects).
-- 이미지 크기 5MB 제한, 1024×1024로 리사이즈 후 호출 (클라이언트에서 선처리).
-- 오늘 카운트 + 30일 누적 카운트 둘 다 저장 (운영 모니터링).
+- Firebase ID Token 필수 (Anonymous 토큰도 허용 — 기존 인증 구조 유지)
+- 사용자별 1초당 1회 rate limit (Vercel Edge Config 또는 Upstash Redis)
+- 이미지 크기 5MB 제한, 1024×1024로 리사이즈 후 호출 (클라이언트에서 선처리)
+- 오늘 카운트 + 30일 누적 카운트 둘 다 저장 (운영 모니터링)
+- 시스템 관리자 대시보드: 사용자별 일일 사용량, 누적 비용, 한도 변경 UI
 
 ---
 
@@ -212,26 +262,26 @@ Response:
 
 대략적 작업 지점. 실제 구현 시 구체 라인은 그때 결정.
 
-1. 활동 객체 마이그레이션: `defaultState`/`load` 시점에 `verifyMode` 기본값 채우기.
-2. 활동 만들기/수정 화면에 완료 조건 UI 추가.
+1. 활동 객체 마이그레이션: `defaultState`/`load` 시점에 `verifyMode='auto'` 기본값 채우기.
+2. 활동 만들기/수정 화면에 완료 조건 UI 추가 (라디오 3개 + AI 선택 시 검증 지시문 입력란 + PRO 안내).
 3. PRO 등급 체크 함수 (현재 PRO 신청 플로우 재사용).
-4. AI 검수 모달 컴포넌트 (카메라 입력, 미리보기, 결과 표시).
-5. 백엔드 호출 헬퍼 (`/verify` POST + Firebase ID Token).
-6. 부모 승인 큐에 `type:'activity-verify'` 처리 추가.
-7. 활동 카드 렌더링에 `verify` 코멘트 1줄 추가.
-8. 잔여 한도 카운터 UI.
+4. AI 검수 모달 컴포넌트 (카메라 입력, 미리보기, 결과 표시, 잔여 한도 칩).
+5. 백엔드 호출 헬퍼 (`POST /api/verify` + Firebase ID Token + 이미지 리사이즈).
+6. 부모 승인 큐에 `type:'activity-verify'` 처리 추가 (기존 보상 승인 컴포넌트 확장).
+7. 활동 카드 렌더링에 **상태 칩** + 클릭 시 상세 모달 + AI 통과 시 미니 코멘트 1줄 추가.
+8. ⏳ 검수 대기 칩 클릭 → 즉시 검수 모달 (부모가 활동 목록에서 바로 처리).
 9. 푸시 알림 텍스트 분기 (보상 vs 활동 검수).
-10. 에러 케이스: 네트워크 실패, 토큰 만료, 카메라 권한 거부, 이미지 너무 큼.
+10. 에러 케이스: 네트워크 실패, 토큰 만료, 카메라 권한 거부, 이미지 너무 큼, over-limit.
 
 ---
 
 ## 7. 안전·프라이버시
 
-- **사진 저장 정책 (기본값)**: 검증 후 즉시 삭제. Firestore에는 검증 결과 텍스트만 보관.
+- **사진 저장 정책 (기본값)**: AI 검증 후 즉시 삭제. Firestore에는 검증 결과 텍스트만 보관.
 - **부모 승인 큐로 이관된 경우만 임시 저장 (24시간 TTL)** — 부모가 봐야 하므로. Firebase Storage 임시 버킷.
 - **AI 응답 원본**(`aiRaw`)은 디버깅 옵션이 켜진 경우만 저장. 기본은 OFF.
 - **민감 콘텐츠 차단**: 검증 지시문에 외모/신체/옷차림 관련 키워드가 들어가면 활동 저장 자체를 차단(클라이언트 + 서버 양쪽 검사).
-- **부모 오버라이드 우선**: AI 결과는 항상 부모가 뒤집을 수 있고, 활동 로그에 양쪽 모두 기록한다.
+- **부모 오버라이드 우선**: AI 통과 결과도 부모가 사후 취소 가능. 활동 로그에 양쪽 모두 기록.
 
 ---
 
@@ -239,8 +289,8 @@ Response:
 
 - 1건당: 약 $0.001 ~ $0.003
 - 사용자 1명 × 일 20건 × 30일 = 600건 → **월 $0.6 ~ $1.8**
-- PRO 월 5,000원 가정 시 마진 99% 이상.
-- 비용 폭주 방어: 일일 20회 하드 캡 + Workers 레벨 IP rate limit + 사용자별 30일 누적 모니터링.
+- PRO 월 5,000원(가정) 시 마진 99% 이상.
+- 비용 폭주 방어: 일일 20회 하드 캡 + Vercel Edge IP rate limit + 사용자별 30일 누적 모니터링.
 
 ---
 
@@ -248,28 +298,37 @@ Response:
 
 | 단계 | 범위 |
 |------|------|
-| **Step 1 (이번 스펙)** | 사진 검증, 일일 20회, 부모 승인 폴백, Haiku 4.5, 결과 텍스트만 보관 |
+| **Step 1 (이번 스펙)** | 사진 검증, 일일 20회, 부모 승인 폴백, Haiku 4.5, 결과 텍스트만 보관, Vercel Edge Function |
 | Step 2 | 음성 검증 (Whisper STT + Haiku 텍스트 평가) |
 | Step 3 | 사진 영구 보관 옵션, 검증 프롬프트 프리셋 |
 | Step 4 | 검증 히스토리 통계, 게이미피케이션 연동(연속 통과 보너스 등) |
 
 ---
 
-## 10. 미해결 / 합의 필요 항목
+## 10. 결정 사항 (확정)
 
-1. PRO 등급 가격 (월 5,000원 가정 — 확정 필요)
-2. Cloudflare Workers vs Firebase Functions 최종 선택
-3. 일일 한도 기본값 20 — 사용자별 부모가 조정 가능하게 할지?
-4. uncertain 판정 시 부모 확인 없이 자동 반려할지, 항상 부모 큐로 보낼지 (현 스펙은 후자)
-5. 검증 실패(reject) 시에도 카운트 +1을 유지할지 — 오남용 방지엔 유리, UX엔 불리
-6. 활동 카드의 검수 코멘트 줄 표시 위치(현재 정의: 활동명 아래 1줄)
+| 항목 | 결정 |
+|------|------|
+| 인프라 | **Vercel Edge Function** (`mily-proxy` 저장소에 `api/verify.js` 추가). Cloudflare Workers는 CF→CF 충돌로 사용 불가 |
+| AI 모델 | **Claude Haiku 4.5** (현재 챗봇과 동일) |
+| 일일 한도 기본값 | **20회** (글로벌). 부모 조정 불가, **시스템 관리자 페이지에서만 조정** |
+| uncertain 처리 | **항상 부모 승인 큐로 이관** |
+| reject 처리 | **활동 자체 취소** (기록 남지 않음). 카운트는 +1로 무한 재시도 방지 |
+| 검수 결과 표시 | **활동명 옆 상태 칩 + 클릭 시 모달**. 통과 시 활동 시간 옆 미니 코멘트 1줄 |
+| ⏳ 검수 대기 칩 | 클릭 시 부모 검수 모달 즉시 오픈 (활동 목록에서 바로 처리 가능) |
+
+## 11. 미해결 / 합의 필요 항목
+
+1. PRO 등급 가격 (월 5,000원 가정 — 확정 필요. Phase 4 결제 연동까지는 신청 폼 기반 베타로 운영)
+2. 부모 반려(`👨‍👩 반려`) 결과를 활동 카드에 칩으로 남길지, 완전 삭제할지 (현 스펙은 회색 칩으로 보존)
 
 ---
 
-## 11. 다음 단계
+## 12. 다음 단계
 
-1. 본 스펙 사용자 리뷰 → 합의 필요 항목 결정
+1. 본 스펙 사용자 최종 리뷰 → 미해결 항목 확정
 2. 합의 완료 후 feature 브랜치(`feature/ai-verify-step1`) 생성
-3. dev/index.html 구현 → PR → 통시테스트 → main merge
-4. 구현 완료 후 `dev_guide.md`에 구현 결과·트러블슈팅·변경 이력 기록
-5. PRO 결제 연동(Phase 4)이 준비되면 정식 런칭, 그 전엔 신청 폼 기반 베타로 운영
+3. **Vercel mily-proxy 저장소에 `api/verify.js` 추가** → 배포 → 단독 테스트
+4. **dev/index.html 구현** → PR → 통시테스트 → main merge
+5. 구현 완료 후 `dev_guide.md`에 구현 결과·트러블슈팅·변경 이력 기록
+6. PRO 결제 연동(Phase 4)이 준비되면 정식 런칭, 그 전엔 신청 폼 기반 베타로 운영
