@@ -9333,7 +9333,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0408p';
+const _APP_VERSION = 'v0408q';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -16157,7 +16157,7 @@ window.rejectActivityVerifyRequest=rejectActivityVerifyRequest;
 // ── AI VERIFY (v0408f) ────────────────────────────────────────────
 // v0408g: /api/verify 는 아직 Vercel 배포 전 → 기존 /api/proxy (Anthropic 포워더) 재사용
 const AI_VERIFY_ENDPOINT='https://mily-proxy.vercel.app/api/proxy';
-const AI_VERIFY_DAILY_LIMIT=20;
+const AI_VERIFY_DAILY_LIMIT=30;
 let _aiVerifyCtx=null; // {act, media, imageDataUrl, imageMime, audioDataUrl, audioMime}
 const AI_VOICE_ENDPOINT='https://mily-proxy.vercel.app/api/audio';
 const AI_VOICE_MAX_SECONDS=10;
@@ -18850,6 +18850,9 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.1.9 (v0408q)',date:'2026-04-08',items:[
+    {type:'chore',text:'AI 검수 일일 제한 20회 → 30회로 상향'},
+  ]},
   {ver:'2.1.8 (v0408p)',date:'2026-04-08',items:[
     {type:'fix',text:'AI 음성 검수: Gemini 응답의 ```json 코드펜스 때문에 파싱 실패하던 버그 수정 (코드펜스 strip 추가, maxOutputTokens 256→512)'},
     {type:'fix',text:'AI 음성 검수: iOS Safari가 WAV data/blob URL을 <audio>에서 재생 거부(code 4) → 재생 플레이어 대신 "🎤 녹음 완료 N초" 텍스트로 교체. 검수 자체는 정상 동작'},
