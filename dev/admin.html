@@ -462,9 +462,9 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
         <div class="section">
           <div class="section-header"><div class="section-title">신규 기능 소개 팝업 (시스템 전체)</div></div>
           <div style="background:#fff;border-radius:12px;padding:16px;border:1px solid #E2E8F0">
-            <div style="font-size:12px;color:#64748B;margin-bottom:12px;line-height:1.6">기능 ID와 종료일(YYYY-MM-DD)을 입력하면 해당 날짜까지 사용자에게 소개 팝업이 노출됩니다.</div>
+            <div style="font-size:12px;color:#64748B;margin-bottom:12px;line-height:1.6"><b>기능 ID</b>는 앱 버전 코드(예: <code>v0408z</code>)예요. 앱 코드에서 그 ID로 노출 여부를 확인하므로, <b>현재 앱의 _APP_VERSION 값과 동일</b>해야 합니다. 종료일까지 모든 사용자에게 해당 버전의 신규 기능 소개 팝업이 표시됩니다.</div>
             <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px">
-              <div style="flex:1;min-width:140px"><div style="font-size:11px;font-weight:800;color:#475569;margin-bottom:4px">기능 ID (예: v0408y)</div><input type="text" id="cfg-fi-id" style="width:100%;padding:8px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px"></div>
+              <div style="flex:1;min-width:140px"><div style="font-size:11px;font-weight:800;color:#475569;margin-bottom:4px">기능 ID (예: v0408z)</div><input type="text" id="cfg-fi-id" placeholder="v0408z" style="width:100%;padding:8px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px"></div>
               <div style="flex:1;min-width:140px"><div style="font-size:11px;font-weight:800;color:#475569;margin-bottom:4px">종료일 (YYYY-MM-DD)</div><input type="date" id="cfg-fi-end" style="width:100%;padding:8px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px"></div>
               <button class="btn-sm btn-primary" onclick="saveAppConfigFeatureIntro()">저장/업데이트</button>
             </div>
