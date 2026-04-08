@@ -9318,7 +9318,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0408f';
+const _APP_VERSION = 'v0408g';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -16099,7 +16099,8 @@ window.approveActivityVerifyRequest=approveActivityVerifyRequest;
 window.rejectActivityVerifyRequest=rejectActivityVerifyRequest;
 
 // ── AI VERIFY (v0408f) ────────────────────────────────────────────
-const AI_VERIFY_ENDPOINT='https://mily-proxy.vercel.app/api/verify';
+// v0408g: /api/verify 는 아직 Vercel 배포 전 → 기존 /api/proxy (Anthropic 포워더) 재사용
+const AI_VERIFY_ENDPOINT='https://mily-proxy.vercel.app/api/proxy';
 const AI_VERIFY_DAILY_LIMIT=20;
 let _aiVerifyCtx=null; // {act, imageDataUrl, imageMime}
 
@@ -16196,28 +16197,52 @@ async function _aiVerifySubmit(){
   }
   document.getElementById('m-ai-verify-stage-preview').style.display='none';
   document.getElementById('m-ai-verify-stage-loading').style.display='block';
-  const logEntryId='l_'+Date.now();
-  const idToken=await _aiVerifyGetIdToken();
-  const headers={'Content-Type':'application/json'};
-  if(idToken)headers['Authorization']='Bearer '+idToken;
   const imageBase64=(_aiVerifyCtx.imageDataUrl||'').split(',')[1]||'';
+  const imageMime=_aiVerifyCtx.imageMime||'image/jpeg';
+  // /api/proxy 는 Anthropic Messages API를 그대로 포워드 → 멀티모달 메시지 구성
+  const systemPrompt=`당신은 어린이 활동 검수봇 "마일리"입니다. 부모가 정한 검증 기준에 따라 사진을 보고 통과/반려를 판정합니다.\n\n규칙:\n1. 반드시 JSON으로만 응답합니다: {"result":"pass|reject|uncertain","comment":"...","confidence":0.0~1.0}\n2. comment는 한국어 30자 이내, 친근한 말투. 아이가 상처받지 않게 작성.\n3. 판정 기준이 모호하거나 사진 품질이 낮으면 "uncertain".\n4. 절대 평가하지 않을 항목: 외모, 신체, 옷차림, 표정, 인종, 체형.\n5. 검증 기준과 사진이 명백히 무관하면 "uncertain"으로 응답하고 comment에 "사진을 다시 찍어줘" 안내.\n6. 이분법적으로 단순 판단. 미묘한 판단은 "uncertain".\n7. JSON 외 다른 텍스트는 절대 출력하지 않습니다.`;
+  const userContent=[
+    {type:'image',source:{type:'base64',media_type:imageMime,data:imageBase64}},
+    {type:'text',text:`검증 기준: ${_prompt}\n\n위 사진이 기준을 충족하는지 판정해서 JSON 한 개만 출력해줘.`}
+  ];
+  const reqBody={
+    model:'claude-haiku-4-5-20251001',
+    system:systemPrompt,
+    messages:[{role:'user',content:userContent}],
+    max_tokens:256
+  };
   let resp=null,data=null,err=null;
   try{
     resp=await fetch(AI_VERIFY_ENDPOINT,{
       method:'POST',
-      headers,
-      body:JSON.stringify({activityId:a.id,logEntryId,prompt:_prompt,imageBase64,imageMime:_aiVerifyCtx.imageMime||'image/jpeg'})
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(reqBody)
     });
     data=await resp.json();
   }catch(e){err=e;}
-  if(err||!resp||!resp.ok||!data){
+  if(err||!resp||!resp.ok||!data||data.error){
+    console.error('[aiVerify] call failed',{err,status:resp&&resp.status,data});
     document.getElementById('m-ai-verify-stage-loading').style.display='none';
     document.getElementById('m-ai-verify-stage-preview').style.display='block';
-    toast('AI 검수 호출 실패: '+(err?err.message:(resp?resp.status:'unknown')));
+    const _em=err?err.message:(data&&data.error&&(data.error.message||data.error))||(resp?('HTTP '+resp.status):'unknown');
+    toast('AI 검수 호출 실패: '+_em);
     return;
   }
-  const result=data.result; // 'pass' | 'reject' | 'uncertain' | 'over-limit'
-  const comment=data.comment||'';
+  // Anthropic 응답에서 텍스트 추출 → JSON 파싱
+  let result='uncertain',comment='',confidence=0;
+  try{
+    const textBlock=(data.content||[]).find(b=>b.type==='text');
+    const raw=textBlock?textBlock.text:'';
+    const m=raw.match(/\{[\s\S]*\}/);
+    const parsed=m?JSON.parse(m[0]):JSON.parse(raw);
+    result=parsed.result||'uncertain';
+    comment=parsed.comment||'';
+    confidence=parsed.confidence||0;
+  }catch(pe){
+    console.warn('[aiVerify] parse fail',pe,data);
+    result='uncertain';
+    comment='판정 결과를 읽지 못했어요';
+  }
   if(result==='over-limit'){_aiVerifyHandleOverLimit(a);return;}
   _aiVerifyIncCount();
   if(result==='pass'){
@@ -18427,6 +18452,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.1.1 (v0408g)',date:'2026-04-08',items:[{type:'fix',text:'AI 검수 "호출 실패 load fail" 수정 — /api/verify 엔드포인트가 Vercel에 아직 배포되지 않아 404가 떠서 실패하던 문제. 기존 /api/proxy(챗봇용 Anthropic 포워더)를 재사용해 멀티모달 메시지로 직접 Claude Haiku 4.5를 호출하도록 변경. 시스템 프롬프트에 JSON 출력 강제 규칙을 포함하고, 응답 텍스트에서 JSON 블록을 추출해 파싱합니다.'}]},
   {ver:'2.1.0 (v0408f)',date:'2026-04-08',items:[{type:'new',text:'[AI 검수 Step 2 — PR B] 🤖 AI 검수 모드 정상 작동 개시. 활동 만들기에서 "🤖 AI 검수"를 선택하면 검증 지시문 입력란이 나타나요. 아이가 활동을 탭하면 카메라 모달이 열리고, 사진을 찍어 [검수 받기]를 누르면 Vercel /api/verify로 전송되어 Claude Haiku 4.5가 통과/반려/uncertain을 판정합니다. 통과 시 즉시 마일리지 적립, 반려 시 기록만 남기고 카운트 +1, uncertain/한도 초과 시 부모 승인 큐로 자동 이관(PR A 메커니즘 재사용). 일일 한도 20회 클라이언트 카운터 + 우상단 잔여 표시.'}]},
   {ver:'2.0.9 (v0408e)',date:'2026-04-08',items:[{type:'new',text:'[AI 검수 Step 2 — PR A/B] "부모 승인" 검수 모드 정상 작동 개시. 활동 만들기에서 "부모 승인"을 선택하면, 아이가 해당 활동을 탭했을 때 바로 마일리지가 적립되지 않고 부모에게 승인 요청 메시지가 발송돼요. 부모가 가족 메시지 팝업에서 [승인]/[반려]를 누르면 그 시점에 마일리지가 적립/반려 처리됩니다. 승인 대기 중인 활동은 목록에 "⏳ 승인 대기" 칩이 표시돼요. (승인 메커니즘은 기존 보상 사용 요청과 동일)'}]},
   {ver:'2.0.8 (v0408d)',date:'2026-04-08',items:[{type:'fix',text:'부모용 [편집][+ 추가] 버튼을 히어로 헤더에서 컨텐츠 영역의 섹션 제목("모든 활동"/"교환 가능한 보상") 우측으로 이동'}]},
