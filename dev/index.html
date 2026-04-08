@@ -9280,7 +9280,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0408d';
+const _APP_VERSION = 'v0408e';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -11861,6 +11861,7 @@ function renderLogList(){
     const cycleLabel=CYCLE_LABEL[a.cycle]||a.cycle;
     const countLabel=max>0?`${done}/${max}회`:'';
     const stickerHTML=renderStickersForLog(a.id);
+    const _pendingVerify=_hasPendingActVerify(a.id);
     const _isDone=exhausted||(max===0&&done>0);
     const _stampHTML=_isDone?'<div class="log-done-stamp"><svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="29" stroke="#34D399" stroke-width="3.5" stroke-dasharray="5 2.5" opacity=".9"/><circle cx="32" cy="32" r="21" stroke="#34D399" stroke-width="2.5" opacity=".7"/><text x="32" y="30" text-anchor="middle" font-size="14" font-weight="900" fill="#10B981" font-family="Noto Sans KR,sans-serif" opacity=".95">완료</text><text x="32" y="43" text-anchor="middle" font-size="9" font-weight="800" fill="#10B981" font-family="sans-serif" letter-spacing="2" opacity=".75">DONE</text></svg></div>':'';
     const _lgColor=exhausted?'rgba(16,185,129,.12)':cls.includes('partial')?'rgba(245,158,11,.12)':'rgba(99,102,241,.12)';
@@ -11877,6 +11878,7 @@ function renderLogList(){
         <div class="log-meta">
           <span class="chip ${cc}">${cycleLabel}</span>
           ${countLabel?`<span class="chip c-yw">${countLabel}</span>`:''}
+          ${_pendingVerify?`<span class="chip" style="background:#FDE68A;color:#78350F">⏳ 승인 대기</span>`:''}
           ${timer?`<span class="log-timer"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-1px;margin-right:2px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${timer}</span>`:''}
         </div>
         ${_stampHTML}
@@ -14462,9 +14464,20 @@ function doAct(id){
   }
   _doActCore(id);
 }
+// v0408e: 부모 승인 대기 요청 조회 헬퍼
+function _hasPendingActVerify(actId){
+  if(!S.actVerifyRequests)return false;
+  const _owner=_globalDataOwner||currentUser;
+  return S.actVerifyRequests.some(r=>r.actId===actId&&r.status==='pending'&&r.forChild===_owner);
+}
 function _doActCore(id){
   const a=S.acts.find(x=>x.id===id);
   if(!a||!canDo(a))return;
+  // v0408e: 부모 승인 모드 — 실제 완료 대신 요청 생성
+  if(a.verifyMode==='parent'){
+    requestActivityVerify(a);
+    return;
+  }
   markDone(a);
 
   // streak — 오늘 할 일을 모두 완료한 경우에만 연속일수 증가
@@ -15906,6 +15919,142 @@ window.refundReward=refundReward;
 window.approveRewardRequest=approveRewardRequest;
 window.rejectRewardRequest=rejectRewardRequest;
 
+// ── ACTIVITY VERIFY (부모 승인) — v0408e ───────────────────────────
+function requestActivityVerify(a){
+  if(_hasPendingActVerify(a.id)){
+    toast('이미 승인 대기 중인 요청이 있어요');
+    return;
+  }
+  if(!S.actVerifyRequests)S.actVerifyRequests=[];
+  if(!S.familyMessages)S.familyMessages=[];
+  const _isCaregiver=isCaregiverUser();
+  const _reqChildId=(_isCaregiver&&viewingChildId)?viewingChildId:(_globalDataOwner||currentUser);
+  const _effectiveFrom=_reqChildId;
+  const adminMembers=[];
+  if(S.familyMeta?.members){
+    for(const [mid,m] of Object.entries(S.familyMeta.members)){
+      const isChild=m.type==='child'||m.role==='child';
+      if(isChild)continue;
+      const isCg=m.type==='caregiver'||m.type==='parent'||m.role==='caregiver'||m.role==='parent';
+      if(m.isAdmin||isCg){
+        if(!_isCaregiver&&mid===currentUser)continue;
+        adminMembers.push(mid);
+      }
+    }
+  }
+  const reqId='avr_'+Date.now();
+  S.actVerifyRequests.push({
+    id:reqId,
+    actId:a.id,
+    actName:a.name,
+    actEmoji:a.emoji,
+    actPts:a.pts,
+    fromUser:_effectiveFrom,
+    forChild:_reqChildId,
+    toUsers:adminMembers,
+    status:'pending',
+    requestedAt:Date.now(),
+    approvedBy:null,
+    approvedAt:null
+  });
+  const _childName=MEMBERS[_reqChildId]?.name||_reqChildId;
+  const _msgText=`✋ ${_childName}이(가) "${a.name}" 활동 완료 승인을 요청했어요!`;
+  for(const adminId of adminMembers){
+    S.familyMessages.push({
+      from:_effectiveFrom,
+      to:adminId,
+      text:_msgText,
+      ts:Date.now(),
+      read:false,
+      type:'activity_verify_request',
+      requestId:reqId,
+      actId:a.id
+    });
+  }
+  save();renderAll();
+  toast(`📲 "${a.name}" 승인 요청을 보냈어요!`);
+  setTimeout(()=>{try{checkNewMessages();_updateFamilyBtnBadge();}catch(e){}},600);
+}
+
+function approveActivityVerifyRequest(reqId,approver){
+  if(!S.actVerifyRequests)return;
+  const req=S.actVerifyRequests.find(x=>x.id===reqId);
+  if(!req||req.status!=='pending')return;
+  const a=S.acts.find(x=>x.id===req.actId);
+  if(!a){toast('활동을 찾을 수 없어요');return;}
+  req.status='approved';
+  req.approvedBy=approver;
+  req.approvedAt=Date.now();
+  // 자녀 데이터 기준으로 실제 완료 크레딧 — memberData 분리 모드 고려
+  const _childId=req.forChild||req.fromUser;
+  const _applyCredit=(target)=>{
+    if(!target)return;
+    if(!target.actDone)target.actDone={};
+    const t=todayStr();
+    const rec=target.actDone[a.id];
+    let cur=0;
+    if(rec){
+      if(a.cycle==='daily'&&rec.date===t)cur=rec.count||0;
+      else if(a.cycle==='weekly'&&rec.date>=weekStart())cur=rec.count||0;
+      else if(a.cycle==='monthly'&&rec.date.slice(0,7)===monthStr())cur=rec.count||0;
+      else if(a.cycle==='none')cur=rec.count||0;
+    }
+    target.actDone[a.id]={date:t,count:cur+1};
+    target.pts=(target.pts||0)+(a.pts||0);
+    target.totalDone=(target.totalDone||0)+1;
+    if(!target.log)target.log=[];
+    target.log.unshift({id:'l_'+Date.now(),emoji:a.emoji,name:a.name,pts:a.pts,ts:Date.now(),actId:a.id,user:_childId,verifyBy:approver});
+    if(target.log.length>300)target.log=target.log.slice(0,300);
+  };
+  // 현재 뷰가 해당 자녀면 S에 직접 반영
+  if((_globalDataOwner||currentUser)===_childId){
+    _applyCredit(S);
+  }
+  // 독립모드 memberData도 반영
+  if(S.memberData&&S.memberData[_childId]){
+    _applyCredit(S.memberData[_childId]);
+  }
+  // 메시지
+  if(!S.familyMessages)S.familyMessages=[];
+  const approverName=MEMBERS[approver]?.name||approver;
+  S.familyMessages.push({
+    from:approver,
+    to:req.fromUser,
+    text:`✅ ${approverName}가 "${req.actName}" 활동을 승인했어요! (+${req.actPts} 마일리지)`,
+    ts:Date.now(),
+    read:false,
+    type:'activity_verify_approval',
+    requestId:reqId
+  });
+  save();renderAll();
+  toast(`✅ "${req.actName}" 승인 완료!`);
+}
+
+function rejectActivityVerifyRequest(reqId,rejector){
+  if(!S.actVerifyRequests)return;
+  const req=S.actVerifyRequests.find(x=>x.id===reqId);
+  if(!req||req.status!=='pending')return;
+  req.status='rejected';
+  req.approvedBy=rejector;
+  req.approvedAt=Date.now();
+  if(!S.familyMessages)S.familyMessages=[];
+  const rejectorName=MEMBERS[rejector]?.name||rejector;
+  S.familyMessages.push({
+    from:rejector,
+    to:req.fromUser,
+    text:`❌ ${rejectorName}가 "${req.actName}" 활동을 반려했어요.`,
+    ts:Date.now(),
+    read:false,
+    type:'activity_verify_rejection',
+    requestId:reqId
+  });
+  save();renderAll();
+  toast(`❌ "${req.actName}" 반려됨.`);
+}
+window.requestActivityVerify=requestActivityVerify;
+window.approveActivityVerifyRequest=approveActivityVerifyRequest;
+window.rejectActivityVerifyRequest=rejectActivityVerifyRequest;
+
 // ADMIN
 function giveBonus(){
   const v=parseInt(document.getElementById('bonus-inp').value)||0;if(v<=0)return;
@@ -17233,30 +17382,27 @@ function openActForm(id){
   _renderFormChildChecks('act',id);
   openModal('m-act');
 }
-// 완료 조건 라디오 선택 (PR 1: UI 스캐폴드 — auto만 실제 동작, parent/ai는 스텁)
+// 완료 조건 라디오 선택 (v0408e: auto + parent 정상 동작, ai는 스텁)
 function pickVerifyMode(btn){
   const v=btn.dataset.v;
-  if(v==='ai'||v==='parent'){
+  if(v==='ai'){
     // 스텁: "곧 출시" 모달 표시, 선택은 유지하지 않음
     const icon=document.getElementById('m-verify-pro-icon');
     const title=document.getElementById('m-verify-pro-title');
     const desc=document.getElementById('m-verify-pro-desc');
-    if(v==='ai'){
-      if(icon)icon.textContent='🤖✨';
-      if(title)title.textContent='AI 검수는 곧 출시돼요';
-      if(desc)desc.innerHTML='활동을 완료하면 AI가 사진을 보고<br>통과/반려를 대신 판정해줄 거예요.<br><span style="color:var(--tx3);font-size:12px">(PRO 전용 기능)</span>';
-    }else{
-      if(icon)icon.textContent='👨‍👩‍👧';
-      if(title)title.textContent='부모 승인은 곧 출시돼요';
-      if(desc)desc.innerHTML='아이가 완료 버튼을 누르면<br>부모님이 확인한 뒤에 마일리지가 적립돼요.';
-    }
+    if(icon)icon.textContent='🤖✨';
+    if(title)title.textContent='AI 검수는 곧 출시돼요';
+    if(desc)desc.innerHTML='활동을 완료하면 AI가 사진을 보고<br>통과/반려를 대신 판정해줄 거예요.<br><span style="color:var(--tx3);font-size:12px">(PRO 전용 기능)</span>';
     openModal('m-verify-pro');
     return;
   }
   document.querySelectorAll('#verify-mode-row .sel-btn').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
   const hint=document.getElementById('verify-mode-hint');
-  if(hint)hint.textContent='누르면 바로 마일리지가 적립돼요';
+  if(hint){
+    if(v==='parent')hint.textContent='부모님 승인 후 마일리지가 적립돼요';
+    else hint.textContent='누르면 바로 마일리지가 적립돼요';
+  }
 }
 function pickCycle(btn){
   document.querySelectorAll('#cycle-row .sel-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');
@@ -18023,6 +18169,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.0.9 (v0408e)',date:'2026-04-08',items:[{type:'new',text:'[AI 검수 Step 2 — PR A/B] "부모 승인" 검수 모드 정상 작동 개시. 활동 만들기에서 "부모 승인"을 선택하면, 아이가 해당 활동을 탭했을 때 바로 마일리지가 적립되지 않고 부모에게 승인 요청 메시지가 발송돼요. 부모가 가족 메시지 팝업에서 [승인]/[반려]를 누르면 그 시점에 마일리지가 적립/반려 처리됩니다. 승인 대기 중인 활동은 목록에 "⏳ 승인 대기" 칩이 표시돼요. (승인 메커니즘은 기존 보상 사용 요청과 동일)'}]},
   {ver:'2.0.8 (v0408d)',date:'2026-04-08',items:[{type:'fix',text:'부모용 [편집][+ 추가] 버튼을 히어로 헤더에서 컨텐츠 영역의 섹션 제목("모든 활동"/"교환 가능한 보상") 우측으로 이동'}]},
   {ver:'2.0.7 (v0408c)',date:'2026-04-08',items:[{type:'feat',text:'부모 계정에서 활동/보상 탭 헤더에 [편집][+ 추가] 버튼 추가. 편집 모드에서 드래그로 순서 변경 + 항목 탭 시 관리자 화면과 동일한 편집창이 떠요. (관리자 화면을 거치지 않고 바로 활동/보상 관리 가능)'}]},
   {ver:'2.0.6 (v0408b)',date:'2026-04-08',items:[{type:'feat',text:'[AI 검수 Step 1 — PR 1/3] 활동 만들기 화면에 "완료 조건" 섹션 추가 (자동/부모 승인/🤖 AI 검수 라디오 3종). 현재는 UI 스캐폴드 단계 — 자동만 동작하고 나머지는 "곧 출시" 안내 모달 표시'}]},
@@ -19524,6 +19671,13 @@ function openMsgList(fromId,fromFamily){
           else if(req.status==='approved')statusTag='<span style="font-size:13px;background:#86EFAC;color:#14532D;padding:2px 6px;border-radius:6px;font-weight:800;margin-left:4px;white-space:nowrap">승인됨</span>';
           else if(req.status==='rejected')statusTag='<span style="font-size:13px;background:#D4D4D8;color:#3F3F46;padding:2px 6px;border-radius:6px;font-weight:800;margin-left:4px;white-space:nowrap">거절됨</span>';
         }
+      }else if(m.type==='activity_verify_request'&&m.requestId){
+        const req=S.actVerifyRequests?S.actVerifyRequests.find(r=>r.id===m.requestId):null;
+        if(req){
+          if(req.status==='pending')statusTag='<span style="font-size:13px;background:#FDE68A;color:#78350F;padding:2px 6px;border-radius:6px;font-weight:800;margin-left:4px;white-space:nowrap">승인대기</span>';
+          else if(req.status==='approved')statusTag='<span style="font-size:13px;background:#BFDBFE;color:#1E3A8A;padding:2px 6px;border-radius:6px;font-weight:800;margin-left:4px;white-space:nowrap">승인됨</span>';
+          else if(req.status==='rejected')statusTag='<span style="font-size:13px;background:#D4D4D8;color:#3F3F46;padding:2px 6px;border-radius:6px;font-weight:800;margin-left:4px;white-space:nowrap">반려됨</span>';
+        }
       }
       return `<div class="msglist-item" onclick="readMsgFromList('${fromId}',${msgs.length-1-i})">
         <div class="msglist-item-dot${m.read?' read':''}"></div>
@@ -19579,14 +19733,22 @@ function readMsgFromList(fromId,msgIdx){
   const timeStr=date.getFullYear()+'.'+(date.getMonth()+1)+'.'+date.getDate()+' '+(date.getHours()>=12?'오후':'오전')+' '+(date.getHours()>12?date.getHours()-12:date.getHours()||12)+':'+String(date.getMinutes()).padStart(2,'0');
 
   let actionsHTML='';
-  if(m.type==='reward_request'&&m.requestId){
-    const req=S.rewardRequests?S.rewardRequests.find(r=>r.id===m.requestId):null;
-    if(req&&req.status==='pending'){
-      actionsHTML=`<div class="msglist-detail-actions">
-        <button style="flex:1;padding:12px;background:#22C55E;color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;min-height:48px;-webkit-tap-highlight-color:transparent;touch-action:manipulation" onclick="handleRewardFromList(${m.ts},'approve')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><polyline points="20 6 9 17 4 12"/></svg> 승인</button>
-        <button style="flex:1;padding:12px;background:#EF4444;color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;min-height:48px;-webkit-tap-highlight-color:transparent;touch-action:manipulation" onclick="handleRewardFromList(${m.ts},'reject')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> 거절</button>
-      </div>`;
+  const _showApproveBtns=(()=>{
+    if(m.type==='reward_request'&&m.requestId){
+      const req=S.rewardRequests?S.rewardRequests.find(r=>r.id===m.requestId):null;
+      return req&&req.status==='pending';
     }
+    if(m.type==='activity_verify_request'&&m.requestId){
+      const req=S.actVerifyRequests?S.actVerifyRequests.find(r=>r.id===m.requestId):null;
+      return req&&req.status==='pending';
+    }
+    return false;
+  })();
+  if(_showApproveBtns){
+    actionsHTML=`<div class="msglist-detail-actions">
+      <button style="flex:1;padding:12px;background:#22C55E;color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;min-height:48px;-webkit-tap-highlight-color:transparent;touch-action:manipulation" onclick="handleRewardFromList(${m.ts},'approve')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><polyline points="20 6 9 17 4 12"/></svg> 승인</button>
+      <button style="flex:1;padding:12px;background:#EF4444;color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;min-height:48px;-webkit-tap-highlight-color:transparent;touch-action:manipulation" onclick="handleRewardFromList(${m.ts},'reject')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> 반려</button>
+    </div>`;
   }
 
   detail.innerHTML=`
@@ -19674,16 +19836,14 @@ function showReceivedMsg(fromId,text,emotion,msgObj){
   }else{
     emotionEl.style.display='none';
   }
-  // Show approve/reject buttons for reward_request messages
+  // Show approve/reject buttons for reward_request/activity_verify_request messages
   const actionsEl=document.getElementById('recv-msg-actions');
   if(msgObj&&msgObj.type==='reward_request'&&msgObj.requestId){
-    // Check if request is still pending
     const req=S.rewardRequests?S.rewardRequests.find(r=>r.id===msgObj.requestId):null;
-    if(req&&req.status==='pending'){
-      actionsEl.style.display='flex';
-    }else{
-      actionsEl.style.display='none';
-    }
+    actionsEl.style.display=(req&&req.status==='pending')?'flex':'none';
+  }else if(msgObj&&msgObj.type==='activity_verify_request'&&msgObj.requestId){
+    const req=S.actVerifyRequests?S.actVerifyRequests.find(r=>r.id===msgObj.requestId):null;
+    actionsEl.style.display=(req&&req.status==='pending')?'flex':'none';
   }else{
     actionsEl.style.display='none';
   }
@@ -19699,17 +19859,19 @@ window.showReceivedMsg=showReceivedMsg;
 
 function handleRewardAction(action){
   if(!_currentRecvMsg||!_currentRecvMsg.requestId)return;
-  // 먼저 읽음 처리
   if(!_currentRecvMsg.read)_currentRecvMsg.read=true;
   const reqId=_currentRecvMsg.requestId;
-  _currentRecvMsg=null; // closeRecvMsg에서 중복 save 방지
+  const _type=_currentRecvMsg.type;
+  _currentRecvMsg=null;
   document.getElementById('recv-msg-bg').style.display='none';
   document.getElementById('recv-msg-pop').style.display='none';
-  unlockBodyScroll(); // 팝업 닫을 때 스크롤 잠금 해제 필수
-  if(action==='approve'){
-    approveRewardRequest(reqId,currentUser);
+  unlockBodyScroll();
+  if(_type==='activity_verify_request'){
+    if(action==='approve')approveActivityVerifyRequest(reqId,currentUser);
+    else rejectActivityVerifyRequest(reqId,currentUser);
   }else{
-    rejectRewardRequest(reqId,currentUser);
+    if(action==='approve')approveRewardRequest(reqId,currentUser);
+    else rejectRewardRequest(reqId,currentUser);
   }
 }
 window.handleRewardAction=handleRewardAction;
@@ -19719,12 +19881,14 @@ function handleRewardFromList(msgTs,action){
   if(!msg||!msg.requestId){toast('요청 정보를 찾을 수 없어요');return;}
   if(!msg.read)msg.read=true;
   const reqId=msg.requestId;
-  // Close message list popup
+  const _type=msg.type;
   closeMsgList();
-  if(action==='approve'){
-    approveRewardRequest(reqId,currentUser);
+  if(_type==='activity_verify_request'){
+    if(action==='approve')approveActivityVerifyRequest(reqId,currentUser);
+    else rejectActivityVerifyRequest(reqId,currentUser);
   }else{
-    rejectRewardRequest(reqId,currentUser);
+    if(action==='approve')approveRewardRequest(reqId,currentUser);
+    else rejectRewardRequest(reqId,currentUser);
   }
 }
 window.handleRewardFromList=handleRewardFromList;
