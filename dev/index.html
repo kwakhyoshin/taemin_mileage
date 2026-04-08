@@ -4390,6 +4390,11 @@ requestAnimationFrame(function(){
           <div class="adm-row-l"><div class="adm-row-nm">활동 이력 초기화</div><div class="adm-row-sub">마일리지·활동기록·보상이력 초기화 (계정 유지)</div></div>
           <button class="btn-sm rd" onclick="resetAll()">삭제</button>
         </div>
+        <div class="divider"></div>
+        <div class="adm-row">
+          <div class="adm-row-l"><div class="adm-row-nm">AI 검수 일일 카운터 리셋</div><div class="adm-row-sub">오늘 사용한 AI 검수 횟수를 0으로 초기화 <span id="ai-verify-cnt-badge" style="color:var(--tx2);font-weight:700"></span></div></div>
+          <button class="btn-sm" onclick="resetAiVerifyDaily()">리셋</button>
+        </div>
       </div>
     </div>
     <!-- ── 앱 캐시 ── -->
@@ -9333,7 +9338,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0408q';
+const _APP_VERSION = 'v0408r';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -17928,6 +17933,26 @@ function restoreData(input){
 function resetAll(){
   showPin('reset_all','<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" style=\"vertical-align:-4px;margin-right:4px\"><rect x=\"3\" y=\"11\" width=\"18\" height=\"11\" rx=\"2\"/><path d=\"M7 11V7a5 5 0 0110 0v4\"/></svg> 관리자 인증','⚠️ 전체 데이터 삭제를 위해<br>PIN 4자리를 입력하세요');
 }
+function resetAiVerifyDaily(){
+  const k=todayStr();
+  const before=(S.aiVerifyDaily&&S.aiVerifyDaily[k])||0;
+  if(before===0){toast('이미 0회예요');return;}
+  if(!confirm('오늘 AI 검수 카운터를 리셋할까요?\n현재 '+before+'/'+AI_VERIFY_DAILY_LIMIT+'회 → 0/'+AI_VERIFY_DAILY_LIMIT+'회'))return;
+  if(!S.aiVerifyDaily)S.aiVerifyDaily={};
+  S.aiVerifyDaily[k]=0;
+  save();
+  try{_refreshAiVerifyCntBadge();}catch(_){}
+  toast('AI 검수 카운터 리셋 완료 ('+before+'→0)');
+}
+function _refreshAiVerifyCntBadge(){
+  const b=document.getElementById('ai-verify-cnt-badge');
+  if(!b)return;
+  const k=todayStr();
+  const c=(S.aiVerifyDaily&&S.aiVerifyDaily[k])||0;
+  b.textContent='(오늘 '+c+'/'+AI_VERIFY_DAILY_LIMIT+'회)';
+}
+window.resetAiVerifyDaily=resetAiVerifyDaily;
+window._refreshAiVerifyCntBadge=_refreshAiVerifyCntBadge;
 function doResetAll(){
   if(!confirm('정말 활동 이력을 모두 삭제할까요?\n(가족·계정 정보는 유지됩니다)\n되돌릴 수 없어요!'))return;
   // 보존해야 할 데이터: 가족구성, 계정정보, 사진, 푸시, 설정
@@ -18850,6 +18875,9 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.2.0 (v0408r)',date:'2026-04-08',items:[
+    {type:'feat',text:'관리자 페이지 → 설정 → 데이터 관리에 "AI 검수 일일 카운터 리셋" 버튼 추가. 오늘 남은 횟수도 표시'},
+  ]},
   {ver:'2.1.9 (v0408q)',date:'2026-04-08',items:[
     {type:'chore',text:'AI 검수 일일 제한 20회 → 30회로 상향'},
   ]},
@@ -20965,7 +20993,7 @@ function reallyGoTab(tab){
     themeMeta.content=isDark?'#1E293B':(TAB_COLORS[tab]||'#6366F1');
   }
 }
-function admTab(i){[0,1,2,3,4].forEach(j=>{document.getElementById('at-'+j).classList.toggle('on',j===i);document.getElementById('adm-p'+j).style.display=j===i?'block':'none';});if(i===2){renderAdmChildSelector();renderBadgeMgrList();}if(i===3){renderFamilyManager();renderNewMemberRoleSelect();renderAdmMemberPhotos();}if(i===4){showCacheInfo();showPushDebug();}}
+function admTab(i){[0,1,2,3,4].forEach(j=>{document.getElementById('at-'+j).classList.toggle('on',j===i);document.getElementById('adm-p'+j).style.display=j===i?'block':'none';});if(i===2){renderAdmChildSelector();renderBadgeMgrList();}if(i===3){renderFamilyManager();renderNewMemberRoleSelect();renderAdmMemberPhotos();}if(i===4){showCacheInfo();showPushDebug();try{_refreshAiVerifyCntBadge();}catch(_){}}}
 function toggleAdvSettings(){
   const body=document.getElementById('adv-settings-body');
   const btn=document.getElementById('adv-settings-btn');
