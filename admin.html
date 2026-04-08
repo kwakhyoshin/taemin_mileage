@@ -1830,15 +1830,20 @@ window.clearChatErrors=clearChatErrors;
 const CFG_DOC = _ENV === 'dev' ? 'config_dev' : 'config_prod';
 async function loadAppConfig(){
   try{
-    await ensureFirebaseAuth();
+    const ok=await ensureFirebaseAuth();
+    if(!ok){document.getElementById('cfg-ai-status').textContent='❌ Firebase 익명 인증 실패. Firebase Console → Authentication → Sign-in method에서 "Anonymous" 공급자가 활성화되어 있는지 확인하세요. (auth.currentUser='+(auth&&auth.currentUser?'있음':'없음')+')';return;}
     const snap = await getDoc(doc(db,'system',CFG_DOC));
     const d = snap.exists()?snap.data():{};
     const ai = d.aiVerify||{};
     document.getElementById('cfg-ai-free').value = (ai.freeDailyLimit!=null?ai.freeDailyLimit:20);
     document.getElementById('cfg-ai-pro').value = (ai.proDailyLimit!=null?ai.proDailyLimit:0);
-    document.getElementById('cfg-ai-status').textContent = '불러옴: '+new Date().toLocaleTimeString();
+    document.getElementById('cfg-ai-status').textContent = '✅ 불러옴: '+new Date().toLocaleTimeString()+' (uid='+(auth.currentUser?auth.currentUser.uid.substring(0,8):'없음')+')';
     renderFeatureIntroList(d.featureIntro||{});
-  }catch(e){ document.getElementById('cfg-ai-status').textContent='로드 실패: '+e.message; }
+  }catch(e){
+    const code=e&&e.code?' ['+e.code+']':'';
+    document.getElementById('cfg-ai-status').textContent='로드 실패'+code+': '+e.message+' (uid='+(auth&&auth.currentUser?auth.currentUser.uid.substring(0,8):'없음')+')';
+    console.error('[Admin] loadAppConfig error',e);
+  }
 }
 function renderFeatureIntroList(fi){
   const box = document.getElementById('cfg-fi-list');
