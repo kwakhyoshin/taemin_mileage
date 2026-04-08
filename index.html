@@ -1482,10 +1482,6 @@ body.dark .adm-child-btn.on{background:rgba(255,107,53,.15)}
 .ch-bug .leg.l2,.ch-bug .leg.l5{animation-delay:.07s}
 .ch-bug .leg.l3,.ch-bug .leg.l6{animation-delay:.14s}
 .ch-bug .ant{transform-origin:12px 6px;animation:chAntWig .5s ease-in-out infinite alternate}
-.ch-bug-sweat{position:absolute;top:-10px;right:-4px;width:14px;height:18px;pointer-events:none;z-index:4}
-.ch-bug-sweat svg{width:100%;height:100%;overflow:visible;display:block}
-.ch-bug-sweat .sw{fill:#5DCCFF;opacity:0;animation:chSweatFall 1.6s ease-in infinite}
-.ch-bug-sweat .sw.s2{animation-delay:.8s}
 .ch-bug .wing{opacity:0;transform-box:view-box;transform-origin:12px 12px}
 .ch-bug.poked{animation:chBugPoke .75s cubic-bezier(.34,1.56,.64,1) forwards}
 .ch-bug.poked .wl{animation:chBugWingL .75s ease-in-out}
@@ -1579,7 +1575,6 @@ body.dark .bug-pick.active{border-color:#A5B4FC;background:rgba(129,140,248,.22)
 @keyframes chBugBob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-1.2px) rotate(3deg)}}
 @keyframes chLegWig{0%{transform:rotate(-15deg)}100%{transform:rotate(15deg)}}
 @keyframes chAntWig{0%{transform:rotate(-8deg)}100%{transform:rotate(8deg)}}
-@keyframes chSweatFall{0%,55%{opacity:0;transform:translateY(0)}65%{opacity:1;transform:translateY(0)}88%{opacity:1;transform:translateY(10px)}100%{opacity:0;transform:translateY(14px)}}
 .my-family-row::-webkit-scrollbar{display:none}
 .my-family-member{display:flex;flex-direction:column;align-items:center;gap:5px;flex-shrink:0;cursor:pointer}
 .my-family-avatar{width:52px;height:52px;border-radius:50%;overflow:visible;border:2.5px solid var(--or);background:var(--bg2);flex-shrink:0;position:relative}
@@ -9260,7 +9255,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'prod'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0407zz';
+const _APP_VERSION = 'v0408a';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -17574,7 +17569,7 @@ window.renderChallengeBug=function(c,pct){
     if(sel==='random'||!ids.includes(sel))bugId=ids[window._bugHash(c.id||c.title||'')%ids.length];
     const bug=window.BUG_TYPES[bugId];
     const left=Math.max(0,Math.min(100,pct));
-    return '<div class="ch-bug bug-'+bugId+'" data-bug="'+bugId+'" onclick="bugPoke(event,this)" style="left:calc('+left+'% - 15px)">'+bug.svg+'<div class="ch-bug-sweat"><svg viewBox="0 0 14 18"><ellipse class="sw" cx="4" cy="4" rx="2.2" ry="2.8"/><ellipse class="sw s2" cx="10" cy="6" rx="1.8" ry="2.3"/></svg></div></div>';
+    return '<div class="ch-bug bug-'+bugId+'" data-bug="'+bugId+'" onclick="bugPoke(event,this)" style="left:calc('+left+'% - 15px)">'+bug.svg+'</div>';
   }catch(e){console.warn('[renderChallengeBug]',e);return '';}
 };
 window.bugPoke=function(ev,el){try{
@@ -17781,6 +17776,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.0.5 (v0408a)',date:'2026-04-08',items:[{type:'fix',text:'챌린지 곤충 땀방울 제거'}]},
   {ver:'2.0.4 (v0407zz)',date:'2026-04-08',items:[{type:'fix',text:'챌린지 곤충 땀방울을 무당벌레 캐릭터(걷기 애니) 스타일로 재구현 — 회전되지 않는 별도 오버레이로 머리 위에 하늘색 물방울이 똑똑 떨어지는 모양'}]},
   {ver:'2.0.3 (v0407zy)',date:'2026-04-08',items:[{type:'fix',text:'챌린지 곤충 땀방울이 실제로 안 보이던 문제 수정 — SVG에 sweat 요소 추가 + 가시성·애니메이션 강화'}]},
   {ver:'2.0.2 (v0407zx)',date:'2026-04-08',items:[{type:'fix',text:'다크모드에서 챌린지 곤충 선택 버튼 활성 표시 가시성 개선'}]},
