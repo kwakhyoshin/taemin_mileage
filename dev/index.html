@@ -4755,6 +4755,10 @@ requestAnimationFrame(function(){
           <div class="sel-btn" data-v="parent" onclick="pickVerifyMode(this)">부모 승인</div>
           <div class="sel-btn" data-v="ai" onclick="pickVerifyMode(this)">🤖 AI 검수 <span style="font-size:9px;background:linear-gradient(135deg,#f59e0b,#f97316);color:#fff;padding:1px 5px;border-radius:5px;margin-left:2px;font-weight:800;letter-spacing:.3px">PRO</span></div>
         </div>
+        <div id="verify-ai-prompt-wrap" style="display:none;margin-top:8px">
+          <label style="font-size:12px;color:var(--tx3);font-weight:700">AI 검증 지시문</label>
+          <textarea id="verify-ai-prompt" rows="2" placeholder="예: 양치 직후의 깨끗한 입 안 사진인지 확인해줘" style="width:100%;padding:10px;border:1px solid var(--bd);border-radius:10px;background:var(--cd);color:var(--tx);font-size:13px;font-family:inherit;resize:vertical"></textarea>
+        </div>
       </div>
       <div class="field">
         <label>완료 횟수 초기화 주기</label>
@@ -4808,6 +4812,40 @@ requestAnimationFrame(function(){
     </div>
     <div class="sheet-foot">
       <button class="s-btn conf" onclick="closeModal('m-verify-pro')">알겠어요</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: AI 검수 (v0408f) -->
+<div class="overlay" id="m-ai-verify">
+  <div class="sheet" style="max-width:380px">
+    <div class="sheet-head" style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--bd)">
+      <div style="font-size:16px;font-weight:800">🤖 AI 검수</div>
+      <div id="m-ai-verify-quota" style="font-size:12px;color:var(--tx3);font-weight:700">🤖 -</div>
+    </div>
+    <div class="sheet-body" style="padding:18px">
+      <div id="m-ai-verify-bubble" style="background:var(--cd);padding:12px 14px;border-radius:14px;font-size:14px;line-height:1.5;margin-bottom:14px">사진을 보여주세요!</div>
+      <div id="m-ai-verify-stage-pick" style="text-align:center">
+        <label for="m-ai-verify-file" style="display:inline-block;cursor:pointer;background:#6366F1;color:#fff;padding:14px 22px;border-radius:14px;font-weight:800;font-size:15px">📷 사진 찍기</label>
+        <input type="file" id="m-ai-verify-file" accept="image/*" capture="environment" style="display:none" onchange="_aiVerifyOnFile(event)">
+      </div>
+      <div id="m-ai-verify-stage-preview" style="display:none;text-align:center">
+        <img id="m-ai-verify-img" style="max-width:100%;max-height:240px;border-radius:12px;margin-bottom:10px">
+        <div style="display:flex;gap:8px">
+          <button onclick="_aiVerifyRetake()" style="flex:1;padding:12px;background:var(--cd);color:var(--tx);border:1px solid var(--bd);border-radius:12px;font-weight:800;cursor:pointer">다시 찍기</button>
+          <button id="m-ai-verify-submit-btn" onclick="_aiVerifySubmit()" style="flex:1;padding:12px;background:#22C55E;color:#fff;border:0;border-radius:12px;font-weight:800;cursor:pointer">검수 받기</button>
+        </div>
+      </div>
+      <div id="m-ai-verify-stage-loading" style="display:none;text-align:center;padding:24px 0">
+        <div style="font-size:36px;margin-bottom:8px">🤖</div>
+        <div style="font-size:14px;color:var(--tx2)">마일리가 확인하고 있어요...</div>
+      </div>
+      <div id="m-ai-verify-stage-result" style="display:none;text-align:center">
+        <div id="m-ai-verify-result-icon" style="font-size:48px;margin-bottom:8px"></div>
+        <div id="m-ai-verify-result-title" style="font-size:18px;font-weight:800;margin-bottom:6px"></div>
+        <div id="m-ai-verify-result-comment" style="font-size:14px;color:var(--tx2);margin-bottom:14px;line-height:1.5"></div>
+        <button onclick="closeModal('m-ai-verify')" style="width:100%;padding:12px;background:#6366F1;color:#fff;border:0;border-radius:12px;font-weight:800;cursor:pointer">닫기</button>
+      </div>
     </div>
   </div>
 </div>
@@ -9280,7 +9318,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0408e';
+const _APP_VERSION = 'v0408f';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -14478,6 +14516,11 @@ function _doActCore(id){
     requestActivityVerify(a);
     return;
   }
+  // v0408f: AI 검수 모드 — 사진 촬영 모달 오픈
+  if(a.verifyMode==='ai'){
+    openAiVerifyModal(a);
+    return;
+  }
   markDone(a);
 
   // streak — 오늘 할 일을 모두 완료한 경우에만 연속일수 증가
@@ -16055,6 +16098,223 @@ window.requestActivityVerify=requestActivityVerify;
 window.approveActivityVerifyRequest=approveActivityVerifyRequest;
 window.rejectActivityVerifyRequest=rejectActivityVerifyRequest;
 
+// ── AI VERIFY (v0408f) ────────────────────────────────────────────
+const AI_VERIFY_ENDPOINT='https://mily-proxy.vercel.app/api/verify';
+const AI_VERIFY_DAILY_LIMIT=20;
+let _aiVerifyCtx=null; // {act, imageDataUrl, imageMime}
+
+function _aiVerifyTodayKey(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function _aiVerifyGetCount(){
+  if(!S.aiVerifyDaily)return 0;
+  const k=_aiVerifyTodayKey();
+  return (S.aiVerifyDaily[k]||0);
+}
+function _aiVerifyIncCount(){
+  if(!S.aiVerifyDaily)S.aiVerifyDaily={};
+  const k=_aiVerifyTodayKey();
+  S.aiVerifyDaily[k]=(S.aiVerifyDaily[k]||0)+1;
+}
+
+function openAiVerifyModal(a){
+  if(!a)return;
+  _aiVerifyCtx={act:a,imageDataUrl:null,imageMime:null};
+  // Reset stages
+  document.getElementById('m-ai-verify-stage-pick').style.display='block';
+  document.getElementById('m-ai-verify-stage-preview').style.display='none';
+  document.getElementById('m-ai-verify-stage-loading').style.display='none';
+  document.getElementById('m-ai-verify-stage-result').style.display='none';
+  const fileEl=document.getElementById('m-ai-verify-file');
+  if(fileEl)fileEl.value='';
+  // Bubble + quota
+  const _prompt=(a.verifyConfig&&a.verifyConfig.prompt)?a.verifyConfig.prompt:`"${a.name}"을(를) 잘 했는지 사진으로 보여줘!`;
+  document.getElementById('m-ai-verify-bubble').textContent=_prompt;
+  const cnt=_aiVerifyGetCount();
+  const q=document.getElementById('m-ai-verify-quota');
+  if(q){
+    q.textContent='🤖 '+cnt+'/'+AI_VERIFY_DAILY_LIMIT;
+    q.style.color=(cnt>=AI_VERIFY_DAILY_LIMIT)?'#9CA3AF':(cnt>=AI_VERIFY_DAILY_LIMIT*0.8?'#F59E0B':'var(--tx3)');
+  }
+  openModal('m-ai-verify');
+}
+
+function _aiVerifyOnFile(ev){
+  const f=ev.target.files&&ev.target.files[0];
+  if(!f||!_aiVerifyCtx)return;
+  if(f.size>10*1024*1024){toast('사진이 너무 커요 (10MB 이하)');return;}
+  // Resize via canvas to max 1024
+  const reader=new FileReader();
+  reader.onload=function(e){
+    const img=new Image();
+    img.onload=function(){
+      const max=1024;
+      let w=img.width,h=img.height;
+      if(w>max||h>max){
+        if(w>=h){h=Math.round(h*max/w);w=max;}
+        else{w=Math.round(w*max/h);h=max;}
+      }
+      const c=document.createElement('canvas');
+      c.width=w;c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
+      const dataUrl=c.toDataURL('image/jpeg',0.85);
+      _aiVerifyCtx.imageDataUrl=dataUrl;
+      _aiVerifyCtx.imageMime='image/jpeg';
+      document.getElementById('m-ai-verify-img').src=dataUrl;
+      document.getElementById('m-ai-verify-stage-pick').style.display='none';
+      document.getElementById('m-ai-verify-stage-preview').style.display='block';
+    };
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(f);
+}
+
+function _aiVerifyRetake(){
+  if(!_aiVerifyCtx)return;
+  _aiVerifyCtx.imageDataUrl=null;
+  document.getElementById('m-ai-verify-stage-preview').style.display='none';
+  document.getElementById('m-ai-verify-stage-pick').style.display='block';
+  const fileEl=document.getElementById('m-ai-verify-file');
+  if(fileEl)fileEl.value='';
+}
+
+async function _aiVerifyGetIdToken(){
+  try{
+    if(typeof fbAuth!=='undefined'&&fbAuth&&fbAuth.currentUser){
+      return await fbAuth.currentUser.getIdToken();
+    }
+  }catch(e){console.warn('[aiVerify] getIdToken failed',e);}
+  return null;
+}
+
+async function _aiVerifySubmit(){
+  if(!_aiVerifyCtx||!_aiVerifyCtx.imageDataUrl){toast('먼저 사진을 찍어주세요');return;}
+  const a=_aiVerifyCtx.act;
+  const _prompt=(a.verifyConfig&&a.verifyConfig.prompt)?a.verifyConfig.prompt:`"${a.name}" 활동을 올바르게 수행했는지 판정해줘`;
+  // 한도 체크 (클라이언트 선체크)
+  if(_aiVerifyGetCount()>=AI_VERIFY_DAILY_LIMIT){
+    _aiVerifyHandleOverLimit(a);
+    return;
+  }
+  document.getElementById('m-ai-verify-stage-preview').style.display='none';
+  document.getElementById('m-ai-verify-stage-loading').style.display='block';
+  const logEntryId='l_'+Date.now();
+  const idToken=await _aiVerifyGetIdToken();
+  const headers={'Content-Type':'application/json'};
+  if(idToken)headers['Authorization']='Bearer '+idToken;
+  const imageBase64=(_aiVerifyCtx.imageDataUrl||'').split(',')[1]||'';
+  let resp=null,data=null,err=null;
+  try{
+    resp=await fetch(AI_VERIFY_ENDPOINT,{
+      method:'POST',
+      headers,
+      body:JSON.stringify({activityId:a.id,logEntryId,prompt:_prompt,imageBase64,imageMime:_aiVerifyCtx.imageMime||'image/jpeg'})
+    });
+    data=await resp.json();
+  }catch(e){err=e;}
+  if(err||!resp||!resp.ok||!data){
+    document.getElementById('m-ai-verify-stage-loading').style.display='none';
+    document.getElementById('m-ai-verify-stage-preview').style.display='block';
+    toast('AI 검수 호출 실패: '+(err?err.message:(resp?resp.status:'unknown')));
+    return;
+  }
+  const result=data.result; // 'pass' | 'reject' | 'uncertain' | 'over-limit'
+  const comment=data.comment||'';
+  if(result==='over-limit'){_aiVerifyHandleOverLimit(a);return;}
+  _aiVerifyIncCount();
+  if(result==='pass'){
+    _aiVerifyApplyPass(a,comment);
+    _aiVerifyShowResult('🎉','통과!',comment||'잘 했어요!');
+  }else if(result==='reject'){
+    _aiVerifyApplyReject(a,comment);
+    _aiVerifyShowResult('😅','다시 도전해볼까?',comment||'기준에 조금 못 미쳤어요');
+  }else{
+    // uncertain → 부모 승인 큐로 이관
+    _aiVerifyEscalateToParent(a,'uncertain',comment);
+    _aiVerifyShowResult('👨‍👩','엄마아빠가 확인할게요',comment||'마일리가 확실하지 않아서 부모님께 보냈어요');
+  }
+}
+
+function _aiVerifyShowResult(icon,title,comment){
+  document.getElementById('m-ai-verify-stage-loading').style.display='none';
+  document.getElementById('m-ai-verify-stage-preview').style.display='none';
+  document.getElementById('m-ai-verify-stage-pick').style.display='none';
+  document.getElementById('m-ai-verify-result-icon').textContent=icon;
+  document.getElementById('m-ai-verify-result-title').textContent=title;
+  document.getElementById('m-ai-verify-result-comment').textContent=comment;
+  document.getElementById('m-ai-verify-stage-result').style.display='block';
+  // Update quota chip
+  const cnt=_aiVerifyGetCount();
+  const q=document.getElementById('m-ai-verify-quota');
+  if(q)q.textContent='🤖 '+cnt+'/'+AI_VERIFY_DAILY_LIMIT;
+}
+
+function _aiVerifyApplyPass(a,comment){
+  // 정상 완료 크레딧 (markDone + pts + log entry with verify info)
+  markDone(a);
+  S.pts+=a.pts;
+  S.totalDone++;
+  if(!S.log)S.log=[];
+  S.log.unshift({
+    id:'l_'+Date.now(),emoji:a.emoji,name:a.name,pts:a.pts,ts:Date.now(),actId:a.id,
+    user:_globalDataOwner||currentUser,
+    status:'approved',
+    verify:{mode:'ai',result:'pass',aiResult:'pass',parentResult:null,comment,by:'ai'}
+  });
+  if(S.log.length>300)S.log=S.log.slice(0,300);
+  // Level XP
+  const _ld=S.levelData||(S.levelData={xp:0,level:1,xpLog:[]});
+  _ld.xp+=(a.pts||10);
+  _ld.xpLog.unshift({xp:a.pts||10,ts:Date.now(),src:a.name});
+  if(_ld.xpLog.length>100)_ld.xpLog=_ld.xpLog.slice(0,100);
+  _ld.level=getLevelInfo(_ld.xp).level;
+  try{updateChallengeProgress();}catch(e){}
+  save();renderAll();
+}
+
+function _aiVerifyApplyReject(a,comment){
+  // 활동 기록은 rejected 상태로 보존, 마일리지 X. 카운트 +1 (재시도 방지).
+  markDone(a);
+  if(!S.log)S.log=[];
+  S.log.unshift({
+    id:'l_'+Date.now(),emoji:a.emoji,name:a.name,pts:0,ts:Date.now(),actId:a.id,
+    user:_globalDataOwner||currentUser,
+    status:'rejected',
+    verify:{mode:'ai',result:'reject',aiResult:'reject',parentResult:null,comment,by:'ai'}
+  });
+  if(S.log.length>300)S.log=S.log.slice(0,300);
+  save();renderAll();
+}
+
+function _aiVerifyEscalateToParent(a,reason,aiComment){
+  // 기존 activity_verify_request 메커니즘 재사용 + AI 메타데이터 첨부
+  if(!_hasPendingActVerify(a.id)){
+    requestActivityVerify(a);
+    // 마지막 요청에 AI 메타 추가
+    const last=S.actVerifyRequests&&S.actVerifyRequests[S.actVerifyRequests.length-1];
+    if(last){
+      last.reason=reason;
+      last.aiResult=(reason==='uncertain')?'uncertain':null;
+      last.aiComment=aiComment||null;
+      // mediaDataUrl은 크기 문제로 Firestore에 저장하면 무거움 → 메모리에만 보존, 부모가 같은 세션에서 보면 OK
+      if(_aiVerifyCtx&&_aiVerifyCtx.imageDataUrl){
+        last.mediaDataUrl=_aiVerifyCtx.imageDataUrl.length<300000?_aiVerifyCtx.imageDataUrl:null;
+      }
+      save();
+    }
+  }
+}
+
+function _aiVerifyHandleOverLimit(a){
+  document.getElementById('m-ai-verify-stage-loading').style.display='none';
+  document.getElementById('m-ai-verify-stage-preview').style.display='none';
+  _aiVerifyEscalateToParent(a,'over-limit',null);
+  _aiVerifyShowResult('⏳','오늘 AI 검수는 다 썼어요','엄마아빠가 확인해 주실 거예요');
+}
+
+window.openAiVerifyModal=openAiVerifyModal;
+window._aiVerifyOnFile=_aiVerifyOnFile;
+window._aiVerifyRetake=_aiVerifyRetake;
+window._aiVerifySubmit=_aiVerifySubmit;
+
 // ADMIN
 function giveBonus(){
   const v=parseInt(document.getElementById('bonus-inp').value)||0;if(v<=0)return;
@@ -17375,34 +17635,30 @@ function openActForm(id){
   document.querySelectorAll('#verify-mode-row .sel-btn').forEach(b=>b.classList.toggle('on',b.dataset.v===vm));
   const vmHint=document.getElementById('verify-mode-hint');
   if(vmHint){
-    vmHint.textContent=vm==='parent'?'부모가 확인한 뒤에 마일리지가 적립돼요 (곧 출시)':vm==='ai'?'AI가 사진을 보고 판정해줘요 (곧 출시)':'누르면 바로 마일리지가 적립돼요';
+    vmHint.textContent=vm==='parent'?'부모님 승인 후 마일리지가 적립돼요':vm==='ai'?'AI가 사진을 보고 통과/반려를 판정해요':'누르면 바로 마일리지가 적립돼요';
   }
+  const _vapw=document.getElementById('verify-ai-prompt-wrap');
+  const _vap=document.getElementById('verify-ai-prompt');
+  if(_vapw)_vapw.style.display=(vm==='ai')?'block':'none';
+  if(_vap)_vap.value=(a&&a.verifyConfig&&a.verifyConfig.prompt)?a.verifyConfig.prompt:'';
   document.getElementById('act-save-btn').textContent=a?'저장하기':'추가하기';
   // 자녀 다중선택 체크박스 (자녀 2명 이상 + 새 활동 추가 시)
   _renderFormChildChecks('act',id);
   openModal('m-act');
 }
-// 완료 조건 라디오 선택 (v0408e: auto + parent 정상 동작, ai는 스텁)
+// 완료 조건 라디오 선택 (v0408f: auto + parent + ai 모두 정상 동작)
 function pickVerifyMode(btn){
   const v=btn.dataset.v;
-  if(v==='ai'){
-    // 스텁: "곧 출시" 모달 표시, 선택은 유지하지 않음
-    const icon=document.getElementById('m-verify-pro-icon');
-    const title=document.getElementById('m-verify-pro-title');
-    const desc=document.getElementById('m-verify-pro-desc');
-    if(icon)icon.textContent='🤖✨';
-    if(title)title.textContent='AI 검수는 곧 출시돼요';
-    if(desc)desc.innerHTML='활동을 완료하면 AI가 사진을 보고<br>통과/반려를 대신 판정해줄 거예요.<br><span style="color:var(--tx3);font-size:12px">(PRO 전용 기능)</span>';
-    openModal('m-verify-pro');
-    return;
-  }
   document.querySelectorAll('#verify-mode-row .sel-btn').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
   const hint=document.getElementById('verify-mode-hint');
   if(hint){
     if(v==='parent')hint.textContent='부모님 승인 후 마일리지가 적립돼요';
+    else if(v==='ai')hint.textContent='AI가 사진을 보고 통과/반려를 판정해요';
     else hint.textContent='누르면 바로 마일리지가 적립돼요';
   }
+  const promptWrap=document.getElementById('verify-ai-prompt-wrap');
+  if(promptWrap)promptWrap.style.display=(v==='ai')?'block':'none';
 }
 function pickCycle(btn){
   document.querySelectorAll('#cycle-row .sel-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');
@@ -17473,7 +17729,9 @@ function saveActivity(){
   }
   // 완료 조건 — PR 1 UI 스캐폴드. parent/ai 선택 시 스텁 모달로 auto로 되돌아감
   const verifyMode=document.querySelector('#verify-mode-row .sel-btn.on')?.dataset.v||'auto';
-  const actData={emoji,name,desc,pts,maxDay,cycle,days,verifyMode};
+  const _aiPrompt=(document.getElementById('verify-ai-prompt')?.value||'').trim();
+  const verifyConfig=(verifyMode==='ai')?{media:'photo',prompt:_aiPrompt}:null;
+  const actData={emoji,name,desc,pts,maxDay,cycle,days,verifyMode,verifyConfig};
   const targetKids=_getFormCheckedChildren('act');
   const curAdm=_admViewChildId||getViewedMemberId();
   // 관리자가 보고 있는 자녀의 acts (memberData에서 직접 수정)
@@ -18169,6 +18427,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.1.0 (v0408f)',date:'2026-04-08',items:[{type:'new',text:'[AI 검수 Step 2 — PR B] 🤖 AI 검수 모드 정상 작동 개시. 활동 만들기에서 "🤖 AI 검수"를 선택하면 검증 지시문 입력란이 나타나요. 아이가 활동을 탭하면 카메라 모달이 열리고, 사진을 찍어 [검수 받기]를 누르면 Vercel /api/verify로 전송되어 Claude Haiku 4.5가 통과/반려/uncertain을 판정합니다. 통과 시 즉시 마일리지 적립, 반려 시 기록만 남기고 카운트 +1, uncertain/한도 초과 시 부모 승인 큐로 자동 이관(PR A 메커니즘 재사용). 일일 한도 20회 클라이언트 카운터 + 우상단 잔여 표시.'}]},
   {ver:'2.0.9 (v0408e)',date:'2026-04-08',items:[{type:'new',text:'[AI 검수 Step 2 — PR A/B] "부모 승인" 검수 모드 정상 작동 개시. 활동 만들기에서 "부모 승인"을 선택하면, 아이가 해당 활동을 탭했을 때 바로 마일리지가 적립되지 않고 부모에게 승인 요청 메시지가 발송돼요. 부모가 가족 메시지 팝업에서 [승인]/[반려]를 누르면 그 시점에 마일리지가 적립/반려 처리됩니다. 승인 대기 중인 활동은 목록에 "⏳ 승인 대기" 칩이 표시돼요. (승인 메커니즘은 기존 보상 사용 요청과 동일)'}]},
   {ver:'2.0.8 (v0408d)',date:'2026-04-08',items:[{type:'fix',text:'부모용 [편집][+ 추가] 버튼을 히어로 헤더에서 컨텐츠 영역의 섹션 제목("모든 활동"/"교환 가능한 보상") 우측으로 이동'}]},
   {ver:'2.0.7 (v0408c)',date:'2026-04-08',items:[{type:'feat',text:'부모 계정에서 활동/보상 탭 헤더에 [편집][+ 추가] 버튼 추가. 편집 모드에서 드래그로 순서 변경 + 항목 탭 시 관리자 화면과 동일한 편집창이 떠요. (관리자 화면을 거치지 않고 바로 활동/보상 관리 가능)'}]},
