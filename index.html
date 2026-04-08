@@ -1567,7 +1567,8 @@ body.screen-shake{animation:screenShake .55s linear}
 .bug-picker{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;padding:4px 2px 2px}
 .bug-pick{width:100%;min-width:0;padding:8px 2px;border:1.5px solid var(--bdr);background:var(--bg2);border-radius:12px;font-family:inherit;font-size:11px;font-weight:700;color:var(--tx2);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;transition:all .15s;box-sizing:border-box}
 .bug-pick:hover{border-color:var(--bdr2)}
-.bug-pick.active{border-color:var(--tab-color,#6366F1);background:var(--card);color:var(--tx);box-shadow:0 0 0 2px var(--tab-color,#6366F1)33}
+.bug-pick.active{border-color:var(--tab-color,#6366F1);border-width:2.5px;background:var(--tab-lt,rgba(99,102,241,.12));color:var(--tx);box-shadow:0 0 0 2px var(--tab-color,#6366F1),0 2px 8px rgba(99,102,241,.25);font-weight:800}
+body.dark .bug-pick.active{border-color:#A5B4FC;background:rgba(129,140,248,.22);box-shadow:0 0 0 2px #A5B4FC,0 2px 10px rgba(129,140,248,.45);color:#fff}
 .bug-pick .bp-emoji{font-size:18px;line-height:1}
 @keyframes chBugFlyAway{0%{transform:translate(0,0) rotate(0) scale(1)}12%{transform:translate(25px,-50px) rotate(80deg) scale(1.1)}30%{transform:translate(180px,-280px) rotate(260deg) scale(.9)}48%{transform:translate(-100px,-460px) rotate(560deg) scale(.65);opacity:.5}55%{opacity:0;transform:translate(-200px,-520px) rotate(720deg) scale(.4)}68%{opacity:0;transform:translate(-260px,-420px) rotate(900deg) scale(.5)}76%{opacity:1;transform:translate(-180px,-260px) rotate(1080deg) scale(.75)}88%{transform:translate(60px,-80px) rotate(1320deg) scale(1.1)}100%{transform:translate(0,0) rotate(1440deg) scale(1)}}
 @keyframes chBugPoke{0%{transform:scale(1) rotate(0)}20%{transform:scale(1.45) rotate(-4deg)}40%{transform:scale(1.35) rotate(4deg)}60%{transform:scale(1.4) rotate(-3deg)}80%{transform:scale(1.15) rotate(2deg)}100%{transform:scale(1) rotate(0)}}
@@ -9257,7 +9258,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'prod'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0407zw';
+const _APP_VERSION = 'v0407zx';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -17778,6 +17779,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.0.2 (v0407zx)',date:'2026-04-08',items:[{type:'fix',text:'다크모드에서 챌린지 곤충 선택 버튼 활성 표시 가시성 개선'}]},
   {ver:'2.0.1 (v0407zw)',date:'2026-04-08',items:[{type:'fix',text:'프로필 아바타 z-index 상향 — 레벨 이펙트(불꽃 등)가 사용자 아이콘을 덮는 현상 수정'},{type:'fix',text:'나의 메뉴 챌린지 곤충 선택 버튼 5칸 그리드로 동일 크기 통일 (거미만 커지던 문제 수정)'},{type:'ui',text:'화면 모드 선택 라이트→시스템→다크 순서로 재배치 + 모든 미리보기에 동일한 둥근 외곽선 적용해 셋이 같은 모양·크기로 보이도록 통일'}]},
   {ver:'2.0.0 (v0407zv)',date:'2026-04-08',items:[{type:'new',text:'개미 10회 클릭 특별액션 교체 — 동료 개미 38마리가 화면 좌→우로 우르르 행진하며 "공격이다!" "적을 공격해라!" 외침'}]},
   {ver:'1.9.99 (v0407zu)',date:'2026-04-08',items:[{type:'fix',text:'메뚜기 박치기 액정 깨짐 효과 리얼하게 개선 — 충돌 지점을 화면 상단 → 화면 약 40% 위치로 이동, 방사형 균열 + 보조 균열 + 충격 동심원 + 중심 섬광으로 한층 사실적, 한번에 깨지고 변하지 않도록 페이드 타이밍 조정'},{type:'fix',text:'거미 특별액션 — 거미줄이 거미 위쪽으로만 보이도록 수정(아래 삐져나옴 제거), 내려오는 속도 좀 더 느리게'}]},
