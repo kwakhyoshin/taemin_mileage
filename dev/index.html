@@ -9332,7 +9332,48 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0408l';
+const _APP_VERSION = 'v0408m';
+// ── 화면 디버그 패널 (dev만) ──────────────────────────────
+if(_ENV==='dev'){(function(){
+  const panel=document.createElement('div');
+  panel.id='dbg-panel';
+  panel.style.cssText='position:fixed;left:8px;right:8px;bottom:8px;max-height:40vh;background:rgba(0,0,0,.88);color:#0f0;font:11px/1.35 ui-monospace,Menlo,monospace;padding:8px 10px 28px;border-radius:8px;z-index:99999;overflow:auto;display:none;white-space:pre-wrap;word-break:break-all';
+  const tgl=document.createElement('button');
+  tgl.textContent='🐛';
+  tgl.style.cssText='position:fixed;right:8px;bottom:8px;width:36px;height:36px;border-radius:999px;border:0;background:#111;color:#0f0;font-size:18px;z-index:100000;box-shadow:0 2px 8px rgba(0,0,0,.4)';
+  tgl.onclick=()=>{panel.style.display=panel.style.display==='none'?'block':'none';};
+  const clr=document.createElement('button');
+  clr.textContent='✕';
+  clr.style.cssText='position:absolute;right:6px;top:4px;background:transparent;border:0;color:#f88;font-size:14px';
+  clr.onclick=(e)=>{e.stopPropagation();panel.querySelectorAll('.dbg-line').forEach(x=>x.remove());};
+  panel.appendChild(clr);
+  const add=(type,args)=>{
+    try{
+      const line=document.createElement('div');
+      line.className='dbg-line';
+      const colors={log:'#0f0',info:'#6cf',warn:'#fc6',error:'#f66'};
+      line.style.color=colors[type]||'#0f0';
+      const t=new Date().toTimeString().slice(0,8);
+      const msg=Array.from(args).map(a=>{
+        if(a instanceof Error)return a.name+': '+a.message+(a.stack?'\n'+a.stack.split('\n').slice(0,3).join('\n'):'');
+        if(typeof a==='object'){try{return JSON.stringify(a);}catch(_){return String(a);}}
+        return String(a);
+      }).join(' ');
+      line.textContent='['+t+'] '+msg;
+      panel.appendChild(line);
+      panel.scrollTop=panel.scrollHeight;
+    }catch(_){}
+  };
+  ['log','info','warn','error'].forEach(k=>{
+    const orig=console[k].bind(console);
+    console[k]=function(){try{add(k,arguments);}catch(_){}orig.apply(console,arguments);};
+  });
+  window.addEventListener('error',(ev)=>add('error',['[window.error]',ev.message,ev.filename+':'+ev.lineno]));
+  window.addEventListener('unhandledrejection',(ev)=>add('error',['[unhandledrejection]',ev.reason&&(ev.reason.message||ev.reason)]));
+  document.addEventListener('DOMContentLoaded',()=>{document.body.appendChild(panel);document.body.appendChild(tgl);});
+  if(document.body){document.body.appendChild(panel);document.body.appendChild(tgl);}
+  window._dbgPanel={show:()=>{panel.style.display='block';},hide:()=>{panel.style.display='none';}};
+})();}
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -16176,18 +16217,26 @@ function openAiVerifyModal(a){
 
 // v0408j: 녹음 토글
 async function _aiVerifyToggleRecord(){
+  console.log('[voice] toggle called, ctx=',!!_aiVerifyCtx,'state=',_aiVoiceRecorder&&_aiVoiceRecorder.state);
+  if(window._dbgPanel)window._dbgPanel.show();
   if(!_aiVerifyCtx)return;
   if(_aiVoiceRecorder&&_aiVoiceRecorder.state==='recording'){
-    try{_aiVoiceRecorder.stop();}catch(e){}
+    console.log('[voice] stopping');
+    try{_aiVoiceRecorder.stop();}catch(e){console.error('[voice] stop err',e);}
     return;
   }
   // 시작
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
+    console.error('[voice] no mediaDevices');
     toast('이 기기는 마이크를 지원하지 않아요');return;
   }
   let stream;
-  try{stream=await navigator.mediaDevices.getUserMedia({audio:true});}
-  catch(e){toast('마이크 권한이 필요해요');return;}
+  try{
+    console.log('[voice] requesting mic...');
+    stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    console.log('[voice] mic granted, tracks=',stream.getAudioTracks().length);
+  }
+  catch(e){console.error('[voice] getUserMedia fail',e);toast('마이크 권한이 필요해요: '+(e.message||e.name));return;}
   // 지원 mime 선택
   let mime='audio/webm';
   if(window.MediaRecorder){
@@ -16195,31 +16244,42 @@ async function _aiVerifyToggleRecord(){
     for(const c of cands){if(MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(c)){mime=c;break;}}
   }
   _aiVoiceMime=mime.split(';')[0];
+  console.log('[voice] chosen mime=',mime,'-> _aiVoiceMime=',_aiVoiceMime);
   _aiVoiceChunks=[];
-  try{_aiVoiceRecorder=new MediaRecorder(stream,{mimeType:mime});}
-  catch(e){_aiVoiceRecorder=new MediaRecorder(stream);_aiVoiceMime='audio/webm';}
-  _aiVoiceRecorder.ondataavailable=(ev)=>{if(ev.data&&ev.data.size>0)_aiVoiceChunks.push(ev.data);};
+  try{_aiVoiceRecorder=new MediaRecorder(stream,{mimeType:mime});console.log('[voice] MediaRecorder ok');}
+  catch(e){console.warn('[voice] MediaRecorder with mime fail, fallback',e);_aiVoiceRecorder=new MediaRecorder(stream);_aiVoiceMime='audio/webm';}
+  _aiVoiceRecorder.ondataavailable=(ev)=>{console.log('[voice] chunk',ev.data&&ev.data.size);if(ev.data&&ev.data.size>0)_aiVoiceChunks.push(ev.data);};
+  _aiVoiceRecorder.onerror=(ev)=>{console.error('[voice] recorder error',ev.error||ev);};
   _aiVoiceRecorder.onstop=async()=>{
+    console.log('[voice] onstop, chunks=',_aiVoiceChunks.length);
     try{stream.getTracks().forEach(t=>t.stop());}catch(e){}
     if(_aiVoiceTimer){clearInterval(_aiVoiceTimer);_aiVoiceTimer=null;}
     const blob=new Blob(_aiVoiceChunks,{type:_aiVoiceMime});
+    console.log('[voice] raw blob size=',blob.size,'type=',_aiVoiceMime);
     if(blob.size<500){toast('녹음이 너무 짧아요');_aiVerifyResetVoiceUI();return;}
     // v0408k: webm/mp4는 Gemini가 직접 지원하지 않음 → AudioContext로 디코드 후 WAV로 재인코딩
     // v0408l: iOS Safari는 user gesture 밖에서 AudioContext가 suspended → resume() 추가, decodeAudioData callback fallback
     try{
       const arrBuf=await blob.arrayBuffer();
+      console.log('[voice] arrBuf bytes=',arrBuf.byteLength);
       const AC=window.AudioContext||window.webkitAudioContext;
+      if(!AC){console.error('[voice] no AudioContext');toast('이 기기는 AudioContext 미지원');_aiVerifyResetVoiceUI();return;}
       const ac=new AC();
-      try{if(ac.state==='suspended')await ac.resume();}catch(_){}
+      console.log('[voice] AC state=',ac.state,'sr=',ac.sampleRate);
+      try{if(ac.state==='suspended'){await ac.resume();console.log('[voice] AC resumed ->',ac.state);}}catch(er){console.warn('[voice] AC resume fail',er);}
       let decoded;
       try{
         decoded=await ac.decodeAudioData(arrBuf.slice(0));
+        console.log('[voice] decode promise ok');
       }catch(e1){
+        console.warn('[voice] decode promise fail, trying callback',e1);
         // 구형 Safari callback-style fallback
         decoded=await new Promise((res,rej)=>{
           try{ac.decodeAudioData(arrBuf.slice(0),res,rej);}catch(e2){rej(e2);}
         });
+        console.log('[voice] decode callback ok');
       }
+      console.log('[voice] decoded ch=',decoded.numberOfChannels,'sr=',decoded.sampleRate,'len=',decoded.length);
       // 모노, 16kHz로 다운샘플 (Gemini 음성 인식에 충분, 용량 절감)
       const targetRate=16000;
       const srcRate=decoded.sampleRate;
@@ -18789,6 +18849,9 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.1.7 (v0408m)',date:'2026-04-08',items:[
+    {type:'chore',text:'(dev only) 화면 디버그 패널 추가 — 우측 하단 🐛 버튼으로 토글, console.log/error를 화면에 표시. AI 음성 검수 각 단계에 상세 로그 instrumentation 추가 (원격 디버깅용)'},
+  ]},
   {ver:'2.1.6 (v0408l)',date:'2026-04-08',items:[
     {type:'fix',text:'AI 음성 검수 녹음 후 오디오 플레이어가 "오류" 표시되던 문제 수정 — 큰 base64 data URL 대신 URL.createObjectURL 사용, iOS Safari용 AudioContext.resume() 및 decodeAudioData callback fallback 추가'},
   ]},
