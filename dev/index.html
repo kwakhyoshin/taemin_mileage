@@ -9352,7 +9352,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0408w';
+const _APP_VERSION = 'v0408x';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -16189,7 +16189,9 @@ window.rejectActivityVerifyRequest=rejectActivityVerifyRequest;
 // ── AI VERIFY (v0408f) ────────────────────────────────────────────
 // v0408g: /api/verify 는 아직 Vercel 배포 전 → 기존 /api/proxy (Anthropic 포워더) 재사용
 const AI_VERIFY_ENDPOINT='https://mily-proxy.vercel.app/api/proxy';
-const AI_VERIFY_DAILY_LIMIT=30;
+const AI_VERIFY_DAILY_LIMIT=20;
+function _aiVerifyLimit(){try{return (typeof _isPro==='function'&&_isPro())?Infinity:AI_VERIFY_DAILY_LIMIT;}catch(_){return AI_VERIFY_DAILY_LIMIT;}}
+function _aiVerifyLimitLabel(){const L=_aiVerifyLimit();return L===Infinity?'∞':String(L);}
 let _aiVerifyCtx=null; // {act, media, imageDataUrl, imageMime, audioDataUrl, audioMime}
 const AI_VOICE_ENDPOINT='https://mily-proxy.vercel.app/api/audio';
 const AI_VOICE_MAX_SECONDS=10;
@@ -16242,8 +16244,9 @@ function openAiVerifyModal(a){
   const cnt=_aiVerifyGetCount();
   const q=document.getElementById('m-ai-verify-quota');
   if(q){
-    q.textContent='🤖 '+cnt+'/'+AI_VERIFY_DAILY_LIMIT;
-    q.style.color=(cnt>=AI_VERIFY_DAILY_LIMIT)?'#9CA3AF':(cnt>=AI_VERIFY_DAILY_LIMIT*0.8?'#F59E0B':'var(--tx3)');
+    const _L=_aiVerifyLimit();
+    q.textContent='🤖 '+cnt+'/'+_aiVerifyLimitLabel();
+    q.style.color=(cnt>=_L)?'#9CA3AF':(_L!==Infinity&&cnt>=_L*0.8?'#F59E0B':'var(--tx3)');
   }
   openModal('m-ai-verify');
 }
@@ -16465,7 +16468,7 @@ async function _aiVerifySubmit(){
   const _prompt=(a.verifyConfig&&a.verifyConfig.prompt)?a.verifyConfig.prompt
     :(isVoice?`"${a.name}" 활동을 기쁜 목소리로 외쳤는지 판정해줘`:`"${a.name}" 활동을 올바르게 수행했는지 판정해줘`);
   // 한도 체크 (클라이언트 선체크)
-  if(_aiVerifyGetCount()>=AI_VERIFY_DAILY_LIMIT){
+  if(_aiVerifyGetCount()>=_aiVerifyLimit()){
     _aiVerifyHandleOverLimit(a);
     return;
   }
@@ -16605,7 +16608,7 @@ function _aiVerifyShowResult(icon,title,comment){
   // Update quota chip
   const cnt=_aiVerifyGetCount();
   const q=document.getElementById('m-ai-verify-quota');
-  if(q)q.textContent='🤖 '+cnt+'/'+AI_VERIFY_DAILY_LIMIT;
+  if(q)q.textContent='🤖 '+cnt+'/'+_aiVerifyLimitLabel();
 }
 
 function _aiVerifyApplyPass(a,comment){
@@ -18022,7 +18025,7 @@ function resetAiVerifyDaily(){
   const k=todayStr();
   const before=(S.aiVerifyDaily&&S.aiVerifyDaily[k])||0;
   if(before===0){toast('이미 0회예요');return;}
-  if(!confirm('오늘 AI 검수 카운터를 리셋할까요?\n현재 '+before+'/'+AI_VERIFY_DAILY_LIMIT+'회 → 0/'+AI_VERIFY_DAILY_LIMIT+'회'))return;
+  if(!confirm('오늘 AI 검수 카운터를 리셋할까요?\n현재 '+before+'/'+_aiVerifyLimitLabel()+'회 → 0/'+_aiVerifyLimitLabel()+'회'))return;
   if(!S.aiVerifyDaily)S.aiVerifyDaily={};
   S.aiVerifyDaily[k]=0;
   save();
@@ -18034,7 +18037,7 @@ function _refreshAiVerifyCntBadge(){
   if(!b)return;
   const k=todayStr();
   const c=(S.aiVerifyDaily&&S.aiVerifyDaily[k])||0;
-  b.textContent='(오늘 '+c+'/'+AI_VERIFY_DAILY_LIMIT+'회)';
+  b.textContent='(오늘 '+c+'/'+_aiVerifyLimitLabel()+'회)';
 }
 window.resetAiVerifyDaily=resetAiVerifyDaily;
 window._refreshAiVerifyCntBadge=_refreshAiVerifyCntBadge;
@@ -18960,6 +18963,9 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.2.6 (v0408x)',date:'2026-04-08',items:[
+    {type:'improve',text:'AI 검수 일일 제한 정책 변경: 프리 등급은 하루 20회, PRO 등급은 무제한. 할당량 표시도 PRO에서는 ∞로 표기'},
+  ]},
   {ver:'2.2.5 (v0408w)',date:'2026-04-08',items:[
     {type:'fix',text:'이력보기에서 과거 날짜 조회 시 "5/5 완료"처럼 미완료 활동이 누락되어 잘못 표시되던 문제 수정. 스냅샷이 없어 로그로 재구성할 때, 그 날 존재했던 현재 활동(showHome)도 함께 합산하여 "5/10" 같은 정확한 진행률을 표시'},
   ]},
@@ -19636,7 +19642,7 @@ const _FEATURE_INTROS={
       {
         eyebrow:'Smart Decision',
         title:'확실하면 즉시, 애매하면 부모님께',
-        desc:'AI가 확실하다고 판단하면 바로 마일리지가 적립돼요. 조금이라도 애매하면 부모님께 자동으로 확인 요청이 전달돼요. 하루 30회까지 사용할 수 있어요.',
+        desc:'AI가 확실하다고 판단하면 바로 마일리지가 적립돼요. 조금이라도 애매하면 부모님께 자동으로 확인 요청이 전달돼요. 프리 등급은 하루 20회, PRO 등급은 무제한으로 사용할 수 있어요.',
         svg:`<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <linearGradient id="s3bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F5F3FF"/><stop offset="1" stop-color="#FFFFFF"/></linearGradient>
