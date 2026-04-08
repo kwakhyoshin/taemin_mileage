@@ -9350,7 +9350,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0408z2';
+const _APP_VERSION = 'v0408z3';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -19847,19 +19847,12 @@ function showFeatureIntro(id){
 }
 function _maybeShowFeatureIntros(){
   if(!currentUser)return;
-  // AI 검수 기능 소개 (v1) — 아이만 대상 (caregiver는 스킵)
+  // AI 검수 기능 소개 (v1) — 부모/아이 모두 대상
   const _id='ai-verify-v1';
   if(_fiHasSeen(_id))return;
   if(!_fiIsActive(_id)){_fiMarkSeen(_id);return;} // 관리자 종료일 지남
   if(_fiIsDismissedToday(_id))return;             // 사용자가 오늘 하루 띄우지 않기 선택
-  try{
-    const isChild=!(typeof isCaregiverUser==='function'&&isCaregiverUser());
-    if(isChild){
-      setTimeout(()=>showFeatureIntro(_id),800);
-    }else{
-      _fiMarkSeen(_id); // 보호자는 노출 없이 본 것으로 처리
-    }
-  }catch(_){}
+  try{ setTimeout(()=>showFeatureIntro(_id),800); }catch(_){}
 }
 window.showFeatureIntro=showFeatureIntro;
 window._fiPrev=_fiPrev;window._fiNext=_fiNext;window._fiClose=_fiClose;
