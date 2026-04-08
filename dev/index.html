@@ -3874,7 +3874,12 @@ requestAnimationFrame(function(){
 <div class="scr" id="s-log">
   <div class="log-header-sticky">
     <div style="display:flex;align-items:center;justify-content:space-between">
-      <h2 style="margin:0">활동 기록하기 <svg class="hdr-ico" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><path d="M9 15l2 2 4-4"/></svg></h2>
+      <h2 style="margin:0;display:flex;align-items:center;gap:8px">활동 기록하기 <svg class="hdr-ico" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><path d="M9 15l2 2 4-4"/></svg>
+        <span id="log-edit-actions" style="display:none;gap:6px;margin-left:4px">
+          <button id="log-edit-toggle-btn" onclick="toggleLogEditMode()" style="background:rgba(255,255,255,.22);color:#fff;border:0;border-radius:14px;padding:5px 12px;font-size:12px;font-weight:800;cursor:pointer;backdrop-filter:blur(8px)">편집</button>
+          <button onclick="openActForm()" style="background:#fff;color:#6366F1;border:0;border-radius:14px;padding:5px 12px;font-size:12px;font-weight:800;cursor:pointer">+ 추가</button>
+        </span>
+      </h2>
       <div id="log-child-selector" style="display:none;flex-shrink:0"><div id="log-child-btns"></div></div>
     </div>
     <p>탭해서 마일리지를 받아요</p>
@@ -3892,7 +3897,12 @@ requestAnimationFrame(function(){
 <div class="scr" id="s-rwd">
   <div class="rwd-header-sticky">
     <div style="display:flex;align-items:center;justify-content:space-between">
-      <h2 style="font-size:26px;font-weight:900;color:#fff;margin:0;transition:font-size .25s">보상 상점 <svg class="hdr-ico" viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg></h2>
+      <h2 style="font-size:26px;font-weight:900;color:#fff;margin:0;transition:font-size .25s;display:flex;align-items:center;gap:8px">보상 상점 <svg class="hdr-ico" viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg>
+        <span id="rwd-edit-actions" style="display:none;gap:6px;margin-left:4px">
+          <button id="rwd-edit-toggle-btn" onclick="toggleRwdEditMode()" style="background:rgba(255,255,255,.22);color:#fff;border:0;border-radius:14px;padding:5px 12px;font-size:12px;font-weight:800;cursor:pointer;backdrop-filter:blur(8px)">편집</button>
+          <button onclick="openRwdForm()" style="background:#fff;color:#EC4899;border:0;border-radius:14px;padding:5px 12px;font-size:12px;font-weight:800;cursor:pointer">+ 추가</button>
+        </span>
+      </h2>
       <div id="rwd-child-selector" style="display:none;flex-shrink:0"><div id="rwd-child-btns"></div></div>
     </div>
     <p style="font-size:14px;color:rgba(255,255,255,.85);margin-top:2px;font-weight:600">모은 마일리지로 교환해요</p>
@@ -9280,7 +9290,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0408b';
+const _APP_VERSION = 'v0408c';
 const _LS_PREFIX = _ENV==='dev'?'taemin_dev_':'taemin_';
 if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.style.display='';_di.textContent='DEV '+_APP_VERSION;}}
 
@@ -11799,6 +11809,47 @@ function renderHomeGrid(){
 
 function renderLogList(){
   const el=document.getElementById('log-list');
+  // 부모 전용 [편집][+추가] 버튼 표시 토글
+  const _logBtns=document.getElementById('log-edit-actions');
+  if(_logBtns)_logBtns.style.display=isCaregiverUser()?'inline-flex':'none';
+  // 부모 편집 모드: 관리자 화면과 동일한 manage-item 리스트로 렌더
+  if(_logEditMode&&isCaregiverUser()){
+    const _admMs=_getAdmMemberData();
+    const _editActs=(_admMs&&_admMs.acts)?_admMs.acts:S.acts;
+    const _toggleBtn=document.getElementById('log-edit-toggle-btn');
+    if(_toggleBtn){_toggleBtn.textContent='완료';_toggleBtn.style.background='rgba(52,211,153,.95)';}
+    if(!_editActs.length){
+      el.innerHTML='<div style="padding:60px 20px;text-align:center;color:var(--tx3);font-size:14px">활동이 없어요.<br>+ 추가 버튼으로 만들어보세요</div>';
+      return;
+    }
+    el.innerHTML='<div style="padding:8px 0">'+_editActs.map(a=>{
+      return `<div class="manage-item" data-edit-actid="${a.id}" style="padding:12px 14px;margin:0 14px 8px;background:var(--cd);border-radius:14px;cursor:pointer">
+        <div class="drag-handle" style="touch-action:none"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="4" y1="8" x2="20" y2="8"/><line x1="4" y1="16" x2="20" y2="16"/></svg></div>
+        <div class="m-emoji">${escapeHtml(a.emoji)}</div>
+        <div class="m-info" style="flex:1;min-width:0">
+          <div class="m-nm" style="font-size:15px">${escapeHtml(a.name)}</div>
+          <div style="display:flex;gap:4px;margin-top:4px;flex-wrap:wrap">
+            <span class="adm-pill">${a.pts}M · ${a.maxDay===0?'무제한':a.maxDay+'회/'+(CYCLE_LABEL[a.cycle]||a.cycle)}</span>
+            ${!a.active?'<span class="adm-pill adm-pill-off">비활성</span>':''}
+          </div>
+        </div>
+        <div style="display:flex;gap:4px;flex-shrink:0">
+          <button class="icon-btn" onclick="event.stopPropagation();openActForm('${a.id}')" style="width:36px;height:36px;min-width:36px;min-height:36px"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg></button>
+        </div>
+      </div>`;
+    }).join('')+'</div>';
+    el.querySelectorAll('.manage-item[data-edit-actid]').forEach(it=>{
+      it.addEventListener('click',(e)=>{
+        if(e.target.closest('.drag-handle'))return;
+        if(e.target.closest('.icon-btn'))return;
+        openActForm(it.dataset.editActid);
+      });
+    });
+    initLogEditDrag();
+    return;
+  }
+  const _toggleBtn=document.getElementById('log-edit-toggle-btn');
+  if(_toggleBtn){_toggleBtn.textContent='편집';_toggleBtn.style.background='rgba(255,255,255,.22)';}
   const acts=S.acts.filter(a=>{
     if(!a.active||!isAvailableToday(a))return false;
     return true;
@@ -12349,6 +12400,49 @@ window.renderBadgeViewHistory=renderBadgeViewHistory;
 
 function renderRewardGrid(){
   const rg=document.getElementById('rwd-grid');
+  // 부모 전용 [편집][+추가] 버튼 표시 토글
+  const _rwdBtns=document.getElementById('rwd-edit-actions');
+  if(_rwdBtns)_rwdBtns.style.display=isCaregiverUser()?'inline-flex':'none';
+  // 부모 편집 모드: 관리자 화면과 동일한 manage-item 리스트로 렌더
+  if(_rwdEditMode&&isCaregiverUser()){
+    const _admMs=_getAdmMemberData();
+    const _editRwds=(_admMs&&_admMs.rwds)?_admMs.rwds:S.rwds;
+    const _toggleBtn=document.getElementById('rwd-edit-toggle-btn');
+    if(_toggleBtn){_toggleBtn.textContent='완료';_toggleBtn.style.background='rgba(52,211,153,.95)';}
+    if(!_editRwds.length){
+      rg.innerHTML='<div style="padding:60px 20px;text-align:center;color:var(--tx3);font-size:14px;grid-column:1/-1">보상이 없어요.<br>+ 추가 버튼으로 만들어보세요</div>';
+      return;
+    }
+    rg.innerHTML='<div style="padding:8px 0;grid-column:1/-1">'+_editRwds.map(r=>{
+      const hasSale=r.sale&&r.sale.percent&&(!r.sale.endDate||new Date(r.sale.endDate+'T23:59:59')>=new Date());
+      return `<div class="manage-item" data-edit-rwdid="${r.id}" style="padding:12px 14px;margin:0 14px 8px;background:var(--cd);border-radius:14px;cursor:pointer">
+        <div class="drag-handle" style="touch-action:none"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="4" y1="8" x2="20" y2="8"/><line x1="4" y1="16" x2="20" y2="16"/></svg></div>
+        <div class="m-emoji">${escapeHtml(r.emoji)}</div>
+        <div class="m-info" style="flex:1;min-width:0">
+          <div class="m-nm" style="font-size:15px">${escapeHtml(r.name)}${r.goal?' 🎯':''}</div>
+          <div style="display:flex;gap:4px;margin-top:4px;flex-wrap:wrap">
+            <span class="adm-pill">${r.pts.toLocaleString()}M</span>
+            <span class="adm-pill ${r.closed?'adm-pill-rd':'adm-pill-gn'}">${r.closed?'종료':'운영중'}</span>
+            ${hasSale?`<span class="adm-pill adm-pill-rd">${r.sale.percent}% 할인</span>`:''}
+          </div>
+        </div>
+        <div style="display:flex;gap:4px;flex-shrink:0">
+          <button class="icon-btn" onclick="event.stopPropagation();openRwdForm('${r.id}')" style="width:36px;height:36px;min-width:36px;min-height:36px"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg></button>
+        </div>
+      </div>`;
+    }).join('')+'</div>';
+    rg.querySelectorAll('.manage-item[data-edit-rwdid]').forEach(it=>{
+      it.addEventListener('click',(e)=>{
+        if(e.target.closest('.drag-handle'))return;
+        if(e.target.closest('.icon-btn'))return;
+        openRwdForm(it.dataset.editRwdid);
+      });
+    });
+    initRwdEditDrag();
+    return;
+  }
+  const _toggleBtn=document.getElementById('rwd-edit-toggle-btn');
+  if(_toggleBtn){_toggleBtn.textContent='편집';_toggleBtn.style.background='rgba(255,255,255,.22)';}
   const rwds=S.rwds;
   // Empty state
   if(rwds.length===0){rg.innerHTML=renderEmptyState('rwds');return;}
@@ -14076,6 +14170,110 @@ function renderAdmActList(){
     </div>`;
   }).join('');
   initActDrag();
+}
+
+// ── 부모 인라인 편집 모드 (활동/보상 탭) ────────────────────────
+let _logEditMode=false;
+let _rwdEditMode=false;
+function toggleLogEditMode(){
+  if(!isCaregiverUser())return;
+  _logEditMode=!_logEditMode;
+  renderLogList();
+}
+function toggleRwdEditMode(){
+  if(!isCaregiverUser())return;
+  _rwdEditMode=!_rwdEditMode;
+  renderRewardGrid();
+}
+let _logEditDragIdx=null;
+function initLogEditDrag(){
+  const container=document.getElementById('log-list');
+  if(!container)return;
+  const items=container.querySelectorAll('.manage-item');
+  items.forEach((item,idx)=>{
+    const handle=item.querySelector('.drag-handle');
+    if(!handle)return;
+    handle.addEventListener('touchstart',function(e){
+      e.preventDefault();_logEditDragIdx=idx;item.classList.add('dragging');
+    },{passive:false});
+    handle.addEventListener('touchmove',function(e){
+      e.preventDefault();
+      const touch=e.touches[0];
+      container.querySelectorAll('.manage-item').forEach(el=>el.classList.remove('drag-over'));
+      const target=document.elementFromPoint(touch.clientX,touch.clientY);
+      const targetItem=target?.closest('.manage-item');
+      if(targetItem&&targetItem!==item)targetItem.classList.add('drag-over');
+    },{passive:false});
+    handle.addEventListener('touchend',function(e){
+      const touch=e.changedTouches[0];
+      item.classList.remove('dragging');
+      container.querySelectorAll('.manage-item').forEach(el=>el.classList.remove('drag-over'));
+      const target=document.elementFromPoint(touch.clientX,touch.clientY);
+      const targetItem=target?.closest('.manage-item');
+      if(targetItem&&targetItem!==item){
+        const items2=container.querySelectorAll('.manage-item');
+        let targetIdx=-1;
+        items2.forEach((el,i)=>{if(el===targetItem)targetIdx=i;});
+        if(targetIdx>=0&&_logEditDragIdx!==null&&_logEditDragIdx!==targetIdx){
+          const curAdm=_admViewChildId||getViewedMemberId();
+          const _ms=getMemberState(curAdm);
+          const _acts=(_ms&&_ms.acts)?_ms.acts:S.acts;
+          const moved=_acts.splice(_logEditDragIdx,1)[0];
+          _acts.splice(targetIdx,0,moved);
+          if(_globalDataOwner===curAdm&&_acts!==S.acts){S.acts=[..._acts];}
+          save();renderLogList();renderHomeGrid();
+          try{if(typeof renderAdmActList==='function')renderAdmActList();}catch(_){}
+          toast('📋 순서가 변경됐어요');
+        }
+      }
+      _logEditDragIdx=null;
+    });
+  });
+}
+let _rwdEditDragIdx=null;
+function initRwdEditDrag(){
+  const container=document.getElementById('rwd-grid');
+  if(!container)return;
+  const items=container.querySelectorAll('.manage-item');
+  items.forEach((item,idx)=>{
+    const handle=item.querySelector('.drag-handle');
+    if(!handle)return;
+    handle.addEventListener('touchstart',function(e){
+      e.preventDefault();_rwdEditDragIdx=idx;item.classList.add('dragging');
+    },{passive:false});
+    handle.addEventListener('touchmove',function(e){
+      e.preventDefault();
+      const touch=e.touches[0];
+      container.querySelectorAll('.manage-item').forEach(el=>el.classList.remove('drag-over'));
+      const target=document.elementFromPoint(touch.clientX,touch.clientY);
+      const targetItem=target?.closest('.manage-item');
+      if(targetItem&&targetItem!==item)targetItem.classList.add('drag-over');
+    },{passive:false});
+    handle.addEventListener('touchend',function(e){
+      const touch=e.changedTouches[0];
+      item.classList.remove('dragging');
+      container.querySelectorAll('.manage-item').forEach(el=>el.classList.remove('drag-over'));
+      const target=document.elementFromPoint(touch.clientX,touch.clientY);
+      const targetItem=target?.closest('.manage-item');
+      if(targetItem&&targetItem!==item){
+        const items2=container.querySelectorAll('.manage-item');
+        let targetIdx=-1;
+        items2.forEach((el,i)=>{if(el===targetItem)targetIdx=i;});
+        if(targetIdx>=0&&_rwdEditDragIdx!==null&&_rwdEditDragIdx!==targetIdx){
+          const curAdm=_admViewChildId||getViewedMemberId();
+          const _ms=getMemberState(curAdm);
+          const _rwds=(_ms&&_ms.rwds)?_ms.rwds:S.rwds;
+          const moved=_rwds.splice(_rwdEditDragIdx,1)[0];
+          _rwds.splice(targetIdx,0,moved);
+          if(_globalDataOwner===curAdm&&_rwds!==S.rwds){S.rwds=[..._rwds];}
+          save();renderRewardGrid();
+          try{if(typeof renderAdmRwdList==='function')renderAdmRwdList();}catch(_){}
+          toast('🎁 보상 순서가 변경됐어요');
+        }
+      }
+      _rwdEditDragIdx=null;
+    });
+  });
 }
 
 // ── ACTIVITY DRAG & DROP ────────────────────────
@@ -17835,6 +18033,7 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.0.7 (v0408c)',date:'2026-04-08',items:[{type:'feat',text:'부모 계정에서 활동/보상 탭 헤더에 [편집][+ 추가] 버튼 추가. 편집 모드에서 드래그로 순서 변경 + 항목 탭 시 관리자 화면과 동일한 편집창이 떠요. (관리자 화면을 거치지 않고 바로 활동/보상 관리 가능)'}]},
   {ver:'2.0.6 (v0408b)',date:'2026-04-08',items:[{type:'feat',text:'[AI 검수 Step 1 — PR 1/3] 활동 만들기 화면에 "완료 조건" 섹션 추가 (자동/부모 승인/🤖 AI 검수 라디오 3종). 현재는 UI 스캐폴드 단계 — 자동만 동작하고 나머지는 "곧 출시" 안내 모달 표시'}]},
   {ver:'2.0.5 (v0408a)',date:'2026-04-08',items:[{type:'fix',text:'챌린지 곤충 땀방울 제거'}]},
   {ver:'2.0.4 (v0407zz)',date:'2026-04-08',items:[{type:'fix',text:'챌린지 곤충 땀방울을 무당벌레 캐릭터(걷기 애니) 스타일로 재구현 — 회전되지 않는 별도 오버레이로 머리 위에 하늘색 물방울이 똑똑 떨어지는 모양'}]},
@@ -21979,6 +22178,7 @@ Object.assign(window, {
   togSetting, saveSettings, togBdaySetting, saveBdaySettings, saveGreetingMode, saveGreetingCustom,
   resetToday, resetAll, backupData, restoreData,
   openActForm, saveActivity, pickCycle, pickVerifyMode, toggleDaysMode, toggleDay,
+  toggleLogEditMode, toggleRwdEditMode,
   openRwdForm, saveReward, setGoalT, setRwdSale, initActDrag, initRwdDrag,
   openEP, closeEP, epSearch, pickE, showEpCat, switchEpCat,
   setPeriod, pk, startChangePIN, lockAdmin,
