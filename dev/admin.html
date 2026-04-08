@@ -1830,6 +1830,7 @@ window.clearChatErrors=clearChatErrors;
 const CFG_DOC = _ENV === 'dev' ? 'config_dev' : 'config_prod';
 async function loadAppConfig(){
   try{
+    await ensureFirebaseAuth();
     const snap = await getDoc(doc(db,'system',CFG_DOC));
     const d = snap.exists()?snap.data():{};
     const ai = d.aiVerify||{};
@@ -1854,6 +1855,7 @@ function renderFeatureIntroList(fi){
 }
 async function saveAppConfigAiLimits(){
   try{
+    await ensureFirebaseAuth();
     const free=parseInt(document.getElementById('cfg-ai-free').value||'0',10);
     const pro=parseInt(document.getElementById('cfg-ai-pro').value||'0',10);
     await setDoc(doc(db,'system',CFG_DOC),{aiVerify:{freeDailyLimit:free,proDailyLimit:pro,updatedAt:Date.now()}},{merge:true});
@@ -1863,6 +1865,7 @@ async function saveAppConfigAiLimits(){
 }
 async function saveAppConfigFeatureIntro(){
   try{
+    await ensureFirebaseAuth();
     const id=(document.getElementById('cfg-fi-id').value||'').trim();
     const end=(document.getElementById('cfg-fi-end').value||'').trim();
     if(!id||!end){document.getElementById('cfg-fi-status').textContent='기능 ID와 종료일 모두 입력 필요';return;}
@@ -1875,6 +1878,7 @@ async function saveAppConfigFeatureIntro(){
 async function deleteFeatureIntro(id){
   if(!confirm('삭제: '+id+'?'))return;
   try{
+    await ensureFirebaseAuth();
     const snap=await getDoc(doc(db,'system',CFG_DOC));
     const d=snap.exists()?snap.data():{};
     const fi=d.featureIntro||{}; delete fi[id];
