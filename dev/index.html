@@ -4964,7 +4964,7 @@ requestAnimationFrame(function(){
       </div>
       <div id="m-ai-verify-stage-loading" style="display:none;text-align:center;padding:24px 0">
         <div style="font-size:36px;margin-bottom:8px">🤖</div>
-        <div style="font-size:14px;color:var(--tx2)">마일리가 확인하고 있어요...</div>
+        <div style="font-size:14px;color:var(--tx2)">mily가 확인하고 있어요...</div>
       </div>
       <div id="m-ai-verify-stage-result" style="display:none;text-align:center">
         <div id="m-ai-verify-result-icon" style="font-size:48px;margin-bottom:8px"></div>
@@ -9444,7 +9444,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0408zB';
+const _APP_VERSION = 'v0410a';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -10287,7 +10287,7 @@ window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change', func
 
 // ── SMART MESSAGE SYSTEM ─────────────────────
 const DAILY_MSGS_BY_TIME={
-  morning:['오늘도 멋진 하루 보내자! 💪','화이팅! 넌 할 수 있어! ⭐','좋은 아침이야! ☀️','잘 잤어? 오늘도 파이팅! 💫','오늘도 응원해! 🎯','새로운 하루가 시작됐어! 🌈','상쾌한 아침! 오늘은 뭘 해볼까? 🤩','아침부터 기분 좋은 날이야! 😊','오늘 하루도 신나게! 🎶','일찍 일어난 새가 마일리지를 잡는다! 🐦','좋은 아침! 오늘도 최고가 되자! 🏆','눈 뜨자마자 마일리가 반겨요! 👋'],
+  morning:['오늘도 멋진 하루 보내자! 💪','화이팅! 넌 할 수 있어! ⭐','좋은 아침이야! ☀️','잘 잤어? 오늘도 파이팅! 💫','오늘도 응원해! 🎯','새로운 하루가 시작됐어! 🌈','상쾌한 아침! 오늘은 뭘 해볼까? 🤩','아침부터 기분 좋은 날이야! 😊','오늘 하루도 신나게! 🎶','일찍 일어난 새가 마일리지를 잡는다! 🐦','좋은 아침! 오늘도 최고가 되자! 🏆','눈 뜨자마자 mily가 반겨요! 👋'],
   afternoon:['오후도 힘내자! 💪','점심 맛있게 먹었어? 🍚','오후에도 파이팅! 🔥','슬슬 활동 해볼까? 🎯','오늘 마일리지 모았어? ⭐','반 왔다! 오후도 화이팅! 🙌','좀 쉬었다 다시 달려볼까? 😎','오후의 여유, 즐기고 있어? 🌤️','에너지 충전 완료! 출발! 🚀','오늘 목표까지 얼마나 남았을까? 📊'],
   evening:['오늘 하루 수고했어! 🌙','저녁 맛있게 먹어! 🍽️','오늘도 열심히 했지? 👏','하루 마무리 잘 하자! ✨','저녁 시간이야, 좀 쉬어! 😌','오늘 뭐 재미있었어? 💬','멋진 하루를 보냈네! 🌟','저녁노을처럼 예쁜 하루였어! 🧡','오늘 한 일 돌아보는 시간! 📝','편안한 저녁 보내! 🍵'],
   night:['오늘도 수고했어! 잘 자! 💤','내일은 더 멋진 하루가 될 거야! 🌙','푹 자고 내일 만나! 😴','좋은 꿈 꿔! 🌜','오늘 정말 잘했어! 내일 또 만나자! ⭐','꿈나라에서도 마일리지 모으는 거 아니야? 😆','편안한 밤 보내! 🛌','하루의 마지막도 멋지게! 🌠','내일도 좋은 일이 가득할 거야! 🍀','눈 감으면 내일이 금방 와! 😊']
@@ -11728,7 +11728,7 @@ function renderMilyGreeting(){
     state='celebrate';
     const msgs=isC
       ?['오늘 활동을 전부 완료했어요! 대단해요!','완벽한 하루예요! 정말 잘하고 있어요!','올클리어! 너무 멋져요!','오늘의 영웅이에요! 다 해냈어요!']
-      :['오늘 전부 해냈어! 정말 대단해!','완벽한 하루! 마일리가 자랑스러워!','올클리어! 너무 멋있어!','오늘의 영웅! 다 해냈구나!'];
+      :['오늘 전부 해냈어! 정말 대단해!','완벽한 하루! mily가 자랑스러워!','올클리어! 너무 멋있어!','오늘의 영웅! 다 해냈구나!'];
     charCfg={face:{eyeStyle:'happy',mouthStyle:'open',cheekGlow:true},bodyAnim:'jump',armStyle:'up',effects:['stars']};
     msg=msgs[Math.floor(Date.now()/60000)%msgs.length];
     hintIcon=_ic.trophy;hint=streak>1?`${streak}일 연속 달성 중!`:(isC?'내일도 이어가 볼까요?':'내일도 이어가자!');
@@ -12220,23 +12220,55 @@ function renderRecent(){
   const el=document.getElementById('rec-list');
   // 어제까지만 필터링
   const cutoff=new Date();cutoff.setDate(cutoff.getDate()-1);cutoff.setHours(0,0,0,0);
-  const items=S.log.filter(i=>i.ts>=cutoff.getTime());
+  const cutoffTs=cutoff.getTime();
 
-  if(!items.length){el.innerHTML='<div class="empty">아직 활동이 없어요. 시작해봐요! 🚀</div>';return;}
+  // 통합 이력 빌드: S.log + S.aiVerifyRejects + S.actVerifyRequests(pending)
+  const unified=[];
+  // 1) 일반 로그 (승인 포함)
+  (S.log||[]).filter(i=>i.ts>=cutoffTs).forEach(i=>{
+    const vf=i.verify||null;
+    let verifyLabel='';
+    if(vf){
+      if(vf.result==='pass') verifyLabel='<div style="font-size:11px;font-weight:700;color:#10B981;margin-top:2px">🤖 AI 검수 승인'+(vf.comment?' — '+vf.comment:'')+'</div>';
+    } else if(i.verifyBy){
+      verifyLabel='<div style="font-size:11px;font-weight:700;color:#6366F1;margin-top:2px">👨‍👩 부모 승인</div>';
+    }
+    unified.push({ts:i.ts,emoji:i.emoji,name:i.name,pts:i.pts,verifyLabel,type:'log'});
+  });
+  // 2) AI 반려 이력
+  (S.aiVerifyRejects||[]).filter(r=>r.ts>=cutoffTs).forEach(r=>{
+    const comment=r.comment||'';
+    const verifyLabel='<div style="font-size:11px;font-weight:700;color:#EF4444;margin-top:2px">🤖 AI 검수 반려'+(comment?' — '+comment:'')+'</div>';
+    unified.push({ts:r.ts,emoji:r.actEmoji||'📝',name:r.actName||'(활동)',pts:0,verifyLabel,type:'reject'});
+  });
+  // 3) 부모 이관 대기 중
+  (S.actVerifyRequests||[]).filter(r=>r.status==='pending'&&r.ts>=cutoffTs).forEach(r=>{
+    const act=(S.acts||[]).find(a=>a.id===r.actId);
+    const reason=r.aiResult==='uncertain'?'AI 판단 불확실':'AI 횟수 초과';
+    const aiComment=r.aiComment?' — '+r.aiComment:'';
+    const verifyLabel='<div style="font-size:11px;font-weight:700;color:#F59E0B;margin-top:2px">👨‍👩 부모 확인 대기 ('+reason+aiComment+')</div>';
+    unified.push({ts:r.ts,emoji:act?act.emoji:'📝',name:act?act.name:'(활동)',pts:0,verifyLabel,type:'escalate'});
+  });
+  // 시간순 정렬
+  unified.sort((a,b)=>b.ts-a.ts);
+
+  if(!unified.length){el.innerHTML='<div class="empty">아직 활동이 없어요. 시작해봐요! 🚀</div>';return;}
 
   let html='';
-  items.forEach(i=>{
+  unified.forEach(i=>{
     const label=getDayLabel(i.ts);
     if(!label)return;
     const h=new Date(i.ts).getHours(),m=String(new Date(i.ts).getMinutes()).padStart(2,'0'),ap=h>=12?'오후':'오전',h12=h>12?h-12:h===0?12:h;
     const timeStr=`${ap} ${h12}:${m}`;
     const tagCls=label==='오늘'?'day-today':'day-1';
     const labelHtml=`<span class="rec-day-tag ${tagCls}">${label}</span>`;
+    const ptsColor=i.type==='reject'?'var(--tx3)':i.pts<0?'var(--rd)':'var(--gn2)';
+    const ptsText=i.type==='reject'?'반려':((i.pts>0?'+':'')+i.pts+' 마일리지');
     html+=`<div class="rec-item">
       <div class="rec-ico">${i.emoji}</div>
-      <div style="flex:1"><div class="rec-nm">${i.name}${labelHtml}</div><div class="rec-tm">${timeStr}</div></div>
+      <div style="flex:1"><div class="rec-nm">${i.name}${labelHtml}</div>${i.verifyLabel||''}<div class="rec-tm">${timeStr}</div></div>
       <div style="display:flex;align-items:center;gap:6px">
-        <div style="font-size:14px;font-weight:800;color:${i.pts<0?'var(--rd)':'var(--gn2)'}">${i.pts>0?'+':''}${i.pts} 마일리지</div>
+        <div style="font-size:14px;font-weight:800;color:${ptsColor}">${ptsText}</div>
       </div>
     </div>`;
   });
@@ -15035,20 +15067,20 @@ async function _getDaySnapshot(dateStr){
   const recon = _reconstructDayFromLog(dateStr);
   return {snapshot: recon, reconstructed: true};
 }
-// S.log에서 그 날 활동 기록을 추출 — 로그에 등장한 actId + 그날 존재했던 현재 활동 합산
+// S.log에서 그 날 활동 기록을 추출 — 오늘 할일(showHome)로 지정된 활동만
 function _reconstructDayFromLog(dateStr){
   const dayStart = new Date(dateStr+'T00:00:00').getTime();
   const dayEnd = dayStart + 86400000;
   const mid = _dhMemberId();
   const dayLogs = (S.log||[]).filter(l=>l.ts>=dayStart && l.ts<dayEnd && l.actId && (!l.user || l.user===mid));
   const byId = {};
-  // 1) 그 날 로그에 등장한 활동 (삭제된 활동 포함)
+  // 1) 그 날 로그에 등장한 활동 중 showHome인 것만 (부모가 오늘 할일로 지정한 것)
   dayLogs.forEach(l=>{
     if(byId[l.actId]) return;
     const cur = (S.acts||[]).find(a=>a.id===l.actId);
-    byId[l.actId] = cur
-      ? {id:cur.id, name:cur.name, emoji:cur.emoji, maxDay:cur.maxDay||1, pts:cur.pts||0}
-      : {id:l.actId, name:l.name||'(삭제된 활동)', emoji:l.emoji||'📝', maxDay:1, pts:l.pts||0, _deleted:true};
+    if(!cur) return; // 삭제된 활동은 showHome 여부 확인 불가 → 제외
+    if(!cur.showHome) return; // 오늘 할일로 지정되지 않은 활동 제외
+    byId[l.actId] = {id:cur.id, name:cur.name, emoji:cur.emoji, maxDay:cur.maxDay||1, pts:cur.pts||0};
   });
   // 2) 그 날 존재했던 현재 활동도 추가 (미완료 항목까지 표시되도록)
   //    id가 'a_<timestamp>' 형식이므로 timestamp를 파싱해 dayEnd 이후 생성된 활동은 제외
@@ -15191,11 +15223,29 @@ function openDayDiary(){
     if(!t || !t.closest || !t.closest('#diary-page')) e.preventDefault();
   },{passive:false});
   var touchStartY=null;
+  var touchStartScrollTop=null;
   var stage = ov.querySelector('#diary-stage');
-  stage.addEventListener('touchstart',function(e){ touchStartY=e.touches[0].clientY; },{passive:true});
+  stage.addEventListener('touchstart',function(e){
+    touchStartY=e.touches[0].clientY;
+    var page=document.getElementById('diary-page');
+    touchStartScrollTop=page?page.scrollTop:0;
+  },{passive:true});
   stage.addEventListener('touchend',function(e){
     if(touchStartY===null)return;
     var dy = e.changedTouches[0].clientY - touchStartY;
+    var page=document.getElementById('diary-page');
+    var scrolled=page?Math.abs(page.scrollTop-(touchStartScrollTop||0)):0;
+    // 페이지 내부 스크롤이 발생했으면 날짜 이동하지 않음
+    if(scrolled>10){ touchStartY=null; return; }
+    // 스크롤 가능한 상태에서 스와이프하면 날짜 이동 대신 스크롤 우선
+    if(page && page.scrollHeight > page.clientHeight + 10){
+      var atTop = page.scrollTop <= 2;
+      var atBottom = page.scrollTop + page.clientHeight >= page.scrollHeight - 2;
+      // 위로 스와이프(다음날)인데 바닥이 아닌 경우 → 스크롤 우선
+      if(dy<0 && !atBottom){ touchStartY=null; return; }
+      // 아래로 스와이프(이전날)인데 맨 위가 아닌 경우 → 스크롤 우선
+      if(dy>0 && !atTop){ touchStartY=null; return; }
+    }
     if(Math.abs(dy)>60){ diaryNav(dy<0 ? 1 : -1); }
     touchStartY=null;
   });
@@ -16693,7 +16743,7 @@ async function _aiVerifySubmit(){
       _aiVerifyShowResult('😅','다시 해볼까?',comment||'조금 더 밝게 외쳐볼래?');
     }else{
       _aiVerifyEscalateToParent(a,'uncertain',comment);
-      _aiVerifyShowResult('👨‍👩','엄마아빠가 확인할게요',comment||'마일리가 확실하지 않아서 부모님께 보냈어요');
+      _aiVerifyShowResult('👨‍👩','엄마아빠가 확인할게요',comment||'mily가 확실하지 않아서 부모님께 보냈어요');
     }
     return;
   }
@@ -16755,7 +16805,7 @@ async function _aiVerifySubmit(){
   }else{
     // uncertain → 부모 승인 큐로 이관
     _aiVerifyEscalateToParent(a,'uncertain',comment);
-    _aiVerifyShowResult('👨‍👩','엄마아빠가 확인할게요',comment||'마일리가 확실하지 않아서 부모님께 보냈어요');
+    _aiVerifyShowResult('👨‍👩','엄마아빠가 확인할게요',comment||'mily가 확실하지 않아서 부모님께 보냈어요');
   }
 }
 
@@ -18332,7 +18382,7 @@ async function _aiSuggestVerifyPrompt(actName,ta,media){
   if(_aiSuggestInflight)return;
   _aiSuggestInflight=true;
   const _orig=ta.placeholder;
-  ta.placeholder='마일리가 추천 지시문을 작성하는 중...';
+  ta.placeholder='mily가 추천 지시문을 작성하는 중...';
   const _media=media||'photo';
   const _sysPhoto='너는 어린이 활동 인증 사진 검증용 프롬프트 작성 도우미야. 활동 이름을 받으면, 부모가 아이의 수행을 사진으로 확인할 수 있도록 "어떤 사진을 찍어야 하고 무엇을 확인해야 하는지"를 한국어 1~2문장(공백 포함 60자 이내)으로 작성해줘. 설명이나 따옴표 없이 지시문 본문만 출력해.';
   const _sysVoice='너는 어린이 활동 인증 음성 검증용 프롬프트 작성 도우미야. 활동 이름을 받으면, 부모가 아이의 *목소리 톤·감정·에너지*를 듣고 확인할 수 있도록 "어떤 말을 어떤 톤으로 말해야 하는지, 무엇을 확인해야 하는지"를 한국어 1~2문장(공백 포함 60자 이내)으로 작성해줘. 단어 자체보다 톤·감정 기준을 명시해. 설명이나 따옴표 없이 지시문 본문만 출력해.';
@@ -19134,6 +19184,12 @@ const APP_CHANGELOG=[
     {type:'fix',text:'부모 알림 뱃지 버그 수정: AI 검수 에스컬레이션/보상 승인 요청 팝업을 닫아도 승인/거절하지 않은 pending 요청은 familyMessages read 상태를 유지하여 가족 뱃지/나의 메뉴 아이 아이콘 뱃지/메시지 리스트에서 사라지지 않도록 함. 또한 Firestore 리스너가 로컬 dirty 상태에서도 actVerifyRequests/rewardRequests를 동기화하도록 개선'},
     {type:'new',text:'신규 기능 소개 팝업에 "오늘 하루 띄우지 않기" 버튼 추가'},
     {type:'new',text:'관리자 페이지 → 설정 → "신규 기능 소개 팝업" 섹션 추가. 기능별 배너 종료일 설정/해제, 미리보기, 본 기록 초기화 지원'},
+  ]},
+  {ver:'2.3.0 (v0410a)',date:'2026-04-10',items:[
+    {type:'fix',text:'오늘 할일 이력: 부모가 선정한 오늘 할일(showHome)만 표시하도록 수정 — 기존에는 할일목록에서 수행한 모든 활동이 이력에 포함되던 문제'},
+    {type:'fix',text:'오늘 할일 이력: 과거일 조회 시 목록 스크롤과 날짜 이동 충돌 수정 — 목록 내 스크롤 가능할 때는 스크롤 우선, 끝(상단/하단)에 도달했을 때만 날짜 이동'},
+    {type:'fix',text:'AI 검수: 마일리 → mily로 이름 통일'},
+    {type:'feat',text:'최근 활동 목록에 AI 검수 결과 표시 — 승인/반려/부모 이관 사유가 활동명 아래에 표시'},
   ]},
   {ver:'2.2.6 (v0408x)',date:'2026-04-08',items:[
     {type:'improve',text:'AI 검수 일일 제한 정책 변경: 프리 등급은 하루 20회, PRO 등급은 무제한. 할당량 표시도 PRO에서는 ∞로 표기'},
