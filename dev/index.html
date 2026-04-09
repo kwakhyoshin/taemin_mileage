@@ -9350,7 +9350,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0408z7';
+const _APP_VERSION = 'v0408z8';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -22470,9 +22470,15 @@ async function initServiceWorker(){
         navigator.serviceWorker.ready.then(()=>resolve());
       });
     }
-    // Check existing subscription
-    pushSubscription = await swRegistration.pushManager.getSubscription();
-    console.log('[SW] existing push sub:', !!pushSubscription);
+    // Check existing subscription (iOS Safari는 pushManager 미지원 → 가드)
+    if(swRegistration.pushManager && typeof swRegistration.pushManager.getSubscription==='function'){
+      try{
+        pushSubscription = await swRegistration.pushManager.getSubscription();
+        console.log('[SW] existing push sub:', !!pushSubscription);
+      }catch(_pe){ console.warn('[SW] pushManager.getSubscription failed:', _pe); }
+    }else{
+      console.log('[SW] pushManager not supported (iOS Safari)');
+    }
     updatePushUI();
   }catch(e){ console.warn('[SW] registration failed:', e); }
 }
