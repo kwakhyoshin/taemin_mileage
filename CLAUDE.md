@@ -162,6 +162,7 @@ git push origin --delete release/v날짜
 2. **`dev_guide.md` 현행화**: 변경사항, 커밋 이력, 트러블슈팅 등 최신 상태로 업데이트
 3. **APP_CHANGELOG 업데이트**: 개발기/운영기 각각의 `APP_CHANGELOG` 배열에 해당 배포의 신규 기능/버그 수정 항목 추가
 4. 배포 대상이 운영기인 경우 `_ENV='prod'` 유지 반드시 확인
+5. **ERD 현행화**: 데이터 모델(Firestore 컬렉션/문서 구조, 필드, 서브컬렉션)이 변경된 경우 `erd.html`과 `erd.mermaid`를 반드시 업데이트
 
 ## 🔴 버그 수정 시 필수: 문서 먼저 읽기
 - **문제가 발생하면 코드를 만지기 전에 반드시 `dev_guide.md`를 먼저 읽을 것**
