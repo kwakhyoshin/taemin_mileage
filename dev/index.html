@@ -1672,7 +1672,7 @@ body.dark .family-popup-avatar{border-color:rgba(255,255,255,.25)}
   .nav-item{padding:8px 12px!important;border-radius:12px!important;flex-direction:column!important;justify-content:center!important;gap:2px!important}
   .nav-item .nav-label{font-size:10px!important;font-weight:700!important;max-width:none!important;opacity:1!important;margin-left:0!important}
   .scr{margin-left:0!important;width:100%!important;max-width:100%!important;padding-bottom:calc(80px + env(safe-area-inset-bottom))!important}
-  #s-badge{margin-left:0!important;width:100%!important}
+  #s-badge,#s-privacy,#s-terms{margin-left:0!important;width:100%!important}
   .nav-users{flex-direction:row!important;gap:0!important}
   .nav-divider{width:1px!important;height:22px!important;margin:0 4px!important}
 }
@@ -1768,8 +1768,8 @@ body.dark .family-popup-avatar{border-color:rgba(255,255,255,.25)}
   .hist-hero{padding:22px 24px 18px;border-radius:0;margin:0 0 14px}
   .my-header{padding:20px 24px;border-radius:0;margin:0}
   .my-header h2{font-size:26px}
-  .badge-hero{border-radius:0!important}
-  #s-badge{margin-left:200px;width:calc(100vw - 200px)}
+  .badge-hero,.legal-hero{border-radius:0!important}
+  #s-badge,#s-privacy,#s-terms{margin-left:200px;width:calc(100vw - 200px)}
   .hist-stats-card{margin:0 20px 14px}
   .adm-top{padding:20px 24px;border-radius:0}
   .adm-top h2{font-size:22px}
@@ -1833,7 +1833,7 @@ body.dark .family-popup-avatar{border-color:rgba(255,255,255,.25)}
   .nav-item{padding:10px 14px!important;justify-content:center!important;flex-direction:column!important;gap:3px!important}
   .nav-item .nav-label{opacity:1!important;max-width:none!important;font-size:11px!important;margin-left:0!important}
   .scr{margin-left:0!important;width:100%!important;max-width:100%!important;margin-right:auto!important;padding-bottom:110px!important}
-  #s-badge{margin-left:0!important;width:100%!important;max-width:100%!important}
+  #s-badge,#s-privacy,#s-terms{margin-left:0!important;width:100%!important;max-width:100%!important}
   .auth-screen{margin-left:0!important;width:100%!important}
 }
 
@@ -1925,8 +1925,8 @@ body.dark .family-popup-avatar{border-color:rgba(255,255,255,.25)}
   .hist-hero{border-radius:0;padding:26px 28px 20px}
   .hist-hero h2{font-size:28px}
   .my-header h2{font-size:28px}
-  .badge-hero{border-radius:0!important}
-  #s-badge{margin-left:240px;width:calc(100vw - 240px)}
+  .badge-hero,.legal-hero{border-radius:0!important}
+  #s-badge,#s-privacy,#s-terms{margin-left:240px;width:calc(100vw - 240px)}
   .hist-stats-card{margin:0 24px 14px}
   .adm-top{border-radius:0;padding:24px 28px}
 
@@ -2032,7 +2032,7 @@ body.dark .family-popup-avatar{border-color:rgba(255,255,255,.25)}
   .bottom-nav{flex-direction:row!important;height:auto!important;border-right:none!important;border-top:none!important}
   .bottom-nav::before{display:none!important}
   .scr{margin-left:0!important;width:100%!important;max-width:100%!important}
-  #s-badge{margin-left:0!important;width:100%!important}
+  #s-badge,#s-privacy,#s-terms{margin-left:0!important;width:100%!important}
   .auth-screen{margin-left:0!important;width:100%!important}
 }
 
@@ -4104,7 +4104,7 @@ requestAnimationFrame(function(){
 <!-- Badge View Screen -->
 <!-- ── 개인정보처리방침 인앱 오버레이 ── -->
 <div class="scr" id="s-privacy" style="display:none;position:fixed;inset:0;z-index:200;background:var(--bg);overflow-y:auto;-webkit-overflow-scrolling:touch">
-  <div style="position:sticky;top:0;z-index:10;background:linear-gradient(135deg,#6366F1,#818CF8);padding:18px 20px 16px;padding-top:calc(18px + env(safe-area-inset-top));border-radius:0 0 var(--rxl) var(--rxl);box-shadow:0 4px 20px rgba(99,102,241,0.3)">
+  <div class="legal-hero" style="position:sticky;top:0;z-index:10;background:linear-gradient(135deg,#6366F1,#818CF8);padding:18px 20px 16px;padding-top:calc(18px + env(safe-area-inset-top));border-radius:0 0 var(--rxl) var(--rxl);box-shadow:0 4px 20px rgba(99,102,241,0.3)">
     <div style="display:flex;align-items:center;gap:12px">
       <button onclick="closePrivacyView()" style="background:rgba(255,255,255,0.2);border:none;width:44px;height:44px;min-width:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;font-size:18px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);-webkit-tap-highlight-color:transparent;touch-action:manipulation">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15,18 9,12 15,6"/></svg>
@@ -4151,7 +4151,7 @@ requestAnimationFrame(function(){
 
 <!-- ── 이용약관 인앱 오버레이 ── -->
 <div class="scr" id="s-terms" style="display:none;position:fixed;inset:0;z-index:200;background:var(--bg);overflow-y:auto;-webkit-overflow-scrolling:touch">
-  <div style="position:sticky;top:0;z-index:10;background:linear-gradient(135deg,#6366F1,#818CF8);padding:18px 20px 16px;padding-top:calc(18px + env(safe-area-inset-top));border-radius:0 0 var(--rxl) var(--rxl);box-shadow:0 4px 20px rgba(99,102,241,0.3)">
+  <div class="legal-hero" style="position:sticky;top:0;z-index:10;background:linear-gradient(135deg,#6366F1,#818CF8);padding:18px 20px 16px;padding-top:calc(18px + env(safe-area-inset-top));border-radius:0 0 var(--rxl) var(--rxl);box-shadow:0 4px 20px rgba(99,102,241,0.3)">
     <div style="display:flex;align-items:center;gap:12px">
       <button onclick="closeTermsView()" style="background:rgba(255,255,255,0.2);border:none;width:44px;height:44px;min-width:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;font-size:18px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);-webkit-tap-highlight-color:transparent;touch-action:manipulation">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15,18 9,12 15,6"/></svg>
