@@ -9350,7 +9350,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0408z5';
+const _APP_VERSION = 'v0408z6';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -9427,6 +9427,8 @@ async function _initFirebase(){
     initializeApp = fbAppMod.initializeApp;
     ({getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction, collection: _fsCollection, addDoc: _fsAddDoc} = fbFsMod);
     ({getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut: signOut, onAuthStateChanged, GoogleAuthProvider, OAuthProvider, signInWithCustomToken} = fbAuthMod);
+    const {signInAnonymously: _signInAnonymously} = fbAuthMod;
+    window._signInAnonymously = _signInAnonymously;
     const {initializeAppCheck, ReCaptchaEnterpriseProvider} = fbAppCheckMod;
 
     const firebaseConfig = {
@@ -9463,6 +9465,16 @@ async function _initFirebase(){
       });
       console.log('[mile.ly] Auth restored:', fbAuth.currentUser?fbAuth.currentUser.uid:'(none)');
     }catch(_awErr){ console.warn('[mile.ly] auth wait failed',_awErr); }
+    // v0408z6: 로그인 세션이 없으면 익명 로그인으로 Firestore write 권한 확보
+    // (회원가입 플로우는 사용자가 아직 Firebase 로그인 전이지만 setDoc을 호출해야 함)
+    if(!fbAuth.currentUser && window._signInAnonymously){
+      try{
+        await window._signInAnonymously(fbAuth);
+        console.log('[mile.ly] Anonymous sign-in OK:', fbAuth.currentUser&&fbAuth.currentUser.uid);
+      }catch(_anErr){
+        console.warn('[mile.ly] Anonymous sign-in failed:', _anErr&&_anErr.code, _anErr&&_anErr.message);
+      }
+    }
     _firebaseReady = true;
     console.log('[mile.ly] Firebase loaded OK (with Auth)');
     // 시스템 전체 설정 로드 (AI 한도 + 신기능 소개 팝업)
@@ -13045,6 +13057,8 @@ function pickRoulettePrize(){
 }
 
 function checkDailyBonus(){
+  // v0408z6: 회원가입 직후 familyMeta 동기화 전이면 룰렛 스킵 (상태 불일치 방지)
+  if(!currentUser||!S.familyMeta||!S.familyMeta.members||!S.familyMeta.members[currentUser])return;
   // 양육자는 룰렛 표시하지 않음 (자녀 전용)
   if(isCaregiverUser())return;
   // 관리자가 룰렛 비활성화한 경우
