@@ -10,7 +10,7 @@
   default-src 'self';
   script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://www.google.com https://cdnjs.cloudflare.com https://t1.kakaocdn.net https://static.nid.naver.com https://apis.google.com;
   style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com;
-  connect-src 'self' https://*.googleapis.com wss://*.googleapis.com https://*.google.com https://www.gstatic.com https://mily-proxy.vercel.app https://kakao-token-proxy.nonmarking.workers.dev https://kapi.kakao.com https://kauth.kakao.com https://nid.naver.com https://openapi.naver.com https://api.openweathermap.org https://api.waqi.info https://nominatim.openstreetmap.org https://wttr.in;
+  connect-src 'self' https://*.googleapis.com wss://*.googleapis.com https://*.google.com https://www.gstatic.com https://mily-proxy.vercel.app https://kakao-token-proxy.nonmarking.workers.dev https://kapi.kakao.com https://kauth.kakao.com https://nid.naver.com https://openapi.naver.com https://api.openweathermap.org https://api.waqi.info https://nominatim.openstreetmap.org https://wttr.in https://api.open-meteo.com;
   font-src 'self' https://cdnjs.cloudflare.com data:;
   img-src 'self' data: blob: https:;
   worker-src 'self';
@@ -9350,7 +9350,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'prod'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0408z5';
+const _APP_VERSION = 'v0408z8';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -9427,6 +9427,8 @@ async function _initFirebase(){
     initializeApp = fbAppMod.initializeApp;
     ({getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction, collection: _fsCollection, addDoc: _fsAddDoc} = fbFsMod);
     ({getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut: signOut, onAuthStateChanged, GoogleAuthProvider, OAuthProvider, signInWithCustomToken} = fbAuthMod);
+    const {signInAnonymously: _signInAnonymously} = fbAuthMod;
+    window._signInAnonymously = _signInAnonymously;
     const {initializeAppCheck, ReCaptchaEnterpriseProvider} = fbAppCheckMod;
 
     const firebaseConfig = {
@@ -9463,6 +9465,16 @@ async function _initFirebase(){
       });
       console.log('[mile.ly] Auth restored:', fbAuth.currentUser?fbAuth.currentUser.uid:'(none)');
     }catch(_awErr){ console.warn('[mile.ly] auth wait failed',_awErr); }
+    // v0408z6: 로그인 세션이 없으면 익명 로그인으로 Firestore write 권한 확보
+    // (회원가입 플로우는 사용자가 아직 Firebase 로그인 전이지만 setDoc을 호출해야 함)
+    if(!fbAuth.currentUser && window._signInAnonymously){
+      try{
+        await window._signInAnonymously(fbAuth);
+        console.log('[mile.ly] Anonymous sign-in OK:', fbAuth.currentUser&&fbAuth.currentUser.uid);
+      }catch(_anErr){
+        console.warn('[mile.ly] Anonymous sign-in failed:', _anErr&&_anErr.code, _anErr&&_anErr.message);
+      }
+    }
     _firebaseReady = true;
     console.log('[mile.ly] Firebase loaded OK (with Auth)');
     // 시스템 전체 설정 로드 (AI 한도 + 신기능 소개 팝업)
@@ -10277,21 +10289,43 @@ async function fetchWeather(){
     }
   }catch(e){console.log('역지오코딩 실패, 기본값 유지');}
 
-  // 날씨 가져오기
+  // 날씨 가져오기 — Open-Meteo 1차 (무료, 안정적), wttr.in 2차
+  let _weatherOk=false;
   try{
-    const res=await fetch(`https://wttr.in/${lat},${lon}?format=j1`);
+    const res=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
     if(res.ok){
       const d=await res.json();
-      const current=d.current_condition[0];
-      weatherData.temp=parseInt(current.temp_C);
-      const code=parseInt(current.weatherCode);
-      if(code>=320)weatherData.condition='snowy';
-      else if(code>=176)weatherData.condition='rainy';
-      else if(code>=119)weatherData.condition='cloudy';
-      else weatherData.condition='sunny';
+      if(d&&d.current_weather){
+        weatherData.temp=Math.round(d.current_weather.temperature);
+        const code=d.current_weather.weathercode;
+        // WMO weather code → 카테고리
+        if(code===0||code===1)weatherData.condition='sunny';
+        else if(code===2||code===3)weatherData.condition='cloudy';
+        else if(code>=71&&code<=77||code>=85)weatherData.condition='snowy';
+        else if(code>=51)weatherData.condition='rainy';
+        else weatherData.condition='cloudy';
+        _weatherOk=true;
+      }
     }
-  }catch(e){
-    console.log('Weather API failed');
+  }catch(_){}
+  if(!_weatherOk){
+    try{
+      const res=await fetch(`https://wttr.in/${lat},${lon}?format=j1`);
+      if(res.ok){
+        const d=await res.json();
+        const current=d.current_condition[0];
+        weatherData.temp=parseInt(current.temp_C);
+        const code=parseInt(current.weatherCode);
+        if(code>=320)weatherData.condition='snowy';
+        else if(code>=176)weatherData.condition='rainy';
+        else if(code>=119)weatherData.condition='cloudy';
+        else weatherData.condition='sunny';
+        _weatherOk=true;
+      }
+    }catch(_){}
+  }
+  if(!_weatherOk){
+    // 두 API 모두 실패 시 기본값 (조용히)
     weatherData.temp=15;
     weatherData.condition='sunny';
   }
@@ -13045,6 +13079,8 @@ function pickRoulettePrize(){
 }
 
 function checkDailyBonus(){
+  // v0408z6: 회원가입 직후 familyMeta 동기화 전이면 룰렛 스킵 (상태 불일치 방지)
+  if(!currentUser||!S.familyMeta||!S.familyMeta.members||!S.familyMeta.members[currentUser])return;
   // 양육자는 룰렛 표시하지 않음 (자녀 전용)
   if(isCaregiverUser())return;
   // 관리자가 룰렛 비활성화한 경우
@@ -22434,9 +22470,15 @@ async function initServiceWorker(){
         navigator.serviceWorker.ready.then(()=>resolve());
       });
     }
-    // Check existing subscription
-    pushSubscription = await swRegistration.pushManager.getSubscription();
-    console.log('[SW] existing push sub:', !!pushSubscription);
+    // Check existing subscription (iOS Safari는 pushManager 미지원 → 가드)
+    if(swRegistration.pushManager && typeof swRegistration.pushManager.getSubscription==='function'){
+      try{
+        pushSubscription = await swRegistration.pushManager.getSubscription();
+        console.log('[SW] existing push sub:', !!pushSubscription);
+      }catch(_pe){ console.warn('[SW] pushManager.getSubscription failed:', _pe); }
+    }else{
+      console.log('[SW] pushManager not supported (iOS Safari)');
+    }
     updatePushUI();
   }catch(e){ console.warn('[SW] registration failed:', e); }
 }
