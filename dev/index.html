@@ -10,7 +10,7 @@
   default-src 'self';
   script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://www.google.com https://cdnjs.cloudflare.com https://t1.kakaocdn.net https://static.nid.naver.com https://apis.google.com;
   style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com;
-  connect-src 'self' https://*.googleapis.com wss://*.googleapis.com https://*.google.com https://www.gstatic.com https://mily-proxy.vercel.app https://kakao-token-proxy.nonmarking.workers.dev https://kapi.kakao.com https://kauth.kakao.com https://nid.naver.com https://openapi.naver.com https://api.openweathermap.org https://api.waqi.info https://nominatim.openstreetmap.org https://wttr.in;
+  connect-src 'self' https://*.googleapis.com wss://*.googleapis.com https://*.google.com https://www.gstatic.com https://mily-proxy.vercel.app https://kakao-token-proxy.nonmarking.workers.dev https://kapi.kakao.com https://kauth.kakao.com https://nid.naver.com https://openapi.naver.com https://api.openweathermap.org https://api.waqi.info https://nominatim.openstreetmap.org https://wttr.in https://api.open-meteo.com;
   font-src 'self' https://cdnjs.cloudflare.com data:;
   img-src 'self' data: blob: https:;
   worker-src 'self';
@@ -9350,7 +9350,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0408z6';
+const _APP_VERSION = 'v0408z7';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -10289,21 +10289,43 @@ async function fetchWeather(){
     }
   }catch(e){console.log('역지오코딩 실패, 기본값 유지');}
 
-  // 날씨 가져오기
+  // 날씨 가져오기 — Open-Meteo 1차 (무료, 안정적), wttr.in 2차
+  let _weatherOk=false;
   try{
-    const res=await fetch(`https://wttr.in/${lat},${lon}?format=j1`);
+    const res=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
     if(res.ok){
       const d=await res.json();
-      const current=d.current_condition[0];
-      weatherData.temp=parseInt(current.temp_C);
-      const code=parseInt(current.weatherCode);
-      if(code>=320)weatherData.condition='snowy';
-      else if(code>=176)weatherData.condition='rainy';
-      else if(code>=119)weatherData.condition='cloudy';
-      else weatherData.condition='sunny';
+      if(d&&d.current_weather){
+        weatherData.temp=Math.round(d.current_weather.temperature);
+        const code=d.current_weather.weathercode;
+        // WMO weather code → 카테고리
+        if(code===0||code===1)weatherData.condition='sunny';
+        else if(code===2||code===3)weatherData.condition='cloudy';
+        else if(code>=71&&code<=77||code>=85)weatherData.condition='snowy';
+        else if(code>=51)weatherData.condition='rainy';
+        else weatherData.condition='cloudy';
+        _weatherOk=true;
+      }
     }
-  }catch(e){
-    console.log('Weather API failed');
+  }catch(_){}
+  if(!_weatherOk){
+    try{
+      const res=await fetch(`https://wttr.in/${lat},${lon}?format=j1`);
+      if(res.ok){
+        const d=await res.json();
+        const current=d.current_condition[0];
+        weatherData.temp=parseInt(current.temp_C);
+        const code=parseInt(current.weatherCode);
+        if(code>=320)weatherData.condition='snowy';
+        else if(code>=176)weatherData.condition='rainy';
+        else if(code>=119)weatherData.condition='cloudy';
+        else weatherData.condition='sunny';
+        _weatherOk=true;
+      }
+    }catch(_){}
+  }
+  if(!_weatherOk){
+    // 두 API 모두 실패 시 기본값 (조용히)
     weatherData.temp=15;
     weatherData.condition='sunny';
   }
