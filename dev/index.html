@@ -7977,7 +7977,7 @@ function logout() {
   // 밀리 챗봇 대화 초기화 & 패널 닫기
   try{
     if(typeof _resetMilyChat==='function') _resetMilyChat();
-    _milyOpen=false;
+    // _milyOpen은 chatbot IIFE 내부 변수라 직접 접근 불가 — 패널 닫기만으로 충분
     const _chatPanel=document.getElementById('mily-chat-panel');
     if(_chatPanel) _chatPanel.classList.remove('open');
     localStorage.removeItem((_LS_PREFIX||'taemin_dev_')+'bubble_counts');
@@ -9350,7 +9350,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0408z9';
+const _APP_VERSION = 'v0408zA';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
