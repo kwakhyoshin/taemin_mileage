@@ -7977,7 +7977,7 @@ function logout() {
   // 밀리 챗봇 대화 초기화 & 패널 닫기
   try{
     if(typeof _resetMilyChat==='function') _resetMilyChat();
-    _milyOpen=false;
+    // _milyOpen은 chatbot IIFE 내부 변수라 직접 접근 불가 — 패널 닫기만으로 충분
     const _chatPanel=document.getElementById('mily-chat-panel');
     if(_chatPanel) _chatPanel.classList.remove('open');
     localStorage.removeItem((_LS_PREFIX||'taemin_dev_')+'bubble_counts');
@@ -9350,7 +9350,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'prod'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0408z8';
+const _APP_VERSION = 'v0408zA';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -10237,14 +10237,14 @@ function getDustGrade(pm10, pm25){
 // 위치 좌표 세션 캐시 (앱 실행 중 한번만 GPS 요청)
 let _cachedCoords=null;
 async function _getLocationSilently(){
-  // 이미 캐시된 좌표가 있으면 재사용
+  // 이미 캐시된 좌표가 있으면 재사용 (세션 내)
   if(_cachedCoords) return _cachedCoords;
-  // localStorage에 저장된 최근 좌표 확인 (24시간 이내)
+  // localStorage에 저장된 최근 좌표 확인 (30분 이내만 — 이동 감지 위해 짧게)
   try{
     const saved=localStorage.getItem('taemin_last_coords');
     if(saved){
       const {lat,lon,ts}=JSON.parse(saved);
-      if(Date.now()-ts<24*60*60*1000){_cachedCoords={lat,lon};return _cachedCoords;}
+      if(Date.now()-ts<30*60*1000){_cachedCoords={lat,lon};return _cachedCoords;}
     }
   }catch(e){}
   // navigator.permissions.query로 권한 상태 먼저 확인
@@ -10252,23 +10252,20 @@ async function _getLocationSilently(){
     try{
       const perm=await navigator.permissions.query({name:'geolocation'});
       if(perm.state==='denied'){
-        // denied → GPS 요청 불가
         console.log('위치 권한 거부됨 → 기본값 사용');
         return null;
       }
-      // 'granted' 또는 'prompt' → GPS 요청 진행
-      console.log(`위치 권한 상태: ${perm.state} → GPS 요청`);
-    }catch(e){/* permissions API 미지원 브라우저 → 아래에서 시도 */}
+    }catch(e){}
   }
-  // GPS 요청 (granted면 바로 응답, prompt면 브라우저 권한 팝업 표시)
+  // GPS 요청 — high accuracy + 짧은 캐시 허용 (60초)
   try{
     const pos=await new Promise((resolve,reject)=>{
-      if(!navigator.geolocation){reject('No geolocation');}
-      navigator.geolocation.getCurrentPosition(resolve,reject,{timeout:8000,maximumAge:600000});
+      if(!navigator.geolocation){reject('No geolocation');return;}
+      navigator.geolocation.getCurrentPosition(resolve,reject,{enableHighAccuracy:true,timeout:10000,maximumAge:60000});
     });
     _cachedCoords={lat:pos.coords.latitude,lon:pos.coords.longitude};
-    // localStorage에 저장 (다음 앱 실행 시 빠르게 사용)
     try{localStorage.setItem('taemin_last_coords',JSON.stringify({..._cachedCoords,ts:Date.now()}));}catch(e){}
+    console.log('[mile.ly] GPS OK:', _cachedCoords.lat.toFixed(4), _cachedCoords.lon.toFixed(4), 'acc:', Math.round(pos.coords.accuracy)+'m');
     return _cachedCoords;
   }catch(e){console.log('GPS 요청 실패:',e);return null;}
 }
