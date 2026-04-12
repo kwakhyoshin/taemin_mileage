@@ -9379,7 +9379,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0410l';
+const _APP_VERSION = 'v0410m';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -11378,7 +11378,7 @@ function renderAll(){
   renderHero();renderHomeGrid();renderChallengeCards();renderRecent();
   renderLogList();renderRewardGrid();renderRewardInventory();renderRewardHistory();
   renderDashboard();renderHistStats();renderHistList();renderCalendar();
-  renderBadgeSummary();
+  renderBadgeSummary();renderBadgeViewGrid();renderBadgeViewHistory();
   renderAdmStats();renderAdmActList();renderAdmRwdList();renderAdmSettings();
   renderAdmChildSelector();renderAdmModeSection();
   renderMsgSettings();renderAdmMemberPhotos();
@@ -19102,6 +19102,9 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.3.12 (v0410m)',date:'2026-04-12',items:[
+    {type:'fix',text:'뱃지 마일리지 수령 후 목록 아이콘이 즉시 갱신되지 않던 문제 수정 — renderAll()에 renderBadgeViewGrid/History 추가'},
+  ]},
   {ver:'2.3.11 (v0410l)',date:'2026-04-12',items:[
     {type:'fix',text:'뱃지 목록(뱃지 보기 화면)에 수령 상태 아이콘 누락 수정 — renderBadgeViewGrid에도 동일 아이콘 적용'},
   ]},
