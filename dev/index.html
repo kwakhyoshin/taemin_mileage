@@ -539,8 +539,8 @@ body.dark .theme-pick.active .theme-pick-radio{border-color:#818CF8;background:#
 .streak-popup{background:var(--card);border-radius:24px;padding:28px 24px;width:min(320px,calc(100vw - 48px));box-shadow:var(--shadow-lg);text-align:center;transform:scale(.9);transition:transform .2s}
 .streak-popup-overlay.show .streak-popup{transform:scale(1)}
 /* ── 마일리 인사말 (hero 안) ── */
-.mily-greeting-hero{display:flex;align-items:flex-start;gap:10px;margin-top:10px;background:rgba(255,255,255,.08);border-radius:24px;padding:8px 14px 8px 6px;transition:opacity .3s}
-.mily-char{width:52px;height:52px;flex-shrink:0}
+.mily-greeting-hero{display:flex;align-items:center;gap:10px;margin-top:10px;background:rgba(255,255,255,.08);border-radius:24px;padding:8px 14px 8px 8px;transition:opacity .3s}
+.mily-char{width:42px;height:42px;flex-shrink:0}
 .mily-char svg{width:100%;height:100%}
 .mily-msg-hero{flex:1;min-width:0;font-size:13px;font-weight:600;color:rgba(255,255,255,.92);line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .mily-msg-hero .mily-hint{font-size:11px;color:rgba(255,255,255,.55);margin-top:1px;font-weight:500;display:flex;align-items:center;gap:4px}
@@ -9378,7 +9378,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0410c';
+const _APP_VERSION = 'v0410d';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -11712,7 +11712,7 @@ function renderMilyGreeting(){
 
   el.style.display='flex';
   el.className='mily-greeting-hero';
-  charEl.innerHTML=_milySVG(charCfg);
+  charEl.innerHTML='<svg viewBox="0 0 200 200" style="border-radius:14px;box-shadow:0 2px 8px rgba(91,79,196,.25)"><defs><linearGradient id="mlgr" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#5B4FC4"/><stop offset="100%" stop-color="#A78BFA"/></linearGradient></defs><rect width="200" height="200" rx="47" fill="url(#mlgr)"/><path d="M30,130 L100,55 L170,130" stroke="#fff" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M100,62 L98.1,60.3 C91.4,54.2 87,50.2 87,45.3 C87,41.3 90.1,38.1 94.2,38.1 C96.4,38.1 98.6,39.2 100,40.9 C101.4,39.2 103.6,38.1 105.9,38.1 C109.8,38.1 113,41.3 113,45.3 C113,50.2 108.6,54.2 101.9,60.3 Z" fill="#FBBF24"/></svg>';
   msgEl.innerHTML=`${msg}${hint?`<div class="mily-hint">${hintIcon||''}${hint}</div>`:''}`;
 }
 
@@ -19109,6 +19109,9 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.3.3 (v0410d)',date:'2026-04-12',items:[
+    {type:'improve',text:'홈 인사말: mily 캐릭터 애니메이션을 mile.ly 로고 아이콘으로 교체'},
+  ]},
   {ver:'2.3.2 (v0410c)',date:'2026-04-12',items:[
     {type:'improve',text:'활동기록/보상 탭: 편집 버튼을 납작한 둥근 사각형으로 변경, 연필 아이콘 추가 — 제목 영역 높이 정렬 개선'},
   ]},
