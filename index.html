@@ -237,11 +237,16 @@ body.dark .toss-invite-share-btn{background:rgba(99,102,241,.2);color:#818CF8}
 body.dark .ins-card-1{background:rgba(99,102,241,.09)}
 body.dark .ins-card-2{background:rgba(236,72,153,.08)}
 body.dark .ins-card-3{background:rgba(245,158,11,.08)}
-.ins-illust{width:min(260px,65vw);height:min(320px,50vh);margin-bottom:16px;flex-shrink:0;filter:drop-shadow(0 8px 24px rgba(0,0,0,.12))}
-.ins-illust svg{width:100%;height:100%}
-.ins-keyword{font-size:24px;font-weight:900;color:#1E293B;text-align:center;line-height:1.35;letter-spacing:-.5px;margin-bottom:8px}
+.ins-illust{width:min(220px,55vw);height:min(380px,48vh);margin-bottom:12px;flex-shrink:0;border-radius:28px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.18);position:relative;background:#0F172A}
+.ins-illust img{width:100%;height:100%;object-fit:cover;object-position:center top;display:block}
+.ins-illust .ins-img-dark{display:none}
+body.dark .ins-illust .ins-img-light{display:none}
+body.dark .ins-illust .ins-img-dark{display:block}
+.ins-illust .ins-img-light{display:block}
+body.dark .ins-illust{background:#1E293B}
+.ins-keyword{font-size:22px;font-weight:900;color:#1E293B;text-align:center;line-height:1.4;letter-spacing:-.5px;margin-bottom:6px}
 .ins-sub{font-size:13px;color:#64748B;text-align:center;font-weight:600;line-height:1.6}
-.ins-evidence{font-size:11px;color:#94A3B8;text-align:center;font-weight:500;margin-top:5px;font-style:italic}
+.ins-evidence{font-size:11px;color:#94A3B8;text-align:center;font-weight:500;margin-top:4px;font-style:italic}
 body.dark .ins-keyword{color:#F1F5F9}
 body.dark .ins-sub{color:#94A3B8}
 body.dark .ins-evidence{color:#64748B}
@@ -3240,170 +3245,51 @@ requestAnimationFrame(function(){
         <div class="ins-step" data-step="1">2</div>
         <div class="ins-step-line"></div>
         <div class="ins-step" data-step="2">3</div>
+        <div class="ins-step-line"></div>
+        <div class="ins-step" data-step="3">4</div>
       </div>
     </div>
     <!-- Swipe cards -->
     <div class="ins-cards-scroll" id="insCardsScroll">
-      <!-- Card 1: 매일 작은 활동이 습관이 돼요 -->
+      <!-- Card 1: 매일 작은 활동이 습관이 돼요 (홈 화면) -->
       <div class="ins-card ins-card-1">
         <div class="ins-illust">
-          <svg viewBox="0 0 240 360" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <!-- Phone shell -->
-            <rect x="16" y="4" width="208" height="352" rx="32" fill="#EEF2F7" stroke="#D1D5DB" stroke-width="1.5"/>
-            <!-- Screen -->
-            <rect x="20" y="8" width="200" height="344" rx="30" fill="#EEF2F7"/>
-            <!-- Header: gradient like real app -->
-            <defs><linearGradient id="h1g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#5457D9"/><stop offset="100%" stop-color="#727BE0"/></linearGradient></defs>
-            <path d="M20 38 Q20 8 50 8 H190 Q220 8 220 38 V100 Q220 100 210 116 Q170 108 120 112 Q70 116 30 108 Q20 100 20 100 Z" fill="url(#h1g)"/>
-            <circle cx="120" cy="72" r="0" fill="#fff" opacity=".08"/>
-            <text x="120" y="42" fill="#fff" font-size="12" font-weight="900" text-anchor="middle" opacity=".9">홈</text>
-            <!-- Mileage hero -->
-            <text x="120" y="72" fill="#fff" font-size="28" font-weight="900" text-anchor="middle">505</text>
-            <text x="120" y="88" fill="#C7D2FE" font-size="10" font-weight="700" text-anchor="middle">마일리지</text>
-            <!-- Section title -->
-            <text x="36" y="134" fill="#0F172A" font-size="11" font-weight="900">오늘의 활동</text>
-            <!-- Activity grid: 2x2 cards like real app -->
-            <!-- Card 1: done -->
-            <rect x="28" y="142" width="88" height="82" rx="14" fill="#F0FDF4" stroke="#BBF7D0" stroke-width="1"/>
-            <text x="72" y="168" fill="#0F172A" font-size="22" text-anchor="middle">📖</text>
-            <text x="72" y="184" fill="#059669" font-size="9" font-weight="800" text-anchor="middle">책 읽기</text>
-            <text x="72" y="198" fill="#059669" font-size="9" font-weight="700" text-anchor="middle">+10M ✓</text>
-            <!-- progress bar done -->
-            <rect x="38" y="206" width="68" height="5" rx="2.5" fill="#BBF7D0"/>
-            <rect x="38" y="206" width="68" height="5" rx="2.5" fill="#22C55E"/>
-            <!-- Card 2: done -->
-            <rect x="124" y="142" width="88" height="82" rx="14" fill="#F0FDF4" stroke="#BBF7D0" stroke-width="1"/>
-            <text x="168" y="168" fill="#0F172A" font-size="22" text-anchor="middle">🏃</text>
-            <text x="168" y="184" fill="#059669" font-size="9" font-weight="800" text-anchor="middle">운동하기</text>
-            <text x="168" y="198" fill="#059669" font-size="9" font-weight="700" text-anchor="middle">+5M ✓</text>
-            <rect x="134" y="206" width="68" height="5" rx="2.5" fill="#BBF7D0"/>
-            <rect x="134" y="206" width="68" height="5" rx="2.5" fill="#22C55E"/>
-            <!-- Card 3: partial (orange) -->
-            <rect x="28" y="232" width="88" height="82" rx="14" fill="#FFF7ED" stroke="#FED7AA" stroke-width="1"/>
-            <text x="72" y="258" fill="#0F172A" font-size="22" text-anchor="middle">🎹</text>
-            <text x="72" y="274" fill="#D97706" font-size="9" font-weight="800" text-anchor="middle">피아노 연습</text>
-            <text x="72" y="288" fill="#D97706" font-size="9" font-weight="700" text-anchor="middle">1/2회</text>
-            <rect x="38" y="296" width="68" height="5" rx="2.5" fill="#FED7AA"/>
-            <rect x="38" y="296" width="34" height="5" rx="2.5" fill="#F59E0B"/>
-            <!-- Card 4: pending -->
-            <rect x="124" y="232" width="88" height="82" rx="14" fill="#fff" stroke="#E2E8F0" stroke-width="1"/>
-            <text x="168" y="258" fill="#0F172A" font-size="22" text-anchor="middle">✏️</text>
-            <text x="168" y="274" fill="#0F172A" font-size="9" font-weight="800" text-anchor="middle">일기 쓰기</text>
-            <text x="168" y="288" fill="#6366F1" font-size="9" font-weight="700" text-anchor="middle">+5M</text>
-            <rect x="134" y="296" width="68" height="5" rx="2.5" fill="#E2E8F0"/>
-            <!-- Bottom nav pill -->
-            <rect x="42" y="326" width="156" height="24" rx="12" fill="#fff" stroke="#E2E8F0" stroke-width="1"/>
-            <circle cx="78" cy="338" r="4" fill="#5457D9"/>
-            <circle cx="120" cy="338" r="4" fill="#CBD5E1"/>
-            <circle cx="162" cy="338" r="4" fill="#CBD5E1"/>
-          </svg>
+          <img class="ins-img-dark" src="ob-home-dark.png" alt="홈 화면 (다크)" loading="lazy">
+          <img class="ins-img-light" src="ob-home-light.png" alt="홈 화면 (라이트)" loading="lazy">
         </div>
         <div class="ins-keyword">매일 작은 활동이<br>습관이 돼요</div>
-        <div class="ins-sub">하루 2분이면 충분해요.<br>66일이면 자동화된 습관이 됩니다.</div>
-        <div class="ins-evidence">— University College London, Phillippa Lally 연구 (2009)</div>
+        <div class="ins-sub">양치, 세수, 숙제 — 하루 2분이면 충분해요.<br><b style="color:#6366F1;font-size:15px">66일</b>이면 자동화된 습관이 됩니다.</div>
+        <div class="ins-evidence">— UCL Phillippa Lally, 습관 형성 연구 (2009)</div>
       </div>
-      <!-- Card 2: 가족이 함께하면 동기부여가 달라져요 -->
+      <!-- Card 2: 보상으로 내재동기를 키워요 (보상 화면) -->
       <div class="ins-card ins-card-2">
         <div class="ins-illust">
-          <svg viewBox="0 0 240 360" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <!-- Phone shell -->
-            <rect x="16" y="4" width="208" height="352" rx="32" fill="#FFF" stroke="#D1D5DB" stroke-width="1.5"/>
-            <rect x="20" y="8" width="200" height="344" rx="30" fill="#FFF8F0"/>
-            <!-- Header -->
-            <defs><linearGradient id="h2g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#EC4899"/><stop offset="100%" stop-color="#F472B6"/></linearGradient></defs>
-            <path d="M20 38 Q20 8 50 8 H190 Q220 8 220 38 V72 Q220 82 210 86 Q170 80 120 82 Q70 84 30 80 Q20 82 20 72 Z" fill="url(#h2g)"/>
-            <text x="120" y="38" fill="#fff" font-size="12" font-weight="900" text-anchor="middle" opacity=".9">우리가족</text>
-            <text x="120" y="60" fill="#fff" font-size="10" font-weight="600" text-anchor="middle" opacity=".8">가족 메시지</text>
-            <!-- Family avatars row -->
-            <circle cx="66" cy="102" r="16" fill="#EC4899"/>
-            <text x="66" y="107" fill="#fff" font-size="9" font-weight="800" text-anchor="middle">엄마</text>
-            <circle cx="120" cy="102" r="16" fill="#6366F1"/>
-            <text x="120" y="107" fill="#fff" font-size="9" font-weight="800" text-anchor="middle">아빠</text>
-            <circle cx="174" cy="102" r="16" fill="#F59E0B"/>
-            <text x="174" y="107" fill="#fff" font-size="9" font-weight="800" text-anchor="middle">태민</text>
-            <!-- Message from 엄마 (left aligned) -->
-            <circle cx="42" cy="140" r="10" fill="#EC4899"/>
-            <text x="42" y="144" fill="#fff" font-size="7" font-weight="800" text-anchor="middle">엄</text>
-            <rect x="56" y="132" width="130" height="38" rx="14" fill="#FCE7F3"/>
-            <text x="66" y="148" fill="#9D174D" font-size="9" font-weight="700">오늘 책읽기 잘했네! 👏</text>
-            <text x="66" y="162" fill="#BE185D" font-size="8" font-weight="600">엄마가 응원할게 💕</text>
-            <!-- Message from 아빠 (left aligned) -->
-            <circle cx="42" cy="190" r="10" fill="#6366F1"/>
-            <text x="42" y="194" fill="#fff" font-size="7" font-weight="800" text-anchor="middle">아</text>
-            <rect x="56" y="182" width="122" height="28" rx="14" fill="#EEF2FF"/>
-            <text x="66" y="200" fill="#312E81" font-size="9" font-weight="700">우리 태민 최고! 화이팅 💪</text>
-            <!-- Message from 태민 (right aligned) -->
-            <rect x="64" y="222" width="132" height="38" rx="14" fill="#FEF3C7"/>
-            <circle cx="204" cy="230" r="10" fill="#F59E0B"/>
-            <text x="204" y="234" fill="#fff" font-size="7" font-weight="800" text-anchor="middle">태</text>
-            <text x="76" y="238" fill="#78350F" font-size="9" font-weight="700">감사합니다! 😊</text>
-            <text x="76" y="252" fill="#92400E" font-size="8" font-weight="600">내일은 운동도 할게요!</text>
-            <!-- Unread badge notification -->
-            <rect x="36" y="274" width="168" height="40" rx="14" fill="#FDF2F8" stroke="#FBCFE8" stroke-width="1"/>
-            <text x="120" y="292" fill="#BE185D" font-size="10" font-weight="900" text-anchor="middle">🏅 가족 응원왕 뱃지 획득!</text>
-            <text x="120" y="306" fill="#9D174D" font-size="8" font-weight="600" text-anchor="middle">가족 메시지 10개 달성</text>
-            <!-- Bottom nav pill -->
-            <rect x="42" y="326" width="156" height="24" rx="12" fill="#fff" stroke="#E2E8F0" stroke-width="1"/>
-            <circle cx="78" cy="338" r="4" fill="#CBD5E1"/>
-            <circle cx="120" cy="338" r="4" fill="#CBD5E1"/>
-            <circle cx="162" cy="338" r="4" fill="#CBD5E1"/>
-          </svg>
+          <img class="ins-img-dark" src="ob-reward-dark.png" alt="보상 상점 (다크)" loading="lazy">
+          <img class="ins-img-light" src="ob-reward-light.png" alt="보상 상점 (라이트)" loading="lazy">
         </div>
-        <div class="ins-keyword">가족이 함께하면<br>동기부여가 달라져요</div>
-        <div class="ins-sub">사회적 지지가 있으면 목표 달성률이<br><b style="color:#EC4899;font-size:16px">95%</b> 높아집니다.</div>
-        <div class="ins-evidence">— ASTC (American Society of Training), 책임 파트너 연구</div>
+        <div class="ins-keyword">노력이 보상으로<br>이어져요</div>
+        <div class="ins-sub">진전이 눈에 보이면 아이는 스스로<br><b style="color:#D98E09;font-size:15px">"한 번 더"</b>를 선택합니다.</div>
+        <div class="ins-evidence">— Teresa Amabile, Harvard 진전의 원칙 (The Progress Principle)</div>
       </div>
-      <!-- Card 3: 마일리지로 성취감을 느껴요 -->
+      <!-- Card 3: 데이터로 성장을 확인해요 (리포트 화면) -->
       <div class="ins-card ins-card-3">
         <div class="ins-illust">
-          <svg viewBox="0 0 240 360" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <!-- Phone shell -->
-            <rect x="16" y="4" width="208" height="352" rx="32" fill="#fff" stroke="#D1D5DB" stroke-width="1.5"/>
-            <rect x="20" y="8" width="200" height="344" rx="30" fill="#FFFDF7"/>
-            <!-- Header -->
-            <defs><linearGradient id="h3g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#D98E09"/><stop offset="100%" stop-color="#E0A820"/></linearGradient></defs>
-            <path d="M20 38 Q20 8 50 8 H190 Q220 8 220 38 V94 Q220 104 210 108 Q170 100 120 102 Q70 104 30 100 Q20 104 20 94 Z" fill="url(#h3g)"/>
-            <text x="120" y="38" fill="#fff" font-size="12" font-weight="900" text-anchor="middle" opacity=".9">보상</text>
-            <!-- Mileage balance card -->
-            <rect x="36" y="52" width="168" height="50" rx="16" fill="rgba(255,255,255,.2)"/>
-            <text x="120" y="74" fill="#fff" font-size="22" font-weight="900" text-anchor="middle">505</text>
-            <text x="120" y="92" fill="rgba(255,255,255,.8)" font-size="9" font-weight="700" text-anchor="middle">보유 마일리지</text>
-            <!-- Reward grid: 2 columns like actual app -->
-            <text x="36" y="130" fill="#0F172A" font-size="10" font-weight="900">내 보상</text>
-            <!-- Reward card 1: redeemable -->
-            <rect x="28" y="138" width="88" height="104" rx="14" fill="#fff" stroke="#FDE68A" stroke-width="1.5"/>
-            <text x="72" y="172" fill="#0F172A" font-size="28" text-anchor="middle">🎮</text>
-            <text x="72" y="192" fill="#0F172A" font-size="9" font-weight="800" text-anchor="middle">게임 30분</text>
-            <rect x="36" y="200" width="72" height="24" rx="10" fill="#D98E09"/>
-            <text x="72" y="216" fill="#fff" font-size="9" font-weight="800" text-anchor="middle">200M 교환</text>
-            <rect x="36" y="228" width="72" height="5" rx="2.5" fill="#FDE68A"/>
-            <rect x="36" y="228" width="72" height="5" rx="2.5" fill="#22C55E"/>
-            <!-- Reward card 2: progress -->
-            <rect x="124" y="138" width="88" height="104" rx="14" fill="#fff" stroke="#E2E8F0" stroke-width="1"/>
-            <text x="168" y="172" fill="#0F172A" font-size="28" text-anchor="middle">🍦</text>
-            <text x="168" y="192" fill="#0F172A" font-size="9" font-weight="800" text-anchor="middle">아이스크림</text>
-            <rect x="132" y="200" width="72" height="24" rx="10" fill="#E2E8F0"/>
-            <text x="168" y="216" fill="#64748B" font-size="9" font-weight="800" text-anchor="middle">500M 필요</text>
-            <rect x="132" y="228" width="72" height="5" rx="2.5" fill="#E2E8F0"/>
-            <rect x="132" y="228" width="50" height="5" rx="2.5" fill="#F59E0B"/>
-            <!-- Reward card 3 (partial view) -->
-            <rect x="28" y="252" width="88" height="56" rx="14" fill="#fff" stroke="#E2E8F0" stroke-width="1"/>
-            <text x="72" y="280" fill="#0F172A" font-size="28" text-anchor="middle">🎨</text>
-            <text x="72" y="298" fill="#0F172A" font-size="9" font-weight="800" text-anchor="middle">미술 용품</text>
-            <!-- Reward card 4 (partial view) -->
-            <rect x="124" y="252" width="88" height="56" rx="14" fill="#fff" stroke="#E2E8F0" stroke-width="1"/>
-            <text x="168" y="280" fill="#0F172A" font-size="28" text-anchor="middle">⚽</text>
-            <text x="168" y="298" fill="#0F172A" font-size="9" font-weight="800" text-anchor="middle">축구공</text>
-            <!-- Bottom nav pill -->
-            <rect x="42" y="326" width="156" height="24" rx="12" fill="#fff" stroke="#E2E8F0" stroke-width="1"/>
-            <circle cx="78" cy="338" r="4" fill="#CBD5E1"/>
-            <circle cx="120" cy="338" r="4" fill="#D98E09"/>
-            <circle cx="162" cy="338" r="4" fill="#CBD5E1"/>
-          </svg>
+          <img class="ins-img-dark" src="ob-report-dark.png" alt="성과 통계 (다크)" loading="lazy">
+          <img class="ins-img-light" src="ob-report-light.png" alt="성과 통계 (라이트)" loading="lazy">
         </div>
-        <div class="ins-keyword">마일리지로<br>성취감을 느껴요</div>
-        <div class="ins-sub">노력이 눈에 보이면 아이는 스스로<br><b style="color:#F59E0B;font-size:16px">"한 번 더"</b>를 선택합니다.</div>
-        <div class="ins-evidence">— Teresa Amabile, Harvard 진전의 원칙 (The Progress Principle)</div>
+        <div class="ins-keyword">데이터로<br>성장을 확인해요</div>
+        <div class="ins-sub">자기 행동을 모니터링하는 아이는<br>목표 달성률이 <b style="color:#7C3AED;font-size:15px">2배</b> 높아집니다.</div>
+        <div class="ins-evidence">— Harkin et al., 자기 모니터링 메타분석 (2016)</div>
+      </div>
+      <!-- Card 4: AI가 보상 체계를 점검해요 (챗봇 화면) ★ KEY -->
+      <div class="ins-card ins-card-1">
+        <div class="ins-illust">
+          <img class="ins-img-dark" src="ob-chat-dark.png" alt="AI 챗봇 (다크)" loading="lazy">
+          <img class="ins-img-light" src="ob-chat-light.png" alt="AI 챗봇 (라이트)" loading="lazy">
+        </div>
+        <div class="ins-keyword">AI가 보상 체계를<br>과학적으로 점검해요</div>
+        <div class="ins-sub">밀리가 보상의 균형, 내재동기 훼손 위험,<br>적정 난이도를 <b style="color:#6366F1;font-size:15px">실시간 분석</b>합니다.</div>
+        <div class="ins-evidence">— Deci & Ryan, 자기결정이론 (SDT) 기반 설계</div>
       </div>
     </div>
     <!-- CTA (이전/다음 + 건너뛰기) -->
@@ -3491,7 +3377,6 @@ requestAnimationFrame(function(){
         </div>
         <div class="toss-cta">
           <button class="toss-btn" id="c1-role-next-btn" onclick="c1SlideRoleFinish()" disabled style="opacity:.4;pointer-events:none">다음</button>
-          <button class="toss-btn ghost" onclick="c1SkipRole()">건너뛰기</button>
         </div>
       </div>
     </div>
@@ -4443,6 +4328,14 @@ requestAnimationFrame(function(){
           </div>
           <button class="btn-sm rd" onclick="withdrawAccount()">탈퇴</button>
         </div>
+        <div class="divider"></div>
+        <div class="adm-row">
+          <div class="adm-row-l">
+            <div class="adm-row-nm" style="color:#EF4444"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg> 가족 전체 삭제</div>
+            <div class="adm-row-sub">이 가족의 모든 구성원, 활동, 기록을 영구 삭제합니다</div>
+          </div>
+          <button class="btn-sm rd" onclick="deleteFamilyAll()">삭제</button>
+        </div>
       </div>
     </div>
     <div style="height:16px"></div>
@@ -5279,24 +5172,24 @@ const _SVG_CHILD_M='<svg viewBox="0 0 80 80" fill="none" stroke="currentColor" s
 const _SVG_CHILD_F='<svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="40" cy="27" r="13"/><path d="M27 21Q27 14 40 14Q53 14 53 21"/><path d="M27 21Q21 18 19 24Q18 31 24 34Q27 35 27 29"/><circle cx="21" cy="28" r="3.5" stroke-width="2"/><path d="M53 21Q59 18 61 24Q62 31 56 34Q53 35 53 29"/><circle cx="59" cy="28" r="3.5" stroke-width="2"/><path d="M20 70v-7a13 13 0 0 1 13-13h14a13 13 0 0 1 13 13v7"/></svg>';
 // 역할별 차별화 SVG 아이콘
 /* ── Flat-design avatar SVGs (preview-adults style) ── */
-const _SVG_DAD='<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="50" fill="#DBEAFE"/><path d="M30 42 C30 22 70 22 70 42" fill="#3B2314"/><ellipse cx="50" cy="52" rx="18" ry="20" fill="#FDDCB5"/><ellipse cx="50" cy="38" rx="20" ry="16" fill="#FDDCB5"/><path d="M28 36 C28 18 72 18 72 36 L70 42 C70 28 30 28 30 42Z" fill="#3B2314"/><circle cx="42" cy="38" r="2.2" fill="#2D1B0E"/><circle cx="58" cy="38" r="2.2" fill="#2D1B0E"/><path d="M46 46 Q50 49 54 46" fill="none" stroke="#C0846A" stroke-width="1.8" stroke-linecap="round"/><path d="M20 88 C20 68 36 58 50 58 C64 58 80 68 80 88" fill="#3B82F6"/><path d="M44 58 L46 68 50 70 54 68 56 58" fill="#fff"/></svg>';
-const _SVG_MOM='<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="50" fill="#FCE7F3"/><ellipse cx="50" cy="52" rx="18" ry="20" fill="#FDDCB5"/><ellipse cx="50" cy="38" rx="20" ry="16" fill="#FDDCB5"/><path d="M24 40 C22 18 78 18 76 40 C76 32 72 26 68 24 L66 42 C66 42 58 28 50 28 C42 28 34 42 34 42 L32 24 C28 26 24 32 24 40Z" fill="#4A2810"/><path d="M24 40 Q22 54 26 66" fill="none" stroke="#4A2810" stroke-width="3"/><path d="M76 40 Q78 54 74 66" fill="none" stroke="#4A2810" stroke-width="3"/><circle cx="42" cy="38" r="2.2" fill="#2D1B0E"/><circle cx="58" cy="38" r="2.2" fill="#2D1B0E"/><path d="M46 46 Q50 49 54 46" fill="none" stroke="#C0846A" stroke-width="1.8" stroke-linecap="round"/><ellipse cx="38" cy="44" rx="4" ry="2.5" fill="#F9A8B8" opacity=".4"/><ellipse cx="62" cy="44" rx="4" ry="2.5" fill="#F9A8B8" opacity=".4"/><path d="M20 88 C20 68 36 58 50 58 C64 58 80 68 80 88" fill="#EC4899"/></svg>';
-const _SVG_GRANDPA='<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="50" fill="#FEF3C7"/><ellipse cx="50" cy="52" rx="18" ry="20" fill="#F5D5B0"/><ellipse cx="50" cy="38" rx="20" ry="16" fill="#F5D5B0"/><path d="M32 32 C34 24 46 22 50 22 C54 22 66 24 68 32" fill="#C8C8C8"/><circle cx="42" cy="38" r="5" fill="none" stroke="#8B7355" stroke-width="2"/><circle cx="58" cy="38" r="5" fill="none" stroke="#8B7355" stroke-width="2"/><line x1="47" y1="38" x2="53" y2="38" stroke="#8B7355" stroke-width="2"/><line x1="37" y1="37" x2="33" y2="35" stroke="#8B7355" stroke-width="1.5"/><line x1="63" y1="37" x2="67" y2="35" stroke="#8B7355" stroke-width="1.5"/><path d="M46 48 Q50 50 54 48" fill="none" stroke="#A0846A" stroke-width="1.5" stroke-linecap="round"/><path d="M20 88 C20 68 36 58 50 58 C64 58 80 68 80 88" fill="#D97706"/></svg>';
-const _SVG_GRANDMA='<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="50" fill="#FEF9C3"/><ellipse cx="50" cy="52" rx="18" ry="20" fill="#F5D5B0"/><ellipse cx="50" cy="38" rx="20" ry="16" fill="#F5D5B0"/><path d="M26 42 C24 22 76 22 74 42 C74 34 70 28 66 26 Q60 22 50 22 Q40 22 34 26 C30 28 26 34 26 42Z" fill="#D4D4D4"/><path d="M26 42 Q24 50 26 58" fill="none" stroke="#D4D4D4" stroke-width="4"/><path d="M74 42 Q76 50 74 58" fill="none" stroke="#D4D4D4" stroke-width="4"/><circle cx="42" cy="38" r="2" fill="#5C4A3A"/><circle cx="58" cy="38" r="2" fill="#5C4A3A"/><path d="M46 47 Q50 50 54 47" fill="none" stroke="#A0846A" stroke-width="1.5" stroke-linecap="round"/><ellipse cx="38" cy="43" rx="4" ry="2.5" fill="#F5A0A0" opacity=".3"/><ellipse cx="62" cy="43" rx="4" ry="2.5" fill="#F5A0A0" opacity=".3"/><path d="M20 88 C20 68 36 58 50 58 C64 58 80 68 80 88" fill="#CA8A04"/></svg>';
-const _SVG_GRANDPA_M='<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="50" fill="#E0E7FF"/><ellipse cx="50" cy="52" rx="18" ry="20" fill="#F5D5B0"/><ellipse cx="50" cy="38" rx="20" ry="16" fill="#F5D5B0"/><path d="M32 30 C34 22 46 20 50 20 C54 20 66 22 68 30" fill="#B0B0B0"/><rect x="34" y="34" width="12" height="9" rx="4.5" fill="none" stroke="#6366F1" stroke-width="2"/><rect x="54" y="34" width="12" height="9" rx="4.5" fill="none" stroke="#6366F1" stroke-width="2"/><line x1="46" y1="38" x2="54" y2="38" stroke="#6366F1" stroke-width="2"/><line x1="34" y1="38" x2="30" y2="36" stroke="#6366F1" stroke-width="1.5"/><line x1="66" y1="38" x2="70" y2="36" stroke="#6366F1" stroke-width="1.5"/><path d="M46 48 Q50 50 54 48" fill="none" stroke="#A0846A" stroke-width="1.5" stroke-linecap="round"/><path d="M20 88 C20 68 36 58 50 58 C64 58 80 68 80 88" fill="#6366F1"/></svg>';
-const _SVG_GRANDMA_M='<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="50" fill="#FDE8EE"/><ellipse cx="50" cy="52" rx="18" ry="20" fill="#F5D5B0"/><ellipse cx="50" cy="38" rx="20" ry="16" fill="#F5D5B0"/><path d="M26 40 C24 18 76 18 74 40" fill="#E8E0D8"/><path d="M30 28 Q28 20 34 18 Q40 16 50 16 Q60 16 66 18 Q72 20 70 28" fill="#E8E0D8"/><path d="M26 40 Q24 52 28 60" fill="none" stroke="#E8E0D8" stroke-width="4" stroke-linecap="round"/><path d="M74 40 Q76 52 72 60" fill="none" stroke="#E8E0D8" stroke-width="4" stroke-linecap="round"/><circle cx="42" cy="38" r="2" fill="#5C4A3A"/><circle cx="58" cy="38" r="2" fill="#5C4A3A"/><path d="M46 47 Q50 50 54 47" fill="none" stroke="#A0846A" stroke-width="1.5" stroke-linecap="round"/><ellipse cx="38" cy="43" rx="4" ry="2.5" fill="#F5A0A0" opacity=".3"/><ellipse cx="62" cy="43" rx="4" ry="2.5" fill="#F5A0A0" opacity=".3"/><path d="M20 88 C20 68 36 58 50 58 C64 58 80 68 80 88" fill="#DB2777"/></svg>';
-const _SVG_UNCLE='<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="50" fill="#ECFDF5"/><ellipse cx="50" cy="52" rx="18" ry="20" fill="#FDDCB5"/><ellipse cx="50" cy="38" rx="20" ry="16" fill="#FDDCB5"/><path d="M30 38 C30 18 70 18 70 38 L68 42 C68 26 32 26 32 42Z" fill="#5B3A1A"/><circle cx="42" cy="38" r="2.2" fill="#2D1B0E"/><circle cx="58" cy="38" r="2.2" fill="#2D1B0E"/><path d="M44 47 Q50 51 56 47" fill="none" stroke="#C0846A" stroke-width="2" stroke-linecap="round"/><path d="M20 88 C20 68 36 58 50 58 C64 58 80 68 80 88" fill="#059669"/></svg>';
-const _SVG_AUNT='<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="50" fill="#FFF7ED"/><ellipse cx="50" cy="52" rx="18" ry="20" fill="#FDDCB5"/><ellipse cx="50" cy="38" rx="20" ry="16" fill="#FDDCB5"/><path d="M26 38 C24 16 76 16 74 38 C74 30 68 24 64 22 Q58 18 50 18 Q42 18 36 22 C32 24 26 30 26 38Z" fill="#8B4513"/><path d="M26 38 Q24 50 28 60" fill="none" stroke="#8B4513" stroke-width="3"/><path d="M74 38 Q76 50 72 60" fill="none" stroke="#8B4513" stroke-width="3"/><circle cx="42" cy="38" r="2" fill="#2D1B0E"/><circle cx="58" cy="38" r="2" fill="#2D1B0E"/><path d="M46 46 Q50 49 54 46" fill="none" stroke="#C0846A" stroke-width="1.8" stroke-linecap="round"/><ellipse cx="38" cy="43" rx="4" ry="2.5" fill="#F9A8B8" opacity=".35"/><ellipse cx="62" cy="43" rx="4" ry="2.5" fill="#F9A8B8" opacity=".35"/><path d="M20 88 C20 68 36 58 50 58 C64 58 80 68 80 88" fill="#F97316"/></svg>';
+const _SVG_DAD='<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#DBEAFE"/><ellipse cx="50" cy="54" rx="22" ry="24" fill="#FDDCB5"/><path d="M26 44 C24 18 76 18 74 44 L72 46 C72 24 28 24 28 46Z" fill="#3B2314"/><path d="M36 20 L34 40" stroke="#2A1A0B" stroke-width="1.5" fill="none"/><path d="M26 44 C24 22 36 20 36 20 L34 40 L28 46Z" fill="#4A2C14"/><path d="M36 20 C38 18 74 18 74 44 L72 46 C72 24 38 24 34 40Z" fill="#3B2314"/><ellipse cx="27" cy="54" rx="4" ry="6" fill="#F0C9A0"/><ellipse cx="73" cy="54" rx="4" ry="6" fill="#F0C9A0"/><path d="M34 45 Q39 42 44 45" fill="none" stroke="#2A1A0B" stroke-width="2.2" stroke-linecap="round"/><path d="M56 45 Q61 42 66 45" fill="none" stroke="#2A1A0B" stroke-width="2.2" stroke-linecap="round"/><ellipse cx="39" cy="50" rx="2.5" ry="2.8" fill="#2D1B0E"/><ellipse cx="61" cy="50" rx="2.5" ry="2.8" fill="#2D1B0E"/><circle cx="40.2" cy="49" r="1" fill="#fff"/><circle cx="62.2" cy="49" r="1" fill="#fff"/><path d="M44 66 Q50 70 56 66" fill="none" stroke="#C0846A" stroke-width="2" stroke-linecap="round"/><path d="M18 96 C18 82 34 74 50 74 C66 74 82 82 82 96" fill="#3B82F6"/><path d="M46 74 L48 84 50 86 52 84 54 74" fill="#1E40AF"/><path d="M44 74 L46 80 50 82 54 80 56 74" fill="#fff"/></svg>';
+const _SVG_MOM='<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#FCE7F3"/><ellipse cx="50" cy="44" rx="34" ry="30" fill="#2C1810"/><rect x="16" y="42" width="13" height="30" rx="6.5" fill="#2C1810"/><rect x="71" y="42" width="13" height="30" rx="6.5" fill="#2C1810"/><rect x="43" y="68" width="14" height="12" rx="5" fill="#F5C89A"/><circle cx="50" cy="52" r="20" fill="#FDDCB5"/><path d="M28 48 C28 22 72 22 72 48" fill="#2C1810"/><path d="M28 46 L28 36 C28 18 72 18 72 36 L72 46 C68 28 32 28 28 46Z" fill="#2C1810"/><ellipse cx="30" cy="54" rx="3.5" ry="5" fill="#F0C490"/><ellipse cx="70" cy="54" rx="3.5" ry="5" fill="#F0C490"/><ellipse cx="41" cy="52" rx="3.2" ry="3.5" fill="#1A0800"/><ellipse cx="59" cy="52" rx="3.2" ry="3.5" fill="#1A0800"/><circle cx="42.2" cy="50.8" r="1.4" fill="#fff"/><circle cx="60.2" cy="50.8" r="1.4" fill="#fff"/><ellipse cx="35" cy="58" rx="5" ry="3" fill="#F472B6" opacity=".35"/><ellipse cx="65" cy="58" rx="5" ry="3" fill="#F472B6" opacity=".35"/><path d="M44 64 Q50 69 56 64" fill="#E8826A" stroke="#C96B52" stroke-width="1"/><path d="M15 98 C15 82 32 74 50 74 C68 74 85 82 85 98" fill="#EC4899"/></svg>';
+const _SVG_GRANDPA='<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#FEF3C7"/><ellipse cx="50" cy="54" rx="22" ry="24" fill="#FDDCB5"/><path d="M26 44 C24 18 76 18 74 44 L72 46 C72 24 28 24 28 46Z" fill="#9E9E9E"/><path d="M36 20 L34 40" stroke="#888" stroke-width="1.2" fill="none"/><path d="M26 44 C24 22 36 20 36 20 L34 40 L28 46Z" fill="#ABABAB"/><path d="M36 20 C38 18 74 18 74 44 L72 46 C72 24 38 24 34 40Z" fill="#9E9E9E"/><ellipse cx="27" cy="54" rx="4" ry="6" fill="#F0C9A0"/><ellipse cx="73" cy="54" rx="4" ry="6" fill="#F0C9A0"/><path d="M34 44 Q39 41 44 44" fill="none" stroke="#7A6A5A" stroke-width="2.2" stroke-linecap="round"/><path d="M56 44 Q61 41 66 44" fill="none" stroke="#7A6A5A" stroke-width="2.2" stroke-linecap="round"/><circle cx="40" cy="50" r="8" fill="none" stroke="#B8860B" stroke-width="2"/><circle cx="60" cy="50" r="8" fill="none" stroke="#B8860B" stroke-width="2"/><path d="M48 50 L52 50" stroke="#B8860B" stroke-width="1.5"/><path d="M32 48 L27 46" stroke="#B8860B" stroke-width="1.5"/><path d="M68 48 L73 46" stroke="#B8860B" stroke-width="1.5"/><ellipse cx="40" cy="50" rx="2.5" ry="2.8" fill="#2D1B0E"/><ellipse cx="60" cy="50" rx="2.5" ry="2.8" fill="#2D1B0E"/><circle cx="41" cy="49" r="1" fill="#fff"/><circle cx="61" cy="49" r="1" fill="#fff"/><ellipse cx="50" cy="59" rx="2.5" ry="1.5" fill="#E0A87C" opacity=".5"/><path d="M43 66 Q50 71 57 66" fill="none" stroke="#C0846A" stroke-width="2" stroke-linecap="round"/><path d="M35 56 Q37 62 39 66" fill="none" stroke="#E0C4A0" stroke-width="1" opacity=".35"/><path d="M65 56 Q63 62 61 66" fill="none" stroke="#E0C4A0" stroke-width="1" opacity=".35"/><path d="M18 96 C18 82 34 74 50 74 C66 74 82 82 82 96" fill="#78716C"/></svg>';
+const _SVG_GRANDMA='<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#FFF7ED"/><ellipse cx="50" cy="44" rx="32" ry="28" fill="#C0C0C0"/><rect x="20" y="44" width="10" height="20" rx="5" fill="#C0C0C0"/><rect x="70" y="44" width="10" height="20" rx="5" fill="#C0C0C0"/><rect x="43" y="68" width="14" height="10" rx="5" fill="#F0C490"/><circle cx="50" cy="52" r="20" fill="#FDDCB5"/><path d="M28 44 C28 20 72 20 72 44" fill="#C0C0C0"/><path d="M28 42 L28 34 C28 16 72 16 72 34 L72 42 C68 26 32 26 28 42Z" fill="#D4D4D4"/><ellipse cx="30" cy="54" rx="3.5" ry="5" fill="#F0C490"/><ellipse cx="70" cy="54" rx="3.5" ry="5" fill="#F0C490"/><path d="M37 48 Q41 46 45 48" fill="none" stroke="#8B7355" stroke-width="1.8" stroke-linecap="round"/><path d="M55 48 Q59 46 63 48" fill="none" stroke="#8B7355" stroke-width="1.8" stroke-linecap="round"/><path d="M39 53 Q41 56 43 53" fill="none" stroke="#4A3520" stroke-width="2.5" stroke-linecap="round"/><path d="M57 53 Q59 56 61 53" fill="none" stroke="#4A3520" stroke-width="2.5" stroke-linecap="round"/><ellipse cx="50" cy="60" rx="2.2" ry="1.3" fill="#E0A87C" opacity=".5"/><path d="M44 65 Q50 69 56 65" fill="none" stroke="#C0846A" stroke-width="2" stroke-linecap="round"/><path d="M18 98 C18 82 34 74 50 74 C66 74 82 82 82 98" fill="#92400E"/></svg>';
+const _SVG_GRANDPA_M='<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#FEF3C7"/><ellipse cx="50" cy="54" rx="22" ry="24" fill="#FDDCB5"/><path d="M26 44 C24 18 76 18 74 44 L72 46 C72 24 28 24 28 46Z" fill="#A0A0A0"/><path d="M50 18 L50 38" stroke="#888" stroke-width="1.2" fill="none"/><path d="M26 44 C24 20 50 18 50 18 L50 38 L28 46Z" fill="#ABABAB"/><path d="M50 18 C50 18 76 20 74 44 L72 46 C72 24 50 24 50 38Z" fill="#A0A0A0"/><ellipse cx="27" cy="54" rx="4" ry="6" fill="#F0C9A0"/><ellipse cx="73" cy="54" rx="4" ry="6" fill="#F0C9A0"/><path d="M34 44 Q39 41 44 44" fill="none" stroke="#6B5B4B" stroke-width="2" stroke-linecap="round"/><path d="M56 44 Q61 41 66 44" fill="none" stroke="#6B5B4B" stroke-width="2" stroke-linecap="round"/><rect x="33" y="46" width="14" height="10" rx="2" fill="none" stroke="#4A4A4A" stroke-width="1.8"/><rect x="53" y="46" width="14" height="10" rx="2" fill="none" stroke="#4A4A4A" stroke-width="1.8"/><path d="M47 50 L53 50" stroke="#4A4A4A" stroke-width="1.5"/><path d="M33 49 L27 47" stroke="#4A4A4A" stroke-width="1.5"/><path d="M67 49 L73 47" stroke="#4A4A4A" stroke-width="1.5"/><ellipse cx="40" cy="50" rx="2.2" ry="2.5" fill="#2D1B0E"/><ellipse cx="60" cy="50" rx="2.2" ry="2.5" fill="#2D1B0E"/><circle cx="41" cy="49" r="0.9" fill="#fff"/><circle cx="61" cy="49" r="0.9" fill="#fff"/><ellipse cx="50" cy="59" rx="2.2" ry="1.3" fill="#E0A87C" opacity=".5"/><path d="M44 66 Q50 70 56 66" fill="none" stroke="#C0846A" stroke-width="2" stroke-linecap="round"/><path d="M18 96 C18 82 34 74 50 74 C66 74 82 82 82 96" fill="#64748B"/><path d="M46 74 L48 84 50 86 52 84 54 74" fill="#334155"/><path d="M44 74 L46 80 50 82 54 80 56 74" fill="#fff"/></svg>';
+const _SVG_GRANDMA_M='<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#FFF1F2"/><circle cx="34" cy="36" r="6" fill="#D4D4D4"/><circle cx="50" cy="32" r="7" fill="#D4D4D4"/><circle cx="66" cy="36" r="6" fill="#D4D4D4"/><circle cx="28" cy="44" r="5.5" fill="#D4D4D4"/><circle cx="72" cy="44" r="5.5" fill="#D4D4D4"/><circle cx="40" cy="30" r="5.5" fill="#DCDCDC"/><circle cx="60" cy="30" r="5.5" fill="#DCDCDC"/><circle cx="44" cy="36" r="5" fill="#DCDCDC"/><circle cx="56" cy="36" r="5" fill="#DCDCDC"/><rect x="43" y="68" width="14" height="10" rx="5" fill="#F0C490"/><circle cx="50" cy="52" r="20" fill="#FDDCB5"/><circle cx="32" cy="40" r="5" fill="#D4D4D4"/><circle cx="68" cy="40" r="5" fill="#D4D4D4"/><ellipse cx="30" cy="54" rx="3.5" ry="5" fill="#F0C490"/><ellipse cx="70" cy="54" rx="3.5" ry="5" fill="#F0C490"/><path d="M37 48 Q41 46 45 48" fill="none" stroke="#8B7355" stroke-width="1.8" stroke-linecap="round"/><path d="M55 48 Q59 46 63 48" fill="none" stroke="#8B7355" stroke-width="1.8" stroke-linecap="round"/><ellipse cx="41" cy="52" rx="2.8" ry="3" fill="#1A0800"/><ellipse cx="59" cy="52" rx="2.8" ry="3" fill="#1A0800"/><circle cx="42" cy="51" r="1.2" fill="#fff"/><circle cx="60" cy="51" r="1.2" fill="#fff"/><ellipse cx="35" cy="58" rx="5" ry="3" fill="#F472B6" opacity=".3"/><ellipse cx="65" cy="58" rx="5" ry="3" fill="#F472B6" opacity=".3"/><ellipse cx="50" cy="60" rx="2.2" ry="1.3" fill="#E0A87C" opacity=".5"/><path d="M43 65 Q50 70 57 65" fill="#E8826A" stroke="#C96B52" stroke-width="1"/><path d="M18 98 C18 82 34 74 50 74 C66 74 82 82 82 98" fill="#BE185D"/></svg>';
+const _SVG_UNCLE='<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#D1FAE5"/><ellipse cx="50" cy="54" rx="22" ry="24" fill="#FDDCB5"/><path d="M26 44 C24 18 76 18 74 44 L72 46 C72 24 28 24 28 46Z" fill="#2C1810"/><path d="M28 40 C28 14 72 14 72 40" fill="#2C1810"/><path d="M30 38 C30 12 70 12 70 38 L68 40 C66 18 34 18 32 40Z" fill="#3B2314"/><path d="M30 38 C34 30 42 28 50 32 C58 28 66 30 70 38 L68 40 C64 32 56 30 50 34 C44 30 36 32 32 40Z" fill="#2C1810"/><path d="M36 28 C40 22 60 22 64 28 L62 32 C58 24 42 24 38 32Z" fill="#1E0C02"/><ellipse cx="27" cy="54" rx="4" ry="6" fill="#F0C9A0"/><ellipse cx="73" cy="54" rx="4" ry="6" fill="#F0C9A0"/><path d="M36 46 Q40 43 44 46" fill="none" stroke="#2C1810" stroke-width="2" stroke-linecap="round"/><path d="M56 46 Q60 43 64 46" fill="none" stroke="#2C1810" stroke-width="2" stroke-linecap="round"/><ellipse cx="40" cy="51" rx="2.5" ry="2.8" fill="#2D1B0E"/><ellipse cx="60" cy="51" rx="2.5" ry="2.8" fill="#2D1B0E"/><circle cx="41" cy="50" r="1" fill="#fff"/><circle cx="61" cy="50" r="1" fill="#fff"/><ellipse cx="50" cy="59" rx="2.2" ry="1.3" fill="#E0A87C" opacity=".5"/><path d="M44 66 Q50 70 56 66" fill="none" stroke="#C0846A" stroke-width="2" stroke-linecap="round"/><path d="M18 96 C18 82 34 74 50 74 C66 74 82 82 82 96" fill="#6B7280"/></svg>';
+const _SVG_AUNT='<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#FDF2F8"/><ellipse cx="50" cy="44" rx="34" ry="30" fill="#3B1E0A"/><rect x="16" y="42" width="12" height="32" rx="6" fill="#3B1E0A"/><rect x="72" y="42" width="12" height="32" rx="6" fill="#3B1E0A"/><rect x="43" y="68" width="14" height="12" rx="5" fill="#F5C89A"/><circle cx="50" cy="52" r="20" fill="#FDDCB5"/><path d="M28 48 C28 22 72 22 72 48" fill="#3B1E0A"/><path d="M28 46 L28 36 C28 18 72 18 72 36 L72 46 C68 28 32 28 28 46Z" fill="#3B1E0A"/><path d="M30 40 L70 40 L68 44 L32 44Z" fill="#2C1208"/><circle cx="26" cy="40" r="4" fill="#F472B6"/><circle cx="23" cy="38" r="2.5" fill="#FB7185"/><circle cx="29" cy="38" r="2.5" fill="#FB7185"/><circle cx="24" cy="42" r="2.5" fill="#FB7185"/><circle cx="28" cy="42" r="2.5" fill="#FB7185"/><circle cx="26" cy="40" r="2" fill="#FDE68A"/><ellipse cx="30" cy="54" rx="3.5" ry="5" fill="#F0C490"/><ellipse cx="70" cy="54" rx="3.5" ry="5" fill="#F0C490"/><path d="M37 46 Q41 44 45 46" fill="none" stroke="#3B1E0A" stroke-width="1.8" stroke-linecap="round"/><path d="M55 46 Q59 44 63 46" fill="none" stroke="#3B1E0A" stroke-width="1.8" stroke-linecap="round"/><ellipse cx="41" cy="52" rx="3" ry="3.2" fill="#1A0800"/><ellipse cx="59" cy="52" rx="3" ry="3.2" fill="#1A0800"/><circle cx="42" cy="51" r="1.3" fill="#fff"/><circle cx="60" cy="51" r="1.3" fill="#fff"/><line x1="38" y1="49" x2="37" y2="47" stroke="#1A0800" stroke-width="1.4"/><line x1="62" y1="49" x2="63" y2="47" stroke="#1A0800" stroke-width="1.4"/><ellipse cx="35" cy="58" rx="5" ry="3" fill="#F472B6" opacity=".3"/><ellipse cx="65" cy="58" rx="5" ry="3" fill="#F472B6" opacity=".3"/><ellipse cx="50" cy="59" rx="2.2" ry="1.3" fill="#E0A87C" opacity=".5"/><path d="M44 64 Q50 68 56 64" fill="#E8826A" stroke="#C96B52" stroke-width="1"/><path d="M15 98 C15 82 32 74 50 74 C68 74 85 82 85 98" fill="#EC4899"/></svg>';
 
 const ROLE_DEFS = {
   dad:       {label:'아빠',      svg:_SVG_DAD,      type:'caregiver', color:'#DBEAFE', textColor:'#3B82F6'},
   mom:       {label:'엄마',      svg:_SVG_MOM,      type:'caregiver', color:'#FCE7F3', textColor:'#EC4899'},
-  grandma:   {label:'할머니',    svg:_SVG_GRANDMA,  type:'caregiver', color:'#FEF9C3', textColor:'#CA8A04'},
-  grandpa:   {label:'할아버지',  svg:_SVG_GRANDPA,  type:'caregiver', color:'#FEF3C7', textColor:'#D97706'},
-  grandpa_m: {label:'외할아버지',svg:_SVG_GRANDPA_M,type:'caregiver', color:'#E0E7FF', textColor:'#6366F1'},
-  grandma_m: {label:'외할머니',  svg:_SVG_GRANDMA_M,type:'caregiver', color:'#FDE8EE', textColor:'#DB2777'},
-  uncle:     {label:'삼촌',      svg:_SVG_UNCLE,    type:'caregiver', color:'#ECFDF5', textColor:'#059669'},
-  aunt:      {label:'이모',      svg:_SVG_AUNT,     type:'caregiver', color:'#FFF7ED', textColor:'#F97316'},
+  grandpa:   {label:'할아버지',  svg:_SVG_GRANDPA,  type:'caregiver', color:'#FEF3C7', textColor:'#78716C'},
+  grandma:   {label:'할머니',    svg:_SVG_GRANDMA,  type:'caregiver', color:'#FFF7ED', textColor:'#92400E'},
+  grandpa_m: {label:'외할아버지',svg:_SVG_GRANDPA_M,type:'caregiver', color:'#FEF3C7', textColor:'#64748B'},
+  grandma_m: {label:'외할머니',  svg:_SVG_GRANDMA_M,type:'caregiver', color:'#FFF1F2', textColor:'#BE185D'},
+  uncle:     {label:'삼촌',      svg:_SVG_UNCLE,    type:'caregiver', color:'#D1FAE5', textColor:'#059669'},
+  aunt:      {label:'이모',      svg:_SVG_AUNT,     type:'caregiver', color:'#FDF2F8', textColor:'#EC4899'},
   child:     {label:'자녀',      svg:_SVG_CHILD_M,  type:'child',     color:'#D1FAE5', textColor:'#059669'},
   caregiver: {label:'양육자',    svg:_SVG_PERSON_M,  type:'caregiver', color:'#EEF2FF', textColor:'#6366F1'}
 };
@@ -6184,7 +6077,7 @@ function updateFamilyNamePreview(val){
 
 function renderRoleGrid(){
   const grid=document.getElementById('create-role-grid');
-  const caregiverRoles=['dad','mom','grandma','grandpa','grandpa_m','grandma_m','uncle','aunt'];
+  const caregiverRoles=['dad','mom','grandpa','grandma','grandpa_m','grandma_m','uncle','aunt'];
   grid.innerHTML=caregiverRoles.map(r=>{
     const d=ROLE_DEFS[r];
     const sel=_createState.myRole===r?'selected':'';
@@ -7977,6 +7870,110 @@ async function _executeWithdrawal(initiator, memberIdsToDelete, memberName, over
   }
 }
 
+// ── 가족 전체 삭제 ──────────────────────────────────
+async function deleteFamilyAll(){
+  if(!currentUser){ toast('로그인 상태가 아니에요'); return; }
+  const fm = S.familyMeta?.members || {};
+  const me = fm[currentUser];
+  if(!me || (me.type !== 'caregiver' && me.type !== 'parent')){ toast('양육자만 가족 삭제가 가능해요'); return; }
+
+  const memberNames = Object.values(fm).map(m => m.name||'이름없음').join(', ');
+  const memberCount = Object.keys(fm).length;
+  const logCount = (S.log||[]).length;
+  const rewardCount = (S.rewards||[]).length;
+  const badgeCount = (S.badges||[]).length;
+  const msgCount = (S.familyMessages||[]).length;
+
+  const summary = `구성원 ${memberCount}명: ${memberNames}\n활동기록 ${logCount}건, 보상 ${rewardCount}개, 뱃지 ${badgeCount}개, 메시지 ${msgCount}건`;
+
+  _showWithdrawModal('⚠️ 가족 전체 삭제',
+    `이 가족의 모든 데이터를 영구 삭제합니다.\n\n${summary}\n\n이 작업은 되돌릴 수 없습니다.\n삭제 후 모든 구성원이 로그아웃됩니다.`,
+    '전체 삭제', async(overlay)=>{
+      try {
+        console.log('[DeleteFamily] Starting family deletion...');
+
+        // 1. Auth Registry 전체 정리
+        const regDoc = _getAuthRegistryDoc();
+        if(regDoc && db){
+          try {
+            const regSnap = await getDoc(regDoc);
+            if(regSnap.exists()){
+              const regData = regSnap.data();
+              const allMids = Object.keys(fm);
+              let changed = false;
+              for(const uid of Object.keys(regData)){
+                if(allMids.includes(regData[uid].memberId)){
+                  delete regData[uid];
+                  changed = true;
+                }
+              }
+              if(changed) await setDoc(regDoc, regData);
+              console.log('[DeleteFamily] Auth registry cleaned');
+            }
+          } catch(e){ console.warn('[DeleteFamily] Auth registry cleanup failed:', e); }
+        }
+
+        // 2. Firestore 가족 문서 삭제
+        if(DATA_DOC && db && typeof deleteDoc === 'function'){
+          try{
+            await deleteDoc(DATA_DOC);
+            console.log('[DeleteFamily] Firestore family document deleted');
+          }catch(e){
+            console.warn('[DeleteFamily] deleteDoc failed, trying empty overwrite:', e);
+            try{ await setDoc(DATA_DOC, {_deleted:true, _deletedAt:new Date().toISOString()}); }catch(e2){ console.error('[DeleteFamily] overwrite also failed:', e2); }
+          }
+        }
+
+        // 3. Firestore 리스너 해제
+        if(_dataListenerUnsub){
+          try{ _dataListenerUnsub(); }catch(_e){}
+          _dataListenerUnsub = null;
+        }
+
+        // 4. 모든 localStorage 정리
+        const keysToRemove = [];
+        for(let i=0; i<localStorage.length; i++){
+          const key = localStorage.key(i);
+          if(key && (key.startsWith(_LS_PREFIX) || key.startsWith('taemin_'))) keysToRemove.push(key);
+        }
+        keysToRemove.forEach(k => { try{localStorage.removeItem(k);}catch(e){} });
+        try{ sessionStorage.clear(); }catch(e){}
+
+        // 5. Firebase Auth 로그아웃
+        if(fbAuth && signOut){
+          try{ await signOut(fbAuth); }catch(e){ console.warn('[DeleteFamily] Firebase signOut:', e); }
+        }
+
+        // 6. 상태 초기화
+        viewingChildId = null;
+        currentUser = null;
+        _admViewChildId = null;
+        _globalDataOwner = null;
+        adminOK = false;
+        DATA_DOC = null;
+        _familyId = null;
+
+        // 7. 완료 화면
+        if(overlay) _showFarewellScreen('가족', overlay);
+        else toast('가족 데이터가 모두 삭제되었습니다');
+
+        const _waitClose = setInterval(()=>{
+          if(!document.getElementById('withdraw-modal-overlay')){
+            clearInterval(_waitClose);
+            showAuthScreen('welcome');
+          }
+        }, 300);
+        setTimeout(()=>{ clearInterval(_waitClose); if(!currentUser) showAuthScreen('welcome'); }, 10000);
+
+        console.log('[DeleteFamily] Completed');
+      } catch(e){
+        console.error('[DeleteFamily] Error:', e);
+        if(overlay) overlay.remove();
+        toast('삭제 중 오류가 발생했어요: ' + (e.message||e));
+      }
+    });
+}
+
 function logout() {
   if (!confirm('로그아웃 하시겠어요?')) return;
   // ★ 상태 초기화 — 개별 try/catch로 감싸서 하나가 실패해도 나머지 계속 실행
@@ -9379,7 +9376,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'prod'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0410m';
+const _APP_VERSION = 'v0413e';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -9441,7 +9438,7 @@ if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.
   if(vi) vi.textContent=(_ENV==='dev'?'DEV ':'')+ _APP_VERSION;
 })();
 
-let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction, _fsCollection, _fsAddDoc;
+let initializeApp, getFirestore, doc, getDoc, setDoc, deleteDoc, onSnapshot, runTransaction, _fsCollection, _fsAddDoc;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, OAuthProvider, signInWithCustomToken;
 let fbApp, db, fbAuth, LEGACY_DOC, DATA_DOC;
 let _firebaseReady = false;
@@ -9454,7 +9451,7 @@ async function _initFirebase(){
     const fbAuthMod = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
     const fbAppCheckMod = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check.js");
     initializeApp = fbAppMod.initializeApp;
-    ({getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction, collection: _fsCollection, addDoc: _fsAddDoc} = fbFsMod);
+    ({getFirestore, doc, getDoc, setDoc, deleteDoc, onSnapshot, runTransaction, collection: _fsCollection, addDoc: _fsAddDoc} = fbFsMod);
     ({getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut: signOut, onAuthStateChanged, GoogleAuthProvider, OAuthProvider, signInWithCustomToken} = fbAuthMod);
     const {signInAnonymously: _signInAnonymously} = fbAuthMod;
     window._signInAnonymously = _signInAnonymously;
@@ -19102,6 +19099,20 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.3.17 (v0413e)',date:'2026-04-13',items:[
+    {type:'fix',text:'가족 만들기 역할 선택에서 역할 미선택 시 건너뛰기 방지'},
+  ]},
+  {ver:'2.3.16 (v0413d)',date:'2026-04-13',items:[
+    {type:'improve',text:'소개 페이지를 실제 앱 스크린샷으로 교체 — 다크/라이트 모드 자동 전환'},
+    {type:'improve',text:'소개 페이지 4단계로 확장 — 홈·보상·리포트·AI챗봇 각 화면 소개'},
+    {type:'improve',text:'소개 카드 문구를 과학적 연구 근거 기반으로 개선'},
+  ]},
+  {ver:'2.3.15 (v0413c)',date:'2026-04-13',items:[
+    {type:'fix',text:'챗봇 대화기록이 다른 사용자로 로그인 시에도 남아있던 버그 수정 — 사용자별 별도 저장'},
+    {type:'new',text:'관리자 설정에 가족 전체 삭제 기능 추가 — 모든 구성원·활동·기록을 영구 삭제'},
+    {type:'fix',text:'역할 선택 아이콘 순서 수정 — 아빠→엄마→할아버지→할머니→외할아버지→외할머니→삼촌→이모'},
+    {type:'new',text:'역할 선택 아이콘 8종 리디자인 + 아빠 눈썹 추가'},
+  ]},
   {ver:'2.3.12 (v0410m)',date:'2026-04-12',items:[
     {type:'fix',text:'뱃지 마일리지 수령 후 목록 아이콘이 즉시 갱신되지 않던 문제 수정 — renderAll()에 renderBadgeViewGrid/History 추가'},
   ]},
@@ -24780,7 +24791,7 @@ window._createState = _createState;
   var nextBtn=document.getElementById('insNextBtn');
   var prevBtn=document.getElementById('insPrevBtn');
   var skipBtn=document.getElementById('insSkipBtn');
-  var total=3,cur=0;
+  var total=4,cur=0;
   function updateSteps(){
     steps.forEach(function(s,i){
       s.classList.remove('active','done');
@@ -25018,25 +25029,33 @@ const MILY_MAX_HISTORY=20; // 대화 기록 최대 유지 수
 let _milyOpen=false;
 let _milySending=false;
 let _milyHistory=[]; // {role,content}
-const _MILY_CHAT_LS_KEY=((window._ENV||'dev')==='dev'?'taemin_dev_':'taemin_')+'chat_history';
+const _MILY_CHAT_LS_PREFIX=((window._ENV||'dev')==='dev'?'taemin_dev_':'taemin_')+'chat_history';
 const _MILY_CHAT_MAX_PERSIST=50; // localStorage 저장 최대 메시지 수
+
+// 사용자별 챗봇 대화 키 (currentUser 기반)
+function _getMilyChatLSKey(){
+  const uid=window.currentUser||'_anon';
+  return _MILY_CHAT_LS_PREFIX+'_'+uid;
+}
 
 function _saveChatHistory(){
   try{
     const toSave=_milyHistory.slice(-_MILY_CHAT_MAX_PERSIST);
-    localStorage.setItem(_MILY_CHAT_LS_KEY,JSON.stringify(toSave));
+    localStorage.setItem(_getMilyChatLSKey(),JSON.stringify(toSave));
   }catch(e){console.warn('[mily-chat] history save failed:',e);}
 }
 function _loadChatHistory(){
   try{
-    const raw=localStorage.getItem(_MILY_CHAT_LS_KEY);
+    const raw=localStorage.getItem(_getMilyChatLSKey());
     if(!raw)return[];
     const arr=JSON.parse(raw);
     return Array.isArray(arr)?arr.slice(-_MILY_CHAT_MAX_PERSIST):[];
   }catch(e){return[];}
 }
 function _clearChatHistory(){
-  try{localStorage.removeItem(_MILY_CHAT_LS_KEY);}catch(e){}
+  try{localStorage.removeItem(_getMilyChatLSKey());}catch(e){}
+  // 레거시 키도 정리
+  try{localStorage.removeItem(_MILY_CHAT_LS_PREFIX);}catch(e){}
 }
 
 // ── 로컬 인텐트 엔진 (API 호출 없이 즉시 응답) ──
