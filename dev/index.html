@@ -237,11 +237,16 @@ body.dark .toss-invite-share-btn{background:rgba(99,102,241,.2);color:#818CF8}
 body.dark .ins-card-1{background:rgba(99,102,241,.09)}
 body.dark .ins-card-2{background:rgba(236,72,153,.08)}
 body.dark .ins-card-3{background:rgba(245,158,11,.08)}
-.ins-illust{width:min(260px,65vw);height:min(320px,50vh);margin-bottom:16px;flex-shrink:0;filter:drop-shadow(0 8px 24px rgba(0,0,0,.12))}
-.ins-illust svg{width:100%;height:100%}
-.ins-keyword{font-size:24px;font-weight:900;color:#1E293B;text-align:center;line-height:1.35;letter-spacing:-.5px;margin-bottom:8px}
+.ins-illust{width:min(220px,55vw);height:min(380px,48vh);margin-bottom:12px;flex-shrink:0;border-radius:28px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.18);position:relative;background:#0F172A}
+.ins-illust img{width:100%;height:100%;object-fit:cover;object-position:center top;display:block}
+.ins-illust .ins-img-dark{display:none}
+body.dark .ins-illust .ins-img-light{display:none}
+body.dark .ins-illust .ins-img-dark{display:block}
+.ins-illust .ins-img-light{display:block}
+body.dark .ins-illust{background:#1E293B}
+.ins-keyword{font-size:22px;font-weight:900;color:#1E293B;text-align:center;line-height:1.4;letter-spacing:-.5px;margin-bottom:6px}
 .ins-sub{font-size:13px;color:#64748B;text-align:center;font-weight:600;line-height:1.6}
-.ins-evidence{font-size:11px;color:#94A3B8;text-align:center;font-weight:500;margin-top:5px;font-style:italic}
+.ins-evidence{font-size:11px;color:#94A3B8;text-align:center;font-weight:500;margin-top:4px;font-style:italic}
 body.dark .ins-keyword{color:#F1F5F9}
 body.dark .ins-sub{color:#94A3B8}
 body.dark .ins-evidence{color:#64748B}
@@ -3240,170 +3245,51 @@ requestAnimationFrame(function(){
         <div class="ins-step" data-step="1">2</div>
         <div class="ins-step-line"></div>
         <div class="ins-step" data-step="2">3</div>
+        <div class="ins-step-line"></div>
+        <div class="ins-step" data-step="3">4</div>
       </div>
     </div>
     <!-- Swipe cards -->
     <div class="ins-cards-scroll" id="insCardsScroll">
-      <!-- Card 1: 매일 작은 활동이 습관이 돼요 -->
+      <!-- Card 1: 매일 작은 활동이 습관이 돼요 (홈 화면) -->
       <div class="ins-card ins-card-1">
         <div class="ins-illust">
-          <svg viewBox="0 0 240 360" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <!-- Phone shell -->
-            <rect x="16" y="4" width="208" height="352" rx="32" fill="#EEF2F7" stroke="#D1D5DB" stroke-width="1.5"/>
-            <!-- Screen -->
-            <rect x="20" y="8" width="200" height="344" rx="30" fill="#EEF2F7"/>
-            <!-- Header: gradient like real app -->
-            <defs><linearGradient id="h1g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#5457D9"/><stop offset="100%" stop-color="#727BE0"/></linearGradient></defs>
-            <path d="M20 38 Q20 8 50 8 H190 Q220 8 220 38 V100 Q220 100 210 116 Q170 108 120 112 Q70 116 30 108 Q20 100 20 100 Z" fill="url(#h1g)"/>
-            <circle cx="120" cy="72" r="0" fill="#fff" opacity=".08"/>
-            <text x="120" y="42" fill="#fff" font-size="12" font-weight="900" text-anchor="middle" opacity=".9">홈</text>
-            <!-- Mileage hero -->
-            <text x="120" y="72" fill="#fff" font-size="28" font-weight="900" text-anchor="middle">505</text>
-            <text x="120" y="88" fill="#C7D2FE" font-size="10" font-weight="700" text-anchor="middle">마일리지</text>
-            <!-- Section title -->
-            <text x="36" y="134" fill="#0F172A" font-size="11" font-weight="900">오늘의 활동</text>
-            <!-- Activity grid: 2x2 cards like real app -->
-            <!-- Card 1: done -->
-            <rect x="28" y="142" width="88" height="82" rx="14" fill="#F0FDF4" stroke="#BBF7D0" stroke-width="1"/>
-            <text x="72" y="168" fill="#0F172A" font-size="22" text-anchor="middle">📖</text>
-            <text x="72" y="184" fill="#059669" font-size="9" font-weight="800" text-anchor="middle">책 읽기</text>
-            <text x="72" y="198" fill="#059669" font-size="9" font-weight="700" text-anchor="middle">+10M ✓</text>
-            <!-- progress bar done -->
-            <rect x="38" y="206" width="68" height="5" rx="2.5" fill="#BBF7D0"/>
-            <rect x="38" y="206" width="68" height="5" rx="2.5" fill="#22C55E"/>
-            <!-- Card 2: done -->
-            <rect x="124" y="142" width="88" height="82" rx="14" fill="#F0FDF4" stroke="#BBF7D0" stroke-width="1"/>
-            <text x="168" y="168" fill="#0F172A" font-size="22" text-anchor="middle">🏃</text>
-            <text x="168" y="184" fill="#059669" font-size="9" font-weight="800" text-anchor="middle">운동하기</text>
-            <text x="168" y="198" fill="#059669" font-size="9" font-weight="700" text-anchor="middle">+5M ✓</text>
-            <rect x="134" y="206" width="68" height="5" rx="2.5" fill="#BBF7D0"/>
-            <rect x="134" y="206" width="68" height="5" rx="2.5" fill="#22C55E"/>
-            <!-- Card 3: partial (orange) -->
-            <rect x="28" y="232" width="88" height="82" rx="14" fill="#FFF7ED" stroke="#FED7AA" stroke-width="1"/>
-            <text x="72" y="258" fill="#0F172A" font-size="22" text-anchor="middle">🎹</text>
-            <text x="72" y="274" fill="#D97706" font-size="9" font-weight="800" text-anchor="middle">피아노 연습</text>
-            <text x="72" y="288" fill="#D97706" font-size="9" font-weight="700" text-anchor="middle">1/2회</text>
-            <rect x="38" y="296" width="68" height="5" rx="2.5" fill="#FED7AA"/>
-            <rect x="38" y="296" width="34" height="5" rx="2.5" fill="#F59E0B"/>
-            <!-- Card 4: pending -->
-            <rect x="124" y="232" width="88" height="82" rx="14" fill="#fff" stroke="#E2E8F0" stroke-width="1"/>
-            <text x="168" y="258" fill="#0F172A" font-size="22" text-anchor="middle">✏️</text>
-            <text x="168" y="274" fill="#0F172A" font-size="9" font-weight="800" text-anchor="middle">일기 쓰기</text>
-            <text x="168" y="288" fill="#6366F1" font-size="9" font-weight="700" text-anchor="middle">+5M</text>
-            <rect x="134" y="296" width="68" height="5" rx="2.5" fill="#E2E8F0"/>
-            <!-- Bottom nav pill -->
-            <rect x="42" y="326" width="156" height="24" rx="12" fill="#fff" stroke="#E2E8F0" stroke-width="1"/>
-            <circle cx="78" cy="338" r="4" fill="#5457D9"/>
-            <circle cx="120" cy="338" r="4" fill="#CBD5E1"/>
-            <circle cx="162" cy="338" r="4" fill="#CBD5E1"/>
-          </svg>
+          <img class="ins-img-dark" src="ob-home-dark.png" alt="홈 화면 (다크)" loading="lazy">
+          <img class="ins-img-light" src="ob-home-light.png" alt="홈 화면 (라이트)" loading="lazy">
         </div>
         <div class="ins-keyword">매일 작은 활동이<br>습관이 돼요</div>
-        <div class="ins-sub">하루 2분이면 충분해요.<br>66일이면 자동화된 습관이 됩니다.</div>
-        <div class="ins-evidence">— University College London, Phillippa Lally 연구 (2009)</div>
+        <div class="ins-sub">양치, 세수, 숙제 — 하루 2분이면 충분해요.<br><b style="color:#6366F1;font-size:15px">66일</b>이면 자동화된 습관이 됩니다.</div>
+        <div class="ins-evidence">— UCL Phillippa Lally, 습관 형성 연구 (2009)</div>
       </div>
-      <!-- Card 2: 가족이 함께하면 동기부여가 달라져요 -->
+      <!-- Card 2: 보상으로 내재동기를 키워요 (보상 화면) -->
       <div class="ins-card ins-card-2">
         <div class="ins-illust">
-          <svg viewBox="0 0 240 360" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <!-- Phone shell -->
-            <rect x="16" y="4" width="208" height="352" rx="32" fill="#FFF" stroke="#D1D5DB" stroke-width="1.5"/>
-            <rect x="20" y="8" width="200" height="344" rx="30" fill="#FFF8F0"/>
-            <!-- Header -->
-            <defs><linearGradient id="h2g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#EC4899"/><stop offset="100%" stop-color="#F472B6"/></linearGradient></defs>
-            <path d="M20 38 Q20 8 50 8 H190 Q220 8 220 38 V72 Q220 82 210 86 Q170 80 120 82 Q70 84 30 80 Q20 82 20 72 Z" fill="url(#h2g)"/>
-            <text x="120" y="38" fill="#fff" font-size="12" font-weight="900" text-anchor="middle" opacity=".9">우리가족</text>
-            <text x="120" y="60" fill="#fff" font-size="10" font-weight="600" text-anchor="middle" opacity=".8">가족 메시지</text>
-            <!-- Family avatars row -->
-            <circle cx="66" cy="102" r="16" fill="#EC4899"/>
-            <text x="66" y="107" fill="#fff" font-size="9" font-weight="800" text-anchor="middle">엄마</text>
-            <circle cx="120" cy="102" r="16" fill="#6366F1"/>
-            <text x="120" y="107" fill="#fff" font-size="9" font-weight="800" text-anchor="middle">아빠</text>
-            <circle cx="174" cy="102" r="16" fill="#F59E0B"/>
-            <text x="174" y="107" fill="#fff" font-size="9" font-weight="800" text-anchor="middle">태민</text>
-            <!-- Message from 엄마 (left aligned) -->
-            <circle cx="42" cy="140" r="10" fill="#EC4899"/>
-            <text x="42" y="144" fill="#fff" font-size="7" font-weight="800" text-anchor="middle">엄</text>
-            <rect x="56" y="132" width="130" height="38" rx="14" fill="#FCE7F3"/>
-            <text x="66" y="148" fill="#9D174D" font-size="9" font-weight="700">오늘 책읽기 잘했네! 👏</text>
-            <text x="66" y="162" fill="#BE185D" font-size="8" font-weight="600">엄마가 응원할게 💕</text>
-            <!-- Message from 아빠 (left aligned) -->
-            <circle cx="42" cy="190" r="10" fill="#6366F1"/>
-            <text x="42" y="194" fill="#fff" font-size="7" font-weight="800" text-anchor="middle">아</text>
-            <rect x="56" y="182" width="122" height="28" rx="14" fill="#EEF2FF"/>
-            <text x="66" y="200" fill="#312E81" font-size="9" font-weight="700">우리 태민 최고! 화이팅 💪</text>
-            <!-- Message from 태민 (right aligned) -->
-            <rect x="64" y="222" width="132" height="38" rx="14" fill="#FEF3C7"/>
-            <circle cx="204" cy="230" r="10" fill="#F59E0B"/>
-            <text x="204" y="234" fill="#fff" font-size="7" font-weight="800" text-anchor="middle">태</text>
-            <text x="76" y="238" fill="#78350F" font-size="9" font-weight="700">감사합니다! 😊</text>
-            <text x="76" y="252" fill="#92400E" font-size="8" font-weight="600">내일은 운동도 할게요!</text>
-            <!-- Unread badge notification -->
-            <rect x="36" y="274" width="168" height="40" rx="14" fill="#FDF2F8" stroke="#FBCFE8" stroke-width="1"/>
-            <text x="120" y="292" fill="#BE185D" font-size="10" font-weight="900" text-anchor="middle">🏅 가족 응원왕 뱃지 획득!</text>
-            <text x="120" y="306" fill="#9D174D" font-size="8" font-weight="600" text-anchor="middle">가족 메시지 10개 달성</text>
-            <!-- Bottom nav pill -->
-            <rect x="42" y="326" width="156" height="24" rx="12" fill="#fff" stroke="#E2E8F0" stroke-width="1"/>
-            <circle cx="78" cy="338" r="4" fill="#CBD5E1"/>
-            <circle cx="120" cy="338" r="4" fill="#CBD5E1"/>
-            <circle cx="162" cy="338" r="4" fill="#CBD5E1"/>
-          </svg>
+          <img class="ins-img-dark" src="ob-reward-dark.png" alt="보상 상점 (다크)" loading="lazy">
+          <img class="ins-img-light" src="ob-reward-light.png" alt="보상 상점 (라이트)" loading="lazy">
         </div>
-        <div class="ins-keyword">가족이 함께하면<br>동기부여가 달라져요</div>
-        <div class="ins-sub">사회적 지지가 있으면 목표 달성률이<br><b style="color:#EC4899;font-size:16px">95%</b> 높아집니다.</div>
-        <div class="ins-evidence">— ASTC (American Society of Training), 책임 파트너 연구</div>
+        <div class="ins-keyword">노력이 보상으로<br>이어져요</div>
+        <div class="ins-sub">진전이 눈에 보이면 아이는 스스로<br><b style="color:#D98E09;font-size:15px">"한 번 더"</b>를 선택합니다.</div>
+        <div class="ins-evidence">— Teresa Amabile, Harvard 진전의 원칙 (The Progress Principle)</div>
       </div>
-      <!-- Card 3: 마일리지로 성취감을 느껴요 -->
+      <!-- Card 3: 데이터로 성장을 확인해요 (리포트 화면) -->
       <div class="ins-card ins-card-3">
         <div class="ins-illust">
-          <svg viewBox="0 0 240 360" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <!-- Phone shell -->
-            <rect x="16" y="4" width="208" height="352" rx="32" fill="#fff" stroke="#D1D5DB" stroke-width="1.5"/>
-            <rect x="20" y="8" width="200" height="344" rx="30" fill="#FFFDF7"/>
-            <!-- Header -->
-            <defs><linearGradient id="h3g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#D98E09"/><stop offset="100%" stop-color="#E0A820"/></linearGradient></defs>
-            <path d="M20 38 Q20 8 50 8 H190 Q220 8 220 38 V94 Q220 104 210 108 Q170 100 120 102 Q70 104 30 100 Q20 104 20 94 Z" fill="url(#h3g)"/>
-            <text x="120" y="38" fill="#fff" font-size="12" font-weight="900" text-anchor="middle" opacity=".9">보상</text>
-            <!-- Mileage balance card -->
-            <rect x="36" y="52" width="168" height="50" rx="16" fill="rgba(255,255,255,.2)"/>
-            <text x="120" y="74" fill="#fff" font-size="22" font-weight="900" text-anchor="middle">505</text>
-            <text x="120" y="92" fill="rgba(255,255,255,.8)" font-size="9" font-weight="700" text-anchor="middle">보유 마일리지</text>
-            <!-- Reward grid: 2 columns like actual app -->
-            <text x="36" y="130" fill="#0F172A" font-size="10" font-weight="900">내 보상</text>
-            <!-- Reward card 1: redeemable -->
-            <rect x="28" y="138" width="88" height="104" rx="14" fill="#fff" stroke="#FDE68A" stroke-width="1.5"/>
-            <text x="72" y="172" fill="#0F172A" font-size="28" text-anchor="middle">🎮</text>
-            <text x="72" y="192" fill="#0F172A" font-size="9" font-weight="800" text-anchor="middle">게임 30분</text>
-            <rect x="36" y="200" width="72" height="24" rx="10" fill="#D98E09"/>
-            <text x="72" y="216" fill="#fff" font-size="9" font-weight="800" text-anchor="middle">200M 교환</text>
-            <rect x="36" y="228" width="72" height="5" rx="2.5" fill="#FDE68A"/>
-            <rect x="36" y="228" width="72" height="5" rx="2.5" fill="#22C55E"/>
-            <!-- Reward card 2: progress -->
-            <rect x="124" y="138" width="88" height="104" rx="14" fill="#fff" stroke="#E2E8F0" stroke-width="1"/>
-            <text x="168" y="172" fill="#0F172A" font-size="28" text-anchor="middle">🍦</text>
-            <text x="168" y="192" fill="#0F172A" font-size="9" font-weight="800" text-anchor="middle">아이스크림</text>
-            <rect x="132" y="200" width="72" height="24" rx="10" fill="#E2E8F0"/>
-            <text x="168" y="216" fill="#64748B" font-size="9" font-weight="800" text-anchor="middle">500M 필요</text>
-            <rect x="132" y="228" width="72" height="5" rx="2.5" fill="#E2E8F0"/>
-            <rect x="132" y="228" width="50" height="5" rx="2.5" fill="#F59E0B"/>
-            <!-- Reward card 3 (partial view) -->
-            <rect x="28" y="252" width="88" height="56" rx="14" fill="#fff" stroke="#E2E8F0" stroke-width="1"/>
-            <text x="72" y="280" fill="#0F172A" font-size="28" text-anchor="middle">🎨</text>
-            <text x="72" y="298" fill="#0F172A" font-size="9" font-weight="800" text-anchor="middle">미술 용품</text>
-            <!-- Reward card 4 (partial view) -->
-            <rect x="124" y="252" width="88" height="56" rx="14" fill="#fff" stroke="#E2E8F0" stroke-width="1"/>
-            <text x="168" y="280" fill="#0F172A" font-size="28" text-anchor="middle">⚽</text>
-            <text x="168" y="298" fill="#0F172A" font-size="9" font-weight="800" text-anchor="middle">축구공</text>
-            <!-- Bottom nav pill -->
-            <rect x="42" y="326" width="156" height="24" rx="12" fill="#fff" stroke="#E2E8F0" stroke-width="1"/>
-            <circle cx="78" cy="338" r="4" fill="#CBD5E1"/>
-            <circle cx="120" cy="338" r="4" fill="#D98E09"/>
-            <circle cx="162" cy="338" r="4" fill="#CBD5E1"/>
-          </svg>
+          <img class="ins-img-dark" src="ob-report-dark.png" alt="성과 통계 (다크)" loading="lazy">
+          <img class="ins-img-light" src="ob-report-light.png" alt="성과 통계 (라이트)" loading="lazy">
         </div>
-        <div class="ins-keyword">마일리지로<br>성취감을 느껴요</div>
-        <div class="ins-sub">노력이 눈에 보이면 아이는 스스로<br><b style="color:#F59E0B;font-size:16px">"한 번 더"</b>를 선택합니다.</div>
-        <div class="ins-evidence">— Teresa Amabile, Harvard 진전의 원칙 (The Progress Principle)</div>
+        <div class="ins-keyword">데이터로<br>성장을 확인해요</div>
+        <div class="ins-sub">자기 행동을 모니터링하는 아이는<br>목표 달성률이 <b style="color:#7C3AED;font-size:15px">2배</b> 높아집니다.</div>
+        <div class="ins-evidence">— Harkin et al., 자기 모니터링 메타분석 (2016)</div>
+      </div>
+      <!-- Card 4: AI가 보상 체계를 점검해요 (챗봇 화면) ★ KEY -->
+      <div class="ins-card ins-card-1">
+        <div class="ins-illust">
+          <img class="ins-img-dark" src="ob-chat-dark.png" alt="AI 챗봇 (다크)" loading="lazy">
+          <img class="ins-img-light" src="ob-chat-light.png" alt="AI 챗봇 (라이트)" loading="lazy">
+        </div>
+        <div class="ins-keyword">AI가 보상 체계를<br>과학적으로 점검해요</div>
+        <div class="ins-sub">밀리가 보상의 균형, 내재동기 훼손 위험,<br>적정 난이도를 <b style="color:#6366F1;font-size:15px">실시간 분석</b>합니다.</div>
+        <div class="ins-evidence">— Deci & Ryan, 자기결정이론 (SDT) 기반 설계</div>
       </div>
     </div>
     <!-- CTA (이전/다음 + 건너뛰기) -->
@@ -9491,7 +9377,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0413c';
+const _APP_VERSION = 'v0413d';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -19214,6 +19100,11 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.3.16 (v0413d)',date:'2026-04-13',items:[
+    {type:'improve',text:'소개 페이지를 실제 앱 스크린샷으로 교체 — 다크/라이트 모드 자동 전환'},
+    {type:'improve',text:'소개 페이지 4단계로 확장 — 홈·보상·리포트·AI챗봇 각 화면 소개'},
+    {type:'improve',text:'소개 카드 문구를 과학적 연구 근거 기반으로 개선'},
+  ]},
   {ver:'2.3.15 (v0413c)',date:'2026-04-13',items:[
     {type:'fix',text:'챗봇 대화기록이 다른 사용자로 로그인 시에도 남아있던 버그 수정 — 사용자별 별도 저장'},
     {type:'new',text:'관리자 설정에 가족 전체 삭제 기능 추가 — 모든 구성원·활동·기록을 영구 삭제'},
@@ -24898,7 +24789,7 @@ window._createState = _createState;
   var nextBtn=document.getElementById('insNextBtn');
   var prevBtn=document.getElementById('insPrevBtn');
   var skipBtn=document.getElementById('insSkipBtn');
-  var total=3,cur=0;
+  var total=4,cur=0;
   function updateSteps(){
     steps.forEach(function(s,i){
       s.classList.remove('active','done');
