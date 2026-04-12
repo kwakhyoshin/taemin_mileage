@@ -2053,6 +2053,7 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
 @keyframes badgeSpin{0%{transform:perspective(800px) rotateY(0deg) scale(0.3);opacity:0}30%{opacity:1}100%{transform:perspective(800px) rotateY(720deg) scale(1)}}
 @keyframes badgeFadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 @keyframes cardFlip{from{transform:rotateY(0)}to{transform:rotateY(180deg)}}
+@keyframes bdg-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.7;transform:scale(1.1)}}
 .badge-grid-section{padding:4px 0}
 .badge-cat-header{font-size:15px;font-weight:800;color:var(--tx2);padding:14px 4px 10px;display:flex;align-items:center;gap:7px;flex-wrap:wrap;line-height:1.5}
 .badge-cat-header svg{flex-shrink:0;stroke:var(--tx2)}
@@ -9378,7 +9379,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0410i';
+const _APP_VERSION = 'v0410j';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -12234,7 +12235,9 @@ function renderBadges(){
       const isEarned=S.badges&&S.badges[b.id];
       const isClaimed=isEarned?.claimed||false;
       const cursor=isEarned?'pointer':'default';
-      html+=`<div class="badge-card" data-badge-id="${b.id}" style="cursor:${cursor};transition:all .2s ease;padding:12px;border-radius:14px;text-align:center;background:${isEarned?'rgba(99,102,241,.1)':'rgba(0,0,0,.05)'};border:1px solid ${isEarned?'rgba(99,102,241,.2)':'rgba(0,0,0,.1)'};display:flex;flex-direction:column;align-items:center;gap:8px" title="${b.name}">
+      const claimIcon=isClaimed?'<div style="position:absolute;top:6px;right:6px;width:22px;height:22px;background:#10B981;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(16,185,129,.4)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>':(isEarned?'<div style="position:absolute;top:6px;right:6px;width:22px;height:22px;background:#F59E0B;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(245,158,11,.4);animation:bdg-pulse 2s ease-in-out infinite"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg></div>':'');
+      html+=`<div class="badge-card" data-badge-id="${b.id}" style="position:relative;cursor:${cursor};transition:all .2s ease;padding:12px;border-radius:14px;text-align:center;background:${isEarned?'rgba(99,102,241,.1)':'rgba(0,0,0,.05)'};border:1px solid ${isEarned?'rgba(99,102,241,.2)':'rgba(0,0,0,.1)'};display:flex;flex-direction:column;align-items:center;gap:8px" title="${b.name}">
+        ${claimIcon}
         <div style="width:80px;height:100px;display:flex;align-items:center;justify-content:center">
           ${generateBadgeSVG(b,isEarned)}
         </div>
@@ -19096,6 +19099,9 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.3.9 (v0410j)',date:'2026-04-12',items:[
+    {type:'feat',text:'뱃지 목록에 마일리지 수령 상태 아이콘 표시 — 수령완료: 초록 체크 원, 미수령: 노랑 선물 아이콘(펄스 애니메이션)'},
+  ]},
   {ver:'2.3.8 (v0410i)',date:'2026-04-12',items:[
     {type:'improve',text:'편집/추가 버튼 디자인을 홈탭 이력보기 버튼과 동일한 스타일로 통일 (border-radius:14px, 회색 외곽선 ghost 스타일)'},
   ]},
