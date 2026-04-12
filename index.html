@@ -1573,6 +1573,7 @@ body.dark .bug-pick.active{border-color:#A5B4FC;background:rgba(129,140,248,.22)
 .bug-pick .bp-ico svg{width:22px;height:22px}
 .bug-pick .bp-svg{display:block;width:22px;height:22px}
 .bug-pick .bp-svg svg{width:100%;height:100%}
+body.dark .bug-pick .bp-svg{filter:drop-shadow(0 0 3px rgba(255,255,255,.7)) drop-shadow(0 0 6px rgba(255,255,255,.3))}
 @keyframes chBugFlyAway{0%{transform:translate(0,0) rotate(0) scale(1)}12%{transform:translate(25px,-50px) rotate(80deg) scale(1.1)}30%{transform:translate(180px,-280px) rotate(260deg) scale(.9)}48%{transform:translate(-100px,-460px) rotate(560deg) scale(.65);opacity:.5}55%{opacity:0;transform:translate(-200px,-520px) rotate(720deg) scale(.4)}68%{opacity:0;transform:translate(-260px,-420px) rotate(900deg) scale(.5)}76%{opacity:1;transform:translate(-180px,-260px) rotate(1080deg) scale(.75)}88%{transform:translate(60px,-80px) rotate(1320deg) scale(1.1)}100%{transform:translate(0,0) rotate(1440deg) scale(1)}}
 @keyframes chBugPoke{0%{transform:scale(1) rotate(0)}20%{transform:scale(1.45) rotate(-4deg)}40%{transform:scale(1.35) rotate(4deg)}60%{transform:scale(1.4) rotate(-3deg)}80%{transform:scale(1.15) rotate(2deg)}100%{transform:scale(1) rotate(0)}}
 @keyframes chBugWingL{0%{opacity:0;transform:rotate(0)}10%{opacity:.85}20%{transform:rotate(-60deg)}35%{transform:rotate(-25deg)}50%{transform:rotate(-65deg)}65%{transform:rotate(-20deg)}80%{transform:rotate(-55deg);opacity:.7}100%{opacity:0;transform:rotate(0)}}
@@ -9270,7 +9271,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'prod'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0413g';
+const _APP_VERSION = 'v0413j';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -18994,6 +18995,9 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.3.21 (v0413j)',date:'2026-04-13',items:[
+    {type:'fix',text:'다크모드 곤충 선택 — 곤충 주변 은은한 밝은 glow 효과로 가시성 개선'},
+  ]},
   {ver:'2.3.19 (v0413g)',date:'2026-04-13',items:[
     {type:'improve',text:'나의 메뉴 챌린지 곤충 선택 — 이모지를 깔끔한 SVG 아이콘으로 교체'},
   ]},
