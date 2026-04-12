@@ -3377,7 +3377,6 @@ requestAnimationFrame(function(){
         </div>
         <div class="toss-cta">
           <button class="toss-btn" id="c1-role-next-btn" onclick="c1SlideRoleFinish()" disabled style="opacity:.4;pointer-events:none">다음</button>
-          <button class="toss-btn ghost" onclick="c1SkipRole()">건너뛰기</button>
         </div>
       </div>
     </div>
@@ -9377,7 +9376,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0413d';
+const _APP_VERSION = 'v0413e';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -19100,6 +19099,9 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.3.17 (v0413e)',date:'2026-04-13',items:[
+    {type:'fix',text:'가족 만들기 역할 선택에서 역할 미선택 시 건너뛰기 방지'},
+  ]},
   {ver:'2.3.16 (v0413d)',date:'2026-04-13',items:[
     {type:'improve',text:'소개 페이지를 실제 앱 스크린샷으로 교체 — 다크/라이트 모드 자동 전환'},
     {type:'improve',text:'소개 페이지 4단계로 확장 — 홈·보상·리포트·AI챗봇 각 화면 소개'},
