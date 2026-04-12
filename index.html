@@ -583,13 +583,10 @@ body.dark .theme-pick.active .theme-pick-radio{border-color:#818CF8;background:#
 /* ── 스플래시 화면 ── */
 #mily-splash{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#5B4FC4;background:linear-gradient(160deg,#3B2F8C 0%,#5B4FC4 40%,#7C6FD9 70%,#A78BFA 100%);transition:opacity .4s ease}
 #mily-splash.hide{opacity:0;pointer-events:none}
-#mily-splash .splash-logo{margin-bottom:8px}
-#mily-splash .splash-char{width:160px;height:160px}
-#mily-splash .splash-text{color:rgba(255,255,255,.6);font-size:13px;font-weight:600;margin-top:12px;letter-spacing:.5px}
+#mily-splash .splash-logo{margin-bottom:16px;animation:splashFadeIn .6s ease .1s both}
+#mily-splash .splash-text{color:rgba(255,255,255,.55);font-size:13px;font-weight:600;margin-top:18px;letter-spacing:.5px;animation:splashFadeIn .5s ease .5s both}
 @keyframes splashFadeIn{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:translateY(0)}}
-#mily-splash .splash-logo{animation:splashFadeIn .5s ease .1s both}
-#mily-splash .splash-char{animation:splashFadeIn .5s ease .3s both}
-#mily-splash .splash-text{animation:splashFadeIn .5s ease .5s both}
+@keyframes splashPulse{0%,100%{opacity:.85}50%{opacity:1}}
 /* 올클리어 축하 */
 @keyframes missionClear{0%{transform:scale(.8);opacity:0}50%{transform:scale(1.05)}100%{transform:scale(1);opacity:1}}
 .mission-clear-anim{animation:missionClear .5s ease}
@@ -608,7 +605,7 @@ body.dark .theme-pick.active .theme-pick-radio{border-color:#818CF8;background:#
 
 /* SECTION */
 .sec{font-size:18px;font-weight:800;color:var(--tx);margin:16px 16px 12px;display:flex;align-items:center;gap:7px}
-.sec-ico{width:22px;height:22px;fill:none;stroke:var(--tab-color,#6366F1);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;margin-top:1px}
+.sec-ico{width:22px;height:22px;fill:none;stroke:var(--tab-color,#6366F1);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
 .dtab-ico{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px}
 .cal-detail-sec{margin:0!important;padding:14px 16px 10px!important;border-bottom:1px solid var(--bdr)}
 .hdr-ico{width:22px;height:22px;fill:none;stroke:rgba(255,255,255,.45);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;margin-left:6px;vertical-align:-3px;display:inline}
@@ -2843,82 +2840,19 @@ button:disabled {
 <body data-tab="home">
 <!-- ── 스플래시 로딩 화면 ── -->
 <div id="mily-splash" style="display:none">
-  <div class="splash-logo">
-    <svg width="64" height="64" viewBox="0 0 200 200"><defs><linearGradient id="sp-g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="rgba(255,255,255,.15)"/><stop offset="100%" stop-color="rgba(255,255,255,.05)"/></linearGradient></defs><rect width="200" height="200" rx="47" fill="url(#sp-g)" stroke="rgba(255,255,255,.2)" stroke-width="3"/><path d="M30,130 L100,55 L170,130" stroke="white" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M100,62 L98.1,60.3 C91.4,54.2 87,50.2 87,45.3 C87,41.3 90.1,38.1 94.2,38.1 C96.4,38.1 98.6,39.2 100,40.9 C101.4,39.2 103.6,38.1 105.9,38.1 C109.8,38.1 113,41.3 113,45.3 C113,50.2 108.6,54.2 101.9,60.3 Z" fill="#FBBF24"/></svg>
-    <svg viewBox="34 248 3020 972" xmlns="http://www.w3.org/2000/svg" style="height:22px;width:auto;display:block;margin-top:6px" aria-label="mile.ly"><g transform="translate(0,1011) scale(1,-1)"><path transform="translate(0,0)" d="M142 -9Q100 -9 77.0 14.0Q54 37 54 81V412Q54 455 76.5 478.0Q99 501 141 501Q183 501 205.0 478.0Q227 455 227 412V357L216 406Q237 450 278.5 476.5Q320 503 377 503Q431 503 469.5 477.0Q508 451 525 398H511Q534 447 580.0 475.0Q626 503 682 503Q740 503 777.0 480.5Q814 458 832.5 410.5Q851 363 851 291V81Q851 37 827.5 14.0Q804 -9 761 -9Q719 -9 696.0 14.0Q673 37 673 81V286Q673 329 660.0 348.0Q647 367 617 367Q580 367 560.5 341.0Q541 315 541 267V81Q541 37 518.0 14.0Q495 -9 452 -9Q409 -9 386.0 14.0Q363 37 363 81V286Q363 329 350.0 348.0Q337 367 307 367Q271 367 251.5 341.0Q232 315 232 267V81Q232 -9 142 -9Z" fill="#fff"/><path transform="translate(869,0)" d="M140 -9Q98 -9 75.0 16.0Q52 41 52 88V404Q52 451 75.0 476.0Q98 501 140 501Q183 501 206.5 476.0Q230 451 230 404V88Q230 41 207.0 16.0Q184 -9 140 -9ZM140 572Q93 572 67.5 594.0Q42 616 42 658Q42 699 67.5 721.0Q93 743 140 743Q189 743 214.0 721.0Q239 699 239 658Q239 616 214.0 594.0Q189 572 140 572Z" fill="#fff"/><path transform="translate(1117,0)" d="M239 -11Q143 -11 97.5 40.5Q52 92 52 196V624Q52 668 75.0 691.0Q98 714 140 714Q183 714 206.5 691.0Q230 668 230 624V202Q230 165 244.5 148.0Q259 131 282 131Q289 131 296.5 132.5Q304 134 313 135Q330 135 338.5 122.0Q347 109 347 69Q347 34 333.0 16.5Q319 -1 290 -6Q282 -7 267.0 -9.0Q252 -11 239 -11Z" fill="#fff"/><path transform="translate(1432,0)" d="M320 -11Q230 -11 164.5 20.5Q99 52 64.0 110.0Q29 168 29 247Q29 323 62.5 380.5Q96 438 154.5 470.5Q213 503 288 503Q343 503 388.0 485.5Q433 468 465.0 434.5Q497 401 513.5 354.0Q530 307 530 249Q530 229 519.0 219.5Q508 210 484 210H178V294H400L384 281Q384 318 374.0 341.0Q364 364 344.5 376.0Q325 388 296 388Q265 388 242.5 373.5Q220 359 208.0 331.0Q196 303 196 261V252Q196 181 227.5 150.5Q259 120 325 120Q347 120 375.5 125.5Q404 131 430 141Q456 151 475.0 144.5Q494 138 504.5 122.5Q515 107 516.0 87.5Q517 68 507.0 49.5Q497 31 474 21Q439 5 399.5 -3.0Q360 -11 320 -11Z" fill="#fff"/><path transform="translate(1954,0)" d="M136 -6Q91 -6 64.5 21.0Q38 48 38 92Q38 135 64.5 161.5Q91 188 136 188Q183 188 208.5 161.5Q234 135 234 92Q234 48 208.5 21.0Q183 -6 136 -6Z" fill="#FBBF24"/><path transform="translate(2193,0)" d="M239 -11Q143 -11 97.5 40.5Q52 92 52 196V624Q52 668 75.0 691.0Q98 714 140 714Q183 714 206.5 691.0Q230 668 230 624V202Q230 165 244.5 148.0Q259 131 282 131Q289 131 296.5 132.5Q304 134 313 135Q330 135 338.5 122.0Q347 109 347 69Q347 34 333.0 16.5Q319 -1 290 -6Q282 -7 267.0 -9.0Q252 -11 239 -11Z" fill="#E0D4FF"/><path transform="translate(2508,0)" d="M195 -189Q164 -189 145.0 -173.0Q126 -157 121.5 -131.0Q117 -105 130 -76L197 69V-3L26 388Q13 418 17.5 444.0Q22 470 44.0 485.5Q66 501 104 501Q136 501 155.5 486.5Q175 472 191 430L291 170H257L363 431Q379 472 399.5 486.5Q420 501 455 501Q485 501 503.0 485.5Q521 470 525.0 444.0Q529 418 516 388L289 -122Q271 -162 249.5 -175.5Q228 -189 195 -189Z" fill="#E0D4FF"/></g></svg>
+  <div class="splash-logo" style="display:flex;flex-direction:column;align-items:center;gap:0">
+    <!-- mile.ly 아이콘 (로고-아이콘 기반, 흰색 버전) -->
+    <svg width="100" height="100" viewBox="0 0 200 200" style="animation:splashPulse 2.5s ease-in-out infinite;filter:drop-shadow(0 8px 32px rgba(0,0,0,.2))"><defs><linearGradient id="sp-bg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="rgba(255,255,255,.18)"/><stop offset="100%" stop-color="rgba(255,255,255,.06)"/></linearGradient></defs><rect width="200" height="200" rx="47" fill="url(#sp-bg)" stroke="rgba(255,255,255,.25)" stroke-width="3"/><path d="M62,150 L62,98 L100,64 L138,98 L138,150 Z" fill="#fff" opacity=".96"/><rect x="87" y="118" width="26" height="32" rx="4" fill="#FF6B35"/><circle cx="100" cy="50" r="8" fill="#FF6B35"/></svg>
+    <!-- mile.ly 텍스트 로고 -->
+    <svg viewBox="34 248 3020 972" xmlns="http://www.w3.org/2000/svg" style="height:30px;width:auto;display:block;margin-top:14px" aria-label="mile.ly"><g transform="translate(0,1011) scale(1,-1)"><path transform="translate(0,0)" d="M142 -9Q100 -9 77.0 14.0Q54 37 54 81V412Q54 455 76.5 478.0Q99 501 141 501Q183 501 205.0 478.0Q227 455 227 412V357L216 406Q237 450 278.5 476.5Q320 503 377 503Q431 503 469.5 477.0Q508 451 525 398H511Q534 447 580.0 475.0Q626 503 682 503Q740 503 777.0 480.5Q814 458 832.5 410.5Q851 363 851 291V81Q851 37 827.5 14.0Q804 -9 761 -9Q719 -9 696.0 14.0Q673 37 673 81V286Q673 329 660.0 348.0Q647 367 617 367Q580 367 560.5 341.0Q541 315 541 267V81Q541 37 518.0 14.0Q495 -9 452 -9Q409 -9 386.0 14.0Q363 37 363 81V286Q363 329 350.0 348.0Q337 367 307 367Q271 367 251.5 341.0Q232 315 232 267V81Q232 -9 142 -9Z" fill="#fff"/><path transform="translate(869,0)" d="M140 -9Q98 -9 75.0 16.0Q52 41 52 88V404Q52 451 75.0 476.0Q98 501 140 501Q183 501 206.5 476.0Q230 451 230 404V88Q230 41 207.0 16.0Q184 -9 140 -9ZM140 572Q93 572 67.5 594.0Q42 616 42 658Q42 699 67.5 721.0Q93 743 140 743Q189 743 214.0 721.0Q239 699 239 658Q239 616 214.0 594.0Q189 572 140 572Z" fill="#fff"/><path transform="translate(1117,0)" d="M239 -11Q143 -11 97.5 40.5Q52 92 52 196V624Q52 668 75.0 691.0Q98 714 140 714Q183 714 206.5 691.0Q230 668 230 624V202Q230 165 244.5 148.0Q259 131 282 131Q289 131 296.5 132.5Q304 134 313 135Q330 135 338.5 122.0Q347 109 347 69Q347 34 333.0 16.5Q319 -1 290 -6Q282 -7 267.0 -9.0Q252 -11 239 -11Z" fill="#fff"/><path transform="translate(1432,0)" d="M320 -11Q230 -11 164.5 20.5Q99 52 64.0 110.0Q29 168 29 247Q29 323 62.5 380.5Q96 438 154.5 470.5Q213 503 288 503Q343 503 388.0 485.5Q433 468 465.0 434.5Q497 401 513.5 354.0Q530 307 530 249Q530 229 519.0 219.5Q508 210 484 210H178V294H400L384 281Q384 318 374.0 341.0Q364 364 344.5 376.0Q325 388 296 388Q265 388 242.5 373.5Q220 359 208.0 331.0Q196 303 196 261V252Q196 181 227.5 150.5Q259 120 325 120Q347 120 375.5 125.5Q404 131 430 141Q456 151 475.0 144.5Q494 138 504.5 122.5Q515 107 516.0 87.5Q517 68 507.0 49.5Q497 31 474 21Q439 5 399.5 -3.0Q360 -11 320 -11Z" fill="#fff"/><path transform="translate(1954,0)" d="M136 -6Q91 -6 64.5 21.0Q38 48 38 92Q38 135 64.5 161.5Q91 188 136 188Q183 188 208.5 161.5Q234 135 234 92Q234 48 208.5 21.0Q183 -6 136 -6Z" fill="#FBBF24"/><path transform="translate(2193,0)" d="M239 -11Q143 -11 97.5 40.5Q52 92 52 196V624Q52 668 75.0 691.0Q98 714 140 714Q183 714 206.5 691.0Q230 668 230 624V202Q230 165 244.5 148.0Q259 131 282 131Q289 131 296.5 132.5Q304 134 313 135Q330 135 338.5 122.0Q347 109 347 69Q347 34 333.0 16.5Q319 -1 290 -6Q282 -7 267.0 -9.0Q252 -11 239 -11Z" fill="#E0D4FF"/><path transform="translate(2508,0)" d="M195 -189Q164 -189 145.0 -173.0Q126 -157 121.5 -131.0Q117 -105 130 -76L197 69V-3L26 388Q13 418 17.5 444.0Q22 470 44.0 485.5Q66 501 104 501Q136 501 155.5 486.5Q175 472 191 430L291 170H257L363 431Q379 472 399.5 486.5Q420 501 455 501Q485 501 503.0 485.5Q521 470 525.0 444.0Q529 418 516 388L289 -122Q271 -162 249.5 -175.5Q228 -189 195 -189Z" fill="#E0D4FF"/></g></svg>
+    <!-- 태그라인 -->
+    <div style="color:rgba(255,255,255,.45);font-size:11px;font-weight:600;margin-top:10px;letter-spacing:1.5px;animation:splashFadeIn .5s ease .3s both">우리 가족의 마일리지 여정</div>
   </div>
-  <div class="splash-char" id="splash-char"></div>
   <div class="splash-text">잠깐만 기다려요...</div>
 </div>
 <script>
-// ── 스플래시 밀리 캐릭터 랜덤 렌더링 ──
+// 스플래시 안전장치: 5초 후 자동 숨김
 (function(){
-  var C='#5457D9',L='#727BE0',D='#4345B8',K='#1a1a2e',W='#fff',Cr='#F5A623',R='#E64D59',P='#FF9EB8';
-  // 공통 파츠
-  var shadow='<ellipse cx="0" cy="42" rx="22" ry="5" fill="#0F172A" opacity=".07"/>';
-  var crown='<g transform="translate(0,-22)"><path d="M-14,0 L-14,-24 L-11,-14 L-5,-26 L0,-12 L5,-26 L11,-14 L14,-24 L14,0 Z" fill="'+Cr+'" stroke="#E8960E" stroke-width=".5"/><circle cx="0" cy="-20" r="2.5" fill="#EE4466"/><circle cx="-8" cy="-14" r="1.5" fill="#5DCCFF"/><circle cx="8" cy="-14" r="1.5" fill="#5DCCFF"/></g>';
-  var body='<ellipse cx="0" cy="2" rx="28" ry="27" fill="'+C+'"/><ellipse cx="0" cy="7" rx="18" ry="14" fill="'+L+'" opacity=".3"/>';
-  var nose='<ellipse cx="0" cy="6" rx="2" ry="1.6" fill="#7B6FC4" opacity=".5"/>';
-  var cheek='<ellipse cx="-16" cy="6" rx="5" ry="3.5" fill="'+P+'" opacity=".4" style="animation:cheekGlow 2.5s ease-in-out infinite"/><ellipse cx="16" cy="6" rx="5" ry="3.5" fill="'+P+'" opacity=".4" style="animation:cheekGlow 2.5s ease-in-out infinite"/>';
-  var happyEyes='<path d="M-17,-3 Q-11,-11 -5,-3" fill="none" stroke="'+K+'" stroke-width="2.5" stroke-linecap="round"/><path d="M5,-3 Q11,-11 17,-3" fill="none" stroke="'+K+'" stroke-width="2.5" stroke-linecap="round"/>';
-  var grin='<path d="M-8,12 Q0,22 8,12" fill="'+R+'"/><path d="M-6,12 Q0,11 6,12" fill="'+W+'"/><ellipse cx="0" cy="17" rx="4" ry="2.5" fill="#F28C94"/>';
-  var openMouth='<ellipse cx="0" cy="15" rx="7" ry="6" fill="'+R+'"/><ellipse cx="0" cy="18" rx="5" ry="3.5" fill="#F28C94"/><rect x="-3.5" y="11.5" width="7" height="3.5" rx="1" fill="'+W+'"/>';
-  var feetBase='<ellipse cx="-10" cy="32" rx="7" ry="5.5" fill="'+D+'"/><ellipse cx="10" cy="32" rx="7" ry="5.5" fill="'+D+'"/>';
-  var armRest='<line x1="-28" y1="2" x2="-38" y2="-4" stroke="'+C+'" stroke-width="5" stroke-linecap="round"/><circle cx="-38" cy="-4" r="4" fill="'+L+'"/><line x1="28" y1="2" x2="38" y2="-4" stroke="'+C+'" stroke-width="5" stroke-linecap="round"/><circle cx="38" cy="-4" r="4" fill="'+L+'"/>';
-  function sv(inner){return '<svg viewBox="-55 -60 110 120" xmlns="http://www.w3.org/2000/svg">'+inner+'</svg>';}
-  // ── 기존 밀리 표정들 ──
-  // 0: bounce (기본)
-  var anim0=sv(shadow+'<g style="animation:milyBounce 2.5s ease-in-out infinite;transform-origin:center 10px">'+feetBase+armRest+crown+body+
-    '<ellipse cx="-11" cy="-4" rx="8.5" ry="9" fill="'+W+'" stroke="#C7C2E8" stroke-width=".6"/><ellipse cx="11" cy="-4" rx="8.5" ry="9" fill="'+W+'" stroke="#C7C2E8" stroke-width=".6"/><ellipse cx="-11" cy="-3" rx="6" ry="6.5" fill="'+D+'"/><ellipse cx="11" cy="-3" rx="6" ry="6.5" fill="'+D+'"/><ellipse cx="-11" cy="-2.5" rx="3.8" ry="4" fill="'+K+'"/><ellipse cx="11" cy="-2.5" rx="3.8" ry="4" fill="'+K+'"/><ellipse cx="-13.5" cy="-6.5" rx="2.2" ry="2" fill="'+W+'" opacity=".9"/><ellipse cx="8.5" cy="-6.5" rx="2.2" ry="2" fill="'+W+'" opacity=".9"/><circle cx="-9.5" cy="-2" r="1" fill="'+W+'" opacity=".5"/><circle cx="12.5" cy="-2" r="1" fill="'+W+'" opacity=".5"/><ellipse cx="-11" cy="-4" rx="9" ry="0" fill="'+C+'"><animate attributeName="ry" values="0;0;9.5;0;0;0;9.5;0;0" dur="3.5s" repeatCount="indefinite" keyTimes="0;.42;.44;.48;.68;.70;.72;.76;1"/></ellipse><ellipse cx="11" cy="-4" rx="9" ry="0" fill="'+C+'"><animate attributeName="ry" values="0;0;9.5;0;0;0;9.5;0;0" dur="3.5s" repeatCount="indefinite" keyTimes="0;.42;.44;.48;.68;.70;.72;.76;1"/></ellipse>'+
-    nose+'<path d="M-7,13 Q0,20 7,13" fill="none" stroke="'+R+'" stroke-width="2.2" stroke-linecap="round"/></g>');
-  // 1: tada (축하)
-  var anim1=sv(shadow+'<g style="animation:milyTada 2.5s ease-in-out infinite;transform-origin:center 10px">'+feetBase+
-    '<g style="animation:milyCheerL 1.6s ease-in-out infinite;transform-origin:-28px 2px"><line x1="-28" y1="2" x2="-38" y2="-10" stroke="'+C+'" stroke-width="5" stroke-linecap="round"/><circle cx="-38" cy="-10" r="4" fill="'+L+'"/></g><g style="animation:milyCheerR 1.6s ease-in-out infinite;transform-origin:28px 2px"><line x1="28" y1="2" x2="38" y2="-10" stroke="'+C+'" stroke-width="5" stroke-linecap="round"/><circle cx="38" cy="-10" r="4" fill="'+L+'"/></g>'+
-    crown+body+happyEyes+cheek+nose+grin+'</g>'+
-    '<circle cx="-35" cy="-15" r="1.5" fill="#F5D630" opacity="0" style="animation:starPop 2s 0s ease infinite"/><circle cx="35" cy="-20" r="1.5" fill="#5DCCFF" opacity="0" style="animation:starPop 2s .7s ease infinite"/><circle cx="0" cy="-50" r="1.5" fill="#EE4466" opacity="0" style="animation:starPop 2s 1.4s ease infinite"/>');
-  // 2: wave (인사)
-  var anim2=sv(shadow+'<g style="animation:milyNod 2s ease-in-out infinite;transform-origin:center 10px">'+feetBase+
-    '<line x1="-28" y1="2" x2="-38" y2="-4" stroke="'+C+'" stroke-width="5" stroke-linecap="round"/><circle cx="-38" cy="-4" r="4" fill="'+L+'"/><g style="animation:milyWaveArm 1.8s ease-in-out infinite;transform-origin:28px 2px"><line x1="28" y1="2" x2="38" y2="-10" stroke="'+C+'" stroke-width="5" stroke-linecap="round"/><circle cx="38" cy="-10" r="4" fill="'+L+'"/></g>'+
-    crown+body+
-    '<ellipse cx="-11" cy="-4" rx="8.5" ry="9" fill="'+W+'" stroke="#C7C2E8" stroke-width=".6"/><ellipse cx="11" cy="-4" rx="8.5" ry="9" fill="'+W+'" stroke="#C7C2E8" stroke-width=".6"/><ellipse cx="-11" cy="-3" rx="6" ry="6.5" fill="'+D+'"/><ellipse cx="11" cy="-3" rx="6" ry="6.5" fill="'+D+'"/><ellipse cx="-11" cy="-2.5" rx="3.8" ry="4" fill="'+K+'"/><ellipse cx="11" cy="-2.5" rx="3.8" ry="4" fill="'+K+'"/><ellipse cx="-13.5" cy="-6.5" rx="2.2" ry="2" fill="'+W+'" opacity=".9"/><ellipse cx="8.5" cy="-6.5" rx="2.2" ry="2" fill="'+W+'" opacity=".9"/>'+
-    cheek+nose+openMouth+'</g>');
-  // ── 새 밀리 애니메이션 ──
-  // 3: 춤추기
-  var anim3=sv(shadow+'<g style="animation:milyDance 1.6s ease-in-out infinite;transform-origin:center 10px">'+feetBase+
-    '<g style="animation:milyDanceArmL 1.6s ease-in-out infinite;transform-origin:-28px 2px"><line x1="-28" y1="2" x2="-38" y2="-12" stroke="'+C+'" stroke-width="5" stroke-linecap="round"/><circle cx="-38" cy="-12" r="4" fill="'+L+'"/></g><g style="animation:milyDanceArmR 1.6s ease-in-out infinite;transform-origin:28px 2px"><line x1="28" y1="2" x2="38" y2="-12" stroke="'+C+'" stroke-width="5" stroke-linecap="round"/><circle cx="38" cy="-12" r="4" fill="'+L+'"/></g>'+
-    crown+body+happyEyes+cheek+nose+grin+'</g>'+
-    '<text x="-35" y="-35" font-size="14" opacity="0" style="animation:milyNoteFloat 2s 0s ease infinite;--nx:-10px;--ny:-20px;--nr:20deg">♪</text><text x="30" y="-30" font-size="12" fill="#EE4466" opacity="0" style="animation:milyNoteFloat 2s .6s ease infinite;--nx:10px;--ny:-18px;--nr:-15deg">♫</text><text x="-25" y="-45" font-size="10" fill="'+Cr+'" opacity="0" style="animation:milyNoteFloat 2s 1.2s ease infinite;--nx:-8px;--ny:-15px;--nr:25deg">♪</text>');
-  // 4: 걸어가다 쉬기
-  var anim4=sv('<g style="animation:milyWalk 4s ease-in-out infinite">'+shadow+'<g style="animation:milyWalkBody 4s ease-in-out infinite;transform-origin:center 10px"><g style="animation:milyBreath 4s ease-in-out infinite;transform-origin:center 15px">'+feetBase+
-    '<g style="animation:milyWalkArmSwing 4s ease-in-out infinite;transform-origin:-28px 2px"><line x1="-28" y1="2" x2="-38" y2="-4" stroke="'+C+'" stroke-width="5" stroke-linecap="round"/><circle cx="-38" cy="-4" r="4" fill="'+L+'"/></g><g style="animation:milyWalkArmSwing 4s .2s ease-in-out infinite;transform-origin:28px 2px"><line x1="28" y1="2" x2="38" y2="-4" stroke="'+C+'" stroke-width="5" stroke-linecap="round"/><circle cx="38" cy="-4" r="4" fill="'+L+'"/></g>'+
-    crown+body+
-    '<ellipse cx="-11" cy="-4" rx="8" ry="8.5" fill="'+W+'" stroke="#C7C2E8" stroke-width=".5"/><ellipse cx="11" cy="-4" rx="8" ry="8.5" fill="'+W+'" stroke="#C7C2E8" stroke-width=".5"/><ellipse cx="-11" cy="-3" rx="5" ry="5.5" fill="'+D+'"/><ellipse cx="11" cy="-3" rx="5" ry="5.5" fill="'+D+'"/><ellipse cx="-11" cy="-2.5" rx="3" ry="3.2" fill="'+K+'"/><ellipse cx="11" cy="-2.5" rx="3" ry="3.2" fill="'+K+'"/><ellipse cx="-13" cy="-5" rx="1.8" ry="1.5" fill="'+W+'" opacity=".8"/><ellipse cx="9" cy="-5" rx="1.8" ry="1.5" fill="'+W+'" opacity=".8"/>'+
-    '<ellipse cx="-11" cy="-7" rx="9" ry="0" fill="'+C+'"><animate attributeName="ry" values="0;0;0;0;0;0;5.5;5.5;5.5;5.5" dur="4s" repeatCount="indefinite"/></ellipse><ellipse cx="11" cy="-7" rx="9" ry="0" fill="'+C+'"><animate attributeName="ry" values="0;0;0;0;0;0;5.5;5.5;5.5;5.5" dur="4s" repeatCount="indefinite"/></ellipse>'+
-    nose+'<path d="M-7,13 Q0,20 7,13" fill="none" stroke="'+R+'" stroke-width="2.2" stroke-linecap="round"><animate attributeName="d" values="M-7,13 Q0,20 7,13;M-7,13 Q0,20 7,13;M-7,13 Q0,20 7,13;M-7,13 Q0,20 7,13;M-7,13 Q0,20 7,13;M-7,13 Q0,20 7,13;M-5,14.5 Q-2.5,13 0,14.5 Q2.5,13 5,14.5;M-5,14.5 Q-2.5,13 0,14.5 Q2.5,13 5,14.5;M-5,14.5 Q-2.5,13 0,14.5 Q2.5,13 5,14.5;M-5,14.5 Q-2.5,13 0,14.5 Q2.5,13 5,14.5" dur="4s" repeatCount="indefinite"/></path>'+
-    '</g></g><circle cx="22" cy="-15" r="2.5" fill="#5DCCFF" opacity="0" style="animation:milySweatDrop 4s 0s ease infinite"/><circle cx="26" cy="-10" r="1.8" fill="#5DCCFF" opacity="0" style="animation:milySweatDrop 4s .5s ease infinite"/></g>');
-  // 5: 팔짝팔짝 뛰기
-  var anim5=sv('<ellipse cx="0" cy="42" rx="22" ry="5" fill="#0F172A" style="animation:milyHopShadow 2.2s ease-in-out infinite"/><g style="animation:milyHop 2.2s ease-in-out infinite;transform-origin:center 32px">'+feetBase+
-    '<g style="animation:milyCheerL 2.2s ease-in-out infinite;transform-origin:-28px 2px"><line x1="-28" y1="2" x2="-38" y2="-12" stroke="'+C+'" stroke-width="5" stroke-linecap="round"/><circle cx="-38" cy="-12" r="4" fill="'+L+'"/></g><g style="animation:milyCheerR 2.2s ease-in-out infinite;transform-origin:28px 2px"><line x1="28" y1="2" x2="38" y2="-12" stroke="'+C+'" stroke-width="5" stroke-linecap="round"/><circle cx="38" cy="-12" r="4" fill="'+L+'"/></g>'+
-    crown+body+happyEyes+cheek+nose+openMouth+'</g>'+
-    '<polygon points="-35,-15 -33.5,-11.5 -30,-13 -33.5,-10.5 -35,-7 -36.5,-10.5 -40,-13 -36.5,-11.5" fill="#F5D630" opacity="0" style="animation:starPop 2.2s 0s ease infinite"/><polygon points="35,-20 36.5,-16.5 40,-18 36.5,-15.5 35,-12 33.5,-15.5 30,-18 33.5,-16.5" fill="#5DCCFF" opacity="0" style="animation:starPop 2.2s .7s ease infinite"/>');
-  // 6: 놀리기
-  var anim6=sv(shadow+'<g style="animation:milyTease 1.8s ease-in-out infinite;transform-origin:center 10px">'+feetBase+
-    '<g style="animation:milyTeaseHand 1.8s ease-in-out infinite;transform-origin:-28px -8px"><line x1="-26" y1="-2" x2="-34" y2="-20" stroke="'+C+'" stroke-width="5" stroke-linecap="round"/><circle cx="-34" cy="-20" r="4" fill="'+L+'"/></g><g style="animation:milyTeaseHand 1.8s .1s ease-in-out infinite;transform-origin:28px -8px"><line x1="26" y1="-2" x2="34" y2="-20" stroke="'+C+'" stroke-width="5" stroke-linecap="round"/><circle cx="34" cy="-20" r="4" fill="'+L+'"/></g>'+
-    crown+body+
-    '<ellipse cx="-11" cy="-4" rx="8.5" ry="9" fill="'+W+'" stroke="#C7C2E8" stroke-width=".6"/><ellipse cx="-11" cy="-3" rx="6" ry="6.5" fill="'+D+'"/><ellipse cx="-11" cy="-2.5" rx="3.8" ry="4" fill="'+K+'"/><ellipse cx="-13.5" cy="-6.5" rx="2.2" ry="2" fill="'+W+'" opacity=".9"/><ellipse cx="-11" cy="-4" rx="9" ry="0" fill="'+C+'"><animate attributeName="ry" values="0;0;9.5;0;0" dur="3s" repeatCount="indefinite" keyTimes="0;.45;.47;.51;1"/></ellipse>'+
-    '<path d="M5,-3 Q11,-11 17,-3" fill="none" stroke="'+K+'" stroke-width="2.5" stroke-linecap="round"/>'+
-    nose+'<path d="M-8,12 Q0,20 8,12" fill="'+R+'"/><path d="M-6,12 Q0,11 6,12" fill="'+W+'"/>'+
-    '<g style="animation:milyTeaseTongue 1.8s ease-in-out infinite;transform-origin:center 18px"><ellipse cx="0" cy="21" rx="5" ry="6" fill="#F28C94"/><ellipse cx="0" cy="22" rx="3.5" ry="4" fill="'+R+'" opacity=".3"/><line x1="0" y1="17" x2="0" y2="25" stroke="'+R+'" stroke-width=".8" opacity=".4"/></g></g>');
-  // 7: 엉덩이 춤
-  var anim7=sv(shadow+'<g style="animation:milyButtDance 1.5s ease-in-out infinite;transform-origin:center 10px">'+feetBase+
-    '<g style="animation:milyButtSlapL 1.5s ease-in-out infinite;transform-origin:-28px 2px"><line x1="-28" y1="5" x2="-32" y2="18" stroke="'+C+'" stroke-width="5" stroke-linecap="round"/><circle cx="-32" cy="18" r="4" fill="'+L+'"/></g><g style="animation:milyButtSlap 1.5s ease-in-out infinite;transform-origin:28px 2px"><line x1="28" y1="5" x2="32" y2="18" stroke="'+C+'" stroke-width="5" stroke-linecap="round"/><circle cx="32" cy="18" r="4" fill="'+L+'"/></g>'+
-    crown+body+happyEyes+cheek+nose+grin+'</g>'+
-    '<circle cx="30" cy="22" r="0" fill="#FFD700" opacity="0" style="animation:milySparkBurst .75s .3s ease infinite"/><circle cx="-30" cy="22" r="0" fill="#FFD700" opacity="0" style="animation:milySparkBurst .75s .9s ease infinite"/><text x="35" y="-30" font-size="12" fill="#EE4466" opacity="0" style="animation:milyNoteFloat 2s 0s ease infinite;--nx:8px;--ny:-15px;--nr:-10deg">♫</text>');
-
-  var anims=[anim0,anim1,anim2,anim3,anim4,anim5,anim6,anim7];
-  var el=document.getElementById('splash-char');
-  if(el) el.innerHTML=anims[Math.floor(Math.random()*anims.length)];
-  // 안전장치: 5초 후 자동 숨김
   setTimeout(function(){
     var sp=document.getElementById('mily-splash');
     if(sp && !sp.classList.contains('hide')){sp.classList.add('hide');setTimeout(function(){sp.style.display='none';},500);}
@@ -3884,7 +3818,7 @@ requestAnimationFrame(function(){
       <div class="hdr-stat"><div class="hdr-stat-num" id="log-today-pts">0</div><div class="hdr-stat-lbl">보유 마일리지</div></div>
     </div>
   </div>
-  <div class="sec" style="display:flex;align-items:center;justify-content:space-between"><span><svg class="sec-ico" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg> 모든 활동</span><span id="log-edit-actions" style="display:none;gap:8px;align-items:center"><button id="log-edit-toggle-btn" onclick="toggleLogEditMode()" title="편집" aria-label="편집" style="display:inline-flex;align-items:center;gap:5px;background:var(--cd);color:var(--tx);border:1px solid var(--bd);border-radius:999px;padding:6px 12px;font-size:12px;font-weight:800;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.04)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>편집</button><button id="log-add-btn" onclick="openActForm()" title="추가" aria-label="추가" style="display:none;align-items:center;gap:4px;background:linear-gradient(135deg,#6366F1,#8B5CF6);color:#fff;border:0;border-radius:999px;padding:6px 13px 6px 11px;font-size:12px;font-weight:800;cursor:pointer;box-shadow:0 2px 6px rgba(99,102,241,.35)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>추가</button></span></div>
+  <div class="sec" style="display:flex;align-items:center;justify-content:space-between"><span style="display:inline-flex;align-items:center;gap:7px"><svg class="sec-ico" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>모든 활동</span><span id="log-edit-actions" style="display:none;gap:8px;align-items:center"><button id="log-edit-toggle-btn" onclick="toggleLogEditMode()" title="편집" aria-label="편집" style="padding:5px 11px;border:1.5px solid var(--bdr2,#CBD5E1);border-radius:14px;background:var(--bg2,#F1F5F9);color:var(--tx2,#475569);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:4px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>편집</button><button id="log-add-btn" onclick="openActForm()" title="추가" aria-label="추가" style="display:none;padding:5px 11px;border:1.5px solid var(--bdr2,#CBD5E1);border-radius:14px;background:var(--bg2,#F1F5F9);color:var(--tx2,#475569);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;align-items:center;gap:4px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>추가</button></span></div>
   <div class="log-wrap" id="log-list"></div>
 </div>
 
@@ -3904,7 +3838,7 @@ requestAnimationFrame(function(){
       <div class="hdr-stat"><div class="hdr-stat-num" id="rwd-hdr-owned">0</div><div class="hdr-stat-lbl">보유 보상</div></div>
     </div>
   </div>
-  <div class="sec" style="display:flex;align-items:center;justify-content:space-between"><span><svg class="sec-ico" viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg> 교환 가능한 보상</span><span id="rwd-edit-actions" style="display:none;gap:8px;align-items:center"><button id="rwd-edit-toggle-btn" onclick="toggleRwdEditMode()" title="편집" aria-label="편집" style="display:inline-flex;align-items:center;gap:5px;background:var(--cd);color:var(--tx);border:1px solid var(--bd);border-radius:999px;padding:6px 12px;font-size:12px;font-weight:800;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.04)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>편집</button><button id="rwd-add-btn" onclick="openRwdForm()" title="추가" aria-label="추가" style="display:none;align-items:center;gap:4px;background:linear-gradient(135deg,#EC4899,#F472B6);color:#fff;border:0;border-radius:999px;padding:6px 13px 6px 11px;font-size:12px;font-weight:800;cursor:pointer;box-shadow:0 2px 6px rgba(236,72,153,.35)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>추가</button></span></div>
+  <div class="sec" style="display:flex;align-items:center;justify-content:space-between"><span style="display:inline-flex;align-items:center;gap:7px"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg>교환 가능한 보상</span><span id="rwd-edit-actions" style="display:none;gap:8px;align-items:center"><button id="rwd-edit-toggle-btn" onclick="toggleRwdEditMode()" title="편집" aria-label="편집" style="padding:5px 11px;border:1.5px solid var(--bdr2,#CBD5E1);border-radius:14px;background:var(--bg2,#F1F5F9);color:var(--tx2,#475569);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:4px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>편집</button><button id="rwd-add-btn" onclick="openRwdForm()" title="추가" aria-label="추가" style="display:none;padding:5px 11px;border:1.5px solid var(--bdr2,#CBD5E1);border-radius:14px;background:var(--bg2,#F1F5F9);color:var(--tx2,#475569);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;align-items:center;gap:4px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>추가</button></span></div>
   <div class="rwd-grid" id="rwd-grid"></div>
   <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg> 보유 보상 목록</div>
   <div id="rwd-inventory"></div>
@@ -9444,7 +9378,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'prod'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0410a';
+const _APP_VERSION = 'v0410i';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -10185,23 +10119,10 @@ function showLoading(msg){
     el = document.createElement('div');
     el.id = 'fb-loading';
     el.style.cssText = 'position:fixed;inset:0;background:#5B4FC4;background:linear-gradient(160deg,#3B2F8C 0%,#5B4FC4 40%,#7C6FD9 70%,#A78BFA 100%);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;font-family:Nunito,sans-serif';
-    // 밀리 캐릭터 바운스 SVG (인라인)
-    var C='#5457D9',L='#727BE0',D='#4345B8',K='#1a1a2e',W='#fff',Cr='#F5A623',R='#E64D59',P='#FF9EB8';
-    var milySvg='<svg viewBox="-55 -60 110 120" xmlns="http://www.w3.org/2000/svg" style="width:120px;height:120px">'
-      +'<ellipse cx="0" cy="42" rx="22" ry="5" fill="#0F172A" opacity=".07"/>'
-      +'<g style="animation:milyBounce 2.5s ease-in-out infinite;transform-origin:center 10px">'
-      +'<ellipse cx="-10" cy="32" rx="7" ry="5.5" fill="'+D+'"/><ellipse cx="10" cy="32" rx="7" ry="5.5" fill="'+D+'"/>'
-      +'<line x1="-28" y1="2" x2="-38" y2="-4" stroke="'+C+'" stroke-width="5" stroke-linecap="round"/><circle cx="-38" cy="-4" r="4" fill="'+L+'"/>'
-      +'<line x1="28" y1="2" x2="38" y2="-4" stroke="'+C+'" stroke-width="5" stroke-linecap="round"/><circle cx="38" cy="-4" r="4" fill="'+L+'"/>'
-      +'<g transform="translate(0,-22)"><path d="M-14,0 L-14,-24 L-11,-14 L-5,-26 L0,-12 L5,-26 L11,-14 L14,-24 L14,0 Z" fill="'+Cr+'" stroke="#E8960E" stroke-width=".5"/><circle cx="0" cy="-20" r="2.5" fill="#EE4466"/><circle cx="-8" cy="-14" r="1.5" fill="#5DCCFF"/><circle cx="8" cy="-14" r="1.5" fill="#5DCCFF"/></g>'
-      +'<ellipse cx="0" cy="2" rx="28" ry="27" fill="'+C+'"/><ellipse cx="0" cy="7" rx="18" ry="14" fill="'+L+'" opacity=".3"/>'
-      +'<path d="M-17,-3 Q-11,-11 -5,-3" fill="none" stroke="'+K+'" stroke-width="2.5" stroke-linecap="round"/>'
-      +'<path d="M5,-3 Q11,-11 17,-3" fill="none" stroke="'+K+'" stroke-width="2.5" stroke-linecap="round"/>'
-      +'<ellipse cx="-16" cy="6" rx="5" ry="3.5" fill="'+P+'" opacity=".4"/><ellipse cx="16" cy="6" rx="5" ry="3.5" fill="'+P+'" opacity=".4"/>'
-      +'<ellipse cx="0" cy="6" rx="2" ry="1.6" fill="#7B6FC4" opacity=".5"/>'
-      +'<path d="M-7,13 Q0,20 7,13" fill="none" stroke="'+R+'" stroke-width="2.2" stroke-linecap="round"/>'
-      +'</g></svg>';
-    el.innerHTML = '<div style="margin-bottom:16px">'+milySvg+'</div>'
+    // mile.ly 브랜드 로고 SVG (기존 앱 로고 폰트 그대로 사용)
+    var logoSvg='<svg viewBox="34 248 3020 972" xmlns="http://www.w3.org/2000/svg" style="height:48px;width:auto;display:block" aria-label="mile.ly"><g transform="translate(0,1011) scale(1,-1)"><path transform="translate(0,0)" d="M142 -9Q100 -9 77.0 14.0Q54 37 54 81V412Q54 455 76.5 478.0Q99 501 141 501Q183 501 205.0 478.0Q227 455 227 412V357L216 406Q237 450 278.5 476.5Q320 503 377 503Q431 503 469.5 477.0Q508 451 525 398H511Q534 447 580.0 475.0Q626 503 682 503Q740 503 777.0 480.5Q814 458 832.5 410.5Q851 363 851 291V81Q851 37 827.5 14.0Q804 -9 761 -9Q719 -9 696.0 14.0Q673 37 673 81V286Q673 329 660.0 348.0Q647 367 617 367Q580 367 560.5 341.0Q541 315 541 267V81Q541 37 518.0 14.0Q495 -9 452 -9Q409 -9 386.0 14.0Q363 37 363 81V286Q363 329 350.0 348.0Q337 367 307 367Q271 367 251.5 341.0Q232 315 232 267V81Q232 -9 142 -9Z" fill="#fff"/><path transform="translate(869,0)" d="M140 -9Q98 -9 75.0 16.0Q52 41 52 88V404Q52 451 75.0 476.0Q98 501 140 501Q183 501 206.5 476.0Q230 451 230 404V88Q230 41 207.0 16.0Q184 -9 140 -9ZM140 572Q93 572 67.5 594.0Q42 616 42 658Q42 699 67.5 721.0Q93 743 140 743Q189 743 214.0 721.0Q239 699 239 658Q239 616 214.0 594.0Q189 572 140 572Z" fill="#fff"/><path transform="translate(1117,0)" d="M239 -11Q143 -11 97.5 40.5Q52 92 52 196V624Q52 668 75.0 691.0Q98 714 140 714Q183 714 206.5 691.0Q230 668 230 624V202Q230 165 244.5 148.0Q259 131 282 131Q289 131 296.5 132.5Q304 134 313 135Q330 135 338.5 122.0Q347 109 347 69Q347 34 333.0 16.5Q319 -1 290 -6Q282 -7 267.0 -9.0Q252 -11 239 -11Z" fill="#fff"/><path transform="translate(1432,0)" d="M320 -11Q230 -11 164.5 20.5Q99 52 64.0 110.0Q29 168 29 247Q29 323 62.5 380.5Q96 438 154.5 470.5Q213 503 288 503Q343 503 388.0 485.5Q433 468 465.0 434.5Q497 401 513.5 354.0Q530 307 530 249Q530 229 519.0 219.5Q508 210 484 210H178V294H400L384 281Q384 318 374.0 341.0Q364 364 344.5 376.0Q325 388 296 388Q265 388 242.5 373.5Q220 359 208.0 331.0Q196 303 196 261V252Q196 181 227.5 150.5Q259 120 325 120Q347 120 375.5 125.5Q404 131 430 141Q456 151 475.0 144.5Q494 138 504.5 122.5Q515 107 516.0 87.5Q517 68 507.0 49.5Q497 31 474 21Q439 5 399.5 -3.0Q360 -11 320 -11Z" fill="#fff"/><path transform="translate(1954,0)" d="M136 -6Q91 -6 64.5 21.0Q38 48 38 92Q38 135 64.5 161.5Q91 188 136 188Q183 188 208.5 161.5Q234 135 234 92Q234 48 208.5 21.0Q183 -6 136 -6Z" fill="#FBBF24"/><path transform="translate(2193,0)" d="M239 -11Q143 -11 97.5 40.5Q52 92 52 196V624Q52 668 75.0 691.0Q98 714 140 714Q183 714 206.5 691.0Q230 668 230 624V202Q230 165 244.5 148.0Q259 131 282 131Q289 131 296.5 132.5Q304 134 313 135Q330 135 338.5 122.0Q347 109 347 69Q347 34 333.0 16.5Q319 -1 290 -6Q282 -7 267.0 -9.0Q252 -11 239 -11Z" fill="#E0D4FF"/><path transform="translate(2508,0)" d="M195 -189Q164 -189 145.0 -173.0Q126 -157 121.5 -131.0Q117 -105 130 -76L197 69V-3L26 388Q13 418 17.5 444.0Q22 470 44.0 485.5Q66 501 104 501Q136 501 155.5 486.5Q175 472 191 430L291 170H257L363 431Q379 472 399.5 486.5Q420 501 455 501Q485 501 503.0 485.5Q521 470 525.0 444.0Q529 418 516 388L289 -122Q271 -162 249.5 -175.5Q228 -189 195 -189Z" fill="#E0D4FF"/></g></svg>';
+    el.innerHTML = '<div style="font-size:14px;font-weight:600;color:rgba(255,255,255,.7);letter-spacing:.5px;margin-bottom:12px">성장하는 우리 아이의 첫 마일리지</div>'
+      +'<div style="margin-bottom:32px">'+logoSvg+'</div>'
       +'<div id="fb-loading-msg" style="font-size:15px;font-weight:700;color:rgba(255,255,255,.95);letter-spacing:.3px"></div>'
       +'<div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:2px">잠깐만 기다려요...</div>';
     document.body.appendChild(el);
@@ -12060,7 +11981,7 @@ function renderLogList(){
     const _admMs=_getAdmMemberData();
     const _editActs=(_admMs&&_admMs.acts)?_admMs.acts:S.acts;
     const _toggleBtn=document.getElementById('log-edit-toggle-btn');
-    if(_toggleBtn){_toggleBtn.textContent='완료';_toggleBtn.style.background='rgba(52,211,153,.95)';}
+    if(_toggleBtn){_toggleBtn.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>완료';_toggleBtn.style.background='rgba(52,211,153,.95)';_toggleBtn.style.color='#fff';_toggleBtn.style.border='1.5px solid rgba(52,211,153,.95)';}
     const _addBtn=document.getElementById('log-add-btn');
     if(_addBtn)_addBtn.style.display='inline-flex';
     if(!_editActs.length){
@@ -12095,7 +12016,7 @@ function renderLogList(){
     return;
   }
   const _toggleBtn=document.getElementById('log-edit-toggle-btn');
-  if(_toggleBtn){_toggleBtn.textContent='편집';_toggleBtn.style.background='rgba(255,255,255,.22)';}
+  if(_toggleBtn){_toggleBtn.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>편집';_toggleBtn.style.background='var(--bg2,#F1F5F9)';_toggleBtn.style.color='var(--tx2,#475569)';_toggleBtn.style.border='1.5px solid var(--bdr2,#CBD5E1)';}
   const _addBtnOff=document.getElementById('log-add-btn');
   if(_addBtnOff)_addBtnOff.style.display='none';
   const acts=S.acts.filter(a=>{
@@ -12700,7 +12621,7 @@ function renderRewardGrid(){
     const _admMs=_getAdmMemberData();
     const _editRwds=(_admMs&&_admMs.rwds)?_admMs.rwds:S.rwds;
     const _toggleBtn=document.getElementById('rwd-edit-toggle-btn');
-    if(_toggleBtn){_toggleBtn.textContent='완료';_toggleBtn.style.background='rgba(52,211,153,.95)';}
+    if(_toggleBtn){_toggleBtn.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>완료';_toggleBtn.style.background='rgba(52,211,153,.95)';_toggleBtn.style.color='#fff';_toggleBtn.style.border='1.5px solid rgba(52,211,153,.95)';}
     const _addBtn=document.getElementById('rwd-add-btn');
     if(_addBtn)_addBtn.style.display='inline-flex';
     if(!_editRwds.length){
@@ -12737,7 +12658,7 @@ function renderRewardGrid(){
     return;
   }
   const _toggleBtn=document.getElementById('rwd-edit-toggle-btn');
-  if(_toggleBtn){_toggleBtn.textContent='편집';_toggleBtn.style.background='rgba(255,255,255,.22)';}
+  if(_toggleBtn){_toggleBtn.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>편집';_toggleBtn.style.background='var(--bg2,#F1F5F9)';_toggleBtn.style.color='var(--tx2,#475569)';_toggleBtn.style.border='1.5px solid var(--bdr2,#CBD5E1)';}
   const _addBtnOff=document.getElementById('rwd-add-btn');
   if(_addBtnOff)_addBtnOff.style.display='none';
   const rwds=S.rwds;
@@ -19175,6 +19096,29 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.3.8 (v0410i)',date:'2026-04-12',items:[
+    {type:'improve',text:'편집/추가 버튼 디자인을 홈탭 이력보기 버튼과 동일한 스타일로 통일 (border-radius:14px, 회색 외곽선 ghost 스타일)'},
+  ]},
+  {ver:'2.3.7 (v0410h)',date:'2026-04-12',items:[
+    {type:'improve',text:'로딩 화면: mile.ly 로고 크기 48px로 확대, "성장하는 우리 아이의 첫 마일리지" 소개 문구 추가'},
+  ]},
+  {ver:'2.3.6 (v0410g)',date:'2026-04-12',items:[
+    {type:'fix',text:'편집/추가 버튼: 네모 높이 추가 축소(padding:0), 모서리 더 둥글게(border-radius:10px)'},
+  ]},
+  {ver:'2.3.5 (v0410f)',date:'2026-04-12',items:[
+    {type:'improve',text:'로딩 화면: mily 캐릭터를 mile.ly 브랜드 로고 텍스트로 교체 (기존 앱 로고 SVG 폰트 사용)'},
+    {type:'fix',text:'홈 인사말 캐릭터 원복 (v0410d 잘못된 변경 되돌림)'},
+    {type:'improve',text:'편집/추가 버튼: 글씨·아이콘 크기 13px로 키우고, 패딩 줄여 꽉 찬 느낌으로'},
+  ]},
+  {ver:'2.3.4 (v0410e)',date:'2026-04-12',items:[
+    {type:'fix',text:'활동기록/보상 탭: 섹션 제목 아이콘과 텍스트 세로 정렬 수정'},
+  ]},
+  {ver:'2.3.2 (v0410c)',date:'2026-04-12',items:[
+    {type:'improve',text:'활동기록/보상 탭: 편집 버튼을 납작한 둥근 사각형으로 변경, 연필 아이콘 추가 — 제목 영역 높이 정렬 개선'},
+  ]},
+  {ver:'2.3.1 (v0410b)',date:'2026-04-12',items:[
+    {type:'improve',text:'스플래시 화면: mily 캐릭터 애니메이션을 mile.ly 로고로 교체 — 브랜드 아이덴티티 통일'},
+  ]},
   {ver:'2.2.8 (v0408z)',date:'2026-04-08',items:[
     {type:'improve',text:'활동기록/보상 탭: 편집 버튼만 기본 노출, 편집 모드에서만 "추가" 버튼이 나타남. 편집 모드 목록 항목에 삭제 버튼 추가'},
     {type:'new',text:'시스템 관리자 페이지(admin.html)에 "AI 검수 일일 한도 (FREE/PRO)" 및 "신규 기능 소개 팝업" 시스템 전체 관리 섹션 추가. 앱은 system/config_{env} 문서에서 설정을 읽어옴'},
