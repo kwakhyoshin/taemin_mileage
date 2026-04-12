@@ -2058,7 +2058,7 @@ body.dark .sale-cost{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(2
 .badge-cat-header{font-size:15px;font-weight:800;color:var(--tx2);padding:14px 4px 10px;display:flex;align-items:center;gap:7px;flex-wrap:wrap;line-height:1.5}
 .badge-cat-header svg{flex-shrink:0;stroke:var(--tx2)}
 .badge-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;padding:0 12px 16px}
-.badge-item{display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;transition:transform .2s;background:var(--card);border-radius:16px;padding:20px 12px 16px;box-shadow:0 2px 8px rgba(0,0,0,.06);border:1px solid var(--bdr)}
+.badge-item{position:relative;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;transition:transform .2s;background:var(--card);border-radius:16px;padding:20px 12px 16px;box-shadow:0 2px 8px rgba(0,0,0,.06);border:1px solid var(--bdr)}
 .badge-item:active{transform:scale(0.97)}
 .badge-item .badge-name{font-size:14px;font-weight:700;color:var(--tx);text-align:center;line-height:1.4}
 .badge-item.locked{opacity:0.7}
@@ -9379,7 +9379,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0410k';
+const _APP_VERSION = 'v0410l';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -12559,8 +12559,11 @@ function renderBadgeViewGrid(){
       <div class="badge-grid">`;
     badges.forEach(b=>{
       const isEarned=S.badges&&S.badges[b.id];
+      const isClaimed=isEarned?.claimed||false;
       const title=b.hidden&&!isEarned?'???':b.name;
+      const claimBadge=isClaimed?'<div style="position:absolute;top:8px;right:8px;width:22px;height:22px;background:#10B981;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(16,185,129,.4)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>':(isEarned?'<div style="position:absolute;top:8px;right:8px;width:22px;height:22px;background:#F59E0B;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(245,158,11,.4);animation:bdg-pulse 2s ease-in-out infinite"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg></div>':'');
       html+=`<div class="badge-item${isEarned?'':' locked'}" onclick="showBadgeDetail('${b.id}')">
+        ${claimBadge}
         ${generateBadgeSVG(b,!!isEarned,80)}
         <div class="badge-name">${title}</div>
       </div>`;
@@ -19099,6 +19102,9 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.3.11 (v0410l)',date:'2026-04-12',items:[
+    {type:'fix',text:'뱃지 목록(뱃지 보기 화면)에 수령 상태 아이콘 누락 수정 — renderBadgeViewGrid에도 동일 아이콘 적용'},
+  ]},
   {ver:'2.3.10 (v0410k)',date:'2026-04-12',items:[
     {type:'fix',text:'메뚜기 뒷다리 수정 — 무릎 위치를 대칭 ㅅ 모양으로, 발끝 높이를 앞다리와 동일하게 맞춤'},
   ]},
