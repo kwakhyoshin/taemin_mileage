@@ -1569,7 +1569,10 @@ body.screen-shake{animation:screenShake .55s linear}
 .bug-pick:hover{border-color:var(--bdr2)}
 .bug-pick.active{border-color:var(--tab-color,#6366F1);border-width:2.5px;background:var(--tab-lt,rgba(99,102,241,.12));color:var(--tx);box-shadow:0 0 0 2px var(--tab-color,#6366F1),0 2px 8px rgba(99,102,241,.25);font-weight:800}
 body.dark .bug-pick.active{border-color:#A5B4FC;background:rgba(129,140,248,.22);box-shadow:0 0 0 2px #A5B4FC,0 2px 10px rgba(129,140,248,.45);color:#fff}
-.bug-pick .bp-emoji{font-size:18px;line-height:1}
+.bug-pick .bp-ico{display:flex;align-items:center;justify-content:center;width:26px;height:26px}
+.bug-pick .bp-ico svg{width:22px;height:22px}
+.bug-pick .bp-svg{display:block;width:22px;height:22px}
+.bug-pick .bp-svg svg{width:100%;height:100%}
 @keyframes chBugFlyAway{0%{transform:translate(0,0) rotate(0) scale(1)}12%{transform:translate(25px,-50px) rotate(80deg) scale(1.1)}30%{transform:translate(180px,-280px) rotate(260deg) scale(.9)}48%{transform:translate(-100px,-460px) rotate(560deg) scale(.65);opacity:.5}55%{opacity:0;transform:translate(-200px,-520px) rotate(720deg) scale(.4)}68%{opacity:0;transform:translate(-260px,-420px) rotate(900deg) scale(.5)}76%{opacity:1;transform:translate(-180px,-260px) rotate(1080deg) scale(.75)}88%{transform:translate(60px,-80px) rotate(1320deg) scale(1.1)}100%{transform:translate(0,0) rotate(1440deg) scale(1)}}
 @keyframes chBugPoke{0%{transform:scale(1) rotate(0)}20%{transform:scale(1.45) rotate(-4deg)}40%{transform:scale(1.35) rotate(4deg)}60%{transform:scale(1.4) rotate(-3deg)}80%{transform:scale(1.15) rotate(2deg)}100%{transform:scale(1) rotate(0)}}
 @keyframes chBugWingL{0%{opacity:0;transform:rotate(0)}10%{opacity:.85}20%{transform:rotate(-60deg)}35%{transform:rotate(-25deg)}50%{transform:rotate(-65deg)}65%{transform:rotate(-20deg)}80%{transform:rotate(-55deg);opacity:.7}100%{opacity:0;transform:rotate(0)}}
@@ -9267,7 +9270,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0413f';
+const _APP_VERSION = 'v0413g';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -18750,12 +18753,13 @@ function renderMyTab(){
 function _renderBugPicker(){
   const wrap=document.getElementById('bug-picker');if(!wrap)return;
   const cur=(S&&S.settings&&S.settings.challengeBug)||'random';
-  const opts=[{id:'random',name:'랜덤',emoji:'🎲'}];
+  const _randomSvg='<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="16" cy="16" r="1.2" fill="currentColor" stroke="none"/><circle cx="16" cy="8" r="1.2" fill="currentColor" stroke="none"/><circle cx="8" cy="16" r="1.2" fill="currentColor" stroke="none"/></svg>';
+  const opts=[{id:'random',name:'랜덤',svg:_randomSvg}];
   const ids=Object.keys(window.BUG_TYPES||{});
-  ids.forEach(id=>{const b=window.BUG_TYPES[id];opts.push({id:id,name:b.name,emoji:b.emoji});});
-  wrap.innerHTML=opts.map(o=>'<button class="bug-pick'+(cur===o.id?' active':'')+'" onclick="_setChallengeBug(\''+o.id+'\')"><span class="bp-emoji">'+o.emoji+'</span><span>'+o.name+'</span></button>').join('');
+  ids.forEach(id=>{const b=window.BUG_TYPES[id];opts.push({id:id,name:b.name,svg:b.svg?'<span class="bp-svg">'+b.svg+'</span>':''});});
+  wrap.innerHTML=opts.map(o=>'<button class="bug-pick'+(cur===o.id?' active':'')+'" onclick="_setChallengeBug(\''+o.id+'\')"><span class="bp-ico">'+(o.svg||'')+'</span><span>'+o.name+'</span></button>').join('');
 }
-window._setChallengeBug=function(id){if(!S.settings)S.settings={};S.settings.challengeBug=id;save();_renderBugPicker();try{if(typeof renderChallengeCards==='function')renderChallengeCards();}catch(_){}toast('🐞 챌린지 곤충: '+(id==='random'?'랜덤':(window.BUG_TYPES[id]&&window.BUG_TYPES[id].name)||id));};
+window._setChallengeBug=function(id){if(!S.settings)S.settings={};S.settings.challengeBug=id;save();_renderBugPicker();try{if(typeof renderChallengeCards==='function')renderChallengeCards();}catch(_){}toast('챌린지 곤충: '+(id==='random'?'랜덤':(window.BUG_TYPES[id]&&window.BUG_TYPES[id].name)||id));};
 const _origRenderMyTab2=renderMyTab;
 renderMyTab=function(){const r=_origRenderMyTab2.apply(this,arguments);try{_renderBugPicker();}catch(_){}return r;};
 window.renderMyTab=renderMyTab;
@@ -18990,6 +18994,9 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.3.19 (v0413g)',date:'2026-04-13',items:[
+    {type:'improve',text:'나의 메뉴 챌린지 곤충 선택 — 이모지를 깔끔한 SVG 아이콘으로 교체'},
+  ]},
   {ver:'2.3.18 (v0413f)',date:'2026-04-13',items:[
     {type:'security',text:'가족 전체 삭제 기능을 시스템 관리자 페이지로 이동 (보안 강화)'},
   ]},
