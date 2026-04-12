@@ -539,8 +539,8 @@ body.dark .theme-pick.active .theme-pick-radio{border-color:#818CF8;background:#
 .streak-popup{background:var(--card);border-radius:24px;padding:28px 24px;width:min(320px,calc(100vw - 48px));box-shadow:var(--shadow-lg);text-align:center;transform:scale(.9);transition:transform .2s}
 .streak-popup-overlay.show .streak-popup{transform:scale(1)}
 /* ── 마일리 인사말 (hero 안) ── */
-.mily-greeting-hero{display:flex;align-items:center;gap:10px;margin-top:10px;background:rgba(255,255,255,.08);border-radius:24px;padding:8px 14px 8px 8px;transition:opacity .3s}
-.mily-char{width:42px;height:42px;flex-shrink:0}
+.mily-greeting-hero{display:flex;align-items:flex-start;gap:10px;margin-top:10px;background:rgba(255,255,255,.08);border-radius:24px;padding:8px 14px 8px 6px;transition:opacity .3s}
+.mily-char{width:52px;height:52px;flex-shrink:0}
 .mily-char svg{width:100%;height:100%}
 .mily-msg-hero{flex:1;min-width:0;font-size:13px;font-weight:600;color:rgba(255,255,255,.92);line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .mily-msg-hero .mily-hint{font-size:11px;color:rgba(255,255,255,.55);margin-top:1px;font-weight:500;display:flex;align-items:center;gap:4px}
@@ -3818,7 +3818,7 @@ requestAnimationFrame(function(){
       <div class="hdr-stat"><div class="hdr-stat-num" id="log-today-pts">0</div><div class="hdr-stat-lbl">보유 마일리지</div></div>
     </div>
   </div>
-  <div class="sec" style="display:flex;align-items:center;justify-content:space-between"><span style="display:inline-flex;align-items:center;gap:7px"><svg class="sec-ico" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>모든 활동</span><span id="log-edit-actions" style="display:none;gap:8px;align-items:center"><button id="log-edit-toggle-btn" onclick="toggleLogEditMode()" title="편집" aria-label="편집" style="display:inline-flex;align-items:center;gap:3px;background:var(--cd);color:var(--tx);border:1px solid var(--bd);border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.04);line-height:1.1;vertical-align:middle"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>편집</button><button id="log-add-btn" onclick="openActForm()" title="추가" aria-label="추가" style="display:none;align-items:center;gap:3px;background:linear-gradient(135deg,#6366F1,#8B5CF6);color:#fff;border:0;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700;cursor:pointer;box-shadow:0 2px 6px rgba(99,102,241,.35);line-height:1.1"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>추가</button></span></div>
+  <div class="sec" style="display:flex;align-items:center;justify-content:space-between"><span style="display:inline-flex;align-items:center;gap:7px"><svg class="sec-ico" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>모든 활동</span><span id="log-edit-actions" style="display:none;gap:8px;align-items:center"><button id="log-edit-toggle-btn" onclick="toggleLogEditMode()" title="편집" aria-label="편집" style="display:inline-flex;align-items:center;gap:3px;background:var(--cd);color:var(--tx);border:1px solid var(--bd);border-radius:6px;padding:1px 6px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.04);line-height:1.2;vertical-align:middle"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>편집</button><button id="log-add-btn" onclick="openActForm()" title="추가" aria-label="추가" style="display:none;align-items:center;gap:3px;background:linear-gradient(135deg,#6366F1,#8B5CF6);color:#fff;border:0;border-radius:6px;padding:1px 6px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 2px 6px rgba(99,102,241,.35);line-height:1.2"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>추가</button></span></div>
   <div class="log-wrap" id="log-list"></div>
 </div>
 
@@ -3838,7 +3838,7 @@ requestAnimationFrame(function(){
       <div class="hdr-stat"><div class="hdr-stat-num" id="rwd-hdr-owned">0</div><div class="hdr-stat-lbl">보유 보상</div></div>
     </div>
   </div>
-  <div class="sec" style="display:flex;align-items:center;justify-content:space-between"><span style="display:inline-flex;align-items:center;gap:7px"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg>교환 가능한 보상</span><span id="rwd-edit-actions" style="display:none;gap:8px;align-items:center"><button id="rwd-edit-toggle-btn" onclick="toggleRwdEditMode()" title="편집" aria-label="편집" style="display:inline-flex;align-items:center;gap:3px;background:var(--cd);color:var(--tx);border:1px solid var(--bd);border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.04);line-height:1.1;vertical-align:middle"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>편집</button><button id="rwd-add-btn" onclick="openRwdForm()" title="추가" aria-label="추가" style="display:none;align-items:center;gap:3px;background:linear-gradient(135deg,#EC4899,#F472B6);color:#fff;border:0;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700;cursor:pointer;box-shadow:0 2px 6px rgba(236,72,153,.35);line-height:1.1"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>추가</button></span></div>
+  <div class="sec" style="display:flex;align-items:center;justify-content:space-between"><span style="display:inline-flex;align-items:center;gap:7px"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg>교환 가능한 보상</span><span id="rwd-edit-actions" style="display:none;gap:8px;align-items:center"><button id="rwd-edit-toggle-btn" onclick="toggleRwdEditMode()" title="편집" aria-label="편집" style="display:inline-flex;align-items:center;gap:3px;background:var(--cd);color:var(--tx);border:1px solid var(--bd);border-radius:6px;padding:1px 6px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.04);line-height:1.2;vertical-align:middle"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>편집</button><button id="rwd-add-btn" onclick="openRwdForm()" title="추가" aria-label="추가" style="display:none;align-items:center;gap:3px;background:linear-gradient(135deg,#EC4899,#F472B6);color:#fff;border:0;border-radius:6px;padding:1px 6px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 2px 6px rgba(236,72,153,.35);line-height:1.2"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>추가</button></span></div>
   <div class="rwd-grid" id="rwd-grid"></div>
   <div class="sec"><svg class="sec-ico" viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg> 보유 보상 목록</div>
   <div id="rwd-inventory"></div>
@@ -9378,7 +9378,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0410e';
+const _APP_VERSION = 'v0410f';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -10119,23 +10119,9 @@ function showLoading(msg){
     el = document.createElement('div');
     el.id = 'fb-loading';
     el.style.cssText = 'position:fixed;inset:0;background:#5B4FC4;background:linear-gradient(160deg,#3B2F8C 0%,#5B4FC4 40%,#7C6FD9 70%,#A78BFA 100%);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;font-family:Nunito,sans-serif';
-    // 밀리 캐릭터 바운스 SVG (인라인)
-    var C='#5457D9',L='#727BE0',D='#4345B8',K='#1a1a2e',W='#fff',Cr='#F5A623',R='#E64D59',P='#FF9EB8';
-    var milySvg='<svg viewBox="-55 -60 110 120" xmlns="http://www.w3.org/2000/svg" style="width:120px;height:120px">'
-      +'<ellipse cx="0" cy="42" rx="22" ry="5" fill="#0F172A" opacity=".07"/>'
-      +'<g style="animation:milyBounce 2.5s ease-in-out infinite;transform-origin:center 10px">'
-      +'<ellipse cx="-10" cy="32" rx="7" ry="5.5" fill="'+D+'"/><ellipse cx="10" cy="32" rx="7" ry="5.5" fill="'+D+'"/>'
-      +'<line x1="-28" y1="2" x2="-38" y2="-4" stroke="'+C+'" stroke-width="5" stroke-linecap="round"/><circle cx="-38" cy="-4" r="4" fill="'+L+'"/>'
-      +'<line x1="28" y1="2" x2="38" y2="-4" stroke="'+C+'" stroke-width="5" stroke-linecap="round"/><circle cx="38" cy="-4" r="4" fill="'+L+'"/>'
-      +'<g transform="translate(0,-22)"><path d="M-14,0 L-14,-24 L-11,-14 L-5,-26 L0,-12 L5,-26 L11,-14 L14,-24 L14,0 Z" fill="'+Cr+'" stroke="#E8960E" stroke-width=".5"/><circle cx="0" cy="-20" r="2.5" fill="#EE4466"/><circle cx="-8" cy="-14" r="1.5" fill="#5DCCFF"/><circle cx="8" cy="-14" r="1.5" fill="#5DCCFF"/></g>'
-      +'<ellipse cx="0" cy="2" rx="28" ry="27" fill="'+C+'"/><ellipse cx="0" cy="7" rx="18" ry="14" fill="'+L+'" opacity=".3"/>'
-      +'<path d="M-17,-3 Q-11,-11 -5,-3" fill="none" stroke="'+K+'" stroke-width="2.5" stroke-linecap="round"/>'
-      +'<path d="M5,-3 Q11,-11 17,-3" fill="none" stroke="'+K+'" stroke-width="2.5" stroke-linecap="round"/>'
-      +'<ellipse cx="-16" cy="6" rx="5" ry="3.5" fill="'+P+'" opacity=".4"/><ellipse cx="16" cy="6" rx="5" ry="3.5" fill="'+P+'" opacity=".4"/>'
-      +'<ellipse cx="0" cy="6" rx="2" ry="1.6" fill="#7B6FC4" opacity=".5"/>'
-      +'<path d="M-7,13 Q0,20 7,13" fill="none" stroke="'+R+'" stroke-width="2.2" stroke-linecap="round"/>'
-      +'</g></svg>';
-    el.innerHTML = '<div style="margin-bottom:16px">'+milySvg+'</div>'
+    // mile.ly 브랜드 로고 SVG (기존 앱 로고 폰트 그대로 사용)
+    var logoSvg='<svg viewBox="34 248 3020 972" xmlns="http://www.w3.org/2000/svg" style="height:36px;width:auto;display:block" aria-label="mile.ly"><g transform="translate(0,1011) scale(1,-1)"><path transform="translate(0,0)" d="M142 -9Q100 -9 77.0 14.0Q54 37 54 81V412Q54 455 76.5 478.0Q99 501 141 501Q183 501 205.0 478.0Q227 455 227 412V357L216 406Q237 450 278.5 476.5Q320 503 377 503Q431 503 469.5 477.0Q508 451 525 398H511Q534 447 580.0 475.0Q626 503 682 503Q740 503 777.0 480.5Q814 458 832.5 410.5Q851 363 851 291V81Q851 37 827.5 14.0Q804 -9 761 -9Q719 -9 696.0 14.0Q673 37 673 81V286Q673 329 660.0 348.0Q647 367 617 367Q580 367 560.5 341.0Q541 315 541 267V81Q541 37 518.0 14.0Q495 -9 452 -9Q409 -9 386.0 14.0Q363 37 363 81V286Q363 329 350.0 348.0Q337 367 307 367Q271 367 251.5 341.0Q232 315 232 267V81Q232 -9 142 -9Z" fill="#fff"/><path transform="translate(869,0)" d="M140 -9Q98 -9 75.0 16.0Q52 41 52 88V404Q52 451 75.0 476.0Q98 501 140 501Q183 501 206.5 476.0Q230 451 230 404V88Q230 41 207.0 16.0Q184 -9 140 -9ZM140 572Q93 572 67.5 594.0Q42 616 42 658Q42 699 67.5 721.0Q93 743 140 743Q189 743 214.0 721.0Q239 699 239 658Q239 616 214.0 594.0Q189 572 140 572Z" fill="#fff"/><path transform="translate(1117,0)" d="M239 -11Q143 -11 97.5 40.5Q52 92 52 196V624Q52 668 75.0 691.0Q98 714 140 714Q183 714 206.5 691.0Q230 668 230 624V202Q230 165 244.5 148.0Q259 131 282 131Q289 131 296.5 132.5Q304 134 313 135Q330 135 338.5 122.0Q347 109 347 69Q347 34 333.0 16.5Q319 -1 290 -6Q282 -7 267.0 -9.0Q252 -11 239 -11Z" fill="#fff"/><path transform="translate(1432,0)" d="M320 -11Q230 -11 164.5 20.5Q99 52 64.0 110.0Q29 168 29 247Q29 323 62.5 380.5Q96 438 154.5 470.5Q213 503 288 503Q343 503 388.0 485.5Q433 468 465.0 434.5Q497 401 513.5 354.0Q530 307 530 249Q530 229 519.0 219.5Q508 210 484 210H178V294H400L384 281Q384 318 374.0 341.0Q364 364 344.5 376.0Q325 388 296 388Q265 388 242.5 373.5Q220 359 208.0 331.0Q196 303 196 261V252Q196 181 227.5 150.5Q259 120 325 120Q347 120 375.5 125.5Q404 131 430 141Q456 151 475.0 144.5Q494 138 504.5 122.5Q515 107 516.0 87.5Q517 68 507.0 49.5Q497 31 474 21Q439 5 399.5 -3.0Q360 -11 320 -11Z" fill="#fff"/><path transform="translate(1954,0)" d="M136 -6Q91 -6 64.5 21.0Q38 48 38 92Q38 135 64.5 161.5Q91 188 136 188Q183 188 208.5 161.5Q234 135 234 92Q234 48 208.5 21.0Q183 -6 136 -6Z" fill="#FBBF24"/><path transform="translate(2193,0)" d="M239 -11Q143 -11 97.5 40.5Q52 92 52 196V624Q52 668 75.0 691.0Q98 714 140 714Q183 714 206.5 691.0Q230 668 230 624V202Q230 165 244.5 148.0Q259 131 282 131Q289 131 296.5 132.5Q304 134 313 135Q330 135 338.5 122.0Q347 109 347 69Q347 34 333.0 16.5Q319 -1 290 -6Q282 -7 267.0 -9.0Q252 -11 239 -11Z" fill="#E0D4FF"/><path transform="translate(2508,0)" d="M195 -189Q164 -189 145.0 -173.0Q126 -157 121.5 -131.0Q117 -105 130 -76L197 69V-3L26 388Q13 418 17.5 444.0Q22 470 44.0 485.5Q66 501 104 501Q136 501 155.5 486.5Q175 472 191 430L291 170H257L363 431Q379 472 399.5 486.5Q420 501 455 501Q485 501 503.0 485.5Q521 470 525.0 444.0Q529 418 516 388L289 -122Q271 -162 249.5 -175.5Q228 -189 195 -189Z" fill="#E0D4FF"/></g></svg>';
+    el.innerHTML = '<div style="margin-bottom:24px">'+logoSvg+'</div>'
       +'<div id="fb-loading-msg" style="font-size:15px;font-weight:700;color:rgba(255,255,255,.95);letter-spacing:.3px"></div>'
       +'<div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:2px">잠깐만 기다려요...</div>';
     document.body.appendChild(el);
@@ -11712,7 +11698,7 @@ function renderMilyGreeting(){
 
   el.style.display='flex';
   el.className='mily-greeting-hero';
-  charEl.innerHTML='<svg viewBox="0 0 200 200" style="border-radius:14px;box-shadow:0 2px 8px rgba(91,79,196,.25)"><defs><linearGradient id="mlgr" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#5B4FC4"/><stop offset="100%" stop-color="#A78BFA"/></linearGradient></defs><rect width="200" height="200" rx="47" fill="url(#mlgr)"/><path d="M30,130 L100,55 L170,130" stroke="#fff" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M100,62 L98.1,60.3 C91.4,54.2 87,50.2 87,45.3 C87,41.3 90.1,38.1 94.2,38.1 C96.4,38.1 98.6,39.2 100,40.9 C101.4,39.2 103.6,38.1 105.9,38.1 C109.8,38.1 113,41.3 113,45.3 C113,50.2 108.6,54.2 101.9,60.3 Z" fill="#FBBF24"/></svg>';
+  charEl.innerHTML=_milySVG(charCfg);
   msgEl.innerHTML=`${msg}${hint?`<div class="mily-hint">${hintIcon||''}${hint}</div>`:''}`;
 }
 
@@ -11994,7 +11980,7 @@ function renderLogList(){
     const _admMs=_getAdmMemberData();
     const _editActs=(_admMs&&_admMs.acts)?_admMs.acts:S.acts;
     const _toggleBtn=document.getElementById('log-edit-toggle-btn');
-    if(_toggleBtn){_toggleBtn.innerHTML='<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>완료';_toggleBtn.style.background='rgba(52,211,153,.95)';_toggleBtn.style.color='#fff';_toggleBtn.style.borderColor='rgba(52,211,153,.95)';}
+    if(_toggleBtn){_toggleBtn.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>완료';_toggleBtn.style.background='rgba(52,211,153,.95)';_toggleBtn.style.color='#fff';_toggleBtn.style.borderColor='rgba(52,211,153,.95)';}
     const _addBtn=document.getElementById('log-add-btn');
     if(_addBtn)_addBtn.style.display='inline-flex';
     if(!_editActs.length){
@@ -12029,7 +12015,7 @@ function renderLogList(){
     return;
   }
   const _toggleBtn=document.getElementById('log-edit-toggle-btn');
-  if(_toggleBtn){_toggleBtn.innerHTML='<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>편집';_toggleBtn.style.background='var(--cd)';_toggleBtn.style.color='var(--tx)';_toggleBtn.style.borderColor='var(--bd)';}
+  if(_toggleBtn){_toggleBtn.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>편집';_toggleBtn.style.background='var(--cd)';_toggleBtn.style.color='var(--tx)';_toggleBtn.style.borderColor='var(--bd)';}
   const _addBtnOff=document.getElementById('log-add-btn');
   if(_addBtnOff)_addBtnOff.style.display='none';
   const acts=S.acts.filter(a=>{
@@ -12634,7 +12620,7 @@ function renderRewardGrid(){
     const _admMs=_getAdmMemberData();
     const _editRwds=(_admMs&&_admMs.rwds)?_admMs.rwds:S.rwds;
     const _toggleBtn=document.getElementById('rwd-edit-toggle-btn');
-    if(_toggleBtn){_toggleBtn.innerHTML='<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>완료';_toggleBtn.style.background='rgba(52,211,153,.95)';_toggleBtn.style.color='#fff';_toggleBtn.style.borderColor='rgba(52,211,153,.95)';}
+    if(_toggleBtn){_toggleBtn.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>완료';_toggleBtn.style.background='rgba(52,211,153,.95)';_toggleBtn.style.color='#fff';_toggleBtn.style.borderColor='rgba(52,211,153,.95)';}
     const _addBtn=document.getElementById('rwd-add-btn');
     if(_addBtn)_addBtn.style.display='inline-flex';
     if(!_editRwds.length){
@@ -12671,7 +12657,7 @@ function renderRewardGrid(){
     return;
   }
   const _toggleBtn=document.getElementById('rwd-edit-toggle-btn');
-  if(_toggleBtn){_toggleBtn.innerHTML='<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>편집';_toggleBtn.style.background='var(--cd)';_toggleBtn.style.color='var(--tx)';_toggleBtn.style.borderColor='var(--bd)';}
+  if(_toggleBtn){_toggleBtn.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>편집';_toggleBtn.style.background='var(--cd)';_toggleBtn.style.color='var(--tx)';_toggleBtn.style.borderColor='var(--bd)';}
   const _addBtnOff=document.getElementById('rwd-add-btn');
   if(_addBtnOff)_addBtnOff.style.display='none';
   const rwds=S.rwds;
@@ -19109,11 +19095,13 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.3.5 (v0410f)',date:'2026-04-12',items:[
+    {type:'improve',text:'로딩 화면: mily 캐릭터를 mile.ly 브랜드 로고 텍스트로 교체 (기존 앱 로고 SVG 폰트 사용)'},
+    {type:'fix',text:'홈 인사말 캐릭터 원복 (v0410d 잘못된 변경 되돌림)'},
+    {type:'improve',text:'편집/추가 버튼: 글씨·아이콘 크기 13px로 키우고, 패딩 줄여 꽉 찬 느낌으로'},
+  ]},
   {ver:'2.3.4 (v0410e)',date:'2026-04-12',items:[
     {type:'fix',text:'활동기록/보상 탭: 섹션 제목 아이콘과 텍스트 세로 정렬 수정'},
-  ]},
-  {ver:'2.3.3 (v0410d)',date:'2026-04-12',items:[
-    {type:'improve',text:'홈 인사말: mily 캐릭터 애니메이션을 mile.ly 로고 아이콘으로 교체'},
   ]},
   {ver:'2.3.2 (v0410c)',date:'2026-04-12',items:[
     {type:'improve',text:'활동기록/보상 탭: 편집 버튼을 납작한 둥근 사각형으로 변경, 연필 아이콘 추가 — 제목 영역 높이 정렬 개선'},
