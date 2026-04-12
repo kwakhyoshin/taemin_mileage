@@ -1247,6 +1247,17 @@ window.openFamilyDetail = function(familyId) {
       </div>
       ${rwdsHtml}
     </div>
+
+    <div class="section" style="border-top:2px solid #FCA5A5;margin-top:24px;padding-top:18px">
+      <div class="section-header">
+        <div class="section-title" style="color:#EF4444">⚠️ 위험 구역</div>
+      </div>
+      <div style="background:#FEF2F2;border:1px solid #FCA5A5;border-radius:12px;padding:16px;margin-top:8px">
+        <div style="font-weight:800;color:#991B1B;margin-bottom:6px">가족 전체 삭제</div>
+        <div style="font-size:13px;color:#7F1D1D;margin-bottom:12px">이 가족의 모든 구성원, 활동 기록, 보상, 뱃지, 메시지를 영구 삭제합니다. 이 작업은 되돌릴 수 없습니다.</div>
+        <button class="btn-sm btn-danger" style="font-weight:800" onclick="deleteFamilyAll('${familyId}')">🗑️ 가족 전체 삭제</button>
+      </div>
+    </div>
   `;
 };
 
@@ -1330,6 +1341,71 @@ window.deleteMember = function(familyId, memberId, memberName) {
         alert('구성원이 제거되었습니다');
       } catch (e) {
         alert('오류: ' + e.message);
+      }
+    }
+  );
+};
+
+// ── 가족 전체 삭제 (시스템 관리자 전용) ──────────────────
+window.deleteFamilyAll = function(familyId) {
+  const f = _allFamilies.find(x => x.id === familyId);
+  if (!f) return;
+
+  const fm = f.familyMeta || {};
+  const members = fm.members || {};
+  const memberNames = Object.values(members).map(m => m.name || '이름없음').join(', ');
+  const memberCount = Object.keys(members).length;
+  const logCount = (f.log || []).length;
+  const rewardCount = (f.rwds || []).length;
+  const badgeCount = Object.keys(f.badges || {}).length;
+
+  const summary = `구성원 ${memberCount}명: ${memberNames}\n활동기록 ${logCount}건, 보상 ${rewardCount}개, 뱃지 ${badgeCount}개`;
+
+  showModal(
+    '⚠️ 가족 전체 삭제',
+    `[${fm.familyName || familyId}] 가족의 모든 데이터를 영구 삭제합니다.\n\n${summary}\n\n이 작업은 되돌릴 수 없습니다.`,
+    async () => {
+      try {
+        // 1. Auth Registry에서 해당 가족 멤버 정리
+        const allMids = Object.keys(members);
+        if (allMids.length > 0) {
+          try {
+            const regRef = doc(db, 'auth', 'registry');
+            const regSnap = await getDoc(regRef);
+            if (regSnap.exists()) {
+              const regData = regSnap.data();
+              let changed = false;
+              for (const uid of Object.keys(regData)) {
+                if (regData[uid].familyId === familyId || allMids.includes(regData[uid].memberId)) {
+                  delete regData[uid];
+                  changed = true;
+                }
+              }
+              if (changed) await setDoc(regRef, regData);
+              console.log('[AdminDeleteFamily] Auth registry cleaned');
+            }
+          } catch (e) { console.warn('[AdminDeleteFamily] Auth registry cleanup failed:', e); }
+        }
+
+        // 2. Firestore 가족 문서 삭제
+        const familyRef = f._isLegacy ? doc(db, 'users', LEGACY_DOC) : doc(db, 'families', familyId);
+        try {
+          await deleteDoc(familyRef);
+          console.log('[AdminDeleteFamily] Family document deleted:', familyId);
+        } catch (e) {
+          console.warn('[AdminDeleteFamily] deleteDoc failed, marking as deleted:', e);
+          try { await setDoc(familyRef, { _deleted: true, _deletedAt: new Date().toISOString() }); } catch (e2) { console.error('[AdminDeleteFamily] fallback also failed:', e2); }
+        }
+
+        // 3. 목록에서 제거 & UI 갱신
+        _allFamilies = _allFamilies.filter(x => x.id !== familyId);
+        await logAdminAction('가족 전체 삭제', `${fm.familyName || familyId} (${memberCount}명)`);
+        window.closeFamilyDetail();
+        renderFamiliesList();
+        alert(`가족 [${fm.familyName || familyId}]이(가) 삭제되었습니다.`);
+      } catch (e) {
+        alert('삭제 중 오류: ' + e.message);
+        console.error('[AdminDeleteFamily] Error:', e);
       }
     }
   );

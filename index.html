@@ -3254,8 +3254,8 @@ requestAnimationFrame(function(){
       <!-- Card 1: 매일 작은 활동이 습관이 돼요 (홈 화면) -->
       <div class="ins-card ins-card-1">
         <div class="ins-illust">
-          <img class="ins-img-dark" src="ob-home-dark.png" alt="홈 화면 (다크)" loading="lazy">
-          <img class="ins-img-light" src="ob-home-light.png" alt="홈 화면 (라이트)" loading="lazy">
+          <img class="ins-img-dark" src="dev/ob-home-dark.png" alt="홈 화면 (다크)" loading="lazy">
+          <img class="ins-img-light" src="dev/ob-home-light.png" alt="홈 화면 (라이트)" loading="lazy">
         </div>
         <div class="ins-keyword">매일 작은 활동이<br>습관이 돼요</div>
         <div class="ins-sub">양치, 세수, 숙제 — 하루 2분이면 충분해요.<br><b style="color:#6366F1;font-size:15px">66일</b>이면 자동화된 습관이 됩니다.</div>
@@ -3264,8 +3264,8 @@ requestAnimationFrame(function(){
       <!-- Card 2: 보상으로 내재동기를 키워요 (보상 화면) -->
       <div class="ins-card ins-card-2">
         <div class="ins-illust">
-          <img class="ins-img-dark" src="ob-reward-dark.png" alt="보상 상점 (다크)" loading="lazy">
-          <img class="ins-img-light" src="ob-reward-light.png" alt="보상 상점 (라이트)" loading="lazy">
+          <img class="ins-img-dark" src="dev/ob-reward-dark.png" alt="보상 상점 (다크)" loading="lazy">
+          <img class="ins-img-light" src="dev/ob-reward-light.png" alt="보상 상점 (라이트)" loading="lazy">
         </div>
         <div class="ins-keyword">노력이 보상으로<br>이어져요</div>
         <div class="ins-sub">진전이 눈에 보이면 아이는 스스로<br><b style="color:#D98E09;font-size:15px">"한 번 더"</b>를 선택합니다.</div>
@@ -3274,8 +3274,8 @@ requestAnimationFrame(function(){
       <!-- Card 3: 데이터로 성장을 확인해요 (리포트 화면) -->
       <div class="ins-card ins-card-3">
         <div class="ins-illust">
-          <img class="ins-img-dark" src="ob-report-dark.png" alt="성과 통계 (다크)" loading="lazy">
-          <img class="ins-img-light" src="ob-report-light.png" alt="성과 통계 (라이트)" loading="lazy">
+          <img class="ins-img-dark" src="dev/ob-report-dark.png" alt="성과 통계 (다크)" loading="lazy">
+          <img class="ins-img-light" src="dev/ob-report-light.png" alt="성과 통계 (라이트)" loading="lazy">
         </div>
         <div class="ins-keyword">데이터로<br>성장을 확인해요</div>
         <div class="ins-sub">자기 행동을 모니터링하는 아이는<br>목표 달성률이 <b style="color:#7C3AED;font-size:15px">2배</b> 높아집니다.</div>
@@ -3284,8 +3284,8 @@ requestAnimationFrame(function(){
       <!-- Card 4: AI가 보상 체계를 점검해요 (챗봇 화면) ★ KEY -->
       <div class="ins-card ins-card-1">
         <div class="ins-illust">
-          <img class="ins-img-dark" src="ob-chat-dark.png" alt="AI 챗봇 (다크)" loading="lazy">
-          <img class="ins-img-light" src="ob-chat-light.png" alt="AI 챗봇 (라이트)" loading="lazy">
+          <img class="ins-img-dark" src="dev/ob-chat-dark.png" alt="AI 챗봇 (다크)" loading="lazy">
+          <img class="ins-img-light" src="dev/ob-chat-light.png" alt="AI 챗봇 (라이트)" loading="lazy">
         </div>
         <div class="ins-keyword">AI가 보상 체계를<br>과학적으로 점검해요</div>
         <div class="ins-sub">밀리가 보상의 균형, 내재동기 훼손 위험,<br>적정 난이도를 <b style="color:#6366F1;font-size:15px">실시간 분석</b>합니다.</div>
@@ -4328,14 +4328,7 @@ requestAnimationFrame(function(){
           </div>
           <button class="btn-sm rd" onclick="withdrawAccount()">탈퇴</button>
         </div>
-        <div class="divider"></div>
-        <div class="adm-row">
-          <div class="adm-row-l">
-            <div class="adm-row-nm" style="color:#EF4444"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg> 가족 전체 삭제</div>
-            <div class="adm-row-sub">이 가족의 모든 구성원, 활동, 기록을 영구 삭제합니다</div>
-          </div>
-          <button class="btn-sm rd" onclick="deleteFamilyAll()">삭제</button>
-        </div>
+        <!-- 가족 전체 삭제: 시스템 관리자 페이지(admin.html)에서만 가능 -->
       </div>
     </div>
     <div style="height:16px"></div>
@@ -7870,109 +7863,8 @@ async function _executeWithdrawal(initiator, memberIdsToDelete, memberName, over
   }
 }
 
-// ── 가족 전체 삭제 ──────────────────────────────────
-async function deleteFamilyAll(){
-  if(!currentUser){ toast('로그인 상태가 아니에요'); return; }
-  const fm = S.familyMeta?.members || {};
-  const me = fm[currentUser];
-  if(!me || (me.type !== 'caregiver' && me.type !== 'parent')){ toast('양육자만 가족 삭제가 가능해요'); return; }
-
-  const memberNames = Object.values(fm).map(m => m.name||'이름없음').join(', ');
-  const memberCount = Object.keys(fm).length;
-  const logCount = (S.log||[]).length;
-  const rewardCount = (S.rewards||[]).length;
-  const badgeCount = (S.badges||[]).length;
-  const msgCount = (S.familyMessages||[]).length;
-
-  const summary = `구성원 ${memberCount}명: ${memberNames}\n활동기록 ${logCount}건, 보상 ${rewardCount}개, 뱃지 ${badgeCount}개, 메시지 ${msgCount}건`;
-
-  _showWithdrawModal('⚠️ 가족 전체 삭제',
-    `이 가족의 모든 데이터를 영구 삭제합니다.\n\n${summary}\n\n이 작업은 되돌릴 수 없습니다.\n삭제 후 모든 구성원이 로그아웃됩니다.`,
-    '전체 삭제', async(overlay)=>{
-      try {
-        console.log('[DeleteFamily] Starting family deletion...');
-
-        // 1. Auth Registry 전체 정리
-        const regDoc = _getAuthRegistryDoc();
-        if(regDoc && db){
-          try {
-            const regSnap = await getDoc(regDoc);
-            if(regSnap.exists()){
-              const regData = regSnap.data();
-              const allMids = Object.keys(fm);
-              let changed = false;
-              for(const uid of Object.keys(regData)){
-                if(allMids.includes(regData[uid].memberId)){
-                  delete regData[uid];
-                  changed = true;
-                }
-              }
-              if(changed) await setDoc(regDoc, regData);
-              console.log('[DeleteFamily] Auth registry cleaned');
-            }
-          } catch(e){ console.warn('[DeleteFamily] Auth registry cleanup failed:', e); }
-        }
-
-        // 2. Firestore 가족 문서 삭제
-        if(DATA_DOC && db && typeof deleteDoc === 'function'){
-          try{
-            await deleteDoc(DATA_DOC);
-            console.log('[DeleteFamily] Firestore family document deleted');
-          }catch(e){
-            console.warn('[DeleteFamily] deleteDoc failed, trying empty overwrite:', e);
-            try{ await setDoc(DATA_DOC, {_deleted:true, _deletedAt:new Date().toISOString()}); }catch(e2){ console.error('[DeleteFamily] overwrite also failed:', e2); }
-          }
-        }
-
-        // 3. Firestore 리스너 해제
-        if(_dataListenerUnsub){
-          try{ _dataListenerUnsub(); }catch(_e){}
-          _dataListenerUnsub = null;
-        }
-
-        // 4. 모든 localStorage 정리
-        const keysToRemove = [];
-        for(let i=0; i<localStorage.length; i++){
-          const key = localStorage.key(i);
-          if(key && (key.startsWith(_LS_PREFIX) || key.startsWith('taemin_'))) keysToRemove.push(key);
-        }
-        keysToRemove.forEach(k => { try{localStorage.removeItem(k);}catch(e){} });
-        try{ sessionStorage.clear(); }catch(e){}
-
-        // 5. Firebase Auth 로그아웃
-        if(fbAuth && signOut){
-          try{ await signOut(fbAuth); }catch(e){ console.warn('[DeleteFamily] Firebase signOut:', e); }
-        }
-
-        // 6. 상태 초기화
-        viewingChildId = null;
-        currentUser = null;
-        _admViewChildId = null;
-        _globalDataOwner = null;
-        adminOK = false;
-        DATA_DOC = null;
-        _familyId = null;
-
-        // 7. 완료 화면
-        if(overlay) _showFarewellScreen('가족', overlay);
-        else toast('가족 데이터가 모두 삭제되었습니다');
-
-        const _waitClose = setInterval(()=>{
-          if(!document.getElementById('withdraw-modal-overlay')){
-            clearInterval(_waitClose);
-            showAuthScreen('welcome');
-          }
-        }, 300);
-        setTimeout(()=>{ clearInterval(_waitClose); if(!currentUser) showAuthScreen('welcome'); }, 10000);
-
-        console.log('[DeleteFamily] Completed');
-      } catch(e){
-        console.error('[DeleteFamily] Error:', e);
-        if(overlay) overlay.remove();
-        toast('삭제 중 오류가 발생했어요: ' + (e.message||e));
-      }
-    });
-}
+// ── 가족 전체 삭제: 시스템 관리자 페이지(admin.html)에서만 가능 ──
+// deleteFamilyAll()은 보안상 앱 내에서 제거됨 (R-034)
 
 function logout() {
   if (!confirm('로그아웃 하시겠어요?')) return;
