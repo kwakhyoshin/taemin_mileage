@@ -24,6 +24,25 @@ function ensureVapid() {
 
 const NAMES = { taemin: "태민이", dad: "아빠", mom: "엄마" };
 
+// 가족 메시지의 msg.type에 따라 푸시 페이로드(타입/제목)를 결정
+// — APK handleNativeNotificationClick이 type별로 화면 분기 처리함
+function buildFamilyMsgPayload(msg, senderName) {
+  const t = msg.type || "";
+  let pushType = "family_msg";
+  let title = senderName + "에게서 메시지가 도착했어요 💌";
+  if (t === "activity_verify_request") {
+    pushType = "activity_verify";
+    title = "✋ " + senderName + "이(가) 활동 승인을 요청했어요";
+  } else if (t === "activity_verify_approval") {
+    pushType = "activity_verify";
+    title = "✅ 활동 승인됨";
+  } else if (t === "activity_verify_rejection") {
+    pushType = "activity_verify";
+    title = "❌ 활동 반려됨";
+  }
+  return { pushType, title };
+}
+
 function sendToDevices(devices, targetUsers, payload, docPath) {
   const promises = [];
   for (const [deviceId, device] of Object.entries(devices)) {
@@ -46,8 +65,13 @@ function sendToDevices(devices, targetUsers, payload, docPath) {
             },
             priority: "high",
           },
+          // ★ APK MilelyFirebaseMessagingService는 data 페이로드를 우선 읽음
+          //   notification 블록만 있으면 앱 백그라운드 시 FCM SDK가 기본 트레이로
+          //   그려서 채널/Importance 커스터마이즈가 무시됨 → title/body도 data에 포함
           data: {
             type:     String(payload.type    || ""),
+            title:    String(payload.title   || ""),
+            body:     String(payload.body    || ""),
             from:     String(payload.from    || ""),
             msgText:  String(payload.msgText || payload.body || ""),
             emotion:  String(payload.emotion || ""),
@@ -107,13 +131,14 @@ exports.onFamilyMessage = onDocumentUpdated({ document: "users/taemin", secrets:
     const msg = newMsgs[i];
     if (!msg || msg.read) continue;
     const senderName = NAMES[msg.from] || "가족";
+    const pp = buildFamilyMsgPayload(msg, senderName);
 
     promises.push(sendToDevices(devices, [msg.to], {
-      title: senderName + "에게서 메시지가 도착했어요 💌",
+      title: pp.title,
       body: msg.text,
       icon: "icon-180.png",
-      tag: "family-msg-" + msg.from + "-" + msg.to + "-" + (msg.ts || Date.now()),
-      type: "family_msg",
+      tag: (pp.pushType === "activity_verify" ? "activity-verify-" : "family-msg-") + msg.from + "-" + msg.to + "-" + (msg.ts || Date.now()),
+      type: pp.pushType,
       from: msg.from,
       msgText: msg.text,
       url: "./"
@@ -239,13 +264,14 @@ exports.onFamilyMessageFamilies = onDocumentUpdated({ document: "families/{famil
     const msg = newMsgs[i];
     if (!msg || msg.read) continue;
     const senderName = (names[msg.from] && names[msg.from].name) || NAMES[msg.from] || "가족";
+    const pp = buildFamilyMsgPayload(msg, senderName);
 
     promises.push(sendToDevices(devices, [msg.to], {
-      title: senderName + "에게서 메시지가 도착했어요 💌",
+      title: pp.title,
       body: msg.text,
       icon: "icon-180.png",
-      tag: "family-msg-" + msg.from + "-" + msg.to + "-" + (msg.ts || Date.now()),
-      type: "family_msg",
+      tag: (pp.pushType === "activity_verify" ? "activity-verify-" : "family-msg-") + msg.from + "-" + msg.to + "-" + (msg.ts || Date.now()),
+      type: pp.pushType,
       from: msg.from,
       msgText: msg.text,
       url: "./"
@@ -380,13 +406,14 @@ exports.onFamilyMessageDevFamilies = onDocumentUpdated({ document: "families/{fa
     const msg = newMsgs[i];
     if (!msg || msg.read) continue;
     const senderName = (names[msg.from] && names[msg.from].name) || NAMES[msg.from] || "가족";
+    const pp = buildFamilyMsgPayload(msg, senderName);
 
     promises.push(sendToDevices(devices, [msg.to], {
-      title: "[DEV] " + senderName + "에게서 메시지가 도착했어요 💌",
+      title: "[DEV] " + pp.title,
       body: msg.text,
       icon: "icon-180.png",
-      tag: "family-msg-" + msg.from + "-" + msg.to + "-" + (msg.ts || Date.now()),
-      type: "family_msg",
+      tag: (pp.pushType === "activity_verify" ? "activity-verify-" : "family-msg-") + msg.from + "-" + msg.to + "-" + (msg.ts || Date.now()),
+      type: pp.pushType,
       from: msg.from,
       msgText: msg.text,
       url: "./"
@@ -518,13 +545,14 @@ exports.onFamilyMessageDev = onDocumentUpdated({ document: "users/taemin_dev", s
     const msg = newMsgs[i];
     if (!msg || msg.read) continue;
     const senderName = NAMES[msg.from] || "가족";
+    const pp = buildFamilyMsgPayload(msg, senderName);
 
     promises.push(sendToDevices(devices, [msg.to], {
-      title: "[DEV] " + senderName + "에게서 메시지가 도착했어요 💌",
+      title: "[DEV] " + pp.title,
       body: msg.text,
       icon: "icon-180.png",
-      tag: "family-msg-" + msg.from + "-" + msg.to + "-" + (msg.ts || Date.now()),
-      type: "family_msg",
+      tag: (pp.pushType === "activity_verify" ? "activity-verify-" : "family-msg-") + msg.from + "-" + msg.to + "-" + (msg.ts || Date.now()),
+      type: pp.pushType,
       from: msg.from,
       msgText: msg.text,
       url: "./"
