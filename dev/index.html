@@ -4459,12 +4459,15 @@ requestAnimationFrame(function(){
   </div>
   <div class="my-section-title">앱 설정</div>
   <div class="my-list">
-    <div class="my-list-item my-list-item-toggle">
-      <span class="my-list-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></span>
-      <span class="my-list-txt">푸시 알림</span>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span id="push-status-my" style="font-size:12px;font-weight:700;color:var(--tx3)"></span>
+    <div class="my-list-item my-list-item-toggle" style="align-items:flex-start">
+      <span class="my-list-ico" style="margin-top:2px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></span>
+      <div style="flex:1;display:flex;flex-direction:column;gap:3px">
+        <span class="my-list-txt">알림 수신</span>
+        <span style="font-size:var(--fs-xs);color:var(--tx3);line-height:1.5;font-weight:500">가족 메시지·아이 활동 승인 요청 등<br>중요한 소식을 알림으로 받아요</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;margin-top:2px">
         <button class="tog off" id="push-tog-my" onclick="togglePush()"><div class="tog-dot"></div></button>
+        <span id="push-status-my" style="font-size:var(--fs-xs);font-weight:700;color:var(--tx3)"></span>
       </div>
     </div>
     <div class="my-list-item" style="flex-direction:column;align-items:stretch;gap:4px;padding:16px 18px">
@@ -9287,7 +9290,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0414d';
+const _APP_VERSION = 'v0414e';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -19011,6 +19014,9 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.4.4 (v0414e)',date:'2026-04-14',items:[
+    {type:'improve',text:'나의 메뉴 알림 항목 — "푸시 알림" → "알림 수신"으로 변경, 설명 문구 추가'},
+  ]},
   {ver:'2.4.3 (v0414d)',date:'2026-04-14',items:[
     {type:'new',text:'Android FCM 알림 브릿지 연동 — 네이티브 앱에서 웹 알림 설정(ON/OFF) 및 FCM 토큰 등록'},
     {type:'new',text:'handleNativeNotificationClick — 알림 클릭 시 해당 화면으로 자동 이동'},
