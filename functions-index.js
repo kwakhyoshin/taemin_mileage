@@ -4,6 +4,7 @@ const webpush = require("web-push");
 
 admin.initializeApp();
 const db = admin.firestore();
+const messaging = admin.messaging();
 
 // VAPID Private Key는 Firebase Functions 환경변수에서 로드
 // 설정: firebase functions:secrets:set VAPID_PRIVATE_KEY
@@ -26,12 +27,53 @@ const NAMES = { taemin: "태민이", dad: "아빠", mom: "엄마" };
 function sendToDevices(devices, targetUsers, payload, docPath) {
   const promises = [];
   for (const [deviceId, device] of Object.entries(devices)) {
-    if (device.enabled && targetUsers.includes(device.user)) {
+    if (!device.enabled || !targetUsers.includes(device.user)) continue;
+
+    if (device.type === "fcm" && device.fcmToken) {
+      // ── FCM (Android 네이티브 앱) ──────────────────────────────────────────
+      promises.push(
+        messaging.send({
+          token: device.fcmToken,
+          notification: {
+            title: payload.title,
+            body: payload.body,
+          },
+          android: {
+            notification: {
+              icon: "ic_notification",
+              color: "#6366F1",
+              sound: "default",
+            },
+            priority: "high",
+          },
+          data: {
+            type:     String(payload.type    || ""),
+            from:     String(payload.from    || ""),
+            msgText:  String(payload.msgText || payload.body || ""),
+            emotion:  String(payload.emotion || ""),
+            url:      String(payload.url     || ""),
+            tag:      String(payload.tag     || ""),
+          },
+        }).catch((err) => {
+          console.log("FCM send failed for device", deviceId, err.code);
+          // 토큰 만료 또는 무효 → Firestore에서 비활성화
+          if (
+            err.code === "messaging/registration-token-not-registered" ||
+            err.code === "messaging/invalid-registration-token"
+          ) {
+            return db.doc(docPath).update({
+              [`pushDevices.${deviceId}.enabled`]: false,
+            });
+          }
+        })
+      );
+    } else if (device.subscription) {
+      // ── Web Push (PWA / 브라우저) ─────────────────────────────────────────
       try {
         const sub = JSON.parse(device.subscription);
         promises.push(
           webpush.sendNotification(sub, JSON.stringify(payload)).catch((err) => {
-            console.log("Push failed for device", deviceId, err.statusCode);
+            console.log("Web Push failed for device", deviceId, err.statusCode);
             if (err.statusCode === 404 || err.statusCode === 410) {
               return db.doc(docPath).update({
                 [`pushDevices.${deviceId}.enabled`]: false,
@@ -40,7 +82,7 @@ function sendToDevices(devices, targetUsers, payload, docPath) {
           })
         );
       } catch (e) {
-        console.log("Invalid subscription for device", deviceId);
+        console.log("Invalid web push subscription for device", deviceId);
       }
     }
   }

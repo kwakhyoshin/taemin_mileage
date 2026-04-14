@@ -9287,7 +9287,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0414c';
+const _APP_VERSION = 'v0414d';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -19011,6 +19011,10 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.4.3 (v0414d)',date:'2026-04-14',items:[
+    {type:'new',text:'Android FCM 알림 브릿지 연동 — 네이티브 앱에서 웹 알림 설정(ON/OFF) 및 FCM 토큰 등록'},
+    {type:'new',text:'handleNativeNotificationClick — 알림 클릭 시 해당 화면으로 자동 이동'},
+  ]},
   {ver:'2.4.2 (v0414c)',date:'2026-04-14',items:[
     {type:'improve',text:'PWA 설치 안내 팝업 제거 — 앱 환경에서 불필요한 팝업 비활성화'},
     {type:'improve',text:'AI 기능 소개 팝업 제거 — 출시 초기 한정 안내 비활성화'},
@@ -22559,6 +22563,10 @@ function urlBase64ToUint8Array(base64String){
 
 // Generate a unique device ID for this browser/device
 function getDeviceId(){
+  // 네이티브 앱(WebView)이면 Android 기기 고유 ID 사용
+  if(window.MilelyBridge && window.MilelyBridge.isNativeApp && window.MilelyBridge.isNativeApp()){
+    try{ return 'native_'+window.MilelyBridge.getDeviceId(); }catch(_){}
+  }
   let id=localStorage.getItem(_LS_PREFIX+'device_id');
   if(!id){
     id='dev_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);
@@ -22568,6 +22576,14 @@ function getDeviceId(){
 }
 
 async function subscribePush(){
+  // ── 네이티브 앱(Android WebView) 분기 ──
+  if(window.MilelyBridge && window.MilelyBridge.isNativeApp && window.MilelyBridge.isNativeApp()){
+    // Android: 권한 요청 → 콜백(_milelyOnPermissionResult) → FCM 토큰 발급 → 콜백(_milelyOnFCMToken)
+    try{ window.MilelyBridge.requestNotificationPermission(); }
+    catch(e){ console.error('[Push/Native] requestNotificationPermission error:', e); }
+    return;
+  }
+
   // Check if running in standalone PWA mode (required on iOS)
   const isStandalone=window.navigator.standalone||window.matchMedia('(display-mode:standalone)').matches;
   const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
@@ -22649,6 +22665,20 @@ async function subscribePush(){
 }
 
 async function unsubscribePush(){
+  // ── 네이티브 앱(Android WebView) 분기 ──
+  if(window.MilelyBridge && window.MilelyBridge.isNativeApp && window.MilelyBridge.isNativeApp()){
+    try{ window.MilelyBridge.disableNotification(); }catch(_){}
+    localStorage.setItem(_LS_PREFIX+'push_enabled','false');
+    const _did=getDeviceId();
+    if(S.pushDevices&&S.pushDevices[_did]){
+      S.pushDevices[_did].enabled=false;
+      save();
+    }
+    updatePushUI();
+    toast('🔕 이 기기에서 알림이 해제됐어요');
+    return;
+  }
+
   try{
     // Push 구독 해제
     if(pushSubscription){
@@ -22676,7 +22706,9 @@ async function unsubscribePush(){
 
 // 유저 전환 시 이 기기의 pushDevice user 필드를 현재 유저로 갱신
 function _syncPushDeviceUser(){
-  if(!pushSubscription || !currentUser) return;
+  const _isNative=!!(window.MilelyBridge&&window.MilelyBridge.isNativeApp&&window.MilelyBridge.isNativeApp());
+  if(!_isNative && !pushSubscription) return;
+  if(!currentUser) return;
   const deviceId = localStorage.getItem(_LS_PREFIX+'device_id');
   if(!deviceId || !S.pushDevices || !S.pushDevices[deviceId]) return;
   if(S.pushDevices[deviceId].user === currentUser) return; // 이미 맞음
@@ -22687,10 +22719,13 @@ function _syncPushDeviceUser(){
 }
 
 function updatePushUI(){
+  const isNative=!!(window.MilelyBridge&&window.MilelyBridge.isNativeApp&&window.MilelyBridge.isNativeApp());
   const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
   const isStandalone=window.navigator.standalone||window.matchMedia('(display-mode:standalone)').matches;
-  const pushSupported=typeof Notification!=='undefined'&&(!isIOS||isStandalone);
-  const isOn=!!pushSubscription;
+  const pushSupported=isNative||(typeof Notification!=='undefined'&&(!isIOS||isStandalone));
+  const isOn=isNative
+    ?(()=>{try{return window.MilelyBridge.isNotificationEnabled();}catch(_){return false;}})()
+    :!!pushSubscription;
   // 관리탭 토글
   const togBtn=document.getElementById('push-tog');
   if(togBtn) togBtn.classList.toggle('off',!isOn);
@@ -22787,6 +22822,15 @@ async function showPushDebug(){
   if(!el)return;
   const lines=[];
   lines.push('환경: '+_ENV);
+  // 네이티브 브릿지 상태
+  if(window.MilelyBridge&&window.MilelyBridge.isNativeApp&&window.MilelyBridge.isNativeApp()){
+    lines.push('앱 타입: 네이티브(FCM)');
+    try{lines.push('알림 권한: '+(window.MilelyBridge.isNotificationPermissionGranted()?'허용':'거부'));}catch(_){}
+    try{lines.push('알림 상태: '+(window.MilelyBridge.isNotificationEnabled()?'활성':'비활성'));}catch(_){}
+    lines.push('기기 ID: '+getDeviceId());
+  } else {
+    lines.push('앱 타입: 웹(Web Push)');
+  }
   lines.push('Firestore: '+(_ENV==='dev'?'users/taemin_dev':'users/taemin'));
   // SW status
   if('serviceWorker' in navigator){
@@ -22836,11 +22880,88 @@ async function sendTestPush(){
 }
 
 function togglePush(){
-  if(pushSubscription)unsubscribePush();
+  const _isNative=!!(window.MilelyBridge&&window.MilelyBridge.isNativeApp&&window.MilelyBridge.isNativeApp());
+  const _isOn=_isNative
+    ?(()=>{try{return window.MilelyBridge.isNotificationEnabled();}catch(_){return false;}})()
+    :!!pushSubscription;
+  if(_isOn)unsubscribePush();
   else subscribePush();
 }
 window.togglePush=togglePush;
 window.sendTestPush=sendTestPush;
+
+// ── MilelyBridge 콜백 (Android → 웹) ──────────────────────────────────────────
+// 1) 권한 요청 결과 → FCM 토큰 발급 시작
+window._milelyOnPermissionResult=function(granted){
+  if(!granted){
+    toast('알림 권한이 거부됐어요. 설정 > 앱 > 알림에서 허용해주세요.');
+    return;
+  }
+  try{ window.MilelyBridge.getFCMToken(); }
+  catch(e){ console.error('[Push/Native] getFCMToken error:', e); }
+};
+
+// 2) FCM 토큰 수신 → Firestore 저장
+window._milelyOnFCMToken=async function(token){
+  if(!token){
+    console.warn('[Push/Native] FCM token empty');
+    toast('알림 토큰 발급 실패. 다시 시도해주세요.');
+    return;
+  }
+  try{
+    const deviceId=getDeviceId();
+    localStorage.setItem(_LS_PREFIX+'push_enabled','true');
+    if(!S.pushDevices)S.pushDevices={};
+    S.pushDevices[deviceId]={
+      fcmToken:token,
+      type:'fcm',
+      user:currentUser||'unknown',
+      enabled:true,
+      updatedAt:Date.now()
+    };
+    await save();
+    updatePushUI();
+    toast('🔔 이 기기에서 알림이 활성화됐어요!');
+    console.log('[Push/Native] FCM token saved, deviceId:', deviceId);
+  }catch(e){
+    console.error('[Push/Native] token save error:', e);
+    toast('알림 설정 저장 실패: '+e.message);
+  }
+};
+
+// 3) 알림 클릭 시 Android가 호출 → 해당 화면으로 이동
+window.handleNativeNotificationClick=function(type, from, msg, emotion){
+  try{
+    console.log('[NativeNotif] click:', type, from, msg, emotion);
+    switch(type){
+      case 'family_msg':
+      case 'family_message':
+        // 가족 메시지: 받은 메시지 팝업 표시
+        if(from && msg){
+          try{ showReceivedMsg(from, msg, emotion||null, {from, text:msg, emotion:emotion||null}); }
+          catch(_){ reallyGoTab('family'); }
+        } else {
+          reallyGoTab('family');
+        }
+        break;
+      case 'mood_update':
+        reallyGoTab('family');
+        break;
+      case 'reward_notify':
+      case 'reward_request':
+        reallyGoTab('reward');
+        break;
+      case 'activity_verify':
+      case 'act_verify':
+        reallyGoTab('activity');
+        break;
+      default:
+        reallyGoTab('home');
+        break;
+    }
+  }catch(e){ console.error('[NativeNotif] click handler error:', e); }
+};
+window.handleNativeNotificationClick=window.handleNativeNotificationClick;
 
 
 // ── DEV: 유저 빠른전환 (관리자 페이지 내 인라인) ──────
