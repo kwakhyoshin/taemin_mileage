@@ -66,7 +66,8 @@
 | R-046 | 2026-04-14 | 나의 메뉴 알림 항목 레이블 개선 — "푸시 알림" → "알림 수신" + 설명 문구 추가 | v0414e | PR #342 운영반영 | "가족 메시지·아이 활동 승인 요청 등 중요한 소식을 알림으로 받아요" |
 | R-047 | 2026-04-14 | Galaxy Fold 펼침 화면 하단 탭바 고정 버그 수정 — position:fixed+transform 조합 문제 | v0414f | PR #344 운영반영 | body.native-app CSS+JS로 WebView 전용 처리, bottom:0 항상 고정 |
 | R-048 | 2026-04-14 | Galaxy Fold 탭바 동작 수정 — 항상 고정 방식 → 일반 폰과 동일한 floating↔dock 방식 | v0414g | PR #346 운영반영 | checkNavDock()이 native-app에서도 동작 |
-| R-049 | 2026-04-14 | 하단 탭바 원래 스타일 복원 — body.native-app nav CSS 오버라이드 제거 | v0414h | PR #348 운영반영 | nav CSS !important 전부 삭제, JS checkNavDock만으로 Galaxy Fold 대응. 일반 폰 blur/반투명 정상 복원 |
+| R-049 | 2026-04-14 | 하단 탭바 원래 스타일 복원 — body.native-app nav CSS 오버라이드 제거 | v0414h | PR #348 운영반영 | nav CSS !important 전부 삭제 (넓은 화면 사이드바 겹침 문제 발생) |
+| R-050 | 2026-04-14 | native-app nav CSS를 @media(min-width:768px)로 스코프 | v0414i | PR #350 운영반영 | 좁은 폰은 기본 CSS 유지(blur/반투명), 넓은 화면만 사이드바→하단바 오버라이드(기본 CSS 값 그대로 복사) |
 
 ## 미착수 백로그 (ROADMAP.md 기준)
 
