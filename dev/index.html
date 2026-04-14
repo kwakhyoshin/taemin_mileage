@@ -2867,8 +2867,8 @@ button:disabled {
    - 넓은 화면(768px+): 태블릿/데스크탑 미디어쿼리에 의해 사이드바 또는 하단바
    - body.native-app 클래스는 향후 WebView 전용 기능에 활용 가능
    ======================================== */
-/* Android 3버튼 모드: 시스템 네비바 높이만큼 floating pill 위로 올림 */
-body.native-app .nav-container:not(.docked){bottom:calc(28px + max(env(safe-area-inset-bottom,0px),var(--native-nav-bar-h,0px)))}
+/* Android 3버튼/제스처 모드: 시스템 네비바 높이만큼 floating pill 위로 올림 (JS가 --native-nav-bar-h 설정) */
+body.native-app .nav-container:not(.docked){bottom:calc(28px + var(--native-nav-bar-h,0px))}
 
 </style>
 <!-- early CSS injection 제거: auth-continue가 HTML에서 바로 visible -->
@@ -2921,22 +2921,36 @@ requestAnimationFrame(function(){
   _setNativeAppClass();
   // 혹시 늦게 주입되는 경우를 대비해 DOMContentLoaded 시점에도 재확인
   document.addEventListener('DOMContentLoaded', _setNativeAppClass, {once:true});
-  // Android 3버튼 네비바 감지: env(safe-area-inset-bottom)이 0인 경우 JS로 보정
-  document.addEventListener('DOMContentLoaded', function(){
+  // Android 네비바 높이 감지 → CSS --native-nav-bar-h 설정
+  // screen.height(전체 화면) - window.innerHeight(WebView) - 상태바(~24dp) = 네비바 높이
+  function _detectAndroidNavBar(){
     if(!document.body.classList.contains('native-app'))return;
-    var test=document.createElement('div');
-    test.style.cssText='position:fixed;bottom:0;height:env(safe-area-inset-bottom,0px);pointer-events:none;visibility:hidden';
-    document.body.appendChild(test);
-    requestAnimationFrame(function(){
-      var h=test.offsetHeight;
-      test.remove();
-      // safe-area가 0이면 Android 3버튼 모드일 수 있음 — MilelyBridge에서 높이 가져오기
-      if(h===0 && window.MilelyBridge && typeof window.MilelyBridge.getNavBarHeight==='function'){
-        var nbh=parseInt(window.MilelyBridge.getNavBarHeight(),10)||0;
-        if(nbh>0) document.documentElement.style.setProperty('--native-nav-bar-h',nbh+'px');
-      }
-    });
-  },{once:true});
+    if(!/Android/i.test(navigator.userAgent))return;
+    // MilelyBridge가 직접 높이를 제공하면 우선 사용
+    if(window.MilelyBridge && typeof window.MilelyBridge.getNavBarHeight==='function'){
+      var nbh=parseInt(window.MilelyBridge.getNavBarHeight(),10)||0;
+      if(nbh>0){document.documentElement.style.setProperty('--native-nav-bar-h',nbh+'px');return;}
+    }
+    // screen.height와 innerHeight 차이로 추정
+    var dpr=window.devicePixelRatio||1;
+    var screenH=window.screen.height; // CSS px
+    var innerH=window.innerHeight;    // CSS px
+    var sysUI=screenH-innerH;         // 상태바 + 네비바
+    // 상태바 ≈ 24dp, 3버튼 네비바 ≈ 48dp → 합계 ≈ 72dp
+    // 제스처 모드: 상태바만 또는 + 힌트바(~16dp) → 합계 ≈ 24~40dp
+    // sysUI > 50이면 네비바가 있다고 판단
+    if(sysUI>50){
+      var navH=Math.round(sysUI-24); // 상태바 24dp 제외
+      if(navH>10) document.documentElement.style.setProperty('--native-nav-bar-h',navH+'px');
+    }
+  }
+  document.addEventListener('DOMContentLoaded', _detectAndroidNavBar, {once:true});
+  // 화면 회전 시 재계산
+  window.addEventListener('resize', function(){
+    if(document.body.classList.contains('native-app')&&/Android/i.test(navigator.userAgent)){
+      _detectAndroidNavBar();
+    }
+  });
 })();
 </script>
 
@@ -9330,7 +9344,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0414m';
+const _APP_VERSION = 'v0414n';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -19054,6 +19068,9 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.4.13 (v0414n)',date:'2026-04-14',items:[
+    'Android 3버튼 모드 네비바 높이 JS 감지로 floating nav 위치 보정 (env() 미지원 대응)'
+  ]},
   {ver:'2.4.12 (v0414m)',date:'2026-04-14',items:[
     'Android 3버튼 모드에서 floating nav이 시스템 네비바에 가려지는 문제 수정'
   ]},
