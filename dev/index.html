@@ -2862,29 +2862,11 @@ button:disabled {
 /* ========================================
    NATIVE APP (body.native-app)
    MilelyApp WebView에서 body에 native-app 클래스 추가 (JS로 설정).
-   - 좁은 폰(<768px)에서는 오버라이드 없음 — 기본 CSS가 그대로 동작
-   - 넓은 화면(≥768px, Galaxy Fold 펼침 등)에서만 사이드바→하단바 전환
-   - JS checkNavDock()이 isTabletOrDesktop() 무시 → 스크롤 dock 정상 동작
+   - nav/레이아웃은 기존 미디어쿼리가 그대로 처리 (별도 오버라이드 없음)
+   - 좁은 폰: 하단 floating pill → 스크롤 시 dock
+   - 넓은 화면(768px+): 태블릿/데스크탑 미디어쿼리에 의해 사이드바 또는 하단바
+   - body.native-app 클래스는 향후 WebView 전용 기능에 활용 가능
    ======================================== */
-/* 모든 크기에서 레이아웃 보정 (사이드바 margin 제거) */
-body.native-app .scr{margin-left:0!important;width:100%!important;max-width:100%!important;padding-bottom:calc(72px + env(safe-area-inset-bottom))!important;box-sizing:border-box!important}
-body.native-app #s-badge,body.native-app #s-privacy,body.native-app #s-terms{margin-left:0!important;width:100%!important;max-width:100%!important}
-body.native-app .auth-screen{margin-left:0!important;width:100%!important}
-/* ≥768px에서만: 사이드바 nav를 일반 폰 하단바 스타일로 재정의 (기본 CSS 값 그대로 사용) */
-@media(min-width:768px){
-body.native-app .nav-container{position:fixed!important;bottom:28px!important;left:50%!important;right:auto!important;top:auto!important;transform:translateX(-50%)!important;width:auto!important;max-width:calc(100vw - 24px)!important;height:auto!important;background:transparent!important}
-body.native-app .nav-container.docked{bottom:0!important;left:0!important;right:0!important;transform:none!important;width:100%!important;max-width:100%!important}
-body.native-app .bottom-nav{display:flex!important;flex-direction:row!important;align-items:center!important;gap:3px!important;background:color-mix(in srgb,var(--tab-color,var(--or)) 6%,rgba(255,255,255,.95))!important;backdrop-filter:blur(24px) saturate(180%)!important;-webkit-backdrop-filter:blur(24px) saturate(180%)!important;border:1px solid color-mix(in srgb,var(--tab-color,var(--or)) 12%,rgba(0,0,0,.04))!important;border-radius:var(--rxl)!important;padding:10px!important;box-shadow:0 4px 20px color-mix(in srgb,var(--tab-color,var(--or)) 12%,rgba(0,0,0,.1)),0 12px 40px rgba(0,0,0,.08)!important;height:auto!important;width:auto!important;box-sizing:border-box!important}
-body.native-app.dark .bottom-nav{background:color-mix(in srgb,var(--tab-color,var(--or)) 10%,rgba(20,30,50,.95))!important;border-color:color-mix(in srgb,var(--tab-color,var(--or)) 15%,rgba(255,255,255,.06))!important;box-shadow:0 4px 20px rgba(0,0,0,.3),0 12px 40px rgba(0,0,0,.2)!important}
-body.native-app .nav-container.docked .bottom-nav{border-radius:0!important;padding:8px 8px calc(8px + env(safe-area-inset-bottom))!important;gap:2px!important;justify-content:center!important;width:100%!important;background:var(--tab-lt,var(--or-lt))!important;border-color:transparent!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
-body.native-app.dark .nav-container.docked .bottom-nav{background:linear-gradient(var(--tab-lt-dk,rgba(99,102,241,.15)),var(--tab-lt-dk,rgba(99,102,241,.15))),rgba(15,23,42,.95)!important}
-body.native-app .bottom-nav::before{display:none!important}
-body.native-app .nav-brand{display:none!important}
-body.native-app .nav-item{padding:10px 14px!important;flex-direction:column!important;gap:3px!important;min-height:auto!important}
-body.native-app .nav-item .nav-label{opacity:1!important;max-width:none!important;font-size:var(--fs-sm)!important;margin-left:0!important}
-body.native-app .nav-divider{width:1px!important;height:22px!important;margin:0 4px!important}
-body.native-app .nav-users{flex-direction:row!important;gap:0!important}
-}
 
 </style>
 <!-- early CSS injection 제거: auth-continue가 HTML에서 바로 visible -->
@@ -2926,7 +2908,7 @@ requestAnimationFrame(function(){
   });
 });
 // 네이티브 앱(MilelyApp WebView) 감지 → body.native-app 클래스 추가
-// JS checkNavDock()에서 isTabletOrDesktop() 체크를 건너뛰어 Galaxy Fold 펼침에서도 dock 동작
+// 향후 WebView 전용 기능에 활용. nav/레이아웃은 기존 미디어쿼리가 처리
 (function(){
   function _setNativeAppClass(){
     if(window.MilelyBridge && typeof window.MilelyBridge.isNativeApp==='function' && window.MilelyBridge.isNativeApp()){
@@ -9330,7 +9312,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0414i';
+const _APP_VERSION = 'v0414j';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -19054,8 +19036,11 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.4.9 (v0414j)',date:'2026-04-14',items:[
+    {type:'fix',text:'native-app nav/레이아웃 오버라이드 전부 제거 — 기존 미디어쿼리 100% 위임. 넓은 화면=사이드바, 좁은 폰=하단 floating+dock, JS checkNavDock도 원복'},
+  ]},
   {ver:'2.4.8 (v0414i)',date:'2026-04-14',items:[
-    {type:'fix',text:'native-app nav CSS를 @media(min-width:768px)로 스코프 — 좁은 폰은 기본 CSS 유지(blur/반투명 정상), 넓은 화면만 사이드바→하단바 오버라이드. 기본 CSS 값 그대로 복사하여 시각 스타일 일치'},
+    {type:'fix',text:'native-app nav CSS @media(min-width:768px) 스코프 (floating pill 알파값 이슈)'},
   ]},
   {ver:'2.4.7 (v0414h)',date:'2026-04-14',items:[
     {type:'fix',text:'하단 탭바 원래 스타일 복원 — body.native-app nav CSS 오버라이드 제거 (넓은 화면 사이드바 겹침 문제 발생)'},
@@ -21789,9 +21774,7 @@ document.addEventListener('touchend',function(e){
 let _navDocked=false;
 function isTabletOrDesktop(){return window.innerWidth>=768}
 function checkNavDock(){
-  const isNative=document.body.classList.contains('native-app');
-  // 네이티브 앱은 화면 너비 무관하게 일반 폰과 동일하게 floating↔dock 처리
-  if(!isNative&&isTabletOrDesktop())return;
+  if(isTabletOrDesktop())return; // 태블릿/데스크탑에서는 사이드바 고정
   const scrollY=window.scrollY||document.documentElement.scrollTop;
   const container=document.querySelector('.nav-container');
   if(!container)return;
@@ -21807,8 +21790,7 @@ window.addEventListener('scroll',checkNavDock,{passive:true});
 // Also check on each visible screen's scroll
 document.querySelectorAll('.scr').forEach(scr=>{
   scr.addEventListener('scroll',()=>{
-    const isNative=document.body.classList.contains('native-app');
-    if(!isNative&&isTabletOrDesktop())return;
+    if(isTabletOrDesktop())return;
     const scrollY=scr.scrollTop;
     const container=document.querySelector('.nav-container');
     if(!container)return;
@@ -21821,10 +21803,9 @@ document.querySelectorAll('.scr').forEach(scr=>{
     }
   },{passive:true});
 });
-// 태블릿/데스크탑 전환 시 docked 클래스 제거 (네이티브 앱은 폰과 동일하게 유지)
+// 태블릿/데스크탑 전환 시 docked 클래스 제거
 window.addEventListener('resize',()=>{
-  const isNative=document.body.classList.contains('native-app');
-  if(!isNative&&isTabletOrDesktop()){
+  if(isTabletOrDesktop()){
     const c=document.querySelector('.nav-container');
     if(c)c.classList.remove('docked');
     _navDocked=false;
