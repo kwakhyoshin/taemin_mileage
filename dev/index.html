@@ -5931,7 +5931,8 @@ async function doJoinSocialLogin(provider){
 
     const memberName=S.familyMeta.members[mid]?.name||'';
     toast(`🎉 ${memberName}, 가입 완료! 환영해요!`);
-    if(!_pwaInstalled)setTimeout(showPwaInstallPopup,1500);
+    // PWA 설치 유도 팝업 비활성화 (앱 환경에서 불필요)
+    // if(!_pwaInstalled)setTimeout(showPwaInstallPopup,1500);
 
   } catch(e){
     console.error('[Join Social Login Error]',e);
@@ -6710,8 +6711,8 @@ async function createFamilyFinish(){
   if(_createState.socialUser && S.photos?.[currentUser]){
     try{ await save(); }catch(_e){ console.warn('[createFamilyFinish] save warning:', _e); }
   }
-  // PWA 설치 유도 (브라우저 환경일 때)
-  if(!_pwaInstalled)setTimeout(showPwaInstallPopup,1500);
+  // PWA 설치 유도 팝업 비활성화 (앱 환경에서 불필요)
+  // if(!_pwaInstalled)setTimeout(showPwaInstallPopup,1500);
 }
 
 // ── 비밀번호 해싱 유틸 ──
@@ -7013,8 +7014,8 @@ async function doJoinRegister(){
       toast(`✅ ${memberName}, ID와 비밀번호가 설정되었어요!`);
     }else{
       toast(`🎉 ${memberName}, 가입 완료! 환영해요!`);
-      // PWA 설치 유도 (초대받은 사용자, 브라우저 환경)
-      if(!_pwaInstalled)setTimeout(showPwaInstallPopup,1500);
+      // PWA 설치 유도 팝업 비활성화 (앱 환경에서 불필요)
+      // if(!_pwaInstalled)setTimeout(showPwaInstallPopup,1500);
     }
   }catch(e){
     console.error('Join register failed:',e);
@@ -9286,7 +9287,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0414b';
+const _APP_VERSION = 'v0414c';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -19010,6 +19011,10 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.4.2 (v0414c)',date:'2026-04-14',items:[
+    {type:'improve',text:'PWA 설치 안내 팝업 제거 — 앱 환경에서 불필요한 팝업 비활성화'},
+    {type:'improve',text:'AI 기능 소개 팝업 제거 — 출시 초기 한정 안내 비활성화'},
+  ]},
   {ver:'2.4.1 (v0414b)',date:'2026-04-14',items:[
     {type:'fix',text:'홈 이력보기 날짜 이동 화살표 방향 수정 — ▲ 이전 날, ▼ 다음 날'},
   ]},
@@ -24029,7 +24034,8 @@ window._createState = _createState;
   // 업데이트 내역 배지 + 알림 배너
   _updateChangelogBadge();
   _showChangelogPopupIfNew();
-  try{_maybeShowFeatureIntros();}catch(_){}
+  // AI 기능 소개 팝업 비활성화 (출시 초기 한정, 현재 불필요)
+  // try{_maybeShowFeatureIntros();}catch(_){}
 
   // 날씨/미세먼지 데이터 가져오기
   fetchWeather();
