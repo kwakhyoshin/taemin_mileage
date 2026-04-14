@@ -9286,7 +9286,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0413j';
+const _APP_VERSION = 'v0414a';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -19010,6 +19010,9 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.4.0 (v0414a)',date:'2026-04-14',items:[
+    {type:'improve',text:'디자인 토큰 표준화 — 색상 349개, border-radius 185개, font-size 410개를 CSS 변수로 통합'},
+  ]},
   {ver:'2.3.21 (v0413j)',date:'2026-04-13',items:[
     {type:'fix',text:'다크모드 곤충 선택 — 곤충 주변 은은한 밝은 glow 효과로 가시성 개선'},
   ]},
