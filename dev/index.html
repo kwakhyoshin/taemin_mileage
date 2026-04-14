@@ -2862,24 +2862,11 @@ button:disabled {
 /* ========================================
    NATIVE APP (body.native-app)
    MilelyApp WebView에서 body에 native-app 클래스 추가 (JS로 설정).
-   - 태블릿 미디어쿼리(사이드바)를 일반 폰과 동일한 floating+dock 방식으로 재정의
-   - floating 기본값 → 스크롤 60px 이상 시 .docked 클래스 추가 → bottom:0 도킹
-   - checkNavDock()이 화면 너비 무관하게 동작하도록 JS도 함께 수정
+   - nav 스타일은 기존 CSS + 미디어쿼리가 그대로 처리 (별도 오버라이드 없음)
+   - JS checkNavDock()만 isTabletOrDesktop() 체크를 native-app에서 건너뛰어
+     Galaxy Fold 펼침(768px+)에서도 일반 폰과 동일하게 floating↔dock 동작
+   - 아래 규칙은 레이아웃(사이드바 margin 등) 보정용만 유지
    ======================================== */
-/* floating 기본 상태 (일반 폰과 동일) */
-body.native-app .nav-container{position:fixed!important;bottom:28px!important;left:50%!important;right:auto!important;top:auto!important;transform:translateX(-50%)!important;width:auto!important;max-width:calc(100vw - 24px)!important;height:auto!important;background:transparent!important;display:flex!important;justify-content:center!important}
-/* docked 상태 (일반 폰 .docked와 동일) */
-body.native-app .nav-container.docked{bottom:0!important;left:0!important;right:0!important;transform:none!important;width:100%!important;max-width:100%!important}
-/* bottom-nav: 사이드바 레이아웃 무력화 → 가로 row (floating 외형 유지) */
-body.native-app .bottom-nav{flex-direction:row!important;align-items:center!important;gap:3px!important;border-radius:var(--rxl)!important;padding:10px!important;height:auto!important;border-right:none!important;width:auto!important;box-sizing:border-box!important}
-/* docked 시 bottom-nav 외형 변경 (일반 폰 docked와 동일) */
-body.native-app .nav-container.docked .bottom-nav{border-radius:0!important;padding:8px 8px calc(8px + env(safe-area-inset-bottom))!important;gap:2px!important;justify-content:center!important;width:100%!important;border-top:.5px solid var(--bdr)!important;background:var(--tab-lt,var(--or-lt))!important;box-shadow:none!important;border-left:none!important;border-right:none!important;border-bottom:none!important}
-body.native-app.dark .nav-container.docked .bottom-nav{background:linear-gradient(var(--tab-lt-dk,rgba(99,102,241,.15)),var(--tab-lt-dk,rgba(99,102,241,.15))),rgba(15,23,42,.95)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
-body.native-app .nav-item{padding:8px 12px!important;border-radius:var(--rsm)!important;flex-direction:column!important;justify-content:center!important;align-items:center!important;gap:2px!important}
-body.native-app .nav-item .nav-label{font-size:var(--fs-xs)!important;font-weight:700!important;max-width:none!important;opacity:1!important;margin-left:0!important}
-body.native-app .nav-brand{display:none!important}
-body.native-app .nav-divider{width:1px!important;height:22px!important;margin:0 4px!important}
-body.native-app .nav-users{flex-direction:row!important;gap:0!important}
 body.native-app .scr{margin-left:0!important;width:100%!important;max-width:100%!important;padding-bottom:calc(72px + env(safe-area-inset-bottom))!important;box-sizing:border-box!important}
 body.native-app #s-badge,body.native-app #s-privacy,body.native-app #s-terms{margin-left:0!important;width:100%!important;max-width:100%!important}
 body.native-app .auth-screen{margin-left:0!important;width:100%!important}
@@ -2924,7 +2911,7 @@ requestAnimationFrame(function(){
   });
 });
 // 네이티브 앱(MilelyApp WebView) 감지 → body.native-app 클래스 추가
-// CSS body.native-app 규칙이 모든 화면 크기에서 하단 탭바를 bottom:0 고정으로 처리
+// JS checkNavDock()에서 isTabletOrDesktop() 체크를 건너뛰어 Galaxy Fold 펼침에서도 dock 동작
 (function(){
   function _setNativeAppClass(){
     if(window.MilelyBridge && typeof window.MilelyBridge.isNativeApp==='function' && window.MilelyBridge.isNativeApp()){
@@ -9328,7 +9315,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0414g';
+const _APP_VERSION = 'v0414h';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -19052,8 +19039,11 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.4.7 (v0414h)',date:'2026-04-14',items:[
+    {type:'fix',text:'하단 탭바 원래 스타일 복원 — body.native-app nav CSS 오버라이드 제거. 일반 폰에서 원래의 blur/반투명 floating+docked 스타일 정상 동작. JS checkNavDock()만으로 Galaxy Fold 대응'},
+  ]},
   {ver:'2.4.6 (v0414g)',date:'2026-04-14',items:[
-    {type:'fix',text:'Galaxy Fold 펼침 화면에서 하단 탭바 동작 수정 — 일반 폰과 동일하게 스크롤 60px 이상 시 플로팅→bottom:0 도킹, 이하 시 다시 플로팅 (항상 고정이 아닌 일반 폰과 동일한 방식)'},
+    {type:'fix',text:'Galaxy Fold 펼침 화면에서 하단 탭바 동작 수정 — floating↔dock 방식으로 변경'},
   ]},
   {ver:'2.4.5 (v0414f)',date:'2026-04-14',items:[
     {type:'fix',text:'Galaxy Fold 펼침(태블릿) 화면에서 하단 탭바가 스크롤에 따라 움직이던 버그 수정 — body.native-app CSS로 처리'},
