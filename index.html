@@ -7324,6 +7324,14 @@ async function doLogin(idField, pwdField, errField){
   const errEl=document.getElementById(errField||'login-error');
   if(!id||!pwd){errEl.textContent='아이디와 비밀번호를 입력해주세요';return;}
 
+  // Firebase 초기화 대기 — WebView 콜드스타트 시 _firebaseReady가 false인 상태에서
+  // 로그인 누르면 글로벌 레지스트리 조회가 skip되어 "비번 틀림" 오탐이 발생하는 문제 방지
+  if(!_firebaseReady){
+    try { if(typeof _initFirebase==='function') await _initFirebase(); }
+    catch(e){ console.warn('[mile.ly] _initFirebase failed in doLogin:', e); }
+  }
+
+  let _fbNetworkError=false;
   try{
     const pwdHashSalted=await hashPassword(pwd);
     // 레거시 해시도 시도 (마이그레이션 지원)
@@ -7445,9 +7453,14 @@ async function doLogin(idField, pwdField, errField){
       }
     } catch (e) {
       console.error('Global login search error:', e);
+      _fbNetworkError = true;
     }
 
-    errEl.textContent='아이디 또는 비밀번호가 틀렸어요';
+    if(_fbNetworkError){
+      errEl.textContent='서버 연결을 확인 후 다시 시도해주세요';
+    } else {
+      errEl.textContent='아이디 또는 비밀번호가 틀렸어요';
+    }
   }catch(e){
     console.error('Login failed:',e);
     errEl.textContent='로그인 중 오류가 발생했어요';
@@ -9352,7 +9365,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'prod'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0415a';
+const _APP_VERSION = 'v0415b';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -19076,6 +19089,9 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.4.18 (v0415b)',date:'2026-04-15',items:[
+    'Android WebView 신규 설치 후 ID/PW 로그인 실패 수정 — doLogin() 진입 시 Firebase 초기화 대기, 네트워크 오류는 별도 메시지로 분기'
+  ]},
   {ver:'2.4.17 (v0415a)',date:'2026-04-15',items:[
     'Android WebView/네이티브 앱에서 beforeunload 다이얼로그로 OAuth 리다이렉트가 막히는 문제 수정 — MilelyApp UA에는 핸들러 미등록'
   ]},
