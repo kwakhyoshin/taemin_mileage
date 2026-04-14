@@ -72,9 +72,9 @@
 | R-052 | 2026-04-14 | Galaxy Fold 세로 펼침: 하단 floating→dock 동작 + 가로 펼침: 사이드바 | v0414k | PR #354 운영반영 | isSidebarMode() 도입: ≥1024px 또는 768+landscape=사이드바skip, 768-1023 portrait=스크롤 dock. docked 스타일은 폰과 동일(var(--tab-lt)) |
 | R-053 | 2026-04-14 | 갤럭시 폴드 세로모드 docked nav backdrop-filter 복원 | v0414l | 개발완료 | 768-1023 portrait 미디어쿼리에서 backdrop-filter:blur(24px) saturate(180%)!important 적용 |
 | R-054 | 2026-04-14 | Android 3버튼 네비바가 floating nav 겹침 수정 | v0414p | 개발완료 | UA 기반 html.is-android 감지 + bottom:76px!important (native-app 의존 제거) |
-| R-055 | 2026-04-14 | Android WebView에서 카카오 로그인: window.open()이 외부 브라우저로 열려 콜백 불가 | v0414q | 개발완료 | _isNativeWebView() 헬퍼 추가, WebView 감지 시 redirect 방식 강제 + 리다이렉트 복귀 처리기 추가 |
-| R-056 | 2026-04-14 | Android WebView에서 네이버 로그인 후 로그인 화면 멈춤 | v0414q | 개발완료 | WebView 감지 시 redirect 방식 강제 (기존 popup 시도 생략) |
-| R-057 | 2026-04-14 | Android WebView에서 온보딩 소개 이미지 깨짐 (ob-*.png) | v0414q | 개발완료 | 상대 경로 → 절대 URL(https://kwakhyoshin.github.io/taemin_mileage/dev/ob-*.png) |
+| R-055 | 2026-04-14 | Android WebView에서 카카오 로그인: window.open()이 외부 브라우저로 열려 콜백 불가 | v0414q | PR #366 운영반영 | _isNativeWebView() 헬퍼 추가, WebView 감지 시 redirect 방식 강제 + 리다이렉트 복귀 처리기 추가 |
+| R-056 | 2026-04-14 | Android WebView에서 네이버 로그인 후 로그인 화면 멈춤 | v0414q | PR #366 운영반영 | WebView 감지 시 redirect 방식 강제 (기존 popup 시도 생략) |
+| R-057 | 2026-04-14 | Android WebView에서 온보딩 소개 이미지 깨짐 (ob-*.png) | v0414q | PR #366 운영반영 | 상대 경로 → 절대 URL(https://kwakhyoshin.github.io/taemin_mileage/dev/ob-*.png) |
 
 ## 미착수 백로그 (ROADMAP.md 기준)
 
