@@ -2867,8 +2867,8 @@ button:disabled {
    - 넓은 화면(768px+): 태블릿/데스크탑 미디어쿼리에 의해 사이드바 또는 하단바
    - body.native-app 클래스는 향후 WebView 전용 기능에 활용 가능
    ======================================== */
-/* Android 3버튼/제스처 모드: 시스템 네비바 높이만큼 floating pill 위로 올림 (JS가 --native-nav-bar-h 설정) */
-body.native-app .nav-container:not(.docked){bottom:calc(28px + var(--native-nav-bar-h,0px))}
+/* Android 시스템 네비바(3버튼) 대응: JS가 html.is-android 클래스 추가 시 floating pill 위로 올림 */
+html.is-android .nav-container:not(.docked){bottom:76px!important}
 
 </style>
 <!-- early CSS injection 제거: auth-continue가 HTML에서 바로 visible -->
@@ -2921,18 +2921,11 @@ requestAnimationFrame(function(){
   _setNativeAppClass();
   // 혹시 늦게 주입되는 경우를 대비해 DOMContentLoaded 시점에도 재확인
   document.addEventListener('DOMContentLoaded', _setNativeAppClass, {once:true});
-  // Android 네이티브 앱: 시스템 네비바 높이 CSS 변수 설정
-  // MilelyBridge.getNavBarHeight() 우선, 없으면 48px(표준 3버튼 높이) 고정 적용
-  function _setAndroidNavBarH(){
-    if(!document.body.classList.contains('native-app'))return;
-    if(!/Android/i.test(navigator.userAgent))return;
-    var nbh=48; // 기본값: Android 3버튼 네비바 표준 높이(dp)
-    if(window.MilelyBridge && typeof window.MilelyBridge.getNavBarHeight==='function'){
-      nbh=parseInt(window.MilelyBridge.getNavBarHeight(),10)||48;
-    }
-    document.documentElement.style.setProperty('--native-nav-bar-h',nbh+'px');
+  // Android 감지: UA에 'Android' 포함 시 html에 is-android 클래스 추가
+  // → CSS에서 floating nav bottom을 3버튼 네비바 높이(48dp)만큼 올림
+  if(/Android/i.test(navigator.userAgent)){
+    document.documentElement.classList.add('is-android');
   }
-  document.addEventListener('DOMContentLoaded', _setAndroidNavBarH, {once:true});
 })();
 </script>
 
@@ -9326,7 +9319,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'prod'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0414o';
+const _APP_VERSION = 'v0414p';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -19050,6 +19043,9 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.4.15 (v0414p)',date:'2026-04-14',items:[
+    'Android 3버튼 네비바 겹침 근본 수정: native-app 의존 제거, UA 감지 + html.is-android로 bottom:76px 적용'
+  ]},
   {ver:'2.4.14 (v0414o)',date:'2026-04-14',items:[
     'Android 네이티브 앱 네비바 48px 고정 적용으로 floating nav 겹침 해결'
   ]},
