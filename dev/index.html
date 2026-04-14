@@ -9389,7 +9389,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0415d';
+const _APP_VERSION = 'v0415e';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -10061,6 +10061,88 @@ function generateSecureRandom(len=32) {
 }
 
 // Robust debounced save with in-flight guard
+// ── 원격 Firestore 스냅샷을 로컬 S에 반영하는 통합 핸들러 ───────────────────
+// listener 중복 코드를 제거하고, 보상 승인/거절 등의 memberData 변경이
+// "S.rewardInventory 뷰"에 늦게 반영되던 버그를 함께 해결
+function _applyRemoteSnap(snap){
+  if(!snap || !snap.exists()) return;
+  if(_isSaving) return;
+  // cooldown 단축: 2000ms → 400ms (승인/거절 등이 빠르게 반영되도록)
+  if(Date.now()-_lastSaveTime<400) return;
+  const _sd = snap.data();
+  const _ij = JSON.stringify(_sd);
+  if(_ij===_lastSavedJSON || _ij===JSON.stringify(S)) return;
+
+  if(!_hasDirtyLocal){
+    // 전체 교체 + 현재 사용자/뷰 기준으로 memberData → S.* 재동기화
+    S=Object.assign(defaultState(),_sd);
+    _lastSavedJSON=_ij;
+    try{ rebuildMembersFromFamily(); }catch(_){}
+    // ★ 독립 모드: S는 방금 원격으로 교체됐으므로, 현재 뷰 대상(자녀/자신)의
+    //   memberData를 다시 S.*에 복사해야 rewardInventory 등이 최신으로 보임
+    try{
+      if(getFamilyMode()==='independent'){
+        const _mid = _globalDataOwner || currentUser;
+        if(_mid && S.memberData && S.memberData[_mid]){
+          syncMemberToGlobal(_mid);
+        }
+      }
+    }catch(e){ console.warn('[_applyRemoteSnap] resync error:', e); }
+    try{ renderAll(); }catch(_){}
+    try{ checkNewMessages(); }catch(_){}
+    try{ renderNavUsers(); }catch(_){}
+    try{ _updatePlanBadges(); }catch(_){}
+    console.log('🔄 다른 기기에서 데이터가 업데이트됐어요');
+    return;
+  }
+
+  // 로컬 dirty 상태 — 부분 sync: 원격에서 도착한 보상 승인/거절/활동 승인 등
+  // "다른 사용자가 나에게 해준 변경"은 놓치면 안 되므로 타겟 필드만 안전하게 반영
+  let _needRender = false;
+  if(_sd.familyMessages && JSON.stringify(_sd.familyMessages)!==JSON.stringify(S.familyMessages)){
+    S.familyMessages=_sd.familyMessages;
+    try{ checkNewMessages(); }catch(_){}
+    try{ _updateFamilyBtnBadge(); }catch(_){}
+  }
+  if(_sd.actVerifyRequests && JSON.stringify(_sd.actVerifyRequests)!==JSON.stringify(S.actVerifyRequests)){
+    S.actVerifyRequests=_sd.actVerifyRequests;
+    try{ _updateFamilyBtnBadge(); }catch(_){}
+  }
+  if(_sd.rewardRequests && JSON.stringify(_sd.rewardRequests)!==JSON.stringify(S.rewardRequests)){
+    S.rewardRequests=_sd.rewardRequests;
+    _needRender = true;
+  }
+  // ★ 보상 승인/거절로 인한 memberData 변경을 dirty 상태에서도 반영
+  //   (원격에서 내 memberData가 바뀌었다면 그대로 덮어씀 — 해당 필드는 다른 사용자가 수정하는 경로이므로 로컬 dirty와 충돌 가능성 낮음)
+  try{
+    const _mid = _globalDataOwner || currentUser;
+    if(_mid && _sd.memberData && _sd.memberData[_mid]){
+      const _remoteMd = _sd.memberData[_mid];
+      const _localMd = (S.memberData && S.memberData[_mid]) || {};
+      const _remoteInv = JSON.stringify(_remoteMd.rewardInventory||[]);
+      const _remoteReq = JSON.stringify(_remoteMd.rewardRequests||[]);
+      const _localInv = JSON.stringify(_localMd.rewardInventory||[]);
+      const _localReq = JSON.stringify(_localMd.rewardRequests||[]);
+      if(_remoteInv!==_localInv || _remoteReq!==_localReq){
+        if(!S.memberData) S.memberData={};
+        if(!S.memberData[_mid]) S.memberData[_mid]={};
+        S.memberData[_mid].rewardInventory = _remoteMd.rewardInventory ? JSON.parse(_remoteInv) : [];
+        S.memberData[_mid].rewardRequests = _remoteMd.rewardRequests ? JSON.parse(_remoteReq) : [];
+        // 독립모드에서 현재 보고 있는 대상이면 S.*도 즉시 반영
+        if(getFamilyMode()==='independent' && (_globalDataOwner===_mid || (!_globalDataOwner && currentUser===_mid))){
+          S.rewardInventory = JSON.parse(_remoteInv);
+          S.rewardRequests = JSON.parse(_remoteReq);
+        }
+        _needRender = true;
+      }
+    }
+  }catch(e){ console.warn('[_applyRemoteSnap] memberData merge error:', e); }
+  if(_needRender){
+    try{ if(typeof renderRewardInventory==='function') renderRewardInventory(); }catch(_){}
+    try{ if(typeof renderAll==='function') renderAll(); }catch(_){}
+  }
+}
+
 function save(){
   // independent 모드에서 양육자가 자녀 데이터를 보고 있으면 해당 자녀에게 저장
   // ⚠️ 반드시 _globalDataOwner만 사용 — viewingChildId를 fallback으로 쓰면
@@ -16094,12 +16176,14 @@ function approveRewardRequest(reqId,approver){
   req.approvedBy=approver;
   req.approvedAt=Date.now();
 
-  if(!S.rewardInventory)return;
-  const inv=S.rewardInventory.find(x=>x.id===req.rwdInvId);
-  if(inv){
-    inv.status='approved';
-    inv.approvedBy=approver;
-    inv.approvedAt=Date.now();
+  // (v0415e) S.rewardInventory가 비어있어도 아래 memberData 업데이트는 반드시 수행
+  if(S.rewardInventory){
+    const inv=S.rewardInventory.find(x=>x.id===req.rwdInvId);
+    if(inv){
+      inv.status='approved';
+      inv.approvedBy=approver;
+      inv.approvedAt=Date.now();
+    }
   }
 
   // ★ 독립모드: 자녀의 memberData에도 승인 상태 반영 (save 시 누락 방지)
@@ -16150,10 +16234,10 @@ function rejectRewardRequest(reqId,rejector){
   req.approvedBy=rejector;
   req.approvedAt=Date.now();
 
-  if(!S.rewardInventory)return;
-  const inv=S.rewardInventory.find(x=>x.id===req.rwdInvId);
-  if(inv){
-    inv.status='owned';
+  // (v0415e) S.rewardInventory가 비어있어도 아래 memberData 업데이트는 반드시 수행
+  if(S.rewardInventory){
+    const inv=S.rewardInventory.find(x=>x.id===req.rwdInvId);
+    if(inv){ inv.status='owned'; }
   }
 
   // ★ 독립모드: 자녀의 memberData에도 거절 상태 반영 (save 시 누락 방지)
@@ -19113,6 +19197,10 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.4.21 (v0415e)',date:'2026-04-15',items:[
+    '보상 사용 승인/거절 후 자녀 기기의 보상 인벤토리 동적 갱신 지연 수정 — Firestore 리스너 쿨다운 2000ms→400ms 단축, 쿨다운/로컬 dirty 상태에서도 memberData[자녀].rewardInventory/rewardRequests 변경을 즉시 S.*에 반영하여 같은 자녀 계정으로 로그인한 다른 기기에서도 "사용신청중" → "사용완료" 상태가 앱 재시작 없이 바로 갱신됨',
+    'approveRewardRequest / rejectRewardRequest: 부모의 root S.rewardInventory가 비어있어도 memberData 업데이트가 수행되도록 early-return 제거'
+  ]},
   {ver:'2.4.20 (v0415d)',date:'2026-04-15',items:[
     'Android APK FCM 푸시 수신 활성화 — 로그인 완료 후 MilelyBridge.requestFcmToken() 자동 호출, 앱 준비 전 수신된 토큰은 pending으로 보관했다가 로그인 직후 flush',
     'Cloud Functions: activity_verify 타입 트리거 추가 — 자녀가 활동 승인 요청 시 부모 기기로 즉시 푸시'
@@ -24387,8 +24475,9 @@ window._createState = _createState;
       if(_isSaving) return;
       if(incomingJSON === _lastSavedJSON) return;
       if(incomingJSON === JSON.stringify(S)) return;
-      // 쿨다운 중이라도 새 메시지/보상요청이 있으면 머지 (알림 누락 방지)
-      if(Date.now() - _lastSaveTime < 2000){
+      // (v0415e) 쿨다운 2000ms → 400ms로 단축 (보상 승인 등이 빠르게 반영되도록)
+      // 쿨다운 중이라도 새 메시지/보상요청/보상승인 상태 변경이 있으면 머지 (알림 누락 방지)
+      if(Date.now() - _lastSaveTime < 400){
         try{
           const _cd=snap.data();
           let _cdChanged=false;
@@ -24404,7 +24493,36 @@ window._createState = _createState;
             _newR.forEach(r=>{S.rewardRequests.push(r);});
             _cdChanged=true;
           }
-          if(_cdChanged){renderNavUsers();checkNewMessages();}
+          // (v0415e) 쿨다운 중 memberData[currentUser] 보상 상태 변경도 즉시 반영
+          try{
+            const _mid = (typeof _globalDataOwner!=='undefined' && _globalDataOwner) || currentUser;
+            if(_mid && _cd.memberData && _cd.memberData[_mid]){
+              const _rm = _cd.memberData[_mid];
+              const _lm = (S.memberData && S.memberData[_mid]) || {};
+              const _rInv = JSON.stringify(_rm.rewardInventory||[]);
+              const _lInv = JSON.stringify(_lm.rewardInventory||[]);
+              const _rReq = JSON.stringify(_rm.rewardRequests||[]);
+              const _lReq = JSON.stringify(_lm.rewardRequests||[]);
+              if(_rInv!==_lInv || _rReq!==_lReq){
+                if(!S.memberData) S.memberData={};
+                if(!S.memberData[_mid]) S.memberData[_mid]={};
+                S.memberData[_mid].rewardInventory = JSON.parse(_rInv);
+                S.memberData[_mid].rewardRequests = JSON.parse(_rReq);
+                // 독립모드에서 지금 그 대상의 데이터를 보고 있으면 S.*에도 즉시 반영
+                if(getFamilyMode()==='independent' && ((typeof _globalDataOwner!=='undefined' && _globalDataOwner===_mid) || ((typeof _globalDataOwner==='undefined' || !_globalDataOwner) && currentUser===_mid))){
+                  S.rewardInventory = JSON.parse(_rInv);
+                  S.rewardRequests = JSON.parse(_rReq);
+                }
+                _cdChanged=true;
+              }
+            }
+          }catch(_e){}
+          if(_cdChanged){
+            try{ renderNavUsers(); }catch(_){}
+            try{ checkNewMessages(); }catch(_){}
+            try{ if(typeof renderRewardInventory==='function') renderRewardInventory(); }catch(_){}
+            try{ renderAll(); }catch(_){}
+          }
         }catch(e){}
         return;
       }
@@ -24534,6 +24652,33 @@ window._createState = _createState;
               S.rewardNotify=incoming.rewardNotify;
             }
           }
+          // (v0415e) memberData[currentUser] 보상 승인/거절 상태 변경 머지 —
+          // 독립모드에서 부모가 자녀의 memberData에 쓴 승인 상태가 "S.rewardInventory 뷰"에 즉시 반영되도록
+          try{
+            const _mid = (typeof _globalDataOwner!=='undefined' && _globalDataOwner) || currentUser;
+            if(_mid && incoming.memberData && incoming.memberData[_mid]){
+              const _rm = incoming.memberData[_mid];
+              const _lm = (S.memberData && S.memberData[_mid]) || {};
+              const _rInv = JSON.stringify(_rm.rewardInventory||[]);
+              const _lInv = JSON.stringify(_lm.rewardInventory||[]);
+              const _rReq = JSON.stringify(_rm.rewardRequests||[]);
+              const _lReq = JSON.stringify(_lm.rewardRequests||[]);
+              let _mdChanged = false;
+              if(_rInv!==_lInv || _rReq!==_lReq){
+                if(!S.memberData) S.memberData={};
+                if(!S.memberData[_mid]) S.memberData[_mid]={};
+                S.memberData[_mid].rewardInventory = JSON.parse(_rInv);
+                S.memberData[_mid].rewardRequests = JSON.parse(_rReq);
+                _mdChanged = true;
+              }
+              if(_mdChanged && getFamilyMode()==='independent' && ((typeof _globalDataOwner!=='undefined' && _globalDataOwner===_mid) || ((typeof _globalDataOwner==='undefined' || !_globalDataOwner) && currentUser===_mid))){
+                S.rewardInventory = JSON.parse(_rInv);
+                S.rewardRequests = JSON.parse(_rReq);
+                try{ if(typeof renderRewardInventory==='function') renderRewardInventory(); }catch(_){}
+                try{ renderAll(); }catch(_){}
+              }
+            }
+          }catch(_e){}
         }catch(e){}
         console.log('🛡️ 로컬 변경 보호: 외부 변경 일부만 머지');
         return;
