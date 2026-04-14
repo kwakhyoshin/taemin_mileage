@@ -75,6 +75,9 @@
 | R-055 | 2026-04-14 | Android WebView에서 카카오 로그인: window.open()이 외부 브라우저로 열려 콜백 불가 | v0414q | PR #366 운영반영 | _isNativeWebView() 헬퍼 추가, WebView 감지 시 redirect 방식 강제 + 리다이렉트 복귀 처리기 추가 |
 | R-056 | 2026-04-14 | Android WebView에서 네이버 로그인 후 로그인 화면 멈춤 | v0414q | PR #366 운영반영 | WebView 감지 시 redirect 방식 강제 (기존 popup 시도 생략) |
 | R-057 | 2026-04-14 | Android WebView에서 온보딩 소개 이미지 깨짐 (ob-*.png) | v0414q | PR #366 운영반영 | 상대 경로 → 절대 URL(https://kwakhyoshin.github.io/taemin_mileage/dev/ob-*.png) |
+| R-058 | 2026-04-15 | FCM 푸시 data 페이로드에 title/body 추가 (APK data 우선 읽음) | PR #367 | N/A (서버) | functions-index.js sendToDevices data 블록에 title/body 포함 |
+| R-059 | 2026-04-15 | activity_verify 푸시 타입 매핑 (familyMessages.type → push data.type) | PR #367 | N/A (서버) | buildFamilyMsgPayload 헬퍼, activity_verify_request/_approval/_rejection → activity_verify |
+| R-060 | 2026-04-15 | push-sender.js FCM 분기 추가 (admin.messaging().send) | PR #367 | N/A (서버) | CLI 리마인더 스크립트에서도 FCM 기기에 발송 가능. 만료 토큰 자동 비활성화 |
 
 ## 미착수 백로그 (ROADMAP.md 기준)
 
