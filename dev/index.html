@@ -2921,36 +2921,18 @@ requestAnimationFrame(function(){
   _setNativeAppClass();
   // 혹시 늦게 주입되는 경우를 대비해 DOMContentLoaded 시점에도 재확인
   document.addEventListener('DOMContentLoaded', _setNativeAppClass, {once:true});
-  // Android 네비바 높이 감지 → CSS --native-nav-bar-h 설정
-  // screen.height(전체 화면) - window.innerHeight(WebView) - 상태바(~24dp) = 네비바 높이
-  function _detectAndroidNavBar(){
+  // Android 네이티브 앱: 시스템 네비바 높이 CSS 변수 설정
+  // MilelyBridge.getNavBarHeight() 우선, 없으면 48px(표준 3버튼 높이) 고정 적용
+  function _setAndroidNavBarH(){
     if(!document.body.classList.contains('native-app'))return;
     if(!/Android/i.test(navigator.userAgent))return;
-    // MilelyBridge가 직접 높이를 제공하면 우선 사용
+    var nbh=48; // 기본값: Android 3버튼 네비바 표준 높이(dp)
     if(window.MilelyBridge && typeof window.MilelyBridge.getNavBarHeight==='function'){
-      var nbh=parseInt(window.MilelyBridge.getNavBarHeight(),10)||0;
-      if(nbh>0){document.documentElement.style.setProperty('--native-nav-bar-h',nbh+'px');return;}
+      nbh=parseInt(window.MilelyBridge.getNavBarHeight(),10)||48;
     }
-    // screen.height와 innerHeight 차이로 추정
-    var dpr=window.devicePixelRatio||1;
-    var screenH=window.screen.height; // CSS px
-    var innerH=window.innerHeight;    // CSS px
-    var sysUI=screenH-innerH;         // 상태바 + 네비바
-    // 상태바 ≈ 24dp, 3버튼 네비바 ≈ 48dp → 합계 ≈ 72dp
-    // 제스처 모드: 상태바만 또는 + 힌트바(~16dp) → 합계 ≈ 24~40dp
-    // sysUI > 50이면 네비바가 있다고 판단
-    if(sysUI>50){
-      var navH=Math.round(sysUI-24); // 상태바 24dp 제외
-      if(navH>10) document.documentElement.style.setProperty('--native-nav-bar-h',navH+'px');
-    }
+    document.documentElement.style.setProperty('--native-nav-bar-h',nbh+'px');
   }
-  document.addEventListener('DOMContentLoaded', _detectAndroidNavBar, {once:true});
-  // 화면 회전 시 재계산
-  window.addEventListener('resize', function(){
-    if(document.body.classList.contains('native-app')&&/Android/i.test(navigator.userAgent)){
-      _detectAndroidNavBar();
-    }
-  });
+  document.addEventListener('DOMContentLoaded', _setAndroidNavBarH, {once:true});
 })();
 </script>
 
@@ -9344,7 +9326,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0414n';
+const _APP_VERSION = 'v0414o';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -19068,6 +19050,9 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.4.14 (v0414o)',date:'2026-04-14',items:[
+    'Android 네이티브 앱 네비바 48px 고정 적용으로 floating nav 겹침 해결'
+  ]},
   {ver:'2.4.13 (v0414n)',date:'2026-04-14',items:[
     'Android 3버튼 모드 네비바 높이 JS 감지로 floating nav 위치 보정 (env() 미지원 대응)'
   ]},
