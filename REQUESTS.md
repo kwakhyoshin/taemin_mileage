@@ -68,7 +68,8 @@
 | R-048 | 2026-04-14 | Galaxy Fold 탭바 동작 수정 — 항상 고정 방식 → 일반 폰과 동일한 floating↔dock 방식 | v0414g | PR #346 운영반영 | checkNavDock()이 native-app에서도 동작 |
 | R-049 | 2026-04-14 | 하단 탭바 원래 스타일 복원 — body.native-app nav CSS 오버라이드 제거 | v0414h | PR #348 운영반영 | nav CSS !important 전부 삭제 (넓은 화면 사이드바 겹침 문제 발생) |
 | R-050 | 2026-04-14 | native-app nav CSS를 @media(min-width:768px)로 스코프 | v0414i | PR #350 운영반영 | 좁은 폰은 기본 CSS 유지, 넓은 화면 사이드바→하단바 오버라이드 |
-| R-051 | 2026-04-14 | Galaxy Fold 펼침=태블릿 모드(사이드바) — native-app nav 오버라이드 전부 제거 | v0414j | PR #352 운영반영 | body.native-app CSS/JS 원복, 기존 미디어쿼리 100% 위임. 넓은 화면=사이드바, 좁은 폰=하단 floating+dock |
+| R-051 | 2026-04-14 | Galaxy Fold 펼침=태블릿 모드(사이드바) — native-app nav 오버라이드 전부 제거 | v0414j | PR #352 운영반영 | body.native-app CSS/JS 원복, 기존 미디어쿼리 위임 |
+| R-052 | 2026-04-14 | Galaxy Fold 세로 펼침: 하단 floating→dock 동작 + 가로 펼침: 사이드바 | v0414k | PR #354 운영반영 | isSidebarMode() 도입: ≥1024px 또는 768+landscape=사이드바skip, 768-1023 portrait=스크롤 dock. docked 스타일은 폰과 동일(var(--tab-lt)) |
 
 ## 미착수 백로그 (ROADMAP.md 기준)
 
