@@ -190,8 +190,10 @@ exports.onBroadcastPush = onDocumentUpdated({ document: "users/taemin", secrets:
   const broadcast = after.pushBroadcast;
   const devices = after.pushDevices || {};
   const allUsers = Object.keys(NAMES);
+  // targetUser 지정 시 해당 유저에게만 발송 (관리자 테스트 알림)
+  const targetUsers = broadcast.targetUser ? [broadcast.targetUser] : allUsers;
 
-  return sendToDevices(devices, allUsers, {
+  return sendToDevices(devices, targetUsers, {
     title: broadcast.title || "태민이 마일리지 🌟",
     body: broadcast.body || "새 알림이 있어요!",
     icon: "icon-180.png",
@@ -328,8 +330,9 @@ exports.onBroadcastPushFamilies = onDocumentUpdated({ document: "families/{famil
   const broadcast = after.pushBroadcast;
   const devices = after.pushDevices || {};
   const allUsers = Object.keys(devices).map(k => devices[k].user).filter((v, i, a) => a.indexOf(v) === i);
+  const targetUsers = broadcast.targetUser ? [broadcast.targetUser] : allUsers;
 
-  return sendToDevices(devices, allUsers, {
+  return sendToDevices(devices, targetUsers, {
     title: broadcast.title || "태민이 마일리지 🌟",
     body: broadcast.body || "새 알림이 있어요!",
     icon: "icon-180.png",
@@ -470,8 +473,9 @@ exports.onBroadcastPushDevFamilies = onDocumentUpdated({ document: "families/{fa
   const broadcast = after.pushBroadcast;
   const devices = after.pushDevices || {};
   const allUsers = Object.keys(devices).map(k => devices[k].user).filter((v, i, a) => a.indexOf(v) === i);
+  const targetUsers = broadcast.targetUser ? [broadcast.targetUser] : allUsers;
 
-  return sendToDevices(devices, allUsers, {
+  return sendToDevices(devices, targetUsers, {
     title: "[DEV] " + (broadcast.title || "태민이 마일리지 🌟"),
     body: broadcast.body || "새 알림이 있어요!",
     icon: "icon-180.png",
@@ -604,8 +608,9 @@ exports.onBroadcastPushDev = onDocumentUpdated({ document: "users/taemin_dev", s
   const broadcast = after.pushBroadcast;
   const devices = after.pushDevices || {};
   const allUsers = Object.keys(NAMES);
+  const targetUsers = broadcast.targetUser ? [broadcast.targetUser] : allUsers;
 
-  return sendToDevices(devices, allUsers, {
+  return sendToDevices(devices, targetUsers, {
     title: broadcast.title || "태민이 마일리지 🌟",
     body: broadcast.body || "새 알림이 있어요!",
     icon: "icon-180.png",

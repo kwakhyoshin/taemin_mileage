@@ -9365,7 +9365,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0415b';
+const _APP_VERSION = 'v0415c';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -19089,6 +19089,9 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.4.19 (v0415c)',date:'2026-04-15',items:[
+    '관리자 테스트 알림 발송 범위 수정 — 가족 전체 → 본인 계정 기기만 (pushBroadcast.targetUser 필드 추가, Cloud Functions 대응)'
+  ]},
   {ver:'2.4.18 (v0415b)',date:'2026-04-15',items:[
     'Android WebView 신규 설치 후 ID/PW 로그인 실패 수정 — doLogin() 진입 시 Firebase 초기화 대기, 네트워크 오류는 별도 메시지로 분기'
   ]},
@@ -22989,20 +22992,24 @@ async function showPushDebug(){
 }
 
 async function sendTestPush(){
-  // 모든 기기에 알림 전송 (Firestore → Cloud Functions → 모든 등록 기기)
+  // 본인 계정 기기에만 알림 전송 (Firestore → Cloud Functions → 본인 기기만)
   try{
-    const deviceCount=S.pushDevices?Object.values(S.pushDevices).filter(d=>d.enabled).length:0;
-    if(deviceCount===0){
-      toast('알림을 받을 기기가 없어요. 먼저 알림 받기를 활성화하세요.');return;
+    const myDeviceCount=S.pushDevices
+      ?Object.values(S.pushDevices).filter(d=>d.enabled && d.user===currentUser).length
+      :0;
+    if(myDeviceCount===0){
+      toast('본인 계정에 알림 받기로 등록된 기기가 없어요. 먼저 알림 받기를 활성화하세요.');return;
     }
     // pushBroadcast 필드를 업데이트하면 Cloud Functions의 onBroadcastPush가 트리거됨
+    // targetUser 필드를 넣으면 해당 유저의 기기에만 발송됨 (v0415c)
     S.pushBroadcast={
       title:'마일리 🌟',
-      body:'테스트 알림이에요! 모든 기기에서 확인해보세요 ✅',
-      ts:Date.now()
+      body:'테스트 알림이에요! 내 기기에서 확인해보세요 ✅',
+      ts:Date.now(),
+      targetUser:currentUser
     };
     save();
-    toast('📤 모든 기기('+deviceCount+'대)로 알림을 보냈어요!');
+    toast('📤 내 기기('+myDeviceCount+'대)로 알림을 보냈어요!');
   }catch(e){toast('알림 전송 실패: '+e.message);}
 }
 
