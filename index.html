@@ -2862,13 +2862,19 @@ button:disabled {
 /* ========================================
    NATIVE APP (body.native-app)
    MilelyApp WebView에서 body에 native-app 클래스 추가 (JS로 설정).
-   - 모든 화면 크기에서 하단 탭바를 position:fixed; bottom:0 으로 고정
-   - transform:translateX(-50%) + position:fixed 조합이 Android WebView에서
-     불안정한 문제 방지 (Galaxy Fold 등 대형 화면 포함)
+   - 태블릿 미디어쿼리(사이드바)를 일반 폰과 동일한 floating+dock 방식으로 재정의
+   - floating 기본값 → 스크롤 60px 이상 시 .docked 클래스 추가 → bottom:0 도킹
+   - checkNavDock()이 화면 너비 무관하게 동작하도록 JS도 함께 수정
    ======================================== */
-body.native-app .nav-container{position:fixed!important;bottom:0!important;top:auto!important;left:0!important;right:0!important;transform:none!important;width:100%!important;max-width:100%!important;height:auto!important;background:transparent!important;display:flex!important;justify-content:center!important}
-body.native-app .bottom-nav{flex-direction:row!important;align-items:center!important;gap:0!important;border-radius:var(--r) var(--r) 0 0!important;padding:8px 8px calc(8px + env(safe-area-inset-bottom))!important;height:auto!important;background:var(--card)!important;border:none!important;border-top:.5px solid var(--bdr)!important;border-right:none!important;box-shadow:0 -4px 20px rgba(0,0,0,.06)!important;justify-content:center!important;width:100%!important}
-body.native-app.dark .bottom-nav{background:var(--card)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;box-shadow:0 -4px 20px rgba(0,0,0,.2)!important}
+/* floating 기본 상태 (일반 폰과 동일) */
+body.native-app .nav-container{position:fixed!important;bottom:28px!important;left:50%!important;right:auto!important;top:auto!important;transform:translateX(-50%)!important;width:auto!important;max-width:calc(100vw - 24px)!important;height:auto!important;background:transparent!important;display:flex!important;justify-content:center!important}
+/* docked 상태 (일반 폰 .docked와 동일) */
+body.native-app .nav-container.docked{bottom:0!important;left:0!important;right:0!important;transform:none!important;width:100%!important;max-width:100%!important}
+/* bottom-nav: 사이드바 레이아웃 무력화 → 가로 row (floating 외형 유지) */
+body.native-app .bottom-nav{flex-direction:row!important;align-items:center!important;gap:3px!important;border-radius:var(--rxl)!important;padding:10px!important;height:auto!important;border-right:none!important;width:auto!important;box-sizing:border-box!important}
+/* docked 시 bottom-nav 외형 변경 (일반 폰 docked와 동일) */
+body.native-app .nav-container.docked .bottom-nav{border-radius:0!important;padding:8px 8px calc(8px + env(safe-area-inset-bottom))!important;gap:2px!important;justify-content:center!important;width:100%!important;border-top:.5px solid var(--bdr)!important;background:var(--tab-lt,var(--or-lt))!important;box-shadow:none!important;border-left:none!important;border-right:none!important;border-bottom:none!important}
+body.native-app.dark .nav-container.docked .bottom-nav{background:linear-gradient(var(--tab-lt-dk,rgba(99,102,241,.15)),var(--tab-lt-dk,rgba(99,102,241,.15))),rgba(15,23,42,.95)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
 body.native-app .nav-item{padding:8px 12px!important;border-radius:var(--rsm)!important;flex-direction:column!important;justify-content:center!important;align-items:center!important;gap:2px!important}
 body.native-app .nav-item .nav-label{font-size:var(--fs-xs)!important;font-weight:700!important;max-width:none!important;opacity:1!important;margin-left:0!important}
 body.native-app .nav-brand{display:none!important}
@@ -9322,7 +9328,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'prod'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0414f';
+const _APP_VERSION = 'v0414g';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -19046,8 +19052,11 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.4.6 (v0414g)',date:'2026-04-14',items:[
+    {type:'fix',text:'Galaxy Fold 펼침 화면에서 하단 탭바 동작 수정 — 일반 폰과 동일하게 스크롤 60px 이상 시 플로팅→bottom:0 도킹, 이하 시 다시 플로팅 (항상 고정이 아닌 일반 폰과 동일한 방식)'},
+  ]},
   {ver:'2.4.5 (v0414f)',date:'2026-04-14',items:[
-    {type:'fix',text:'Galaxy Fold 펼침(태블릿) 화면에서 하단 탭바가 스크롤에 따라 움직이던 버그 수정 — position:fixed+transform 조합 대신 body.native-app CSS로 항상 bottom:0 고정'},
+    {type:'fix',text:'Galaxy Fold 펼침(태블릿) 화면에서 하단 탭바가 스크롤에 따라 움직이던 버그 수정 — body.native-app CSS로 처리'},
   ]},
   {ver:'2.4.4 (v0414e)',date:'2026-04-14',items:[
     {type:'improve',text:'나의 메뉴 알림 항목 — "푸시 알림" → "알림 수신"으로 변경, 설명 문구 추가'},
@@ -21772,9 +21781,9 @@ document.addEventListener('touchend',function(e){
 let _navDocked=false;
 function isTabletOrDesktop(){return window.innerWidth>=768}
 function checkNavDock(){
-  // 네이티브 앱은 CSS body.native-app 으로 항상 bottom:0 고정 → JS dock 불필요
-  if(document.body.classList.contains('native-app'))return;
-  if(isTabletOrDesktop())return; // 태블릿/데스크탑에서는 사이드바 고정
+  const isNative=document.body.classList.contains('native-app');
+  // 네이티브 앱은 화면 너비 무관하게 일반 폰과 동일하게 floating↔dock 처리
+  if(!isNative&&isTabletOrDesktop())return;
   const scrollY=window.scrollY||document.documentElement.scrollTop;
   const container=document.querySelector('.nav-container');
   if(!container)return;
@@ -21790,8 +21799,8 @@ window.addEventListener('scroll',checkNavDock,{passive:true});
 // Also check on each visible screen's scroll
 document.querySelectorAll('.scr').forEach(scr=>{
   scr.addEventListener('scroll',()=>{
-    if(document.body.classList.contains('native-app'))return;
-    if(isTabletOrDesktop())return;
+    const isNative=document.body.classList.contains('native-app');
+    if(!isNative&&isTabletOrDesktop())return;
     const scrollY=scr.scrollTop;
     const container=document.querySelector('.nav-container');
     if(!container)return;
@@ -21804,9 +21813,10 @@ document.querySelectorAll('.scr').forEach(scr=>{
     }
   },{passive:true});
 });
-// 태블릿/데스크탑 전환 시 docked 클래스 제거
+// 태블릿/데스크탑 전환 시 docked 클래스 제거 (네이티브 앱은 폰과 동일하게 유지)
 window.addEventListener('resize',()=>{
-  if(isTabletOrDesktop()){
+  const isNative=document.body.classList.contains('native-app');
+  if(!isNative&&isTabletOrDesktop()){
     const c=document.querySelector('.nav-container');
     if(c)c.classList.remove('docked');
     _navDocked=false;
