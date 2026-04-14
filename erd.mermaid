@@ -1,0 +1,318 @@
+erDiagram
+    families ||--|| familyMeta : "embeds"
+    families ||--o{ memberData : "contains (independent mode)"
+    families ||--o{ dh_member : "subcollection"
+    families ||--o{ log : "activity logs"
+    families ||--o{ rewardInventory : "owned rewards"
+    families ||--o{ rewardRequests : "approval queue"
+    families ||--o{ actVerifyRequests : "activity approval queue"
+    families ||--o{ pushDevices : "push subscriptions"
+    families ||--o| pushBroadcast : "admin test push trigger"
+    families ||--o| rewardNotify : "reward approval push trigger"
+    families ||--o{ familyMessages : "chat"
+    families ||--o{ moodLog : "mood tracking"
+    families ||--o{ badges : "earned badges"
+    families ||--o{ challenges : "active challenges"
+    families ||--o{ stickers : "stickers"
+    familyMeta ||--o{ members : "has"
+    familyMeta ||--o{ inviteTokens : "has"
+    members ||--o| account : "login credentials"
+    _id_registry }o--|| families : "maps loginId to"
+    _auth_registry }o--|| families : "maps firebaseUid to"
+    emailVerify ||--|| members : "verifies signup"
+    users_legacy ||--|| families : "migrated to"
+
+    families {
+        string familyId PK "UUID"
+        string familyName "가족 이름"
+        string createdBy "생성자 memberId"
+        string mode "shared | independent"
+        string plan "free | pro"
+        number pts "총 마일리지 (shared)"
+        number streak "연속 일수"
+        number longest "최장 연속"
+        string lastDate "YYYY-MM-DD"
+        number totalDone "총 완료 수"
+        array acts "활동 정의"
+        array rwds "보상 정의"
+        array log "활동 완료 기록"
+        object actDone "활동별 완료 추적"
+        array allDoneDays "전체완료 날짜"
+        object badges "획득 뱃지"
+        array badgeLog "뱃지 이력"
+        array customBadges "커스텀 뱃지"
+        object badgeOverrides "뱃지 오버라이드"
+        object levelData "레벨 xp 데이터"
+        array challenges "진행중 챌린지"
+        array challengeHistory "완료 챌린지"
+        array rewardInventory "보유 보상"
+        array rewardRequests "승인 요청"
+        array rewardLog "보상 거래 내역"
+        array moodLog "기분 기록"
+        object moods "현재 기분 by member"
+        array familyMessages "가족 메시지"
+        object photos "프로필 사진 by member"
+        array stickers "스티커"
+        object settings "앱 설정"
+        object greetings "인사말 by member"
+        object dailyBonus "일일 룰렛"
+        object pushDevices "푸시 디바이스 맵 (deviceId→device)"
+        object pushBroadcast "관리자 테스트 푸시 트리거 (targetUser로 범위 제한)"
+        object rewardNotify "보상 승인 푸시 트리거 (deprecated, familyMessages 사용)"
+        array actVerifyRequests "활동 승인 요청 큐 (부모 승인제)"
+        object memberData "멤버별 데이터 (independent)"
+        object featureIntroConfig "기능 소개 설정"
+    }
+
+    familyMeta {
+        string familyId PK
+        string familyName
+        string mode "shared | independent"
+        string createdBy
+        number createdAt
+        string plan "free | pro"
+        object members "memberId to member info"
+        array inviteTokens "초대 토큰"
+    }
+
+    members {
+        string memberId PK
+        string name "가족 내 이름"
+        string type "child | caregiver | parent"
+        string role "역할 구분"
+        string displayRole "dad | mom | grandpa..."
+        boolean isAdmin
+        string birthDate "YYYY-MM-DD"
+        string gender
+        string color "테마 색상 hex"
+        string textColor "텍스트 색상 hex"
+        number joinedAt
+        object account FK "로그인 계정"
+    }
+
+    account {
+        string id "로그인 ID"
+        string pwdHash "암호화 비밀번호"
+        string authUid "Firebase UID (소셜)"
+        string authProvider "google | apple | local"
+        string email "소셜 이메일"
+        string socialDisplayName
+        number v "스키마 버전 (2)"
+    }
+
+    inviteTokens {
+        string token PK "UUID"
+        string memberId "배정된 멤버 (선택)"
+        number createdAt
+        number expiresAt "7일 후"
+        string type "auto | manual"
+        string createdBy "초대자 ID"
+        object autoAccount "자동생성 계정 (선택)"
+    }
+
+    memberData {
+        string memberId PK
+        number pts "개인 마일리지"
+        number streak
+        number longest
+        string lastDate
+        number totalDone
+        array acts "개인 활동"
+        array rwds "개인 보상"
+        array log "개인 활동 기록"
+        object actDone
+        array allDoneDays
+        array moodLog
+        object badges
+        array badgeLog
+        object levelData
+        array challenges
+        array challengeHistory
+        array rewardLog
+        array stickers
+        array rewardInventory "★ 독립모드에서 S.rewardInventory 소스"
+        array rewardRequests "★ 독립모드에서 S.rewardRequests 소스"
+    }
+
+    dh_member {
+        string memberId PK
+        string month PK "YYYY-MM"
+        number updatedAt
+        object days "DD별 일간 스냅샷"
+    }
+
+    dh_day_snapshot {
+        string day PK "DD"
+        array acts "그날 활동 스냅샷"
+        object done "actId to count"
+        boolean allDone
+        number streak
+        number ts
+    }
+
+    dh_member ||--o{ dh_day_snapshot : "days[DD]"
+
+    log {
+        string id PK
+        string emoji
+        string name "활동명"
+        number pts
+        number ts "타임스탬프"
+        string user "수행자 memberId"
+        string actId FK "활동 ID"
+        string note "메모"
+    }
+
+    rewardInventory {
+        string id PK
+        string rwdId FK "보상 정의 ID"
+        string rwdName
+        string rwdEmoji
+        number purchasedAt
+        number pts "사용 마일리지"
+        string status "owned | pending | approved | used"
+        string requestId "사용 요청 ID (pending 시)"
+        string approvedBy
+        number approvedAt
+    }
+
+    rewardRequests {
+        string id PK
+        string rwdInvId FK "인벤토리 ID"
+        string rwdName
+        string rwdEmoji
+        string fromUser "요청자 memberId (양육자 대리요청 시 자녀 ID)"
+        string forChild "대상 자녀 memberId"
+        array toUsers "승인자 목록"
+        string status "pending | approved | rejected"
+        number requestedAt
+        string approvedBy
+        number approvedAt
+    }
+
+    actVerifyRequests {
+        string id PK
+        string actId FK "활동 ID"
+        string actName
+        string actEmoji
+        number pts "해당 활동 마일리지"
+        string fromUser "요청 자녀 memberId"
+        array toUsers "승인 대상 양육자 목록"
+        string status "pending | approved | rejected"
+        number requestedAt
+        string approvedBy
+        number approvedAt
+        string note "첨부 메모/사진 URL"
+    }
+
+    familyMessages {
+        string from "발신 memberId"
+        string to "수신 memberId"
+        string text "메시지 본문"
+        string emotion "감정 태그"
+        number ts
+        boolean read
+        string type "general | reward_request | reward_approval | reward_rejection | activity_verify_request | activity_verify_approval | activity_verify_rejection | mood_update"
+        string requestId "관련 요청 ID"
+        string rwdInvId "관련 보상 인벤토리 ID"
+    }
+
+    pushDevices {
+        string deviceId PK "기기 식별자"
+        string type "webpush | fcm"
+        object subscription "VAPID subscription (webpush 전용)"
+        string fcmToken "FCM registration token (fcm 전용)"
+        string platform "ios | android | web"
+        string user "소유자 memberId"
+        boolean enabled
+        number updatedAt
+    }
+
+    pushBroadcast {
+        string title "푸시 제목"
+        string body "푸시 본문"
+        string url "클릭 시 이동 URL"
+        string targetUser "수신 대상 memberId (본인 제한 시)"
+        number ts "트리거 타임스탬프"
+    }
+
+    moodLog {
+        string mood "기분 ID"
+        string emoji
+        string label "기분 이름"
+        number ts
+        string user "memberId"
+    }
+
+    badges {
+        string badgeId PK
+        number earnedAt
+        boolean seen
+        boolean claimed "보너스 수령 여부"
+    }
+
+    challenges {
+        string id PK
+        string title
+        string emoji
+        string type "챌린지 유형"
+        number target "목표 수치"
+        number progress "현재 진행"
+        number reward "보상 마일리지"
+        string startDate
+        string endDate
+        boolean completed
+        boolean claimed
+    }
+
+    stickers {
+        string id PK
+        string actId FK
+        string type "emoji | bubble"
+        string content
+        string user "memberId"
+        number ts
+    }
+
+    _id_registry {
+        string loginId PK
+        string familyId FK
+        string memberId FK
+    }
+
+    _auth_registry {
+        string firebaseUid PK
+        string familyId FK
+        string memberId FK
+    }
+
+    emailVerify {
+        string email PK
+        string code "6자리 인증코드"
+        number createdAt
+        number expiresAt "5분"
+        number attempts "실패 횟수"
+        boolean verified
+        number verifiedAt
+    }
+
+    users_legacy {
+        string userId PK "taemin | taemin_dev"
+        string _migratedTo "families familyId"
+        string note "구조는 families와 동일"
+    }
+
+    system {
+        string configName PK
+        object config "동적 설정"
+    }
+
+    chatErrors {
+        string documentId PK "auto-generated"
+        object errorData "에러 로그"
+    }
+
+    chatQueries {
+        string documentId PK "auto-generated"
+        object queryData "쿼리 로그"
+    }

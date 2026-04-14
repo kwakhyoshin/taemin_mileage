@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>마일리(mile.ly) Firestore ERD</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Pretendard',sans-serif;background:#0F172A;color:#E2E8F0;min-height:100vh;overflow-x:auto}
+.header{background:linear-gradient(135deg,#6366F1,#818CF8);padding:32px 24px;text-align:center}
+.header h1{font-size:28px;font-weight:900;color:#fff}
+.header p{font-size:14px;color:rgba(255,255,255,.8);margin-top:6px}
+.container{max-width:1400px;margin:0 auto;padding:24px}
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:24px;justify-content:center}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:#94A3B8}
+.legend-dot{width:12px;height:12px;border-radius:50%}
+.section-title{font-size:20px;font-weight:800;color:#A5B4FC;margin:32px 0 16px;padding-left:12px;border-left:3px solid #6366F1}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;margin-bottom:24px}
+.entity{background:#1E293B;border-radius:16px;border:1px solid #334155;overflow:hidden;transition:transform .2s,box-shadow .2s}
+.entity:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.entity-header{padding:14px 16px;font-weight:800;font-size:15px;display:flex;align-items:center;gap:8px}
+.entity-header .path{font-size:11px;font-weight:500;color:rgba(255,255,255,.6);margin-left:auto}
+.entity-body{padding:0 16px 14px}
+.field{display:flex;align-items:baseline;padding:3px 0;font-size:12px;border-bottom:1px solid rgba(51,65,85,.5)}
+.field:last-child{border-bottom:none}
+.field-name{font-weight:700;color:#E2E8F0;min-width:120px;flex-shrink:0}
+.field-type{color:#818CF8;min-width:70px;font-size:11px;flex-shrink:0}
+.field-desc{color:#64748B;font-size:11px;margin-left:8px}
+.pk{color:#FCD34D}
+.fk{color:#34D399}
+.badge{font-size:9px;padding:1px 5px;border-radius:4px;font-weight:700;margin-left:4px}
+.badge-pk{background:rgba(252,211,77,.15);color:#FCD34D}
+.badge-fk{background:rgba(52,211,153,.15);color:#34D399}
+.badge-arr{background:rgba(251,146,60,.15);color:#FB923C}
+.badge-obj{background:rgba(129,140,248,.15);color:#818CF8}
+/* Colors by domain */
+.c-main{border-top:3px solid #6366F1}.c-main .entity-header{background:linear-gradient(135deg,#4338CA,#6366F1);color:#fff}
+.c-member{border-top:3px solid #8B5CF6}.c-member .entity-header{background:linear-gradient(135deg,#7C3AED,#8B5CF6);color:#fff}
+.c-auth{border-top:3px solid #EC4899}.c-auth .entity-header{background:linear-gradient(135deg,#DB2777,#EC4899);color:#fff}
+.c-data{border-top:3px solid #14B8A6}.c-data .entity-header{background:linear-gradient(135deg,#0D9488,#14B8A6);color:#fff}
+.c-social{border-top:3px solid #F59E0B}.c-social .entity-header{background:linear-gradient(135deg,#D97706,#F59E0B);color:#fff}
+.c-system{border-top:3px solid #64748B}.c-system .entity-header{background:linear-gradient(135deg,#475569,#64748B);color:#fff}
+.rel-section{margin:32px 0}
+.rel-table{width:100%;border-collapse:collapse;font-size:13px}
+.rel-table th{background:#1E293B;color:#A5B4FC;padding:10px 14px;text-align:left;font-weight:700;border-bottom:2px solid #334155}
+.rel-table td{padding:10px 14px;border-bottom:1px solid #1E293B;color:#CBD5E1}
+.rel-table tr:hover td{background:rgba(99,102,241,.05)}
+.arrow{color:#6366F1;font-weight:700}
+.note{background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.2);border-radius:10px;padding:14px 16px;margin:16px 0;font-size:13px;color:#FCD34D;line-height:1.7}
+.flow-diagram{background:#1E293B;border-radius:16px;padding:24px;margin:24px 0;text-align:center;overflow-x:auto}
+.flow-diagram svg{max-width:100%}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>마일리(mile.ly) — Firestore ERD</h1>
+  <p>v0415e 기준 데이터 구조 · 2026-04-15</p>
+</div>
+
+<div class="container">
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#6366F1"></div> 핵심 데이터</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#8B5CF6"></div> 멤버/역할</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#EC4899"></div> 인증/레지스트리</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#14B8A6"></div> 활동/기록</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#F59E0B"></div> 소셜/메시지</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#64748B"></div> 시스템</div>
+  <div class="legend-item"><span class="badge badge-pk">PK</span> Primary Key</div>
+  <div class="legend-item"><span class="badge badge-fk">FK</span> Foreign Key</div>
+  <div class="legend-item"><span class="badge badge-arr">arr</span> Array</div>
+  <div class="legend-item"><span class="badge badge-obj">obj</span> Object</div>
+</div>
+
+<!-- ═══ 핵심 구조 ═══ -->
+<div class="section-title">핵심 컬렉션 — families/{familyId}</div>
+
+<div class="grid">
+  <div class="entity c-main">
+    <div class="entity-header">families <span class="path">families/{familyId}</span></div>
+    <div class="entity-body">
+      <div class="field"><span class="field-name pk">familyId</span><span class="field-type">string</span><span class="badge badge-pk">PK</span><span class="field-desc">UUID</span></div>
+      <div class="field"><span class="field-name">familyName</span><span class="field-type">string</span><span class="field-desc">가족 이름</span></div>
+      <div class="field"><span class="field-name">createdBy</span><span class="field-type">string</span><span class="badge badge-fk">FK</span><span class="field-desc">생성자 memberId</span></div>
+      <div class="field"><span class="field-name">mode</span><span class="field-type">string</span><span class="field-desc">shared | independent</span></div>
+      <div class="field"><span class="field-name">plan</span><span class="field-type">string</span><span class="field-desc">free | pro</span></div>
+      <div class="field"><span class="field-name">pts</span><span class="field-type">number</span><span class="field-desc">총 마일리지 (shared)</span></div>
+      <div class="field"><span class="field-name">streak</span><span class="field-type">number</span><span class="field-desc">연속 일수</span></div>
+      <div class="field"><span class="field-name">longest</span><span class="field-type">number</span><span class="field-desc">최장 연속</span></div>
+      <div class="field"><span class="field-name">lastDate</span><span class="field-type">string</span><span class="field-desc">YYYY-MM-DD</span></div>
+      <div class="field"><span class="field-name">totalDone</span><span class="field-type">number</span><span class="field-desc">총 완료 수</span></div>
+      <div class="field"><span class="field-name">acts</span><span class="field-type">array</span><span class="badge badge-arr">arr</span><span class="field-desc">활동 정의 [{id,emoji,name,pts,maxDay,...}]</span></div>
+      <div class="field"><span class="field-name">rwds</span><span class="field-type">array</span><span class="badge badge-arr">arr</span><span class="field-desc">보상 정의 [{id,emoji,name,pts,...}]</span></div>
+      <div class="field"><span class="field-name">log</span><span class="field-type">array</span><span class="badge badge-arr">arr</span><span class="field-desc">활동 완료 기록</span></div>
+      <div class="field"><span class="field-name">actDone</span><span class="field-type">object</span><span class="badge badge-obj">obj</span><span class="field-desc">{actId: {count,ts,dates}}</span></div>
+      <div class="field"><span class="field-name">badges</span><span class="field-type">object</span><span class="badge badge-obj">obj</span><span class="field-desc">{badgeId: {earnedAt,claimed}}</span></div>
+      <div class="field"><span class="field-name">levelData</span><span class="field-type">object</span><span class="badge badge-obj">obj</span><span class="field-desc">{xp, level, xpLog}</span></div>
+      <div class="field"><span class="field-name">settings</span><span class="field-type">object</span><span class="badge badge-obj">obj</span><span class="field-desc">streakBonus, pinHash, msgMode...</span></div>
+      <div class="field"><span class="field-name">memberData</span><span class="field-type">object</span><span class="badge badge-obj">obj</span><span class="field-desc">independent 모드 전용</span></div>
+      <div class="field"><span class="field-name">familyMeta</span><span class="field-type">object</span><span class="badge badge-obj">obj</span><span class="field-desc">내장된 가족 메타</span></div>
+    </div>
+  </div>
+
+  <div class="entity c-member">
+    <div class="entity-header">familyMeta (embedded) <span class="path">families/{fId}.familyMeta</span></div>
+    <div class="entity-body">
+      <div class="field"><span class="field-name pk">familyId</span><span class="field-type">string</span><span class="badge badge-pk">PK</span></div>
+      <div class="field"><span class="field-name">familyName</span><span class="field-type">string</span></div>
+      <div class="field"><span class="field-name">mode</span><span class="field-type">string</span><span class="field-desc">shared | independent</span></div>
+      <div class="field"><span class="field-name">createdBy</span><span class="field-type">string</span></div>
+      <div class="field"><span class="field-name">createdAt</span><span class="field-type">number</span><span class="field-desc">ms timestamp</span></div>
+      <div class="field"><span class="field-name">plan</span><span class="field-type">string</span><span class="field-desc">free | pro</span></div>
+      <div class="field"><span class="field-name">members</span><span class="field-type">object</span><span class="badge badge-obj">obj</span><span class="field-desc">{memberId: member}</span></div>
+      <div class="field"><span class="field-name">inviteTokens</span><span class="field-type">array</span><span class="badge badge-arr">arr</span><span class="field-desc">초대 링크</span></div>
+    </div>
+  </div>
+
+  <div class="entity c-member">
+    <div class="entity-header">member (in familyMeta.members) <span class="path">.members.{memberId}</span></div>
+    <div class="entity-body">
+      <div class="field"><span class="field-name pk">memberId</span><span class="field-type">string</span><span class="badge badge-pk">PK</span></div>
+      <div class="field"><span class="field-name">name</span><span class="field-type">string</span><span class="field-desc">가족 내 이름</span></div>
+      <div class="field"><span class="field-name">type</span><span class="field-type">string</span><span class="field-desc">child | caregiver | parent</span></div>
+      <div class="field"><span class="field-name">displayRole</span><span class="field-type">string</span><span class="field-desc">dad, mom, grandpa...</span></div>
+      <div class="field"><span class="field-name">isAdmin</span><span class="field-type">boolean</span></div>
+      <div class="field"><span class="field-name">birthDate</span><span class="field-type">string</span><span class="field-desc">YYYY-MM-DD</span></div>
+      <div class="field"><span class="field-name">color / textColor</span><span class="field-type">string</span><span class="field-desc">hex 테마색</span></div>
+      <div class="field"><span class="field-name">account</span><span class="field-type">object</span><span class="badge badge-obj">obj</span><span class="field-desc">로그인 자격증명</span></div>
+      <div class="field"><span class="field-name">joinedAt</span><span class="field-type">number</span></div>
+    </div>
+  </div>
+
+  <div class="entity c-auth">
+    <div class="entity-header">account (in member) <span class="path">.members.{mId}.account</span></div>
+    <div class="entity-body">
+      <div class="field"><span class="field-name">id</span><span class="field-type">string</span><span class="field-desc">로그인 ID (basic auth)</span></div>
+      <div class="field"><span class="field-name">pwdHash</span><span class="field-type">string</span><span class="field-desc">SHA-256 해시</span></div>
+      <div class="field"><span class="field-name">authUid</span><span class="field-type">string</span><span class="field-desc">Firebase UID (소셜)</span></div>
+      <div class="field"><span class="field-name">authProvider</span><span class="field-type">string</span><span class="field-desc">google | apple | local</span></div>
+      <div class="field"><span class="field-name">email</span><span class="field-type">string</span><span class="field-desc">소셜 이메일</span></div>
+      <div class="field"><span class="field-name">v</span><span class="field-type">number</span><span class="field-desc">스키마 버전 (2)</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 멤버별 데이터 ═══ -->
+<div class="section-title">멤버별 데이터 — independent 모드</div>
+
+<div class="grid">
+  <div class="entity c-data">
+    <div class="entity-header">memberData[memberId] <span class="path">.memberData.{memberId}</span></div>
+    <div class="entity-body">
+      <div class="field"><span class="field-name pk">memberId</span><span class="field-type">string</span><span class="badge badge-pk">PK</span></div>
+      <div class="field"><span class="field-name">pts</span><span class="field-type">number</span><span class="field-desc">개인 마일리지</span></div>
+      <div class="field"><span class="field-name">streak / longest</span><span class="field-type">number</span></div>
+      <div class="field"><span class="field-name">lastDate</span><span class="field-type">string</span></div>
+      <div class="field"><span class="field-name">totalDone</span><span class="field-type">number</span></div>
+      <div class="field"><span class="field-name">acts</span><span class="field-type">array</span><span class="badge badge-arr">arr</span><span class="field-desc">개인 활동</span></div>
+      <div class="field"><span class="field-name">rwds</span><span class="field-type">array</span><span class="badge badge-arr">arr</span><span class="field-desc">개인 보상</span></div>
+      <div class="field"><span class="field-name">log</span><span class="field-type">array</span><span class="badge badge-arr">arr</span></div>
+      <div class="field"><span class="field-name">badges</span><span class="field-type">object</span><span class="badge badge-obj">obj</span></div>
+      <div class="field"><span class="field-name">levelData</span><span class="field-type">object</span><span class="badge badge-obj">obj</span></div>
+      <div class="field"><span class="field-name">challenges</span><span class="field-type">array</span><span class="badge badge-arr">arr</span></div>
+      <div class="field"><span class="field-name">rewardInventory</span><span class="field-type">array</span><span class="badge badge-arr">arr</span><span class="field-desc">★ independent 모드에서 S.rewardInventory 소스</span></div>
+      <div class="field"><span class="field-name">rewardRequests</span><span class="field-type">array</span><span class="badge badge-arr">arr</span><span class="field-desc">★ independent 모드에서 S.rewardRequests 소스</span></div>
+      <div class="field"><span class="field-name">구조는 families 문서와 동일</span><span class="field-type"></span></div>
+    </div>
+  </div>
+
+  <div class="entity c-data">
+    <div class="entity-header">dayHistory (subcollection) <span class="path">…/dh_{memberId}/{YYYY-MM}</span></div>
+    <div class="entity-body">
+      <div class="field"><span class="field-name pk">memberId</span><span class="field-type">string</span><span class="badge badge-pk">PK</span></div>
+      <div class="field"><span class="field-name pk">month</span><span class="field-type">string</span><span class="badge badge-pk">PK</span><span class="field-desc">YYYY-MM</span></div>
+      <div class="field"><span class="field-name">updatedAt</span><span class="field-type">number</span></div>
+      <div class="field"><span class="field-name">days</span><span class="field-type">object</span><span class="badge badge-obj">obj</span><span class="field-desc">{DD: snapshot}</span></div>
+      <div class="field" style="padding-left:16px"><span class="field-name" style="color:#94A3B8">↳ days.DD.acts</span><span class="field-type">array</span><span class="field-desc">그날 활동 스냅샷</span></div>
+      <div class="field" style="padding-left:16px"><span class="field-name" style="color:#94A3B8">↳ days.DD.done</span><span class="field-type">object</span><span class="field-desc">{actId: count}</span></div>
+      <div class="field" style="padding-left:16px"><span class="field-name" style="color:#94A3B8">↳ days.DD.allDone</span><span class="field-type">boolean</span></div>
+      <div class="field" style="padding-left:16px"><span class="field-name" style="color:#94A3B8">↳ days.DD.streak</span><span class="field-type">number</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 활동 & 보상 ═══ -->
+<div class="section-title">활동 · 보상 · 뱃지 · 챌린지</div>
+
+<div class="grid">
+  <div class="entity c-data">
+    <div class="entity-header">log[] (활동 기록) <span class="path">.log[n]</span></div>
+    <div class="entity-body">
+      <div class="field"><span class="field-name pk">id</span><span class="field-type">string</span><span class="badge badge-pk">PK</span></div>
+      <div class="field"><span class="field-name">actId</span><span class="field-type">string</span><span class="badge badge-fk">FK</span><span class="field-desc">활동 ID</span></div>
+      <div class="field"><span class="field-name">emoji / name</span><span class="field-type">string</span></div>
+      <div class="field"><span class="field-name">pts</span><span class="field-type">number</span></div>
+      <div class="field"><span class="field-name">ts</span><span class="field-type">number</span><span class="field-desc">ms timestamp</span></div>
+      <div class="field"><span class="field-name">user</span><span class="field-type">string</span><span class="badge badge-fk">FK</span><span class="field-desc">memberId</span></div>
+      <div class="field"><span class="field-name">note</span><span class="field-type">string</span></div>
+    </div>
+  </div>
+
+  <div class="entity c-data">
+    <div class="entity-header">rewardInventory[] <span class="path">.rewardInventory[n]</span></div>
+    <div class="entity-body">
+      <div class="field"><span class="field-name pk">id</span><span class="field-type">string</span><span class="badge badge-pk">PK</span></div>
+      <div class="field"><span class="field-name">rwdId</span><span class="field-type">string</span><span class="badge badge-fk">FK</span></div>
+      <div class="field"><span class="field-name">rwdName / rwdEmoji</span><span class="field-type">string</span></div>
+      <div class="field"><span class="field-name">pts</span><span class="field-type">number</span><span class="field-desc">사용 마일리지</span></div>
+      <div class="field"><span class="field-name">purchasedAt</span><span class="field-type">number</span></div>
+      <div class="field"><span class="field-name">status</span><span class="field-type">string</span><span class="field-desc">owned | pending | approved | used</span></div>
+      <div class="field"><span class="field-name">requestId / approvedBy / approvedAt</span><span class="field-type">string/num</span><span class="field-desc">사용 요청 연동</span></div>
+    </div>
+  </div>
+
+  <div class="entity c-data">
+    <div class="entity-header">rewardRequests[] <span class="path">.rewardRequests[n]</span></div>
+    <div class="entity-body">
+      <div class="field"><span class="field-name pk">id</span><span class="field-type">string</span><span class="badge badge-pk">PK</span></div>
+      <div class="field"><span class="field-name">rwdInvId</span><span class="field-type">string</span><span class="badge badge-fk">FK</span><span class="field-desc">인벤토리 ID</span></div>
+      <div class="field"><span class="field-name">fromUser</span><span class="field-type">string</span><span class="badge badge-fk">FK</span></div>
+      <div class="field"><span class="field-name">forChild</span><span class="field-type">string</span><span class="badge badge-fk">FK</span><span class="field-desc">대상 자녀</span></div>
+      <div class="field"><span class="field-name">toUsers</span><span class="field-type">array</span><span class="field-desc">승인자 목록</span></div>
+      <div class="field"><span class="field-name">status</span><span class="field-type">string</span><span class="field-desc">pending | approved | rejected</span></div>
+      <div class="field"><span class="field-name">approvedBy / approvedAt</span><span class="field-type">string/num</span></div>
+    </div>
+  </div>
+
+  <div class="entity c-data">
+    <div class="entity-header">actVerifyRequests[] <span class="path">.actVerifyRequests[n]</span></div>
+    <div class="entity-body">
+      <div class="field"><span class="field-name pk">id</span><span class="field-type">string</span><span class="badge badge-pk">PK</span></div>
+      <div class="field"><span class="field-name">actId</span><span class="field-type">string</span><span class="badge badge-fk">FK</span><span class="field-desc">활동 ID</span></div>
+      <div class="field"><span class="field-name">actName / actEmoji</span><span class="field-type">string</span></div>
+      <div class="field"><span class="field-name">pts</span><span class="field-type">number</span><span class="field-desc">활동 마일리지</span></div>
+      <div class="field"><span class="field-name">fromUser</span><span class="field-type">string</span><span class="badge badge-fk">FK</span><span class="field-desc">요청 자녀</span></div>
+      <div class="field"><span class="field-name">toUsers</span><span class="field-type">array</span><span class="field-desc">승인 대상 양육자</span></div>
+      <div class="field"><span class="field-name">status</span><span class="field-type">string</span><span class="field-desc">pending | approved | rejected</span></div>
+      <div class="field"><span class="field-name">note</span><span class="field-type">string</span><span class="field-desc">첨부 메모/사진</span></div>
+      <div class="field"><span class="field-name">approvedBy / approvedAt</span><span class="field-type">string/num</span></div>
+    </div>
+  </div>
+
+  <div class="entity c-data">
+    <div class="entity-header">badges{} / badgeLog[] <span class="path">.badges / .badgeLog</span></div>
+    <div class="entity-body">
+      <div class="field"><span class="field-name pk">badgeId</span><span class="field-type">string</span><span class="badge badge-pk">PK</span></div>
+      <div class="field"><span class="field-name">earnedAt</span><span class="field-type">number</span></div>
+      <div class="field"><span class="field-name">seen / claimed</span><span class="field-type">boolean</span></div>
+      <div class="field"><span class="field-name">badgeLog[].pts</span><span class="field-type">number</span><span class="field-desc">보너스 마일리지</span></div>
+    </div>
+  </div>
+
+  <div class="entity c-data">
+    <div class="entity-header">challenges[] <span class="path">.challenges[n]</span></div>
+    <div class="entity-body">
+      <div class="field"><span class="field-name pk">id</span><span class="field-type">string</span><span class="badge badge-pk">PK</span></div>
+      <div class="field"><span class="field-name">title / emoji</span><span class="field-type">string</span></div>
+      <div class="field"><span class="field-name">type</span><span class="field-type">string</span><span class="field-desc">챌린지 유형</span></div>
+      <div class="field"><span class="field-name">target / progress</span><span class="field-type">number</span></div>
+      <div class="field"><span class="field-name">reward</span><span class="field-type">number</span><span class="field-desc">보상 마일리지</span></div>
+      <div class="field"><span class="field-name">completed / claimed</span><span class="field-type">boolean</span></div>
+    </div>
+  </div>
+
+  <div class="entity c-data">
+    <div class="entity-header">levelData{} <span class="path">.levelData</span></div>
+    <div class="entity-body">
+      <div class="field"><span class="field-name">xp</span><span class="field-type">number</span><span class="field-desc">현재 경험치</span></div>
+      <div class="field"><span class="field-name">level</span><span class="field-type">number</span><span class="field-desc">현재 레벨</span></div>
+      <div class="field"><span class="field-name">xpLog</span><span class="field-type">array</span><span class="badge badge-arr">arr</span><span class="field-desc">XP 획득 이력</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 소셜 ═══ -->
+<div class="section-title">소셜 · 메시지 · 기분</div>
+
+<div class="grid">
+  <div class="entity c-social">
+    <div class="entity-header">familyMessages[] <span class="path">.familyMessages[n]</span></div>
+    <div class="entity-body">
+      <div class="field"><span class="field-name">from / to</span><span class="field-type">string</span><span class="badge badge-fk">FK</span><span class="field-desc">memberId</span></div>
+      <div class="field"><span class="field-name">text</span><span class="field-type">string</span></div>
+      <div class="field"><span class="field-name">emotion</span><span class="field-type">string</span></div>
+      <div class="field"><span class="field-name">ts</span><span class="field-type">number</span></div>
+      <div class="field"><span class="field-name">read</span><span class="field-type">boolean</span></div>
+      <div class="field"><span class="field-name">type</span><span class="field-type">string</span><span class="field-desc">general | reward_request | reward_approval | reward_rejection | activity_verify_request | activity_verify_approval | activity_verify_rejection | mood_update</span></div>
+      <div class="field"><span class="field-name">requestId / rwdInvId</span><span class="field-type">string</span><span class="field-desc">관련 요청/인벤토리 ID</span></div>
+    </div>
+  </div>
+
+  <div class="entity c-social">
+    <div class="entity-header">moodLog[] / moods{} <span class="path">.moodLog / .moods</span></div>
+    <div class="entity-body">
+      <div class="field"><span class="field-name">mood</span><span class="field-type">string</span><span class="field-desc">기분 ID</span></div>
+      <div class="field"><span class="field-name">emoji / label</span><span class="field-type">string</span></div>
+      <div class="field"><span class="field-name">ts</span><span class="field-type">number</span></div>
+      <div class="field"><span class="field-name">user</span><span class="field-type">string</span><span class="badge badge-fk">FK</span><span class="field-desc">memberId</span></div>
+    </div>
+  </div>
+
+  <div class="entity c-social">
+    <div class="entity-header">stickers[] <span class="path">.stickers[n]</span></div>
+    <div class="entity-body">
+      <div class="field"><span class="field-name pk">id</span><span class="field-type">string</span><span class="badge badge-pk">PK</span></div>
+      <div class="field"><span class="field-name">actId</span><span class="field-type">string</span><span class="badge badge-fk">FK</span></div>
+      <div class="field"><span class="field-name">type</span><span class="field-type">string</span><span class="field-desc">emoji | bubble</span></div>
+      <div class="field"><span class="field-name">content</span><span class="field-type">string</span></div>
+      <div class="field"><span class="field-name">user / ts</span><span class="field-type">string/number</span></div>
+    </div>
+  </div>
+
+  <div class="entity c-social">
+    <div class="entity-header">photos{} / greetings{} <span class="path">.photos / .greetings</span></div>
+    <div class="entity-body">
+      <div class="field"><span class="field-name">photos</span><span class="field-type">object</span><span class="badge badge-obj">obj</span><span class="field-desc">{memberId: imageUrl}</span></div>
+      <div class="field"><span class="field-name">greetings</span><span class="field-type">object</span><span class="badge badge-obj">obj</span><span class="field-desc">{memberId: {mode, messages}}</span></div>
+      <div class="field"><span class="field-name">dailyBonus</span><span class="field-type">object</span><span class="badge badge-obj">obj</span><span class="field-desc">{lastDate, history}</span></div>
+      <div class="field"><span class="field-name">pushDevices</span><span class="field-type">object</span><span class="badge badge-obj">obj</span><span class="field-desc">{deviceId: device} — 상세 아래</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 푸시 ═══ -->
+<div class="section-title">푸시 · 알림 (v0415 기준)</div>
+
+<div class="grid">
+  <div class="entity c-social">
+    <div class="entity-header">pushDevices{deviceId} <span class="path">.pushDevices[deviceId]</span></div>
+    <div class="entity-body">
+      <div class="field"><span class="field-name pk">deviceId</span><span class="field-type">string</span><span class="badge badge-pk">PK</span><span class="field-desc">기기 식별자</span></div>
+      <div class="field"><span class="field-name">type</span><span class="field-type">string</span><span class="field-desc">webpush | fcm (v0415d~)</span></div>
+      <div class="field"><span class="field-name">subscription</span><span class="field-type">object</span><span class="field-desc">VAPID endpoint (webpush 전용)</span></div>
+      <div class="field"><span class="field-name">fcmToken</span><span class="field-type">string</span><span class="field-desc">FCM 토큰 (fcm 전용, Android APK)</span></div>
+      <div class="field"><span class="field-name">platform</span><span class="field-type">string</span><span class="field-desc">ios | android | web</span></div>
+      <div class="field"><span class="field-name">user</span><span class="field-type">string</span><span class="badge badge-fk">FK</span><span class="field-desc">소유자 memberId</span></div>
+      <div class="field"><span class="field-name">enabled / updatedAt</span><span class="field-type">bool/num</span></div>
+    </div>
+  </div>
+
+  <div class="entity c-social">
+    <div class="entity-header">pushBroadcast{} <span class="path">.pushBroadcast</span></div>
+    <div class="entity-body">
+      <div class="field"><span class="field-name">title / body / url</span><span class="field-type">string</span></div>
+      <div class="field"><span class="field-name">targetUser</span><span class="field-type">string</span><span class="field-desc">v0415c — 본인 계정 기기로 제한 시</span></div>
+      <div class="field"><span class="field-name">ts</span><span class="field-type">number</span><span class="field-desc">Cloud Function 트리거 감지 키</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 인증 & 레지스트리 ═══ -->
+<div class="section-title">인증 · 레지스트리 컬렉션</div>
+
+<div class="grid">
+  <div class="entity c-auth">
+    <div class="entity-header">_id_registry <span class="path">families/_id_registry</span></div>
+    <div class="entity-body">
+      <div class="field"><span class="field-name pk">{loginId}</span><span class="field-type">key</span><span class="badge badge-pk">PK</span><span class="field-desc">로그인 아이디</span></div>
+      <div class="field"><span class="field-name">familyId</span><span class="field-type">string</span><span class="badge badge-fk">FK</span></div>
+      <div class="field"><span class="field-name">memberId</span><span class="field-type">string</span><span class="badge badge-fk">FK</span></div>
+    </div>
+  </div>
+
+  <div class="entity c-auth">
+    <div class="entity-header">_auth_registry <span class="path">families/_auth_registry</span></div>
+    <div class="entity-body">
+      <div class="field"><span class="field-name pk">{firebaseUid}</span><span class="field-type">key</span><span class="badge badge-pk">PK</span><span class="field-desc">Firebase Auth UID</span></div>
+      <div class="field"><span class="field-name">familyId</span><span class="field-type">string</span><span class="badge badge-fk">FK</span></div>
+      <div class="field"><span class="field-name">memberId</span><span class="field-type">string</span><span class="badge badge-fk">FK</span></div>
+    </div>
+  </div>
+
+  <div class="entity c-auth">
+    <div class="entity-header">emailVerify <span class="path">emailVerify/{email}</span></div>
+    <div class="entity-body">
+      <div class="field"><span class="field-name pk">email</span><span class="field-type">string</span><span class="badge badge-pk">PK</span></div>
+      <div class="field"><span class="field-name">code</span><span class="field-type">string</span><span class="field-desc">6자리 인증코드</span></div>
+      <div class="field"><span class="field-name">createdAt</span><span class="field-type">number</span></div>
+      <div class="field"><span class="field-name">expiresAt</span><span class="field-type">number</span><span class="field-desc">5분</span></div>
+      <div class="field"><span class="field-name">attempts</span><span class="field-type">number</span></div>
+      <div class="field"><span class="field-name">verified</span><span class="field-type">boolean</span></div>
+    </div>
+  </div>
+
+  <div class="entity c-auth">
+    <div class="entity-header">inviteTokens[] <span class="path">.familyMeta.inviteTokens[n]</span></div>
+    <div class="entity-body">
+      <div class="field"><span class="field-name pk">token</span><span class="field-type">string</span><span class="badge badge-pk">PK</span><span class="field-desc">UUID</span></div>
+      <div class="field"><span class="field-name">memberId</span><span class="field-type">string</span><span class="field-desc">배정 멤버 (선택)</span></div>
+      <div class="field"><span class="field-name">createdAt / expiresAt</span><span class="field-type">number</span></div>
+      <div class="field"><span class="field-name">type</span><span class="field-type">string</span><span class="field-desc">auto | manual</span></div>
+      <div class="field"><span class="field-name">createdBy</span><span class="field-type">string</span><span class="badge badge-fk">FK</span></div>
+      <div class="field"><span class="field-name">autoAccount</span><span class="field-type">object</span><span class="badge badge-obj">obj</span><span class="field-desc">자동생성 계정</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 시스템 & 레거시 ═══ -->
+<div class="section-title">시스템 · 레거시</div>
+
+<div class="grid">
+  <div class="entity c-system">
+    <div class="entity-header">system <span class="path">system/{config}</span></div>
+    <div class="entity-body">
+      <div class="field"><span class="field-name pk">configName</span><span class="field-type">string</span><span class="badge badge-pk">PK</span></div>
+      <div class="field"><span class="field-name">config</span><span class="field-type">object</span><span class="field-desc">동적 설정값</span></div>
+    </div>
+  </div>
+
+  <div class="entity c-system">
+    <div class="entity-header">users (legacy) <span class="path">users/{userId}</span></div>
+    <div class="entity-body">
+      <div class="field"><span class="field-name pk">userId</span><span class="field-type">string</span><span class="badge badge-pk">PK</span><span class="field-desc">taemin | taemin_dev</span></div>
+      <div class="field"><span class="field-name">_migratedTo</span><span class="field-type">string</span><span class="badge badge-fk">FK</span><span class="field-desc">families/{familyId}</span></div>
+      <div class="field"><span class="field-name" style="color:#64748B">(구조는 families와 동일)</span><span class="field-type"></span></div>
+    </div>
+  </div>
+
+  <div class="entity c-system">
+    <div class="entity-header">chatErrors / chatQueries <span class="path">chatErrors/{docId}</span></div>
+    <div class="entity-body">
+      <div class="field"><span class="field-name pk">documentId</span><span class="field-type">auto</span><span class="badge badge-pk">PK</span></div>
+      <div class="field"><span class="field-name">errorData / queryData</span><span class="field-type">object</span><span class="field-desc">챗봇 로그</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 관계 다이어그램 ═══ -->
+<div class="section-title">관계 (Relationships)</div>
+
+<div class="rel-section">
+<table class="rel-table">
+  <tr><th>From</th><th></th><th>To</th><th>관계</th><th>설명</th></tr>
+  <tr><td>families</td><td class="arrow">1 ─── 1</td><td>familyMeta</td><td>embedded</td><td>문서 내 내장 (familyMeta 필드)</td></tr>
+  <tr><td>familyMeta</td><td class="arrow">1 ─── N</td><td>members</td><td>embedded</td><td>최대 7명 멤버</td></tr>
+  <tr><td>member</td><td class="arrow">1 ─── 0..1</td><td>account</td><td>embedded</td><td>로그인 자격 (없을 수도)</td></tr>
+  <tr><td>families</td><td class="arrow">1 ─── N</td><td>memberData</td><td>embedded</td><td>independent 모드 전용</td></tr>
+  <tr><td>families</td><td class="arrow">1 ─── N</td><td>dh_{memberId}</td><td>subcollection</td><td>멤버별 일간 기록</td></tr>
+  <tr><td>_id_registry</td><td class="arrow">N ─── 1</td><td>families + member</td><td>lookup</td><td>loginId → familyId + memberId</td></tr>
+  <tr><td>_auth_registry</td><td class="arrow">N ─── 1</td><td>families + member</td><td>lookup</td><td>firebaseUid → familyId + memberId</td></tr>
+  <tr><td>users (legacy)</td><td class="arrow">1 ─── 1</td><td>families</td><td>migration</td><td>_migratedTo 포인터</td></tr>
+  <tr><td>users (legacy)</td><td class="arrow">1 ─── N</td><td>dh_{memberId}</td><td>subcollection</td><td>레거시 사용자 dayHistory</td></tr>
+  <tr><td>families</td><td class="arrow">1 ─── N</td><td>pushDevices</td><td>embedded map</td><td>deviceId별 webpush/fcm 구독</td></tr>
+  <tr><td>families</td><td class="arrow">1 ─── N</td><td>actVerifyRequests</td><td>embedded array</td><td>활동 승인 요청 큐</td></tr>
+  <tr><td>families</td><td class="arrow">1 ─── 1</td><td>pushBroadcast</td><td>embedded</td><td>관리자 테스트 푸시 트리거</td></tr>
+  <tr><td>rewardRequests</td><td class="arrow">N ─── 1</td><td>rewardInventory</td><td>rwdInvId FK</td><td>승인 시 status 동기화</td></tr>
+  <tr><td>familyMessages</td><td class="arrow">N ─── 1</td><td>rewardRequests / actVerifyRequests</td><td>requestId FK</td><td>승인/거절 알림</td></tr>
+</table>
+</div>
+
+<div class="note">
+  <strong>환경 분리 규칙:</strong><br>
+  • Production: families/{familyId}, users/taemin, emailVerify/{email}<br>
+  • Development: families/dev_{familyId}, users/taemin_dev, emailVerify/dev_{email}<br>
+  • 레지스트리: _id_registry (prod) vs _dev_id_registry (dev)<br>
+  • dayHistory 서브컬렉션: 부모 문서(families 또는 users) 아래에 위치
+</div>
+
+<div class="note">
+  <strong>데이터 모드 차이:</strong><br>
+  • <strong>shared 모드:</strong> 가족 전체가 하나의 pts, acts, rwds 공유. memberData 미사용<br>
+  • <strong>independent 모드:</strong> memberData[memberId]에 개인별 pts, acts, rwds, log 등 분리 저장. 전역 S.pts도 동시 갱신 (하위호환)<br>
+  • <strong>보상 동기화 (v0415e):</strong> independent 모드에서 rewardInventory/rewardRequests는 memberData[자녀]에 저장되며, Firestore 리스너가 이 변경을 감지해 다기기 로그인 자녀의 S.rewardInventory에 즉시 반영
+</div>
+
+<div class="note">
+  <strong>v0415 변경 이력:</strong><br>
+  • <strong>v0415c:</strong> pushBroadcast.targetUser 필드 추가 — 관리자 테스트 푸시를 본인 계정 기기로 제한<br>
+  • <strong>v0415d:</strong> pushDevices[deviceId]에 type='fcm' / fcmToken / platform 구조 추가 — Android APK FCM 수신 활성화. webpush(VAPID)와 공존<br>
+  • <strong>v0415d:</strong> Cloud Functions에 activity_verify 전용 트리거 추가 (actVerifyRequests 배열 변경 감지)<br>
+  • <strong>v0415e:</strong> Firestore 리스너에 memberData[자녀].rewardInventory/rewardRequests 동적 머지 로직 추가. 쿨다운 2000ms→400ms
+</div>
+
+</div>
+</body>
+</html>
