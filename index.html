@@ -51,14 +51,18 @@
   document.addEventListener('touchend',function(){isEdge=false;},{passive:true,capture:true});
 
   // 3. beforeunload 이벤트로 페이지 이탈 방지 시도
-  window.addEventListener('beforeunload',function(e){
-    // PWA에서 뒤로가기로 빈 페이지로 나가는 것 방지 (캐시 초기화 시 제외)
-    if(window._cacheClearing) return;
-    if(document.visibilityState==='visible'){
-      e.preventDefault();
-      e.returnValue='';
-    }
-  });
+  //    네이티브 앱(MilelyApp WebView)에서는 등록하지 않음 — OAuth 리다이렉트 시
+  //    다이얼로그가 떠서 Kakao/Naver 로그인이 진행되지 못하는 문제 방지
+  if(!navigator.userAgent.includes('MilelyApp')){
+    window.addEventListener('beforeunload',function(e){
+      // PWA에서 뒤로가기로 빈 페이지로 나가는 것 방지 (캐시 초기화 시 제외)
+      if(window._cacheClearing) return;
+      if(document.visibilityState==='visible'){
+        e.preventDefault();
+        e.returnValue='';
+      }
+    });
+  }
 })();
 </script>
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -9348,7 +9352,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'prod'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0414q';
+const _APP_VERSION = 'v0415a';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -19072,6 +19076,9 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.4.17 (v0415a)',date:'2026-04-15',items:[
+    'Android WebView/네이티브 앱에서 beforeunload 다이얼로그로 OAuth 리다이렉트가 막히는 문제 수정 — MilelyApp UA에는 핸들러 미등록'
+  ]},
   {ver:'2.4.16 (v0414q)',date:'2026-04-14',items:[
     'Android WebView 앱에서 카카오/네이버 로그인: window.open()이 외부 브라우저를 열어 콜백 불가 → redirect 방식 강제 적용',
     '카카오 redirect 복귀 처리기 추가 (네이버와 동일한 패턴)',
