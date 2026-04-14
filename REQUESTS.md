@@ -64,6 +64,8 @@
 | R-044 | 2026-04-14 | handleNativeNotificationClick 전역 함수 추가 — 알림 클릭 시 화면 이동 | v0414d | PR #342 운영반영 | type별 탭 이동 (family_msg/reward/activity/home) |
 | R-045 | 2026-04-14 | Cloud Functions sendToDevices FCM 분기 추가 — type:'fcm' 기기 admin.messaging().send() 처리 | v0414d | PR #342 운영반영 | 토큰 만료 시 자동 enabled:false |
 | R-046 | 2026-04-14 | 나의 메뉴 알림 항목 레이블 개선 — "푸시 알림" → "알림 수신" + 설명 문구 추가 | v0414e | PR #342 운영반영 | "가족 메시지·아이 활동 승인 요청 등 중요한 소식을 알림으로 받아요" |
+| R-047 | 2026-04-14 | Galaxy Fold 펼침 화면 하단 탭바 고정 버그 수정 — position:fixed+transform 조합 문제 | v0414f | PR #344 운영반영 | body.native-app CSS+JS로 WebView 전용 처리, bottom:0 항상 고정 |
+| R-048 | 2026-04-14 | Galaxy Fold 탭바 동작 수정 — 항상 고정 방식 → 일반 폰과 동일한 floating↔dock 방식 | v0414g | PR #346 운영반영 | checkNavDock()이 native-app에서도 동작, CSS floating+.docked 상태 분리 |
 
 ## 미착수 백로그 (ROADMAP.md 기준)
 
