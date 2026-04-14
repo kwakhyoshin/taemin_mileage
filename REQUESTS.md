@@ -57,6 +57,9 @@
 | R-037 | 2026-04-14 | 디자인 Phase 2: border-radius 7단계 통합 (185개 교체) | v0414a | PR #335 반영 | --rxs~--rfull 변수 체계 |
 | R-038 | 2026-04-14 | 디자인 Phase 2: font-size 9단계 통합 (410개 교체) | v0414a | PR #335 반영 | --fs-xs~--fs-4xl 변수 체계 |
 | R-039 | 2026-04-14 | 디자인 Phase 2: --shadow-sm 변수 추가 | v0414a | PR #335 반영 | box-shadow 3단계 체계 (sm/default/lg) |
+| R-040 | 2026-04-14 | 홈 이력보기 날짜 이동 화살표 방향 수정 (▲ 이전날 ↔ ▼ 다음날) | v0414b | PR #338 반영 | diaryNav 호출 인자 교체 |
+| R-041 | 2026-04-14 | PWA 설치 안내 팝업 제거 (Android/iOS 가입 완료 시 자동 팝업) | v0414c | PR #339 반영 | 3곳 비활성화, 수동 tryPwaInstall은 유지 |
+| R-042 | 2026-04-14 | AI 기능 소개 팝업 제거 (_maybeShowFeatureIntros 비활성화) | v0414c | PR #339 반영 | 관리자 미리보기 및 함수 코드는 유지 |
 
 ## 미착수 백로그 (ROADMAP.md 기준)
 
