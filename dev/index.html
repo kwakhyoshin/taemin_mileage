@@ -7690,6 +7690,30 @@ function postLoginInit(){
 
   // Daily bonus check
   setTimeout(()=>{if(typeof checkDailyBonus==='function')checkDailyBonus();},2000);
+
+  // [FCM] 네이티브 앱이면 로그인 직후 토큰 확보 시도
+  //  - pending 토큰 있으면 먼저 flush (앱 콜드스타트 시 토큰이 먼저 도착한 경우)
+  //  - 그 외에는 MilelyBridge.requestFcmToken()으로 APK에 토큰 요청
+  setTimeout(function(){
+    try{
+      const bridge = window.MilelyBridge;
+      const isNative = !!(bridge && typeof bridge.isNativeApp==='function' && bridge.isNativeApp());
+      if(!isNative) return;
+      if(window._pendingFcmToken){
+        const t = window._pendingFcmToken;
+        window._pendingFcmToken = null;
+        console.log('[Push/Native] flushing pending FCM token after login');
+        try{ window._milelyOnFCMToken(t); }catch(e){ console.error('[Push/Native] pending flush error:', e); }
+        return;
+      }
+      // 이미 알림 활성화된 기기면 토큰 재요청 (APK 재설치·기기변경 등으로 토큰 바뀌었을 수 있음)
+      const enabled = localStorage.getItem(_LS_PREFIX+'push_enabled')==='true';
+      if(enabled && typeof bridge.requestFcmToken==='function'){
+        try{ bridge.requestFcmToken(); console.log('[Push/Native] MilelyBridge.requestFcmToken() called'); }
+        catch(e){ console.warn('[Push/Native] requestFcmToken failed:', e); }
+      }
+    }catch(e){ console.warn('[Push/Native] postLoginInit FCM hook error:', e); }
+  }, 1500);
 }
 
 // ── 회원 탈퇴 ──────────────────────────────────
@@ -9365,7 +9389,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0415c';
+const _APP_VERSION = 'v0415d';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -19089,6 +19113,10 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.4.20 (v0415d)',date:'2026-04-15',items:[
+    'Android APK FCM 푸시 수신 활성화 — 로그인 완료 후 MilelyBridge.requestFcmToken() 자동 호출, 앱 준비 전 수신된 토큰은 pending으로 보관했다가 로그인 직후 flush',
+    'Cloud Functions: activity_verify 타입 트리거 추가 — 자녀가 활동 승인 요청 시 부모 기기로 즉시 푸시'
+  ]},
   {ver:'2.4.19 (v0415c)',date:'2026-04-15',items:[
     '관리자 테스트 알림 발송 범위 수정 — 가족 전체 → 본인 계정 기기만 (pushBroadcast.targetUser 필드 추가, Cloud Functions 대응)'
   ]},
@@ -23036,10 +23064,18 @@ window._milelyOnPermissionResult=function(granted){
 };
 
 // 2) FCM 토큰 수신 → Firestore 저장
+// 로그인/가족 데이터 로드 전에 토큰이 먼저 도착하는 경우가 있으므로
+// 준비 안 됐으면 window._pendingFcmToken에 보관했다가 postLoginInit에서 재호출
 window._milelyOnFCMToken=async function(token){
   if(!token){
     console.warn('[Push/Native] FCM token empty');
-    toast('알림 토큰 발급 실패. 다시 시도해주세요.');
+    try{ toast('알림 토큰 발급 실패. 다시 시도해주세요.'); }catch(_){}
+    return;
+  }
+  // 앱이 아직 준비 안 됐으면 pending으로 저장
+  if(!currentUser || !_firebaseReady || !_familyId || typeof save!=='function'){
+    window._pendingFcmToken=token;
+    console.log('[Push/Native] FCM token received before ready — pending stored');
     return;
   }
   try{
@@ -23054,12 +23090,14 @@ window._milelyOnFCMToken=async function(token){
       updatedAt:Date.now()
     };
     await save();
-    updatePushUI();
-    toast('🔔 이 기기에서 알림이 활성화됐어요!');
+    try{ updatePushUI(); }catch(_){}
+    try{ toast('🔔 이 기기에서 알림이 활성화됐어요!'); }catch(_){}
     console.log('[Push/Native] FCM token saved, deviceId:', deviceId);
+    // 처리 완료했으니 pending 비움
+    window._pendingFcmToken=null;
   }catch(e){
     console.error('[Push/Native] token save error:', e);
-    toast('알림 설정 저장 실패: '+e.message);
+    try{ toast('알림 설정 저장 실패: '+e.message); }catch(_){}
   }
 };
 

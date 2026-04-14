@@ -620,6 +620,98 @@ exports.onBroadcastPushDev = onDocumentUpdated({ document: "users/taemin_dev", s
   }, "users/taemin_dev");
 });
 
+// ── activity_verify: actVerifyRequests 배열 변화 감지 ────────────────────────
+// 이미 familyMessages의 activity_verify_request 타입으로도 푸시가 발송되지만,
+// 만일 familyMessage 쓰기가 실패하거나 누락된 경우를 대비한 안전망 트리거.
+// 새 pending 요청이 추가된 경우에만 발송 (승인/반려는 이미 familyMessage가 처리).
+function _findNewActVerifyRequest(before, after) {
+  const arrA = Array.isArray(after && after.actVerifyRequests) ? after.actVerifyRequests : [];
+  if (!arrA.length) return null;
+  const arrB = Array.isArray(before && before.actVerifyRequests) ? before.actVerifyRequests : [];
+  const seen = new Set(arrB.map(r => r && r.id).filter(Boolean));
+  // 마지막 원소부터 훑어 pending 상태 새 요청 1개 반환
+  for (let i = arrA.length - 1; i >= 0; i--) {
+    const r = arrA[i];
+    if (!r || !r.id) continue;
+    if (seen.has(r.id)) continue;
+    if (r.status && r.status !== 'pending') continue;
+    return r;
+  }
+  return null;
+}
+
+function _buildActVerifyPayload(req, after) {
+  const names = (after && after.users) || NAMES;
+  const childId = req.forChild || req.fromUser;
+  const childName = (names[childId] && names[childId].name) || NAMES[childId] || "자녀";
+  return {
+    title: "✋ " + childName + "이(가) 활동 승인을 요청했어요",
+    body: '"' + (req.actName || "활동") + '" 완료를 승인해주세요',
+    icon: "icon-180.png",
+    tag: "activity-verify-" + req.id,
+    type: "activity_verify",
+    url: "./"
+  };
+}
+
+// 운영 families
+exports.onActVerifyRequestFamilies = onDocumentUpdated({ document: "families/{familyId}", secrets: [vapidPrivateKey] }, async (event) => {
+  ensureVapid();
+  const familyId = event.params.familyId;
+  if (familyId.startsWith("dev_") || familyId.startsWith("_")) return null;
+  const before = event.data.before.data();
+  const after = event.data.after.data();
+  const req = _findNewActVerifyRequest(before, after);
+  if (!req) return null;
+  const devices = after.pushDevices || {};
+  const targetUsers = Array.isArray(req.toUsers) ? req.toUsers : [];
+  if (!targetUsers.length) return null;
+  return sendToDevices(devices, targetUsers, _buildActVerifyPayload(req, after), "families/" + familyId);
+});
+
+// 개발 families
+exports.onActVerifyRequestDevFamilies = onDocumentUpdated({ document: "families/{familyId}", secrets: [vapidPrivateKey] }, async (event) => {
+  ensureVapid();
+  const familyId = event.params.familyId;
+  if (!(familyId.startsWith("dev_") || familyId.startsWith("_"))) return null;
+  const before = event.data.before.data();
+  const after = event.data.after.data();
+  const req = _findNewActVerifyRequest(before, after);
+  if (!req) return null;
+  const devices = after.pushDevices || {};
+  const targetUsers = Array.isArray(req.toUsers) ? req.toUsers : [];
+  if (!targetUsers.length) return null;
+  const payload = _buildActVerifyPayload(req, after);
+  payload.title = "[DEV] " + payload.title;
+  return sendToDevices(devices, targetUsers, payload, "families/" + familyId);
+});
+
+// 레거시 users/taemin(_dev)
+exports.onActVerifyRequestLegacy = onDocumentUpdated({ document: "users/taemin", secrets: [vapidPrivateKey] }, async (event) => {
+  ensureVapid();
+  const before = event.data.before.data();
+  const after = event.data.after.data();
+  const req = _findNewActVerifyRequest(before, after);
+  if (!req) return null;
+  const devices = after.pushDevices || {};
+  const targetUsers = Array.isArray(req.toUsers) ? req.toUsers : [];
+  if (!targetUsers.length) return null;
+  return sendToDevices(devices, targetUsers, _buildActVerifyPayload(req, after), "users/taemin");
+});
+exports.onActVerifyRequestLegacyDev = onDocumentUpdated({ document: "users/taemin_dev", secrets: [vapidPrivateKey] }, async (event) => {
+  ensureVapid();
+  const before = event.data.before.data();
+  const after = event.data.after.data();
+  const req = _findNewActVerifyRequest(before, after);
+  if (!req) return null;
+  const devices = after.pushDevices || {};
+  const targetUsers = Array.isArray(req.toUsers) ? req.toUsers : [];
+  if (!targetUsers.length) return null;
+  const payload = _buildActVerifyPayload(req, after);
+  payload.title = "[DEV] " + payload.title;
+  return sendToDevices(devices, targetUsers, payload, "users/taemin_dev");
+});
+
 // 4-dev) 보상 요청/승인/거절 알림
 exports.onRewardRequestDev = onDocumentUpdated({ document: "users/taemin_dev", secrets: [vapidPrivateKey] }, async (event) => {
   ensureVapid();
