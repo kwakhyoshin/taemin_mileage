@@ -36,6 +36,7 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
 const firestore = admin.firestore();
+const messaging = admin.messaging();
 
 // CLI 인자 파싱
 const args = process.argv.slice(2);
@@ -82,28 +83,74 @@ async function sendPush(title, body) {
 
     console.log(`📱 ${enabledDevices.length}대의 기기에 발송 중...`);
 
-    const payload = JSON.stringify({
-      title: prefix + (title || '태민이 마일리지 🌟'),
-      body: body || '오늘 활동을 확인해보세요!',
+    const finalTitle = prefix + (title || '태민이 마일리지 🌟');
+    const finalBody = body || '오늘 활동을 확인해보세요!';
+    // Web Push 페이로드 (JSON 문자열)
+    const webPayload = JSON.stringify({
+      title: finalTitle,
+      body: finalBody,
       icon: 'icon-180.png',
       url: './'
     });
 
     let success = 0, failed = 0;
     for (const [deviceId, device] of enabledDevices) {
+      // ── FCM (Android 네이티브 앱) 분기 ──
+      if (device.type === 'fcm' && device.fcmToken) {
+        try {
+          const mid = await messaging.send({
+            token: device.fcmToken,
+            // APK MilelyFirebaseMessagingService는 data 우선 읽음 → notification 블록 미포함
+            android: {
+              priority: 'high',
+              notification: { icon: 'ic_notification', color: '#6366F1', sound: 'default' }
+            },
+            data: {
+              type:    'broadcast',
+              title:   finalTitle,
+              body:    finalBody,
+              from:    '',
+              msgText: finalBody,
+              emotion: '',
+              url:     './',
+              tag:     'cli-broadcast'
+            }
+          });
+          console.log(`  ✅ ${deviceId} (${device.user}) [FCM]: ${mid}`);
+          success++;
+        } catch (error) {
+          if (error.code === 'messaging/registration-token-not-registered' ||
+              error.code === 'messaging/invalid-registration-token') {
+            console.log(`  ⚠️ ${deviceId}: FCM 토큰 만료, 비활성화 처리`);
+            await firestore.doc(docPath).update({
+              [`pushDevices.${deviceId}.enabled`]: false
+            });
+          } else {
+            console.error(`  ❌ ${deviceId} [FCM]: ${error.message}`);
+          }
+          failed++;
+        }
+        continue;
+      }
+      // ── Web Push (PWA / 브라우저) 분기 ──
+      if (!device.subscription) {
+        console.log(`  ⚠️ ${deviceId}: subscription 없음 (type=${device.type||'?'}) — 건너뜀`);
+        failed++;
+        continue;
+      }
       try {
         const sub = JSON.parse(device.subscription);
-        const result = await webpush.sendNotification(sub, payload);
-        console.log(`  ✅ ${deviceId} (${device.user}): ${result.statusCode}`);
+        const result = await webpush.sendNotification(sub, webPayload);
+        console.log(`  ✅ ${deviceId} (${device.user}) [WebPush]: ${result.statusCode}`);
         success++;
       } catch (error) {
         if (error.statusCode === 410 || error.statusCode === 404) {
-          console.log(`  ⚠️ ${deviceId}: 구독 만료, 비활성화 처리`);
+          console.log(`  ⚠️ ${deviceId}: WebPush 구독 만료, 비활성화 처리`);
           await firestore.doc(docPath).update({
             [`pushDevices.${deviceId}.enabled`]: false
           });
         } else {
-          console.error(`  ❌ ${deviceId}: ${error.message}`);
+          console.error(`  ❌ ${deviceId} [WebPush]: ${error.message}`);
         }
         failed++;
       }
