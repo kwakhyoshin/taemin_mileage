@@ -3273,8 +3273,8 @@ requestAnimationFrame(function(){
       <!-- Card 1: 매일 작은 활동이 습관이 돼요 (홈 화면) -->
       <div class="ins-card ins-card-1">
         <div class="ins-illust">
-          <img class="ins-img-dark" src="dev/ob-home-dark.png" alt="홈 화면 (다크)" loading="lazy">
-          <img class="ins-img-light" src="dev/ob-home-light.png" alt="홈 화면 (라이트)" loading="lazy">
+          <img class="ins-img-dark" src="ob-home-dark.png" alt="홈 화면 (다크)" loading="lazy">
+          <img class="ins-img-light" src="ob-home-light.png" alt="홈 화면 (라이트)" loading="lazy">
         </div>
         <div class="ins-keyword">매일 작은 활동이<br>습관이 돼요</div>
         <div class="ins-sub">양치, 세수, 숙제 — 하루 2분이면 충분해요.<br><b style="color:#6366F1;font-size:15px">66일</b>이면 자동화된 습관이 됩니다.</div>
@@ -3283,8 +3283,8 @@ requestAnimationFrame(function(){
       <!-- Card 2: 보상으로 내재동기를 키워요 (보상 화면) -->
       <div class="ins-card ins-card-2">
         <div class="ins-illust">
-          <img class="ins-img-dark" src="dev/ob-reward-dark.png" alt="보상 상점 (다크)" loading="lazy">
-          <img class="ins-img-light" src="dev/ob-reward-light.png" alt="보상 상점 (라이트)" loading="lazy">
+          <img class="ins-img-dark" src="ob-reward-dark.png" alt="보상 상점 (다크)" loading="lazy">
+          <img class="ins-img-light" src="ob-reward-light.png" alt="보상 상점 (라이트)" loading="lazy">
         </div>
         <div class="ins-keyword">노력이 보상으로<br>이어져요</div>
         <div class="ins-sub">진전이 눈에 보이면 아이는 스스로<br><b style="color:#D98E09;font-size:15px">"한 번 더"</b>를 선택합니다.</div>
@@ -3293,8 +3293,8 @@ requestAnimationFrame(function(){
       <!-- Card 3: 데이터로 성장을 확인해요 (리포트 화면) -->
       <div class="ins-card ins-card-3">
         <div class="ins-illust">
-          <img class="ins-img-dark" src="dev/ob-report-dark.png" alt="성과 통계 (다크)" loading="lazy">
-          <img class="ins-img-light" src="dev/ob-report-light.png" alt="성과 통계 (라이트)" loading="lazy">
+          <img class="ins-img-dark" src="ob-report-dark.png" alt="성과 통계 (다크)" loading="lazy">
+          <img class="ins-img-light" src="ob-report-light.png" alt="성과 통계 (라이트)" loading="lazy">
         </div>
         <div class="ins-keyword">데이터로<br>성장을 확인해요</div>
         <div class="ins-sub">자기 행동을 모니터링하는 아이는<br>목표 달성률이 <b style="color:#7C3AED;font-size:15px">2배</b> 높아집니다.</div>
@@ -3303,8 +3303,8 @@ requestAnimationFrame(function(){
       <!-- Card 4: AI가 보상 체계를 점검해요 (챗봇 화면) ★ KEY -->
       <div class="ins-card ins-card-1">
         <div class="ins-illust">
-          <img class="ins-img-dark" src="dev/ob-chat-dark.png" alt="AI 챗봇 (다크)" loading="lazy">
-          <img class="ins-img-light" src="dev/ob-chat-light.png" alt="AI 챗봇 (라이트)" loading="lazy">
+          <img class="ins-img-dark" src="ob-chat-dark.png" alt="AI 챗봇 (다크)" loading="lazy">
+          <img class="ins-img-light" src="ob-chat-light.png" alt="AI 챗봇 (라이트)" loading="lazy">
         </div>
         <div class="ins-keyword">AI가 보상 체계를<br>과학적으로 점검해요</div>
         <div class="ins-sub">밀리가 보상의 균형, 내재동기 훼손 위험,<br>적정 난이도를 <b style="color:#6366F1;font-size:15px">실시간 분석</b>합니다.</div>
@@ -4459,12 +4459,15 @@ requestAnimationFrame(function(){
   </div>
   <div class="my-section-title">앱 설정</div>
   <div class="my-list">
-    <div class="my-list-item my-list-item-toggle">
-      <span class="my-list-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></span>
-      <span class="my-list-txt">푸시 알림</span>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span id="push-status-my" style="font-size:12px;font-weight:700;color:var(--tx3)"></span>
+    <div class="my-list-item my-list-item-toggle" style="align-items:flex-start">
+      <span class="my-list-ico" style="margin-top:2px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></span>
+      <div style="flex:1;display:flex;flex-direction:column;gap:3px">
+        <span class="my-list-txt">알림 수신</span>
+        <span style="font-size:var(--fs-xs);color:var(--tx3);line-height:1.5;font-weight:500">가족 메시지·아이 활동 승인 요청 등<br>중요한 소식을 알림으로 받아요</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;margin-top:2px">
         <button class="tog off" id="push-tog-my" onclick="togglePush()"><div class="tog-dot"></div></button>
+        <span id="push-status-my" style="font-size:var(--fs-xs);font-weight:700;color:var(--tx3)"></span>
       </div>
     </div>
     <div class="my-list-item" style="flex-direction:column;align-items:stretch;gap:4px;padding:16px 18px">
@@ -5931,7 +5934,8 @@ async function doJoinSocialLogin(provider){
 
     const memberName=S.familyMeta.members[mid]?.name||'';
     toast(`🎉 ${memberName}, 가입 완료! 환영해요!`);
-    if(!_pwaInstalled)setTimeout(showPwaInstallPopup,1500);
+    // PWA 설치 유도 팝업 비활성화 (앱 환경에서 불필요)
+    // if(!_pwaInstalled)setTimeout(showPwaInstallPopup,1500);
 
   } catch(e){
     console.error('[Join Social Login Error]',e);
@@ -6710,8 +6714,8 @@ async function createFamilyFinish(){
   if(_createState.socialUser && S.photos?.[currentUser]){
     try{ await save(); }catch(_e){ console.warn('[createFamilyFinish] save warning:', _e); }
   }
-  // PWA 설치 유도 (브라우저 환경일 때)
-  if(!_pwaInstalled)setTimeout(showPwaInstallPopup,1500);
+  // PWA 설치 유도 팝업 비활성화 (앱 환경에서 불필요)
+  // if(!_pwaInstalled)setTimeout(showPwaInstallPopup,1500);
 }
 
 // ── 비밀번호 해싱 유틸 ──
@@ -7013,8 +7017,8 @@ async function doJoinRegister(){
       toast(`✅ ${memberName}, ID와 비밀번호가 설정되었어요!`);
     }else{
       toast(`🎉 ${memberName}, 가입 완료! 환영해요!`);
-      // PWA 설치 유도 (초대받은 사용자, 브라우저 환경)
-      if(!_pwaInstalled)setTimeout(showPwaInstallPopup,1500);
+      // PWA 설치 유도 팝업 비활성화 (앱 환경에서 불필요)
+      // if(!_pwaInstalled)setTimeout(showPwaInstallPopup,1500);
     }
   }catch(e){
     console.error('Join register failed:',e);
@@ -9286,7 +9290,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'prod'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0414b';
+const _APP_VERSION = 'v0414e';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -19010,6 +19014,17 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.4.4 (v0414e)',date:'2026-04-14',items:[
+    {type:'improve',text:'나의 메뉴 알림 항목 — "푸시 알림" → "알림 수신"으로 변경, 설명 문구 추가'},
+  ]},
+  {ver:'2.4.3 (v0414d)',date:'2026-04-14',items:[
+    {type:'new',text:'Android FCM 알림 브릿지 연동 — 네이티브 앱에서 웹 알림 설정(ON/OFF) 및 FCM 토큰 등록'},
+    {type:'new',text:'handleNativeNotificationClick — 알림 클릭 시 해당 화면으로 자동 이동'},
+  ]},
+  {ver:'2.4.2 (v0414c)',date:'2026-04-14',items:[
+    {type:'improve',text:'PWA 설치 안내 팝업 제거 — 앱 환경에서 불필요한 팝업 비활성화'},
+    {type:'improve',text:'AI 기능 소개 팝업 제거 — 출시 초기 한정 안내 비활성화'},
+  ]},
   {ver:'2.4.1 (v0414b)',date:'2026-04-14',items:[
     {type:'fix',text:'홈 이력보기 날짜 이동 화살표 방향 수정 — ▲ 이전 날, ▼ 다음 날'},
   ]},
@@ -22554,6 +22569,10 @@ function urlBase64ToUint8Array(base64String){
 
 // Generate a unique device ID for this browser/device
 function getDeviceId(){
+  // 네이티브 앱(WebView)이면 Android 기기 고유 ID 사용
+  if(window.MilelyBridge && window.MilelyBridge.isNativeApp && window.MilelyBridge.isNativeApp()){
+    try{ return 'native_'+window.MilelyBridge.getDeviceId(); }catch(_){}
+  }
   let id=localStorage.getItem(_LS_PREFIX+'device_id');
   if(!id){
     id='dev_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);
@@ -22563,6 +22582,14 @@ function getDeviceId(){
 }
 
 async function subscribePush(){
+  // ── 네이티브 앱(Android WebView) 분기 ──
+  if(window.MilelyBridge && window.MilelyBridge.isNativeApp && window.MilelyBridge.isNativeApp()){
+    // Android: 권한 요청 → 콜백(_milelyOnPermissionResult) → FCM 토큰 발급 → 콜백(_milelyOnFCMToken)
+    try{ window.MilelyBridge.requestNotificationPermission(); }
+    catch(e){ console.error('[Push/Native] requestNotificationPermission error:', e); }
+    return;
+  }
+
   // Check if running in standalone PWA mode (required on iOS)
   const isStandalone=window.navigator.standalone||window.matchMedia('(display-mode:standalone)').matches;
   const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
@@ -22644,6 +22671,20 @@ async function subscribePush(){
 }
 
 async function unsubscribePush(){
+  // ── 네이티브 앱(Android WebView) 분기 ──
+  if(window.MilelyBridge && window.MilelyBridge.isNativeApp && window.MilelyBridge.isNativeApp()){
+    try{ window.MilelyBridge.disableNotification(); }catch(_){}
+    localStorage.setItem(_LS_PREFIX+'push_enabled','false');
+    const _did=getDeviceId();
+    if(S.pushDevices&&S.pushDevices[_did]){
+      S.pushDevices[_did].enabled=false;
+      save();
+    }
+    updatePushUI();
+    toast('🔕 이 기기에서 알림이 해제됐어요');
+    return;
+  }
+
   try{
     // Push 구독 해제
     if(pushSubscription){
@@ -22671,7 +22712,9 @@ async function unsubscribePush(){
 
 // 유저 전환 시 이 기기의 pushDevice user 필드를 현재 유저로 갱신
 function _syncPushDeviceUser(){
-  if(!pushSubscription || !currentUser) return;
+  const _isNative=!!(window.MilelyBridge&&window.MilelyBridge.isNativeApp&&window.MilelyBridge.isNativeApp());
+  if(!_isNative && !pushSubscription) return;
+  if(!currentUser) return;
   const deviceId = localStorage.getItem(_LS_PREFIX+'device_id');
   if(!deviceId || !S.pushDevices || !S.pushDevices[deviceId]) return;
   if(S.pushDevices[deviceId].user === currentUser) return; // 이미 맞음
@@ -22682,10 +22725,13 @@ function _syncPushDeviceUser(){
 }
 
 function updatePushUI(){
+  const isNative=!!(window.MilelyBridge&&window.MilelyBridge.isNativeApp&&window.MilelyBridge.isNativeApp());
   const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
   const isStandalone=window.navigator.standalone||window.matchMedia('(display-mode:standalone)').matches;
-  const pushSupported=typeof Notification!=='undefined'&&(!isIOS||isStandalone);
-  const isOn=!!pushSubscription;
+  const pushSupported=isNative||(typeof Notification!=='undefined'&&(!isIOS||isStandalone));
+  const isOn=isNative
+    ?(()=>{try{return window.MilelyBridge.isNotificationEnabled();}catch(_){return false;}})()
+    :!!pushSubscription;
   // 관리탭 토글
   const togBtn=document.getElementById('push-tog');
   if(togBtn) togBtn.classList.toggle('off',!isOn);
@@ -22782,6 +22828,15 @@ async function showPushDebug(){
   if(!el)return;
   const lines=[];
   lines.push('환경: '+_ENV);
+  // 네이티브 브릿지 상태
+  if(window.MilelyBridge&&window.MilelyBridge.isNativeApp&&window.MilelyBridge.isNativeApp()){
+    lines.push('앱 타입: 네이티브(FCM)');
+    try{lines.push('알림 권한: '+(window.MilelyBridge.isNotificationPermissionGranted()?'허용':'거부'));}catch(_){}
+    try{lines.push('알림 상태: '+(window.MilelyBridge.isNotificationEnabled()?'활성':'비활성'));}catch(_){}
+    lines.push('기기 ID: '+getDeviceId());
+  } else {
+    lines.push('앱 타입: 웹(Web Push)');
+  }
   lines.push('Firestore: '+(_ENV==='dev'?'users/taemin_dev':'users/taemin'));
   // SW status
   if('serviceWorker' in navigator){
@@ -22831,11 +22886,88 @@ async function sendTestPush(){
 }
 
 function togglePush(){
-  if(pushSubscription)unsubscribePush();
+  const _isNative=!!(window.MilelyBridge&&window.MilelyBridge.isNativeApp&&window.MilelyBridge.isNativeApp());
+  const _isOn=_isNative
+    ?(()=>{try{return window.MilelyBridge.isNotificationEnabled();}catch(_){return false;}})()
+    :!!pushSubscription;
+  if(_isOn)unsubscribePush();
   else subscribePush();
 }
 window.togglePush=togglePush;
 window.sendTestPush=sendTestPush;
+
+// ── MilelyBridge 콜백 (Android → 웹) ──────────────────────────────────────────
+// 1) 권한 요청 결과 → FCM 토큰 발급 시작
+window._milelyOnPermissionResult=function(granted){
+  if(!granted){
+    toast('알림 권한이 거부됐어요. 설정 > 앱 > 알림에서 허용해주세요.');
+    return;
+  }
+  try{ window.MilelyBridge.getFCMToken(); }
+  catch(e){ console.error('[Push/Native] getFCMToken error:', e); }
+};
+
+// 2) FCM 토큰 수신 → Firestore 저장
+window._milelyOnFCMToken=async function(token){
+  if(!token){
+    console.warn('[Push/Native] FCM token empty');
+    toast('알림 토큰 발급 실패. 다시 시도해주세요.');
+    return;
+  }
+  try{
+    const deviceId=getDeviceId();
+    localStorage.setItem(_LS_PREFIX+'push_enabled','true');
+    if(!S.pushDevices)S.pushDevices={};
+    S.pushDevices[deviceId]={
+      fcmToken:token,
+      type:'fcm',
+      user:currentUser||'unknown',
+      enabled:true,
+      updatedAt:Date.now()
+    };
+    await save();
+    updatePushUI();
+    toast('🔔 이 기기에서 알림이 활성화됐어요!');
+    console.log('[Push/Native] FCM token saved, deviceId:', deviceId);
+  }catch(e){
+    console.error('[Push/Native] token save error:', e);
+    toast('알림 설정 저장 실패: '+e.message);
+  }
+};
+
+// 3) 알림 클릭 시 Android가 호출 → 해당 화면으로 이동
+window.handleNativeNotificationClick=function(type, from, msg, emotion){
+  try{
+    console.log('[NativeNotif] click:', type, from, msg, emotion);
+    switch(type){
+      case 'family_msg':
+      case 'family_message':
+        // 가족 메시지: 받은 메시지 팝업 표시
+        if(from && msg){
+          try{ showReceivedMsg(from, msg, emotion||null, {from, text:msg, emotion:emotion||null}); }
+          catch(_){ reallyGoTab('family'); }
+        } else {
+          reallyGoTab('family');
+        }
+        break;
+      case 'mood_update':
+        reallyGoTab('family');
+        break;
+      case 'reward_notify':
+      case 'reward_request':
+        reallyGoTab('reward');
+        break;
+      case 'activity_verify':
+      case 'act_verify':
+        reallyGoTab('activity');
+        break;
+      default:
+        reallyGoTab('home');
+        break;
+    }
+  }catch(e){ console.error('[NativeNotif] click handler error:', e); }
+};
+window.handleNativeNotificationClick=window.handleNativeNotificationClick;
 
 
 // ── DEV: 유저 빠른전환 (관리자 페이지 내 인라인) ──────
@@ -24029,7 +24161,8 @@ window._createState = _createState;
   // 업데이트 내역 배지 + 알림 배너
   _updateChangelogBadge();
   _showChangelogPopupIfNew();
-  try{_maybeShowFeatureIntros();}catch(_){}
+  // AI 기능 소개 팝업 비활성화 (출시 초기 한정, 현재 불필요)
+  // try{_maybeShowFeatureIntros();}catch(_){}
 
   // 날씨/미세먼지 데이터 가져오기
   fetchWeather();
