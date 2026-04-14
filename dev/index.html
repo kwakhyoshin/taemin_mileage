@@ -3302,8 +3302,8 @@ requestAnimationFrame(function(){
       <!-- Card 1: 매일 작은 활동이 습관이 돼요 (홈 화면) -->
       <div class="ins-card ins-card-1">
         <div class="ins-illust">
-          <img class="ins-img-dark" src="ob-home-dark.png" alt="홈 화면 (다크)" loading="lazy">
-          <img class="ins-img-light" src="ob-home-light.png" alt="홈 화면 (라이트)" loading="lazy">
+          <img class="ins-img-dark" src="https://kwakhyoshin.github.io/taemin_mileage/dev/ob-home-dark.png" alt="홈 화면 (다크)" loading="lazy">
+          <img class="ins-img-light" src="https://kwakhyoshin.github.io/taemin_mileage/dev/ob-home-light.png" alt="홈 화면 (라이트)" loading="lazy">
         </div>
         <div class="ins-keyword">매일 작은 활동이<br>습관이 돼요</div>
         <div class="ins-sub">양치, 세수, 숙제 — 하루 2분이면 충분해요.<br><b style="color:#6366F1;font-size:15px">66일</b>이면 자동화된 습관이 됩니다.</div>
@@ -3312,8 +3312,8 @@ requestAnimationFrame(function(){
       <!-- Card 2: 보상으로 내재동기를 키워요 (보상 화면) -->
       <div class="ins-card ins-card-2">
         <div class="ins-illust">
-          <img class="ins-img-dark" src="ob-reward-dark.png" alt="보상 상점 (다크)" loading="lazy">
-          <img class="ins-img-light" src="ob-reward-light.png" alt="보상 상점 (라이트)" loading="lazy">
+          <img class="ins-img-dark" src="https://kwakhyoshin.github.io/taemin_mileage/dev/ob-reward-dark.png" alt="보상 상점 (다크)" loading="lazy">
+          <img class="ins-img-light" src="https://kwakhyoshin.github.io/taemin_mileage/dev/ob-reward-light.png" alt="보상 상점 (라이트)" loading="lazy">
         </div>
         <div class="ins-keyword">노력이 보상으로<br>이어져요</div>
         <div class="ins-sub">진전이 눈에 보이면 아이는 스스로<br><b style="color:#D98E09;font-size:15px">"한 번 더"</b>를 선택합니다.</div>
@@ -3322,8 +3322,8 @@ requestAnimationFrame(function(){
       <!-- Card 3: 데이터로 성장을 확인해요 (리포트 화면) -->
       <div class="ins-card ins-card-3">
         <div class="ins-illust">
-          <img class="ins-img-dark" src="ob-report-dark.png" alt="성과 통계 (다크)" loading="lazy">
-          <img class="ins-img-light" src="ob-report-light.png" alt="성과 통계 (라이트)" loading="lazy">
+          <img class="ins-img-dark" src="https://kwakhyoshin.github.io/taemin_mileage/dev/ob-report-dark.png" alt="성과 통계 (다크)" loading="lazy">
+          <img class="ins-img-light" src="https://kwakhyoshin.github.io/taemin_mileage/dev/ob-report-light.png" alt="성과 통계 (라이트)" loading="lazy">
         </div>
         <div class="ins-keyword">데이터로<br>성장을 확인해요</div>
         <div class="ins-sub">자기 행동을 모니터링하는 아이는<br>목표 달성률이 <b style="color:#7C3AED;font-size:15px">2배</b> 높아집니다.</div>
@@ -3332,8 +3332,8 @@ requestAnimationFrame(function(){
       <!-- Card 4: AI가 보상 체계를 점검해요 (챗봇 화면) ★ KEY -->
       <div class="ins-card ins-card-1">
         <div class="ins-illust">
-          <img class="ins-img-dark" src="ob-chat-dark.png" alt="AI 챗봇 (다크)" loading="lazy">
-          <img class="ins-img-light" src="ob-chat-light.png" alt="AI 챗봇 (라이트)" loading="lazy">
+          <img class="ins-img-dark" src="https://kwakhyoshin.github.io/taemin_mileage/dev/ob-chat-dark.png" alt="AI 챗봇 (다크)" loading="lazy">
+          <img class="ins-img-light" src="https://kwakhyoshin.github.io/taemin_mileage/dev/ob-chat-light.png" alt="AI 챗봇 (라이트)" loading="lazy">
         </div>
         <div class="ins-keyword">AI가 보상 체계를<br>과학적으로 점검해요</div>
         <div class="ins-sub">밀리가 보상의 균형, 내재동기 훼손 위험,<br>적정 난이도를 <b style="color:#6366F1;font-size:15px">실시간 분석</b>합니다.</div>
@@ -8066,6 +8066,17 @@ async function _loadNaverSDK(){
   });
 }
 
+// ── Android WebView(네이티브 앱) 감지 헬퍼 ──────────────────────────
+// window.open()이 외부 브라우저로 열리는 환경에서는 redirect 방식으로 로그인 진행
+function _isNativeWebView(){
+  try{
+    if(window.MilelyBridge && typeof window.MilelyBridge.isNativeApp==='function' && window.MilelyBridge.isNativeApp()) return true;
+  }catch(_){}
+  // WebView UA 패턴: "; wv)" (Android WebView)
+  try{ if(/; wv\)/.test(navigator.userAgent)) return true; }catch(_){}
+  return false;
+}
+
 async function _doKakaoLogin(){
   if(!_KAKAO_REST_KEY){ toast('카카오 로그인 키가 설정되지 않았어요'); return null; }
   return new Promise((resolve)=>{
@@ -8075,6 +8086,15 @@ async function _doKakaoLogin(){
     try{ sessionStorage.setItem('oauth_state_kakao', state); }catch(e){}
     const redirectUri = _getKakaoCallbackUrl();
     const authUrl = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${_KAKAO_REST_KEY}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}`;
+    // ★ Android WebView에서는 window.open()이 외부 브라우저를 열어 콜백 불가 → redirect 방식 강제
+    if(_isNativeWebView()){
+      console.log('[Kakao] Native WebView detected, using redirect flow');
+      localStorage.setItem(_LS_PREFIX+'social_pending', 'kakao');
+      localStorage.setItem('taemin_v6_kakao_redirect', 'true');
+      window.location.href = authUrl;
+      resolve(null); // 페이지 이동 — 이후 로직 실행 안 됨
+      return;
+    }
     const popup = window.open(authUrl, 'kakaoLogin', 'width=500,height=700,scrollbars=yes');
     let resolved = false;
     // localStorage fallback 결과 초기화
@@ -8147,6 +8167,15 @@ async function _doNaverLogin(){
     const authUrl = `https://nid.naver.com/oauth2.0/authorize?response_type=token&client_id=${_NAVER_CLIENT_ID}&redirect_uri=${encodeURIComponent(_getNaverCallbackUrl())}&state=${state}`;
     // localStorage fallback 결과 초기화 (이전 세션 잔여값 제거)
     try{ localStorage.removeItem('taemin_v6_naver_callback_result'); }catch(e){}
+    // ★ Android WebView: window.open()이 외부 브라우저를 열어 콜백 불가 → redirect 강제
+    if(_isNativeWebView()){
+      console.log('[Naver] Native WebView detected, using redirect flow');
+      localStorage.setItem(_LS_PREFIX+'social_pending', 'naver');
+      localStorage.setItem('taemin_v6_naver_redirect', 'true');
+      window.location.href = authUrl;
+      resolve(null);
+      return;
+    }
     const popup = window.open(authUrl, 'naverLogin', 'width=500,height=600,scrollbars=yes');
 
     // ★ 모바일에서 팝업이 차단된 경우 → 현재 페이지에서 직접 이동 (redirect 방식)
@@ -9319,7 +9348,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0414p';
+const _APP_VERSION = 'v0414q';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -19043,6 +19072,11 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.4.16 (v0414q)',date:'2026-04-14',items:[
+    'Android WebView 앱에서 카카오/네이버 로그인: window.open()이 외부 브라우저를 열어 콜백 불가 → redirect 방식 강제 적용',
+    '카카오 redirect 복귀 처리기 추가 (네이버와 동일한 패턴)',
+    '온보딩 소개 이미지 경로를 절대 URL로 변경 — WebView에서도 정상 표시'
+  ]},
   {ver:'2.4.15 (v0414p)',date:'2026-04-14',items:[
     'Android 3버튼 네비바 겹침 근본 수정: native-app 의존 제거, UA 감지 + html.is-android로 bottom:76px 적용'
   ]},
@@ -23899,6 +23933,8 @@ window._createState = _createState;
   const _kakaoCode = _kakaoQs.get('code');
   const _kakaoState = _kakaoQs.get('state') || '';
   // ★ 모바일에서 window.opener는 null일 수 있음 → window.name으로도 감지
+  // ★ Android WebView redirect 복귀: taemin_v6_kakao_redirect 플래그로 감지
+  const _isKakaoRedirectReturn = _kakaoCode && _kakaoState.startsWith('kakao_') && localStorage.getItem('taemin_v6_kakao_redirect') === 'true';
   const _isKakaoCallback = _kakaoCode && _kakaoState.startsWith('kakao_') && (window.opener || window.name === 'kakaoLogin');
   // S-11: state 검증 — 팝업 콜백에서만 (opener가 있을 때)
   if(_isKakaoCallback && window.opener){
@@ -23910,15 +23946,51 @@ window._createState = _createState;
       window.opener.sessionStorage.removeItem('oauth_state_kakao');
     }catch(e){ /* cross-origin일 수 있음 — 무시 */ }
   }
-  if(_isKakaoCallback){
-    console.log('[Kakao Callback] authorization code detected, opener:', !!window.opener, 'name:', window.name);
-    // 콜백 탭에서는 앱 초기화 불필요 — 즉시 body 교체
-    document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;color:#666">인증 처리 중...</div>';
+  if(_isKakaoCallback || _isKakaoRedirectReturn){
+    console.log('[Kakao Callback] authorization code detected, opener:', !!window.opener, 'name:', window.name, 'redirect:', _isKakaoRedirectReturn);
+    // 콜백 탭에서는 앱 초기화 불필요 — 즉시 body 교체 (팝업 모드만)
+    if(!_isKakaoRedirectReturn){
+      document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;color:#666">인증 처리 중...</div>';
+    }
+    if(_isKakaoRedirectReturn){
+      localStorage.removeItem('taemin_v6_kakao_redirect');
+      // state 검증 (redirect 모드)
+      try{
+        const _savedKState = sessionStorage.getItem('oauth_state_kakao');
+        if(_savedKState && _savedKState !== _kakaoState){
+          console.warn('[Kakao Redirect] state mismatch — possible CSRF');
+        }
+        sessionStorage.removeItem('oauth_state_kakao');
+      }catch(e){}
+    }
     // Step 1: code → access_token 교환
-    const _kakaoRedirectUri = window.location.href.split('?')[0]; // query string 제거한 redirect_uri
+    // ★ redirect 모드에서는 redirect_uri가 authorize 호출 시의 값과 정확히 일치해야 함
+    const _kakaoRedirectUri = _isKakaoRedirectReturn ? _getKakaoCallbackUrl() : window.location.href.split('?')[0];
     // ── S-02: client_secret은 Cloudflare Worker 프록시에서 처리 ──
-    // 결과 전달 헬퍼: postMessage + localStorage fallback
+    // 결과 전달 헬퍼: postMessage + localStorage fallback + redirect 모드 직접 처리
     function _deliverKakaoResult(data){
+      if(_isKakaoRedirectReturn){
+        // ★ WebView redirect 복귀: 메인 페이지에서 직접 _handleSocialLoginResult 호출
+        console.log('[Kakao Redirect] Processing result directly:', data.uid);
+        localStorage.removeItem(_LS_PREFIX+'social_pending');
+        history.replaceState(null, '', window.location.pathname);
+        (async ()=>{
+          try {
+            if(data._error || !data.uid){
+              toast('카카오 로그인 실패: ' + (data._error || '정보 없음'));
+              return;
+            }
+            if(!_firebaseReady) await _initFirebase();
+            _showSocialLoading('카카오');
+            await _handleSocialLoginResult(data, 'kakao');
+          } catch(e){
+            console.error('[Kakao Redirect] handleSocialLoginResult error:', e);
+            if(_ENV==='dev') toast('[DEV] 카카오 redirect 에러: '+(e.message||e), 5000);
+            else toast('카카오 로그인 처리 중 오류가 발생했어요');
+          }
+        })();
+        return;
+      }
       if(window.opener){ try{ window.opener.postMessage(data, 'https://kwakhyoshin.github.io'); }catch(e){} }
       try{ localStorage.setItem('taemin_v6_kakao_callback_result', JSON.stringify(data)); }catch(e){}
       setTimeout(()=>{ try{window.close();}catch(e){} }, 300);
@@ -23964,7 +24036,7 @@ window._createState = _createState;
         _error: err.message || 'token exchange failed'
       });
     });
-    return; // 이 창은 콜백 처리만 하고 종료
+    if(!_isKakaoRedirectReturn) return; // 팝업 모드: 이 창은 콜백 처리만 하고 종료 (redirect 모드는 앱 초기화 계속)
   }
 
   // ── 네이버 OAuth 콜백 감지 (팝업 또는 redirect 복귀) ──
