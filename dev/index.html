@@ -7699,6 +7699,31 @@ function postLoginInit(){
       const bridge = window.MilelyBridge;
       const isNative = !!(bridge && typeof bridge.isNativeApp==='function' && bridge.isNativeApp());
       if(!isNative) return;
+      // ✅ v0415f: 레거시 경로(users/taemin_dev.pushDevices)에 저장된 이전 FCM 토큰을
+      //   families/{familyId}.pushDevices 로 마이그레이션. 재설치·재로그인 없이 복구되도록.
+      try{
+        if(_familyId && _firebaseReady && db && LEGACY_DOC && LEGACY_DOC.path && currentUser){
+          getDoc(LEGACY_DOC).then(function(_ls){
+            if(!_ls || !_ls.exists()) return;
+            const _lpd=_ls.data()&&_ls.data().pushDevices;
+            if(!_lpd || typeof _lpd!=='object') return;
+            const _patch={};
+            Object.keys(_lpd).forEach(function(_did){
+              const _d=_lpd[_did]; if(!_d || _d.type!=='fcm' || !_d.fcmToken) return;
+              // memberId 형식("m_xxx") 매칭 or 현재 기기의 deviceId면 migrate
+              const _myDid=localStorage.getItem(_LS_PREFIX+'device_id');
+              if(_d.user===currentUser || _did===_myDid){
+                _patch[_did]={..._d, user:currentUser, updatedAt:Date.now()};
+              }
+            });
+            if(Object.keys(_patch).length===0) return;
+            const _famRef=doc(db,'families',_familyId);
+            setDoc(_famRef,{pushDevices:_patch},{merge:true})
+              .then(()=>console.log('[Push/Native] migrated legacy FCM tokens →',_familyId,Object.keys(_patch)))
+              .catch(e=>console.warn('[Push/Native] legacy FCM migration failed:',e));
+          }).catch(function(_e){ console.warn('[Push/Native] legacy read failed:',_e); });
+        }
+      }catch(_mgErr){ console.warn('[Push/Native] FCM migration error:',_mgErr); }
       if(window._pendingFcmToken){
         const t = window._pendingFcmToken;
         window._pendingFcmToken = null;
@@ -9389,7 +9414,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0415e';
+const _APP_VERSION = 'v0415f';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -19197,6 +19222,10 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.4.22 (v0415f)',date:'2026-04-15',items:[
+    'Android APK FCM 푸시 수신 복구 — FCM 토큰이 잘못된 경로(users/taemin_dev.pushDevices)에 저장되어 Cloud Function이 찾지 못하던 문제 수정. 이제 _milelyOnFCMToken / _syncPushDeviceUser 는 families/{familyId}.pushDevices.{deviceId} 에 직접 merge 저장',
+    '로그인 직후 레거시 경로에 남은 이전 FCM 토큰을 families 문서로 자동 마이그레이션 (재설치 불필요)'
+  ]},
   {ver:'2.4.21 (v0415e)',date:'2026-04-15',items:[
     '보상 사용 승인/거절 후 자녀 기기의 보상 인벤토리 동적 갱신 지연 수정 — Firestore 리스너 쿨다운 2000ms→400ms 단축, 쿨다운/로컬 dirty 상태에서도 memberData[자녀].rewardInventory/rewardRequests 변경을 즉시 S.*에 반영하여 같은 자녀 계정으로 로그인한 다른 기기에서도 "사용신청중" → "사용완료" 상태가 앱 재시작 없이 바로 갱신됨',
     'approveRewardRequest / rejectRewardRequest: 부모의 root S.rewardInventory가 비어있어도 memberData 업데이트가 수행되도록 early-return 제거'
@@ -22959,9 +22988,17 @@ function _syncPushDeviceUser(){
   if(!deviceId || !S.pushDevices || !S.pushDevices[deviceId]) return;
   if(S.pushDevices[deviceId].user === currentUser) return; // 이미 맞음
   console.log('[Push] 디바이스 유저 갱신:', S.pushDevices[deviceId].user, '→', currentUser);
+  const _now=Date.now();
   S.pushDevices[deviceId].user = currentUser;
-  S.pushDevices[deviceId].updatedAt = Date.now();
-  save();
+  S.pushDevices[deviceId].updatedAt = _now;
+  // ✅ v0415f: families 문서에 직접 merge (Cloud Function이 읽는 위치)
+  if(_familyId && _firebaseReady && db){
+    try{
+      const _famRef=doc(db,'families',_familyId);
+      setDoc(_famRef,{pushDevices:{[deviceId]:{...S.pushDevices[deviceId]}}},{merge:true})
+        .catch(e=>console.warn('[_syncPushDeviceUser] families write failed:',e));
+    }catch(_e){ console.warn('[_syncPushDeviceUser]',_e); }
+  }
 }
 
 function updatePushUI(){
@@ -23169,15 +23206,30 @@ window._milelyOnFCMToken=async function(token){
   try{
     const deviceId=getDeviceId();
     localStorage.setItem(_LS_PREFIX+'push_enabled','true');
-    if(!S.pushDevices)S.pushDevices={};
-    S.pushDevices[deviceId]={
+    const _dev={
       fcmToken:token,
       type:'fcm',
       user:currentUser||'unknown',
       enabled:true,
       updatedAt:Date.now()
     };
-    await save();
+    // ✅ v0415f: families/{familyId}.pushDevices.{deviceId} 직접 업데이트
+    // — Cloud Function onFamilyMessageDevFamilies 는 families 문서의 pushDevices를 읽음
+    // — 기존에는 S.pushDevices 에 저장하고 save()가 DATA_DOC(families/) 로 썼으나,
+    //   독립모드·마이그레이션 타이밍에 따라 families 문서에 pushDevices가 비어있는 케이스 발생.
+    //   이제는 무조건 families 문서에 직접 merge 저장.
+    if(_familyId && _firebaseReady && db){
+      try{
+        const _famRef=doc(db,'families',_familyId);
+        await setDoc(_famRef,{pushDevices:{[deviceId]:_dev}},{merge:true});
+        console.log('[Push/Native] FCM token saved to families/'+_familyId+'.pushDevices.'+deviceId);
+      }catch(_werr){
+        console.error('[Push/Native] families pushDevices write failed:', _werr);
+      }
+    }
+    // 로컬 S에도 반영 (UI 표시·다른 로직 호환)
+    if(!S.pushDevices)S.pushDevices={};
+    S.pushDevices[deviceId]=_dev;
     try{ updatePushUI(); }catch(_){}
     try{ toast('🔔 이 기기에서 알림이 활성화됐어요!'); }catch(_){}
     console.log('[Push/Native] FCM token saved, deviceId:', deviceId);
