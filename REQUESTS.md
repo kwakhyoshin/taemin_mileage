@@ -60,6 +60,9 @@
 | R-040 | 2026-04-14 | 홈 이력보기 날짜 이동 화살표 방향 수정 (▲ 이전날 ↔ ▼ 다음날) | v0414b | PR #338 반영 | diaryNav 호출 인자 교체 |
 | R-041 | 2026-04-14 | PWA 설치 안내 팝업 제거 (Android/iOS 가입 완료 시 자동 팝업) | v0414c | PR #339 반영 | 3곳 비활성화, 수동 tryPwaInstall은 유지 |
 | R-042 | 2026-04-14 | AI 기능 소개 팝업 제거 (_maybeShowFeatureIntros 비활성화) | v0414c | PR #339 반영 | 관리자 미리보기 및 함수 코드는 유지 |
+| R-043 | 2026-04-14 | Android FCM 알림 브릿지 연동 — subscribePush/unsubscribePush/updatePushUI MilelyBridge 분기 | v0414d | PR #340 반영 | getDeviceId도 native_ 접두사로 분리 |
+| R-044 | 2026-04-14 | handleNativeNotificationClick 전역 함수 추가 — 알림 클릭 시 화면 이동 | v0414d | PR #340 반영 | type별 탭 이동 (family_msg/reward/activity/home) |
+| R-045 | 2026-04-14 | Cloud Functions sendToDevices FCM 분기 추가 — type:'fcm' 기기 admin.messaging().send() 처리 | v0414d | PR #340 반영 | 토큰 만료 시 자동 enabled:false |
 
 ## 미착수 백로그 (ROADMAP.md 기준)
 
