@@ -9312,7 +9312,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0414j';
+const _APP_VERSION = 'v0414k';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -19036,8 +19036,11 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.4.10 (v0414k)',date:'2026-04-14',items:[
+    {type:'fix',text:'isSidebarMode() 도입 — portrait 태블릿(Galaxy Fold 세로 펼침)에서 스크롤 시 하단 dock 정상 동작. landscape/≥1024px만 사이드바 skip'},
+  ]},
   {ver:'2.4.9 (v0414j)',date:'2026-04-14',items:[
-    {type:'fix',text:'native-app nav/레이아웃 오버라이드 전부 제거 — 기존 미디어쿼리 100% 위임. 넓은 화면=사이드바, 좁은 폰=하단 floating+dock, JS checkNavDock도 원복'},
+    {type:'fix',text:'native-app nav 오버라이드 전부 제거 — 기존 미디어쿼리 위임'},
   ]},
   {ver:'2.4.8 (v0414i)',date:'2026-04-14',items:[
     {type:'fix',text:'native-app nav CSS @media(min-width:768px) 스코프 (floating pill 알파값 이슈)'},
@@ -21770,11 +21773,13 @@ document.addEventListener('touchend',function(e){
   }
 },{passive:true});
 
-// ── DOCK NAV ON SCROLL (모바일 only) ──────────────────────────
+// ── DOCK NAV ON SCROLL ──────────────────────────
 let _navDocked=false;
 function isTabletOrDesktop(){return window.innerWidth>=768}
+// 사이드바 모드: ≥1024px(모든 방향) 또는 768-1023px landscape
+function isSidebarMode(){return window.innerWidth>=1024||(window.innerWidth>=768&&window.matchMedia('(orientation:landscape)').matches)}
 function checkNavDock(){
-  if(isTabletOrDesktop())return; // 태블릿/데스크탑에서는 사이드바 고정
+  if(isSidebarMode())return; // 사이드바일 때만 skip — portrait 태블릿은 dock 동작
   const scrollY=window.scrollY||document.documentElement.scrollTop;
   const container=document.querySelector('.nav-container');
   if(!container)return;
@@ -21790,7 +21795,7 @@ window.addEventListener('scroll',checkNavDock,{passive:true});
 // Also check on each visible screen's scroll
 document.querySelectorAll('.scr').forEach(scr=>{
   scr.addEventListener('scroll',()=>{
-    if(isTabletOrDesktop())return;
+    if(isSidebarMode())return;
     const scrollY=scr.scrollTop;
     const container=document.querySelector('.nav-container');
     if(!container)return;
@@ -21803,9 +21808,9 @@ document.querySelectorAll('.scr').forEach(scr=>{
     }
   },{passive:true});
 });
-// 태블릿/데스크탑 전환 시 docked 클래스 제거
+// 사이드바 전환 시 docked 클래스 제거
 window.addEventListener('resize',()=>{
-  if(isTabletOrDesktop()){
+  if(isSidebarMode()){
     const c=document.querySelector('.nav-container');
     if(c)c.classList.remove('docked');
     _navDocked=false;
