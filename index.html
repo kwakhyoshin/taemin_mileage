@@ -2859,6 +2859,25 @@ button:disabled {
 @keyframes tourHandHold{0%{transform:translate(0,0) scale(1)}10%{transform:translate(0,5px) scale(.88)}65%{transform:translate(0,5px) scale(.88)}80%{transform:translate(0,0) scale(1.06)}100%{transform:translate(0,0) scale(1)}}
 @keyframes tourConfetti{0%{opacity:1;transform:translateY(0) rotate(0deg) scale(1)}100%{opacity:0;transform:translateY(-100px) rotate(540deg) scale(0)}}
 
+/* ========================================
+   NATIVE APP (body.native-app)
+   MilelyApp WebView에서 body에 native-app 클래스 추가 (JS로 설정).
+   - 모든 화면 크기에서 하단 탭바를 position:fixed; bottom:0 으로 고정
+   - transform:translateX(-50%) + position:fixed 조합이 Android WebView에서
+     불안정한 문제 방지 (Galaxy Fold 등 대형 화면 포함)
+   ======================================== */
+body.native-app .nav-container{position:fixed!important;bottom:0!important;top:auto!important;left:0!important;right:0!important;transform:none!important;width:100%!important;max-width:100%!important;height:auto!important;background:transparent!important;display:flex!important;justify-content:center!important}
+body.native-app .bottom-nav{flex-direction:row!important;align-items:center!important;gap:0!important;border-radius:var(--r) var(--r) 0 0!important;padding:8px 8px calc(8px + env(safe-area-inset-bottom))!important;height:auto!important;background:var(--card)!important;border:none!important;border-top:.5px solid var(--bdr)!important;border-right:none!important;box-shadow:0 -4px 20px rgba(0,0,0,.06)!important;justify-content:center!important;width:100%!important}
+body.native-app.dark .bottom-nav{background:var(--card)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;box-shadow:0 -4px 20px rgba(0,0,0,.2)!important}
+body.native-app .nav-item{padding:8px 12px!important;border-radius:var(--rsm)!important;flex-direction:column!important;justify-content:center!important;align-items:center!important;gap:2px!important}
+body.native-app .nav-item .nav-label{font-size:var(--fs-xs)!important;font-weight:700!important;max-width:none!important;opacity:1!important;margin-left:0!important}
+body.native-app .nav-brand{display:none!important}
+body.native-app .nav-divider{width:1px!important;height:22px!important;margin:0 4px!important}
+body.native-app .nav-users{flex-direction:row!important;gap:0!important}
+body.native-app .scr{margin-left:0!important;width:100%!important;max-width:100%!important;padding-bottom:calc(72px + env(safe-area-inset-bottom))!important;box-sizing:border-box!important}
+body.native-app #s-badge,body.native-app #s-privacy,body.native-app #s-terms{margin-left:0!important;width:100%!important;max-width:100%!important}
+body.native-app .auth-screen{margin-left:0!important;width:100%!important}
+
 </style>
 <!-- early CSS injection 제거: auth-continue가 HTML에서 바로 visible -->
 </head>
@@ -2898,6 +2917,19 @@ requestAnimationFrame(function(){
     document.body.classList.add('auth-active');
   });
 });
+// 네이티브 앱(MilelyApp WebView) 감지 → body.native-app 클래스 추가
+// CSS body.native-app 규칙이 모든 화면 크기에서 하단 탭바를 bottom:0 고정으로 처리
+(function(){
+  function _setNativeAppClass(){
+    if(window.MilelyBridge && typeof window.MilelyBridge.isNativeApp==='function' && window.MilelyBridge.isNativeApp()){
+      document.body.classList.add('native-app');
+    }
+  }
+  // MilelyBridge는 WebView가 페이지 로드 전 주입하므로 즉시 확인
+  _setNativeAppClass();
+  // 혹시 늦게 주입되는 경우를 대비해 DOMContentLoaded 시점에도 재확인
+  document.addEventListener('DOMContentLoaded', _setNativeAppClass, {once:true});
+})();
 </script>
 
 <!-- Auth: standalone script (no module dependency) for auth screen navigation -->
@@ -9290,7 +9322,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'prod'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0414e';
+const _APP_VERSION = 'v0414f';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -19014,6 +19046,9 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.4.5 (v0414f)',date:'2026-04-14',items:[
+    {type:'fix',text:'Galaxy Fold 펼침(태블릿) 화면에서 하단 탭바가 스크롤에 따라 움직이던 버그 수정 — position:fixed+transform 조합 대신 body.native-app CSS로 항상 bottom:0 고정'},
+  ]},
   {ver:'2.4.4 (v0414e)',date:'2026-04-14',items:[
     {type:'improve',text:'나의 메뉴 알림 항목 — "푸시 알림" → "알림 수신"으로 변경, 설명 문구 추가'},
   ]},
@@ -21737,6 +21772,8 @@ document.addEventListener('touchend',function(e){
 let _navDocked=false;
 function isTabletOrDesktop(){return window.innerWidth>=768}
 function checkNavDock(){
+  // 네이티브 앱은 CSS body.native-app 으로 항상 bottom:0 고정 → JS dock 불필요
+  if(document.body.classList.contains('native-app'))return;
   if(isTabletOrDesktop())return; // 태블릿/데스크탑에서는 사이드바 고정
   const scrollY=window.scrollY||document.documentElement.scrollTop;
   const container=document.querySelector('.nav-container');
@@ -21753,6 +21790,7 @@ window.addEventListener('scroll',checkNavDock,{passive:true});
 // Also check on each visible screen's scroll
 document.querySelectorAll('.scr').forEach(scr=>{
   scr.addEventListener('scroll',()=>{
+    if(document.body.classList.contains('native-app'))return;
     if(isTabletOrDesktop())return;
     const scrollY=scr.scrollTop;
     const container=document.querySelector('.nav-container');
