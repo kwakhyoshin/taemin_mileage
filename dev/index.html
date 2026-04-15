@@ -5,6 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <meta name="googlebot" content="noindex, nofollow">
+<!-- [PERF ④] preconnect / modulepreload — Firebase SDK / Firestore 연결 미리 맺어 콜드스타트 단축 -->
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://firebaseinstallations.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js" crossorigin>
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js" crossorigin>
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js" crossorigin>
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check.js" crossorigin>
+<link rel="dns-prefetch" href="https://www.googleapis.com">
 <!-- S-12: Content Security Policy -->
 <meta http-equiv="Content-Security-Policy" content="
   default-src 'self';
@@ -9434,7 +9444,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0415k';
+const _APP_VERSION = 'v0415l';
 // (v0415i) 운영기에서만 숨길 관리자 섹션 처리 — data-env-only="dev" 요소를 prod에서 숨김
 try{
   if(_ENV!=='dev'){
@@ -9569,25 +9579,27 @@ async function _initFirebase(){
     }
     LEGACY_DOC = doc(db, 'users', _ENV==='dev'?'taemin_dev':'taemin');
     DATA_DOC = LEGACY_DOC;
-    // iPhone PWA 콜드스타트 대응: 첫 onAuthStateChanged 이벤트까지 대기 (최대 3초)
+    // [PERF ③] iPhone PWA 콜드스타트 대응: 첫 onAuthStateChanged 이벤트까지 대기 (최대 1.2초, 기존 3초)
     // 이렇게 해야 auth.currentUser가 복구된 후 Firestore 읽기가 진행되어 permission-denied 방지
+    // 1.2초로 단축 — iPhone PWA에서 auth 토큰 복원은 보통 300ms 이내, 3초는 과도한 세금
     try{
       await new Promise(function(resolve){
         let done=false;
         const unsub=onAuthStateChanged(fbAuth,function(){ if(done)return; done=true; try{unsub&&unsub();}catch(_){}; resolve(); });
-        setTimeout(function(){ if(done)return; done=true; try{unsub&&unsub();}catch(_){}; resolve(); },3000);
+        setTimeout(function(){ if(done)return; done=true; try{unsub&&unsub();}catch(_){}; resolve(); },1200);
       });
       console.log('[mile.ly] Auth restored:', fbAuth.currentUser?fbAuth.currentUser.uid:'(none)');
     }catch(_awErr){ console.warn('[mile.ly] auth wait failed',_awErr); }
+    // [PERF ③] 익명 로그인 비동기화 — await 제거하고 백그라운드로 날려서 부팅 경로 단축
     // v0408z6: 로그인 세션이 없으면 익명 로그인으로 Firestore write 권한 확보
     // (회원가입 플로우는 사용자가 아직 Firebase 로그인 전이지만 setDoc을 호출해야 함)
+    // Firestore SDK는 쓰기를 큐잉하므로 익명 로그인이 늦게 완료돼도 write가 안전히 진행됨
     if(!fbAuth.currentUser && window._signInAnonymously){
-      try{
-        await window._signInAnonymously(fbAuth);
-        console.log('[mile.ly] Anonymous sign-in OK:', fbAuth.currentUser&&fbAuth.currentUser.uid);
-      }catch(_anErr){
+      window._signInAnonymously(fbAuth).then(function(){
+        console.log('[mile.ly] Anonymous sign-in OK (deferred):', fbAuth.currentUser&&fbAuth.currentUser.uid);
+      }).catch(function(_anErr){
         console.warn('[mile.ly] Anonymous sign-in failed:', _anErr&&_anErr.code, _anErr&&_anErr.message);
-      }
+      });
     }
     _firebaseReady = true;
     console.log('[mile.ly] Firebase loaded OK (with Auth)');
@@ -19292,6 +19304,11 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.4.28 (v0415l)',date:'2026-04-15',items:[
+    '[PERF ③] onAuthStateChanged 대기 3초 → 1.2초 단축 (iPhone PWA 토큰 복원은 보통 300ms 이내)',
+    '[PERF ③] 익명 로그인 비동기화 — await 제거하고 백그라운드로 수행. 부팅 경로 최대 1초+ 단축',
+    '[PERF ④] preconnect / modulepreload 추가 — gstatic, firestore, auth 도메인에 TCP/TLS 미리 맺어 Firebase SDK 로딩 가속'
+  ]},
   {ver:'2.4.27 (v0415k)',date:'2026-04-15',items:[
     '[PERF ②] 스플래시/로딩 UX 이원화 — localStorage 백업 + 세션이 있으면 "데이터 불러오는 중..." 풀블로킹 오버레이 없이 홈 화면을 즉시 렌더. 최신 데이터는 백그라운드로 가져와 자연스럽게 갱신',
     '네트워크 동기화 중에는 상단에 얇은 파란 진행바 표시 (fresh 데이터 도착 시 페이드아웃)',
