@@ -9414,7 +9414,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0415i';
+const _APP_VERSION = 'v0415j';
 // (v0415i) 운영기에서만 숨길 관리자 섹션 처리 — data-env-only="dev" 요소를 prod에서 숨김
 try{
   if(_ENV!=='dev'){
@@ -9498,6 +9498,10 @@ async function _initFirebase(){
     const fbAppCheckMod = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check.js");
     initializeApp = fbAppMod.initializeApp;
     ({getFirestore, doc, getDoc, setDoc, deleteDoc, onSnapshot, runTransaction, collection: _fsCollection, addDoc: _fsAddDoc} = fbFsMod);
+    // (PERF ①) 오프라인 IndexedDB 캐시를 위한 추가 API 추출 (SDK 버전이 낮아 없을 경우 undefined)
+    const _initializeFirestore = fbFsMod.initializeFirestore;
+    const _persistentLocalCache = fbFsMod.persistentLocalCache;
+    const _persistentMultipleTabManager = fbFsMod.persistentMultipleTabManager;
     ({getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut: signOut, onAuthStateChanged, GoogleAuthProvider, OAuthProvider, signInWithCustomToken} = fbAuthMod);
     const {signInAnonymously: _signInAnonymously} = fbAuthMod;
     window._signInAnonymously = _signInAnonymously;
@@ -9512,7 +9516,25 @@ async function _initFirebase(){
       appId: "1:1002709736057:web:5e4df58febe004c765d2a8"
     };
     fbApp = initializeApp(firebaseConfig);
-    db = getFirestore(fbApp);
+    // (PERF ①) Firestore — 가능하면 IndexedDB 영속 캐시 활성화 (콜드스타트 수초 → 수백ms)
+    //   - 실패 케이스: 프라이빗 브라우징, 저장소 부족, 다중 탭 충돌 → 메모리 캐시로 폴백
+    //   - persistentMultipleTabManager: 여러 탭/창 동시 사용 시 안전하게 공유
+    try{
+      if(typeof _initializeFirestore==='function' && typeof _persistentLocalCache==='function'){
+        const _cacheOpts={};
+        if(typeof _persistentMultipleTabManager==='function'){
+          _cacheOpts.tabManager=_persistentMultipleTabManager();
+        }
+        db = _initializeFirestore(fbApp, { localCache: _persistentLocalCache(_cacheOpts) });
+        console.log('[mile.ly][PERF①] Firestore persistent cache enabled');
+      }else{
+        db = getFirestore(fbApp);
+        console.warn('[mile.ly][PERF①] persistentLocalCache API not available, using default (memory) cache');
+      }
+    }catch(_cacheErr){
+      console.warn('[mile.ly][PERF①] persistent cache init failed, falling back to memory cache:', _cacheErr&&_cacheErr.code, _cacheErr&&_cacheErr.message);
+      try{ db = getFirestore(fbApp); }catch(_getErr){ console.error('[mile.ly][PERF①] getFirestore fallback also failed:', _getErr); }
+    }
     fbAuth = getAuth(fbApp);
 
     // App Check — reCAPTCHA Enterprise로 Firestore 접근 보호
@@ -19250,6 +19272,10 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.4.26 (v0415j)',date:'2026-04-15',items:[
+    '[PERF ①] Firestore 오프라인 IndexedDB 영속 캐시 활성화 — initializeFirestore + persistentLocalCache. 두 번째 이후 콜드스타트에서 "데이터 불러오는 중..." 화면 체감 수초 → 수백ms로 단축 기대',
+    '캐시 초기화 실패(프라이빗 브라우징/저장소 부족)시 메모리 캐시로 자동 폴백'
+  ]},
   {ver:'2.4.25 (v0415i)',date:'2026-04-15',items:[
     '관리자 메뉴 단순화 — 운영기에서 [알림 테스트] / [데이터 백업·복원] 섹션 숨김 (환경변수 _ENV 기반, 개발기에서는 그대로 노출)',
     '보안 PIN 로직 개편 — 기본 PIN "1234" 자동 등록 제거. 최초 사용자는 [보안 PIN > 변경] 에서 직접 등록해야 함',
