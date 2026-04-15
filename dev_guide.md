@@ -1130,6 +1130,36 @@ account: {
 
 ## 변경 이력 (Change Log)
 
+### 2026-04-15 세션 — 안드로이드 APK edge-to-edge 시스템 바 inset 반영 (R-061, v0415n)
+
+**적용 범위: 개발기 (v0415n) — 운영기 반영 대기 (사용자 승인 후 release 브랜치로)**
+
+#### 배경
+- 안드로이드 APK가 edge-to-edge 모드로 구동 → WebView가 하단 네비게이션 바 영역까지 확장됨
+- 네이티브(MainActivity.kt `injectSystemBarInsets`)가 `:root`에 `--android-nav-inset`, `--android-status-inset` CSS 변수와 `window.__milelyAndroidInsets` 객체, `milely-inset-change` 이벤트를 주입
+- WebView 컨테이너에 네이티브 padding 주는 방식은 하단에 흰 띠가 생겨 사용 불가 → 웹이 필요한 요소에만 padding 보정
+
+#### 수정 내역
+- `.sheet-body` / `.sheet-foot` (라인 1098~1099): 기존 padding + `max(env(safe-area-inset-bottom, 0px), var(--android-nav-inset, 0px))` 적용 → AI 검수 팝업(`#m-ai-verify`) 등 모든 하단 시트 모달의 버튼이 네비게이션 바에 가리지 않음
+- `.nav-container` (floating 모드 bottom:28px → `calc(28px + var(--android-nav-inset, 0px))`)
+- `.nav-container.docked .bottom-nav` padding-bottom → `max(env, var)` 공존
+- 768px portrait / 1024px+ 미디어쿼리의 docked `.bottom-nav` padding도 동일 방식 적용
+- `.mily-fab` bottom 140/110px → `calc(... + var(--android-nav-inset, 0px))`
+- `.toast` bottom 90px → 동일
+- `.ep-pop` (이모지 피커) padding-bottom: 기존 32px 유지하되 max()로 inset 보정
+
+#### 폴백 검증
+- iOS PWA: `--android-nav-inset` 비어 있음 → `var(..., 0px)` fallback + `env(safe-area-inset-bottom)` 그대로 작동
+- 데스크탑 웹: 둘 다 0 → 기존 수치(8px/38px/28px/140px 등) 그대로
+- 안드로이드 APK: 네이티브가 주입한 실제 nav 높이(보통 ~48px)만큼 아래로 밀림
+
+#### 미처리 (자동 반응)
+- `milely-inset-change` 이벤트 리스너는 별도 추가 안 함 — 네이티브가 `:root` CSS 변수를 갱신하면 CSS가 자동 재계산하므로 JS 개입 불필요
+
+#### 카메라/녹음 (작업 3번 확인)
+- AI 검수 사진 입력(라인 4831): `<input type="file" accept="image/*" capture="environment">` — Android WebView `onShowFileChooser` 네이티브 구현이 되어 있으면 자동 작동 (확인됨)
+- AI 검수 음성(라인 16610): `navigator.mediaDevices.getUserMedia({audio:true})` + MediaRecorder — Android WebView `onPermissionRequest`(`RESOURCE_AUDIO_CAPTURE`) 네이티브 구현 필요. 둘 다 표준 API라 웹쪽 분기 불요.
+
 ### 2026-04-07 세션 — 게임화 UX + 무당벌레 + 레이저/용접불꽃 + 챌린지 SVG + 레벨 sync
 
 **적용 범위: 개발기 (v0407j~z) + 운영기 (v0407n, v0407x, v0407y, v0407z)**
