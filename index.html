@@ -9451,7 +9451,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'prod'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0416a';
+const _APP_VERSION = 'v0416b';
 // (v0415i) 운영기에서만 숨길 관리자 섹션 처리 — data-env-only="dev" 요소를 prod에서 숨김
 try{
   if(_ENV!=='dev'){
@@ -19329,6 +19329,9 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.4.32 (v0416b)',date:'2026-04-16',items:[
+    '[알림] _milelyOnFCMToken UI/토스트 즉시 반영 — Firestore setDoc await hang 시에도 토글+토스트가 먼저 동작하도록 순서 변경. setDoc는 fire-and-forget(8초 타임아웃)으로 분리',
+  ]},
   {ver:'2.4.31 (v0416a)',date:'2026-04-16',items:[
     '[알림] 안드로이드 APK 알림 토글 즉시 피드백 — 네이티브 권한 요청 중 토글에 로딩 표시 + 결과 토스트',
     '[알림] FCM 토큰 토스트 중복 방지 — 앱 실행 시마다 "알림이 활성화됐어요" 뜨던 문제 수정. 새 등록/토큰 변경 시에만 표시',
@@ -23363,7 +23366,7 @@ window._milelyOnPermissionResult=function(granted){
 // 2) FCM 토큰 수신 → Firestore 저장
 // 로그인/가족 데이터 로드 전에 토큰이 먼저 도착하는 경우가 있으므로
 // 준비 안 됐으면 window._pendingFcmToken에 보관했다가 postLoginInit에서 재호출
-window._milelyOnFCMToken=async function(token){
+window._milelyOnFCMToken=function(token){
   if(!token){
     console.warn('[Push/Native] FCM token empty');
     try{ toast('알림 토큰 발급 실패. 다시 시도해주세요.'); }catch(_){}
@@ -23388,25 +23391,28 @@ window._milelyOnFCMToken=async function(token){
       enabled:true,
       updatedAt:Date.now()
     };
-    // ✅ v0415f: families/{familyId}.pushDevices.{deviceId} 직접 업데이트
-    if(_familyId && _firebaseReady && db){
-      try{
-        const _famRef=doc(db,'families',_familyId);
-        await setDoc(_famRef,{pushDevices:{[deviceId]:_dev}},{merge:true});
-        console.log('[Push/Native] FCM token saved to families/'+_familyId+'.pushDevices.'+deviceId);
-      }catch(_werr){
-        console.error('[Push/Native] families pushDevices write failed:', _werr);
-      }
-    }
-    // 로컬 S에도 반영 (UI 표시·다른 로직 호환)
+    // ★ UI/토스트를 먼저 — Firestore write가 hang해도 사용자 피드백은 즉시
     if(!S.pushDevices)S.pushDevices={};
     S.pushDevices[deviceId]=_dev;
     try{ updatePushUI(); }catch(_){}
-    // 처음 등록이거나 토큰이 바뀐 경우에만 토스트 표시
     if(_isNewOrChanged){ try{ toast('🔔 이 기기에서 알림이 활성화됐어요!'); }catch(_){} }
-    console.log('[Push/Native] FCM token saved, deviceId:', deviceId, _isNewOrChanged?'(new/changed)':'(unchanged)');
-    // 처리 완료했으니 pending 비움
+    console.log('[Push/Native] FCM token saved locally, deviceId:', deviceId, _isNewOrChanged?'(new/changed)':'(unchanged)');
     window._pendingFcmToken=null;
+    // Firestore 저장 — fire-and-forget (UI와 분리)
+    if(_familyId && _firebaseReady && db){
+      try{
+        const _famRef=doc(db,'families',_familyId);
+        // 타임아웃 8초: setDoc이 hang해도 무기한 대기하지 않음
+        Promise.race([
+          setDoc(_famRef,{pushDevices:{[deviceId]:_dev}},{merge:true}),
+          new Promise(function(_,rej){setTimeout(function(){rej(new Error('setDoc timeout 8s'));},8000);})
+        ]).then(function(){
+          console.log('[Push/Native] FCM token saved to families/'+_familyId+'.pushDevices.'+deviceId);
+        }).catch(function(_werr){
+          console.error('[Push/Native] families pushDevices write failed:', _werr);
+        });
+      }catch(_syncErr){ console.error('[Push/Native] Firestore ref error:', _syncErr); }
+    }
   }catch(e){
     console.error('[Push/Native] token save error:', e);
     try{ toast('알림 설정 저장 실패: '+e.message); }catch(_){}
