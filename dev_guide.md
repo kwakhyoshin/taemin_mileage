@@ -1130,9 +1130,19 @@ account: {
 
 ## 변경 이력 (Change Log)
 
-### 2026-04-15 세션 — 안드로이드 APK edge-to-edge 시스템 바 inset 반영 (R-061, v0415n)
+### 2026-04-15 세션 — 안드로이드 APK edge-to-edge 시스템 바 inset 반영 (R-061, v0415n → v0415o → 운영반영)
 
-**적용 범위: 개발기 (v0415n) — 운영기 반영 대기 (사용자 승인 후 release 브랜치로)**
+**적용 범위: 개발기 (v0415n, v0415o) + 운영기 (v0415o, release/v0415o)**
+
+**v0415o 추가 수정**
+- AI 검수 팝업(`#m-ai-verify`) 내 4개 stage 컨테이너(`stage-pick`/`stage-pick-voice`/`stage-preview`/`stage-result`)에 padding-bottom 명시 셀렉터 추가 — 전역 `.sheet-body` 규칙에 더해 버튼 직속 컨테이너도 따로 보정
+- 네이티브 변수명 `--native-nav-bar-h`도 함께 인식 (기존 `--android-nav-inset`와 병기) → 네이티브가 둘 중 아무 이름으로 주입해도 작동
+
+**운영 반영(release/v0415o)에 함께 딸려간 것**
+- v0415l: PERF ③ (onAuth 대기 3초→1.2초) + PERF ④ (preconnect / modulepreload)
+- v0415m: 날씨/미세먼지 localStorage 24h 캐시(플리커 제거) + signInAnonymously await 복원(안드로이드 WebView 오프라인 폴백 이슈 해결)
+- v0415n: Android 시스템 바 inset 전역 CSS
+- v0415o: AI 검수 팝업 stage 명시 + `--native-nav-bar-h` 변수 추가 지원
 
 #### 배경
 - 안드로이드 APK가 edge-to-edge 모드로 구동 → WebView가 하단 네비게이션 바 영역까지 확장됨

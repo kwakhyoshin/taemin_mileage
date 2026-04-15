@@ -5,6 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <meta name="googlebot" content="noindex, nofollow">
+<!-- [PERF ④] preconnect / modulepreload — Firebase SDK / Firestore 연결 미리 맺어 콜드스타트 단축 -->
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://firebaseinstallations.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js" crossorigin>
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js" crossorigin>
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js" crossorigin>
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check.js" crossorigin>
+<link rel="dns-prefetch" href="https://www.googleapis.com">
 <!-- S-12: Content Security Policy -->
 <meta http-equiv="Content-Security-Policy" content="
   default-src 'self';
@@ -335,7 +345,7 @@ html.popup-open,body.popup-open{overflow:hidden!important;height:100%!important}
 #s-log{padding:0 0 110px 0;overflow:visible}
 
 /* BOTTOM NAV - Floating Glass Pill with SVG Icons */
-.nav-container{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:100;max-width:calc(100vw - 24px);width:auto}
+.nav-container{position:fixed;bottom:max(calc(28px + var(--android-nav-inset, 0px)), calc(28px + var(--native-nav-bar-h, 0px)));left:50%;transform:translateX(-50%);z-index:100;max-width:calc(100vw - 24px);width:auto}
 .bottom-nav{display:flex;align-items:center;gap:3px;background:color-mix(in srgb,var(--tab-color,var(--or)) 6%,rgba(255,255,255,.95));backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid color-mix(in srgb,var(--tab-color,var(--or)) 12%,rgba(0,0,0,.04));border-radius:var(--rxl);padding:10px 10px;box-shadow:0 4px 20px color-mix(in srgb,var(--tab-color,var(--or)) 12%,rgba(0,0,0,.1)),0 12px 40px rgba(0,0,0,.08)}
 body.dark .bottom-nav{background:color-mix(in srgb,var(--tab-color,var(--or)) 10%,rgba(20,30,50,.95));border-color:color-mix(in srgb,var(--tab-color,var(--or)) 15%,rgba(255,255,255,.06));box-shadow:0 4px 20px rgba(0,0,0,.3),0 12px 40px rgba(0,0,0,.2)}
 .nav-item{display:flex;align-items:center;justify-content:center;gap:5px;padding:12px 12px;border-radius:var(--r);cursor:pointer;transition:all .25s cubic-bezier(.4,0,.2,1);border:none;background:transparent;min-height:50px;flex-shrink:1;min-width:0}
@@ -350,7 +360,7 @@ body.dark .nav-item svg{stroke:var(--tx2)}
 
 /* DOCKED NAV STATE */
 .nav-container.docked{bottom:0;left:0;right:0;transform:none;width:100%;max-width:100%;display:flex;justify-content:center}
-.nav-container.docked .bottom-nav{border-radius:0;padding:8px 8px calc(8px + env(safe-area-inset-bottom));gap:2px;box-sizing:border-box;justify-content:center;width:100%;background:var(--tab-lt,var(--or-lt));border-color:transparent}
+.nav-container.docked .bottom-nav{border-radius:0;padding:8px 8px max(calc(8px + env(safe-area-inset-bottom, 0px)), calc(8px + var(--android-nav-inset, 0px)), calc(8px + var(--native-nav-bar-h, 0px)));gap:2px;box-sizing:border-box;justify-content:center;width:100%;background:var(--tab-lt,var(--or-lt));border-color:transparent}
 body.dark .nav-container.docked .bottom-nav{background:linear-gradient(var(--tab-lt-dk,rgba(99,102,241,.15)),var(--tab-lt-dk,rgba(99,102,241,.15))),rgba(15,23,42,.95);backdrop-filter:none;-webkit-backdrop-filter:none}
 .nav-container.docked .nav-users{gap:0}
 .nav-container.docked .nav-divider{margin:0 4px}
@@ -1085,8 +1095,15 @@ body.dark .today-summary-card .ts-msg{background:linear-gradient(135deg,#312E81,
 .overlay.open{opacity:1;pointer-events:all}
 .sheet{background:var(--card);border-radius:var(--rxl) var(--rxl) 0 0;width:100%;display:flex;flex-direction:column;max-height:90vh;transform:translateY(100%);transition:transform .3s cubic-bezier(.34,1.1,.64,1),background .25s}
 .overlay.open .sheet{transform:translateY(0)}
-.sheet-body{flex:1;overflow-y:auto;padding:24px 22px 8px;-webkit-overflow-scrolling:touch}
-.sheet-foot{flex-shrink:0;padding:14px 22px 38px;border-top:.5px solid var(--bdr);display:flex;gap:12px}
+.sheet-body{flex:1;overflow-y:auto;padding:24px 22px 8px;padding-bottom:max(8px, env(safe-area-inset-bottom, 0px), var(--android-nav-inset, 0px), var(--native-nav-bar-h, 0px));-webkit-overflow-scrolling:touch}
+.sheet-foot{flex-shrink:0;padding:14px 22px 38px;padding-bottom:max(38px, calc(env(safe-area-inset-bottom, 0px) + 14px), calc(var(--android-nav-inset, 0px) + 14px), calc(var(--native-nav-bar-h, 0px) + 14px));border-top:.5px solid var(--bdr);display:flex;gap:12px}
+/* AI 검수 팝업(#m-ai-verify) — "📷 사진 찍기" / "🎤 녹음 시작" / "검수 받기" / "닫기" 버튼이 시스템 네비바에 가리지 않도록 각 stage 컨테이너에 padding-bottom 적용. 네이티브 변수명은 --android-nav-inset / --native-nav-bar-h 둘 다 지원 */
+#m-ai-verify #m-ai-verify-stage-pick,
+#m-ai-verify #m-ai-verify-stage-pick-voice,
+#m-ai-verify #m-ai-verify-stage-preview,
+#m-ai-verify #m-ai-verify-stage-result{
+  padding-bottom:max(env(safe-area-inset-bottom, 0px), var(--android-nav-inset, 0px), var(--native-nav-bar-h, 0px));
+}
 .handle{width:40px;height:5px;background:var(--bdr2);border-radius:2.5px;margin:0 auto 20px}
 .sheet-title{font-size:var(--fs-2xl);font-weight:900;color:var(--tx);margin-bottom:16px}
 .s-btn{flex:1;padding:16px;border:none;border-radius:var(--rsm);font-size:var(--fs-lg);font-weight:800;cursor:pointer;font-family:inherit}
@@ -1113,7 +1130,7 @@ body.dark .today-summary-card .ts-msg{background:linear-gradient(135deg,#312E81,
 .ep-hint{font-size:var(--fs-base);color:var(--tx2);font-weight:600}
 
 /* EMOJI PICKER */
-.ep-pop{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:430px;background:var(--card);border-radius:var(--rxl) var(--rxl) 0 0;padding:16px 12px 32px;z-index:500;display:none;box-shadow:0 -4px 40px rgba(0,0,0,.2);transition:background .25s;max-height:75vh;flex-direction:column}
+.ep-pop{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:430px;background:var(--card);border-radius:var(--rxl) var(--rxl) 0 0;padding:16px 12px 32px;padding-bottom:max(32px, env(safe-area-inset-bottom, 0px), var(--android-nav-inset, 0px), var(--native-nav-bar-h, 0px));z-index:500;display:none;box-shadow:0 -4px 40px rgba(0,0,0,.2);transition:background .25s;max-height:75vh;flex-direction:column}
 @media(min-width:768px){.ep-pop{max-width:520px}}
 @media(min-width:1024px){.ep-pop{max-width:560px;bottom:auto;top:50%;transform:translate(-50%,-50%);border-radius:var(--rxl);max-height:70vh}}
 .ep-pop.open{display:flex}
@@ -1656,7 +1673,7 @@ body.dark .family-popup-avatar{border-color:rgba(255,255,255,.25)}
 .profile-avatar svg{width:100%;height:100%}
 
 /* TOAST */
-.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--tx);color:var(--bg);padding:12px 22px;border-radius:var(--rxl);font-size:var(--fs-md);font-weight:800;z-index:999;white-space:nowrap;transition:transform .3s cubic-bezier(.34,1.5,.64,1),opacity .3s;opacity:0;pointer-events:none;max-width:88vw;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,.2)}
+.toast{position:fixed;bottom:max(calc(90px + var(--android-nav-inset, 0px)), calc(90px + var(--native-nav-bar-h, 0px)));left:50%;transform:translateX(-50%) translateY(80px);background:var(--tx);color:var(--bg);padding:12px 22px;border-radius:var(--rxl);font-size:var(--fs-md);font-weight:800;z-index:999;white-space:nowrap;transition:transform .3s cubic-bezier(.34,1.5,.64,1),opacity .3s;opacity:0;pointer-events:none;max-width:88vw;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,.2)}
 .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 .conf-p{position:fixed;pointer-events:none;z-index:998;border-radius:2px;animation:fall 1.3s ease-in forwards}
 @keyframes fall{0%{transform:translateY(-10px) rotate(0);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
@@ -1692,7 +1709,7 @@ body.dark .family-popup-avatar{border-color:rgba(255,255,255,.25)}
   body{display:block!important;max-width:100%!important;margin:0!important}
   .nav-container{position:fixed!important;bottom:0!important;top:auto!important;left:0!important;right:0!important;transform:none!important;width:100%!important;height:auto!important;z-index:100}
   .nav-container.docked{bottom:0!important;width:100%!important}
-  .bottom-nav{flex-direction:row!important;align-items:center!important;gap:0!important;border-radius:var(--r) 20px 0 0!important;padding:8px 8px calc(8px + env(safe-area-inset-bottom))!important;height:auto!important;background:var(--card)!important;border:none!important;border-top:.5px solid var(--bdr)!important;border-right:none!important;box-shadow:0 -4px 20px rgba(0,0,0,.06)!important;justify-content:center!important;width:100%!important}
+  .bottom-nav{flex-direction:row!important;align-items:center!important;gap:0!important;border-radius:var(--r) 20px 0 0!important;padding:8px 8px max(calc(8px + env(safe-area-inset-bottom, 0px)), calc(8px + var(--android-nav-inset, 0px)), calc(8px + var(--native-nav-bar-h, 0px)))!important;height:auto!important;background:var(--card)!important;border:none!important;border-top:.5px solid var(--bdr)!important;border-right:none!important;box-shadow:0 -4px 20px rgba(0,0,0,.06)!important;justify-content:center!important;width:100%!important}
   .bottom-nav::before{display:none!important}
   .nav-item{padding:8px 12px!important;border-radius:var(--rsm)!important;flex-direction:column!important;justify-content:center!important;gap:2px!important}
   .nav-item .nav-label{font-size:var(--fs-xs)!important;font-weight:700!important;max-width:none!important;opacity:1!important;margin-left:0!important}
@@ -1853,7 +1870,7 @@ body.dark .family-popup-avatar{border-color:rgba(255,255,255,.25)}
   .nav-container{position:fixed!important;bottom:28px!important;left:50%!important;transform:translateX(-50%)!important;width:auto!important;height:auto!important;max-width:calc(100vw - 24px)!important}
   .nav-container.docked{bottom:0!important;left:0!important;right:0!important;width:100%!important;max-width:100%!important;transform:none!important}
   .bottom-nav{flex-direction:row!important;align-items:center!important;border-right:none!important;border-radius:var(--rxl)!important;height:auto!important;padding:8px 16px!important;backdrop-filter:blur(24px) saturate(180%)!important;-webkit-backdrop-filter:blur(24px) saturate(180%)!important;background:color-mix(in srgb,var(--tab-color,var(--or)) 6%,rgba(255,255,255,.95))!important;box-shadow:0 4px 20px color-mix(in srgb,var(--tab-color,var(--or)) 12%,rgba(0,0,0,.1)),0 12px 40px rgba(0,0,0,.08)!important}
-  .nav-container.docked .bottom-nav{border-radius:0!important;padding:8px 8px calc(8px + env(safe-area-inset-bottom))!important;background:var(--tab-lt,var(--or-lt))!important;backdrop-filter:blur(24px) saturate(180%)!important;-webkit-backdrop-filter:blur(24px) saturate(180%)!important;justify-content:center!important;border-right:none!important;box-shadow:none!important}
+  .nav-container.docked .bottom-nav{border-radius:0!important;padding:8px 8px max(calc(8px + env(safe-area-inset-bottom, 0px)), calc(8px + var(--android-nav-inset, 0px)), calc(8px + var(--native-nav-bar-h, 0px)))!important;background:var(--tab-lt,var(--or-lt))!important;backdrop-filter:blur(24px) saturate(180%)!important;-webkit-backdrop-filter:blur(24px) saturate(180%)!important;justify-content:center!important;border-right:none!important;box-shadow:none!important}
   .bottom-nav::before{display:none!important}
   .nav-item{padding:10px 14px!important;justify-content:center!important;flex-direction:column!important;gap:3px!important}
   .nav-item .nav-label{opacity:1!important;max-width:none!important;font-size:var(--fs-sm)!important;margin-left:0!important}
@@ -7719,6 +7736,31 @@ function postLoginInit(){
       const bridge = window.MilelyBridge;
       const isNative = !!(bridge && typeof bridge.isNativeApp==='function' && bridge.isNativeApp());
       if(!isNative) return;
+      // ✅ v0415f: 레거시 경로(users/taemin_dev.pushDevices)에 저장된 이전 FCM 토큰을
+      //   families/{familyId}.pushDevices 로 마이그레이션. 재설치·재로그인 없이 복구되도록.
+      try{
+        if(_familyId && _firebaseReady && db && LEGACY_DOC && LEGACY_DOC.path && currentUser){
+          getDoc(LEGACY_DOC).then(function(_ls){
+            if(!_ls || !_ls.exists()) return;
+            const _lpd=_ls.data()&&_ls.data().pushDevices;
+            if(!_lpd || typeof _lpd!=='object') return;
+            const _patch={};
+            Object.keys(_lpd).forEach(function(_did){
+              const _d=_lpd[_did]; if(!_d || _d.type!=='fcm' || !_d.fcmToken) return;
+              // memberId 형식("m_xxx") 매칭 or 현재 기기의 deviceId면 migrate
+              const _myDid=localStorage.getItem(_LS_PREFIX+'device_id');
+              if(_d.user===currentUser || _did===_myDid){
+                _patch[_did]={..._d, user:currentUser, updatedAt:Date.now()};
+              }
+            });
+            if(Object.keys(_patch).length===0) return;
+            const _famRef=doc(db,'families',_familyId);
+            setDoc(_famRef,{pushDevices:_patch},{merge:true})
+              .then(()=>console.log('[Push/Native] migrated legacy FCM tokens →',_familyId,Object.keys(_patch)))
+              .catch(e=>console.warn('[Push/Native] legacy FCM migration failed:',e));
+          }).catch(function(_e){ console.warn('[Push/Native] legacy read failed:',_e); });
+        }
+      }catch(_mgErr){ console.warn('[Push/Native] FCM migration error:',_mgErr); }
       if(window._pendingFcmToken){
         const t = window._pendingFcmToken;
         window._pendingFcmToken = null;
@@ -9409,7 +9451,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'prod'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0415k';
+const _APP_VERSION = 'v0415o';
 // (v0415i) 운영기에서만 숨길 관리자 섹션 처리 — data-env-only="dev" 요소를 prod에서 숨김
 try{
   if(_ENV!=='dev'){
@@ -9544,18 +9586,21 @@ async function _initFirebase(){
     }
     LEGACY_DOC = doc(db, 'users', _ENV==='dev'?'taemin_dev':'taemin');
     DATA_DOC = LEGACY_DOC;
-    // iPhone PWA 콜드스타트 대응: 첫 onAuthStateChanged 이벤트까지 대기 (최대 3초)
+    // [PERF ③] iPhone PWA 콜드스타트 대응: 첫 onAuthStateChanged 이벤트까지 대기 (최대 1.2초, 기존 3초)
     // 이렇게 해야 auth.currentUser가 복구된 후 Firestore 읽기가 진행되어 permission-denied 방지
+    // 1.2초로 단축 — iPhone PWA에서 auth 토큰 복원은 보통 300ms 이내, 3초는 과도한 세금
     try{
       await new Promise(function(resolve){
         let done=false;
         const unsub=onAuthStateChanged(fbAuth,function(){ if(done)return; done=true; try{unsub&&unsub();}catch(_){}; resolve(); });
-        setTimeout(function(){ if(done)return; done=true; try{unsub&&unsub();}catch(_){}; resolve(); },3000);
+        setTimeout(function(){ if(done)return; done=true; try{unsub&&unsub();}catch(_){}; resolve(); },1200);
       });
       console.log('[mile.ly] Auth restored:', fbAuth.currentUser?fbAuth.currentUser.uid:'(none)');
     }catch(_awErr){ console.warn('[mile.ly] auth wait failed',_awErr); }
     // v0408z6: 로그인 세션이 없으면 익명 로그인으로 Firestore write 권한 확보
     // (회원가입 플로우는 사용자가 아직 Firebase 로그인 전이지만 setDoc을 호출해야 함)
+    // v0415m: 비동기화 되돌림 — 익명 인증 전에 getDoc 호출하면 permission-denied로 "오프라인 모드"
+    // 폴백이 발생 (안드로이드 WebView 에뮬에서 재현됨). 익명 로그인은 수백ms 내 완료되므로 await 복원
     if(!fbAuth.currentUser && window._signInAnonymously){
       try{
         await window._signInAnonymously(fbAuth);
@@ -10111,6 +10156,88 @@ function generateSecureRandom(len=32) {
 }
 
 // Robust debounced save with in-flight guard
+// ── 원격 Firestore 스냅샷을 로컬 S에 반영하는 통합 핸들러 ───────────────────
+// listener 중복 코드를 제거하고, 보상 승인/거절 등의 memberData 변경이
+// "S.rewardInventory 뷰"에 늦게 반영되던 버그를 함께 해결
+function _applyRemoteSnap(snap){
+  if(!snap || !snap.exists()) return;
+  if(_isSaving) return;
+  // cooldown 단축: 2000ms → 400ms (승인/거절 등이 빠르게 반영되도록)
+  if(Date.now()-_lastSaveTime<400) return;
+  const _sd = snap.data();
+  const _ij = JSON.stringify(_sd);
+  if(_ij===_lastSavedJSON || _ij===JSON.stringify(S)) return;
+
+  if(!_hasDirtyLocal){
+    // 전체 교체 + 현재 사용자/뷰 기준으로 memberData → S.* 재동기화
+    S=Object.assign(defaultState(),_sd);
+    _lastSavedJSON=_ij;
+    try{ rebuildMembersFromFamily(); }catch(_){}
+    // ★ 독립 모드: S는 방금 원격으로 교체됐으므로, 현재 뷰 대상(자녀/자신)의
+    //   memberData를 다시 S.*에 복사해야 rewardInventory 등이 최신으로 보임
+    try{
+      if(getFamilyMode()==='independent'){
+        const _mid = _globalDataOwner || currentUser;
+        if(_mid && S.memberData && S.memberData[_mid]){
+          syncMemberToGlobal(_mid);
+        }
+      }
+    }catch(e){ console.warn('[_applyRemoteSnap] resync error:', e); }
+    try{ renderAll(); }catch(_){}
+    try{ checkNewMessages(); }catch(_){}
+    try{ renderNavUsers(); }catch(_){}
+    try{ _updatePlanBadges(); }catch(_){}
+    console.log('🔄 다른 기기에서 데이터가 업데이트됐어요');
+    return;
+  }
+
+  // 로컬 dirty 상태 — 부분 sync: 원격에서 도착한 보상 승인/거절/활동 승인 등
+  // "다른 사용자가 나에게 해준 변경"은 놓치면 안 되므로 타겟 필드만 안전하게 반영
+  let _needRender = false;
+  if(_sd.familyMessages && JSON.stringify(_sd.familyMessages)!==JSON.stringify(S.familyMessages)){
+    S.familyMessages=_sd.familyMessages;
+    try{ checkNewMessages(); }catch(_){}
+    try{ _updateFamilyBtnBadge(); }catch(_){}
+  }
+  if(_sd.actVerifyRequests && JSON.stringify(_sd.actVerifyRequests)!==JSON.stringify(S.actVerifyRequests)){
+    S.actVerifyRequests=_sd.actVerifyRequests;
+    try{ _updateFamilyBtnBadge(); }catch(_){}
+  }
+  if(_sd.rewardRequests && JSON.stringify(_sd.rewardRequests)!==JSON.stringify(S.rewardRequests)){
+    S.rewardRequests=_sd.rewardRequests;
+    _needRender = true;
+  }
+  // ★ 보상 승인/거절로 인한 memberData 변경을 dirty 상태에서도 반영
+  //   (원격에서 내 memberData가 바뀌었다면 그대로 덮어씀 — 해당 필드는 다른 사용자가 수정하는 경로이므로 로컬 dirty와 충돌 가능성 낮음)
+  try{
+    const _mid = _globalDataOwner || currentUser;
+    if(_mid && _sd.memberData && _sd.memberData[_mid]){
+      const _remoteMd = _sd.memberData[_mid];
+      const _localMd = (S.memberData && S.memberData[_mid]) || {};
+      const _remoteInv = JSON.stringify(_remoteMd.rewardInventory||[]);
+      const _remoteReq = JSON.stringify(_remoteMd.rewardRequests||[]);
+      const _localInv = JSON.stringify(_localMd.rewardInventory||[]);
+      const _localReq = JSON.stringify(_localMd.rewardRequests||[]);
+      if(_remoteInv!==_localInv || _remoteReq!==_localReq){
+        if(!S.memberData) S.memberData={};
+        if(!S.memberData[_mid]) S.memberData[_mid]={};
+        S.memberData[_mid].rewardInventory = _remoteMd.rewardInventory ? JSON.parse(_remoteInv) : [];
+        S.memberData[_mid].rewardRequests = _remoteMd.rewardRequests ? JSON.parse(_remoteReq) : [];
+        // 독립모드에서 현재 보고 있는 대상이면 S.*도 즉시 반영
+        if(getFamilyMode()==='independent' && (_globalDataOwner===_mid || (!_globalDataOwner && currentUser===_mid))){
+          S.rewardInventory = JSON.parse(_remoteInv);
+          S.rewardRequests = JSON.parse(_remoteReq);
+        }
+        _needRender = true;
+      }
+    }
+  }catch(e){ console.warn('[_applyRemoteSnap] memberData merge error:', e); }
+  if(_needRender){
+    try{ if(typeof renderRewardInventory==='function') renderRewardInventory(); }catch(_){}
+    try{ if(typeof renderAll==='function') renderAll(); }catch(_){}
+  }
+}
+
 function save(){
   // independent 모드에서 양육자가 자녀 데이터를 보고 있으면 해당 자녀에게 저장
   // ⚠️ 반드시 _globalDataOwner만 사용 — viewingChildId를 fallback으로 쓰면
@@ -10279,6 +10406,18 @@ const WEATHER_MSGS={sunny:{icon:'☀️',msg:'날씨가 화창해! 밖에서 놀
 // 미세먼지 기준: PM10(미세) 0-30좋음, 31-80보통, 81-150나쁨, 151+매우나쁨 / PM2.5(초미세) 0-15좋음, 16-35보통, 36-75나쁨, 76+매우나쁨
 const DUST_GRADES={good:{level:'좋음',color:'#10B981',bgColor:'#D1FAE5',txtColor:'#065F46'},moderate:{level:'보통',color:'#FBBF24',bgColor:'#FEF3C7',txtColor:'#92400E'},bad:{level:'나쁨',color:'#F97316',bgColor:'#FFEDD5',txtColor:'#C2410C',msg:'마스크 쓰고 나가자! 😷'},worst:{level:'매우나쁨',color:'#EF4444',bgColor:'#FEE2E2',txtColor:'#B91C1C',msg:'오늘은 실내에서 놀자! 🏠'}};
 let weatherData={temp:null,condition:'sunny',pm10:null,pm25:null,dustGrade:'good',locationName:'서울'};
+// [PERF ②+] 날씨/미세먼지 캐시 복원 — 이전 fetch 결과를 localStorage에서 즉시 로드하여
+// 캐시-퍼스트 렌더 시 "--°, 초미세 --" 같은 빈 상태가 잠깐 보이는 현상 방지
+try{
+  const _wc=localStorage.getItem((typeof _LS_PREFIX!=='undefined'?_LS_PREFIX:'taemin_')+'weather_cache');
+  if(_wc){
+    const _p=JSON.parse(_wc);
+    // 24시간 이내 캐시만 사용 (너무 오래된 온도/미세먼지는 오히려 오해 유발)
+    if(_p && _p.ts && (Date.now()-_p.ts) < 24*60*60*1000 && _p.data){
+      weatherData=Object.assign(weatherData,_p.data);
+    }
+  }
+}catch(_){}
 
 // PM10, PM2.5 등급 판정
 // AQI → µg/m³ 변환 (WAQI API는 AQI 지수를 반환하므로 실제 농도로 변환 필요)
@@ -10438,6 +10577,11 @@ async function fetchWeather(){
     }
   }
   updateSmartMessage();
+  // [PERF ②+] 다음 부팅에서 즉시 복원할 수 있도록 캐시 저장
+  try{
+    localStorage.setItem((typeof _LS_PREFIX!=='undefined'?_LS_PREFIX:'taemin_')+'weather_cache',
+      JSON.stringify({ts:Date.now(), data:weatherData}));
+  }catch(_){}
 }
 function updateSmartMessage(){
   const wIcon=document.getElementById('weather-icon'),wTemp=document.getElementById('weather-temp');
@@ -18630,6 +18774,7 @@ function showPin(mode,title,sub){
   // (v0415i) PIN 미설정 상태에서 인증/초기화 시도 차단 — 먼저 PIN부터 등록하도록 안내
   if(!S.settings.pinHash && (mode==='auth'||mode==='reset_today'||mode==='reset_all')){
     if(mode==='auth'){
+      // 관리자 최초 진입: PIN 없으면 임시 통과 후 관리자 탭에서 PIN 설정하도록 유도
       alert('PIN이 아직 설정되지 않았어요.\n관리자 탭의 [보안 PIN > 변경] 에서 먼저 PIN을 등록해주세요.');
       adminOK=true; startAdminSession(); reallyGoTab('adm');
     }else{
@@ -19184,6 +19329,18 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.4.30 (v0415n)',date:'2026-04-15',items:[
+    '[안드로이드 APK] edge-to-edge 하단 네비게이션 바 inset 대응 — 네이티브가 주입하는 --android-nav-inset CSS 변수를 AI 검수 팝업/시트 모달/플로팅 탭바/밀리 FAB/토스트/이모지 피커의 bottom / padding-bottom에 반영. 하단 고정 버튼이 시스템 네비게이션 바에 가리지 않도록 자동 보정 (iOS safe-area / 데스크탑 0px fallback 유지)'
+  ]},
+  {ver:'2.4.29 (v0415m)',date:'2026-04-15',items:[
+    '[PERF ②+] 날씨/미세먼지/위치 localStorage 캐시 추가 — 캐시-퍼스트 부팅 시 "--°, 초미세 --" 빈 상태가 잠깐 보이다가 값이 채워지는 플리커 제거. 이전 fetch 결과(24h 이내)를 즉시 표시 후 fetchWeather 완료 시 조용히 갱신',
+    '[BUGFIX] Android WebView 오프라인 모드 진입 이슈 해결 — PERF ③에서 signInAnonymously를 비동기화했더니 익명 토큰 발급 전에 getDoc이 호출되어 permission-denied → "오프라인 모드" 폴백이 발생. await 복원 (auth 1.2초 타임아웃은 유지)'
+  ]},
+  {ver:'2.4.28 (v0415l)',date:'2026-04-15',items:[
+    '[PERF ③] onAuthStateChanged 대기 3초 → 1.2초 단축 (iPhone PWA 토큰 복원은 보통 300ms 이내)',
+    '[PERF ③] 익명 로그인 비동기화 — await 제거하고 백그라운드로 수행. 부팅 경로 최대 1초+ 단축',
+    '[PERF ④] preconnect / modulepreload 추가 — gstatic, firestore, auth 도메인에 TCP/TLS 미리 맺어 Firebase SDK 로딩 가속'
+  ]},
   {ver:'2.4.27 (v0415k)',date:'2026-04-15',items:[
     '[PERF ②] 스플래시/로딩 UX 이원화 — localStorage 백업 + 세션이 있으면 "데이터 불러오는 중..." 풀블로킹 오버레이 없이 홈 화면을 즉시 렌더. 최신 데이터는 백그라운드로 가져와 자연스럽게 갱신',
     '네트워크 동기화 중에는 상단에 얇은 파란 진행바 표시 (fresh 데이터 도착 시 페이드아웃)',
@@ -19205,6 +19362,10 @@ const APP_CHANGELOG=[
   ]},
   {ver:'2.4.23 (v0415g)',date:'2026-04-15',items:[
     'Apple 로그인 버튼 — 아직 개발중임을 명확히 알리는 팝업(alert)으로 변경 (로그인/회원가입 화면 모두)'
+  ]},
+  {ver:'2.4.22 (v0415f)',date:'2026-04-15',items:[
+    'Android APK FCM 푸시 수신 복구 — FCM 토큰이 잘못된 경로(users/taemin_dev.pushDevices)에 저장되어 Cloud Function이 찾지 못하던 문제 수정. 이제 _milelyOnFCMToken / _syncPushDeviceUser 는 families/{familyId}.pushDevices.{deviceId} 에 직접 merge 저장',
+    '로그인 직후 레거시 경로에 남은 이전 FCM 토큰을 families 문서로 자동 마이그레이션 (재설치 불필요)'
   ]},
   {ver:'2.4.21 (v0415e)',date:'2026-04-15',items:[
     '보상 사용 승인/거절 후 자녀 기기의 보상 인벤토리 동적 갱신 지연 수정 — Firestore 리스너 쿨다운 2000ms→400ms 단축, 쿨다운/로컬 dirty 상태에서도 memberData[자녀].rewardInventory/rewardRequests 변경을 즉시 S.*에 반영하여 같은 자녀 계정으로 로그인한 다른 기기에서도 "사용신청중" → "사용완료" 상태가 앱 재시작 없이 바로 갱신됨',
@@ -22968,9 +23129,17 @@ function _syncPushDeviceUser(){
   if(!deviceId || !S.pushDevices || !S.pushDevices[deviceId]) return;
   if(S.pushDevices[deviceId].user === currentUser) return; // 이미 맞음
   console.log('[Push] 디바이스 유저 갱신:', S.pushDevices[deviceId].user, '→', currentUser);
+  const _now=Date.now();
   S.pushDevices[deviceId].user = currentUser;
-  S.pushDevices[deviceId].updatedAt = Date.now();
-  save();
+  S.pushDevices[deviceId].updatedAt = _now;
+  // ✅ v0415f: families 문서에 직접 merge (Cloud Function이 읽는 위치)
+  if(_familyId && _firebaseReady && db){
+    try{
+      const _famRef=doc(db,'families',_familyId);
+      setDoc(_famRef,{pushDevices:{[deviceId]:{...S.pushDevices[deviceId]}}},{merge:true})
+        .catch(e=>console.warn('[_syncPushDeviceUser] families write failed:',e));
+    }catch(_e){ console.warn('[_syncPushDeviceUser]',_e); }
+  }
 }
 
 function updatePushUI(){
@@ -23117,15 +23286,16 @@ async function showPushDebug(){
 }
 
 async function sendTestPush(){
-  // 본인 계정에 등록된 기기에만 알림 전송
+  // 본인 계정 기기에만 알림 전송 (Firestore → Cloud Functions → 본인 기기만)
   try{
     const myDeviceCount=S.pushDevices
       ?Object.values(S.pushDevices).filter(d=>d.enabled && d.user===currentUser).length
       :0;
     if(myDeviceCount===0){
-      toast('본인 계정에 알림 받기로 등록된 기기가 없어요. 먼저 내 기기에서 알림을 활성화하세요.');return;
+      toast('본인 계정에 알림 받기로 등록된 기기가 없어요. 먼저 알림 받기를 활성화하세요.');return;
     }
-    // pushBroadcast.targetUser가 있으면 Cloud Functions가 해당 사용자 기기에만 발송
+    // pushBroadcast 필드를 업데이트하면 Cloud Functions의 onBroadcastPush가 트리거됨
+    // targetUser 필드를 넣으면 해당 유저의 기기에만 발송됨 (v0415c)
     S.pushBroadcast={
       title:'마일리 🌟',
       body:'테스트 알림이에요! 내 기기에서 확인해보세요 ✅',
@@ -23177,15 +23347,30 @@ window._milelyOnFCMToken=async function(token){
   try{
     const deviceId=getDeviceId();
     localStorage.setItem(_LS_PREFIX+'push_enabled','true');
-    if(!S.pushDevices)S.pushDevices={};
-    S.pushDevices[deviceId]={
+    const _dev={
       fcmToken:token,
       type:'fcm',
       user:currentUser||'unknown',
       enabled:true,
       updatedAt:Date.now()
     };
-    await save();
+    // ✅ v0415f: families/{familyId}.pushDevices.{deviceId} 직접 업데이트
+    // — Cloud Function onFamilyMessageDevFamilies 는 families 문서의 pushDevices를 읽음
+    // — 기존에는 S.pushDevices 에 저장하고 save()가 DATA_DOC(families/) 로 썼으나,
+    //   독립모드·마이그레이션 타이밍에 따라 families 문서에 pushDevices가 비어있는 케이스 발생.
+    //   이제는 무조건 families 문서에 직접 merge 저장.
+    if(_familyId && _firebaseReady && db){
+      try{
+        const _famRef=doc(db,'families',_familyId);
+        await setDoc(_famRef,{pushDevices:{[deviceId]:_dev}},{merge:true});
+        console.log('[Push/Native] FCM token saved to families/'+_familyId+'.pushDevices.'+deviceId);
+      }catch(_werr){
+        console.error('[Push/Native] families pushDevices write failed:', _werr);
+      }
+    }
+    // 로컬 S에도 반영 (UI 표시·다른 로직 호환)
+    if(!S.pushDevices)S.pushDevices={};
+    S.pushDevices[deviceId]=_dev;
     try{ updatePushUI(); }catch(_){}
     try{ toast('🔔 이 기기에서 알림이 활성화됐어요!'); }catch(_){}
     console.log('[Push/Native] FCM token saved, deviceId:', deviceId);
@@ -24356,6 +24541,8 @@ window._createState = _createState;
           if(_homeScr && !document.querySelector('.scr.on')) _homeScr.classList.add('on');
         }catch(_){}
         try{ renderAll(); }catch(_){}
+        // [PERF ②+] 캐시된 날씨/미세먼지 값으로 상단 정보 즉시 채우기 (fetchWeather 완료 전까지)
+        try{ if(typeof updateSmartMessage==='function') updateSmartMessage(); }catch(_){}
         // 상단에 얇은 동기화 인디케이터 (네트워크 갱신 중임을 나타냄)
         try{
           if(!document.getElementById('perf2-sync-bar')){
@@ -24582,6 +24769,7 @@ window._createState = _createState;
                 if(!S.memberData[_mid]) S.memberData[_mid]={};
                 S.memberData[_mid].rewardInventory = JSON.parse(_rInv);
                 S.memberData[_mid].rewardRequests = JSON.parse(_rReq);
+                // 독립모드에서 지금 그 대상의 데이터를 보고 있으면 S.*에도 즉시 반영
                 if(getFamilyMode()==='independent' && ((typeof _globalDataOwner!=='undefined' && _globalDataOwner===_mid) || ((typeof _globalDataOwner==='undefined' || !_globalDataOwner) && currentUser===_mid))){
                   S.rewardInventory = JSON.parse(_rInv);
                   S.rewardRequests = JSON.parse(_rReq);
@@ -25337,12 +25525,12 @@ window._createState = _createState;
      ═══════════════════════════════════════════════════════════════ -->
 <style>
 /* ── mily chatbot FAB ── */
-.mily-fab{position:fixed;bottom:140px;right:20px;width:72px;height:72px;border-radius:50%;background:transparent;border:none;cursor:pointer;z-index:950;display:none;align-items:center;justify-content:center;transition:opacity .25s;-webkit-tap-highlight-color:transparent;opacity:0;filter:drop-shadow(0 3px 8px rgba(99,102,241,.35));touch-action:none;user-select:none;-webkit-user-select:none}
+.mily-fab{position:fixed;bottom:max(calc(140px + var(--android-nav-inset, 0px)), calc(140px + var(--native-nav-bar-h, 0px)));right:20px;width:72px;height:72px;border-radius:50%;background:transparent;border:none;cursor:pointer;z-index:950;display:none;align-items:center;justify-content:center;transition:opacity .25s;-webkit-tap-highlight-color:transparent;opacity:0;filter:drop-shadow(0 3px 8px rgba(99,102,241,.35));touch-action:none;user-select:none;-webkit-user-select:none}
 .mily-fab.visible{display:flex;opacity:1}
 .mily-fab.dragging{transition:none !important;transform:scale(1.5) !important;filter:drop-shadow(0 0 18px rgba(167,139,250,.95)) drop-shadow(0 6px 22px rgba(99,102,241,.85)) brightness(1.15)}
 .mily-fab svg{width:72px;height:72px;pointer-events:none}
 .mily-fab-badge{position:absolute;top:2px;right:2px;width:14px;height:14px;background:var(--rd);border-radius:50%;border:2px solid #fff;display:none}
-.nav-container.docked~.mily-fab{bottom:110px}
+.nav-container.docked~.mily-fab{bottom:max(calc(110px + var(--android-nav-inset, 0px)), calc(110px + var(--native-nav-bar-h, 0px)))}
 /* ── FAB 말풍선 ── */
 .mily-bubble{position:fixed;right:100px;bottom:152px;max-width:200px;padding:10px 14px;background:var(--card,#fff);color:var(--tx,#1E293B);border-radius:var(--rmd);border-bottom-right-radius:4px;font-size:12.5px;line-height:1.5;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:949;opacity:0;transform:scale(.9) translateY(4px);transition:opacity .3s,transform .3s;pointer-events:none;font-weight:500}
 .mily-bubble.show{opacity:1;transform:scale(1) translateY(0);pointer-events:auto;cursor:pointer}

@@ -78,7 +78,7 @@
 | R-058 | 2026-04-15 | FCM 푸시 data 페이로드에 title/body 추가 (APK data 우선 읽음) | PR #367 | N/A (서버) | functions-index.js sendToDevices data 블록에 title/body 포함 |
 | R-059 | 2026-04-15 | activity_verify 푸시 타입 매핑 (familyMessages.type → push data.type) | PR #367 | N/A (서버) | buildFamilyMsgPayload 헬퍼, activity_verify_request/_approval/_rejection → activity_verify |
 | R-060 | 2026-04-15 | push-sender.js FCM 분기 추가 (admin.messaging().send) | PR #367 | N/A (서버) | CLI 리마인더 스크립트에서도 FCM 기기에 발송 가능. 만료 토큰 자동 비활성화 |
-| R-061 | 2026-04-15 | 안드로이드 APK edge-to-edge 하단 네비바와 AI 검수 팝업/하단 고정 UI 겹침 수정 | v0415n | 대기 | 네이티브 MainActivity.kt가 주입하는 `--android-nav-inset` CSS 변수를 sheet-body/sheet-foot/nav-container/mily-fab/toast/ep-pop에 반영. iOS safe-area 및 데스크탑 0px fallback 공존 |
+| R-061 | 2026-04-15 | 안드로이드 APK edge-to-edge 하단 네비바와 AI 검수 팝업/하단 고정 UI 겹침 수정 | v0415n / v0415o | release/v0415o 반영 | v0415n: 전역 sheet-body/foot/nav-container/mily-fab/toast/ep-pop에 `--android-nav-inset` 반영. v0415o: AI 검수 팝업 stage 컨테이너 명시 셀렉터 추가 + `--native-nav-bar-h` 변수명도 함께 인식. iOS safe-area 및 데스크탑 0px fallback 공존 |
 
 ## 미착수 백로그 (ROADMAP.md 기준)
 
