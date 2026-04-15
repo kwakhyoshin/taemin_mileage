@@ -9444,7 +9444,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0415l';
+const _APP_VERSION = 'v0415m';
 // (v0415i) 운영기에서만 숨길 관리자 섹션 처리 — data-env-only="dev" 요소를 prod에서 숨김
 try{
   if(_ENV!=='dev'){
@@ -10398,6 +10398,18 @@ const WEATHER_MSGS={sunny:{icon:'☀️',msg:'날씨가 화창해! 밖에서 놀
 // 미세먼지 기준: PM10(미세) 0-30좋음, 31-80보통, 81-150나쁨, 151+매우나쁨 / PM2.5(초미세) 0-15좋음, 16-35보통, 36-75나쁨, 76+매우나쁨
 const DUST_GRADES={good:{level:'좋음',color:'#10B981',bgColor:'#D1FAE5',txtColor:'#065F46'},moderate:{level:'보통',color:'#FBBF24',bgColor:'#FEF3C7',txtColor:'#92400E'},bad:{level:'나쁨',color:'#F97316',bgColor:'#FFEDD5',txtColor:'#C2410C',msg:'마스크 쓰고 나가자! 😷'},worst:{level:'매우나쁨',color:'#EF4444',bgColor:'#FEE2E2',txtColor:'#B91C1C',msg:'오늘은 실내에서 놀자! 🏠'}};
 let weatherData={temp:null,condition:'sunny',pm10:null,pm25:null,dustGrade:'good',locationName:'서울'};
+// [PERF ②+] 날씨/미세먼지 캐시 복원 — 이전 fetch 결과를 localStorage에서 즉시 로드하여
+// 캐시-퍼스트 렌더 시 "--°, 초미세 --" 같은 빈 상태가 잠깐 보이는 현상 방지
+try{
+  const _wc=localStorage.getItem((typeof _LS_PREFIX!=='undefined'?_LS_PREFIX:'taemin_')+'weather_cache');
+  if(_wc){
+    const _p=JSON.parse(_wc);
+    // 24시간 이내 캐시만 사용 (너무 오래된 온도/미세먼지는 오히려 오해 유발)
+    if(_p && _p.ts && (Date.now()-_p.ts) < 24*60*60*1000 && _p.data){
+      weatherData=Object.assign(weatherData,_p.data);
+    }
+  }
+}catch(_){}
 
 // PM10, PM2.5 등급 판정
 // AQI → µg/m³ 변환 (WAQI API는 AQI 지수를 반환하므로 실제 농도로 변환 필요)
@@ -10557,6 +10569,11 @@ async function fetchWeather(){
     }
   }
   updateSmartMessage();
+  // [PERF ②+] 다음 부팅에서 즉시 복원할 수 있도록 캐시 저장
+  try{
+    localStorage.setItem((typeof _LS_PREFIX!=='undefined'?_LS_PREFIX:'taemin_')+'weather_cache',
+      JSON.stringify({ts:Date.now(), data:weatherData}));
+  }catch(_){}
 }
 function updateSmartMessage(){
   const wIcon=document.getElementById('weather-icon'),wTemp=document.getElementById('weather-temp');
@@ -19304,6 +19321,9 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.4.29 (v0415m)',date:'2026-04-15',items:[
+    '[PERF ②+] 날씨/미세먼지/위치 localStorage 캐시 추가 — 캐시-퍼스트 부팅 시 "--°, 초미세 --" 빈 상태가 잠깐 보이다가 값이 채워지는 플리커 제거. 이전 fetch 결과(24h 이내)를 즉시 표시 후 fetchWeather 완료 시 조용히 갱신'
+  ]},
   {ver:'2.4.28 (v0415l)',date:'2026-04-15',items:[
     '[PERF ③] onAuthStateChanged 대기 3초 → 1.2초 단축 (iPhone PWA 토큰 복원은 보통 300ms 이내)',
     '[PERF ③] 익명 로그인 비동기화 — await 제거하고 백그라운드로 수행. 부팅 경로 최대 1초+ 단축',
@@ -24509,6 +24529,8 @@ window._createState = _createState;
           if(_homeScr && !document.querySelector('.scr.on')) _homeScr.classList.add('on');
         }catch(_){}
         try{ renderAll(); }catch(_){}
+        // [PERF ②+] 캐시된 날씨/미세먼지 값으로 상단 정보 즉시 채우기 (fetchWeather 완료 전까지)
+        try{ if(typeof updateSmartMessage==='function') updateSmartMessage(); }catch(_){}
         // 상단에 얇은 동기화 인디케이터 (네트워크 갱신 중임을 나타냄)
         try{
           if(!document.getElementById('perf2-sync-bar')){
