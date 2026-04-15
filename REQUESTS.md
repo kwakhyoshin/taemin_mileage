@@ -82,6 +82,7 @@
 | R-062 | 2026-04-16 | subscribePush() 네이티브 경로 즉시 피드백 (로딩 상태 + 토스트) | v0416a | — | 권한 요청 중 토글 opacity .5 + pointerEvents none, 완료 후 복원 |
 | R-063 | 2026-04-16 | _milelyOnFCMToken 토스트 중복 방지 — 기존 등록 + 동일 토큰이면 생략 | v0416a | — | 앱 실행마다 "활성화됐어요" 뜨던 문제 해결 |
 | R-064 | 2026-04-16 | 알림 상태 체크 네이티브 분기 누락 (sendFamilyMsg + _showPushOffBanner) | v0416a | — | pushSubscription 대신 MilelyBridge.isNotificationEnabled() 사용. 안드로이드 APK에서 "알림이 꺼져 있어요" 항상 뜨던 문제 해결 |
+| R-065 | 2026-04-16 | 운영기 알림 토글: 토스트+토글 안 변하는 문제 — _milelyOnFCMToken의 await setDoc hang 대응 | v0416b | — | UI/토스트를 Firestore write 앞으로 이동, setDoc은 fire-and-forget + 8초 타임아웃. async→sync 함수 변경 |
 
 ## 미착수 백로그 (ROADMAP.md 기준)
 
