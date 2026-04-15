@@ -119,8 +119,11 @@
 |------|------|----|--------|--------|------|
 | ① Firestore 오프라인 캐시 | 개발기+운영기 반영 | #381 | v0415j | v0415j | 2026-04-15 |
 | ② 스플래시/로딩 UX 이원화 | 개발기+운영기 반영 | release/v0415k | v0415k | v0415k | 2026-04-15, 로그인 버튼 즉시 피드백 포함 |
-| ③ auth 대기 단축 + 익명 지연 | 개발기 반영 | PR 예정 | v0415l | — | 3000ms → 1200ms, 익명 로그인 비동기화 |
-| ④ preconnect/modulepreload | 개발기 반영 | PR 예정 | v0415l | — | gstatic/firestore/auth preconnect + modulepreload |
+| ③ auth 대기 단축 + 익명 지연 | 개발기+운영기 반영 | release/v0415o | v0415l | v0415o | 3000ms → 1200ms. 익명 로그인은 WebView 오프라인 이슈로 v0415m에서 await 복원 |
+| ④ preconnect/modulepreload | 개발기+운영기 반영 | release/v0415o | v0415l | v0415o | gstatic/firestore/auth preconnect + modulepreload |
+| +날씨 캐시 | 개발기+운영기 반영 | release/v0415o | v0415m | v0415o | localStorage 24h 캐시로 "--°" 플리커 제거 |
+| +WebView 오프라인 폴백 복구 | 개발기+운영기 반영 | release/v0415o | v0415m | v0415o | signInAnonymously await 복원 |
+| +안드로이드 APK edge-to-edge inset | 개발기+운영기 반영 | release/v0415o | v0415n/o | v0415o | `--android-nav-inset` / `--native-nav-bar-h` 반영, R-061 |
 | ⑤ 거대 문서 분할 | 대기 | — | — | — | 설계 문서 필요 |
 | ⑥ updateDoc 부분 patch | 대기 | — | — | — | ⑤ 선행 |
 | ⑦ snapshot stringify 제거 | 대기 | — | — | — | ⑤ 선행 |
