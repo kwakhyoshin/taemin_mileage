@@ -4293,8 +4293,8 @@ requestAnimationFrame(function(){
         </div>
       </div>
     </div>
-    <!-- ── 알림 테스트 ── -->
-    <div class="adm-sec">
+    <!-- ── 알림 테스트 ── (v0415i: 운영기에서는 숨김) -->
+    <div class="adm-sec" data-env-only="dev">
       <div class="adm-sec-lbl">알림 테스트</div>
       <div class="adm-card">
         <div class="adm-row">
@@ -4309,8 +4309,8 @@ requestAnimationFrame(function(){
         <div id="push-debug" style="padding:8px 4px 4px;font-size:13px;color:var(--tx3);line-height:1.6"></div>
       </div>
     </div>
-    <!-- ── 데이터 백업 · 복원 ── -->
-    <div class="adm-sec">
+    <!-- ── 데이터 백업 · 복원 ── (v0415i: 운영기에서는 숨김) -->
+    <div class="adm-sec" data-env-only="dev">
       <div class="adm-sec-lbl">데이터 백업 · 복원</div>
       <div class="adm-card">
         <div class="adm-row">
@@ -9414,7 +9414,15 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0415h';
+const _APP_VERSION = 'v0415i';
+// (v0415i) 운영기에서만 숨길 관리자 섹션 처리 — data-env-only="dev" 요소를 prod에서 숨김
+try{
+  if(_ENV!=='dev'){
+    const _envStyle=document.createElement('style');
+    _envStyle.textContent='[data-env-only="dev"]{display:none !important}';
+    document.head.appendChild(_envStyle);
+  }
+}catch(_envErr){console.warn('[env-only] style inject failed',_envErr);}
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -18680,14 +18688,21 @@ async function migratePinIfNeeded(){
     delete S.settings.pin;
     await save();
   }
-  // 최초 설치: 기본 PIN '1234' 해시 설정
-  if(!S.settings.pinHash){
-    S.settings.pinHash=await hashPin('1234');
-    await save();
-  }
+  // (v0415i) 기본 PIN '1234' 자동 설정 로직 제거 — 최초 사용자가 직접 등록하도록 변경
 }
 
 function showPin(mode,title,sub){
+  // (v0415i) PIN 미설정 상태에서 인증/초기화 시도 차단 — 먼저 PIN부터 등록하도록 안내
+  if(!S.settings.pinHash && (mode==='auth'||mode==='reset_today'||mode==='reset_all')){
+    if(mode==='auth'){
+      // 관리자 최초 진입: PIN 없으면 임시 통과 후 관리자 탭에서 PIN 설정하도록 유도
+      alert('PIN이 아직 설정되지 않았어요.\n관리자 탭의 [보안 PIN > 변경] 에서 먼저 PIN을 등록해주세요.');
+      adminOK=true; startAdminSession(); reallyGoTab('adm');
+    }else{
+      alert('PIN이 아직 설정되지 않았어요.\n먼저 관리자 탭에서 PIN을 등록한 뒤 다시 시도해주세요.');
+    }
+    return;
+  }
   pMode=mode;pBuf='';
   document.getElementById('pin-title').innerHTML=title;
   document.getElementById('pin-sub').innerHTML=sub;
@@ -18698,7 +18713,14 @@ function showPin(mode,title,sub){
   if(wasHidden)lockBodyScroll();
 }
 
-function startChangePIN(){showPin('new1','<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" style=\"vertical-align:-4px;margin-right:4px\"><circle cx=\"7.5\" cy=\"15.5\" r=\"5.5\"/><path d=\"M21 2l-9.6 9.6\"/><path d=\"M15.5 7.5l3 3L21 8l-3-3\"/></svg> 새 PIN 설정','새로 사용할 PIN 4자리를 입력하세요');}
+function startChangePIN(){
+  // (v0415i) 최초 등록 vs 기존 변경 분기
+  if(!S.settings.pinHash){
+    showPin('new1','<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" style=\"vertical-align:-4px;margin-right:4px\"><circle cx=\"7.5\" cy=\"15.5\" r=\"5.5\"/><path d=\"M21 2l-9.6 9.6\"/><path d=\"M15.5 7.5l3 3L21 8l-3-3\"/></svg> PIN 최초 설정','사용할 PIN 4자리를 입력하세요');
+  }else{
+    showPin('change_auth','<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" style=\"vertical-align:-4px;margin-right:4px\"><rect x=\"3\" y=\"11\" width=\"18\" height=\"11\" rx=\"2\"/><path d=\"M7 11V7a5 5 0 0110 0v4\"/></svg> 기존 PIN 확인','현재 사용 중인 PIN 4자리를 입력하세요');
+  }
+}
 function pk(k){
   if(k==='cancel'){document.getElementById('pin-wrap').style.display='none';unlockBodyScroll();pBuf='';pFirst='';pMode='auth';return;}
   if(k==='del'){pBuf=pBuf.slice(0,-1);updDots('normal');return;}
@@ -18714,6 +18736,12 @@ async function handlePin(){
   if(pMode==='auth'){
     if(inputHash===S.settings.pinHash){closePin();adminOK=true;pBuf='';startAdminSession();reallyGoTab('adm');}
     else{updDots('err');setTimeout(()=>{pBuf='';updDots('normal');toast('❌ PIN이 틀렸어요');},600);}
+  }else if(pMode==='change_auth'){
+    // (v0415i) 기존 PIN 확인 → 통과 시 새 PIN 입력 단계로
+    if(inputHash===S.settings.pinHash){
+      pBuf='';
+      showPin('new1','<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" style=\"vertical-align:-4px;margin-right:4px\"><circle cx=\"7.5\" cy=\"15.5\" r=\"5.5\"/><path d=\"M21 2l-9.6 9.6\"/><path d=\"M15.5 7.5l3 3L21 8l-3-3\"/></svg> 새 PIN 설정','새로 사용할 PIN 4자리를 입력하세요');
+    }else{updDots('err');setTimeout(()=>{pBuf='';updDots('normal');toast('❌ PIN이 틀렸어요');},600);}
   }else if(pMode==='new1'){
     pFirst=pBuf;pBuf='';
     showPin('new2','<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" style=\"vertical-align:-4px;margin-right:4px\"><circle cx=\"7.5\" cy=\"15.5\" r=\"5.5\"/><path d=\"M21 2l-9.6 9.6\"/><path d=\"M15.5 7.5l3 3L21 8l-3-3\"/></svg> PIN 확인','방금 입력한 PIN을 한 번 더 입력하세요');
@@ -19222,6 +19250,12 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.4.25 (v0415i)',date:'2026-04-15',items:[
+    '관리자 메뉴 단순화 — 운영기에서 [알림 테스트] / [데이터 백업·복원] 섹션 숨김 (환경변수 _ENV 기반, 개발기에서는 그대로 노출)',
+    '보안 PIN 로직 개편 — 기본 PIN "1234" 자동 등록 제거. 최초 사용자는 [보안 PIN > 변경] 에서 직접 등록해야 함',
+    'PIN 미등록 상태에서 데이터 초기화/관리자 인증 액션 발생 시 "PIN부터 등록하세요" 안내 팝업 표시',
+    'PIN 변경 플로우 — 기존 PIN 등록된 경우 새 PIN 설정 전에 기존 PIN 확인 단계 추가 (change_auth 모드)'
+  ]},
   {ver:'2.4.24 (v0415h)',date:'2026-04-15',items:[
     '챗봇 입력창 보내기 버튼 잘림 수정 — .mily-chat-input / .mily-chat-hd 좌우 패딩에 env(safe-area-inset-right/left) 추가 (삼성 엣지패널/시스템 inset 흡수), input에 min-width:0 추가 (flex 오버플로우 방지). 갤럭시 울트라 등 안드로이드 WebView에서 발생하던 증상 해결'
   ]},
