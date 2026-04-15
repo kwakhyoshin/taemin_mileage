@@ -9389,7 +9389,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'prod'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0415g';
+const _APP_VERSION = 'v0415h';
 // ── 화면 디버그 패널 (dev만) ──────────────────────────────
 if(_ENV==='dev'){(function(){
   const panel=document.createElement('div');
@@ -19115,6 +19115,9 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.4.24 (v0415h)',date:'2026-04-15',items:[
+    '챗봇 입력창 보내기 버튼 잘림 수정 — .mily-chat-input / .mily-chat-hd 좌우 패딩에 env(safe-area-inset-right/left) 추가 (삼성 엣지패널/시스템 inset 흡수), input에 min-width:0 추가 (flex 오버플로우 방지). 갤럭시 울트라 등 안드로이드 WebView에서 발생하던 증상 해결'
+  ]},
   {ver:'2.4.23 (v0415g)',date:'2026-04-15',items:[
     'Apple 로그인 버튼 — 아직 개발중임을 명확히 알리는 팝업(alert)으로 변경 (로그인/회원가입 화면 모두)'
   ]},
@@ -25203,7 +25206,7 @@ window._createState = _createState;
 @keyframes milyChatIn{from{opacity:0;transform:translateY(100%)}to{opacity:1;transform:translateY(0)}}
 
 /* chat header — 키보드 올라와도 고정 */
-.mily-chat-hd{background:linear-gradient(135deg,var(--or),var(--or-bright));color:#fff;padding:10px 16px;padding-top:calc(10px + env(safe-area-inset-top));display:flex;align-items:center;gap:6px;flex-shrink:0;position:sticky;top:0;z-index:2}
+.mily-chat-hd{background:linear-gradient(135deg,var(--or),var(--or-bright));color:#fff;padding:10px calc(16px + env(safe-area-inset-right)) 10px calc(16px + env(safe-area-inset-left));padding-top:calc(10px + env(safe-area-inset-top));display:flex;align-items:center;gap:6px;flex-shrink:0;position:sticky;top:0;z-index:2}
 .mily-chat-hd-avatar{width:36px;height:36px;flex-shrink:0;display:none}
 .mily-chat-hd-char{width:80px;height:80px;flex-shrink:0}
 .mily-chat-hd-char svg{width:80px;height:80px}
@@ -25291,8 +25294,8 @@ body.dark .mily-msg.bot pre{background:rgba(255,255,255,.06)}
 @keyframes milyDot{0%,80%,100%{transform:scale(.6);opacity:.4}40%{transform:scale(1);opacity:1}}
 
 /* input area */
-.mily-chat-input{display:flex;gap:8px;padding:10px 12px;padding-bottom:calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--bdr,#E2E8F0);flex-shrink:0;background:var(--card,#fff)}
-.mily-chat-input input{flex:1;border:1.5px solid var(--bdr,#E2E8F0);border-radius:var(--rlg);padding:10px 16px;font-size:var(--fs-lg);font-family:inherit;outline:none;background:var(--bg,var(--card2));color:var(--tx,#1E293B);transition:border-color .15s}
+.mily-chat-input{display:flex;gap:8px;padding:10px calc(12px + env(safe-area-inset-right)) 10px calc(12px + env(safe-area-inset-left));padding-bottom:calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--bdr,#E2E8F0);flex-shrink:0;background:var(--card,#fff)}
+.mily-chat-input input{flex:1;min-width:0;border:1.5px solid var(--bdr,#E2E8F0);border-radius:var(--rlg);padding:10px 16px;font-size:var(--fs-lg);font-family:inherit;outline:none;background:var(--bg,var(--card2));color:var(--tx,#1E293B);transition:border-color .15s}
 .mily-chat-input input:focus{border-color:var(--or)}
 .mily-chat-input button{width:40px;height:40px;border-radius:50%;border:none;background:linear-gradient(135deg,var(--or),var(--or-bright));color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:opacity .15s}
 .mily-chat-input button:disabled{opacity:.4;cursor:default}
