@@ -7324,6 +7324,23 @@ async function doLogin(idField, pwdField, errField){
   const errEl=document.getElementById(errField||'login-error');
   if(!id||!pwd){errEl.textContent='아이디와 비밀번호를 입력해주세요';return;}
 
+  // (v0415k) 로그인 버튼 즉시 피드백 — "로그인 중..." 표시 + 중복클릭 차단
+  // 버튼이 반응 없어 보여서 유저가 여러번 누르거나 "느리다"고 느끼던 문제 해결
+  errEl.textContent='';
+  const _btnEl = (errEl && errEl.closest && errEl.closest('.auth-card')) ?
+    errEl.closest('.auth-card').querySelector('.auth-btn') : null;
+  let _btnRestore = null;
+  if(_btnEl){
+    const _origText = _btnEl.textContent;
+    const _origDisabled = _btnEl.disabled;
+    _btnEl.disabled = true;
+    _btnEl.textContent = '로그인 중...';
+    _btnEl.style.opacity = '0.7';
+    _btnRestore = ()=>{ try{ _btnEl.disabled=_origDisabled; _btnEl.textContent=_origText; _btnEl.style.opacity=''; }catch(_){} };
+  }
+  // 화면이 실제로 갱신되도록 한 프레임 양보 (await microtask 후에 무거운 작업)
+  await new Promise(r=>requestAnimationFrame(()=>r()));
+
   // Firebase 초기화 대기 — WebView 콜드스타트 시 _firebaseReady가 false인 상태에서
   // 로그인 누르면 글로벌 레지스트리 조회가 skip되어 "비번 틀림" 오탐이 발생하는 문제 방지
   if(!_firebaseReady){
@@ -7464,6 +7481,9 @@ async function doLogin(idField, pwdField, errField){
   }catch(e){
     console.error('Login failed:',e);
     errEl.textContent='로그인 중 오류가 발생했어요';
+  }finally{
+    // (v0415k) 로그인 버튼 복원 — 성공 시는 화면 전환되므로 보이지 않고, 실패 시만 의미있음
+    if(_btnRestore) _btnRestore();
   }
 }
 
@@ -19275,7 +19295,8 @@ const APP_CHANGELOG=[
   {ver:'2.4.27 (v0415k)',date:'2026-04-15',items:[
     '[PERF ②] 스플래시/로딩 UX 이원화 — localStorage 백업 + 세션이 있으면 "데이터 불러오는 중..." 풀블로킹 오버레이 없이 홈 화면을 즉시 렌더. 최신 데이터는 백그라운드로 가져와 자연스럽게 갱신',
     '네트워크 동기화 중에는 상단에 얇은 파란 진행바 표시 (fresh 데이터 도착 시 페이드아웃)',
-    '초대링크 진입/소셜로그인 처리 중에는 안전을 위해 기존 flow 유지 (캐시 부트 스킵)'
+    '초대링크 진입/소셜로그인 처리 중에는 안전을 위해 기존 flow 유지 (캐시 부트 스킵)',
+    '로그인 버튼 즉시 피드백 — 클릭 시 "로그인 중..." 표시 + 중복클릭 차단 + requestAnimationFrame으로 화면 갱신 보장. 버튼이 반응 없어 보이던 체감 지연 해결'
   ]},
   {ver:'2.4.26 (v0415j)',date:'2026-04-15',items:[
     '[PERF ①] Firestore 오프라인 IndexedDB 영속 캐시 활성화 — initializeFirestore + persistentLocalCache. 두 번째 이후 콜드스타트에서 "데이터 불러오는 중..." 화면 체감 수초 → 수백ms로 단축 기대',
