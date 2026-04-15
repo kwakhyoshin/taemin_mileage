@@ -9590,16 +9590,17 @@ async function _initFirebase(){
       });
       console.log('[mile.ly] Auth restored:', fbAuth.currentUser?fbAuth.currentUser.uid:'(none)');
     }catch(_awErr){ console.warn('[mile.ly] auth wait failed',_awErr); }
-    // [PERF ③] 익명 로그인 비동기화 — await 제거하고 백그라운드로 날려서 부팅 경로 단축
     // v0408z6: 로그인 세션이 없으면 익명 로그인으로 Firestore write 권한 확보
     // (회원가입 플로우는 사용자가 아직 Firebase 로그인 전이지만 setDoc을 호출해야 함)
-    // Firestore SDK는 쓰기를 큐잉하므로 익명 로그인이 늦게 완료돼도 write가 안전히 진행됨
+    // v0415m: 비동기화 되돌림 — 익명 인증 전에 getDoc 호출하면 permission-denied로 "오프라인 모드"
+    // 폴백이 발생 (안드로이드 WebView 에뮬에서 재현됨). 익명 로그인은 수백ms 내 완료되므로 await 복원
     if(!fbAuth.currentUser && window._signInAnonymously){
-      window._signInAnonymously(fbAuth).then(function(){
-        console.log('[mile.ly] Anonymous sign-in OK (deferred):', fbAuth.currentUser&&fbAuth.currentUser.uid);
-      }).catch(function(_anErr){
+      try{
+        await window._signInAnonymously(fbAuth);
+        console.log('[mile.ly] Anonymous sign-in OK:', fbAuth.currentUser&&fbAuth.currentUser.uid);
+      }catch(_anErr){
         console.warn('[mile.ly] Anonymous sign-in failed:', _anErr&&_anErr.code, _anErr&&_anErr.message);
-      });
+      }
     }
     _firebaseReady = true;
     console.log('[mile.ly] Firebase loaded OK (with Auth)');
@@ -19322,7 +19323,8 @@ window.pfMenuAction=pfMenuAction;
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
   {ver:'2.4.29 (v0415m)',date:'2026-04-15',items:[
-    '[PERF ②+] 날씨/미세먼지/위치 localStorage 캐시 추가 — 캐시-퍼스트 부팅 시 "--°, 초미세 --" 빈 상태가 잠깐 보이다가 값이 채워지는 플리커 제거. 이전 fetch 결과(24h 이내)를 즉시 표시 후 fetchWeather 완료 시 조용히 갱신'
+    '[PERF ②+] 날씨/미세먼지/위치 localStorage 캐시 추가 — 캐시-퍼스트 부팅 시 "--°, 초미세 --" 빈 상태가 잠깐 보이다가 값이 채워지는 플리커 제거. 이전 fetch 결과(24h 이내)를 즉시 표시 후 fetchWeather 완료 시 조용히 갱신',
+    '[BUGFIX] Android WebView 오프라인 모드 진입 이슈 해결 — PERF ③에서 signInAnonymously를 비동기화했더니 익명 토큰 발급 전에 getDoc이 호출되어 permission-denied → "오프라인 모드" 폴백이 발생. await 복원 (auth 1.2초 타임아웃은 유지)'
   ]},
   {ver:'2.4.28 (v0415l)',date:'2026-04-15',items:[
     '[PERF ③] onAuthStateChanged 대기 3초 → 1.2초 단축 (iPhone PWA 토큰 복원은 보통 300ms 이내)',
