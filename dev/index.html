@@ -9451,7 +9451,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0415o';
+const _APP_VERSION = 'v0416a';
 // (v0415i) 운영기에서만 숨길 관리자 섹션 처리 — data-env-only="dev" 요소를 prod에서 숨김
 try{
   if(_ENV!=='dev'){
@@ -19329,6 +19329,11 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.4.31 (v0416a)',date:'2026-04-16',items:[
+    '[알림] 안드로이드 APK 알림 토글 즉시 피드백 — 네이티브 권한 요청 중 토글에 로딩 표시 + 결과 토스트',
+    '[알림] FCM 토큰 토스트 중복 방지 — 앱 실행 시마다 "알림이 활성화됐어요" 뜨던 문제 수정. 새 등록/토큰 변경 시에만 표시',
+    '[알림] 안드로이드 APK에서 "알림이 꺼져 있어요" 팝업이 항상 뜨던 문제 수정 — PWA pushSubscription 대신 MilelyBridge.isNotificationEnabled()로 네이티브 알림 상태 체크'
+  ]},
   {ver:'2.4.30 (v0415n)',date:'2026-04-15',items:[
     '[안드로이드 APK] edge-to-edge 하단 네비게이션 바 inset 대응 — 네이티브가 주입하는 --android-nav-inset CSS 변수를 AI 검수 팝업/시트 모달/플로팅 탭바/밀리 FAB/토스트/이모지 피커의 bottom / padding-bottom에 반영. 하단 고정 버튼이 시스템 네비게이션 바에 가리지 않도록 자동 보정 (iOS safe-area / 데스크탑 0px fallback 유지)'
   ]},
@@ -21144,8 +21149,12 @@ function sendFamilyMsg(){
     setTimeout(()=>showReceivedMsg(currentUser,sentText,sentEmotion,sentMsg),300);
   }else{
     toast(`💌 ${toName}에게 메시지를 보냈어요!`);
-    // 발신자 알림이 꺼져 있으면 1회 안내
-    if(!pushSubscription && !window._pushOffMsgWarned){
+    // 발신자 알림이 꺼져 있으면 1회 안내 (네이티브 APK에서는 MilelyBridge로 체크)
+    const _isNative=!!(window.MilelyBridge&&window.MilelyBridge.isNativeApp&&window.MilelyBridge.isNativeApp());
+    const _pushOff=_isNative
+      ?(()=>{try{return !window.MilelyBridge.isNotificationEnabled();}catch(_){return true;}})()
+      :!pushSubscription;
+    if(_pushOff && !window._pushOffMsgWarned){
       window._pushOffMsgWarned=true;
       setTimeout(()=>{
         _showPushOffGuide('메시지를 보냈지만, 알림이 꺼져 있어서\n상대방의 답장을 받지 못할 수 있어요.');
@@ -22995,8 +23004,17 @@ async function subscribePush(){
   // ── 네이티브 앱(Android WebView) 분기 ──
   if(window.MilelyBridge && window.MilelyBridge.isNativeApp && window.MilelyBridge.isNativeApp()){
     // Android: 권한 요청 → 콜백(_milelyOnPermissionResult) → FCM 토큰 발급 → 콜백(_milelyOnFCMToken)
+    // 즉시 피드백: 토글을 로딩 상태로 표시
+    const _togMy=document.getElementById('push-tog-my');
+    const _togAdm=document.getElementById('push-tog');
+    if(_togMy){_togMy.style.opacity='.5';_togMy.style.pointerEvents='none';}
+    if(_togAdm){_togAdm.style.opacity='.5';_togAdm.style.pointerEvents='none';}
+    toast('알림 권한을 요청하고 있어요…');
     try{ window.MilelyBridge.requestNotificationPermission(); }
-    catch(e){ console.error('[Push/Native] requestNotificationPermission error:', e); }
+    catch(e){ console.error('[Push/Native] requestNotificationPermission error:', e);
+      if(_togMy){_togMy.style.opacity='';_togMy.style.pointerEvents='';}
+      if(_togAdm){_togAdm.style.opacity='';_togAdm.style.pointerEvents='';}
+    }
     return;
   }
 
@@ -23212,10 +23230,17 @@ function _showPushOffGuide(msg){
 function _showPushOffBanner(){
   // 이미 표시했거나, 알림 지원 안 하거나, 이미 켜져있으면 skip
   if(window._pushBannerShown) return;
-  if(pushSubscription) return;
-  const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
-  const isStandalone=window.navigator.standalone||window.matchMedia('(display-mode:standalone)').matches;
-  if(typeof Notification==='undefined'||(isIOS&&!isStandalone)) return;
+  // 네이티브 APK: MilelyBridge로 알림 상태 체크, PWA: pushSubscription
+  const _isNative=!!(window.MilelyBridge&&window.MilelyBridge.isNativeApp&&window.MilelyBridge.isNativeApp());
+  const _pushOn=_isNative
+    ?(()=>{try{return !!window.MilelyBridge.isNotificationEnabled();}catch(_){return false;}})()
+    :!!pushSubscription;
+  if(_pushOn) return;
+  if(!_isNative){
+    const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isStandalone=window.navigator.standalone||window.matchMedia('(display-mode:standalone)').matches;
+    if(typeof Notification==='undefined'||(isIOS&&!isStandalone)) return;
+  }
   window._pushBannerShown=true;
   // 세션당 1회만 (localStorage)
   const bannerKey=_LS_PREFIX+'push_banner_dismissed';
@@ -23321,12 +23346,18 @@ window.sendTestPush=sendTestPush;
 // ── MilelyBridge 콜백 (Android → 웹) ──────────────────────────────────────────
 // 1) 권한 요청 결과 → FCM 토큰 발급 시작
 window._milelyOnPermissionResult=function(granted){
+  // 토글 로딩 상태 해제
+  const _togMy=document.getElementById('push-tog-my');
+  const _togAdm=document.getElementById('push-tog');
+  if(_togMy){_togMy.style.opacity='';_togMy.style.pointerEvents='';}
+  if(_togAdm){_togAdm.style.opacity='';_togAdm.style.pointerEvents='';}
   if(!granted){
     toast('알림 권한이 거부됐어요. 설정 > 앱 > 알림에서 허용해주세요.');
+    updatePushUI();
     return;
   }
   try{ window.MilelyBridge.getFCMToken(); }
-  catch(e){ console.error('[Push/Native] getFCMToken error:', e); }
+  catch(e){ console.error('[Push/Native] getFCMToken error:', e); updatePushUI(); }
 };
 
 // 2) FCM 토큰 수신 → Firestore 저장
@@ -23347,6 +23378,9 @@ window._milelyOnFCMToken=async function(token){
   try{
     const deviceId=getDeviceId();
     localStorage.setItem(_LS_PREFIX+'push_enabled','true');
+    // 중복 토스트 방지: 이미 등록된 동일 토큰이면 새 등록/변경이 아님
+    const _existing=S.pushDevices&&S.pushDevices[deviceId];
+    const _isNewOrChanged=!_existing||_existing.fcmToken!==token||!_existing.enabled;
     const _dev={
       fcmToken:token,
       type:'fcm',
@@ -23355,10 +23389,6 @@ window._milelyOnFCMToken=async function(token){
       updatedAt:Date.now()
     };
     // ✅ v0415f: families/{familyId}.pushDevices.{deviceId} 직접 업데이트
-    // — Cloud Function onFamilyMessageDevFamilies 는 families 문서의 pushDevices를 읽음
-    // — 기존에는 S.pushDevices 에 저장하고 save()가 DATA_DOC(families/) 로 썼으나,
-    //   독립모드·마이그레이션 타이밍에 따라 families 문서에 pushDevices가 비어있는 케이스 발생.
-    //   이제는 무조건 families 문서에 직접 merge 저장.
     if(_familyId && _firebaseReady && db){
       try{
         const _famRef=doc(db,'families',_familyId);
@@ -23372,8 +23402,9 @@ window._milelyOnFCMToken=async function(token){
     if(!S.pushDevices)S.pushDevices={};
     S.pushDevices[deviceId]=_dev;
     try{ updatePushUI(); }catch(_){}
-    try{ toast('🔔 이 기기에서 알림이 활성화됐어요!'); }catch(_){}
-    console.log('[Push/Native] FCM token saved, deviceId:', deviceId);
+    // 처음 등록이거나 토큰이 바뀐 경우에만 토스트 표시
+    if(_isNewOrChanged){ try{ toast('🔔 이 기기에서 알림이 활성화됐어요!'); }catch(_){} }
+    console.log('[Push/Native] FCM token saved, deviceId:', deviceId, _isNewOrChanged?'(new/changed)':'(unchanged)');
     // 처리 완료했으니 pending 비움
     window._pendingFcmToken=null;
   }catch(e){
