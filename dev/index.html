@@ -7324,6 +7324,23 @@ async function doLogin(idField, pwdField, errField){
   const errEl=document.getElementById(errField||'login-error');
   if(!id||!pwd){errEl.textContent='아이디와 비밀번호를 입력해주세요';return;}
 
+  // (v0415k) 로그인 버튼 즉시 피드백 — "로그인 중..." 표시 + 중복클릭 차단
+  // 버튼이 반응 없어 보여서 유저가 여러번 누르거나 "느리다"고 느끼던 문제 해결
+  errEl.textContent='';
+  const _btnEl = (errEl && errEl.closest && errEl.closest('.auth-card')) ?
+    errEl.closest('.auth-card').querySelector('.auth-btn') : null;
+  let _btnRestore = null;
+  if(_btnEl){
+    const _origText = _btnEl.textContent;
+    const _origDisabled = _btnEl.disabled;
+    _btnEl.disabled = true;
+    _btnEl.textContent = '로그인 중...';
+    _btnEl.style.opacity = '0.7';
+    _btnRestore = ()=>{ try{ _btnEl.disabled=_origDisabled; _btnEl.textContent=_origText; _btnEl.style.opacity=''; }catch(_){} };
+  }
+  // 화면이 실제로 갱신되도록 한 프레임 양보 (await microtask 후에 무거운 작업)
+  await new Promise(r=>requestAnimationFrame(()=>r()));
+
   // Firebase 초기화 대기 — WebView 콜드스타트 시 _firebaseReady가 false인 상태에서
   // 로그인 누르면 글로벌 레지스트리 조회가 skip되어 "비번 틀림" 오탐이 발생하는 문제 방지
   if(!_firebaseReady){
@@ -7464,6 +7481,9 @@ async function doLogin(idField, pwdField, errField){
   }catch(e){
     console.error('Login failed:',e);
     errEl.textContent='로그인 중 오류가 발생했어요';
+  }finally{
+    // (v0415k) 로그인 버튼 복원 — 성공 시는 화면 전환되므로 보이지 않고, 실패 시만 의미있음
+    if(_btnRestore) _btnRestore();
   }
 }
 
@@ -9414,7 +9434,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0415j';
+const _APP_VERSION = 'v0415k';
 // (v0415i) 운영기에서만 숨길 관리자 섹션 처리 — data-env-only="dev" 요소를 prod에서 숨김
 try{
   if(_ENV!=='dev'){
@@ -19272,6 +19292,12 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.4.27 (v0415k)',date:'2026-04-15',items:[
+    '[PERF ②] 스플래시/로딩 UX 이원화 — localStorage 백업 + 세션이 있으면 "데이터 불러오는 중..." 풀블로킹 오버레이 없이 홈 화면을 즉시 렌더. 최신 데이터는 백그라운드로 가져와 자연스럽게 갱신',
+    '네트워크 동기화 중에는 상단에 얇은 파란 진행바 표시 (fresh 데이터 도착 시 페이드아웃)',
+    '초대링크 진입/소셜로그인 처리 중에는 안전을 위해 기존 flow 유지 (캐시 부트 스킵)',
+    '로그인 버튼 즉시 피드백 — 클릭 시 "로그인 중..." 표시 + 중복클릭 차단 + requestAnimationFrame으로 화면 갱신 보장. 버튼이 반응 없어 보이던 체감 지연 해결'
+  ]},
   {ver:'2.4.26 (v0415j)',date:'2026-04-15',items:[
     '[PERF ①] Firestore 오프라인 IndexedDB 영속 캐시 활성화 — initializeFirestore + persistentLocalCache. 두 번째 이후 콜드스타트에서 "데이터 불러오는 중..." 화면 체감 수초 → 수백ms로 단축 기대',
     '캐시 초기화 실패(프라이빗 브라우징/저장소 부족)시 메모리 캐시로 자동 폴백'
@@ -24430,7 +24456,62 @@ window._createState = _createState;
   const days=['일','월','화','수','목','금','토'],now=new Date();
   document.getElementById('today-str').textContent=`${now.getMonth()+1}월 ${now.getDate()}일 (${days[now.getDay()]})`;
 
-  showLoading('데이터 불러오는 중...');
+  // ── PERF ② 캐시-퍼스트 즉시 렌더링 ──
+  // localStorage 백업 + 세션 정보가 있으면 풀블로킹 로딩 없이 홈 화면 즉시 표시
+  // 이후 네트워크에서 최신 데이터 도착 시 자연스럽게 갱신됨 (기존 flow + onSnapshot)
+  let _bootFromCache = false;
+  try{
+    const _cachedBackup = localStorage.getItem(_LS_PREFIX+'v6_backup');
+    const _cachedUser = localStorage.getItem(_LS_PREFIX+'current_user');
+    const _cachedFamily = localStorage.getItem(_LS_PREFIX+'family_id');
+    const _hasInviteParam = new URLSearchParams(window.location.search).get('invite');
+    const _hasSocialPending = localStorage.getItem(_LS_PREFIX+'social_pending');
+    // 초대링크 진입 / 소셜로그인 처리중에는 캐시부트 스킵 (정상 flow 필요)
+    if(_cachedBackup && _cachedUser && _cachedFamily && !_hasInviteParam && !_hasSocialPending){
+      const _parsed = JSON.parse(_cachedBackup);
+      if(_parsed && _parsed.users && _parsed.users[_cachedUser]){
+        S = Object.assign(defaultState(), _parsed);
+        currentUser = _cachedUser;
+        _familyId = _cachedFamily;
+        _bootFromCache = true;
+        console.log('[mile.ly][PERF②] Boot from cache — instant render (family:'+_cachedFamily+' user:'+_cachedUser+')');
+        try{ rebuildMembersFromFamily(); }catch(_){}
+        try{ loadDarkPref(); }catch(_){}
+        try{ applyUserProfile(); }catch(_){}
+        // 홈 탭 theme-color 미리 설정 (깜빡임 방지)
+        try{
+          document.body.setAttribute('data-tab','home');
+          const _bdark=document.body.classList.contains('dark');
+          document.documentElement.style.background=_bdark?(TAB_COLORS_DARK&&TAB_COLORS_DARK['home']||'#1E293B'):(TAB_COLORS&&TAB_COLORS['home']||'#5457D9');
+          const _btm=document.getElementById('theme-color-meta');
+          if(_btm){ _btm.content=_bdark?'#1E293B':(TAB_COLORS&&TAB_COLORS['home']||'#5457D9'); }
+        }catch(_){}
+        try{ hideAllAuth(); }catch(_){}
+        try{
+          const _homeScr = document.getElementById('s-home');
+          if(_homeScr && !document.querySelector('.scr.on')) _homeScr.classList.add('on');
+        }catch(_){}
+        try{ renderAll(); }catch(_){}
+        // 상단에 얇은 동기화 인디케이터 (네트워크 갱신 중임을 나타냄)
+        try{
+          if(!document.getElementById('perf2-sync-bar')){
+            const _syncStyle=document.createElement('style');
+            _syncStyle.id='perf2-sync-style';
+            _syncStyle.textContent='@keyframes perf2Sync{0%{background-position:200% 0}100%{background-position:-200% 0}}#perf2-sync-bar{position:fixed;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#60a5fa 30%,#60a5fa 70%,transparent);background-size:200% 100%;animation:perf2Sync 1.1s linear infinite;z-index:99999;pointer-events:none;opacity:.85}';
+            document.head.appendChild(_syncStyle);
+            const _sync=document.createElement('div');
+            _sync.id='perf2-sync-bar';
+            document.body.appendChild(_sync);
+          }
+        }catch(_){}
+      }
+    }
+  }catch(_cacheBootErr){
+    console.warn('[mile.ly][PERF②] Cache boot failed, falling back to normal flow:', _cacheBootErr);
+    _bootFromCache = false;
+  }
+
+  if(!_bootFromCache) showLoading('데이터 불러오는 중...');
 
   // Firebase 동적 로드 (실패해도 앱 UI는 동작)
   await _initFirebase();
@@ -24512,7 +24593,18 @@ window._createState = _createState;
     }
   }
 
-  hideLoading();
+  if(!_bootFromCache) hideLoading();
+  // PERF ② 동기화 인디케이터 제거 (fresh 데이터 도착 완료)
+  if(_bootFromCache){
+    try{
+      const _sb=document.getElementById('perf2-sync-bar');
+      if(_sb){
+        _sb.style.transition='opacity .3s ease';
+        _sb.style.opacity='0';
+        setTimeout(()=>{ try{ _sb.remove(); const _ss=document.getElementById('perf2-sync-style'); if(_ss) _ss.remove(); }catch(_){} }, 350);
+      }
+    }catch(_){}
+  }
 
   // ── 초대 링크가 있으면 먼저 처리 (checkAuth보다 선행) ──
   const _urlParams = new URLSearchParams(window.location.search);
