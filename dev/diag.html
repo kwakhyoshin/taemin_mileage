@@ -120,6 +120,14 @@ try {
 
   statusEl.textContent = '✅ 데이터 로드 완료';
 
+  // ★ 글로벌 노출 — JavaScript 콘솔에서 접근 가능
+  window._prodDoc = legacySnap.exists() ? legacySnap.data() : null;
+  window._devDoc = devLegacySnap.exists() ? devLegacySnap.data() : null;
+  window._familyDocs = familyDocs;
+  window._db = db;
+  window._doc = doc;
+  window._getDoc = getDoc;
+
   let html = '';
 
   // === 레거시 문서 분석 ===
@@ -253,6 +261,81 @@ try {
     html += '<h3>개발기 Registry</h3><pre>' + JSON.stringify(devRegistry.data(), null, 2).substring(0, 2000) + '</pre>';
   }
   html += '</div>';
+
+  // ★ 최근 활동 정합성 심층 분석
+  if(legacySnap.exists()) {
+    const d = legacySnap.data();
+    html += '<div class="card"><h2>🔬 최근 활동 심층 분석 (운영기)</h2>';
+
+    const sLog = d.log || [];
+    const mdTaemin = d.memberData && d.memberData.taemin;
+    const mdLog = mdTaemin ? (mdTaemin.log || []) : [];
+
+    // S.log vs memberData.taemin.log 비교
+    html += `<h3>S.log vs memberData.taemin.log</h3>`;
+    html += `<p>S.log: ${sLog.length}건 / memberData.taemin.log: ${mdLog.length}건</p>`;
+    html += `<p>동일 여부: ${JSON.stringify(sLog) === JSON.stringify(mdLog) ? '<span class="ok">✅ 동일</span>' : '<span class="warn">⚠️ 다름!</span>'}</p>`;
+
+    // 최근 7일 활동 일별 분포
+    const now = Date.now();
+    html += '<h3>최근 7일 활동 분포 (memberData.taemin.log 기준)</h3>';
+    html += '<table><tr><th>날짜</th><th>S.log</th><th>md.taemin.log</th><th>활동 목록</th></tr>';
+    for(let dayOffset = 0; dayOffset < 7; dayOffset++) {
+      const dayStart = new Date(now);
+      dayStart.setDate(dayStart.getDate() - dayOffset);
+      dayStart.setHours(0,0,0,0);
+      const dayEnd = new Date(dayStart);
+      dayEnd.setDate(dayEnd.getDate() + 1);
+      const ds = dayStart.getTime();
+      const de = dayEnd.getTime();
+
+      const sItems = sLog.filter(l => l.ts >= ds && l.ts < de);
+      const mdItems = mdLog.filter(l => l.ts >= ds && l.ts < de);
+      const dateStr = `${dayStart.getMonth()+1}/${dayStart.getDate()} (${['일','월','화','수','목','금','토'][dayStart.getDay()]})`;
+
+      const itemList = mdItems.map(l => `${l.emoji||''} ${l.name} +${l.pts}`).join(', ') || '-';
+      html += `<tr><td>${dateStr}</td><td>${sItems.length}</td><td>${mdItems.length}</td><td style="font-size:11px">${itemList}</td></tr>`;
+    }
+    html += '</table>';
+
+    // renderRecent 기준 (어제 0시) 계산
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate()-1);
+    cutoff.setHours(0,0,0,0);
+    const cutoffTs = cutoff.getTime();
+    const recentS = sLog.filter(l => l.ts >= cutoffTs);
+    const recentMd = mdLog.filter(l => l.ts >= cutoffTs);
+    html += `<h3>renderRecent() 기준 (${cutoff.toLocaleDateString('ko')} 이후)</h3>`;
+    html += `<p>S.log 기준: <b>${recentS.length}건</b> / md.taemin.log 기준: <b>${recentMd.length}건</b></p>`;
+    html += '<pre>';
+    recentMd.forEach(l => {
+      html += `${new Date(l.ts).toLocaleString('ko')} | ${l.emoji||''} ${l.name} | +${l.pts}\n`;
+    });
+    if(!recentMd.length) html += '(없음)\n';
+    html += '</pre>';
+
+    // 최근 20건 전체 (타임스탬프 포함)
+    html += '<h3>최신 20건 (memberData.taemin.log)</h3><pre>';
+    mdLog.slice(0, 20).forEach((l, i) => {
+      html += `#${i+1} | ${new Date(l.ts).toLocaleString('ko')} | ${l.emoji||''} ${l.name} | +${l.pts} | ts=${l.ts}\n`;
+    });
+    html += '</pre>';
+
+    // 모든 멤버 최근 활동 비교
+    if(d.memberData) {
+      html += '<h3>모든 멤버 최근 활동 (어제~오늘)</h3>';
+      html += '<table><tr><th>멤버</th><th>총 log</th><th>최근(어제~오늘)</th><th>pts</th><th>최신 활동</th></tr>';
+      for(const [mid, md] of Object.entries(d.memberData)) {
+        const mLog = md.log || [];
+        const mRecent = mLog.filter(l => l.ts >= cutoffTs);
+        const latest = mLog.length > 0 ? `${new Date(mLog[0].ts).toLocaleString('ko')} ${mLog[0].name}` : '-';
+        html += `<tr><td>${mid}</td><td>${mLog.length}</td><td>${mRecent.length}</td><td>${md.pts}</td><td style="font-size:11px">${latest}</td></tr>`;
+      }
+      html += '</table>';
+    }
+
+    html += '</div>';
+  }
 
   resultsEl.innerHTML = html;
 
