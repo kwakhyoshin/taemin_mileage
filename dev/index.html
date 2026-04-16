@@ -9472,7 +9472,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0417a';
+const _APP_VERSION = 'v0417b';
 // (v0415i) 운영기에서만 숨길 관리자 섹션 처리 — data-env-only="dev" 요소를 prod에서 숨김
 try{
   if(_ENV!=='dev'){
@@ -9550,10 +9550,13 @@ let _dataListenerUnsub = null; // onSnapshot 구독 해제 함수
 
 async function _initFirebase(){
   try {
-    const fbAppMod = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
-    const fbFsMod = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-    const fbAuthMod = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
-    const fbAppCheckMod = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check.js");
+    // [PERF ⑤] 4개 Firebase SDK 모듈을 병렬 import (직렬 대비 ~300-500ms 단축)
+    const [fbAppMod, fbFsMod, fbAuthMod, fbAppCheckMod] = await Promise.all([
+      import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"),
+      import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"),
+      import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"),
+      import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check.js")
+    ]);
     initializeApp = fbAppMod.initializeApp;
     ({getFirestore, doc, getDoc, setDoc, deleteDoc, onSnapshot, runTransaction, collection: _fsCollection, addDoc: _fsAddDoc} = fbFsMod);
     // (PERF ①) 오프라인 IndexedDB 캐시를 위한 추가 API 추출 (SDK 버전이 낮아 없을 경우 undefined)
@@ -19377,6 +19380,10 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.4.43 (v0417b)',date:'2026-04-17',items:[
+    '[PERF ⑤] Firebase SDK 4개 모듈 import 병렬화 (Promise.all) — 직렬 대비 ~300-500ms boot 단축',
+    '[PERF ⑥] 정상 경로(family_id 있음) getDoc 즉시 fire — fallback 체크 대기 없이 병렬 진행',
+  ]},
   {ver:'2.4.42 (v0417a)',date:'2026-04-17',items:[
     '[FIX] 사고7 재발 방지 — saveFamilyToFirestore()에서 레거시 문서에 _migratedTo 포인터 자동 설정',
     '[FIX] cold start auth registry fallback — localStorage.family_id 소실 시 Firebase UID로 가족 문서 자동 복구',
@@ -24724,14 +24731,24 @@ window._createState = _createState;
 
   // 다가족: 저장된 familyId가 있으면 해당 문서 로드
   if(_firebaseReady) updateDataDoc();
-  // 레거시 계정이 다른 기기에서 마이그레이션됐으면 포인터 따라가기
-  if(_firebaseReady && !_familyId) await _checkLegacyMigrationPointer();
-  // auth registry fallback: _migratedTo도 없고 family_id도 없을 때 인증된 사용자면 registry 확인
-  if(_firebaseReady && !_familyId) await _checkAuthRegistryOnBoot();
+
+  // [PERF ⑥] family_id가 있으면(정상 경로 99%) getDoc을 즉시 fire — fallback 체크 대기 없이 병렬 진행
+  // family_id가 없는 비정상 경로에서만 순차 fallback (legacy pointer → auth registry)
+  let _earlyDocPromise = null;
+  if(_firebaseReady && _familyId && DATA_DOC && DATA_DOC.path){
+    _earlyDocPromise = getDoc(DATA_DOC); // 네트워크 요청 즉시 시작
+    console.log('[mile.ly][PERF⑥] Early getDoc fired for', DATA_DOC.path);
+  } else if(_firebaseReady && !_familyId){
+    // 레거시 계정이 다른 기기에서 마이그레이션됐으면 포인터 따라가기
+    await _checkLegacyMigrationPointer();
+    // auth registry fallback: _migratedTo도 없고 family_id도 없을 때 인증된 사용자면 registry 확인
+    if(!_familyId) await _checkAuthRegistryOnBoot();
+  }
 
   try{
     // Load initial data from Firestore
-    const snap = _firebaseReady ? await getDoc(DATA_DOC) : {exists:()=>false};
+    const snap = _earlyDocPromise ? await _earlyDocPromise
+      : (_firebaseReady ? await getDoc(DATA_DOC) : {exists:()=>false});
     if(snap.exists()){
       const data = snap.data();
       S = Object.assign(defaultState(), data);
