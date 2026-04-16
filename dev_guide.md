@@ -3042,3 +3042,57 @@ window._currentUser_ref = function(){ return currentUser; };
 |------|-----|----------|
 | v0414a | #335 | Phase 1+2 디자인 토큰 표준화 |
 | v0414a | #336(운영) | 운영 반영 |
+
+### 2026-04-17 세션 — Firestore 서브컬렉션 분할 (PERF ⑤)
+
+#### 배경
+Firestore 문서 1MB 제한 대비. 현재 `families/{id}` 단일 문서에 모든 데이터(활동 로그, 메시지, 기분 기록, 보상 이력 등)가 배열로 저장되어 있어, 사용자가 늘어나면 문서 크기가 1MB를 초과할 위험. 독립 모드 4인 가족 기준 ~750KB~1MB 근접.
+
+#### 아키텍처
+1. **분할 대상 7개 배열**: `log`, `familyMessages`, `moodLog`, `rewardLog`, `badgeLog`, `stickers`, `challengeHistory`
+2. **서브컬렉션 경로**: `families/{familyId}/sub/{fieldName}` — 각 문서에 `{items: [...], updatedAt: timestamp}`
+3. **독립모드 memberData**: `families/{familyId}/memberSub/{memberId}` — 멤버별 전체 데이터 사본
+4. **마이그레이션 플래그**: `_subCollMigrated: true` (메인 문서 필드)
+
+#### 핵심 함수
+| 함수 | 역할 |
+|------|------|
+| `_getSubDoc(name)` | `families/{id}/sub/{name}` doc ref 반환 |
+| `_getMemberSubDoc(memberId)` | `families/{id}/memberSub/{memberId}` doc ref 반환 |
+| `_readSubCollections()` | 7개 서브컬렉션 병렬 읽기 |
+| `_readMemberSubCollections()` | memberSub 컬렉션 전체 읽기 (getDocs) |
+| `_saveSubCollections()` | 변경된 서브컬렉션만 선택적 저장 (JSON 비교) |
+| `_saveMemberSubCollections()` | 변경된 멤버 서브컬렉션만 선택적 저장 |
+| `_migrateToSubCollections()` | 일회성 자동 마이그레이션 (배열→서브컬렉션 복사 후 메인 doc에서 제거) |
+| `_buildMainDocForSave()` | 메인 문서 저장용 객체 생성 (7개 배열 + memberData 제외) |
+| `_setupSubColListeners()` | 서브컬렉션 onSnapshot 리스너 설정 |
+
+#### 동작 흐름
+1. **부트**: 메인 doc 읽기 → `_subCollMigrated` 확인 → true이면 서브컬렉션 병렬 읽기 → S에 병합
+2. **자동 마이그레이션**: `_subCollMigrated` 없고 `S.log.length > 0`이면 2초 후 자동 실행
+3. **저장**: `save()` → 메인 doc (배열 제외) setDoc + 변경된 서브컬렉션만 개별 setDoc
+4. **실시간 동기화**: 서브컬렉션별 onSnapshot 리스너로 다른 기기 변경 감지
+5. **에코 감지**: `_lastSavedJSON`은 메인 doc 포맷(배열 제외)으로 저장 → onSnapshot에서 비교
+
+#### 하위 호환성
+- `_subCollMigrated` 플래그 없으면 기존 동작 100% 유지
+- 마이그레이션 실패 시 기존 데이터 메인 doc에 그대로 보존
+- 기존 Firestore Security Rules의 와일드카드(`{document=**}`) 규칙으로 서브컬렉션 접근 허용됨
+
+#### echo detection 수정
+서브컬렉션 모드에서 `snap.data()`는 배열이 없는 메인 doc만 포함. `_lastSavedJSON`도 동일 포맷으로 저장해야 에코 감지가 작동:
+```javascript
+// save()에서
+const docToWrite = _subCollMigrated ? _buildMainDocForSave() : S;
+_lastSavedJSON = JSON.stringify(docToWrite);
+
+// _applyRemoteSnap에서
+if(_subCollMigrated){
+  if(_ij === JSON.stringify(_buildMainDocForSave())) return; // echo
+}
+```
+
+#### PR/커밋 이력
+| 버전 | PR | 주요 내용 |
+|------|-----|----------|
+| v0417d | TBD | 7개 배열 + memberData 서브컬렉션 분리, 자동 마이그레이션, echo detection 수정 |

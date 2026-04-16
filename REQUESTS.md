@@ -92,6 +92,7 @@
 | R-072 | 2026-04-17 | 사고7 재발 방지: _migratedTo 자동 설정 + cold start auth registry fallback + v0416k 잘못된 코드 제거 | v0417a | PR #396 운영반영 | saveFamilyToFirestore()에 _migratedTo 추가, _checkAuthRegistryOnBoot() 신규, _firstRemoteLoaded guard/dirty merge memberData 삭제 |
 | R-073 | 2026-04-17 | 앱 boot 속도개선: Firebase SDK 병렬 import + getDoc 즉시 fire | v0417b | PR #398 운영반영 | PERF ⑤ Promise.all로 4개 SDK 동시 로드, PERF ⑥ family_id 있으면 fallback 대기 없이 getDoc 즉시 시작 |
 | R-074 | 2026-04-17 | 레거시 데이터 표시 완전 차단: _migratedTo 있는 레거시 문서 절대 표시 안 함 | v0417c | — | boot/onSnapshot/save 3곳에 safety check 추가. 레거시 데이터 로드 시 family 문서로 자동 전환 |
+| R-075 | 2026-04-17 | Firestore 1MB 문서 분할: 서브컬렉션 이행 (PERF ⑤) — 100만 사용자 확장성 | v0417d | — | 7개 배열(log, familyMessages, moodLog, rewardLog, badgeLog, stickers, challengeHistory) → families/{id}/sub/{name}. memberData → families/{id}/memberSub/{memberId}. 자동 마이그레이션, save() 최적화, 서브컬렉션 리스너 |
 
 ## 미착수 백로그 (ROADMAP.md 기준)
 
