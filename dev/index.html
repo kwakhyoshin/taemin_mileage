@@ -2856,8 +2856,11 @@ button:disabled {
              hero-pts-glow   0.55s ease-out;
 }
 
-/* ── 세로모드 최종 보루 (PORTRAIT SAFETY — 항상 마지막 적용) ── */
-@media (max-width: 767px), (orientation: portrait) and (max-width: 1023px) {
+/* ── 세로모드 최종 보루 (PHONE SAFETY — 폰에서만 적용) ── */
+/* ★ v0416g: 768-1023px portrait은 L1868 PORTRAIT TABLET RESET에서 별도 처리.
+   기존 (orientation:portrait) and (max-width:1023px) 조건이 L1868 CSS를 덮어쓰는
+   cascade 문제를 해결하기 위해, 이 블록은 폰(max-width:767px)에만 적용. */
+@media (max-width: 767px) {
   /* 플로팅 상태: 중앙 정렬 */
   .nav-container{position:fixed!important;bottom:28px!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important;top:auto!important;width:auto!important;max-width:calc(100vw - 24px)!important;height:auto!important;}
   /* 도킹 상태: 전체 너비 하단 고정 */
@@ -9467,7 +9470,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0416f';
+const _APP_VERSION = 'v0416g';
 // (v0415i) 운영기에서만 숨길 관리자 섹션 처리 — data-env-only="dev" 요소를 prod에서 숨김
 try{
   if(_ENV!=='dev'){
@@ -19345,6 +19348,9 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.4.37 (v0416g)',date:'2026-04-16',items:[
+    '[UI] 적응형 UI 미적용 수정 — "세로모드 최종 보루" CSS가 태블릿 세로 설정을 덮어쓰던 cascade 버그 해결 (max-width:767px로 범위 축소)',
+  ]},
   {ver:'2.4.36 (v0416f)',date:'2026-04-16',items:[
     '[알림] 운영기 FCM 토큰 저장 실패 수정 — _familyId null인 레거시 사용자(users/taemin)에서 LEGACY_DOC 경로로 직접 저장',
     '[알림] _syncPushDeviceUser 레거시 경로 fallback 추가',
