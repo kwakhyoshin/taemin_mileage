@@ -1702,24 +1702,6 @@ body.dark .family-popup-avatar{border-color:rgba(255,255,255,.25)}
 .avatar-preview-sm img{width:100%;height:100%;object-fit:cover}
 
 /* ========================================
-   RESPONSIVE: PORTRAIT OVERRIDE
-   세로 모드(portrait)에서는 사이드바 숨기고 하단 네비로 복귀
-   ======================================== */
-@media(min-width:768px) and (orientation:portrait){
-  body{display:block!important;max-width:100%!important;margin:0!important}
-  .nav-container{position:fixed!important;bottom:0!important;top:auto!important;left:0!important;right:0!important;transform:none!important;width:100%!important;height:auto!important;z-index:100}
-  .nav-container.docked{bottom:0!important;width:100%!important}
-  .bottom-nav{flex-direction:row!important;align-items:center!important;gap:0!important;border-radius:var(--r) 20px 0 0!important;padding:8px 8px max(calc(8px + env(safe-area-inset-bottom, 0px)), calc(8px + var(--android-nav-inset, 0px)), calc(8px + var(--native-nav-bar-h, 0px)))!important;height:auto!important;background:var(--card)!important;border:none!important;border-top:.5px solid var(--bdr)!important;border-right:none!important;box-shadow:0 -4px 20px rgba(0,0,0,.06)!important;justify-content:center!important;width:100%!important}
-  .bottom-nav::before{display:none!important}
-  .nav-item{padding:8px 12px!important;border-radius:var(--rsm)!important;flex-direction:column!important;justify-content:center!important;gap:2px!important}
-  .nav-item .nav-label{font-size:var(--fs-xs)!important;font-weight:700!important;max-width:none!important;opacity:1!important;margin-left:0!important}
-  .scr{margin-left:0!important;width:100%!important;max-width:100%!important;padding-bottom:calc(80px + env(safe-area-inset-bottom))!important}
-  #s-badge,#s-privacy,#s-terms{margin-left:0!important;width:100%!important}
-  .nav-users{flex-direction:row!important;gap:0!important}
-  .nav-divider{width:1px!important;height:22px!important;margin:0 4px!important}
-}
-
-/* ========================================
    RESPONSIVE: TABLET (768px+)
    ======================================== */
 @media(min-width:768px){
@@ -1877,19 +1859,43 @@ body.dark .family-popup-avatar{border-color:rgba(255,255,255,.25)}
   /* 대시보드 masonry 2열 */
   #dash-p0 .dash-masonry{columns:2!important;column-gap:14px}
 }
-/* ── 768-1023px portrait: 사이드바 → 폰 스타일 하단 네비 복원 ── */
+/* ── 768-1023px portrait: 사이드바 완전 해제 → 폰과 100% 동일한 floating pill nav ── */
 @media(min-width:768px) and (max-width:1023px) and (orientation:portrait){
+  /* body: 사이드바 flex row 해제 */
   body{display:block!important;max-width:100%!important;margin:0!important}
+
+  /* nav-container floating (폰 기본 L348과 동일) */
   .nav-container{position:fixed!important;bottom:max(calc(28px + var(--android-nav-inset, 0px)), calc(28px + var(--native-nav-bar-h, 0px)))!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important;top:auto!important;width:auto!important;max-width:calc(100vw - 24px)!important;height:auto!important;background:transparent!important}
-  .nav-container.docked{bottom:0!important;left:0!important;right:0!important;transform:none!important;width:100%!important;max-width:100%!important;background:transparent!important}
-  .bottom-nav{flex-direction:row!important;height:auto!important;border-right:none!important;border-top:none!important;align-items:center!important}
+
+  /* nav-container docked (폰 기본 L362과 동일) */
+  .nav-container.docked{bottom:0!important;left:0!important;right:0!important;transform:none!important;width:100%!important;max-width:100%!important;display:flex!important;justify-content:center!important;background:transparent!important}
+
+  /* bottom-nav: glass pill (폰 기본 L349와 동일) */
+  .bottom-nav{flex-direction:row!important;align-items:center!important;gap:3px!important;background:color-mix(in srgb,var(--tab-color,var(--or)) 6%,rgba(255,255,255,.95))!important;backdrop-filter:blur(24px) saturate(180%)!important;-webkit-backdrop-filter:blur(24px) saturate(180%)!important;border:1px solid color-mix(in srgb,var(--tab-color,var(--or)) 12%,rgba(0,0,0,.04))!important;border-radius:var(--rxl)!important;padding:10px 10px!important;box-shadow:0 4px 20px color-mix(in srgb,var(--tab-color,var(--or)) 12%,rgba(0,0,0,.1)),0 12px 40px rgba(0,0,0,.08)!important;width:auto!important;height:auto!important;border-right:none!important;box-sizing:border-box!important;justify-content:initial!important}
+  body.dark .bottom-nav{background:color-mix(in srgb,var(--tab-color,var(--or)) 10%,rgba(20,30,50,.95))!important;border-color:color-mix(in srgb,var(--tab-color,var(--or)) 15%,rgba(255,255,255,.06))!important;box-shadow:0 4px 20px rgba(0,0,0,.3),0 12px 40px rgba(0,0,0,.2)!important}
+
+  /* bottom-nav docked (폰 기본 L363과 동일) */
+  .nav-container.docked .bottom-nav{border-radius:0!important;padding:8px 8px max(calc(8px + env(safe-area-inset-bottom, 0px)), calc(8px + var(--android-nav-inset, 0px)), calc(8px + var(--native-nav-bar-h, 0px)))!important;gap:2px!important;box-sizing:border-box!important;justify-content:center!important;width:100%!important;background:var(--tab-lt,var(--or-lt))!important;border-color:transparent!important;border:none!important;box-shadow:none!important}
+  body.dark .nav-container.docked .bottom-nav{background:linear-gradient(var(--tab-lt-dk,rgba(99,102,241,.15)),var(--tab-lt-dk,rgba(99,102,241,.15))),rgba(15,23,42,.95)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+
+  /* 사이드바 요소 숨김 */
   .bottom-nav::before{display:none!important}
   .nav-brand,.sidebar,.side-menu{display:none!important}
-  .nav-item{flex-direction:column!important;justify-content:center!important;gap:2px!important}
-  .nav-item .nav-label{opacity:1!important;max-width:none!important;font-size:var(--fs-xs)!important;margin-left:0!important}
+
+  /* nav-item: 폰 기본 스타일 (아이콘만, active만 라벨 표시) */
+  .nav-item{display:flex!important;align-items:center!important;justify-content:center!important;flex-direction:row!important;gap:5px!important;padding:12px 12px!important;border-radius:var(--r)!important;min-height:50px!important;flex-shrink:1!important}
+  .nav-item svg{width:26px!important;height:26px!important}
+  .nav-item .nav-label{font-size:var(--fs-base)!important;font-weight:700!important;max-width:0!important;overflow:hidden!important;white-space:nowrap!important;opacity:0!important;margin-left:0!important}
+  .nav-item:not(.active) .nav-label{max-width:0!important;opacity:0!important}
+  .nav-item.active{padding:12px 12px!important}
+  .nav-item.active .nav-label{max-width:40px!important;opacity:1!important;margin-left:2px!important}
+
+  /* 콘텐츠 영역: 사이드바 마진 제거 */
   .scr{margin-left:0!important;width:100%!important;max-width:100%!important;padding-bottom:110px!important}
   #s-badge,#s-privacy,#s-terms{margin-left:0!important;width:100%!important;max-width:100%!important}
   .auth-screen{margin-left:0!important;width:100%!important}
+
+  /* 사용자 아바타: 가로 배치 */
   .nav-users{flex-direction:row!important;gap:0!important}
   .nav-divider{width:1px!important;height:22px!important;margin:0 4px!important}
 }
@@ -9469,7 +9475,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0416h';
+const _APP_VERSION = 'v0416i';
 // (v0415i) 운영기에서만 숨길 관리자 섹션 처리 — data-env-only="dev" 요소를 prod에서 숨김
 try{
   if(_ENV!=='dev'){
@@ -19347,8 +19353,8 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
-  {ver:'2.4.38 (v0416h)',date:'2026-04-16',items:[
-    '[UI] 태블릿 세로 = 폴드 세로 통일 — 580-1023px portrait 하나의 블록으로 통합, 폰 스타일 네비 + 4열 카드',
+  {ver:'2.4.39 (v0416i)',date:'2026-04-16',items:[
+    '[UI] 태블릿 세로모드 nav를 스마트폰과 100% 동일하게 수정 — floating glass pill, 스크롤 시 dock, mile.ly 로고 숨김, 아이콘만 표시',
   ]},
   {ver:'2.4.37 (v0416g)',date:'2026-04-16',items:[
     '[UI] 적응형 UI 미적용 수정 — "세로모드 최종 보루" CSS가 태블릿 세로 설정을 덮어쓰던 cascade 버그 해결 (max-width:767px로 범위 축소)',
