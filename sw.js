@@ -34,7 +34,7 @@ self.addEventListener('fetch', (e) => {
   if (e.request.mode === 'navigate' || e.request.destination === 'document' ||
       url.pathname.endsWith('.html') || url.pathname.endsWith('/')) {
     e.respondWith(
-      fetch(e.request)
+      fetch(e.request, { cache: 'no-cache' })
         .then(response => {
           // Cache the fresh response for offline fallback
           const clone = response.clone();
