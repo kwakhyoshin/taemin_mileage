@@ -1862,30 +1862,13 @@ body.dark .family-popup-avatar{border-color:rgba(255,255,255,.25)}
 }
 
 /* ========================================
-   PORTRAIT TABLET RESET (768-1023px portrait)
-   세로모드에서 사이드바 레이아웃 제거 → 솔리드 하단 바 (바닥 밀착)
+   WIDE PORTRAIT (580-1023px portrait)
+   갤럭시 폴드 펼친 세로 + 태블릿 세로 공통
+   — 카드 레이아웃만 태블릿(4열)으로 변경
+   — 네비게이션은 폰 스타일 그대로 유지
    ======================================== */
-@media(min-width:768px) and (max-width:1023px) and (orientation:portrait){
-  body{display:block!important;max-width:100%!important;margin:0!important}
-  .nav-container{position:fixed!important;bottom:0!important;left:0!important;right:0!important;transform:none!important;width:100%!important;height:auto!important;max-width:100%!important;background:var(--card)!important}
-  .nav-container.docked{bottom:0!important;left:0!important;right:0!important;width:100%!important;max-width:100%!important;transform:none!important;background:var(--card)!important}
-  .bottom-nav{flex-direction:row!important;align-items:center!important;border-right:none!important;border-radius:0!important;height:auto!important;padding:8px 8px max(calc(8px + env(safe-area-inset-bottom, 0px)), calc(8px + var(--android-nav-inset, 0px)), calc(8px + var(--native-nav-bar-h, 0px)))!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:var(--card)!important;box-shadow:0 -4px 20px rgba(0,0,0,.06)!important;border-top:.5px solid var(--bdr)!important;justify-content:center!important}
-  .nav-container.docked .bottom-nav{border-radius:0!important;padding:8px 8px max(calc(8px + env(safe-area-inset-bottom, 0px)), calc(8px + var(--android-nav-inset, 0px)), calc(8px + var(--native-nav-bar-h, 0px)))!important;background:var(--card)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;justify-content:center!important;border-right:none!important;box-shadow:0 -4px 20px rgba(0,0,0,.06)!important;border-top:.5px solid var(--bdr)!important}
-  .bottom-nav::before{display:none!important}
-  .nav-brand{border-bottom:none!important;margin-bottom:0!important;padding-bottom:12px!important}
-  .nav-item{padding:10px 14px!important;justify-content:center!important;flex-direction:column!important;gap:3px!important}
-  .nav-item .nav-label{opacity:1!important;max-width:none!important;font-size:var(--fs-sm)!important;margin-left:0!important}
-  .scr{margin-left:0!important;width:100%!important;max-width:100%!important;margin-right:auto!important;padding-bottom:calc(80px + env(safe-area-inset-bottom))!important}
-  #s-badge,#s-privacy,#s-terms{margin-left:0!important;width:100%!important;max-width:100%!important}
-  .auth-screen{margin-left:0!important;width:100%!important}
-}
-
-/* ========================================
-   FOLD UNFOLDED PORTRAIT (580-767px portrait)
-   갤럭시 폴드 펼친 세로: 태블릿 카드 레이아웃 + 하단 바 네비게이션
-   ======================================== */
-@media(min-width:580px) and (max-width:767px) and (orientation:portrait){
-  /* 4-column grids — 태블릿과 동일한 카드 배치 */
+@media(min-width:580px) and (max-width:1023px) and (orientation:portrait){
+  /* 4-column grids */
   .act-grid{grid-template-columns:repeat(4,1fr)!important;gap:12px;margin:0 16px 16px}
   .rwd-grid{grid-template-columns:repeat(4,1fr)!important;gap:12px;margin:0 16px 16px}
   /* 통계 카드 2열 */
@@ -1893,6 +1876,22 @@ body.dark .family-popup-avatar{border-color:rgba(255,255,255,.25)}
   .stat-c{flex:none!important;width:auto!important}
   /* 대시보드 masonry 2열 */
   #dash-p0 .dash-masonry{columns:2!important;column-gap:14px}
+}
+/* ── 768-1023px portrait: 사이드바 → 폰 스타일 하단 네비 복원 ── */
+@media(min-width:768px) and (max-width:1023px) and (orientation:portrait){
+  body{display:block!important;max-width:100%!important;margin:0!important}
+  .nav-container{position:fixed!important;bottom:max(calc(28px + var(--android-nav-inset, 0px)), calc(28px + var(--native-nav-bar-h, 0px)))!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important;top:auto!important;width:auto!important;max-width:calc(100vw - 24px)!important;height:auto!important;background:transparent!important}
+  .nav-container.docked{bottom:0!important;left:0!important;right:0!important;transform:none!important;width:100%!important;max-width:100%!important;background:transparent!important}
+  .bottom-nav{flex-direction:row!important;height:auto!important;border-right:none!important;border-top:none!important;align-items:center!important}
+  .bottom-nav::before{display:none!important}
+  .nav-brand,.sidebar,.side-menu{display:none!important}
+  .nav-item{flex-direction:column!important;justify-content:center!important;gap:2px!important}
+  .nav-item .nav-label{opacity:1!important;max-width:none!important;font-size:var(--fs-xs)!important;margin-left:0!important}
+  .scr{margin-left:0!important;width:100%!important;max-width:100%!important;padding-bottom:110px!important}
+  #s-badge,#s-privacy,#s-terms{margin-left:0!important;width:100%!important;max-width:100%!important}
+  .auth-screen{margin-left:0!important;width:100%!important}
+  .nav-users{flex-direction:row!important;gap:0!important}
+  .nav-divider{width:1px!important;height:22px!important;margin:0 4px!important}
 }
 
 /* ========================================
@@ -9470,7 +9469,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0416g';
+const _APP_VERSION = 'v0416h';
 // (v0415i) 운영기에서만 숨길 관리자 섹션 처리 — data-env-only="dev" 요소를 prod에서 숨김
 try{
   if(_ENV!=='dev'){
@@ -19348,6 +19347,9 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.4.38 (v0416h)',date:'2026-04-16',items:[
+    '[UI] 태블릿 세로 = 폴드 세로 통일 — 580-1023px portrait 하나의 블록으로 통합, 폰 스타일 네비 + 4열 카드',
+  ]},
   {ver:'2.4.37 (v0416g)',date:'2026-04-16',items:[
     '[UI] 적응형 UI 미적용 수정 — "세로모드 최종 보루" CSS가 태블릿 세로 설정을 덮어쓰던 cascade 버그 해결 (max-width:767px로 범위 축소)',
   ]},
