@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>mile.ly 데이터 진단</title>
+<style>
+body{font-family:system-ui,-apple-system,sans-serif;max-width:700px;margin:20px auto;padding:0 16px;background:#f8fafc;color:#1e293b}
+h1{font-size:20px;color:#5B4FC4}
+.card{background:#fff;border-radius:12px;padding:16px;margin:12px 0;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.card h2{font-size:16px;margin:0 0 12px;color:#334155}
+.val{font-size:28px;font-weight:900;color:#5B4FC4}
+.warn{color:#ef4444;font-weight:700}
+.ok{color:#22c55e;font-weight:700}
+pre{background:#1e293b;color:#e2e8f0;padding:12px;border-radius:8px;overflow-x:auto;font-size:12px;line-height:1.5}
+.loading{text-align:center;padding:40px;color:#94a3b8}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:6px 8px;border-bottom:1px solid #e2e8f0;text-align:left}
+th{background:#f1f5f9;font-weight:600}
+.diff{background:#fef2f2;color:#dc2626;font-weight:700}
+</style>
+</head>
+<body>
+<h1>🔍 mile.ly Firestore 데이터 진단</h1>
+<div id="status" class="loading">Firebase 초기화 중...</div>
+<div id="results"></div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, doc, getDoc, collection, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { initializeAppCheck, ReCaptchaEnterpriseProvider } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDTS81EBGgiuo564ThxvTTOpR_iAHLb8tg",
+  authDomain: "taemin-mileage.firebaseapp.com",
+  projectId: "taemin-mileage",
+  storageBucket: "taemin-mileage.firebasestorage.app",
+  messagingSenderId: "1002709736057",
+  appId: "1:1002709736057:web:5e4df58febe004c765d2a8"
+};
+
+const app = initializeApp(firebaseConfig);
+
+// App Check 초기화
+try {
+  initializeAppCheck(app, {
+    provider: new ReCaptchaEnterpriseProvider('6LebG6EsAAAAAHDVc21krou2ConwJdB_m9nsAP3R'),
+    isTokenAutoRefreshEnabled: true
+  });
+} catch(e) { console.warn('App Check failed:', e); }
+
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+const statusEl = document.getElementById('status');
+const resultsEl = document.getElementById('results');
+
+try {
+  statusEl.textContent = 'Firebase 인증 중...';
+  await signInAnonymously(auth);
+  statusEl.textContent = 'Firestore 데이터 읽는 중...';
+
+  // 1. 운영기 레거시 문서 (users/taemin)
+  const legacySnap = await getDoc(doc(db, 'users', 'taemin'));
+
+  // 2. 개발기 레거시 문서 (users/taemin_dev)
+  const devLegacySnap = await getDoc(doc(db, 'users', 'taemin_dev'));
+
+  // 3. families 컬렉션에서 관련 문서 찾기 — registry 확인
+  const prodRegistry = await getDoc(doc(db, 'families', '_id_registry'));
+  const devRegistry = await getDoc(doc(db, 'families', '_dev_id_registry'));
+
+  // 4. 레거시 문서의 _migratedTo 확인
+  let migratedTo = null;
+  if(legacySnap.exists()) {
+    const ld = legacySnap.data();
+    if(ld._migratedTo) migratedTo = ld._migratedTo;
+  }
+  let devMigratedTo = null;
+  if(devLegacySnap.exists()) {
+    const dd = devLegacySnap.data();
+    if(dd._migratedTo) devMigratedTo = dd._migratedTo;
+  }
+
+  // 5. families 문서 읽기
+  let familyDocs = {};
+  // 레거시 마이그레이션 포인터 따라가기
+  for(const mt of [migratedTo, devMigratedTo]) {
+    if(mt) {
+      try {
+        const fSnap = await getDoc(doc(db, 'families', mt));
+        if(fSnap.exists()) familyDocs[mt] = fSnap.data();
+      } catch(e) { console.warn('family doc read error:', mt, e); }
+    }
+  }
+  // registry에서 familyId 찾기
+  if(prodRegistry.exists()) {
+    const rd = prodRegistry.data();
+    for(const [loginId, info] of Object.entries(rd)) {
+      if(info && info.familyId && !familyDocs[info.familyId]) {
+        try {
+          const fSnap = await getDoc(doc(db, 'families', info.familyId));
+          if(fSnap.exists()) familyDocs[info.familyId] = fSnap.data();
+        } catch(e) {}
+      }
+    }
+  }
+  if(devRegistry.exists()) {
+    const rd = devRegistry.data();
+    for(const [loginId, info] of Object.entries(rd)) {
+      if(info && info.familyId && !familyDocs[info.familyId]) {
+        try {
+          const fSnap = await getDoc(doc(db, 'families', info.familyId));
+          if(fSnap.exists()) familyDocs[info.familyId] = fSnap.data();
+        } catch(e) {}
+      }
+    }
+  }
+
+  statusEl.textContent = '✅ 데이터 로드 완료';
+
+  let html = '';
+
+  // === 레거시 문서 분석 ===
+  function analyzeDoc(label, data, docPath) {
+    if(!data) return `<div class="card"><h2>${label} (${docPath})</h2><p>문서 없음</p></div>`;
+
+    let h = `<div class="card"><h2>${label} (${docPath})</h2>`;
+
+    if(data._migratedTo) {
+      h += `<p>⏩ 마이그레이션됨 → <b>${data._migratedTo}</b></p>`;
+    }
+
+    // 글로벌 pts
+    h += `<p>글로벌 S.pts = <span class="val">${data.pts ?? 'N/A'}</span></p>`;
+    h += `<p>S.streak = ${data.streak ?? 'N/A'}, S.totalDone = ${data.totalDone ?? 'N/A'}, S.lastDate = ${data.lastDate ?? 'N/A'}</p>`;
+
+    // 활동 로그 수
+    if(data.log) {
+      h += `<p>S.log 길이 = ${data.log.length}건`;
+      if(data.log.length > 0) {
+        const logPtsSum = data.log.reduce((s,l) => s + (l.pts||0), 0);
+        h += ` (합계: ${logPtsSum} 마일리지)`;
+        h += `<br>최근: ${data.log.slice(0,3).map(l => `${l.name} +${l.pts} (${new Date(l.ts).toLocaleString('ko')})`).join('<br>')}`;
+      }
+      h += '</p>';
+    }
+
+    // memberData 분석
+    if(data.memberData) {
+      h += '<h3>📊 memberData (자녀별 데이터)</h3>';
+      h += '<table><tr><th>멤버ID</th><th>pts</th><th>streak</th><th>totalDone</th><th>lastDate</th><th>log수</th><th>log합계</th></tr>';
+      for(const [mid, md] of Object.entries(data.memberData)) {
+        const logSum = (md.log||[]).reduce((s,l) => s + (l.pts||0), 0);
+        const ptsMatch = md.pts === logSum;
+        h += `<tr${!ptsMatch?' class="diff"':''}>`;
+        h += `<td>${mid}</td>`;
+        h += `<td><b>${md.pts ?? 'N/A'}</b></td>`;
+        h += `<td>${md.streak ?? 0}</td>`;
+        h += `<td>${md.totalDone ?? 0}</td>`;
+        h += `<td>${md.lastDate ?? '-'}</td>`;
+        h += `<td>${(md.log||[]).length}</td>`;
+        h += `<td>${logSum}${!ptsMatch?' <span class="warn">⚠️ pts≠log합계!</span>':' ✅'}</td>`;
+        h += '</tr>';
+      }
+      h += '</table>';
+
+      // pts vs log 합계 불일치 상세
+      for(const [mid, md] of Object.entries(data.memberData)) {
+        if(!md.log) continue;
+        const logSum = md.log.reduce((s,l) => s + (l.pts||0), 0);
+        // 보상 교환으로 차감된 마일리지 계산
+        const rewardDeductions = (md.rewardLog||[]).reduce((s,r) => {
+          if(r.type === 'exchange') return s + (r.pts||0);
+          if(r.type === 'refund') return s - (r.pts||0);
+          return s;
+        }, 0);
+        const expectedPts = logSum - rewardDeductions;
+        h += `<div class="card" style="margin-left:16px">`;
+        h += `<h3>${mid} 상세</h3>`;
+        h += `<p>log 합계: <b>${logSum}</b></p>`;
+        h += `<p>보상 교환 차감: <b>-${rewardDeductions}</b></p>`;
+        h += `<p>예상 pts (log합계 - 교환차감): <b>${expectedPts}</b></p>`;
+        h += `<p>실제 pts: <span class="${md.pts === expectedPts?'ok':'warn'}">${md.pts}</span></p>`;
+        if(md.pts !== expectedPts) {
+          h += `<p class="warn">⚠️ 차이: ${md.pts - expectedPts} (실제가 ${md.pts > expectedPts?'더 많음':'더 적음'})</p>`;
+        }
+        // 최근 로그
+        if(md.log.length > 0) {
+          h += `<p><b>최근 활동 로그 (최신 10건):</b></p><pre>`;
+          md.log.slice(0,10).forEach(l => {
+            h += `${new Date(l.ts).toLocaleString('ko')} | ${l.emoji||''} ${l.name} | +${l.pts} | user:${l.user||'-'}\n`;
+          });
+          h += '</pre>';
+        }
+        if((md.rewardLog||[]).length > 0) {
+          h += `<p><b>보상 로그:</b></p><pre>`;
+          md.rewardLog.slice(0,10).forEach(r => {
+            h += `${new Date(r.ts).toLocaleString('ko')} | ${r.emoji||''} ${r.name} | ${r.type} ${r.pts} | rwdId:${r.rwdId||'-'}\n`;
+          });
+          h += '</pre>';
+        }
+        h += '</div>';
+      }
+    }
+
+    // users 목록
+    if(data.users) {
+      h += '<h3>👥 users</h3><table><tr><th>ID</th><th>이름</th><th>역할</th></tr>';
+      for(const [uid, u] of Object.entries(data.users)) {
+        h += `<tr><td>${uid}</td><td>${u.name||'-'}</td><td>${u.role||'-'}</td></tr>`;
+      }
+      h += '</table>';
+    }
+
+    // familyMeta
+    if(data.familyMeta) {
+      h += `<h3>🏠 familyMeta</h3>`;
+      h += `<p>familyName: ${data.familyMeta.familyName || '-'}, mode: ${data.familyMeta.mode || '-'}</p>`;
+      if(data.familyMeta.members) {
+        h += '<table><tr><th>멤버ID</th><th>이름</th><th>역할</th><th>childType</th></tr>';
+        for(const [mid, m] of Object.entries(data.familyMeta.members)) {
+          h += `<tr><td>${mid}</td><td>${m.name||'-'}</td><td>${m.role||'-'}</td><td>${m.childType||'-'}</td></tr>`;
+        }
+        h += '</table>';
+      }
+    }
+
+    h += '</div>';
+    return h;
+  }
+
+  // 레거시 문서
+  if(legacySnap.exists()) {
+    html += analyzeDoc('🔵 운영기 레거시', legacySnap.data(), 'users/taemin');
+  }
+  if(devLegacySnap.exists()) {
+    html += analyzeDoc('🟡 개발기 레거시', devLegacySnap.data(), 'users/taemin_dev');
+  }
+
+  // families 문서
+  for(const [fid, fdata] of Object.entries(familyDocs)) {
+    html += analyzeDoc(`🟢 families/${fid}`, fdata, `families/${fid}`);
+  }
+
+  // Registry 정보
+  html += '<div class="card"><h2>📋 ID Registry</h2>';
+  if(prodRegistry.exists()) {
+    html += '<h3>운영기 Registry</h3><pre>' + JSON.stringify(prodRegistry.data(), null, 2).substring(0, 2000) + '</pre>';
+  }
+  if(devRegistry.exists()) {
+    html += '<h3>개발기 Registry</h3><pre>' + JSON.stringify(devRegistry.data(), null, 2).substring(0, 2000) + '</pre>';
+  }
+  html += '</div>';
+
+  resultsEl.innerHTML = html;
+
+} catch(e) {
+  statusEl.innerHTML = `<span class="warn">❌ 오류: ${e.message}</span><pre>${e.stack}</pre>`;
+  console.error(e);
+}
+</script>
+</body>
+</html>
