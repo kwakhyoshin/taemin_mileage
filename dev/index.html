@@ -9467,7 +9467,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0416e';
+const _APP_VERSION = 'v0416f';
 // (v0415i) 운영기에서만 숨길 관리자 섹션 처리 — data-env-only="dev" 요소를 prod에서 숨김
 try{
   if(_ENV!=='dev'){
@@ -19345,6 +19345,10 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.4.36 (v0416f)',date:'2026-04-16',items:[
+    '[알림] 운영기 FCM 토큰 저장 실패 수정 — _familyId null인 레거시 사용자(users/taemin)에서 LEGACY_DOC 경로로 직접 저장',
+    '[알림] _syncPushDeviceUser 레거시 경로 fallback 추가',
+  ]},
   {ver:'2.4.35 (v0416e)',date:'2026-04-16',items:[
     '[UI] 태블릿 세로 하단 네비 바닥 밀착 수정 — nav-container 배경색 추가로 safe-area 검정 간격 제거',
     '[UI] 태블릿 세로 로고 밑줄만 제거 (로고 유지) — border-bottom:none, margin-bottom:0',
@@ -23197,11 +23201,17 @@ function _syncPushDeviceUser(){
   S.pushDevices[deviceId].user = currentUser;
   S.pushDevices[deviceId].updatedAt = _now;
   // ✅ v0415f: families 문서에 직접 merge (Cloud Function이 읽는 위치)
+  // ★ v0416f: _familyId null이면 LEGACY_DOC에 저장 (레거시 사용자 대응)
+  var _syncRef=null;
   if(_familyId && _firebaseReady && db){
+    _syncRef=doc(db,'families',_familyId);
+  }else if(!_familyId && typeof LEGACY_DOC!=='undefined' && LEGACY_DOC && LEGACY_DOC.path && _firebaseReady && db){
+    _syncRef=LEGACY_DOC;
+  }
+  if(_syncRef){
     try{
-      const _famRef=doc(db,'families',_familyId);
-      setDoc(_famRef,{pushDevices:{[deviceId]:{...S.pushDevices[deviceId]}}},{merge:true})
-        .catch(e=>console.warn('[_syncPushDeviceUser] families write failed:',e));
+      setDoc(_syncRef,{pushDevices:{[deviceId]:{...S.pushDevices[deviceId]}}},{merge:true})
+        .catch(e=>console.warn('[_syncPushDeviceUser] pushDevices write failed:',e));
     }catch(_e){ console.warn('[_syncPushDeviceUser]',_e); }
   }
 }
@@ -23422,9 +23432,11 @@ window._milelyOnFCMToken=function(token){
     return;
   }
   // 앱이 아직 준비 안 됐으면 pending으로 저장
-  if(!currentUser || !_firebaseReady || !_familyId || typeof save!=='function'){
+  // ★ _familyId가 null이어도 LEGACY_DOC(users/taemin)가 있으면 레거시 경로로 저장 가능
+  var _hasDocTarget = !!_familyId || (typeof LEGACY_DOC!=='undefined' && LEGACY_DOC && LEGACY_DOC.path);
+  if(!currentUser || !_firebaseReady || !_hasDocTarget || typeof save!=='function'){
     window._pendingFcmToken=token;
-    console.log('[Push/Native] FCM token received before ready — pending stored');
+    console.log('[Push/Native] FCM token received before ready — pending stored (familyId=',_familyId,', legacyDoc=',!!(LEGACY_DOC&&LEGACY_DOC.path),')');
     return;
   }
   try{
@@ -23448,17 +23460,27 @@ window._milelyOnFCMToken=function(token){
     console.log('[Push/Native] FCM token saved locally, deviceId:', deviceId, _isNewOrChanged?'(new/changed)':'(unchanged)');
     window._pendingFcmToken=null;
     // Firestore 저장 — fire-and-forget (UI와 분리)
+    // ★ _familyId 있으면 families/{familyId}, 없으면 LEGACY_DOC(users/taemin)에 저장
+    var _targetRef=null;
+    var _targetPath='';
     if(_familyId && _firebaseReady && db){
+      _targetRef=doc(db,'families',_familyId);
+      _targetPath='families/'+_familyId;
+    }else if(!_familyId && typeof LEGACY_DOC!=='undefined' && LEGACY_DOC && LEGACY_DOC.path && _firebaseReady && db){
+      _targetRef=LEGACY_DOC;
+      _targetPath=LEGACY_DOC.path;
+      console.log('[Push/Native] _familyId null → 레거시 경로('+_targetPath+')에 FCM 토큰 저장');
+    }
+    if(_targetRef){
       try{
-        const _famRef=doc(db,'families',_familyId);
         // 타임아웃 8초: setDoc이 hang해도 무기한 대기하지 않음
         Promise.race([
-          setDoc(_famRef,{pushDevices:{[deviceId]:_dev}},{merge:true}),
+          setDoc(_targetRef,{pushDevices:{[deviceId]:_dev}},{merge:true}),
           new Promise(function(_,rej){setTimeout(function(){rej(new Error('setDoc timeout 8s'));},8000);})
         ]).then(function(){
-          console.log('[Push/Native] FCM token saved to families/'+_familyId+'.pushDevices.'+deviceId);
+          console.log('[Push/Native] FCM token saved to '+_targetPath+'.pushDevices.'+deviceId);
         }).catch(function(_werr){
-          console.error('[Push/Native] families pushDevices write failed:', _werr);
+          console.error('[Push/Native] pushDevices write failed:', _werr);
         });
       }catch(_syncErr){ console.error('[Push/Native] Firestore ref error:', _syncErr); }
     }
