@@ -183,11 +183,6 @@ body.dark .role-card:hover{background:#263348;border-color:var(--or)}
 body.dark .role-card.selected{background:rgba(99,102,241,.18);border-color:var(--rc,var(--or-bright))}
 body.dark .role-card-check{color:var(--rc,var(--or-bright))}
 body.dark .role-name{color:#F1F5F9}
-body.dark .mode-card{background:#1E293B;border-color:#334155}
-body.dark .mode-card:hover{border-color:var(--or)}
-body.dark .mode-card.selected{background:rgba(99,102,241,.15);border-color:var(--or-bright)}
-body.dark .mode-card-title{color:#F1F5F9}
-body.dark .mode-card-desc{color:var(--tx3)}
 body.dark .member-card{background:#1E293B;border-color:#334155}
 body.dark .member-card:hover{background:#263348}
 body.dark .member-card.selected{border-color:var(--or-bright);background:rgba(99,102,241,.15)}
@@ -217,11 +212,7 @@ body.dark .toss-role-grid .role-card.selected{background:rgba(99,102,241,.18);bo
 body.dark .toss-role-grid .role-name{color:#F1F5F9}
 body.dark .toss-add-btn-caregiver{background:rgba(99,102,241,.15);border-color:#4338CA;color:var(--or-bright)}
 body.dark .toss-add-btn-child{background:rgba(217,119,6,.15);border-color:#92400E;color:var(--yw-bright)}
-body.dark .toss-mode-card{background:#1E293B;border-color:#334155}
-body.dark .toss-mode-card.selected{background:rgba(99,102,241,.15);border-color:var(--or-bright)}
-body.dark .toss-mode-card:hover{border-color:var(--or)}
-body.dark .toss-mode-title{color:#F1F5F9}
-body.dark .toss-mode-desc{color:var(--tx3)}
+/* body.dark .toss-mode 제거됨 */
 body.dark .toss-member-section{background:#1E293B}
 body.dark .toss-invite-card{background:#1E293B}
 body.dark .toss-invite-name{color:#F1F5F9}
@@ -1365,14 +1356,7 @@ body.dark .social-email{background:#334155!important;color:#E2E8F0!important;bor
 .child-card-row .auth-input,.child-card-row .auth-select{margin-bottom:0;flex:1;padding:10px 12px;font-size:var(--fs-base)}
 .child-card-row .auth-select{font-size:var(--fs-base)}
 
-/* MODE SELECT */
-.mode-grid{display:flex;flex-direction:column;gap:12px;margin:16px 0}
-.mode-card{background:var(--card2);border:2px solid #E2E8F0;border-radius:var(--rmd);padding:18px 16px;cursor:pointer;transition:all .2s;text-align:left}
-.mode-card:hover{border-color:var(--or-md)}
-.mode-card.selected{border-color:var(--or);background:var(--or-lt)}
-.mode-card-title{font-size:var(--fs-md);font-weight:800;color:#1E293B;margin-bottom:4px;display:flex;align-items:center;gap:8px}
-.mode-card-desc{font-size:var(--fs-base);color:var(--tx2);line-height:1.5}
-.mode-card-illust{display:flex;justify-content:center;gap:6px;margin-top:10px;padding:10px;background:rgba(99,102,241,.05);border-radius:var(--rsm)}
+/* MODE SELECT — 제거됨 (항상 독립모드) */
 
 /* MEMBER SELECT */
 .member-grid{display:flex;flex-direction:column;gap:10px;margin:20px 0}
@@ -1457,12 +1441,7 @@ body.dark .reg-substep.done{background:var(--or-dk)}
 .toss-add-btn-caregiver{background:var(--or-lt);border-color:var(--or-md);color:var(--or)}
 .toss-add-btn-child{background:var(--yw-lt);border-color:#FCD34D;color:var(--yw-dk)}
 .toss-add-btn-icon{font-size:var(--fs-3xl)}
-.toss-mode-grid{display:flex;flex-direction:column;gap:12px;margin:4px 0}
-.toss-mode-card{background:var(--card2);border:2px solid #E2E8F0;border-radius:var(--rmd);padding:20px 18px;cursor:pointer;transition:all .2s}
-.toss-mode-card.selected{border-color:var(--or);background:var(--or-lt)}
-.toss-mode-card:hover{border-color:var(--or-md)}
-.toss-mode-title{font-size:var(--fs-lg);font-weight:800;color:#1E293B;margin-bottom:6px;display:flex;align-items:center;gap:8px}
-.toss-mode-desc{font-size:var(--fs-base);color:var(--tx2);line-height:1.5}
+/* toss-mode CSS 제거됨 (모드 선택 UI 삭제) */
 .toss-family-badge{padding:10px 16px;background:linear-gradient(135deg,var(--or-lt),#E0E7FF);border-radius:var(--rsm);font-size:var(--fs-md);font-weight:700;color:var(--or);margin-bottom:16px;text-align:center}
 
 /* PROFILE ICON IN NAV */
@@ -3006,7 +2985,7 @@ requestAnimationFrame(function(){
     });
   }
 
-  var AUTH_IDS=['auth-login','auth-welcome','auth-onboarding','auth-continue','auth-email-verify','auth-social-link','auth-insight','auth-create-1','auth-create-2','auth-create-3','auth-create-4','auth-create-5','auth-create-done','auth-join-select','auth-join-register'];
+  var AUTH_IDS=['auth-login','auth-welcome','auth-onboarding','auth-continue','auth-email-verify','auth-social-link','auth-insight','auth-create-1','auth-create-2','auth-create-3','auth-create-5','auth-create-done','auth-join-select','auth-join-register'];
 
   window._showAuth=function(screen){
     AUTH_IDS.forEach(function(id){
@@ -3546,39 +3525,7 @@ requestAnimationFrame(function(){
 </div>
 
 <!-- AUTH: 가족 만들기 — 스텝 4: 관리 모드 선택 -->
-<div class="auth-screen hidden toss-style" id="auth-create-4">
-  <div class="toss-wizard">
-    <div class="reg-stepper-bar" id="reg-stepper-4">
-      <button class="reg-stepper-back" onclick="renderRegStepper(2,1,4);showAuthScreen('create-3')">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
-      </button>
-      <div class="reg-stepper" id="regStepperGroups4"></div>
-      <div class="reg-substeps" id="regStepperSubs4"></div>
-    </div>
-    <div class="toss-slides-wrap">
-      <div class="toss-slide active">
-        <div class="toss-slide-content">
-
-          <div class="toss-question">마일리지를 어떻게<br>관리할까요?</div>
-          <div class="toss-desc">자녀가 여러 명일 때 관리 방식을 선택해요</div>
-          <div class="toss-mode-grid" id="create-mode-grid">
-            <div class="toss-mode-card selected" onclick="selectMode('independent')" id="mode-independent">
-              <div class="toss-mode-title">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="2.5" stroke-linecap="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
-                독립 관리
-              </div>
-              <div class="toss-mode-desc">자녀별로 활동과 보상을 따로 관리해요. 각 자녀에게 맞는 목표를 설정할 수 있어요.</div>
-            </div>
-          </div>
-          <div class="auth-error" id="create4-error" style="margin-top:10px"></div>
-        </div>
-        <div class="toss-cta">
-          <button class="toss-btn" onclick="createStep4Next()">다음</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+<!-- create-4 (모드 선택) 제거됨 — 항상 독립모드 -->
 
 <!-- AUTH: 가족 만들기 — 스텝 5: 구성원 초대 -->
 <div class="auth-screen hidden toss-style" id="auth-create-5">
@@ -4232,13 +4179,6 @@ requestAnimationFrame(function(){
     </div>
   </div>
   <div id="adm-p4" style="display:none">
-    <!-- ── 다자녀 운영 모드 ── -->
-    <div class="adm-sec" id="adm-mode-sec" style="margin-top:6px">
-      <div class="adm-sec-lbl">다자녀 운영 모드</div>
-      <div class="adm-card" id="adm-mode-card">
-        <!-- renderAdmModeSection()으로 동적 렌더링 -->
-      </div>
-    </div>
     <!-- ── 스마트 메시지 설정 ── -->
     <div class="adm-sec">
       <div class="adm-sec-lbl">스마트 메시지 설정</div>
@@ -5501,9 +5441,7 @@ let _createState = {
   memberCount: 3,
   // Step 3
   members: [], // [{role, name, birthDate, gender, isSelf}] - index 0 is creator
-  // Step 4
-  mode: 'independent',
-  // Step 5
+  // Step 5 (Step 4 모드 선택 제거됨 — 항상 독립모드)
   childAccounts: {}, // {memberIndex: {id, pwd}}
   inviteType: 'link'
 };
@@ -5519,7 +5457,7 @@ let _joinState = {
 };
 
 // ── AUTH 화면 관리 ──
-const _AUTH_SCREENS = ['auth-login','auth-welcome','auth-onboarding','auth-continue','auth-email-verify','auth-social-link','auth-insight','auth-create-1','auth-create-2','auth-create-3','auth-create-4','auth-create-5','auth-create-done','auth-join-select','auth-join-register'];
+const _AUTH_SCREENS = ['auth-login','auth-welcome','auth-onboarding','auth-continue','auth-email-verify','auth-social-link','auth-insight','auth-create-1','auth-create-2','auth-create-3','auth-create-5','auth-create-done','auth-join-select','auth-join-register'];
 
 function showAuthScreen(screen) {
   setTimeout(function(){if(typeof _hideSplash==='function') _hideSplash();},1500);
@@ -6463,17 +6401,7 @@ async function createStep3Next(){
   renderInviteOptions();
 }
 
-function selectMode(mode){
-  _createState.mode=mode;
-  document.getElementById('mode-independent').classList.toggle('selected',mode==='independent');
-}
-
-async function createStep4Next(){
-  renderRegStepper(2, 3, 4); // Group 2, step 3 (invites)
-  await saveFamilyToFirestore();
-  showAuthScreen('create-5');
-  renderInviteOptions();
-}
+// selectMode(), createStep4Next() 제거됨 — 항상 독립모드
 
 function createStep5Back(){
   renderRegStepper(2, 1, 4); // Group 2, step 1 (members)
@@ -6617,7 +6545,7 @@ let _saveFamilyDone=false;
 async function saveFamilyToFirestore(){
   if(_saveFamilyDone) return; // 이미 저장됨
   try{
-    const btn=document.querySelector('#auth-create-3 .toss-btn, #auth-create-4 .toss-btn');
+    const btn=document.querySelector('#auth-create-3 .toss-btn');
     if(btn){btn.disabled=true;btn.textContent='저장 중...';}
 
     const isSocialUser = !!_createState.socialUser;
@@ -6757,7 +6685,7 @@ async function saveFamilyToFirestore(){
   }catch(e){
     console.error('Family save failed:',e);
     toast('❌ 가족 등록에 실패했어요. 다시 시도해주세요.');
-    const btn=document.querySelector('#auth-create-3 .toss-btn, #auth-create-4 .toss-btn');
+    const btn=document.querySelector('#auth-create-3 .toss-btn');
     if(btn){btn.disabled=false;btn.textContent='다음';}
     throw e; // 상위에서 처리
   }
@@ -7587,7 +7515,6 @@ function applyUserProfile() {
   // 양육자(independent mode)는 renderHero()에서 자녀 이름으로 덮어씀 — 여기서는 비양육자만 처리
   const heroLbl = document.getElementById('hero-lbl');
   if(heroLbl){
-    const _hMode=getFamilyMode();
     if(isCaregiverUser()){
       // 양육자: 모드 무관하게 보고 있는 자녀 이름 표시 (flash 방지)
       const _hVid=getViewedMemberId();
@@ -7721,24 +7648,21 @@ function postLoginInit(){
   viewingChildId = null;
   _admViewChildId = null;
   _globalDataOwner = null;
-  const mode = getFamilyMode();
-  if(mode === 'independent'){
-    if(!S.memberData) S.memberData = {};
-    if(isCaregiverUser()){
-      // 양육자: 첫 자녀 뷰로 전환
-      const kids = getChildMemberIds();
-      if(kids.length > 0){
-        viewingChildId = kids[0];
-        if(!S.memberData[viewingChildId]) getMemberState(viewingChildId);
-        syncMemberToGlobal(viewingChildId);
-        applyChildTheme(viewingChildId);
-      }
-    } else if(currentUser) {
-      // 자녀 직접 로그인: 자신의 memberData를 글로벌에 로드
-      // (S.acts/actDone 등이 다른 사용자의 데이터일 수 있으므로 반드시 자신의 것으로 교체)
-      if(!S.memberData[currentUser]) getMemberState(currentUser);
-      syncMemberToGlobal(currentUser);
+  // 항상 독립모드: memberData 초기화 및 뷰 설정
+  if(!S.memberData) S.memberData = {};
+  if(isCaregiverUser()){
+    // 양육자: 첫 자녀 뷰로 전환
+    const kids = getChildMemberIds();
+    if(kids.length > 0){
+      viewingChildId = kids[0];
+      if(!S.memberData[viewingChildId]) getMemberState(viewingChildId);
+      syncMemberToGlobal(viewingChildId);
+      applyChildTheme(viewingChildId);
     }
+  } else if(currentUser) {
+    // 자녀 직접 로그인: 자신의 memberData를 글로벌에 로드
+    if(!S.memberData[currentUser]) getMemberState(currentUser);
+    syncMemberToGlobal(currentUser);
   }
   _admViewChildId = getChildMemberIds()[0] || null;
 
@@ -9087,7 +9011,7 @@ function checkAuth() {
     _syncPushDeviceUser(); // 앱 시작 시 푸시 디바이스 유저 갱신
     // 양육자(caregiver)는 postLoginInit에서 자녀 데이터를 로드하므로 여기서 parent sync 생략
     // (parent의 memberData에 마지막 자녀의 stale 데이터가 오염되는 것을 방지)
-    if(!(getFamilyMode()==='independent'&&isCaregiverUser())){
+    if(!(isCaregiverUser())){
       syncMemberToGlobal(); // Load member data for this user
     }
     postLoginInit();
@@ -9472,7 +9396,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0417d';
+const _APP_VERSION = 'v0417e';
 // (v0415i) 운영기에서만 숨길 관리자 섹션 처리 — data-env-only="dev" 요소를 prod에서 숨김
 try{
   if(_ENV!=='dev'){
@@ -9995,7 +9919,7 @@ function getMemberState(memberId) {
     const inheritRwds = isChildInit ? _getInheritableRwds() : null;
     // isMe인데 독립 모드이고 _globalDataOwner가 다른 사람이면:
     // 글로벌 S 값이 다른 자녀의 데이터이므로 상속 대신 형제/기본값 사용
-    const isStaleGlobal = isMe && getFamilyMode()==='independent' && _globalDataOwner && _globalDataOwner !== memberId;
+    const isStaleGlobal = isMe && _globalDataOwner && _globalDataOwner !== memberId;
     const safeInheritActs = isStaleGlobal ? _getInheritableActs() : null;
     const safeInheritRwds = isStaleGlobal ? _getInheritableRwds() : null;
     // First time: migrate global data if it's the current user, else start fresh
@@ -10148,7 +10072,7 @@ function syncGlobalToMember(targetId) {
   if (!S.familyMeta?.members) return; // 레거시 모드(familyMeta 없음)에서는 memberData 분리 불필요
   // ⚠️ 안전장치: _globalDataOwner가 설정되어 있고 mid와 다르면
   //   현재 S.*는 다른 자녀의 데이터이므로 mid에 저장하면 안됨
-  if(_globalDataOwner && mid !== _globalDataOwner && getFamilyMode()==='independent'){
+  if(_globalDataOwner && mid !== _globalDataOwner){
     console.warn(`[syncGlobalToMember] BLOCKED: S.* belongs to ${_globalDataOwner} but tried to save to ${mid}`);
     return;
   }
@@ -10327,7 +10251,7 @@ function _applyRemoteSnap(snap){
         S.memberData[_mid].rewardInventory = _remoteMd.rewardInventory ? JSON.parse(_remoteInv) : [];
         S.memberData[_mid].rewardRequests = _remoteMd.rewardRequests ? JSON.parse(_remoteReq) : [];
         // 독립모드에서 현재 보고 있는 대상이면 S.*도 즉시 반영
-        if(getFamilyMode()==='independent' && (_globalDataOwner===_mid || (!_globalDataOwner && currentUser===_mid))){
+        if((_globalDataOwner===_mid || (!_globalDataOwner && currentUser===_mid))){
           S.rewardInventory = JSON.parse(_remoteInv);
           S.rewardRequests = JSON.parse(_remoteReq);
         }
@@ -10347,7 +10271,7 @@ function save(){
   // independent 모드에서 양육자가 자녀 데이터를 보고 있으면 해당 자녀에게 저장
   // ⚠️ 반드시 _globalDataOwner만 사용 — viewingChildId를 fallback으로 쓰면
   //   아직 syncMemberToGlobal이 안 된 상태에서 엉뚱한 자녀에게 S 데이터가 덮어씌워짐
-  if(getFamilyMode()==='independent'&&isCaregiverUser()){
+  if(isCaregiverUser()){
     if(_globalDataOwner) syncGlobalToMember(_globalDataOwner);
     // _globalDataOwner가 null이면 아직 어떤 자녀도 로드하지 않은 상태 → sync 생략
   }else{
@@ -11052,7 +10976,7 @@ function isTodayAllDone(){
 // 현재 보고 있는 멤버의 streak/lastDate/acts/actDone 컨텍스트를 가져옴 (양육자가 자녀 home을 볼 때 대응)
 function _getViewedStreakCtx(){
   try{
-    if(getFamilyMode()==='independent'&&isCaregiverUser()){
+    if(isCaregiverUser()){
       const vid=getViewedMemberId();
       // S가 이미 보고있는 멤버 데이터를 들고 있으면 S에서 직접 읽기 (실시간 반영)
       if(vid && _globalDataOwner===vid){
@@ -11968,7 +11892,7 @@ function renderAll(){
   renderDashboard();renderHistStats();renderHistList();renderCalendar();
   renderBadgeSummary();renderBadgeViewGrid();renderBadgeViewHistory();
   renderAdmStats();renderAdmActList();renderAdmRwdList();renderAdmSettings();
-  renderAdmChildSelector();renderAdmModeSection();
+  renderAdmChildSelector();
   renderMsgSettings();renderAdmMemberPhotos();
   if(typeof renderDevUserSwitch==='function')renderDevUserSwitch();
   renderNavUsers();
@@ -11988,8 +11912,7 @@ function renderHero(){
     if(el)el.textContent=greetingTxt;
   }
 
-  // 모드별 hero 라벨 및 pts 표시
-  const mode=getFamilyMode();
+  // hero 라벨 및 pts 표시 (항상 독립모드)
   const heroLbl=document.getElementById('hero-lbl');
   if(isCaregiverUser()){
     // 양육자: 모드 무관하게 보고 있는 자녀 이름 표시
@@ -12037,7 +11960,7 @@ function renderHero(){
   // 관리자 pts: 모드별로 올바른 자녀 pts 표시
   const admPtsEl=document.getElementById('adm-pts');
   if(admPtsEl){
-    if(mode==='independent'&&isCaregiverUser()){
+    if(isCaregiverUser()){
       const admId=_admViewChildId||getViewedMemberId();
       const admMs=S.memberData?.[admId];
       admPtsEl.textContent=(admMs?.pts||S.pts).toLocaleString();
@@ -14899,13 +14822,12 @@ function renderAdmStats(){
 
 // 관리자 패널 자녀 선택기 렌더링
 function renderAdmChildSelector(){
-  const mode=getFamilyMode();
   const kids=getChildMemberIds();
-  // 자녀가 2명 미만이거나 통합 모드면 선택기 숨김
+  // 자녀가 2명 미만이면 선택기 숨김
   ['adm-child-selector-0','adm-child-selector-1','adm-child-selector-2','adm-child-selector-miles'].forEach(id=>{
     const el=document.getElementById(id);
     if(!el)return;
-    if(mode!=='independent'||kids.length<2){el.innerHTML='';return;}
+    if(kids.length<2){el.innerHTML='';return;}
     const currentAdmId=_admViewChildId||getViewedMemberId();
     el.innerHTML=`<div class="adm-child-sel-bar">
       ${kids.map(id=>`<button class="adm-child-btn${id===currentAdmId?' on':''}" data-cid="${id}" onclick="admSelectChild('${id}')">${getAvatarHTML(id,22)} <span>${escapeHtml(MEMBERS[id]?.name||id)}</span></button>`).join('')}
@@ -14917,9 +14839,8 @@ function renderAdmChildSelector(){
 function renderMilesTargetInfo(){
   const el=document.getElementById('adm-miles-target-info');
   if(!el)return;
-  const mode=getFamilyMode();
   const kids=getChildMemberIds();
-  if(mode!=='independent'||kids.length<2){el.style.display='none';return;}
+  if(kids.length<2){el.style.display='none';return;}
   const targetId=_admViewChildId||getViewedMemberId();
   if(!targetId){el.style.display='none';return;}
   const ms=S.memberData?.[targetId];
@@ -14929,31 +14850,7 @@ function renderMilesTargetInfo(){
   el.innerHTML=`📌 대상: <span style="color:var(--tx1)">${escapeHtml(name)}</span> · 현재 <span style="color:var(--tx1)">${escapeHtml(String(pts))}</span> 마일리지`;
 }
 
-// 관리자 모드 섹션 렌더링
-function renderAdmModeSection(){
-  const el=document.getElementById('adm-mode-card');
-  if(!el)return;
-  const kids=getChildMemberIds();
-  if(kids.length<2){
-    // 자녀 1명이면 모드 선택 숨김
-    const sec=document.getElementById('adm-mode-sec');
-    if(sec)sec.style.display='none';
-    return;
-  }
-  const sec=document.getElementById('adm-mode-sec');
-  if(sec)sec.style.display='';
-  el.innerHTML=`
-    <div class="adm-row">
-      <div class="adm-row-l">
-        <div class="adm-row-nm">현재 모드</div>
-        <div class="adm-row-sub">독립 모드: 자녀별 마일리지 분리</div>
-      </div>
-    </div>
-    <div class="divider"></div>
-    <div style="padding:8px 14px 10px;font-size:13px;color:var(--tx3);line-height:1.6">
-      💡 독립 모드: 자녀별로 활동·보상·마일리지가 완전히 분리돼요. 각 자녀에게 맞는 목표를 설정할 수 있어요.
-    </div>`;
-}
+// renderAdmModeSection() 제거됨 — 다자녀 운영 모드 UI 삭제 (항상 독립모드)
 function renderAdmActList(){
   const el=document.getElementById('adm-act-list');
   // independent 모드: 관리자가 선택한 자녀의 acts 사용
@@ -15236,8 +15133,6 @@ function renderAdmSettings(){
   const bdayMsg=document.getElementById('bday-msg-inp');if(bdayMsg&&!bdayMsg.matches(':focus'))bdayMsg.value=S.settings.birthdayMsg||'생일 축하해! 오늘은 네 특별한 날이야! 🎂🎉';
   // 게이미피케이션 설정 렌더링
   renderGameSettings();
-  // 다자녀 모드 섹션 렌더링
-  renderAdmModeSection();
   // 자녀 선택기 렌더링
   renderAdmChildSelector();
 
@@ -15279,7 +15174,7 @@ function doAct(id){
   if(isCaregiverUser()&&getChildMembers().length>=2){
     showChildPicker('어떤 아이의 활동인가요?',function(childId){
       if(!childId)return;
-      if(getFamilyMode()==='independent'&&getViewedMemberId()!==childId)switchViewingChild(childId);
+      if(getViewedMemberId()!==childId)switchViewingChild(childId);
       _doActCore(id);
     });
     return;
@@ -15385,7 +15280,7 @@ function undoAct(actId){
   if(isCaregiverUser()&&getChildMembers().length>=2){
     showChildPicker('어떤 아이의 활동을 취소할까요?',function(childId){
       if(!childId)return;
-      if(getFamilyMode()==='independent'&&getViewedMemberId()!==childId)switchViewingChild(childId);
+      if(getViewedMemberId()!==childId)switchViewingChild(childId);
       _undoActCore(actId);
     });
     return;
@@ -16339,10 +16234,8 @@ function isCaregiverUser(){
 // 하위 호환 별칭
 const isParentUser=isCaregiverUser;
 
-// ── 모드 / 자녀 헬퍼 ────────────────────────
-function getFamilyMode(){
-  return 'independent'; // 통합모드 비활성화 — 항상 독립모드
-}
+// ── 자녀 헬퍼 (항상 독립모드) ────────────────────────
+function getFamilyMode(){ return 'independent'; } // 레거시 호환용 — 항상 독립모드
 function getChildMemberIds(){
   if(!S.familyMeta?.members)return[];
   return Object.entries(S.familyMeta.members)
@@ -16356,7 +16249,7 @@ function getChildMemberIds(){
 }
 // 현재 화면에 표시 중인 구성원 ID (선택된 자녀)
 function getViewedMemberId(){
-  if(getFamilyMode()==='independent'&&isCaregiverUser()){
+  if(isCaregiverUser()){
     const kids=getChildMemberIds();
     if(kids.length>0)return viewingChildId||kids[0];
   }
@@ -16373,7 +16266,7 @@ function getViewedLevelData(){
 window.getViewedLevelData=getViewedLevelData;
 // 현재 활성 마일리지 반환: 양육자(independent)면 선택된 자녀의 pts, 아니면 S.pts
 function getActiveMileage(){
-  if(getFamilyMode()==='independent'&&isCaregiverUser()){
+  if(isCaregiverUser()){
     const vid=getViewedMemberId();
     if(vid&&S.memberData&&S.memberData[vid]!==undefined)return S.memberData[vid].pts||0;
   }
@@ -16446,7 +16339,7 @@ function _getAdmMemberData(){
 
 // ── END STICKER SYSTEM ──────────────────────
 
-// ── 통합/독립 모드 공통 헬퍼 ──
+// ── 보상/활동 승인 헬퍼 ──
 function isAssignedToUser(item,userId){
   if(!item||!item.assignedTo||item.assignedTo.includes('all'))return true;
   return item.assignedTo.includes(userId);
@@ -16489,7 +16382,7 @@ function openRedeem(id,srcEl){
   if(isCaregiverUser()&&getChildMembers().length>=2){
     showChildPicker('어떤 아이의 보상인가요?',function(childId){
       if(!childId)return;
-      if(getFamilyMode()==='independent'&&getViewedMemberId()!==childId)switchViewingChild(childId);
+      if(getViewedMemberId()!==childId)switchViewingChild(childId);
       _openRedeemModal(id,srcEl);
     });
     return;
@@ -17500,9 +17393,8 @@ window._aiVerifySubmit=_aiVerifySubmit;
 // ADMIN
 function giveBonus(){
   const v=parseInt(document.getElementById('bonus-inp').value)||0;if(v<=0)return;
-  const mode=getFamilyMode();
-  // independent 모드: 반드시 선택된 자녀에게만 지급
-  if(mode==='independent'&&isCaregiverUser()){
+  // 선택된 자녀에게만 지급
+  if(isCaregiverUser()){
     const targetId=_admViewChildId;
     if(!targetId){toast('⚠️ 대상 자녀를 먼저 선택해주세요');return;}
     const ms=getMemberState(targetId);
@@ -17518,9 +17410,8 @@ function giveBonus(){
 }
 function deductPts(){
   const v=parseInt(document.getElementById('deduct-inp').value)||0;if(v<=0)return;
-  const mode=getFamilyMode();
-  // independent 모드: 반드시 선택된 자녀에게만 차감
-  if(mode==='independent'&&isCaregiverUser()){
+  // 선택된 자녀에게만 차감
+  if(isCaregiverUser()){
     const targetId=_admViewChildId;
     if(!targetId){toast('⚠️ 대상 자녀를 먼저 선택해주세요');return;}
     const name=MEMBERS[targetId]?.name||'자녀';
@@ -19713,6 +19604,11 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.5.1 (v0417e)',date:'2026-04-17',items:[
+    '통합모드(shared) 완전 제거 — 항상 독립모드로 운영 (UI, 코드, CSS 정리)',
+    '관리자 설정에서 "다자녀 운영 모드" 섹션 제거',
+    '가족 생성 시 모드 선택 단계(Step 4) 제거 — 자동으로 독립모드 적용',
+  ]},
   {ver:'2.5.0 (v0417d)',date:'2026-04-17',items:[
     '[PERF ⑤] Firestore 문서 분할: 큰 배열(log, messages, moodLog 등) 서브컬렉션 분리 — 1MB 한계 해소',
     '[PERF ⑤] memberData 독립모드 멤버별 서브컬렉션 분리 — 100만 사용자 확장성 확보',
@@ -23980,7 +23876,6 @@ window.switchViewingChild=switchViewingChild;
 window.admSelectChild=admSelectChild;
 window.postLoginInit=postLoginInit;
 window.renderAdmChildSelector=renderAdmChildSelector;
-window.renderAdmModeSection=renderAdmModeSection;
 
 // mily AI 챗봇 IIFE에서 접근 필요한 변수/함수 exports
 // (module scope는 window에 자동 노출되지 않으므로 명시적 export 필요)
@@ -25352,7 +25247,7 @@ window._createState = _createState;
                 S.memberData[_mid].rewardInventory = JSON.parse(_rInv);
                 S.memberData[_mid].rewardRequests = JSON.parse(_rReq);
                 // 독립모드에서 지금 그 대상의 데이터를 보고 있으면 S.*에도 즉시 반영
-                if(getFamilyMode()==='independent' && ((typeof _globalDataOwner!=='undefined' && _globalDataOwner===_mid) || ((typeof _globalDataOwner==='undefined' || !_globalDataOwner) && currentUser===_mid))){
+                if(((_globalDataOwner===_mid) || (!_globalDataOwner && currentUser===_mid))){
                   S.rewardInventory = JSON.parse(_rInv);
                   S.rewardRequests = JSON.parse(_rReq);
                 }
@@ -25517,7 +25412,7 @@ window._createState = _createState;
                 S.memberData[_mid].rewardRequests = JSON.parse(_rReq);
                 _mdChanged = true;
               }
-              if(_mdChanged && getFamilyMode()==='independent' && ((typeof _globalDataOwner!=='undefined' && _globalDataOwner===_mid) || ((typeof _globalDataOwner==='undefined' || !_globalDataOwner) && currentUser===_mid))){
+              if(_mdChanged && ((_globalDataOwner===_mid) || (!_globalDataOwner && currentUser===_mid))){
                 S.rewardInventory = JSON.parse(_rInv);
                 S.rewardRequests = JSON.parse(_rReq);
                 try{ if(typeof renderRewardInventory==='function') renderRewardInventory(); }catch(_){}
