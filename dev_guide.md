@@ -714,21 +714,30 @@ git add index.html && git commit -m "운영기 배포: ..." && git push
 
 ## 8. 과거 사고 사례 및 교훈
 
-### 사고 7: 기기간 마일리지 동기화 불일치 — dirty merge memberData 누락 (2026-04-16, v0416k)
-- **증상**: 아이폰에서 마일리지 810, 다른 기기(태민 기기, 아이패드)에서 1236. 아이폰에서 최근활동 2개, 다른 기기에서 9개. 아이폰이 "별동대"처럼 독립적으로 동작.
-- **근본 원인**: `_hasDirtyLocal=true`(로컬에 미저장 변경이 있는 상태)일 때 onSnapshot의 dirty 브랜치가 familyMessages, stickers, photos 등은 머지하면서 **memberData의 pts/log/streak는 머지하지 않음**. 아이폰이 구 캐시(localStorage)에서 부팅 → dirty 플래그 세팅 → 서버 스냅샷이 와도 memberData 갱신 안 됨 → 구 캐시의 pts=810을 save()로 서버에 덮어씀.
-- **피해**: 서버 데이터가 810으로 덮어쓰여짐 (정상 1236). 활동 기록 7건 손실.
-- **긴급 복구**: diag.html(App Check + anonymous auth)로 서버 데이터 확인 후, Chrome DevTools에서 Firebase `updateDoc`으로 pts와 memberData.taemin.pts를 1236으로 수동 복구.
-- **코드 수정 (v0416k, PR #393)**:
-  1. `_applyRemoteSnap` dirty 브랜치에 memberData pts/log/streak/rewardLog 머지 추가
-  2. main boot onSnapshot dirty 브랜치에 동일한 memberData 머지 추가
-  3. `_firstRemoteLoaded` 플래그: Firestore 첫 동기화 완료 전 save() 차단 — stale cache 보호
-  4. 인라인 onSnapshot 3개를 `_applyRemoteSnap(snap)` 호출로 통합
-  5. `_loginToFamily`에서 independent 모드 caregiver도 `syncMemberToGlobal()` 호출
-- **교훈**:
-  1. `_hasDirtyLocal` dirty merge는 **모든 데이터 유형**을 커버해야 한다. 메시지만 머지하고 핵심 데이터(pts/log)를 빠뜨리면 구 캐시가 서버를 덮어쓴다.
-  2. localStorage cache-first 부팅은 stale 데이터 위험이 항상 있다. Firestore 동기화 전에는 save()를 차단해야 한다.
-  3. onSnapshot 리스너가 여러 곳에 분산되면 하나만 고쳐도 나머지에서 같은 버그가 발생한다. 중앙 함수(`_applyRemoteSnap`)로 통합이 필요하다.
+### 사고 7: DATA_DOC 분기 — 기기마다 다른 Firestore 문서 참조 (2026-04-16~17)
+- **증상**: 아이폰에서 최근활동 2개, 다른 기기(태민 기기, 아이패드)에서 9개. 아이폰이 "별동대"처럼 독립적으로 동작 — 푸시 알림 안 옴, 메시지 동기화 안 됨, 마일리지 다름.
+- **오진 과정 (시간 낭비한 잘못된 가설들)**:
+  1. ❌ "아이폰 캐시 문제" → 새 브라우저에서도 2개. 캐시 아님.
+  2. ❌ "아이폰이 stale cache로 서버를 덮어씀" → 그러면 정상 기기들도 영향받아야 함. 정상 기기끼리는 정상 동기화됨.
+  3. ❌ "dirty merge에서 memberData 누락" → 코드 수정(v0416k)했지만 문제 해결 안 됨. **증상이 아니라 가정에 기반한 수정이었음.**
+- **진짜 근본 원인**: **정상 기기와 아이폰이 서로 다른 Firestore 문서를 읽고 있었음.**
+  - 정상 기기: `localStorage.family_id` 있음 → `families/wwec8f4hpemnfki8fo` 읽기/쓰기
+  - 아이폰: `localStorage.family_id` 소실 (PWA 재설치/iOS 저장공간 정리 등) → `users/taemin` (레거시) 읽기
+  - 새 브라우저: localStorage 없음 → `users/taemin` 읽기
+  - `users/taemin`에 `_migratedTo` 포인터가 설정되어 있지 않아서 리다이렉트 불가
+- **왜 `_migratedTo`가 없었나**: `saveFamilyToFirestore()` (가족 생성 함수)에 레거시 문서에 `_migratedTo`를 설정하는 코드가 **없음**. `linkSocialFromMyMenu()`와 `sendFamilyInvite()`에만 있음. 가족 생성 시 `localStorage.family_id`만 설정하고 끝냈기 때문에, localStorage를 잃은 기기는 영원히 레거시 문서에 갇힘.
+- **왜 앱 재시작 시 auth registry를 안 타나**: `onAuthStateChanged`는 `social_pending` 플래그가 있을 때만 `_handleSocialLoginResult` 호출. 콜드스타트(이미 로그인된 상태)에서는 auth registry를 전혀 확인하지 않음.
+- **피해**:
+  - 아이폰에서 17일간 정상 데이터 안 보임 (families 문서에 170건 vs 레거시에 153건)
+  - 잘못된 가설 기반으로 v0416k 코드 수정 → 불필요한 dirty merge 코드 + `_firstRemoteLoaded` guard 추가 → **앱 시작 속도 저하**
+  - 레거시 문서의 pts를 810→1236으로 수동 변경 → 데이터 불일치 악화 (log 합계와 맞지 않음)
+- **복구**: diag.html에서 families 컬렉션 전체 스캔 → `families/wwec8f4hpemnfki8fo`에 실제 데이터 확인 → `users/taemin`에 `_migratedTo: 'wwec8f4hpemnfki8fo'` 수동 설정
+- **교훈 (매우 중요)**:
+  1. **증상을 먼저 정확히 이해하라.** "아이폰만 다르다" → "다른 문서를 읽고 있다"가 가장 단순한 설명인데, 복잡한 가설(dirty merge, cache overwrite)부터 추정했다.
+  2. **`saveFamilyToFirestore()`에서 `_migratedTo` 설정 필수.** localStorage는 언제든 사라질 수 있다. 레거시 문서의 포인터만이 신뢰할 수 있는 리다이렉트 수단.
+  3. **콜드스타트 시에도 auth registry를 확인해야 한다.** `social_pending` 없이도 auth registry 경로를 타도록 수정 필요.
+  4. **가설이 맞는지 데이터로 검증하지 않고 코드를 고치지 마라.** diag.html로 서버 데이터를 먼저 봤으면 families 문서를 바로 찾았을 것.
+  5. **속도 최적화 과정에서 데이터 안전성을 훼손하지 마라.** `_firstRemoteLoaded` guard, dirty merge 확장 등은 근본 원인(DATA_DOC 분기)을 모른 채 증상만 막으려 한 코드 — 속도만 느려지고 문제는 해결 안 됨.
 
 ### 사고 5: iPhone PWA 콜드스타트 auth race (2026-04-08, v0408z5)
 - **증상**: iPhone PWA 콜드스타트 시 `permission-denied` 에러 연속 발생 → "오프라인 모드" toast. Mac Chrome에서는 정상 동작.
