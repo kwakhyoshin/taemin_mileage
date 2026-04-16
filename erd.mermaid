@@ -2,6 +2,8 @@ erDiagram
     families ||--|| familyMeta : "embeds"
     families ||--o{ memberData : "contains (independent mode)"
     families ||--o{ dh_member : "subcollection"
+    families ||--o{ sub_doc : "subcollection (families/{id}/sub/{name})"
+    families ||--o{ memberSub_doc : "subcollection (families/{id}/memberSub/{memberId})"
     families ||--o{ log : "activity logs"
     families ||--o{ rewardInventory : "owned rewards"
     families ||--o{ rewardRequests : "approval queue"
@@ -62,6 +64,7 @@ erDiagram
         array actVerifyRequests "활동 승인 요청 큐 (부모 승인제)"
         object memberData "멤버별 데이터 (independent)"
         object featureIntroConfig "기능 소개 설정"
+        boolean _subCollMigrated "서브컬렉션 마이그레이션 완료 플래그"
     }
 
     familyMeta {
@@ -315,4 +318,35 @@ erDiagram
     chatQueries {
         string documentId PK "auto-generated"
         object queryData "쿼리 로그"
+    }
+
+    sub_doc {
+        string name PK "log | familyMessages | moodLog | rewardLog | badgeLog | stickers | challengeHistory"
+        array items "해당 배열 데이터"
+        number updatedAt "마지막 수정 타임스탬프"
+    }
+
+    memberSub_doc {
+        string memberId PK "멤버 ID"
+        number pts "개인 마일리지"
+        number streak
+        number longest
+        string lastDate
+        number totalDone
+        array acts "개인 활동"
+        array rwds "개인 보상"
+        array log "개인 활동 기록"
+        object actDone
+        array allDoneDays
+        array moodLog
+        object badges
+        array badgeLog
+        object levelData
+        array challenges
+        array challengeHistory
+        array rewardLog
+        array stickers
+        array rewardInventory
+        array rewardRequests
+        number updatedAt
     }

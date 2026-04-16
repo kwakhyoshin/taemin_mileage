@@ -99,6 +99,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Pretendard',sans-serif;backgr
       <div class="field"><span class="field-name">settings</span><span class="field-type">object</span><span class="badge badge-obj">obj</span><span class="field-desc">streakBonus, pinHash, msgMode...</span></div>
       <div class="field"><span class="field-name">memberData</span><span class="field-type">object</span><span class="badge badge-obj">obj</span><span class="field-desc">independent 모드 전용</span></div>
       <div class="field"><span class="field-name">familyMeta</span><span class="field-type">object</span><span class="badge badge-obj">obj</span><span class="field-desc">내장된 가족 메타</span></div>
+      <div class="field"><span class="field-name">_subCollMigrated</span><span class="field-type">boolean</span><span class="field-desc">서브컬렉션 마이그레이션 완료 플래그 (v0417d)</span></div>
     </div>
   </div>
 
@@ -396,6 +397,39 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Pretendard',sans-serif;backgr
   </div>
 </div>
 
+<!-- ═══ 서브컬렉션 분할 (v0417d PERF ⑤) ═══ -->
+<div class="section-title">서브컬렉션 분할 — families/{familyId}/sub/ · memberSub/ (v0417d)</div>
+
+<div class="grid">
+  <div class="entity c-subcol" style="border-color:#6366F1">
+    <div class="entity-header" style="background:linear-gradient(135deg,#4F46E5,#6366F1);color:#fff">sub/{name} <span class="path">families/{id}/sub/{name}</span></div>
+    <div class="entity-body">
+      <div class="field"><span class="field-name pk">name</span><span class="field-type">string</span><span class="badge badge-pk">PK</span><span class="field-desc">log | familyMessages | moodLog | rewardLog | badgeLog | stickers | challengeHistory</span></div>
+      <div class="field"><span class="field-name">items</span><span class="field-type">array</span><span class="field-desc">해당 배열 데이터 전체</span></div>
+      <div class="field"><span class="field-name">updatedAt</span><span class="field-type">number</span><span class="field-desc">마지막 수정 타임스탬프</span></div>
+    </div>
+  </div>
+
+  <div class="entity c-subcol" style="border-color:#6366F1">
+    <div class="entity-header" style="background:linear-gradient(135deg,#4F46E5,#6366F1);color:#fff">memberSub/{memberId} <span class="path">families/{id}/memberSub/{memberId}</span></div>
+    <div class="entity-body">
+      <div class="field"><span class="field-name pk">memberId</span><span class="field-type">string</span><span class="badge badge-pk">PK</span><span class="field-desc">멤버 ID</span></div>
+      <div class="field"><span class="field-name">pts / streak / longest / totalDone</span><span class="field-type">number</span><span class="field-desc">개인 마일리지·연속·최장·합계</span></div>
+      <div class="field"><span class="field-name">acts / rwds / log / moodLog / ...</span><span class="field-type">array</span><span class="field-desc">memberData 전체 필드 (독립모드)</span></div>
+      <div class="field"><span class="field-name">badges / actDone / levelData</span><span class="field-type">object</span></div>
+      <div class="field"><span class="field-name">updatedAt</span><span class="field-type">number</span><span class="field-desc">마지막 수정 타임스탬프</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="note">
+  <strong>서브컬렉션 분할 (v0417d):</strong><br>
+  • <strong>_subCollMigrated 플래그:</strong> families 메인 문서에 true로 설정 시 서브컬렉션 모드 활성화<br>
+  • <strong>자동 마이그레이션:</strong> 첫 부트 시 기존 배열→서브컬렉션 복사, 메인 문서에서 배열 제거<br>
+  • <strong>선택적 저장:</strong> 변경된 서브컬렉션만 개별 setDoc (JSON 비교)<br>
+  • <strong>하위 호환:</strong> _subCollMigrated 없으면 기존 단일 문서 모드로 동작
+</div>
+
 <!-- ═══ 시스템 & 레거시 ═══ -->
 <div class="section-title">시스템 · 레거시</div>
 
@@ -437,6 +471,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Pretendard',sans-serif;backgr
   <tr><td>member</td><td class="arrow">1 ─── 0..1</td><td>account</td><td>embedded</td><td>로그인 자격 (없을 수도)</td></tr>
   <tr><td>families</td><td class="arrow">1 ─── N</td><td>memberData</td><td>embedded</td><td>independent 모드 전용</td></tr>
   <tr><td>families</td><td class="arrow">1 ─── N</td><td>dh_{memberId}</td><td>subcollection</td><td>멤버별 일간 기록</td></tr>
+  <tr><td>families</td><td class="arrow">1 ─── N</td><td>sub/{name}</td><td>subcollection</td><td>7개 배열 분할 (log, familyMessages, moodLog, rewardLog, badgeLog, stickers, challengeHistory)</td></tr>
+  <tr><td>families</td><td class="arrow">1 ─── N</td><td>memberSub/{memberId}</td><td>subcollection</td><td>독립모드 멤버별 데이터 분할</td></tr>
   <tr><td>_id_registry</td><td class="arrow">N ─── 1</td><td>families + member</td><td>lookup</td><td>loginId → familyId + memberId</td></tr>
   <tr><td>_auth_registry</td><td class="arrow">N ─── 1</td><td>families + member</td><td>lookup</td><td>firebaseUid → familyId + memberId</td></tr>
   <tr><td>users (legacy)</td><td class="arrow">1 ─── 1</td><td>families</td><td>migration</td><td>_migratedTo 포인터</td></tr>

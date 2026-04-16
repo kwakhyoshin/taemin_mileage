@@ -124,9 +124,9 @@
 | +날씨 캐시 | 개발기+운영기 반영 | release/v0415o | v0415m | v0415o | localStorage 24h 캐시로 "--°" 플리커 제거 |
 | +WebView 오프라인 폴백 복구 | 개발기+운영기 반영 | release/v0415o | v0415m | v0415o | signInAnonymously await 복원 |
 | +안드로이드 APK edge-to-edge inset | 개발기+운영기 반영 | release/v0415o | v0415n/o | v0415o | `--android-nav-inset` / `--native-nav-bar-h` 반영, R-061 |
-| ⑤ 거대 문서 분할 | 대기 | — | — | — | 설계 문서 필요 |
-| ⑥ updateDoc 부분 patch | 대기 | — | — | — | ⑤ 선행 |
-| ⑦ snapshot stringify 제거 | 대기 | — | — | — | ⑤ 선행 |
+| ⑤ 거대 문서 분할 (서브컬렉션) | 개발기 반영 | PR 대기 | v0417d | — | 2026-04-17, 7개 배열 + memberData 서브컬렉션 분리, 자동 마이그레이션 |
+| ⑥ updateDoc 부분 patch | 대기 | — | — | — | ⑤ 완료로 부분적 달성 (변경된 서브컬렉션만 write) |
+| ⑦ snapshot stringify 제거 | 대기 | — | — | — | ⑤ 완료로 메인 doc 크기 축소, stringify 비용 감소 |
 | ⑧ App Check 지연 초기화 | 대기 | — | — | — | |
 | ⑨ HTML 분리/번들러 | 대기 | — | — | — | 중장기 |
 
@@ -134,5 +134,5 @@
 
 ## 6. 결정 사항 / 열린 질문
 - (열림) 시나리오 A vs B 확정 필요
-- (열림) ⑤ 서브컬렉션 스키마 상세 설계 (별도 문서)
+- (완료) ⑤ 서브컬렉션 스키마: `families/{id}/sub/{name}` (7개 배열), `families/{id}/memberSub/{memberId}` (독립모드)
 - (열림) 타임아웃 시 "오프라인 모드" UX 디자인
