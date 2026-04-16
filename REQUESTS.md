@@ -88,7 +88,7 @@
 | R-068 | 2026-04-16 | 적응형 UI Type 5: 갤럭시 폴드 펼친 세로(580-767px) 카드 4열 + 폰 스타일 네비 | v0416h | 개발완료 | fold+tablet 통합 블록(580-1023px portrait)으로 동일 레이아웃 적용. 운영 반영은 별도 release 필요 |
 | R-069 | 2026-04-16 | 운영기 FCM 토큰 저장 실패 — _familyId null 레거시 사용자 LEGACY_DOC 경로 fallback | v0416f | PR #388 운영반영 | _milelyOnFCMToken guard에서 LEGACY_DOC.path 허용, Firestore write시 users/taemin에 직접 저장. _syncPushDeviceUser도 동일 수정 |
 | R-070 | 2026-04-16 | SW HTML fetch가 HTTP 캐시 사용하여 구버전 유지 — cache:no-cache 추가 | PR #390 | PR #390 운영반영 | dev/sw.js + sw.js 동시 수정. fetch(e.request)→fetch(e.request,{cache:'no-cache'}). 정적 에셋은 기존 cache-first 유지 |
-| R-071 | 2026-04-16 | 기기간 마일리지 동기화 버그 — dirty merge에서 memberData pts/log/streak 누락 | v0416k | PR #393 개발완료 | _hasDirtyLocal=true일 때 memberData 머지 누락 → 구 캐시 기기가 서버 덮어씀. _firstRemoteLoaded 가드 추가. 서버 데이터 810→1236 수동 복구 완료 |
+| R-071 | 2026-04-16 | 기기간 마일리지 동기화 버그 — dirty merge에서 memberData pts/log/streak 누락 | v0416k | PR #394 운영반영 | _hasDirtyLocal=true일 때 memberData 머지 누락 → 구 캐시 기기가 서버 덮어씀. _firstRemoteLoaded 가드 추가. 서버 데이터 810→1236 수동 복구 완료 |
 
 ## 미착수 백로그 (ROADMAP.md 기준)
 
