@@ -6700,6 +6700,15 @@ async function saveFamilyToFirestore(){
     if(familyDoc) await setDoc(familyDoc,newState);
     else { localStorage.setItem(_LS_PREFIX+'v6_backup', sanitizeForBackup(newState)); console.warn('Firebase offline — saved to localStorage'); }
 
+    // ★ 사고7 재발 방지: 레거시 문서에 _migratedTo 포인터 설정
+    // 다른 기기가 localStorage.family_id를 잃어도 레거시 문서에서 가족 문서를 찾을 수 있도록
+    try{
+      if(LEGACY_DOC && LEGACY_DOC.path){
+        await setDoc(LEGACY_DOC, {_migratedTo: docPath}, {merge:true});
+        console.log('[saveFamilyToFirestore] _migratedTo set on legacy doc:', docPath);
+      }
+    }catch(_migErr){ console.warn('[saveFamilyToFirestore] Legacy _migratedTo write failed:', _migErr); }
+
     // 글로벌 ID 레지스트리에 등록 (생성자 ID + 자녀 미리생성 계정)
     try {
       if(isSocialUser){
@@ -7469,7 +7478,6 @@ async function doLogin(idField, pwdField, errField){
                 // 해당 가족으로 전환하고 로그인
                 await save();
                 S = Object.assign(defaultState(), familyData);
-                _firstRemoteLoaded = true; // [R-071]
                 _familyId = otherFamilyPath;
                 DATA_DOC = familyDoc;
                 localStorage.setItem(_LS_PREFIX+'family_id', otherFamilyPath);
@@ -9464,7 +9472,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0416k';
+const _APP_VERSION = 'v0417a';
 // (v0415i) 운영기에서만 숨길 관리자 섹션 처리 — data-env-only="dev" 요소를 prod에서 숨김
 try{
   if(_ENV!=='dev'){
@@ -9684,6 +9692,30 @@ async function _checkLegacyMigrationPointer(){
       window._pendingFromLegacy=true;
     }
   }catch(e){ console.warn('[_checkLegacyMigrationPointer]', e); }
+}
+
+// ★ 사고7 재발 방지: cold start에서 Firebase 인증 사용자의 auth registry를 체크
+// localStorage.family_id가 없고 _migratedTo도 없을 때 최후의 fallback
+async function _checkAuthRegistryOnBoot(){
+  if(_familyId || !_firebaseReady || !db || !fbAuth || !fbAuth.currentUser) return;
+  try{
+    const uid = fbAuth.currentUser.uid;
+    const regDoc = _getAuthRegistryDoc();
+    const snap = await getDoc(regDoc);
+    if(!snap.exists()) return;
+    const entry = snap.data()[uid];
+    if(entry && entry.familyId){
+      console.log('[_checkAuthRegistryOnBoot] Found family from auth registry:', entry.familyId);
+      _familyId = entry.familyId;
+      DATA_DOC = getFamilyDoc(entry.familyId);
+      localStorage.setItem(_LS_PREFIX+'family_id', entry.familyId);
+      if(entry.memberId) localStorage.setItem(_LS_PREFIX+'current_user', entry.memberId);
+      // 레거시 문서에도 _migratedTo 설정 (다음번엔 레거시 포인터로 바로 찾도록)
+      try{
+        if(LEGACY_DOC && LEGACY_DOC.path) await setDoc(LEGACY_DOC, {_migratedTo: entry.familyId}, {merge:true});
+      }catch(_e){}
+    }
+  }catch(e){ console.warn('[_checkAuthRegistryOnBoot]', e); }
 }
 
 // 캐시된 사용자 데이터 (S.users에서 로드)
@@ -9933,7 +9965,7 @@ let _saveTimer = null;
 let _isSaving = false;      // true while a setDoc write is in-flight
 let _pendingSave = false;   // another save was requested while one was in-flight
 let _hasDirtyLocal = false; // true when local changes haven't been saved to Firestore yet
-let _firstRemoteLoaded = false; // [R-071] true after first Firestore snapshot received — save() blocked until then to prevent stale cache overwrite
+// _firstRemoteLoaded 제거됨 (v0417a) — 사고7 분석 결과 잘못된 가설에 기반한 guard였음. DATA_DOC 분기가 진짜 원인.
 let _lastSavedJSON = '';    // tracks what we last wrote → prevents echo loop
 let _lastSaveTime = 0;      // timestamp of last save completion — cooldown for echo
 let _actAnimating = false;  // true during activity completion animation — blocks renderAll
@@ -10201,12 +10233,9 @@ function _applyRemoteSnap(snap){
     try{ checkNewMessages(); }catch(_){}
     try{ renderNavUsers(); }catch(_){}
     try{ _updatePlanBadges(); }catch(_){}
-    _firstRemoteLoaded = true; // [R-071] Firestore 첫 동기화 완료
     console.log('🔄 다른 기기에서 데이터가 업데이트됐어요');
     return;
   }
-  // dirty 경로에서도 원격 데이터를 받았으므로 플래그 세팅
-  _firstRemoteLoaded = true;
 
   // 로컬 dirty 상태 — 부분 sync: 원격에서 도착한 보상 승인/거절/활동 승인 등
   // "다른 사용자가 나에게 해준 변경"은 놓치면 안 되므로 타겟 필드만 안전하게 반영
@@ -10249,44 +10278,8 @@ function _applyRemoteSnap(snap){
       }
     }
   }catch(e){ console.warn('[_applyRemoteSnap] memberData merge error:', e); }
-  // ★ [R-071] memberData pts/log/streak — dirty 상태에서도 다른 기기의 활동 기록 반영
-  //   원격 log가 로컬보다 길면(append-only) 원격이 더 최신 → 원격 값 수용
-  //   이렇게 해야 save() 시 syncGlobalToMember가 stale한 S.pts를 memberData에 덮어쓰는 것을 방지
-  try{
-    if(_sd.memberData && S.memberData){
-      const _myMid = _globalDataOwner || currentUser;
-      for(const [_rmid, _rmd] of Object.entries(_sd.memberData)){
-        if(!S.memberData[_rmid]) continue;
-        const _lmd = S.memberData[_rmid];
-        const _rLogLen = (_rmd.log||[]).length;
-        const _lLogLen = (_lmd.log||[]).length;
-        // 원격 log가 로컬보다 길거나 같으면서 pts가 다르면 → 원격이 더 최신
-        if(_rLogLen >= _lLogLen && _rmd.pts !== undefined && _rmd.pts !== _lmd.pts){
-          _lmd.pts = _rmd.pts;
-          if(_rmid === _myMid){ S.pts = _rmd.pts; }
-          _needRender = true;
-        }
-        if(_rLogLen > _lLogLen){
-          _lmd.log = _rmd.log;
-          if(_rmid === _myMid){ S.log = _rmd.log; }
-          if(_rmd.totalDone !== undefined){ _lmd.totalDone = _rmd.totalDone; if(_rmid === _myMid) S.totalDone = _rmd.totalDone; }
-          if(_rmd.lastDate !== undefined){ _lmd.lastDate = _rmd.lastDate; if(_rmid === _myMid) S.lastDate = _rmd.lastDate; }
-          _needRender = true;
-        }
-        if(_rmd.streak !== undefined && _rmd.streak !== _lmd.streak){
-          _lmd.streak = _rmd.streak;
-          if(_rmid === _myMid){ S.streak = _rmd.streak; }
-        }
-        // rewardLog도 동기화 (교환/환불 기록)
-        const _rRwdLen = (_rmd.rewardLog||[]).length;
-        const _lRwdLen = (_lmd.rewardLog||[]).length;
-        if(_rRwdLen > _lRwdLen){
-          _lmd.rewardLog = _rmd.rewardLog;
-          if(_rmid === _myMid){ S.rewardLog = _rmd.rewardLog; }
-        }
-      }
-    }
-  }catch(e){ console.warn('[_applyRemoteSnap] memberData pts/log merge error:', e); }
+  // v0416k memberData dirty merge 제거 (v0417a) — 사고7의 잘못된 가설에 기반했음
+  // 원래의 non-dirty 경로(S = Object.assign)가 정상적으로 전체 데이터를 반영
   if(_needRender){
     try{ if(typeof renderRewardInventory==='function') renderRewardInventory(); }catch(_){}
     try{ if(typeof renderAll==='function') renderAll(); }catch(_){}
@@ -10294,11 +10287,6 @@ function _applyRemoteSnap(snap){
 }
 
 function save(){
-  // [R-071] Firestore 첫 동기화 전에는 save 차단 — cache-first boot의 stale 데이터가 서버를 덮어쓰는 것 방지
-  if(!_firstRemoteLoaded){
-    console.warn('[save] BLOCKED: Firestore 첫 동기화 전 — stale cache 보호');
-    return;
-  }
   // independent 모드에서 양육자가 자녀 데이터를 보고 있으면 해당 자녀에게 저장
   // ⚠️ 반드시 _globalDataOwner만 사용 — viewingChildId를 fallback으로 쓰면
   //   아직 syncMemberToGlobal이 안 된 상태에서 엉뚱한 자녀에게 S 데이터가 덮어씌워짐
@@ -19389,6 +19377,11 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.4.42 (v0417a)',date:'2026-04-17',items:[
+    '[FIX] 사고7 재발 방지 — saveFamilyToFirestore()에서 레거시 문서에 _migratedTo 포인터 자동 설정',
+    '[FIX] cold start auth registry fallback — localStorage.family_id 소실 시 Firebase UID로 가족 문서 자동 복구',
+    '[PERF] v0416k 잘못된 가설 기반 코드 제거 — _firstRemoteLoaded save() guard, dirty merge memberData 코드 삭제로 boot 속도 복원',
+  ]},
   {ver:'2.4.41 (v0416k)',date:'2026-04-16',items:[
     '[FIX] 기기간 마일리지 동기화 버그 수정 — dirty 상태에서 memberData pts/log/streak가 머지되지 않아 구 캐시가 서버 덮어쓰던 문제 해결',
     '[FIX] Firestore 첫 동기화 전 save() 차단 — stale localStorage 캐시가 서버 데이터를 덮어쓰는 것을 방지',
@@ -24733,6 +24726,8 @@ window._createState = _createState;
   if(_firebaseReady) updateDataDoc();
   // 레거시 계정이 다른 기기에서 마이그레이션됐으면 포인터 따라가기
   if(_firebaseReady && !_familyId) await _checkLegacyMigrationPointer();
+  // auth registry fallback: _migratedTo도 없고 family_id도 없을 때 인증된 사용자면 registry 확인
+  if(_firebaseReady && !_familyId) await _checkAuthRegistryOnBoot();
 
   try{
     // Load initial data from Firestore
@@ -24742,7 +24737,6 @@ window._createState = _createState;
       S = Object.assign(defaultState(), data);
       _lastSavedJSON = JSON.stringify(S); // Firestore 로드 직후 상태 기록 (불필요한 save 방지)
       _lastSaveTime = Date.now();
-      _firstRemoteLoaded = true; // [R-071] Firestore에서 직접 로드 완료
     } else if(_familyId) {
       // 가족 문서가 없어짐 — stale localStorage 정리 후 레거시 doc으로 폴백
       console.warn('[mile.ly] Family doc not found, clearing stale family_id:', _familyId);
@@ -25103,39 +25097,7 @@ window._createState = _createState;
               }
             }
           }catch(_e){}
-          // ★ [R-071] memberData pts/log/streak — dirty 상태에서도 다른 기기의 활동 기록 반영
-          try{
-            if(incoming.memberData && S.memberData){
-              const _myMid = (typeof _globalDataOwner!=='undefined' && _globalDataOwner) || currentUser;
-              for(const [_rmid, _rmd] of Object.entries(incoming.memberData)){
-                if(!S.memberData[_rmid]) continue;
-                const _lmd = S.memberData[_rmid];
-                const _rLogLen = (_rmd.log||[]).length;
-                const _lLogLen = (_lmd.log||[]).length;
-                if(_rLogLen >= _lLogLen && _rmd.pts !== undefined && _rmd.pts !== _lmd.pts){
-                  _lmd.pts = _rmd.pts;
-                  if(_rmid === _myMid){ S.pts = _rmd.pts; }
-                }
-                if(_rLogLen > _lLogLen){
-                  _lmd.log = _rmd.log;
-                  if(_rmid === _myMid){ S.log = _rmd.log; }
-                  if(_rmd.totalDone !== undefined){ _lmd.totalDone = _rmd.totalDone; if(_rmid === _myMid) S.totalDone = _rmd.totalDone; }
-                  if(_rmd.lastDate !== undefined){ _lmd.lastDate = _rmd.lastDate; if(_rmid === _myMid) S.lastDate = _rmd.lastDate; }
-                }
-                if(_rmd.streak !== undefined && _rmd.streak !== _lmd.streak){
-                  _lmd.streak = _rmd.streak;
-                  if(_rmid === _myMid){ S.streak = _rmd.streak; }
-                }
-                const _rRwdLen = (_rmd.rewardLog||[]).length;
-                const _lRwdLen = (_lmd.rewardLog||[]).length;
-                if(_rRwdLen > _lRwdLen){
-                  _lmd.rewardLog = _rmd.rewardLog;
-                  if(_rmid === _myMid){ S.rewardLog = _rmd.rewardLog; }
-                }
-              }
-              renderAll();
-            }
-          }catch(_e2){ console.warn('[boot onSnapshot] memberData pts/log merge error:', _e2); }
+          // v0416k dirty merge memberData 코드 제거 (v0417a) — 사고7의 잘못된 가설에 기반했음
         }catch(e){}
         console.log('🛡️ 로컬 변경 보호: 외부 변경 일부만 머지');
         return;
@@ -25144,7 +25106,6 @@ window._createState = _createState;
       // Another device changed the data — apply it
       S = Object.assign(defaultState(), snap.data());
       _lastSavedJSON = incomingJSON;
-      _firstRemoteLoaded = true; // [R-071] Firestore 동기화 완료
       rebuildMembersFromFamily();
       // 독립 모드: 올바른 구성원의 memberData를 글로벌에 복원
       if(getFamilyMode()==='independent'){
