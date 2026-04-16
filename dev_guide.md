@@ -714,6 +714,22 @@ git add index.html && git commit -m "운영기 배포: ..." && git push
 
 ## 8. 과거 사고 사례 및 교훈
 
+### 사고 7: 기기간 마일리지 동기화 불일치 — dirty merge memberData 누락 (2026-04-16, v0416k)
+- **증상**: 아이폰에서 마일리지 810, 다른 기기(태민 기기, 아이패드)에서 1236. 아이폰에서 최근활동 2개, 다른 기기에서 9개. 아이폰이 "별동대"처럼 독립적으로 동작.
+- **근본 원인**: `_hasDirtyLocal=true`(로컬에 미저장 변경이 있는 상태)일 때 onSnapshot의 dirty 브랜치가 familyMessages, stickers, photos 등은 머지하면서 **memberData의 pts/log/streak는 머지하지 않음**. 아이폰이 구 캐시(localStorage)에서 부팅 → dirty 플래그 세팅 → 서버 스냅샷이 와도 memberData 갱신 안 됨 → 구 캐시의 pts=810을 save()로 서버에 덮어씀.
+- **피해**: 서버 데이터가 810으로 덮어쓰여짐 (정상 1236). 활동 기록 7건 손실.
+- **긴급 복구**: diag.html(App Check + anonymous auth)로 서버 데이터 확인 후, Chrome DevTools에서 Firebase `updateDoc`으로 pts와 memberData.taemin.pts를 1236으로 수동 복구.
+- **코드 수정 (v0416k, PR #393)**:
+  1. `_applyRemoteSnap` dirty 브랜치에 memberData pts/log/streak/rewardLog 머지 추가
+  2. main boot onSnapshot dirty 브랜치에 동일한 memberData 머지 추가
+  3. `_firstRemoteLoaded` 플래그: Firestore 첫 동기화 완료 전 save() 차단 — stale cache 보호
+  4. 인라인 onSnapshot 3개를 `_applyRemoteSnap(snap)` 호출로 통합
+  5. `_loginToFamily`에서 independent 모드 caregiver도 `syncMemberToGlobal()` 호출
+- **교훈**:
+  1. `_hasDirtyLocal` dirty merge는 **모든 데이터 유형**을 커버해야 한다. 메시지만 머지하고 핵심 데이터(pts/log)를 빠뜨리면 구 캐시가 서버를 덮어쓴다.
+  2. localStorage cache-first 부팅은 stale 데이터 위험이 항상 있다. Firestore 동기화 전에는 save()를 차단해야 한다.
+  3. onSnapshot 리스너가 여러 곳에 분산되면 하나만 고쳐도 나머지에서 같은 버그가 발생한다. 중앙 함수(`_applyRemoteSnap`)로 통합이 필요하다.
+
 ### 사고 5: iPhone PWA 콜드스타트 auth race (2026-04-08, v0408z5)
 - **증상**: iPhone PWA 콜드스타트 시 `permission-denied` 에러 연속 발생 → "오프라인 모드" toast. Mac Chrome에서는 정상 동작.
 - **디버그**: v0408z4에서 `console.error` + `window._lastFirebaseError`로 진단 로그 추가. 스크린샷에서 `auth_uid: null` 확인 — Firebase auth 세션이 복구되지 않은 상태에서 `getDoc(DATA_DOC)`이 발사됨.
