@@ -27,7 +27,7 @@ th{background:#f1f5f9;font-weight:600}
 
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getFirestore, doc, getDoc, collection, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { getFirestore, doc, getDoc, collection, getDocs, query, where } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 import { initializeAppCheck, ReCaptchaEnterpriseProvider } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check.js';
 
@@ -70,6 +70,26 @@ try {
   // 3. families 컬렉션에서 관련 문서 찾기 — registry 확인
   const prodRegistry = await getDoc(doc(db, 'families', '_id_registry'));
   const devRegistry = await getDoc(doc(db, 'families', '_dev_id_registry'));
+
+  // ★ AUTH REGISTRY — UID → familyId/memberId 매핑
+  const prodAuthRegistry = await getDoc(doc(db, 'families', '_auth_registry'));
+  const devAuthRegistry = await getDoc(doc(db, 'families', '_dev_auth_registry'));
+  window._prodAuthRegistry = prodAuthRegistry.exists() ? prodAuthRegistry.data() : null;
+  window._devAuthRegistry = devAuthRegistry.exists() ? devAuthRegistry.data() : null;
+
+  // ★ families 컬렉션 전체 스캔 — 모든 문서 가져오기
+  statusEl.textContent = 'families 컬렉션 전체 스캔 중...';
+  let allFamilyDocs = {};
+  try {
+    const familiesSnap = await getDocs(collection(db, 'families'));
+    familiesSnap.forEach(docSnap => {
+      const id = docSnap.id;
+      // registry/내부 문서 제외
+      if(id.startsWith('_')) return;
+      allFamilyDocs[id] = docSnap.data();
+    });
+  } catch(e) { console.warn('families scan failed (permission?):', e); }
+  window._allFamilyDocs = allFamilyDocs;
 
   // 4. 레거시 문서의 _migratedTo 확인
   let migratedTo = null;
@@ -119,6 +139,12 @@ try {
   }
 
   statusEl.textContent = '✅ 데이터 로드 완료';
+
+  // renderRecent 기준 (어제 0시) — 여러 섹션에서 사용
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate()-1);
+  cutoff.setHours(0,0,0,0);
+  const cutoffTs = cutoff.getTime();
 
   // ★ 글로벌 노출 — JavaScript 콘솔에서 접근 가능
   window._prodDoc = legacySnap.exists() ? legacySnap.data() : null;
@@ -247,10 +273,73 @@ try {
     html += analyzeDoc('🟡 개발기 레거시', devLegacySnap.data(), 'users/taemin_dev');
   }
 
-  // families 문서
+  // families 문서 (registry/migration pointer로 찾은 것)
   for(const [fid, fdata] of Object.entries(familyDocs)) {
     html += analyzeDoc(`🟢 families/${fid}`, fdata, `families/${fid}`);
   }
+
+  // ★ families 전체 스캔에서 taemin이 있는 문서 상세 분석
+  for(const [fid, fdata] of Object.entries(allFamilyDocs)) {
+    if(familyDocs[fid]) continue; // 이미 위에서 표시한 것은 스킵
+    if(fdata.memberData && fdata.memberData.taemin) {
+      html += analyzeDoc(`🔴 families/${fid} (taemin 데이터 포함!)`, fdata, `families/${fid}`);
+    }
+  }
+
+  // ★ AUTH REGISTRY (가장 중요 — 어떤 UID가 어떤 families 문서를 가리키는지)
+  html += '<div class="card" style="border:3px solid #ef4444"><h2>🔑 Auth Registry (UID → familyId 매핑)</h2>';
+  if(prodAuthRegistry.exists()) {
+    html += '<h3>운영기 Auth Registry</h3><table><tr><th>UID</th><th>familyId</th><th>memberId</th><th>provider</th><th>email</th></tr>';
+    for(const [uid, info] of Object.entries(prodAuthRegistry.data())) {
+      html += `<tr><td style="font-size:11px">${uid}</td><td><b>${info.familyId||'-'}</b></td><td>${info.memberId||'-'}</td><td>${info.provider||'-'}</td><td>${info.email||'-'}</td></tr>`;
+    }
+    html += '</table>';
+  } else { html += '<p>운영기 Auth Registry 없음</p>'; }
+  if(devAuthRegistry.exists()) {
+    html += '<h3>개발기 Auth Registry</h3><table><tr><th>UID</th><th>familyId</th><th>memberId</th><th>provider</th><th>email</th></tr>';
+    for(const [uid, info] of Object.entries(devAuthRegistry.data())) {
+      html += `<tr><td style="font-size:11px">${uid}</td><td><b>${info.familyId||'-'}</b></td><td>${info.memberId||'-'}</td><td>${info.provider||'-'}</td><td>${info.email||'-'}</td></tr>`;
+    }
+    html += '</table>';
+  }
+  html += '</div>';
+
+  // ★ families 컬렉션 전체 — taemin 데이터가 있는 문서 찾기
+  html += '<div class="card" style="border:3px solid #f59e0b"><h2>📂 families 컬렉션 전체 스캔</h2>';
+  html += `<p>총 ${Object.keys(allFamilyDocs).length}개 families 문서 발견</p>`;
+  for(const [fid, fdata] of Object.entries(allFamilyDocs)) {
+    const hasTaemin = fdata.memberData && fdata.memberData.taemin;
+    const hasDad = fdata.memberData && fdata.memberData.dad;
+    const hasMom = fdata.memberData && fdata.memberData.mom;
+    const hasFamilyMeta = !!fdata.familyMeta;
+    const logCount = hasTaemin ? (fdata.memberData.taemin.log||[]).length : 0;
+    const pts = hasTaemin ? fdata.memberData.taemin.pts : '-';
+    const recentCount = hasTaemin ? (fdata.memberData.taemin.log||[]).filter(l => l.ts >= cutoffTs).length : 0;
+
+    const style = hasTaemin ? 'background:#fef3c7' : '';
+    html += `<div style="padding:8px;margin:4px 0;border-radius:8px;${style}">`;
+    html += `<b>families/${fid}</b>`;
+    html += ` | taemin:${hasTaemin?'✅':'❌'} dad:${hasDad?'✅':'❌'} mom:${hasMom?'✅':'❌'}`;
+    html += ` | familyMeta:${hasFamilyMeta?'✅':'❌'}`;
+    if(hasTaemin) {
+      html += `<br>&nbsp;&nbsp;→ taemin: pts=<b>${pts}</b>, log=<b>${logCount}건</b>, <span style="color:#dc2626;font-weight:700">최근활동=${recentCount}건</span>`;
+      // 최근 3건 표시
+      const recent3 = (fdata.memberData.taemin.log||[]).filter(l => l.ts >= cutoffTs).slice(0,5);
+      if(recent3.length) {
+        html += '<br>&nbsp;&nbsp;→ 최근: ' + recent3.map(l => `${l.emoji||''} ${l.name} +${l.pts} (${new Date(l.ts).toLocaleString('ko')})`).join(', ');
+      }
+    }
+    if(fdata.familyMeta) {
+      html += `<br>&nbsp;&nbsp;→ familyName: ${fdata.familyMeta.familyName||'-'}, mode: ${fdata.familyMeta.mode||'-'}`;
+      if(fdata.familyMeta.members) {
+        const memberNames = Object.entries(fdata.familyMeta.members).map(([mid,m])=>`${mid}(${m.name||'-'})`).join(', ');
+        html += `, members: ${memberNames}`;
+      }
+    }
+    html += '</div>';
+  }
+  // cutoffTs를 여기서도 미리 계산 (아래 심층분석에서도 사용)
+  html += '</div>';
 
   // Registry 정보
   html += '<div class="card"><h2>📋 ID Registry</h2>';
@@ -298,11 +387,6 @@ try {
     }
     html += '</table>';
 
-    // renderRecent 기준 (어제 0시) 계산
-    const cutoff = new Date();
-    cutoff.setDate(cutoff.getDate()-1);
-    cutoff.setHours(0,0,0,0);
-    const cutoffTs = cutoff.getTime();
     const recentS = sLog.filter(l => l.ts >= cutoffTs);
     const recentMd = mdLog.filter(l => l.ts >= cutoffTs);
     html += `<h3>renderRecent() 기준 (${cutoff.toLocaleDateString('ko')} 이후)</h3>`;
