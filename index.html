@@ -1702,24 +1702,6 @@ body.dark .family-popup-avatar{border-color:rgba(255,255,255,.25)}
 .avatar-preview-sm img{width:100%;height:100%;object-fit:cover}
 
 /* ========================================
-   RESPONSIVE: PORTRAIT OVERRIDE
-   세로 모드(portrait)에서는 사이드바 숨기고 하단 네비로 복귀
-   ======================================== */
-@media(min-width:768px) and (orientation:portrait){
-  body{display:block!important;max-width:100%!important;margin:0!important}
-  .nav-container{position:fixed!important;bottom:0!important;top:auto!important;left:0!important;right:0!important;transform:none!important;width:100%!important;height:auto!important;z-index:100}
-  .nav-container.docked{bottom:0!important;width:100%!important}
-  .bottom-nav{flex-direction:row!important;align-items:center!important;gap:0!important;border-radius:var(--r) 20px 0 0!important;padding:8px 8px max(calc(8px + env(safe-area-inset-bottom, 0px)), calc(8px + var(--android-nav-inset, 0px)), calc(8px + var(--native-nav-bar-h, 0px)))!important;height:auto!important;background:var(--card)!important;border:none!important;border-top:.5px solid var(--bdr)!important;border-right:none!important;box-shadow:0 -4px 20px rgba(0,0,0,.06)!important;justify-content:center!important;width:100%!important}
-  .bottom-nav::before{display:none!important}
-  .nav-item{padding:8px 12px!important;border-radius:var(--rsm)!important;flex-direction:column!important;justify-content:center!important;gap:2px!important}
-  .nav-item .nav-label{font-size:var(--fs-xs)!important;font-weight:700!important;max-width:none!important;opacity:1!important;margin-left:0!important}
-  .scr{margin-left:0!important;width:100%!important;max-width:100%!important;padding-bottom:calc(80px + env(safe-area-inset-bottom))!important}
-  #s-badge,#s-privacy,#s-terms{margin-left:0!important;width:100%!important}
-  .nav-users{flex-direction:row!important;gap:0!important}
-  .nav-divider{width:1px!important;height:22px!important;margin:0 4px!important}
-}
-
-/* ========================================
    RESPONSIVE: TABLET (768px+)
    ======================================== */
 @media(min-width:768px){
@@ -1862,30 +1844,13 @@ body.dark .family-popup-avatar{border-color:rgba(255,255,255,.25)}
 }
 
 /* ========================================
-   PORTRAIT TABLET RESET (768-1023px portrait)
-   세로모드에서 사이드바 레이아웃 제거 → 솔리드 하단 바 (바닥 밀착)
+   WIDE PORTRAIT (580-1023px portrait)
+   갤럭시 폴드 펼친 세로 + 태블릿 세로 공통
+   — 카드 레이아웃만 태블릿(4열)으로 변경
+   — 네비게이션은 폰 스타일 그대로 유지
    ======================================== */
-@media(min-width:768px) and (max-width:1023px) and (orientation:portrait){
-  body{display:block!important;max-width:100%!important;margin:0!important}
-  .nav-container{position:fixed!important;bottom:0!important;left:0!important;right:0!important;transform:none!important;width:100%!important;height:auto!important;max-width:100%!important;background:var(--card)!important}
-  .nav-container.docked{bottom:0!important;left:0!important;right:0!important;width:100%!important;max-width:100%!important;transform:none!important;background:var(--card)!important}
-  .bottom-nav{flex-direction:row!important;align-items:center!important;border-right:none!important;border-radius:0!important;height:auto!important;padding:8px 8px max(calc(8px + env(safe-area-inset-bottom, 0px)), calc(8px + var(--android-nav-inset, 0px)), calc(8px + var(--native-nav-bar-h, 0px)))!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:var(--card)!important;box-shadow:0 -4px 20px rgba(0,0,0,.06)!important;border-top:.5px solid var(--bdr)!important;justify-content:center!important}
-  .nav-container.docked .bottom-nav{border-radius:0!important;padding:8px 8px max(calc(8px + env(safe-area-inset-bottom, 0px)), calc(8px + var(--android-nav-inset, 0px)), calc(8px + var(--native-nav-bar-h, 0px)))!important;background:var(--card)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;justify-content:center!important;border-right:none!important;box-shadow:0 -4px 20px rgba(0,0,0,.06)!important;border-top:.5px solid var(--bdr)!important}
-  .bottom-nav::before{display:none!important}
-  .nav-brand{border-bottom:none!important;margin-bottom:0!important;padding-bottom:12px!important}
-  .nav-item{padding:10px 14px!important;justify-content:center!important;flex-direction:column!important;gap:3px!important}
-  .nav-item .nav-label{opacity:1!important;max-width:none!important;font-size:var(--fs-sm)!important;margin-left:0!important}
-  .scr{margin-left:0!important;width:100%!important;max-width:100%!important;margin-right:auto!important;padding-bottom:calc(80px + env(safe-area-inset-bottom))!important}
-  #s-badge,#s-privacy,#s-terms{margin-left:0!important;width:100%!important;max-width:100%!important}
-  .auth-screen{margin-left:0!important;width:100%!important}
-}
-
-/* ========================================
-   FOLD UNFOLDED PORTRAIT (580-767px portrait)
-   갤럭시 폴드 펼친 세로: 태블릿 카드 레이아웃 + 하단 바 네비게이션
-   ======================================== */
-@media(min-width:580px) and (max-width:767px) and (orientation:portrait){
-  /* 4-column grids — 태블릿과 동일한 카드 배치 */
+@media(min-width:580px) and (orientation:portrait){
+  /* 4-column grids */
   .act-grid{grid-template-columns:repeat(4,1fr)!important;gap:12px;margin:0 16px 16px}
   .rwd-grid{grid-template-columns:repeat(4,1fr)!important;gap:12px;margin:0 16px 16px}
   /* 통계 카드 2열 */
@@ -1894,7 +1859,6 @@ body.dark .family-popup-avatar{border-color:rgba(255,255,255,.25)}
   /* 대시보드 masonry 2열 */
   #dash-p0 .dash-masonry{columns:2!important;column-gap:14px}
 }
-
 /* ========================================
    RESPONSIVE: DESKTOP (1024px+)
    ======================================== */
@@ -2077,6 +2041,50 @@ body.dark .family-popup-avatar{border-color:rgba(255,255,255,.25)}
   #dash-p0 .dash-full-row{padding:0 28px}
   #dash-p0 .dash-masonry{columns:3;column-gap:24px;padding:0 28px}
   #dash-p0 .dash-brick .card{margin:0 0 18px}
+}
+
+/* ========================================
+   PORTRAIT RESET: 768px+ 세로 → 사이드바 해제, 폰 floating pill nav
+   ★ 반드시 1024px+ 블록 뒤에 위치해야 cascade로 사이드바를 덮어씀
+   ★ 모든 세로 태블릿(768px~어떤 너비든) 커버
+   ======================================== */
+@media(min-width:768px) and (orientation:portrait){
+  body{display:block!important;max-width:100%!important;margin:0!important}
+
+  /* nav-container floating (폰 기본과 동일) */
+  .nav-container{position:fixed!important;bottom:max(calc(28px + var(--android-nav-inset, 0px)), calc(28px + var(--native-nav-bar-h, 0px)))!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important;top:auto!important;width:auto!important;max-width:calc(100vw - 24px)!important;height:auto!important;background:transparent!important}
+
+  /* nav-container docked (폰 기본과 동일) */
+  .nav-container.docked{bottom:0!important;left:0!important;right:0!important;transform:none!important;width:100%!important;max-width:100%!important;display:flex!important;justify-content:center!important;background:transparent!important}
+
+  /* bottom-nav: glass pill (폰 기본과 동일) */
+  .bottom-nav{flex-direction:row!important;align-items:center!important;gap:3px!important;background:color-mix(in srgb,var(--tab-color,var(--or)) 6%,rgba(255,255,255,.95))!important;backdrop-filter:blur(24px) saturate(180%)!important;-webkit-backdrop-filter:blur(24px) saturate(180%)!important;border:1px solid color-mix(in srgb,var(--tab-color,var(--or)) 12%,rgba(0,0,0,.04))!important;border-radius:var(--rxl)!important;padding:10px 10px!important;box-shadow:0 4px 20px color-mix(in srgb,var(--tab-color,var(--or)) 12%,rgba(0,0,0,.1)),0 12px 40px rgba(0,0,0,.08)!important;width:auto!important;height:auto!important;border-right:none!important;box-sizing:border-box!important;justify-content:initial!important}
+  body.dark .bottom-nav{background:color-mix(in srgb,var(--tab-color,var(--or)) 10%,rgba(20,30,50,.95))!important;border-color:color-mix(in srgb,var(--tab-color,var(--or)) 15%,rgba(255,255,255,.06))!important;box-shadow:0 4px 20px rgba(0,0,0,.3),0 12px 40px rgba(0,0,0,.2)!important}
+
+  /* bottom-nav docked (폰 기본과 동일) */
+  .nav-container.docked .bottom-nav{border-radius:0!important;padding:8px 8px max(calc(8px + env(safe-area-inset-bottom, 0px)), calc(8px + var(--android-nav-inset, 0px)), calc(8px + var(--native-nav-bar-h, 0px)))!important;gap:2px!important;box-sizing:border-box!important;justify-content:center!important;width:100%!important;background:var(--tab-lt,var(--or-lt))!important;border-color:transparent!important;border:none!important;box-shadow:none!important}
+  body.dark .nav-container.docked .bottom-nav{background:linear-gradient(var(--tab-lt-dk,rgba(99,102,241,.15)),var(--tab-lt-dk,rgba(99,102,241,.15))),rgba(15,23,42,.95)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+
+  /* 사이드바 요소 숨김 */
+  .bottom-nav::before{display:none!important}
+  .nav-brand,.sidebar,.side-menu{display:none!important}
+
+  /* nav-item: 폰 기본 (아이콘만, active만 라벨) */
+  .nav-item{display:flex!important;align-items:center!important;justify-content:center!important;flex-direction:row!important;gap:5px!important;padding:12px 12px!important;border-radius:var(--r)!important;min-height:50px!important;flex-shrink:1!important}
+  .nav-item svg{width:26px!important;height:26px!important}
+  .nav-item .nav-label{font-size:var(--fs-base)!important;font-weight:700!important;max-width:0!important;overflow:hidden!important;white-space:nowrap!important;opacity:0!important;margin-left:0!important}
+  .nav-item:not(.active) .nav-label{max-width:0!important;opacity:0!important}
+  .nav-item.active{padding:12px 12px!important}
+  .nav-item.active .nav-label{max-width:40px!important;opacity:1!important;margin-left:2px!important}
+
+  /* 콘텐츠 영역: 사이드바 마진 제거 */
+  .scr{margin-left:0!important;width:100%!important;max-width:100%!important;padding-bottom:110px!important}
+  #s-badge,#s-privacy,#s-terms{margin-left:0!important;width:100%!important;max-width:100%!important}
+  .auth-screen{margin-left:0!important;width:100%!important}
+
+  /* 사용자 아바타: 가로 배치 */
+  .nav-users{flex-direction:row!important;gap:0!important}
+  .nav-divider{width:1px!important;height:22px!important;margin:0 4px!important}
 }
 
 /* ========================================
@@ -2856,8 +2864,11 @@ button:disabled {
              hero-pts-glow   0.55s ease-out;
 }
 
-/* ── 세로모드 최종 보루 (PORTRAIT SAFETY — 항상 마지막 적용) ── */
-@media (max-width: 767px), (orientation: portrait) and (max-width: 1023px) {
+/* ── 세로모드 최종 보루 (PHONE SAFETY — 폰에서만 적용) ── */
+/* ★ v0416g: 768-1023px portrait은 L1868 PORTRAIT TABLET RESET에서 별도 처리.
+   기존 (orientation:portrait) and (max-width:1023px) 조건이 L1868 CSS를 덮어쓰는
+   cascade 문제를 해결하기 위해, 이 블록은 폰(max-width:767px)에만 적용. */
+@media (max-width: 767px) {
   /* 플로팅 상태: 중앙 정렬 */
   .nav-container{position:fixed!important;bottom:28px!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important;top:auto!important;width:auto!important;max-width:calc(100vw - 24px)!important;height:auto!important;}
   /* 도킹 상태: 전체 너비 하단 고정 */
@@ -6721,23 +6732,7 @@ async function saveFamilyToFirestore(){
     // ★ 새 가족 문서에 대한 실시간 리스너 설정
     if(DATA_DOC && onSnapshot){
       try{
-        _dataListenerUnsub = onSnapshot(DATA_DOC, (snap)=>{
-          if(!snap.exists()) return;
-          if(_isSaving) return;
-          if(Date.now()-_lastSaveTime<2000) return;
-          const _ij=JSON.stringify(snap.data());
-          if(_ij===_lastSavedJSON||_ij===JSON.stringify(S)) return;
-          if(!_hasDirtyLocal){
-            S=Object.assign(defaultState(),snap.data());
-            _lastSavedJSON=_ij;
-            rebuildMembersFromFamily();
-            renderAll();
-            checkNewMessages();
-            renderNavUsers();
-            try{_updatePlanBadges();}catch(e){}
-            console.log('🔄 다른 기기에서 데이터가 업데이트됐어요');
-          }else{const _sd=snap.data();if(_sd.familyMessages&&JSON.stringify(_sd.familyMessages)!==JSON.stringify(S.familyMessages)){S.familyMessages=_sd.familyMessages;checkNewMessages();_updateFamilyBtnBadge();}if(_sd.actVerifyRequests&&JSON.stringify(_sd.actVerifyRequests)!==JSON.stringify(S.actVerifyRequests)){S.actVerifyRequests=_sd.actVerifyRequests;try{_updateFamilyBtnBadge();}catch(_){}}if(_sd.rewardRequests&&JSON.stringify(_sd.rewardRequests)!==JSON.stringify(S.rewardRequests)){S.rewardRequests=_sd.rewardRequests;}}
-        });
+        _dataListenerUnsub = onSnapshot(DATA_DOC, (snap)=>{ _applyRemoteSnap(snap); });
         console.log('[saveFamilyToFirestore] New listener on', docPath);
       }catch(_e){ console.warn('New family listener failed:', _e); }
     }
@@ -7474,6 +7469,7 @@ async function doLogin(idField, pwdField, errField){
                 // 해당 가족으로 전환하고 로그인
                 await save();
                 S = Object.assign(defaultState(), familyData);
+                _firstRemoteLoaded = true; // [R-071]
                 _familyId = otherFamilyPath;
                 DATA_DOC = familyDoc;
                 localStorage.setItem(_LS_PREFIX+'family_id', otherFamilyPath);
@@ -7483,7 +7479,7 @@ async function doLogin(idField, pwdField, errField){
                 await save();
                 // 리스너를 새 DATA_DOC으로 재연결
                 if(_dataListenerUnsub){try{_dataListenerUnsub();}catch(_e){}}
-                try{_dataListenerUnsub=onSnapshot(DATA_DOC,(snap)=>{if(!snap.exists())return;if(_isSaving)return;if(Date.now()-_lastSaveTime<2000)return;const _ij=JSON.stringify(snap.data());if(_ij===_lastSavedJSON||_ij===JSON.stringify(S))return;if(!_hasDirtyLocal){S=Object.assign(defaultState(),snap.data());_lastSavedJSON=_ij;rebuildMembersFromFamily();renderAll();checkNewMessages();renderNavUsers();}else{const _sd=snap.data();if(_sd.familyMessages&&JSON.stringify(_sd.familyMessages)!==JSON.stringify(S.familyMessages)){S.familyMessages=_sd.familyMessages;checkNewMessages();_updateFamilyBtnBadge();}if(_sd.actVerifyRequests&&JSON.stringify(_sd.actVerifyRequests)!==JSON.stringify(S.actVerifyRequests)){S.actVerifyRequests=_sd.actVerifyRequests;try{_updateFamilyBtnBadge();}catch(_){}}if(_sd.rewardRequests&&JSON.stringify(_sd.rewardRequests)!==JSON.stringify(S.rewardRequests)){S.rewardRequests=_sd.rewardRequests;}}});}catch(_e){}
+                try{_dataListenerUnsub=onSnapshot(DATA_DOC,(snap)=>{_applyRemoteSnap(snap);});}catch(_e){}
                 currentUser = otherMid;
                 localStorage.setItem(_LS_PREFIX+'current_user', otherMid);
                 syncMemberToGlobal();
@@ -8812,7 +8808,8 @@ async function _loginToFamily(familyId, memberId, authUid, provider, email, prof
     rebuildMembersFromFamily();
   } catch(e){ console.warn('[_loginToFamily] State setup warning:', e); }
   try {
-    if(!(getFamilyMode()==='independent'&&isCaregiverUser())) syncMemberToGlobal();
+    // [R-071] independent 모드 caregiver도 syncMemberToGlobal 필요 — postLoginInit에서 viewingChild 설정됨
+    syncMemberToGlobal();
   } catch(e){ console.warn('[_loginToFamily] syncMemberToGlobal warning:', e); }
   try { postLoginInit(); } catch(e){ console.warn('[_loginToFamily] postLoginInit warning:', e); }
   try { hideAllAuth(); } catch(e){ console.warn('[_loginToFamily] hideAllAuth warning:', e); }
@@ -8832,7 +8829,7 @@ async function _loginToFamily(familyId, memberId, authUid, provider, email, prof
   // 3단계: 리스너 연결 (실패해도 무시)
   try{
     if(_dataListenerUnsub){try{_dataListenerUnsub();}catch(_e){}}
-    _dataListenerUnsub=onSnapshot(DATA_DOC,(snap)=>{if(!snap.exists())return;if(_isSaving)return;if(Date.now()-_lastSaveTime<2000)return;const _ij=JSON.stringify(snap.data());if(_ij===_lastSavedJSON||_ij===JSON.stringify(S))return;if(!_hasDirtyLocal){S=Object.assign(defaultState(),snap.data());_lastSavedJSON=_ij;rebuildMembersFromFamily();renderAll();checkNewMessages();renderNavUsers();}else{const _sd=snap.data();if(_sd.familyMessages&&JSON.stringify(_sd.familyMessages)!==JSON.stringify(S.familyMessages)){S.familyMessages=_sd.familyMessages;checkNewMessages();_updateFamilyBtnBadge();}if(_sd.actVerifyRequests&&JSON.stringify(_sd.actVerifyRequests)!==JSON.stringify(S.actVerifyRequests)){S.actVerifyRequests=_sd.actVerifyRequests;try{_updateFamilyBtnBadge();}catch(_){}}if(_sd.rewardRequests&&JSON.stringify(_sd.rewardRequests)!==JSON.stringify(S.rewardRequests)){S.rewardRequests=_sd.rewardRequests;}}});
+    _dataListenerUnsub=onSnapshot(DATA_DOC,(snap)=>{_applyRemoteSnap(snap);});
   }catch(_e){console.warn('Snapshot listener failed:',_e);}
 }
 
@@ -9467,7 +9464,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'prod'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0416f';
+const _APP_VERSION = 'v0416k';
 // (v0415i) 운영기에서만 숨길 관리자 섹션 처리 — data-env-only="dev" 요소를 prod에서 숨김
 try{
   if(_ENV!=='dev'){
@@ -9936,6 +9933,7 @@ let _saveTimer = null;
 let _isSaving = false;      // true while a setDoc write is in-flight
 let _pendingSave = false;   // another save was requested while one was in-flight
 let _hasDirtyLocal = false; // true when local changes haven't been saved to Firestore yet
+let _firstRemoteLoaded = false; // [R-071] true after first Firestore snapshot received — save() blocked until then to prevent stale cache overwrite
 let _lastSavedJSON = '';    // tracks what we last wrote → prevents echo loop
 let _lastSaveTime = 0;      // timestamp of last save completion — cooldown for echo
 let _actAnimating = false;  // true during activity completion animation — blocks renderAll
@@ -10203,9 +10201,12 @@ function _applyRemoteSnap(snap){
     try{ checkNewMessages(); }catch(_){}
     try{ renderNavUsers(); }catch(_){}
     try{ _updatePlanBadges(); }catch(_){}
+    _firstRemoteLoaded = true; // [R-071] Firestore 첫 동기화 완료
     console.log('🔄 다른 기기에서 데이터가 업데이트됐어요');
     return;
   }
+  // dirty 경로에서도 원격 데이터를 받았으므로 플래그 세팅
+  _firstRemoteLoaded = true;
 
   // 로컬 dirty 상태 — 부분 sync: 원격에서 도착한 보상 승인/거절/활동 승인 등
   // "다른 사용자가 나에게 해준 변경"은 놓치면 안 되므로 타겟 필드만 안전하게 반영
@@ -10248,6 +10249,44 @@ function _applyRemoteSnap(snap){
       }
     }
   }catch(e){ console.warn('[_applyRemoteSnap] memberData merge error:', e); }
+  // ★ [R-071] memberData pts/log/streak — dirty 상태에서도 다른 기기의 활동 기록 반영
+  //   원격 log가 로컬보다 길면(append-only) 원격이 더 최신 → 원격 값 수용
+  //   이렇게 해야 save() 시 syncGlobalToMember가 stale한 S.pts를 memberData에 덮어쓰는 것을 방지
+  try{
+    if(_sd.memberData && S.memberData){
+      const _myMid = _globalDataOwner || currentUser;
+      for(const [_rmid, _rmd] of Object.entries(_sd.memberData)){
+        if(!S.memberData[_rmid]) continue;
+        const _lmd = S.memberData[_rmid];
+        const _rLogLen = (_rmd.log||[]).length;
+        const _lLogLen = (_lmd.log||[]).length;
+        // 원격 log가 로컬보다 길거나 같으면서 pts가 다르면 → 원격이 더 최신
+        if(_rLogLen >= _lLogLen && _rmd.pts !== undefined && _rmd.pts !== _lmd.pts){
+          _lmd.pts = _rmd.pts;
+          if(_rmid === _myMid){ S.pts = _rmd.pts; }
+          _needRender = true;
+        }
+        if(_rLogLen > _lLogLen){
+          _lmd.log = _rmd.log;
+          if(_rmid === _myMid){ S.log = _rmd.log; }
+          if(_rmd.totalDone !== undefined){ _lmd.totalDone = _rmd.totalDone; if(_rmid === _myMid) S.totalDone = _rmd.totalDone; }
+          if(_rmd.lastDate !== undefined){ _lmd.lastDate = _rmd.lastDate; if(_rmid === _myMid) S.lastDate = _rmd.lastDate; }
+          _needRender = true;
+        }
+        if(_rmd.streak !== undefined && _rmd.streak !== _lmd.streak){
+          _lmd.streak = _rmd.streak;
+          if(_rmid === _myMid){ S.streak = _rmd.streak; }
+        }
+        // rewardLog도 동기화 (교환/환불 기록)
+        const _rRwdLen = (_rmd.rewardLog||[]).length;
+        const _lRwdLen = (_lmd.rewardLog||[]).length;
+        if(_rRwdLen > _lRwdLen){
+          _lmd.rewardLog = _rmd.rewardLog;
+          if(_rmid === _myMid){ S.rewardLog = _rmd.rewardLog; }
+        }
+      }
+    }
+  }catch(e){ console.warn('[_applyRemoteSnap] memberData pts/log merge error:', e); }
   if(_needRender){
     try{ if(typeof renderRewardInventory==='function') renderRewardInventory(); }catch(_){}
     try{ if(typeof renderAll==='function') renderAll(); }catch(_){}
@@ -10255,6 +10294,11 @@ function _applyRemoteSnap(snap){
 }
 
 function save(){
+  // [R-071] Firestore 첫 동기화 전에는 save 차단 — cache-first boot의 stale 데이터가 서버를 덮어쓰는 것 방지
+  if(!_firstRemoteLoaded){
+    console.warn('[save] BLOCKED: Firestore 첫 동기화 전 — stale cache 보호');
+    return;
+  }
   // independent 모드에서 양육자가 자녀 데이터를 보고 있으면 해당 자녀에게 저장
   // ⚠️ 반드시 _globalDataOwner만 사용 — viewingChildId를 fallback으로 쓰면
   //   아직 syncMemberToGlobal이 안 된 상태에서 엉뚱한 자녀에게 S 데이터가 덮어씌워짐
@@ -19345,6 +19389,16 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.4.41 (v0416k)',date:'2026-04-16',items:[
+    '[FIX] 기기간 마일리지 동기화 버그 수정 — dirty 상태에서 memberData pts/log/streak가 머지되지 않아 구 캐시가 서버 덮어쓰던 문제 해결',
+    '[FIX] Firestore 첫 동기화 전 save() 차단 — stale localStorage 캐시가 서버 데이터를 덮어쓰는 것을 방지',
+  ]},
+  {ver:'2.4.40 (v0416j)',date:'2026-04-16',items:[
+    '[UI] 모든 세로모드(768px+ portrait) nav를 스마트폰과 동일하게 — 1024px+ 태블릿 세로에서도 사이드바 대신 floating pill',
+  ]},
+  {ver:'2.4.37 (v0416g)',date:'2026-04-16',items:[
+    '[UI] 적응형 UI 미적용 수정 — "세로모드 최종 보루" CSS가 태블릿 세로 설정을 덮어쓰던 cascade 버그 해결 (max-width:767px로 범위 축소)',
+  ]},
   {ver:'2.4.36 (v0416f)',date:'2026-04-16',items:[
     '[알림] 운영기 FCM 토큰 저장 실패 수정 — _familyId null인 레거시 사용자(users/taemin)에서 LEGACY_DOC 경로로 직접 저장',
     '[알림] _syncPushDeviceUser 레거시 경로 fallback 추가',
@@ -24688,6 +24742,7 @@ window._createState = _createState;
       S = Object.assign(defaultState(), data);
       _lastSavedJSON = JSON.stringify(S); // Firestore 로드 직후 상태 기록 (불필요한 save 방지)
       _lastSaveTime = Date.now();
+      _firstRemoteLoaded = true; // [R-071] Firestore에서 직접 로드 완료
     } else if(_familyId) {
       // 가족 문서가 없어짐 — stale localStorage 정리 후 레거시 doc으로 폴백
       console.warn('[mile.ly] Family doc not found, clearing stale family_id:', _familyId);
@@ -25048,6 +25103,39 @@ window._createState = _createState;
               }
             }
           }catch(_e){}
+          // ★ [R-071] memberData pts/log/streak — dirty 상태에서도 다른 기기의 활동 기록 반영
+          try{
+            if(incoming.memberData && S.memberData){
+              const _myMid = (typeof _globalDataOwner!=='undefined' && _globalDataOwner) || currentUser;
+              for(const [_rmid, _rmd] of Object.entries(incoming.memberData)){
+                if(!S.memberData[_rmid]) continue;
+                const _lmd = S.memberData[_rmid];
+                const _rLogLen = (_rmd.log||[]).length;
+                const _lLogLen = (_lmd.log||[]).length;
+                if(_rLogLen >= _lLogLen && _rmd.pts !== undefined && _rmd.pts !== _lmd.pts){
+                  _lmd.pts = _rmd.pts;
+                  if(_rmid === _myMid){ S.pts = _rmd.pts; }
+                }
+                if(_rLogLen > _lLogLen){
+                  _lmd.log = _rmd.log;
+                  if(_rmid === _myMid){ S.log = _rmd.log; }
+                  if(_rmd.totalDone !== undefined){ _lmd.totalDone = _rmd.totalDone; if(_rmid === _myMid) S.totalDone = _rmd.totalDone; }
+                  if(_rmd.lastDate !== undefined){ _lmd.lastDate = _rmd.lastDate; if(_rmid === _myMid) S.lastDate = _rmd.lastDate; }
+                }
+                if(_rmd.streak !== undefined && _rmd.streak !== _lmd.streak){
+                  _lmd.streak = _rmd.streak;
+                  if(_rmid === _myMid){ S.streak = _rmd.streak; }
+                }
+                const _rRwdLen = (_rmd.rewardLog||[]).length;
+                const _lRwdLen = (_lmd.rewardLog||[]).length;
+                if(_rRwdLen > _lRwdLen){
+                  _lmd.rewardLog = _rmd.rewardLog;
+                  if(_rmid === _myMid){ S.rewardLog = _rmd.rewardLog; }
+                }
+              }
+              renderAll();
+            }
+          }catch(_e2){ console.warn('[boot onSnapshot] memberData pts/log merge error:', _e2); }
         }catch(e){}
         console.log('🛡️ 로컬 변경 보호: 외부 변경 일부만 머지');
         return;
@@ -25056,6 +25144,7 @@ window._createState = _createState;
       // Another device changed the data — apply it
       S = Object.assign(defaultState(), snap.data());
       _lastSavedJSON = incomingJSON;
+      _firstRemoteLoaded = true; // [R-071] Firestore 동기화 완료
       rebuildMembersFromFamily();
       // 독립 모드: 올바른 구성원의 memberData를 글로벌에 복원
       if(getFamilyMode()==='independent'){
