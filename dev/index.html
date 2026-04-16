@@ -1867,12 +1867,12 @@ body.dark .family-popup-avatar{border-color:rgba(255,255,255,.25)}
    ======================================== */
 @media(min-width:768px) and (max-width:1023px) and (orientation:portrait){
   body{display:block!important;max-width:100%!important;margin:0!important}
-  .nav-container{position:fixed!important;bottom:0!important;left:0!important;right:0!important;transform:none!important;width:100%!important;height:auto!important;max-width:100%!important}
-  .nav-container.docked{bottom:0!important;left:0!important;right:0!important;width:100%!important;max-width:100%!important;transform:none!important}
+  .nav-container{position:fixed!important;bottom:0!important;left:0!important;right:0!important;transform:none!important;width:100%!important;height:auto!important;max-width:100%!important;background:var(--card)!important}
+  .nav-container.docked{bottom:0!important;left:0!important;right:0!important;width:100%!important;max-width:100%!important;transform:none!important;background:var(--card)!important}
   .bottom-nav{flex-direction:row!important;align-items:center!important;border-right:none!important;border-radius:0!important;height:auto!important;padding:8px 8px max(calc(8px + env(safe-area-inset-bottom, 0px)), calc(8px + var(--android-nav-inset, 0px)), calc(8px + var(--native-nav-bar-h, 0px)))!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:var(--card)!important;box-shadow:0 -4px 20px rgba(0,0,0,.06)!important;border-top:.5px solid var(--bdr)!important;justify-content:center!important}
   .nav-container.docked .bottom-nav{border-radius:0!important;padding:8px 8px max(calc(8px + env(safe-area-inset-bottom, 0px)), calc(8px + var(--android-nav-inset, 0px)), calc(8px + var(--native-nav-bar-h, 0px)))!important;background:var(--card)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;justify-content:center!important;border-right:none!important;box-shadow:0 -4px 20px rgba(0,0,0,.06)!important;border-top:.5px solid var(--bdr)!important}
   .bottom-nav::before{display:none!important}
-  .nav-brand{display:none!important}
+  .nav-brand{border-bottom:none!important;margin-bottom:0!important;padding-bottom:12px!important}
   .nav-item{padding:10px 14px!important;justify-content:center!important;flex-direction:column!important;gap:3px!important}
   .nav-item .nav-label{opacity:1!important;max-width:none!important;font-size:var(--fs-sm)!important;margin-left:0!important}
   .scr{margin-left:0!important;width:100%!important;max-width:100%!important;margin-right:auto!important;padding-bottom:calc(80px + env(safe-area-inset-bottom))!important}
@@ -9467,7 +9467,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0416d';
+const _APP_VERSION = 'v0416e';
 // (v0415i) 운영기에서만 숨길 관리자 섹션 처리 — data-env-only="dev" 요소를 prod에서 숨김
 try{
   if(_ENV!=='dev'){
@@ -19345,8 +19345,12 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.4.35 (v0416e)',date:'2026-04-16',items:[
+    '[UI] 태블릿 세로 하단 네비 바닥 밀착 수정 — nav-container 배경색 추가로 safe-area 검정 간격 제거',
+    '[UI] 태블릿 세로 로고 밑줄만 제거 (로고 유지) — border-bottom:none, margin-bottom:0',
+  ]},
   {ver:'2.4.34 (v0416d)',date:'2026-04-16',items:[
-    '[UI] 태블릿 세로 모드 하단 네비 바닥 밀착 — 플로팅 간격 제거, 솔리드 배경, 로고 밑줄 제거',
+    '[UI] 태블릿 세로 모드 하단 네비 바닥 밀착 — 플로팅 간격 제거, 솔리드 배경',
     '[UI] 갤럭시 폴드 펼친 세로 적응형 레이아웃 — 활동·보상 카드 4열, 통계 카드 2열 (태블릿과 동일한 콘텐츠 밀도)',
   ]},
   {ver:'2.4.33 (v0416c)',date:'2026-04-16',items:[
