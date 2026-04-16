@@ -124,7 +124,7 @@
 | +날씨 캐시 | 개발기+운영기 반영 | release/v0415o | v0415m | v0415o | localStorage 24h 캐시로 "--°" 플리커 제거 |
 | +WebView 오프라인 폴백 복구 | 개발기+운영기 반영 | release/v0415o | v0415m | v0415o | signInAnonymously await 복원 |
 | +안드로이드 APK edge-to-edge inset | 개발기+운영기 반영 | release/v0415o | v0415n/o | v0415o | `--android-nav-inset` / `--native-nav-bar-h` 반영, R-061 |
-| ⑤ 거대 문서 분할 (서브컬렉션) | 개발기 반영 | PR 대기 | v0417d | — | 2026-04-17, 7개 배열 + memberData 서브컬렉션 분리, 자동 마이그레이션 |
+| ⑤ 거대 문서 분할 (서브컬렉션) | 개발기+운영기 반영 | #401(개발), #402(운영) | v0417d | v0417d | 2026-04-17, 7개 배열 + memberData 서브컬렉션 분리, 자동 마이그레이션 |
 | ⑥ updateDoc 부분 patch | 대기 | — | — | — | ⑤ 완료로 부분적 달성 (변경된 서브컬렉션만 write) |
 | ⑦ snapshot stringify 제거 | 대기 | — | — | — | ⑤ 완료로 메인 doc 크기 축소, stringify 비용 감소 |
 | ⑧ App Check 지연 초기화 | 대기 | — | — | — | |
