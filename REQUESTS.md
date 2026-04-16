@@ -84,9 +84,9 @@
 | R-064 | 2026-04-16 | 알림 상태 체크 네이티브 분기 누락 (sendFamilyMsg + _showPushOffBanner) | v0416a | — | pushSubscription 대신 MilelyBridge.isNotificationEnabled() 사용. 안드로이드 APK에서 "알림이 꺼져 있어요" 항상 뜨던 문제 해결 |
 | R-065 | 2026-04-16 | 운영기 알림 토글: 토스트+토글 안 변하는 문제 — _milelyOnFCMToken의 await setDoc hang 대응 | v0416b | — | UI/토스트를 Firestore write 앞으로 이동, setDoc은 fire-and-forget + 8초 타임아웃. async→sync 함수 변경 |
 | R-066 | 2026-04-16 | 운영기 알림: 네이티브 evaluateJavascript 콜백 미수신 — 5초 폴백 타이머 + 권한 승인 즉시 UI 갱신 | v0416c | — | _milelyOnPermissionResult에서 즉시 updatePushUI, subscribePush에 5초 폴백 타이머 |
-| R-067 | 2026-04-16 | 적응형 UI Type 4: 태블릿 세로(768-1023px portrait) 하단 바 바닥 밀착 + 로고 밑줄 제거 | v0416d | — | 플로팅→솔리드 바, bottom:0, border-radius:0, nav-brand 숨김 |
-| R-068 | 2026-04-16 | 적응형 UI Type 5: 갤럭시 폴드 펼친 세로(580-767px portrait) 카드 레이아웃 태블릿 동일화 | v0416d | — | 활동·보상 4열, 통계 2열, 대시보드 masonry 2열. 네비는 스마트폰 하단 스타일 유지 |
-| R-069 | 2026-04-16 | 운영기 FCM 토큰 저장 실패 — _familyId null 레거시 사용자 LEGACY_DOC 경로 fallback | v0416f | — | _milelyOnFCMToken guard에서 LEGACY_DOC.path 허용, Firestore write시 users/taemin에 직접 저장. _syncPushDeviceUser도 동일 수정 |
+| R-067 | 2026-04-16 | 적응형 UI Type 4: 태블릿 세로(768-1023px portrait) 하단 바 바닥 밀착 + 로고 밑줄 제거 | v0416e | PR #388 운영반영 | 솔리드 바 bottom:0, nav-container 배경색, nav-brand border-bottom 제거 |
+| R-068 | 2026-04-16 | 적응형 UI Type 5: 갤럭시 폴드 펼친 세로(580-767px portrait) 카드 레이아웃 태블릿 동일화 | v0416d | PR #388 운영반영 | 활동·보상 4열, 통계 2열, 대시보드 masonry 2열. 네비는 스마트폰 하단 스타일 유지 |
+| R-069 | 2026-04-16 | 운영기 FCM 토큰 저장 실패 — _familyId null 레거시 사용자 LEGACY_DOC 경로 fallback | v0416f | PR #388 운영반영 | _milelyOnFCMToken guard에서 LEGACY_DOC.path 허용, Firestore write시 users/taemin에 직접 저장. _syncPushDeviceUser도 동일 수정 |
 
 ## 미착수 백로그 (ROADMAP.md 기준)
 
