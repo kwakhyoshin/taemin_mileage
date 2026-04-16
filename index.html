@@ -9472,7 +9472,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'prod'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0417b';
+const _APP_VERSION = 'v0417c';
 // (v0415i) 운영기에서만 숨길 관리자 섹션 처리 — data-env-only="dev" 요소를 prod에서 숨김
 try{
   if(_ENV!=='dev'){
@@ -10210,6 +10210,24 @@ function generateSecureRandom(len=32) {
 // "S.rewardInventory 뷰"에 늦게 반영되던 버그를 함께 해결
 function _applyRemoteSnap(snap){
   if(!snap || !snap.exists()) return;
+  // ★ 레거시 데이터 차단: 원격 스냅샷에 _migratedTo가 있으면 레거시 문서의 stale 데이터 → 무시하고 family로 전환
+  if(snap.data()._migratedTo && DATA_DOC === LEGACY_DOC){
+    const _mt = snap.data()._migratedTo;
+    console.warn('[_applyRemoteSnap] 레거시 스냅샷에 _migratedTo 발견 — 무시하고 family로 전환:', _mt);
+    _familyId = _mt;
+    DATA_DOC = getFamilyDoc(_mt);
+    localStorage.setItem(_LS_PREFIX+'family_id', _mt);
+    // 기존 리스너 해제 + 새 리스너 설정
+    if(_dataListenerUnsub){ try{_dataListenerUnsub();}catch(_){} _dataListenerUnsub=null; }
+    try{
+      _dataListenerUnsub = onSnapshot(DATA_DOC, (_s)=>{ _applyRemoteSnap(_s); });
+      // family 문서 즉시 로드
+      getDoc(DATA_DOC).then((_fs)=>{
+        if(_fs.exists()){ S=Object.assign(defaultState(),_fs.data()); rebuildMembersFromFamily(); renderAll(); }
+      }).catch((_e)=>{});
+    }catch(_e){}
+    return; // 레거시 스냅샷 데이터는 사용하지 않음
+  }
   if(_isSaving) return;
   // cooldown 단축: 2000ms → 400ms (승인/거절 등이 빠르게 반영되도록)
   if(Date.now()-_lastSaveTime<400) return;
@@ -10310,6 +10328,11 @@ function save(){
     _isSaving = true;
     _pendingSave = false;
     try{
+      // ★ 레거시 문서에 family 데이터 쓰기 방지 — DATA_DOC이 레거시인데 이미 마이그레이션된 상태면 차단
+      if(DATA_DOC === LEGACY_DOC && _familyId){
+        console.warn('[save] BLOCKED: DATA_DOC이 레거시인데 _familyId가 있음 — family 문서로 전환');
+        DATA_DOC = getFamilyDoc(_familyId);
+      }
       const json = JSON.stringify(S);
       await setDoc(DATA_DOC, S);
       _lastSavedJSON = json; // remember what we just wrote
@@ -19380,6 +19403,10 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.4.44 (v0417c)',date:'2026-04-17',items:[
+    '[FIX] 레거시 데이터 표시 완전 차단 — _migratedTo가 있는 레거시 문서 데이터를 절대 표시하지 않고 family 문서로 자동 전환',
+    '[FIX] save() 레거시 쓰기 방지 — DATA_DOC이 레거시인데 _familyId가 있으면 family 문서로 전환 후 저장',
+  ]},
   {ver:'2.4.43 (v0417b)',date:'2026-04-17',items:[
     '[PERF ⑤] Firebase SDK 4개 모듈 import 병렬화 (Promise.all) — 직렬 대비 ~300-500ms boot 단축',
     '[PERF ⑥] 정상 경로(family_id 있음) getDoc 즉시 fire — fallback 체크 대기 없이 병렬 진행',
@@ -24747,8 +24774,21 @@ window._createState = _createState;
 
   try{
     // Load initial data from Firestore
-    const snap = _earlyDocPromise ? await _earlyDocPromise
+    let snap = _earlyDocPromise ? await _earlyDocPromise
       : (_firebaseReady ? await getDoc(DATA_DOC) : {exists:()=>false});
+
+    // ★ 레거시 데이터 표시 차단: 로드한 문서에 _migratedTo가 있으면 레거시 데이터 → family로 전환
+    // 이 safety check는 _checkLegacyMigrationPointer가 어떤 이유로 실패했을 때의 최후 방어선
+    if(snap.exists() && snap.data()._migratedTo && (!_familyId || DATA_DOC === LEGACY_DOC)){
+      const _mt = snap.data()._migratedTo;
+      console.warn('[mile.ly] 레거시 데이터에 _migratedTo 발견 — family 문서로 전환:', _mt);
+      _familyId = _mt;
+      DATA_DOC = getFamilyDoc(_mt);
+      localStorage.setItem(_LS_PREFIX+'family_id', _mt);
+      // family 문서 다시 로드
+      try{ snap = await getDoc(DATA_DOC); }catch(_e){ snap = {exists:()=>false}; }
+    }
+
     if(snap.exists()){
       const data = snap.data();
       S = Object.assign(defaultState(), data);
@@ -24899,6 +24939,13 @@ window._createState = _createState;
   try{
     _dataListenerUnsub = onSnapshot(DATA_DOC, (snap)=>{
       if(!snap.exists()) return;
+
+      // ★ 레거시 데이터 차단 (boot onSnapshot)
+      if(snap.data()._migratedTo && DATA_DOC === LEGACY_DOC){
+        console.warn('[boot onSnapshot] 레거시 스냅샷에 _migratedTo — _applyRemoteSnap에서 전환 처리');
+        _applyRemoteSnap(snap);
+        return;
+      }
 
       const incomingJSON = JSON.stringify(snap.data());
 
