@@ -2,7 +2,7 @@
 
 > 이 문서는 새 세션에서 실수 없이 개발·테스트·배포할 수 있도록 모든 핵심 정보를 담고 있습니다.
 > **새 세션 시작 시 반드시 이 문서를 먼저 읽을 것.**
-> 최종 업데이트: 2026-04-14 (디자인 토큰 표준화 Phase 1+2, v0414a, PR #335~#336)
+> 최종 업데이트: 2026-04-16 (적응형 UI 6타입 문서화, FCM 레거시 경로 수정, v0416h)
 
 ---
 
@@ -241,6 +241,58 @@ save() 호출
   - `applyChildTheme(childId)` — CSS 변수에 적용
   - `themeFromColor(c1)` — hex → 테마 객체 생성
 - **검색어**: `CHILD_THEMES`, `applyChildTheme`
+
+#### 5.1.6 적응형 UI (Adaptive/Responsive Layout) — v0416h 기준
+
+이 앱은 6가지 화면 유형(Type)에 대해 CSS 미디어쿼리로 레이아웃을 전환한다.
+
+**Type 정의 및 브레이크포인트**
+
+| Type | 화면 유형 | 조건 | 네비게이션 | 카드 그리드 |
+|------|-----------|------|-----------|------------|
+| 1 | 스마트폰 세로 | `max-width:579px` | 하단 floating → dock | 2열 |
+| 2 | 스마트폰 가로 | `orientation:landscape` + `max-width:767px` | 하단 floating → dock | 기본 |
+| 3 | 태블릿 가로 / 데스크탑 가로 | `min-width:768px` + `orientation:landscape` | 좌측 사이드바 | 3~4열 |
+| 4 | 태블릿 세로 (768-1023px portrait) | `min-width:768px` + `max-width:1023px` + `portrait` | 하단 floating → dock (Type 1과 동일) | 4열 |
+| 5 | 갤럭시 폴드 펼친 세로 (~660px portrait) | `min-width:580px` + `max-width:767px` + `portrait` | 하단 floating → dock (Type 1과 동일) | 4열 |
+| 6 | 데스크탑 | `min-width:1024px` | 좌측 사이드바 | 4열+ |
+
+**핵심 설계 원칙**
+- Type 4(태블릿 세로)와 Type 5(폴드 세로)는 **동일한 레이아웃**을 공유한다
+- 이 두 타입은 하나의 CSS 블록(`580-1023px portrait`)으로 합쳐져 있다
+- 태블릿 세로(768-1023px)는 기본 768px+ 사이드바 레이아웃이 적용된 후, 별도 리셋 블록이 하단 네비 스타일로 되돌린다
+
+**CSS 미디어쿼리 블록 구조 (순서 중요!)**
+
+```
+1. 기본 스타일 — 스마트폰 세로 (mobile-first)
+2. @media(min-width:768px) — 사이드바 레이아웃 활성화
+3. @media(min-width:580px) and (max-width:1023px) and (portrait) — 넓은 세로모드 카드 4열 (fold+tablet 통합)
+   → .act-grid: 4열, .rwd-grid: 4열, .stat-row: 2열 grid, #dash-p0 masonry: 2열
+4. @media(min-width:768px) and (max-width:1023px) and (portrait) — 태블릿 세로 네비 리셋
+   → 사이드바 → 하단 네비로 되돌림 (body display:block, .nav-container fixed bottom, .nav-brand/sidebar 숨김 등)
+5. @media(max-width:767px) — PHONE SAFETY: 폰 전용 최종 보루
+   → 767px 이하에서 반드시 하단 네비, 사이드바 숨김
+```
+
+**⚠️ CSS Cascade 주의사항 (사고 교훈)**
+- 같은 `!important` 끼리는 **선언 순서**가 뒤인 것이 이긴다 (specificity 동일 시)
+- 예: 블록 3에서 설정한 값을 블록 5가 덮어쓸 수 있다
+- **v0416g 이전 버그**: 블록 5(PHONE SAFETY)의 미디어쿼리가 `(max-width:767px), (orientation:portrait) and (max-width:1023px)`로 되어 있어 태블릿 세로(768-1023px portrait)까지 매칭 → 블록 4의 리셋을 모두 덮어씀
+- **수정**: 블록 5를 `(max-width:767px)` 전용으로 축소하여 태블릿 세로에 영향 안 미치게 함
+
+**JS 관련 함수**
+- `isSidebarMode()` — `≥1024px` 또는 `768px+ landscape`일 때 true 반환 → 사이드바 모드
+- `checkNavDock()` — 스크롤 위치에 따라 floating↔docked 전환. `isSidebarMode()` true면 skip
+- 768-1023px portrait에서는 `isSidebarMode()`가 false이므로 스마트폰과 동일한 floating→dock 동작
+
+**변경 시 주의사항**
+1. 미디어쿼리 블록 추가/수정 시 **반드시 기존 블록과의 cascade 순서 확인**
+2. PHONE SAFETY 블록의 조건을 확대하면 태블릿 세로 리셋이 무효화될 수 있음
+3. Playwright로 최소 3개 뷰포트 검증 권장: 390px(폰), 660px(폴드), 810px(태블릿)
+4. Type 4/5 통합 블록(580-1023px)에 네비 스타일을 넣지 말 것 — 네비 리셋은 768-1023px 전용 블록에서 처리
+
+**검색어**: `isSidebarMode`, `checkNavDock`, `PHONE SAFETY`, `WIDE PORTRAIT`, `580px`, `1023px`
 
 ---
 
