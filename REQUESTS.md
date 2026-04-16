@@ -84,7 +84,7 @@
 | R-064 | 2026-04-16 | 알림 상태 체크 네이티브 분기 누락 (sendFamilyMsg + _showPushOffBanner) | v0416a | — | pushSubscription 대신 MilelyBridge.isNotificationEnabled() 사용. 안드로이드 APK에서 "알림이 꺼져 있어요" 항상 뜨던 문제 해결 |
 | R-065 | 2026-04-16 | 운영기 알림 토글: 토스트+토글 안 변하는 문제 — _milelyOnFCMToken의 await setDoc hang 대응 | v0416b | — | UI/토스트를 Firestore write 앞으로 이동, setDoc은 fire-and-forget + 8초 타임아웃. async→sync 함수 변경 |
 | R-066 | 2026-04-16 | 운영기 알림: 네이티브 evaluateJavascript 콜백 미수신 — 5초 폴백 타이머 + 권한 승인 즉시 UI 갱신 | v0416c | — | _milelyOnPermissionResult에서 즉시 updatePushUI, subscribePush에 5초 폴백 타이머 |
-| R-067 | 2026-04-16 | 적응형 UI Type 4: 태블릿 세로(768-1023px portrait) 하단 바 + 폰 스타일 네비로 전환 | v0416h | 개발완료 | v0416e→v0416g(PHONE SAFETY 축소)→v0416h(fold+tablet 통합 580-1023px). PR #388 운영반영분은 CSS 무효(PHONE SAFETY 블록 미수정) |
+| R-067 | 2026-04-16 | 적응형 UI Type 4: 태블릿 세로(768-1023px portrait) 스마트폰과 100% 동일 nav | v0416i | PR #391 개발반영 | v0416i: L1708 PORTRAIT OVERRIDE 제거 + 768-1023px 리셋을 폰 glass pill과 동일하게 재작성. specificity 문제(.nav-item:not(.active) 0-3-0)도 해결 |
 | R-068 | 2026-04-16 | 적응형 UI Type 5: 갤럭시 폴드 펼친 세로(580-767px) 카드 4열 + 폰 스타일 네비 | v0416h | 개발완료 | fold+tablet 통합 블록(580-1023px portrait)으로 동일 레이아웃 적용. 운영 반영은 별도 release 필요 |
 | R-069 | 2026-04-16 | 운영기 FCM 토큰 저장 실패 — _familyId null 레거시 사용자 LEGACY_DOC 경로 fallback | v0416f | PR #388 운영반영 | _milelyOnFCMToken guard에서 LEGACY_DOC.path 허용, Firestore write시 users/taemin에 직접 저장. _syncPushDeviceUser도 동일 수정 |
 | R-070 | 2026-04-16 | SW HTML fetch가 HTTP 캐시 사용하여 구버전 유지 — cache:no-cache 추가 | PR #390 | PR #390 운영반영 | dev/sw.js + sw.js 동시 수정. fetch(e.request)→fetch(e.request,{cache:'no-cache'}). 정적 에셋은 기존 cache-first 유지 |
