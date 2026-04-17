@@ -183,6 +183,11 @@ body.dark .role-card:hover{background:#263348;border-color:var(--or)}
 body.dark .role-card.selected{background:rgba(99,102,241,.18);border-color:var(--rc,var(--or-bright))}
 body.dark .role-card-check{color:var(--rc,var(--or-bright))}
 body.dark .role-name{color:#F1F5F9}
+body.dark .mode-card{background:#1E293B;border-color:#334155}
+body.dark .mode-card:hover{border-color:var(--or)}
+body.dark .mode-card.selected{background:rgba(99,102,241,.15);border-color:var(--or-bright)}
+body.dark .mode-card-title{color:#F1F5F9}
+body.dark .mode-card-desc{color:var(--tx3)}
 body.dark .member-card{background:#1E293B;border-color:#334155}
 body.dark .member-card:hover{background:#263348}
 body.dark .member-card.selected{border-color:var(--or-bright);background:rgba(99,102,241,.15)}
@@ -212,7 +217,11 @@ body.dark .toss-role-grid .role-card.selected{background:rgba(99,102,241,.18);bo
 body.dark .toss-role-grid .role-name{color:#F1F5F9}
 body.dark .toss-add-btn-caregiver{background:rgba(99,102,241,.15);border-color:#4338CA;color:var(--or-bright)}
 body.dark .toss-add-btn-child{background:rgba(217,119,6,.15);border-color:#92400E;color:var(--yw-bright)}
-/* body.dark .toss-mode 제거됨 */
+body.dark .toss-mode-card{background:#1E293B;border-color:#334155}
+body.dark .toss-mode-card.selected{background:rgba(99,102,241,.15);border-color:var(--or-bright)}
+body.dark .toss-mode-card:hover{border-color:var(--or)}
+body.dark .toss-mode-title{color:#F1F5F9}
+body.dark .toss-mode-desc{color:var(--tx3)}
 body.dark .toss-member-section{background:#1E293B}
 body.dark .toss-invite-card{background:#1E293B}
 body.dark .toss-invite-name{color:#F1F5F9}
@@ -1356,7 +1365,14 @@ body.dark .social-email{background:#334155!important;color:#E2E8F0!important;bor
 .child-card-row .auth-input,.child-card-row .auth-select{margin-bottom:0;flex:1;padding:10px 12px;font-size:var(--fs-base)}
 .child-card-row .auth-select{font-size:var(--fs-base)}
 
-/* MODE SELECT — 제거됨 (항상 독립모드) */
+/* MODE SELECT */
+.mode-grid{display:flex;flex-direction:column;gap:12px;margin:16px 0}
+.mode-card{background:var(--card2);border:2px solid #E2E8F0;border-radius:var(--rmd);padding:18px 16px;cursor:pointer;transition:all .2s;text-align:left}
+.mode-card:hover{border-color:var(--or-md)}
+.mode-card.selected{border-color:var(--or);background:var(--or-lt)}
+.mode-card-title{font-size:var(--fs-md);font-weight:800;color:#1E293B;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.mode-card-desc{font-size:var(--fs-base);color:var(--tx2);line-height:1.5}
+.mode-card-illust{display:flex;justify-content:center;gap:6px;margin-top:10px;padding:10px;background:rgba(99,102,241,.05);border-radius:var(--rsm)}
 
 /* MEMBER SELECT */
 .member-grid{display:flex;flex-direction:column;gap:10px;margin:20px 0}
@@ -1441,7 +1457,12 @@ body.dark .reg-substep.done{background:var(--or-dk)}
 .toss-add-btn-caregiver{background:var(--or-lt);border-color:var(--or-md);color:var(--or)}
 .toss-add-btn-child{background:var(--yw-lt);border-color:#FCD34D;color:var(--yw-dk)}
 .toss-add-btn-icon{font-size:var(--fs-3xl)}
-/* toss-mode CSS 제거됨 (모드 선택 UI 삭제) */
+.toss-mode-grid{display:flex;flex-direction:column;gap:12px;margin:4px 0}
+.toss-mode-card{background:var(--card2);border:2px solid #E2E8F0;border-radius:var(--rmd);padding:20px 18px;cursor:pointer;transition:all .2s}
+.toss-mode-card.selected{border-color:var(--or);background:var(--or-lt)}
+.toss-mode-card:hover{border-color:var(--or-md)}
+.toss-mode-title{font-size:var(--fs-lg);font-weight:800;color:#1E293B;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.toss-mode-desc{font-size:var(--fs-base);color:var(--tx2);line-height:1.5}
 .toss-family-badge{padding:10px 16px;background:linear-gradient(135deg,var(--or-lt),#E0E7FF);border-radius:var(--rsm);font-size:var(--fs-md);font-weight:700;color:var(--or);margin-bottom:16px;text-align:center}
 
 /* PROFILE ICON IN NAV */
@@ -2985,7 +3006,7 @@ requestAnimationFrame(function(){
     });
   }
 
-  var AUTH_IDS=['auth-login','auth-welcome','auth-onboarding','auth-continue','auth-email-verify','auth-social-link','auth-insight','auth-create-1','auth-create-2','auth-create-3','auth-create-5','auth-create-done','auth-join-select','auth-join-register'];
+  var AUTH_IDS=['auth-login','auth-welcome','auth-onboarding','auth-continue','auth-email-verify','auth-social-link','auth-insight','auth-create-1','auth-create-2','auth-create-3','auth-create-4','auth-create-5','auth-create-done','auth-join-select','auth-join-register'];
 
   window._showAuth=function(screen){
     AUTH_IDS.forEach(function(id){
@@ -3525,7 +3546,39 @@ requestAnimationFrame(function(){
 </div>
 
 <!-- AUTH: 가족 만들기 — 스텝 4: 관리 모드 선택 -->
-<!-- create-4 (모드 선택) 제거됨 — 항상 독립모드 -->
+<div class="auth-screen hidden toss-style" id="auth-create-4">
+  <div class="toss-wizard">
+    <div class="reg-stepper-bar" id="reg-stepper-4">
+      <button class="reg-stepper-back" onclick="renderRegStepper(2,1,4);showAuthScreen('create-3')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+      </button>
+      <div class="reg-stepper" id="regStepperGroups4"></div>
+      <div class="reg-substeps" id="regStepperSubs4"></div>
+    </div>
+    <div class="toss-slides-wrap">
+      <div class="toss-slide active">
+        <div class="toss-slide-content">
+
+          <div class="toss-question">마일리지를 어떻게<br>관리할까요?</div>
+          <div class="toss-desc">자녀가 여러 명일 때 관리 방식을 선택해요</div>
+          <div class="toss-mode-grid" id="create-mode-grid">
+            <div class="toss-mode-card selected" onclick="selectMode('independent')" id="mode-independent">
+              <div class="toss-mode-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="2.5" stroke-linecap="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+                독립 관리
+              </div>
+              <div class="toss-mode-desc">자녀별로 활동과 보상을 따로 관리해요. 각 자녀에게 맞는 목표를 설정할 수 있어요.</div>
+            </div>
+          </div>
+          <div class="auth-error" id="create4-error" style="margin-top:10px"></div>
+        </div>
+        <div class="toss-cta">
+          <button class="toss-btn" onclick="createStep4Next()">다음</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- AUTH: 가족 만들기 — 스텝 5: 구성원 초대 -->
 <div class="auth-screen hidden toss-style" id="auth-create-5">
@@ -4179,6 +4232,13 @@ requestAnimationFrame(function(){
     </div>
   </div>
   <div id="adm-p4" style="display:none">
+    <!-- ── 다자녀 운영 모드 ── -->
+    <div class="adm-sec" id="adm-mode-sec" style="margin-top:6px">
+      <div class="adm-sec-lbl">다자녀 운영 모드</div>
+      <div class="adm-card" id="adm-mode-card">
+        <!-- renderAdmModeSection()으로 동적 렌더링 -->
+      </div>
+    </div>
     <!-- ── 스마트 메시지 설정 ── -->
     <div class="adm-sec">
       <div class="adm-sec-lbl">스마트 메시지 설정</div>
@@ -5441,7 +5501,9 @@ let _createState = {
   memberCount: 3,
   // Step 3
   members: [], // [{role, name, birthDate, gender, isSelf}] - index 0 is creator
-  // Step 5 (Step 4 모드 선택 제거됨 — 항상 독립모드)
+  // Step 4
+  mode: 'independent',
+  // Step 5
   childAccounts: {}, // {memberIndex: {id, pwd}}
   inviteType: 'link'
 };
@@ -5457,7 +5519,7 @@ let _joinState = {
 };
 
 // ── AUTH 화면 관리 ──
-const _AUTH_SCREENS = ['auth-login','auth-welcome','auth-onboarding','auth-continue','auth-email-verify','auth-social-link','auth-insight','auth-create-1','auth-create-2','auth-create-3','auth-create-5','auth-create-done','auth-join-select','auth-join-register'];
+const _AUTH_SCREENS = ['auth-login','auth-welcome','auth-onboarding','auth-continue','auth-email-verify','auth-social-link','auth-insight','auth-create-1','auth-create-2','auth-create-3','auth-create-4','auth-create-5','auth-create-done','auth-join-select','auth-join-register'];
 
 function showAuthScreen(screen) {
   setTimeout(function(){if(typeof _hideSplash==='function') _hideSplash();},1500);
@@ -6401,7 +6463,17 @@ async function createStep3Next(){
   renderInviteOptions();
 }
 
-// selectMode(), createStep4Next() 제거됨 — 항상 독립모드
+function selectMode(mode){
+  _createState.mode=mode;
+  document.getElementById('mode-independent').classList.toggle('selected',mode==='independent');
+}
+
+async function createStep4Next(){
+  renderRegStepper(2, 3, 4); // Group 2, step 3 (invites)
+  await saveFamilyToFirestore();
+  showAuthScreen('create-5');
+  renderInviteOptions();
+}
 
 function createStep5Back(){
   renderRegStepper(2, 1, 4); // Group 2, step 1 (members)
@@ -6545,7 +6617,7 @@ let _saveFamilyDone=false;
 async function saveFamilyToFirestore(){
   if(_saveFamilyDone) return; // 이미 저장됨
   try{
-    const btn=document.querySelector('#auth-create-3 .toss-btn');
+    const btn=document.querySelector('#auth-create-3 .toss-btn, #auth-create-4 .toss-btn');
     if(btn){btn.disabled=true;btn.textContent='저장 중...';}
 
     const isSocialUser = !!_createState.socialUser;
@@ -6685,7 +6757,7 @@ async function saveFamilyToFirestore(){
   }catch(e){
     console.error('Family save failed:',e);
     toast('❌ 가족 등록에 실패했어요. 다시 시도해주세요.');
-    const btn=document.querySelector('#auth-create-3 .toss-btn');
+    const btn=document.querySelector('#auth-create-3 .toss-btn, #auth-create-4 .toss-btn');
     if(btn){btn.disabled=false;btn.textContent='다음';}
     throw e; // 상위에서 처리
   }
@@ -7515,6 +7587,7 @@ function applyUserProfile() {
   // 양육자(independent mode)는 renderHero()에서 자녀 이름으로 덮어씀 — 여기서는 비양육자만 처리
   const heroLbl = document.getElementById('hero-lbl');
   if(heroLbl){
+    const _hMode=getFamilyMode();
     if(isCaregiverUser()){
       // 양육자: 모드 무관하게 보고 있는 자녀 이름 표시 (flash 방지)
       const _hVid=getViewedMemberId();
@@ -7648,21 +7721,24 @@ function postLoginInit(){
   viewingChildId = null;
   _admViewChildId = null;
   _globalDataOwner = null;
-  // 항상 독립모드: memberData 초기화 및 뷰 설정
-  if(!S.memberData) S.memberData = {};
-  if(isCaregiverUser()){
-    // 양육자: 첫 자녀 뷰로 전환
-    const kids = getChildMemberIds();
-    if(kids.length > 0){
-      viewingChildId = kids[0];
-      if(!S.memberData[viewingChildId]) getMemberState(viewingChildId);
-      syncMemberToGlobal(viewingChildId);
-      applyChildTheme(viewingChildId);
+  const mode = getFamilyMode();
+  if(mode === 'independent'){
+    if(!S.memberData) S.memberData = {};
+    if(isCaregiverUser()){
+      // 양육자: 첫 자녀 뷰로 전환
+      const kids = getChildMemberIds();
+      if(kids.length > 0){
+        viewingChildId = kids[0];
+        if(!S.memberData[viewingChildId]) getMemberState(viewingChildId);
+        syncMemberToGlobal(viewingChildId);
+        applyChildTheme(viewingChildId);
+      }
+    } else if(currentUser) {
+      // 자녀 직접 로그인: 자신의 memberData를 글로벌에 로드
+      // (S.acts/actDone 등이 다른 사용자의 데이터일 수 있으므로 반드시 자신의 것으로 교체)
+      if(!S.memberData[currentUser]) getMemberState(currentUser);
+      syncMemberToGlobal(currentUser);
     }
-  } else if(currentUser) {
-    // 자녀 직접 로그인: 자신의 memberData를 글로벌에 로드
-    if(!S.memberData[currentUser]) getMemberState(currentUser);
-    syncMemberToGlobal(currentUser);
   }
   _admViewChildId = getChildMemberIds()[0] || null;
 
@@ -9011,7 +9087,7 @@ function checkAuth() {
     _syncPushDeviceUser(); // 앱 시작 시 푸시 디바이스 유저 갱신
     // 양육자(caregiver)는 postLoginInit에서 자녀 데이터를 로드하므로 여기서 parent sync 생략
     // (parent의 memberData에 마지막 자녀의 stale 데이터가 오염되는 것을 방지)
-    if(!(isCaregiverUser())){
+    if(!(getFamilyMode()==='independent'&&isCaregiverUser())){
       syncMemberToGlobal(); // Load member data for this user
     }
     postLoginInit();
@@ -9396,7 +9472,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0417e';
+const _APP_VERSION = 'v0417c';
 // (v0415i) 운영기에서만 숨길 관리자 섹션 처리 — data-env-only="dev" 요소를 prod에서 숨김
 try{
   if(_ENV!=='dev'){
@@ -9466,18 +9542,11 @@ if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.
   if(vi) vi.textContent=(_ENV==='dev'?'DEV ':'')+ _APP_VERSION;
 })();
 
-let initializeApp, getFirestore, doc, getDoc, setDoc, deleteDoc, onSnapshot, runTransaction, _fsCollection, _fsAddDoc, _fsGetDocs, _fsUpdateDoc, _fsDeleteField;
+let initializeApp, getFirestore, doc, getDoc, setDoc, deleteDoc, onSnapshot, runTransaction, _fsCollection, _fsAddDoc;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, OAuthProvider, signInWithCustomToken;
 let fbApp, db, fbAuth, LEGACY_DOC, DATA_DOC;
 let _firebaseReady = false;
 let _dataListenerUnsub = null; // onSnapshot 구독 해제 함수
-// ── 서브컬렉션 분할 인프라 (PERF ⑤) ──
-// Firestore 1MB 문서 한계 해소 + 100만 사용자 확장성 확보
-// 큰 배열(log, familyMessages, moodLog 등)을 families/{id}/sub/{name} 서브컬렉션으로 분리
-const _SUBCOL_FIELDS = ['log','familyMessages','moodLog','rewardLog','badgeLog','stickers','challengeHistory'];
-let _subCollMigrated = false; // 서브컬렉션 마이그레이션 완료 여부
-let _subColListeners = []; // 서브컬렉션 onSnapshot 해제 함수 배열
-let _lastSubColJSON = {}; // 서브컬렉션별 마지막 저장 JSON (변경 감지용)
 
 async function _initFirebase(){
   try {
@@ -9489,7 +9558,7 @@ async function _initFirebase(){
       import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check.js")
     ]);
     initializeApp = fbAppMod.initializeApp;
-    ({getFirestore, doc, getDoc, setDoc, deleteDoc, onSnapshot, runTransaction, collection: _fsCollection, addDoc: _fsAddDoc, getDocs: _fsGetDocs, updateDoc: _fsUpdateDoc, deleteField: _fsDeleteField} = fbFsMod);
+    ({getFirestore, doc, getDoc, setDoc, deleteDoc, onSnapshot, runTransaction, collection: _fsCollection, addDoc: _fsAddDoc} = fbFsMod);
     // (PERF ①) 오프라인 IndexedDB 캐시를 위한 추가 API 추출 (SDK 버전이 낮아 없을 경우 undefined)
     const _initializeFirestore = fbFsMod.initializeFirestore;
     const _persistentLocalCache = fbFsMod.persistentLocalCache;
@@ -9919,7 +9988,7 @@ function getMemberState(memberId) {
     const inheritRwds = isChildInit ? _getInheritableRwds() : null;
     // isMe인데 독립 모드이고 _globalDataOwner가 다른 사람이면:
     // 글로벌 S 값이 다른 자녀의 데이터이므로 상속 대신 형제/기본값 사용
-    const isStaleGlobal = isMe && _globalDataOwner && _globalDataOwner !== memberId;
+    const isStaleGlobal = isMe && getFamilyMode()==='independent' && _globalDataOwner && _globalDataOwner !== memberId;
     const safeInheritActs = isStaleGlobal ? _getInheritableActs() : null;
     const safeInheritRwds = isStaleGlobal ? _getInheritableRwds() : null;
     // First time: migrate global data if it's the current user, else start fresh
@@ -10072,7 +10141,7 @@ function syncGlobalToMember(targetId) {
   if (!S.familyMeta?.members) return; // 레거시 모드(familyMeta 없음)에서는 memberData 분리 불필요
   // ⚠️ 안전장치: _globalDataOwner가 설정되어 있고 mid와 다르면
   //   현재 S.*는 다른 자녀의 데이터이므로 mid에 저장하면 안됨
-  if(_globalDataOwner && mid !== _globalDataOwner){
+  if(_globalDataOwner && mid !== _globalDataOwner && getFamilyMode()==='independent'){
     console.warn(`[syncGlobalToMember] BLOCKED: S.* belongs to ${_globalDataOwner} but tried to save to ${mid}`);
     return;
   }
@@ -10153,21 +10222,8 @@ function _applyRemoteSnap(snap){
     try{
       _dataListenerUnsub = onSnapshot(DATA_DOC, (_s)=>{ _applyRemoteSnap(_s); });
       // family 문서 즉시 로드
-      getDoc(DATA_DOC).then(async (_fs)=>{
-        if(_fs.exists()){
-          S=Object.assign(defaultState(),_fs.data());
-          // [PERF ⑤] 전환된 family 문서가 서브컬렉션 모드이면 서브컬렉션 데이터도 로드
-          if(_fs.data()._subCollMigrated){
-            _subCollMigrated = true;
-            try{
-              const [subData, memberSubData] = await Promise.all([_readSubCollections(), _readMemberSubCollections()]);
-              for(const f of _SUBCOL_FIELDS){ if(subData[f]) S[f] = subData[f]; }
-              if(Object.keys(memberSubData).length > 0) S.memberData = memberSubData;
-              _setupSubColListeners();
-            }catch(_e){ console.warn('[_applyRemoteSnap] 서브컬렉션 로드 실패:', _e); }
-          }
-          rebuildMembersFromFamily(); renderAll();
-        }
+      getDoc(DATA_DOC).then((_fs)=>{
+        if(_fs.exists()){ S=Object.assign(defaultState(),_fs.data()); rebuildMembersFromFamily(); renderAll(); }
       }).catch((_e)=>{});
     }catch(_e){}
     return; // 레거시 스냅샷 데이터는 사용하지 않음
@@ -10177,25 +10233,11 @@ function _applyRemoteSnap(snap){
   if(Date.now()-_lastSaveTime<400) return;
   const _sd = snap.data();
   const _ij = JSON.stringify(_sd);
-  if(_ij===_lastSavedJSON) return;
-  // 서브컬렉션 모드에서는 메인 문서에 배열이 없으므로 _buildMainDocForSave()와 비교
-  if(_subCollMigrated){
-    if(_ij===JSON.stringify(_buildMainDocForSave())) return;
-  } else {
-    if(_ij===JSON.stringify(S)) return;
-  }
+  if(_ij===_lastSavedJSON || _ij===JSON.stringify(S)) return;
 
   if(!_hasDirtyLocal){
-    // [PERF ⑤] 서브컬렉션 모드: 메인 문서에 배열이 없으므로 현재 메모리의 서브컬렉션 데이터 보존
-    if(_subCollMigrated){
-      const _preserved = {};
-      for(const f of _SUBCOL_FIELDS){ _preserved[f] = S[f]; }
-      _preserved.memberData = S.memberData;
-      S = Object.assign(defaultState(), _sd, _preserved);
-    } else {
-      // 전체 교체 + 현재 사용자/뷰 기준으로 memberData → S.* 재동기화
-      S=Object.assign(defaultState(),_sd);
-    }
+    // 전체 교체 + 현재 사용자/뷰 기준으로 memberData → S.* 재동기화
+    S=Object.assign(defaultState(),_sd);
     _lastSavedJSON=_ij;
     try{ rebuildMembersFromFamily(); }catch(_){}
     // ★ 독립 모드: S는 방금 원격으로 교체됐으므로, 현재 뷰 대상(자녀/자신)의
@@ -10218,10 +10260,8 @@ function _applyRemoteSnap(snap){
 
   // 로컬 dirty 상태 — 부분 sync: 원격에서 도착한 보상 승인/거절/활동 승인 등
   // "다른 사용자가 나에게 해준 변경"은 놓치면 안 되므로 타겟 필드만 안전하게 반영
-  // [PERF ⑤] 서브컬렉션 모드에서는 familyMessages가 서브컬렉션 리스너에서 처리되지만,
-  //   actVerifyRequests/rewardRequests는 여전히 메인 문서에 있으므로 여기서 처리
   let _needRender = false;
-  if(!_subCollMigrated && _sd.familyMessages && JSON.stringify(_sd.familyMessages)!==JSON.stringify(S.familyMessages)){
+  if(_sd.familyMessages && JSON.stringify(_sd.familyMessages)!==JSON.stringify(S.familyMessages)){
     S.familyMessages=_sd.familyMessages;
     try{ checkNewMessages(); }catch(_){}
     try{ _updateFamilyBtnBadge(); }catch(_){}
@@ -10251,7 +10291,7 @@ function _applyRemoteSnap(snap){
         S.memberData[_mid].rewardInventory = _remoteMd.rewardInventory ? JSON.parse(_remoteInv) : [];
         S.memberData[_mid].rewardRequests = _remoteMd.rewardRequests ? JSON.parse(_remoteReq) : [];
         // 독립모드에서 현재 보고 있는 대상이면 S.*도 즉시 반영
-        if((_globalDataOwner===_mid || (!_globalDataOwner && currentUser===_mid))){
+        if(getFamilyMode()==='independent' && (_globalDataOwner===_mid || (!_globalDataOwner && currentUser===_mid))){
           S.rewardInventory = JSON.parse(_remoteInv);
           S.rewardRequests = JSON.parse(_remoteReq);
         }
@@ -10271,7 +10311,7 @@ function save(){
   // independent 모드에서 양육자가 자녀 데이터를 보고 있으면 해당 자녀에게 저장
   // ⚠️ 반드시 _globalDataOwner만 사용 — viewingChildId를 fallback으로 쓰면
   //   아직 syncMemberToGlobal이 안 된 상태에서 엉뚱한 자녀에게 S 데이터가 덮어씌워짐
-  if(isCaregiverUser()){
+  if(getFamilyMode()==='independent'&&isCaregiverUser()){
     if(_globalDataOwner) syncGlobalToMember(_globalDataOwner);
     // _globalDataOwner가 null이면 아직 어떤 자녀도 로드하지 않은 상태 → sync 생략
   }else{
@@ -10293,18 +10333,9 @@ function save(){
         console.warn('[save] BLOCKED: DATA_DOC이 레거시인데 _familyId가 있음 — family 문서로 전환');
         DATA_DOC = getFamilyDoc(_familyId);
       }
-      // [PERF ⑤] 서브컬렉션 분할: 메인 문서에는 배열 제외, 서브컬렉션에 개별 저장
-      const docToWrite = _subCollMigrated ? _buildMainDocForSave() : S;
-      await setDoc(DATA_DOC, docToWrite);
-      // 서브컬렉션에 변경된 배열 저장 (병렬)
-      if(_subCollMigrated){
-        await Promise.all([
-          _saveSubCollections(),
-          _saveMemberSubCollections()
-        ]);
-      }
-      // echo 감지용: onSnapshot이 받을 데이터와 동일한 형태로 기록
-      _lastSavedJSON = JSON.stringify(docToWrite); // remember what we just wrote
+      const json = JSON.stringify(S);
+      await setDoc(DATA_DOC, S);
+      _lastSavedJSON = json; // remember what we just wrote
       _hasDirtyLocal = false; // 저장 완료
       _lastSaveTime = Date.now(); // cooldown start
       localStorage.setItem(_LS_PREFIX+'v6_backup', sanitizeForBackup(S));
@@ -10342,271 +10373,6 @@ function _syncPushToLegacy(){
     .then(()=>console.log('[_syncPushToLegacy] pushDevices OK'))
     .catch(e=>console.warn('[_syncPushToLegacy]', e));
 }
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// ── 서브컬렉션 분할 (PERF ⑤) ─────────────────────────────────────────────────
-// Firestore 단일 문서 1MB 한계 해소 + 100만 사용자 확장성
-// families/{id}/sub/{name} 에 큰 배열을 분리 저장
-// families/{id}/memberSub/{memberId} 에 독립모드 멤버 데이터 분리 저장
-// ═══════════════════════════════════════════════════════════════════════════════
-
-/** 서브컬렉션 문서 참조 반환 */
-function _getSubDoc(name){
-  if(!DATA_DOC || !DATA_DOC.path || DATA_DOC === LEGACY_DOC) return null;
-  return doc(db, DATA_DOC.path, 'sub', name);
-}
-
-/** 멤버 서브컬렉션 문서 참조 반환 (독립모드용) */
-function _getMemberSubDoc(memberId){
-  if(!DATA_DOC || !DATA_DOC.path || DATA_DOC === LEGACY_DOC) return null;
-  return doc(db, DATA_DOC.path, 'memberSub', memberId);
-}
-
-/** 서브컬렉션에서 모든 배열 데이터 읽기 (병렬) */
-async function _readSubCollections(){
-  const result = {};
-  const promises = _SUBCOL_FIELDS.map(field => {
-    const ref = _getSubDoc(field);
-    if(!ref) return Promise.resolve();
-    return getDoc(ref).then(snap => {
-      if(snap.exists()){
-        result[field] = snap.data().items || [];
-      }
-    }).catch(e => {
-      console.warn('[_readSubCollections]', field, e);
-    });
-  });
-  await Promise.all(promises);
-  return result;
-}
-
-/** 멤버 서브컬렉션 읽기 (독립모드: 전체 멤버) */
-async function _readMemberSubCollections(){
-  if(!DATA_DOC || !DATA_DOC.path || DATA_DOC === LEGACY_DOC) return {};
-  try{
-    const colRef = _fsCollection(db, DATA_DOC.path, 'memberSub');
-    const snaps = await _fsGetDocs(colRef);
-    const memberData = {};
-    snaps.forEach(d => {
-      memberData[d.id] = d.data();
-    });
-    return memberData;
-  }catch(e){
-    console.warn('[_readMemberSubCollections]', e);
-    return {};
-  }
-}
-
-/** 서브컬렉션에 배열 저장 (변경된 것만) */
-async function _saveSubCollections(){
-  if(!_subCollMigrated || !DATA_DOC || DATA_DOC === LEGACY_DOC) return;
-  const writes = [];
-  for(const field of _SUBCOL_FIELDS){
-    const arr = S[field];
-    if(!Array.isArray(arr)) continue;
-    const json = JSON.stringify(arr);
-    if(json !== _lastSubColJSON[field]){
-      const ref = _getSubDoc(field);
-      if(ref){
-        writes.push(
-          setDoc(ref, {items: arr, updatedAt: Date.now()})
-            .then(()=>{ _lastSubColJSON[field] = json; })
-            .catch(e => console.warn('[_saveSubCollections]', field, e))
-        );
-      }
-    }
-  }
-  if(writes.length) await Promise.all(writes);
-}
-
-/** 멤버 서브컬렉션 저장 (독립모드: 변경된 멤버만) */
-let _lastMemberSubJSON = {};
-async function _saveMemberSubCollections(){
-  if(!_subCollMigrated || !DATA_DOC || DATA_DOC === LEGACY_DOC) return;
-  if(!S.memberData || typeof S.memberData !== 'object') return;
-  const writes = [];
-  for(const [mid, mdata] of Object.entries(S.memberData)){
-    if(!mdata || typeof mdata !== 'object') continue;
-    const json = JSON.stringify(mdata);
-    if(json !== _lastMemberSubJSON[mid]){
-      const ref = _getMemberSubDoc(mid);
-      if(ref){
-        writes.push(
-          setDoc(ref, mdata)
-            .then(()=>{ _lastMemberSubJSON[mid] = json; })
-            .catch(e => console.warn('[_saveMemberSubCollections]', mid, e))
-        );
-      }
-    }
-  }
-  if(writes.length) await Promise.all(writes);
-}
-
-/** 마이그레이션: 메인 문서의 배열 → 서브컬렉션으로 복사 + memberData 분리 */
-async function _migrateToSubCollections(){
-  if(!DATA_DOC || DATA_DOC === LEGACY_DOC || !_firebaseReady) return;
-  console.log('[PERF⑤] 서브컬렉션 마이그레이션 시작...');
-  try{
-    // 1) 배열 데이터를 서브컬렉션으로 복사
-    const arrayWrites = [];
-    for(const field of _SUBCOL_FIELDS){
-      const arr = S[field];
-      if(Array.isArray(arr) && arr.length > 0){
-        const ref = _getSubDoc(field);
-        if(ref){
-          arrayWrites.push(setDoc(ref, {items: arr, updatedAt: Date.now()}));
-        }
-      }
-    }
-    await Promise.all(arrayWrites);
-    console.log('[PERF⑤] 배열 서브컬렉션 마이그레이션 완료:', arrayWrites.length, '개');
-
-    // 2) memberData 분리 저장 (독립모드)
-    if(S.memberData && typeof S.memberData === 'object'){
-      const memberWrites = [];
-      for(const [mid, mdata] of Object.entries(S.memberData)){
-        if(mdata && typeof mdata === 'object' && Object.keys(mdata).length > 0){
-          const ref = _getMemberSubDoc(mid);
-          if(ref) memberWrites.push(setDoc(ref, mdata));
-        }
-      }
-      if(memberWrites.length){
-        await Promise.all(memberWrites);
-        console.log('[PERF⑤] memberData 서브컬렉션 마이그레이션 완료:', memberWrites.length, '명');
-      }
-    }
-
-    // 3) 메인 문서에서 배열+memberData 제거, _subCollMigrated 플래그 설정
-    const stripUpdate = { _subCollMigrated: true };
-    // 메인 문서를 배열 없이 다시 쓰기 (deleteField보다 안전)
-    const mainDoc = _buildMainDocForSave();
-    mainDoc._subCollMigrated = true;
-    await setDoc(DATA_DOC, mainDoc);
-
-    _subCollMigrated = true;
-    // JSON 캐시 초기화
-    for(const field of _SUBCOL_FIELDS){
-      _lastSubColJSON[field] = JSON.stringify(S[field] || []);
-    }
-    if(S.memberData){
-      for(const [mid, mdata] of Object.entries(S.memberData)){
-        _lastMemberSubJSON[mid] = JSON.stringify(mdata || {});
-      }
-    }
-    console.log('[PERF⑤] ✅ 서브컬렉션 마이그레이션 완료! 메인 문서에서 배열 제거됨');
-  }catch(e){
-    console.error('[PERF⑤] 서브컬렉션 마이그레이션 실패:', e);
-    // 실패해도 기존 동작에 영향 없음 — 다음 부팅 시 재시도
-  }
-}
-
-/** 메인 문서 저장용 객체 생성 (서브컬렉션 필드 제외) */
-function _buildMainDocForSave(){
-  const mainDoc = {};
-  for(const key of Object.keys(S)){
-    if(_SUBCOL_FIELDS.includes(key)) continue; // 서브컬렉션으로 분리된 배열 제외
-    if(_subCollMigrated && key === 'memberData') continue; // 멤버 데이터도 제외
-    mainDoc[key] = S[key];
-  }
-  if(_subCollMigrated) mainDoc._subCollMigrated = true;
-  return mainDoc;
-}
-
-/** 서브컬렉션 onSnapshot 리스너 설정 */
-function _setupSubColListeners(){
-  // 기존 리스너 해제
-  _subColListeners.forEach(unsub => { try{ unsub(); }catch(_){} });
-  _subColListeners = [];
-
-  if(!_subCollMigrated || !DATA_DOC || DATA_DOC === LEGACY_DOC) return;
-
-  for(const field of _SUBCOL_FIELDS){
-    const ref = _getSubDoc(field);
-    if(!ref) continue;
-    try{
-      const unsub = onSnapshot(ref, (snap) => {
-        if(!snap.exists()) return;
-        if(_isSaving) return;
-        if(Date.now() - _lastSaveTime < 400) return;
-        const remoteItems = snap.data().items || [];
-        const remoteJSON = JSON.stringify(remoteItems);
-        if(remoteJSON === _lastSubColJSON[field]) return;
-        if(remoteJSON === JSON.stringify(S[field])) return;
-
-        if(!_hasDirtyLocal){
-          S[field] = remoteItems;
-          _lastSubColJSON[field] = remoteJSON;
-          // 독립모드에서 현재 뷰 대상의 memberData에도 반영
-          try{
-            if(getFamilyMode()==='independent'){
-              const _mid = _globalDataOwner || currentUser;
-              if(_mid && S.memberData && S.memberData[_mid]){
-                if(field in S.memberData[_mid]){
-                  S.memberData[_mid][field] = [...remoteItems];
-                }
-              }
-            }
-          }catch(_){}
-          try{ renderAll(); }catch(_){}
-          try{ checkNewMessages(); }catch(_){}
-          console.log('[서브컬렉션] 🔄', field, '원격 업데이트 수신 (' + remoteItems.length + '건)');
-        } else {
-          // dirty 상태에서는 familyMessages만 머지 (다른 사용자가 보낸 메시지 놓치면 안 됨)
-          if(field === 'familyMessages'){
-            S.familyMessages = remoteItems;
-            _lastSubColJSON[field] = remoteJSON;
-            try{ checkNewMessages(); }catch(_){}
-            try{ _updateFamilyBtnBadge(); }catch(_){}
-          }
-        }
-      });
-      _subColListeners.push(unsub);
-    }catch(e){
-      console.warn('[_setupSubColListeners]', field, e);
-    }
-  }
-
-  // memberData 서브컬렉션 리스너 (독립모드)
-  try{
-    const memberColRef = _fsCollection(db, DATA_DOC.path, 'memberSub');
-    const memberUnsub = onSnapshot(
-      // memberSub 전체 컬렉션을 감시 — 다른 가족 구성원의 데이터 변경 실시간 반영
-      // 주의: onSnapshot(collection)은 querySnapshot을 반환
-      memberColRef,
-      (querySnap) => {
-        if(_isSaving) return;
-        if(Date.now() - _lastSaveTime < 400) return;
-        if(!_hasDirtyLocal){
-          const newMemberData = {};
-          querySnap.forEach(d => { newMemberData[d.id] = d.data(); });
-          if(JSON.stringify(newMemberData) !== JSON.stringify(S.memberData)){
-            S.memberData = newMemberData;
-            _lastMemberSubJSON = {};
-            for(const [mid, mdata] of Object.entries(newMemberData)){
-              _lastMemberSubJSON[mid] = JSON.stringify(mdata);
-            }
-            // 현재 뷰 대상의 데이터를 S.*에 재동기화
-            try{
-              if(getFamilyMode()==='independent'){
-                const _mid = _globalDataOwner || currentUser;
-                if(_mid && S.memberData[_mid]) syncMemberToGlobal(_mid);
-              }
-            }catch(_){}
-            try{ renderAll(); }catch(_){}
-            console.log('[서브컬렉션] 🔄 memberData 원격 업데이트 수신');
-          }
-        }
-      }
-    );
-    _subColListeners.push(memberUnsub);
-  }catch(e){
-    console.warn('[_setupSubColListeners] memberSub', e);
-  }
-
-  console.log('[PERF⑤] 서브컬렉션 리스너', _subColListeners.length, '개 설정 완료');
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
 
 // Show loading overlay while fetching data (밀리 캐릭터 + 시그니처 그라데이션)
 function showLoading(msg){
@@ -10976,7 +10742,7 @@ function isTodayAllDone(){
 // 현재 보고 있는 멤버의 streak/lastDate/acts/actDone 컨텍스트를 가져옴 (양육자가 자녀 home을 볼 때 대응)
 function _getViewedStreakCtx(){
   try{
-    if(isCaregiverUser()){
+    if(getFamilyMode()==='independent'&&isCaregiverUser()){
       const vid=getViewedMemberId();
       // S가 이미 보고있는 멤버 데이터를 들고 있으면 S에서 직접 읽기 (실시간 반영)
       if(vid && _globalDataOwner===vid){
@@ -11892,7 +11658,7 @@ function renderAll(){
   renderDashboard();renderHistStats();renderHistList();renderCalendar();
   renderBadgeSummary();renderBadgeViewGrid();renderBadgeViewHistory();
   renderAdmStats();renderAdmActList();renderAdmRwdList();renderAdmSettings();
-  renderAdmChildSelector();
+  renderAdmChildSelector();renderAdmModeSection();
   renderMsgSettings();renderAdmMemberPhotos();
   if(typeof renderDevUserSwitch==='function')renderDevUserSwitch();
   renderNavUsers();
@@ -11912,7 +11678,8 @@ function renderHero(){
     if(el)el.textContent=greetingTxt;
   }
 
-  // hero 라벨 및 pts 표시 (항상 독립모드)
+  // 모드별 hero 라벨 및 pts 표시
+  const mode=getFamilyMode();
   const heroLbl=document.getElementById('hero-lbl');
   if(isCaregiverUser()){
     // 양육자: 모드 무관하게 보고 있는 자녀 이름 표시
@@ -11960,7 +11727,7 @@ function renderHero(){
   // 관리자 pts: 모드별로 올바른 자녀 pts 표시
   const admPtsEl=document.getElementById('adm-pts');
   if(admPtsEl){
-    if(isCaregiverUser()){
+    if(mode==='independent'&&isCaregiverUser()){
       const admId=_admViewChildId||getViewedMemberId();
       const admMs=S.memberData?.[admId];
       admPtsEl.textContent=(admMs?.pts||S.pts).toLocaleString();
@@ -14822,12 +14589,13 @@ function renderAdmStats(){
 
 // 관리자 패널 자녀 선택기 렌더링
 function renderAdmChildSelector(){
+  const mode=getFamilyMode();
   const kids=getChildMemberIds();
-  // 자녀가 2명 미만이면 선택기 숨김
+  // 자녀가 2명 미만이거나 통합 모드면 선택기 숨김
   ['adm-child-selector-0','adm-child-selector-1','adm-child-selector-2','adm-child-selector-miles'].forEach(id=>{
     const el=document.getElementById(id);
     if(!el)return;
-    if(kids.length<2){el.innerHTML='';return;}
+    if(mode!=='independent'||kids.length<2){el.innerHTML='';return;}
     const currentAdmId=_admViewChildId||getViewedMemberId();
     el.innerHTML=`<div class="adm-child-sel-bar">
       ${kids.map(id=>`<button class="adm-child-btn${id===currentAdmId?' on':''}" data-cid="${id}" onclick="admSelectChild('${id}')">${getAvatarHTML(id,22)} <span>${escapeHtml(MEMBERS[id]?.name||id)}</span></button>`).join('')}
@@ -14839,8 +14607,9 @@ function renderAdmChildSelector(){
 function renderMilesTargetInfo(){
   const el=document.getElementById('adm-miles-target-info');
   if(!el)return;
+  const mode=getFamilyMode();
   const kids=getChildMemberIds();
-  if(kids.length<2){el.style.display='none';return;}
+  if(mode!=='independent'||kids.length<2){el.style.display='none';return;}
   const targetId=_admViewChildId||getViewedMemberId();
   if(!targetId){el.style.display='none';return;}
   const ms=S.memberData?.[targetId];
@@ -14850,7 +14619,31 @@ function renderMilesTargetInfo(){
   el.innerHTML=`📌 대상: <span style="color:var(--tx1)">${escapeHtml(name)}</span> · 현재 <span style="color:var(--tx1)">${escapeHtml(String(pts))}</span> 마일리지`;
 }
 
-// renderAdmModeSection() 제거됨 — 다자녀 운영 모드 UI 삭제 (항상 독립모드)
+// 관리자 모드 섹션 렌더링
+function renderAdmModeSection(){
+  const el=document.getElementById('adm-mode-card');
+  if(!el)return;
+  const kids=getChildMemberIds();
+  if(kids.length<2){
+    // 자녀 1명이면 모드 선택 숨김
+    const sec=document.getElementById('adm-mode-sec');
+    if(sec)sec.style.display='none';
+    return;
+  }
+  const sec=document.getElementById('adm-mode-sec');
+  if(sec)sec.style.display='';
+  el.innerHTML=`
+    <div class="adm-row">
+      <div class="adm-row-l">
+        <div class="adm-row-nm">현재 모드</div>
+        <div class="adm-row-sub">독립 모드: 자녀별 마일리지 분리</div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div style="padding:8px 14px 10px;font-size:13px;color:var(--tx3);line-height:1.6">
+      💡 독립 모드: 자녀별로 활동·보상·마일리지가 완전히 분리돼요. 각 자녀에게 맞는 목표를 설정할 수 있어요.
+    </div>`;
+}
 function renderAdmActList(){
   const el=document.getElementById('adm-act-list');
   // independent 모드: 관리자가 선택한 자녀의 acts 사용
@@ -15133,6 +14926,8 @@ function renderAdmSettings(){
   const bdayMsg=document.getElementById('bday-msg-inp');if(bdayMsg&&!bdayMsg.matches(':focus'))bdayMsg.value=S.settings.birthdayMsg||'생일 축하해! 오늘은 네 특별한 날이야! 🎂🎉';
   // 게이미피케이션 설정 렌더링
   renderGameSettings();
+  // 다자녀 모드 섹션 렌더링
+  renderAdmModeSection();
   // 자녀 선택기 렌더링
   renderAdmChildSelector();
 
@@ -15174,7 +14969,7 @@ function doAct(id){
   if(isCaregiverUser()&&getChildMembers().length>=2){
     showChildPicker('어떤 아이의 활동인가요?',function(childId){
       if(!childId)return;
-      if(getViewedMemberId()!==childId)switchViewingChild(childId);
+      if(getFamilyMode()==='independent'&&getViewedMemberId()!==childId)switchViewingChild(childId);
       _doActCore(id);
     });
     return;
@@ -15280,7 +15075,7 @@ function undoAct(actId){
   if(isCaregiverUser()&&getChildMembers().length>=2){
     showChildPicker('어떤 아이의 활동을 취소할까요?',function(childId){
       if(!childId)return;
-      if(getViewedMemberId()!==childId)switchViewingChild(childId);
+      if(getFamilyMode()==='independent'&&getViewedMemberId()!==childId)switchViewingChild(childId);
       _undoActCore(actId);
     });
     return;
@@ -16234,8 +16029,10 @@ function isCaregiverUser(){
 // 하위 호환 별칭
 const isParentUser=isCaregiverUser;
 
-// ── 자녀 헬퍼 (항상 독립모드) ────────────────────────
-function getFamilyMode(){ return 'independent'; } // 레거시 호환용 — 항상 독립모드
+// ── 모드 / 자녀 헬퍼 ────────────────────────
+function getFamilyMode(){
+  return 'independent'; // 통합모드 비활성화 — 항상 독립모드
+}
 function getChildMemberIds(){
   if(!S.familyMeta?.members)return[];
   return Object.entries(S.familyMeta.members)
@@ -16249,7 +16046,7 @@ function getChildMemberIds(){
 }
 // 현재 화면에 표시 중인 구성원 ID (선택된 자녀)
 function getViewedMemberId(){
-  if(isCaregiverUser()){
+  if(getFamilyMode()==='independent'&&isCaregiverUser()){
     const kids=getChildMemberIds();
     if(kids.length>0)return viewingChildId||kids[0];
   }
@@ -16266,7 +16063,7 @@ function getViewedLevelData(){
 window.getViewedLevelData=getViewedLevelData;
 // 현재 활성 마일리지 반환: 양육자(independent)면 선택된 자녀의 pts, 아니면 S.pts
 function getActiveMileage(){
-  if(isCaregiverUser()){
+  if(getFamilyMode()==='independent'&&isCaregiverUser()){
     const vid=getViewedMemberId();
     if(vid&&S.memberData&&S.memberData[vid]!==undefined)return S.memberData[vid].pts||0;
   }
@@ -16339,7 +16136,7 @@ function _getAdmMemberData(){
 
 // ── END STICKER SYSTEM ──────────────────────
 
-// ── 보상/활동 승인 헬퍼 ──
+// ── 통합/독립 모드 공통 헬퍼 ──
 function isAssignedToUser(item,userId){
   if(!item||!item.assignedTo||item.assignedTo.includes('all'))return true;
   return item.assignedTo.includes(userId);
@@ -16382,7 +16179,7 @@ function openRedeem(id,srcEl){
   if(isCaregiverUser()&&getChildMembers().length>=2){
     showChildPicker('어떤 아이의 보상인가요?',function(childId){
       if(!childId)return;
-      if(getViewedMemberId()!==childId)switchViewingChild(childId);
+      if(getFamilyMode()==='independent'&&getViewedMemberId()!==childId)switchViewingChild(childId);
       _openRedeemModal(id,srcEl);
     });
     return;
@@ -17393,8 +17190,9 @@ window._aiVerifySubmit=_aiVerifySubmit;
 // ADMIN
 function giveBonus(){
   const v=parseInt(document.getElementById('bonus-inp').value)||0;if(v<=0)return;
-  // 선택된 자녀에게만 지급
-  if(isCaregiverUser()){
+  const mode=getFamilyMode();
+  // independent 모드: 반드시 선택된 자녀에게만 지급
+  if(mode==='independent'&&isCaregiverUser()){
     const targetId=_admViewChildId;
     if(!targetId){toast('⚠️ 대상 자녀를 먼저 선택해주세요');return;}
     const ms=getMemberState(targetId);
@@ -17410,8 +17208,9 @@ function giveBonus(){
 }
 function deductPts(){
   const v=parseInt(document.getElementById('deduct-inp').value)||0;if(v<=0)return;
-  // 선택된 자녀에게만 차감
-  if(isCaregiverUser()){
+  const mode=getFamilyMode();
+  // independent 모드: 반드시 선택된 자녀에게만 차감
+  if(mode==='independent'&&isCaregiverUser()){
     const targetId=_admViewChildId;
     if(!targetId){toast('⚠️ 대상 자녀를 먼저 선택해주세요');return;}
     const name=MEMBERS[targetId]?.name||'자녀';
@@ -19604,18 +19403,6 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
-  {ver:'2.5.1 (v0417e)',date:'2026-04-17',items:[
-    '통합모드(shared) 완전 제거 — 항상 독립모드로 운영 (UI, 코드, CSS 정리)',
-    '관리자 설정에서 "다자녀 운영 모드" 섹션 제거',
-    '가족 생성 시 모드 선택 단계(Step 4) 제거 — 자동으로 독립모드 적용',
-  ]},
-  {ver:'2.5.0 (v0417d)',date:'2026-04-17',items:[
-    '[PERF ⑤] Firestore 문서 분할: 큰 배열(log, messages, moodLog 등) 서브컬렉션 분리 — 1MB 한계 해소',
-    '[PERF ⑤] memberData 독립모드 멤버별 서브컬렉션 분리 — 100만 사용자 확장성 확보',
-    '[PERF ⑤] 자동 마이그레이션: 기존 데이터를 서브컬렉션으로 자동 이전 (하위호환 보장)',
-    '[PERF ⑤] save() 최적화: 변경된 서브컬렉션만 선택적 저장 (쓰기 비용 절감)',
-    '[PERF ⑤] 서브컬렉션별 실시간 리스너: 배열 데이터 변경 즉시 동기화',
-  ]},
   {ver:'2.4.44 (v0417c)',date:'2026-04-17',items:[
     '[FIX] 레거시 데이터 표시 완전 차단 — _migratedTo가 있는 레거시 문서 데이터를 절대 표시하지 않고 family 문서로 자동 전환',
     '[FIX] save() 레거시 쓰기 방지 — DATA_DOC이 레거시인데 _familyId가 있으면 family 문서로 전환 후 저장',
@@ -22078,15 +21865,6 @@ async function checkUrlParams(){
       _familyId=docPath;
       DATA_DOC=fDoc;
       localStorage.setItem(_LS_PREFIX+'family_id',docPath);
-      // [PERF ⑤] 초대 합류 시 서브컬렉션 모드 가족이면 서브컬렉션 데이터도 로드
-      if(data._subCollMigrated){
-        _subCollMigrated = true;
-        try{
-          const [subData, memberSubData] = await Promise.all([_readSubCollections(), _readMemberSubCollections()]);
-          for(const f of _SUBCOL_FIELDS){ if(subData[f]) S[f] = subData[f]; }
-          if(Object.keys(memberSubData).length > 0) S.memberData = memberSubData;
-        }catch(_e){ console.warn('[invite] 서브컬렉션 로드 실패:', _e); }
-      }
       rebuildMembersFromFamily();
 
       const fm=S.familyMeta?.members||{};
@@ -23876,6 +23654,7 @@ window.switchViewingChild=switchViewingChild;
 window.admSelectChild=admSelectChild;
 window.postLoginInit=postLoginInit;
 window.renderAdmChildSelector=renderAdmChildSelector;
+window.renderAdmModeSection=renderAdmModeSection;
 
 // mily AI 챗봇 IIFE에서 접근 필요한 변수/함수 exports
 // (module scope는 window에 자동 노출되지 않으므로 명시적 export 필요)
@@ -25013,36 +24792,6 @@ window._createState = _createState;
     if(snap.exists()){
       const data = snap.data();
       S = Object.assign(defaultState(), data);
-
-      // [PERF ⑤] 서브컬렉션 모드 감지 및 데이터 로드
-      if(data._subCollMigrated){
-        _subCollMigrated = true;
-        console.log('[PERF⑤] 서브컬렉션 모드 감지 — 서브컬렉션에서 배열 데이터 로드 시작');
-        try{
-          // 배열 서브컬렉션 + memberData 서브컬렉션 병렬 로드
-          const [subData, memberSubData] = await Promise.all([
-            _readSubCollections(),
-            _readMemberSubCollections()
-          ]);
-          // 배열 데이터 S에 반영
-          for(const field of _SUBCOL_FIELDS){
-            if(subData[field]) S[field] = subData[field];
-            _lastSubColJSON[field] = JSON.stringify(S[field] || []);
-          }
-          // memberData 반영
-          if(Object.keys(memberSubData).length > 0){
-            S.memberData = memberSubData;
-            for(const [mid, mdata] of Object.entries(memberSubData)){
-              _lastMemberSubJSON[mid] = JSON.stringify(mdata || {});
-            }
-          }
-          console.log('[PERF⑤] 서브컬렉션 데이터 로드 완료 — log:', (S.log||[]).length, 'messages:', (S.familyMessages||[]).length);
-        }catch(_subErr){
-          console.warn('[PERF⑤] 서브컬렉션 로드 실패, 메인 문서 데이터 사용:', _subErr);
-          _subCollMigrated = false; // 폴백: 메인 문서 모드로 복귀
-        }
-      }
-
       _lastSavedJSON = JSON.stringify(S); // Firestore 로드 직후 상태 기록 (불필요한 save 방지)
       _lastSaveTime = Date.now();
     } else if(_familyId) {
@@ -25207,20 +24956,15 @@ window._createState = _createState;
       // 4. We have unsaved local changes (prevent overwriting local edits during debounce window)
       if(_isSaving) return;
       if(incomingJSON === _lastSavedJSON) return;
-      // [PERF ⑤] 서브컬렉션 모드에서는 메인 문서 형태로 비교
-      if(_subCollMigrated){
-        if(incomingJSON === JSON.stringify(_buildMainDocForSave())) return;
-      } else {
-        if(incomingJSON === JSON.stringify(S)) return;
-      }
+      if(incomingJSON === JSON.stringify(S)) return;
       // (v0415e) 쿨다운 2000ms → 400ms로 단축 (보상 승인 등이 빠르게 반영되도록)
       // 쿨다운 중이라도 새 메시지/보상요청/보상승인 상태 변경이 있으면 머지 (알림 누락 방지)
       if(Date.now() - _lastSaveTime < 400){
         try{
           const _cd=snap.data();
           let _cdChanged=false;
-          // 새 familyMessages 머지 (서브컬렉션 모드에서는 서브컬렉션 리스너가 처리)
-          if(!_subCollMigrated && _cd.familyMessages&&S.familyMessages&&_cd.familyMessages.length>S.familyMessages.length){
+          // 새 familyMessages 머지
+          if(_cd.familyMessages&&S.familyMessages&&_cd.familyMessages.length>S.familyMessages.length){
             const _newM=_cd.familyMessages.slice(S.familyMessages.length);
             _newM.forEach(m=>{S.familyMessages.push(m);});
             _cdChanged=true;
@@ -25247,7 +24991,7 @@ window._createState = _createState;
                 S.memberData[_mid].rewardInventory = JSON.parse(_rInv);
                 S.memberData[_mid].rewardRequests = JSON.parse(_rReq);
                 // 독립모드에서 지금 그 대상의 데이터를 보고 있으면 S.*에도 즉시 반영
-                if(((_globalDataOwner===_mid) || (!_globalDataOwner && currentUser===_mid))){
+                if(getFamilyMode()==='independent' && ((typeof _globalDataOwner!=='undefined' && _globalDataOwner===_mid) || ((typeof _globalDataOwner==='undefined' || !_globalDataOwner) && currentUser===_mid))){
                   S.rewardInventory = JSON.parse(_rInv);
                   S.rewardRequests = JSON.parse(_rReq);
                 }
@@ -25272,8 +25016,7 @@ window._createState = _createState;
           if(incoming.pushDevices) S.pushDevices = incoming.pushDevices;
           if(incoming.pushUpdatedAt) S.pushUpdatedAt = incoming.pushUpdatedAt;
           // Merge family messages from other devices (새 메시지 + 읽음 상태)
-          // [PERF ⑤] 서브컬렉션 모드에서는 서브컬렉션 리스너가 처리
-          if(!_subCollMigrated && incoming.familyMessages) {
+          if(incoming.familyMessages) {
             if(!S.familyMessages)S.familyMessages=[];
             let msgChanged=false;
             // 새 메시지 머지: incoming에만 있는 메시지 추가
@@ -25292,8 +25035,7 @@ window._createState = _createState;
             if(msgChanged){renderNavUsers();checkNewMessages();}
           }
           // Merge stickers from other devices
-          // [PERF ⑤] 서브컬렉션 모드에서는 서브컬렉션 리스너가 처리
-          if(!_subCollMigrated && incoming.stickers && Array.isArray(incoming.stickers)){
+          if(incoming.stickers && Array.isArray(incoming.stickers)){
             const localIds=new Set((S.stickers||[]).map(s=>s.id));
             incoming.stickers.forEach(s=>{if(!localIds.has(s.id)){if(!S.stickers)S.stickers=[];S.stickers.push(s);}});
             renderAll();
@@ -25329,8 +25071,7 @@ window._createState = _createState;
             if(moodChanged){renderNavUsers();renderMyTab();}
           }
           // Merge moodLog from other devices
-          // [PERF ⑤] 서브컬렉션 모드에서는 서브컬렉션 리스너가 처리
-          if(!_subCollMigrated && incoming.moodLog&&Array.isArray(incoming.moodLog)){
+          if(incoming.moodLog&&Array.isArray(incoming.moodLog)){
             if(!S.moodLog)S.moodLog=[];
             const localTs=new Set(S.moodLog.map(l=>l.ts));
             let added=false;
@@ -25412,7 +25153,7 @@ window._createState = _createState;
                 S.memberData[_mid].rewardRequests = JSON.parse(_rReq);
                 _mdChanged = true;
               }
-              if(_mdChanged && ((_globalDataOwner===_mid) || (!_globalDataOwner && currentUser===_mid))){
+              if(_mdChanged && getFamilyMode()==='independent' && ((typeof _globalDataOwner!=='undefined' && _globalDataOwner===_mid) || ((typeof _globalDataOwner==='undefined' || !_globalDataOwner) && currentUser===_mid))){
                 S.rewardInventory = JSON.parse(_rInv);
                 S.rewardRequests = JSON.parse(_rReq);
                 try{ if(typeof renderRewardInventory==='function') renderRewardInventory(); }catch(_){}
@@ -25427,15 +25168,7 @@ window._createState = _createState;
       }
 
       // Another device changed the data — apply it
-      // [PERF ⑤] 서브컬렉션 모드: 메인 문서에 배열이 없으므로 현재 메모리 배열 보존
-      if(_subCollMigrated){
-        const _preserved = {};
-        for(const f of _SUBCOL_FIELDS){ _preserved[f] = S[f]; }
-        _preserved.memberData = S.memberData;
-        S = Object.assign(defaultState(), snap.data(), _preserved);
-      } else {
-        S = Object.assign(defaultState(), snap.data());
-      }
+      S = Object.assign(defaultState(), snap.data());
       _lastSavedJSON = incomingJSON;
       rebuildMembersFromFamily();
       // 독립 모드: 올바른 구성원의 memberData를 글로벌에 복원
@@ -25454,27 +25187,8 @@ window._createState = _createState;
       console.log('🔄 다른 기기에서 데이터가 업데이트됐어요');
     });
   }catch(e){ console.warn('Realtime listener failed:', e); }
+  
 
-  // [PERF ⑤] 서브컬렉션 리스너 설정 + 미마이그레이션 시 자동 마이그레이션
-  if(_firebaseReady && DATA_DOC && DATA_DOC !== LEGACY_DOC){
-    if(_subCollMigrated){
-      // 이미 마이그레이션 완료 — 서브컬렉션 리스너만 설정
-      try{ _setupSubColListeners(); }catch(_e){ console.warn('[PERF⑤] 서브컬렉션 리스너 설정 실패:', _e); }
-    } else if(S.log && S.log.length > 0){
-      // 마이그레이션 필요 — 데이터가 있는 기존 사용자
-      // 백그라운드에서 비동기 마이그레이션 (UI 블로킹 없음)
-      setTimeout(async ()=>{
-        try{
-          await _migrateToSubCollections();
-          // 마이그레이션 완료 후 서브컬렉션 리스너 설정
-          _setupSubColListeners();
-          console.log('[PERF⑤] ✅ 서브컬렉션 마이그레이션 + 리스너 설정 완료');
-        }catch(_e){
-          console.warn('[PERF⑤] 서브컬렉션 마이그레이션 실패 (다음 부팅 시 재시도):', _e);
-        }
-      }, 2000); // 부팅 완료 후 2초 뒤 시작 (UI 우선)
-    }
-  }
 
   // 모든 탭 스크롤 시 헤더 축소 (compact)
   const homeScr = document.getElementById('s-home');
