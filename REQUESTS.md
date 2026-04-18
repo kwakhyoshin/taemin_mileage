@@ -95,6 +95,8 @@
 | R-075 | 2026-04-17 | Firestore 1MB 문서 분할: 서브컬렉션 이행 (PERF ⑤) — 100만 사용자 확장성 | v0417d | PR #402 반영 | 7개 배열(log, familyMessages, moodLog, rewardLog, badgeLog, stickers, challengeHistory) → families/{id}/sub/{name}. memberData → families/{id}/memberSub/{memberId}. 자동 마이그레이션, save() 최적화, 서브컬렉션 리스너 |
 | R-076 | 2026-04-17 | 통합모드(shared) 완전 제거 — 항상 독립모드로 운영 | v0417e | ~~PR #404~~ 롤백 | ⚠️ **사고 5**: v0417e 배포 후 로그인 실패, 버튼 무반응 발생 → PR #405로 v0417c 롤백 → v0417c가 서브컬렉션 미지원으로 0 마일리지 → PR #406으로 v0417d 복원. R-076은 재작업 필요 |
 | R-077 | 2026-04-17 | [사고 복구] v0417e 롤백 후 v0417d 복원 | v0417d | PR #406 반영 | v0417e 롤백(PR #405) → v0417c 서브컬렉션 미지원 → v0417d 복원(PR #406)으로 데이터 정상화 |
+| R-078 | 2026-04-18 | [버그] 다자녀 활동/보상 편집 — 체크박스에서 다른 자녀 선택해도 "첫번째/현재 admin" 자녀에만 설정 적용 | v0418a | — | 근본 원인: saveActivity/saveReward가 targetKids와 무관하게 curAdm(=_admViewChildId\|\|getViewedMemberId())에 무조건 저장. 수정: 체크박스(targetKids)를 유일한 저장 대상으로 사용, curAdm 강제 저장 로직 제거. AI 검수뿐 아니라 pts/cycle/maxDay 등 모든 필드가 같은 버그 공유 → 한번에 수정 |
+| R-079 | 2026-04-18 | [버그] 활동기록 탭에서 편집 진입 시 자녀 체크박스가 항상 첫번째(또는 관리자 탭 선택 자녀) 기준 — 홈 뷰 자녀(viewingChildId) 기준이어야 함 | v0418a | — | 근본 원인: openActForm/_renderFormChildChecks가 `_admViewChildId\|\|getViewedMemberId()`를 사용하여 관리자 탭 선택이 로그탭 편집에 영향. 수정: `_getFormBaseChildId()` 신규 헬퍼 — data-tab==='adm'일 때만 _admViewChildId 우선, 그 외 탭에서는 viewingChildId 기준. renderLogList/renderRewardGrid의 편집 모드도 동일 헬퍼로 분리 |
 
 ## 미착수 백로그 (ROADMAP.md 기준)
 

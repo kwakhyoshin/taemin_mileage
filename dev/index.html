@@ -9472,7 +9472,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0417d';
+const _APP_VERSION = 'v0418a';
 // (v0415i) 운영기에서만 숨길 관리자 섹션 처리 — data-env-only="dev" 요소를 prod에서 숨김
 try{
   if(_ENV!=='dev'){
@@ -12567,7 +12567,8 @@ function renderLogList(){
   if(_logBtns)_logBtns.style.display=isCaregiverUser()?'inline-flex':'none';
   // 부모 편집 모드: 관리자 화면과 동일한 manage-item 리스트로 렌더
   if(_logEditMode&&isCaregiverUser()){
-    const _admMs=_getAdmMemberData();
+    // v0418a: 로그탭 편집은 홈 뷰 자녀(viewingChildId) 기준이어야 함 (관리자 탭 영향 분리)
+    const _admMs=_getFormMemberData();
     const _editActs=(_admMs&&_admMs.acts)?_admMs.acts:S.acts;
     const _toggleBtn=document.getElementById('log-edit-toggle-btn');
     if(_toggleBtn){_toggleBtn.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>완료';_toggleBtn.style.background='rgba(52,211,153,.95)';_toggleBtn.style.color='#fff';_toggleBtn.style.border='1.5px solid rgba(52,211,153,.95)';}
@@ -13212,7 +13213,8 @@ function renderRewardGrid(){
   if(_rwdBtns)_rwdBtns.style.display=isCaregiverUser()?'inline-flex':'none';
   // 부모 편집 모드: 관리자 화면과 동일한 manage-item 리스트로 렌더
   if(_rwdEditMode&&isCaregiverUser()){
-    const _admMs=_getAdmMemberData();
+    // v0418a: 보상 탭 편집은 홈 뷰 자녀(viewingChildId) 기준이어야 함 (관리자 탭 영향 분리)
+    const _admMs=_getFormMemberData();
     const _editRwds=(_admMs&&_admMs.rwds)?_admMs.rwds:S.rwds;
     const _toggleBtn=document.getElementById('rwd-edit-toggle-btn');
     if(_toggleBtn){_toggleBtn.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>완료';_toggleBtn.style.background='rgba(52,211,153,.95)';_toggleBtn.style.color='#fff';_toggleBtn.style.border='1.5px solid rgba(52,211,153,.95)';}
@@ -16443,6 +16445,21 @@ function _getAdmMemberData(){
   const admId=_admViewChildId||getViewedMemberId();
   return S.memberData?.[admId]||null;
 }
+// v0418a: 활동/보상 편집 폼 기준 자녀 — 현재 활성 탭에 따라 분기
+// - 관리자 탭('adm')에서 진입: _admViewChildId 우선 (관리자가 선택한 자녀)
+// - 그 외 탭(home/log/goal 등)에서 진입: viewingChildId (양육자가 홈에서 보고 있는 자녀)
+//   관리자 탭에 한번 들어갔다 나와도 로그탭 편집에 영향 없도록 분리
+function _getFormBaseChildId(){
+  try{
+    const tab=document.body&&document.body.getAttribute('data-tab');
+    if(tab==='adm' && _admViewChildId) return _admViewChildId;
+  }catch(e){}
+  return getViewedMemberId();
+}
+function _getFormMemberData(){
+  const id=_getFormBaseChildId();
+  return S.memberData?.[id]||null;
+}
 
 // ── END STICKER SYSTEM ──────────────────────
 
@@ -18808,7 +18825,8 @@ function doResetAll(){
 
 // ── ACTIVITY FORM ──────────────────────────────
 function openActForm(id){
-  const _admMs=_getAdmMemberData();
+  // v0418a: _getAdmMemberData → _getFormMemberData (현재 탭 기준 자녀 참조)
+  const _admMs=_getFormMemberData();
   const _acts=(_admMs&&_admMs.acts)?_admMs.acts:S.acts;
   const a=id?_acts.find(x=>x.id===id):null;
   document.getElementById('act-form-title').textContent=a?'활동 수정':'새 활동 추가';
@@ -18954,8 +18972,8 @@ function _renderFormChildChecks(prefix,editId){
   const kids=getChildMemberIds();
   if(kids.length<2){field.style.display='none';return;}
   field.style.display='block';
-  // 현재 admin 선택 자녀를 기본 체크
-  const currentAdm=_admViewChildId||getViewedMemberId();
+  // v0418a: 현재 탭 기준으로 기본 체크 자녀 결정 (로그탭=viewingChildId, 관리자탭=_admViewChildId)
+  const currentAdm=_getFormBaseChildId();
   container.innerHTML=kids.map(id=>{
     const nm=MEMBERS[id]?.name||S.familyMeta?.members?.[id]?.name||id;
     const checked=editId?id===currentAdm:true; // 새 항목이면 전체 선택, 수정이면 현재 자녀만
@@ -18997,42 +19015,37 @@ function saveActivity(){
   const _aiMedia=document.querySelector('#verify-media-row .sel-btn.on')?.dataset.media||'photo';
   const verifyConfig=(verifyMode==='ai')?{media:_aiMedia,prompt:_aiPrompt}:null;
   const actData={emoji,name,desc,pts,maxDay,cycle,days,verifyMode,verifyConfig};
+  // v0418a: 체크박스 선택(targetKids)을 유일한 저장 대상으로 사용.
+  // 체크박스 UI가 없는 경우(자녀 1명) 또는 체크가 하나도 안 된 경우 → 기준 자녀(baseKid)에만 반영.
   const targetKids=_getFormCheckedChildren('act');
-  const curAdm=_admViewChildId||getViewedMemberId();
-  // 관리자가 보고 있는 자녀의 acts (memberData에서 직접 수정)
-  const _curAdmMs=getMemberState(curAdm);
-  const _curAdmActs=_curAdmMs.acts||(_curAdmMs.acts=JSON.parse(JSON.stringify(S.acts)));
+  const baseKid=_getFormBaseChildId();
+  const applyKids=(targetKids&&targetKids.length>0)?targetKids:[baseKid];
   if(id){
-    // 수정: 현재 관리자 선택 자녀의 acts에 반영
-    const a=_curAdmActs.find(x=>x.id===id);if(a)Object.assign(a,actData);
-    // 글로벌 S.acts에도 반영 (홈 렌더링용, _globalDataOwner와 같은 자녀면)
-    if(_globalDataOwner===curAdm){const sa=S.acts.find(x=>x.id===id);if(sa)Object.assign(sa,actData);}
-    // 선택된 다른 자녀에도 동일 수정 적용
-    if(targetKids&&targetKids.length>0){
-      targetKids.forEach(kid=>{
-        if(kid===curAdm)return; // 이미 위에서 반영됨
-        const ms=getMemberState(kid);
-        if(ms.acts){const ka=ms.acts.find(x=>x.id===id);if(ka)Object.assign(ka,actData);}
-      });
-    }
+    // 수정: 선택된 자녀들의 acts에만 반영
+    applyKids.forEach(kid=>{
+      if(!kid)return;
+      const ms=getMemberState(kid);
+      if(!ms)return;
+      if(!ms.acts)ms.acts=JSON.parse(JSON.stringify(S.acts));
+      const a=ms.acts.find(x=>x.id===id);if(a)Object.assign(a,actData);
+      // _globalDataOwner와 일치하는 자녀면 S.acts에도 반영 (홈 렌더링용)
+      if(_globalDataOwner===kid){const sa=S.acts.find(x=>x.id===id);if(sa)Object.assign(sa,actData);}
+    });
   }else{
+    // 새 활동: 선택된 자녀들 전부에 동일 ID로 추가
     const newId='a_'+Date.now();
     const newAct={id:newId,...actData,active:true,showHome:false};
-    // 관리자 선택 자녀에 추가
-    _curAdmActs.push({...newAct});
-    if(_globalDataOwner===curAdm)S.acts.push({...newAct});
-    // 선택된 다른 자녀에도 추가
-    if(targetKids&&targetKids.length>0){
-      targetKids.forEach(kid=>{
-        if(kid===curAdm)return;
-        const ms=getMemberState(kid);
-        if(!ms.acts)ms.acts=[];
-        ms.acts.push(JSON.parse(JSON.stringify(newAct)));
-      });
-    }
+    applyKids.forEach(kid=>{
+      if(!kid)return;
+      const ms=getMemberState(kid);
+      if(!ms)return;
+      if(!ms.acts)ms.acts=[];
+      ms.acts.push(JSON.parse(JSON.stringify(newAct)));
+      if(_globalDataOwner===kid)S.acts.push({...newAct});
+    });
   }
   save();renderAll();closeModal('m-act');
-  const appliedCount=targetKids?targetKids.length:1;
+  const appliedCount=applyKids.length;
   toast(id?'✏️ 활동이 수정됐어요'+(appliedCount>1?` (${appliedCount}명 적용)`:''):'✅ 새 활동이 추가됐어요!'+(appliedCount>1?` (${appliedCount}명 적용)`:''));
 }
 
@@ -19048,7 +19061,8 @@ function setRwdSale(v){
 }
 
 function openRwdForm(id){
-  const _admMs=_getAdmMemberData();
+  // v0418a: _getAdmMemberData → _getFormMemberData (현재 탭 기준 자녀 참조)
+  const _admMs=_getFormMemberData();
   const _rwds=(_admMs&&_admMs.rwds)?_admMs.rwds:S.rwds;
   const r=id?_rwds.find(x=>x.id===id):null;
   document.getElementById('rwd-form-title').textContent=r?'보상 수정':'새 보상 추가';
@@ -19092,42 +19106,43 @@ function saveReward(){
   }:null;
 
   const rwdData={emoji,name,pts,goal:rwdGoal,sale:saleData};
+  // v0418a: 체크박스 선택(targetKids)을 유일한 저장 대상으로 사용.
   const targetKids=_getFormCheckedChildren('rwd');
-  const curAdm=_admViewChildId||getViewedMemberId();
-  const _curAdmMs=getMemberState(curAdm);
-  const _curAdmRwds=_curAdmMs.rwds||(_curAdmMs.rwds=JSON.parse(JSON.stringify(S.rwds)));
-  if(rwdGoal)_curAdmRwds.forEach(r=>r.goal=false);
+  const baseKid=_getFormBaseChildId();
+  const applyKids=(targetKids&&targetKids.length>0)?targetKids:[baseKid];
   if(id){
-    const r=_curAdmRwds.find(x=>x.id===id);if(r)Object.assign(r,rwdData);
-    // 현재 글로벌 뷰 소유자면 S에도 반영
-    if(_globalDataOwner===curAdm){const sr=S.rwds.find(x=>x.id===id);if(sr)Object.assign(sr,rwdData);if(rwdGoal)S.rwds.forEach(r=>{if(r.id!==id)r.goal=false;});}
-    if(targetKids&&targetKids.length>0){
-      targetKids.forEach(kid=>{
-        if(kid===curAdm)return;
-        const ms=getMemberState(kid);
-        if(ms.rwds){
-          if(rwdGoal)ms.rwds.forEach(r=>r.goal=false);
-          const kr=ms.rwds.find(x=>x.id===id);if(kr)Object.assign(kr,rwdData);
-        }
-      });
-    }
+    // 수정: 선택된 자녀들의 rwds에만 반영
+    applyKids.forEach(kid=>{
+      if(!kid)return;
+      const ms=getMemberState(kid);
+      if(!ms)return;
+      if(!ms.rwds)ms.rwds=JSON.parse(JSON.stringify(S.rwds));
+      if(rwdGoal)ms.rwds.forEach(r=>r.goal=false);
+      const kr=ms.rwds.find(x=>x.id===id);if(kr)Object.assign(kr,rwdData);
+      if(_globalDataOwner===kid){
+        if(rwdGoal)S.rwds.forEach(r=>{if(r.id!==id)r.goal=false;});
+        const sr=S.rwds.find(x=>x.id===id);if(sr)Object.assign(sr,rwdData);
+      }
+    });
   }else{
+    // 새 보상: 선택된 자녀들 전부에 동일 ID로 추가
     const newId='r_'+Date.now();
     const newRwd={id:newId,...rwdData};
-    _curAdmRwds.push({...newRwd});
-    if(_globalDataOwner===curAdm)S.rwds.push({...newRwd});
-    if(targetKids&&targetKids.length>0){
-      targetKids.forEach(kid=>{
-        if(kid===curAdm)return;
-        const ms=getMemberState(kid);
-        if(!ms.rwds)ms.rwds=[];
-        if(rwdGoal)ms.rwds.forEach(r=>r.goal=false);
-        ms.rwds.push(JSON.parse(JSON.stringify(newRwd)));
-      });
-    }
+    applyKids.forEach(kid=>{
+      if(!kid)return;
+      const ms=getMemberState(kid);
+      if(!ms)return;
+      if(!ms.rwds)ms.rwds=[];
+      if(rwdGoal)ms.rwds.forEach(r=>r.goal=false);
+      ms.rwds.push(JSON.parse(JSON.stringify(newRwd)));
+      if(_globalDataOwner===kid){
+        if(rwdGoal)S.rwds.forEach(r=>r.goal=false);
+        S.rwds.push({...newRwd});
+      }
+    });
   }
   save();renderAll();closeModal('m-rwd');
-  const appliedCount=targetKids?targetKids.length:1;
+  const appliedCount=applyKids.length;
   toast(id?'✏️ 보상이 수정됐어요'+(appliedCount>1?` (${appliedCount}명 적용)`:''):'🎁 새 보상이 추가됐어요!'+(appliedCount>1?` (${appliedCount}명 적용)`:''));
 }
 
@@ -19713,6 +19728,11 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.5.1 (v0418a)',date:'2026-04-18',items:[
+    '[FIX] 다자녀 활동·보상 편집 시 "다른 자녀 선택해도 첫번째 자녀에만 적용" 버그 수정 — 체크박스 선택(targetKids)을 유일한 저장 대상으로 사용, curAdm 강제 저장 제거',
+    '[FIX] 활동기록/보상 탭에서 편집 진입 시 자녀 기본 선택 — 관리자 탭의 _admViewChildId가 아닌 현재 보고 있는 자녀(viewingChildId) 기준으로 체크박스 기본값 결정',
+    '[REFACTOR] 새 헬퍼 _getFormBaseChildId/_getFormMemberData — 현재 활성 탭(adm vs 그 외)에 따라 기준 자녀 분기',
+  ]},
   {ver:'2.5.0 (v0417d)',date:'2026-04-17',items:[
     '[PERF ⑤] Firestore 문서 분할: 큰 배열(log, messages, moodLog 등) 서브컬렉션 분리 — 1MB 한계 해소',
     '[PERF ⑤] memberData 독립모드 멤버별 서브컬렉션 분리 — 100만 사용자 확장성 확보',
