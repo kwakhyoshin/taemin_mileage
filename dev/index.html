@@ -9472,7 +9472,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0420a';
+const _APP_VERSION = 'v0420b';
 // (v0415i) 운영기에서만 숨길 관리자 섹션 처리 — data-env-only="dev" 요소를 prod에서 숨김
 try{
   if(_ENV!=='dev'){
@@ -9617,28 +9617,51 @@ async function _initFirebase(){
     }
     LEGACY_DOC = doc(db, 'users', _ENV==='dev'?'taemin_dev':'taemin');
     DATA_DOC = LEGACY_DOC;
-    // [PERF ③] iPhone PWA 콜드스타트 대응: 첫 onAuthStateChanged 이벤트까지 대기 (최대 1.2초, 기존 3초)
-    // 이렇게 해야 auth.currentUser가 복구된 후 Firestore 읽기가 진행되어 permission-denied 방지
-    // 1.2초로 단축 — iPhone PWA에서 auth 토큰 복원은 보통 300ms 이내, 3초는 과도한 세금
-    try{
-      await new Promise(function(resolve){
+    // [PERF A4] 조건부 auth wait: 캐시된 family_id가 있으면(99% 재방문) auth wait를 비차단(fire-and-forget)으로 돌려서
+    // boot critical path에서 최대 1200ms 제거. getDoc 호출 쪽에서 permission-denied 발생 시 await 후 1회 재시도.
+    // 캐시가 없는 첫 방문(회원가입/초대)에서만 기존 동기 대기를 유지 → 익명 로그인 후 setDoc 호출 안전성 보장.
+    const _hasCachedFamily = (function(){ try{ return !!localStorage.getItem(_LS_PREFIX+'family_id'); }catch(_){ return false; } })();
+    const _buildAuthWait = function(){
+      return new Promise(function(resolve){
         let done=false;
         const unsub=onAuthStateChanged(fbAuth,function(){ if(done)return; done=true; try{unsub&&unsub();}catch(_){}; resolve(); });
         setTimeout(function(){ if(done)return; done=true; try{unsub&&unsub();}catch(_){}; resolve(); },1200);
       });
-      console.log('[mile.ly] Auth restored:', fbAuth.currentUser?fbAuth.currentUser.uid:'(none)');
-    }catch(_awErr){ console.warn('[mile.ly] auth wait failed',_awErr); }
-    // v0408z6: 로그인 세션이 없으면 익명 로그인으로 Firestore write 권한 확보
-    // (회원가입 플로우는 사용자가 아직 Firebase 로그인 전이지만 setDoc을 호출해야 함)
-    // v0415m: 비동기화 되돌림 — 익명 인증 전에 getDoc 호출하면 permission-denied로 "오프라인 모드"
-    // 폴백이 발생 (안드로이드 WebView 에뮬에서 재현됨). 익명 로그인은 수백ms 내 완료되므로 await 복원
-    if(!fbAuth.currentUser && window._signInAnonymously){
+    };
+    if(_hasCachedFamily){
+      // 재방문 경로 — 비차단. getDoc이 permission-denied를 뱉으면 outer retry에서 await하고 1회 재시도.
+      window._authWaitPromise = _buildAuthWait().then(function(){
+        console.log('[mile.ly][A4] Auth restored (background):', fbAuth.currentUser?fbAuth.currentUser.uid:'(none)');
+        // 토큰이 여전히 없으면 익명 로그인도 백그라운드에서 보장
+        if(!fbAuth.currentUser && window._signInAnonymously){
+          return window._signInAnonymously(fbAuth).then(function(){
+            console.log('[mile.ly][A4] Anonymous sign-in OK (background):', fbAuth.currentUser&&fbAuth.currentUser.uid);
+          }).catch(function(_anErr){
+            console.warn('[mile.ly][A4] Anonymous sign-in failed (background):', _anErr&&_anErr.code, _anErr&&_anErr.message);
+          });
+        }
+      }).catch(function(_awErr){ console.warn('[mile.ly][A4] auth wait failed (background)',_awErr); });
+      console.log('[mile.ly][A4] Skipping blocking auth wait (cached family present)');
+    } else {
+      // 첫 방문/초대 경로 — 기존 동기 대기 유지 (안전성 우선)
       try{
-        await window._signInAnonymously(fbAuth);
-        console.log('[mile.ly] Anonymous sign-in OK:', fbAuth.currentUser&&fbAuth.currentUser.uid);
-      }catch(_anErr){
-        console.warn('[mile.ly] Anonymous sign-in failed:', _anErr&&_anErr.code, _anErr&&_anErr.message);
+        await _buildAuthWait();
+        console.log('[mile.ly] Auth restored:', fbAuth.currentUser?fbAuth.currentUser.uid:'(none)');
+      }catch(_awErr){ console.warn('[mile.ly] auth wait failed',_awErr); }
+      // v0408z6: 로그인 세션이 없으면 익명 로그인으로 Firestore write 권한 확보
+      // (회원가입 플로우는 사용자가 아직 Firebase 로그인 전이지만 setDoc을 호출해야 함)
+      // v0415m: 비동기화 되돌림 — 익명 인증 전에 getDoc 호출하면 permission-denied로 "오프라인 모드"
+      // 폴백이 발생 (안드로이드 WebView 에뮬에서 재현됨). 익명 로그인은 수백ms 내 완료되므로 await 복원
+      if(!fbAuth.currentUser && window._signInAnonymously){
+        try{
+          await window._signInAnonymously(fbAuth);
+          console.log('[mile.ly] Anonymous sign-in OK:', fbAuth.currentUser&&fbAuth.currentUser.uid);
+        }catch(_anErr){
+          console.warn('[mile.ly] Anonymous sign-in failed:', _anErr&&_anErr.code, _anErr&&_anErr.message);
+        }
       }
+      // outer retry에서 await 가능하게 resolved promise 설정
+      window._authWaitPromise = Promise.resolve();
     }
     _firebaseReady = true;
     console.log('[mile.ly] Firebase loaded OK (with Auth)');
@@ -19728,6 +19751,12 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.6.1 (v0420b)',date:'2026-04-20',items:[
+    '[PERF A4] 재방문(캐시된 family_id 있음)에서는 auth wait 1200ms 차단 제거 — critical path에서 최대 1.2초 단축. 첫 방문/초대 경로는 기존 동기 대기 유지.',
+    '[PERF A4] getDoc permission-denied 발생 시 _authWaitPromise await 후 1회 자동 재시도 — A4 비차단 모드의 안전망',
+    '[PERF B3] _subCollMigrated 플래그를 localStorage에 캐싱 — 재방문 시 main doc과 서브컬렉션 fetch를 병렬 fire(Promise.all) → 직렬 대기 제거',
+    '[PERF B3] main doc 응답이 _subCollMigrated=false이면 stale 캐시 플래그 자동 삭제 → 다음 부팅부터 올바른 경로',
+  ]},
   {ver:'2.6.0 (v0420a)',date:'2026-04-20',items:[
     '[PERF B1] Service Worker stale-while-revalidate — 재방문 콜드스타트 시 HTML을 캐시에서 즉시 반환, 네트워크는 백그라운드 갱신 (CACHE_NAME v4→v5)',
     '[PERF B1] 새 HTML 도착 시 postMessage(HTML_UPDATED) — 사용자에게 조용한 토스트 "새 버전이 준비됐어요. 앱을 다시 열면 자동 적용됩니다." 표시',
@@ -25161,11 +25190,23 @@ window._milePerfReport = function(){
 
   // [PERF ⑥] family_id가 있으면(정상 경로 99%) getDoc을 즉시 fire — fallback 체크 대기 없이 병렬 진행
   // family_id가 없는 비정상 경로에서만 순차 fallback (legacy pointer → auth registry)
+  // [PERF B3] _subCollMigrated 캐시 플래그가 있으면 서브컬렉션 fetch도 동시에 fire (main doc과 병렬)
   let _earlyDocPromise = null;
+  let _earlySubPromise = null;
+  let _earlyMemberSubPromise = null;
+  const _cachedSubMigrated = (function(){ try{ return localStorage.getItem(_LS_PREFIX+'subColMigrated')==='1'; }catch(_){ return false; } })();
   if(_firebaseReady && _familyId && DATA_DOC && DATA_DOC.path){
     _earlyDocPromise = getDoc(DATA_DOC); // 네트워크 요청 즉시 시작
     window._milePerfMark('first-getdoc-fired');
     console.log('[mile.ly][PERF⑥] Early getDoc fired for', DATA_DOC.path);
+    if(_cachedSubMigrated){
+      try{
+        _earlySubPromise = _readSubCollections();
+        _earlyMemberSubPromise = _readMemberSubCollections();
+        window._milePerfMark('first-subcol-fired');
+        console.log('[mile.ly][B3] Speculative subcol fetch fired (cached flag)');
+      }catch(_specErr){ console.warn('[mile.ly][B3] speculative subcol fire failed', _specErr); }
+    }
   } else if(_firebaseReady && !_familyId){
     // 레거시 계정이 다른 기기에서 마이그레이션됐으면 포인터 따라가기
     await _checkLegacyMigrationPointer();
@@ -25173,10 +25214,24 @@ window._milePerfReport = function(){
     if(!_familyId) await _checkAuthRegistryOnBoot();
   }
 
+  // [PERF A4] getDoc 결과를 기다리되, permission-denied인 경우 auth wait 완료 후 1회 재시도
+  const _awaitDocWithAuthRetry = async function(p){
+    try{ return await p; }
+    catch(e){
+      const code = e && e.code;
+      if(code === 'permission-denied' || code === 'unauthenticated'){
+        console.warn('[mile.ly][A4] getDoc permission-denied — awaiting auth then retrying');
+        try{ if(window._authWaitPromise) await window._authWaitPromise; }catch(_){}
+        return await getDoc(DATA_DOC);
+      }
+      throw e;
+    }
+  };
+
   try{
     // Load initial data from Firestore
-    let snap = _earlyDocPromise ? await _earlyDocPromise
-      : (_firebaseReady ? await getDoc(DATA_DOC) : {exists:()=>false});
+    let snap = _earlyDocPromise ? await _awaitDocWithAuthRetry(_earlyDocPromise)
+      : (_firebaseReady ? await _awaitDocWithAuthRetry(getDoc(DATA_DOC)) : {exists:()=>false});
     window._milePerfMark('firestore-resolved');
 
     // ★ 레거시 데이터 표시 차단: 로드한 문서에 _migratedTo가 있으면 레거시 데이터 → family로 전환
@@ -25196,15 +25251,16 @@ window._milePerfReport = function(){
       S = Object.assign(defaultState(), data);
 
       // [PERF ⑤] 서브컬렉션 모드 감지 및 데이터 로드
+      // [PERF B3] 캐시된 플래그로 이미 병렬 fetch가 진행 중이면 그 결과를 재사용
       if(data._subCollMigrated){
         _subCollMigrated = true;
-        console.log('[PERF⑤] 서브컬렉션 모드 감지 — 서브컬렉션에서 배열 데이터 로드 시작');
+        const _usingSpeculative = !!(_earlySubPromise && _earlyMemberSubPromise);
+        console.log('[PERF⑤] 서브컬렉션 모드 감지 — 서브컬렉션에서 배열 데이터 로드'+(_usingSpeculative?' (B3 speculative hit)':''));
         try{
-          // 배열 서브컬렉션 + memberData 서브컬렉션 병렬 로드
-          const [subData, memberSubData] = await Promise.all([
-            _readSubCollections(),
-            _readMemberSubCollections()
-          ]);
+          // 배열 서브컬렉션 + memberData 서브컬렉션 병렬 로드 (또는 speculative 결과 재사용)
+          const [subData, memberSubData] = _usingSpeculative
+            ? await Promise.all([_earlySubPromise, _earlyMemberSubPromise])
+            : await Promise.all([_readSubCollections(), _readMemberSubCollections()]);
           // 배열 데이터 S에 반영
           for(const field of _SUBCOL_FIELDS){
             if(subData[field]) S[field] = subData[field];
@@ -25218,9 +25274,17 @@ window._milePerfReport = function(){
             }
           }
           console.log('[PERF⑤] 서브컬렉션 데이터 로드 완료 — log:', (S.log||[]).length, 'messages:', (S.familyMessages||[]).length);
+          // B3 캐시 플래그 write-through (다음 부팅에서 병렬 fire 조건 충족)
+          try{ localStorage.setItem(_LS_PREFIX+'subColMigrated','1'); }catch(_){}
         }catch(_subErr){
           console.warn('[PERF⑤] 서브컬렉션 로드 실패, 메인 문서 데이터 사용:', _subErr);
           _subCollMigrated = false; // 폴백: 메인 문서 모드로 복귀
+        }
+      } else {
+        // 메인 문서가 서브컬렉션 모드가 아님 — 캐시 플래그가 stale하면 제거
+        if(_cachedSubMigrated){
+          try{ localStorage.removeItem(_LS_PREFIX+'subColMigrated'); }catch(_){}
+          console.log('[mile.ly][B3] Cleared stale subColMigrated cache flag');
         }
       }
 
