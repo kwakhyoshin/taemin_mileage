@@ -1,8 +1,11 @@
 // ═══════════════════════════════════════════════
 // 태민이 마일리지 — Service Worker (Push + Cache)
 // ═══════════════════════════════════════════════
+// [PERF B1] Stale-While-Revalidate for HTML — 캐시 즉시 반환 + 백그라운드 네트워크 갱신
+// 새 HTML 도착 시 클라이언트에 postMessage('HTML_UPDATED') 로 알림
+// 다음 리로드 시 자동 반영 (강제 새로고침 없이 자연스럽게 업데이트)
 
-const CACHE_NAME = 'taemin-v4';
+const CACHE_NAME = 'taemin-v5';
 
 // Install — skip waiting to activate immediately
 self.addEventListener('install', (e) => {
@@ -20,7 +23,7 @@ self.addEventListener('activate', (e) => {
   );
 });
 
-// Fetch — Network-first strategy for HTML, network-only for API calls
+// Fetch — [PERF B1] Stale-While-Revalidate for HTML
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
 
@@ -30,22 +33,33 @@ self.addEventListener('fetch', (e) => {
   // Skip cross-origin requests (Firebase, APIs, CDNs)
   if (url.origin !== self.location.origin) return;
 
-  // HTML pages (index.html, /, etc.) — Network first, fallback to cache
+  // HTML pages (index.html, /, etc.) — Stale-While-Revalidate
+  // 캐시가 있으면 즉시 반환 (부팅 RTT 제거) + 백그라운드에서 네트워크로 갱신
+  // 갱신된 HTML이 도착하면 클라이언트에 'HTML_UPDATED' 메시지 전송
   if (e.request.mode === 'navigate' || e.request.destination === 'document' ||
       url.pathname.endsWith('.html') || url.pathname.endsWith('/')) {
-    e.respondWith(
-      fetch(e.request, { cache: 'no-cache' })
+    e.respondWith((async () => {
+      const cached = await caches.match(e.request);
+      const networkPromise = fetch(e.request, { cache: 'no-cache' })
         .then(response => {
-          // Cache the fresh response for offline fallback
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
+          if (response && response.ok) {
+            const clone = response.clone();
+            // 캐시 저장 (백그라운드)
+            caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
+            // 캐시가 있었다면 HTML 갱신 알림 (캐시 첫 저장 시에는 알릴 필요 없음)
+            if (cached) {
+              self.clients.matchAll({ type: 'window', includeUncontrolled: true })
+                .then(clientList => {
+                  clientList.forEach(c => c.postMessage({ type: 'HTML_UPDATED' }));
+                });
+            }
+          }
           return response;
         })
-        .catch(() => {
-          // Network failed — serve from cache (offline support)
-          return caches.match(e.request);
-        })
-    );
+        .catch(() => cached); // 네트워크 실패 시 캐시 폴백
+      // 캐시가 있으면 즉시 반환, 없으면 네트워크 대기
+      return cached || networkPromise;
+    })());
     return;
   }
 
