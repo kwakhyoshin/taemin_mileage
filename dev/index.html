@@ -9472,7 +9472,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0418a';
+const _APP_VERSION = 'v0420a';
 // (v0415i) 운영기에서만 숨길 관리자 섹션 처리 — data-env-only="dev" 요소를 prod에서 숨김
 try{
   if(_ENV!=='dev'){
@@ -19728,6 +19728,11 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.6.0 (v0420a)',date:'2026-04-20',items:[
+    '[PERF B1] Service Worker stale-while-revalidate — 재방문 콜드스타트 시 HTML을 캐시에서 즉시 반환, 네트워크는 백그라운드 갱신 (CACHE_NAME v4→v5)',
+    '[PERF B1] 새 HTML 도착 시 postMessage(HTML_UPDATED) — 사용자에게 조용한 토스트 "새 버전이 준비됐어요. 앱을 다시 열면 자동 적용됩니다." 표시',
+    '[PERF D1] 부팅 성능 측정 로깅 — performance.mark 7단계 + _milePerfReport() 콘솔 리포트 + localStorage(perf_last) 기록',
+  ]},
   {ver:'2.5.1 (v0418a)',date:'2026-04-18',items:[
     '[FIX] 다자녀 활동·보상 편집 시 "다른 자녀 선택해도 첫번째 자녀에만 적용" 버그 수정 — 체크박스 선택(targetKids)을 유일한 저장 대상으로 사용, curAdm 강제 저장 제거',
     '[FIX] 활동기록/보상 탭에서 편집 진입 시 자녀 기본 선택 — 관리자 탭의 _admViewChildId가 아닌 현재 보고 있는 자녀(viewingChildId) 기준으로 체크박스 기본값 결정',
@@ -22137,6 +22142,19 @@ if('serviceWorker' in navigator){
       // SW에서 push 수신 시 뱃지 즉시 갱신 (아이폰 onSnapshot 지연 보완)
       console.log('[SW→App] PUSH_RECEIVED - 뱃지 갱신');
       setTimeout(()=>{ try{ checkNewMessages(); _updateFamilyBtnBadge(); }catch(e){} }, 1000);
+      return;
+    }
+    // [PERF B1] Stale-While-Revalidate: SW가 백그라운드에서 새 HTML을 받으면 알려줌
+    // 현재 세션은 구 HTML로 계속 돌아가고, 다음 리로드 시 자동으로 새 버전 활성화
+    if(event.data&&event.data.type==='HTML_UPDATED'){
+      console.log('[SW→App] HTML_UPDATED — 다음 리로드 시 새 버전 활성화');
+      window._htmlUpdatePending = true;
+      // 조용한 토스트 (사용자 방해 최소화 — 작업 중일 수 있으므로 자동 리로드는 하지 않음)
+      try{
+        if(typeof toast==='function'){
+          toast('✨ 새 버전이 준비됐어요. 앱을 다시 열면 자동 적용됩니다.');
+        }
+      }catch(_){}
       return;
     }
     if(event.data&&event.data.type==='NOTIFICATION_CLICK'){
@@ -24810,7 +24828,39 @@ console.log('[mile.ly] module loaded OK');
 window._createState = _createState;
 
 // ── INIT (Firebase async) ─────────────────────
+// [PERF D1] 부팅 구간 성능 측정 헬퍼 — 운영 반영 전 실측 기반 튜닝 용
+// 각 단계별 mark 후 마지막 단계에서 measure → console.log + localStorage 기록 (디버그)
+window._milePerfMark = function(name){
+  try{
+    if(window.performance && performance.mark) performance.mark('mileboot:'+name);
+    if(_ENV==='dev') console.log('[PERF-D1] mark:', name, 'at', Math.round(performance.now()), 'ms');
+  }catch(_){}
+};
+window._milePerfReport = function(){
+  try{
+    if(!window.performance || !performance.getEntriesByName) return;
+    const stages = ['start','cache-rendered','fb-init-start','fb-ready','first-getdoc-fired','firestore-resolved','data-ready'];
+    const marks = {};
+    stages.forEach(s => {
+      const m = performance.getEntriesByName('mileboot:'+s);
+      if(m && m.length) marks[s] = Math.round(m[0].startTime);
+    });
+    // 단계별 소요시간 계산
+    const deltas = {};
+    const keys = Object.keys(marks);
+    for(let i=1; i<keys.length; i++){
+      deltas[keys[i-1]+'→'+keys[i]] = marks[keys[i]] - marks[keys[i-1]];
+    }
+    const totalMs = marks['data-ready'] ? marks['data-ready'] - (marks['start']||0) : null;
+    const bootCache = marks['cache-rendered'] != null; // cache-rendered mark가 찍혔으면 캐시부트
+    const report = { ver:_APP_VERSION, bootCache, total:totalMs, marks, deltas, ts:Date.now() };
+    console.log('[PERF-D1] 부팅 리포트:', report);
+    try{ localStorage.setItem(_LS_PREFIX+'perf_last', JSON.stringify(report)); }catch(_){}
+    return report;
+  }catch(e){ console.warn('[PERF-D1] report error:', e); }
+};
 (async function(){
+  window._milePerfMark('start');
   // ── 카카오 OAuth 콜백 감지 (Authorization Code flow) ──
   // 카카오는 ?code=xxx&state=kakao_xxx 형태로 리다이렉트됨
   const _kakaoQs = new URLSearchParams(window.location.search);
@@ -25097,10 +25147,14 @@ window._createState = _createState;
     _bootFromCache = false;
   }
 
+  if(_bootFromCache) window._milePerfMark('cache-rendered');
+
   if(!_bootFromCache) showLoading('데이터 불러오는 중...');
 
   // Firebase 동적 로드 (실패해도 앱 UI는 동작)
+  window._milePerfMark('fb-init-start');
   await _initFirebase();
+  window._milePerfMark('fb-ready');
 
   // 다가족: 저장된 familyId가 있으면 해당 문서 로드
   if(_firebaseReady) updateDataDoc();
@@ -25110,6 +25164,7 @@ window._createState = _createState;
   let _earlyDocPromise = null;
   if(_firebaseReady && _familyId && DATA_DOC && DATA_DOC.path){
     _earlyDocPromise = getDoc(DATA_DOC); // 네트워크 요청 즉시 시작
+    window._milePerfMark('first-getdoc-fired');
     console.log('[mile.ly][PERF⑥] Early getDoc fired for', DATA_DOC.path);
   } else if(_firebaseReady && !_familyId){
     // 레거시 계정이 다른 기기에서 마이그레이션됐으면 포인터 따라가기
@@ -25122,6 +25177,7 @@ window._createState = _createState;
     // Load initial data from Firestore
     let snap = _earlyDocPromise ? await _earlyDocPromise
       : (_firebaseReady ? await getDoc(DATA_DOC) : {exists:()=>false});
+    window._milePerfMark('firestore-resolved');
 
     // ★ 레거시 데이터 표시 차단: 로드한 문서에 _migratedTo가 있으면 레거시 데이터 → family로 전환
     // 이 safety check는 _checkLegacyMigrationPointer가 어떤 이유로 실패했을 때의 최후 방어선
@@ -25288,6 +25344,9 @@ window._createState = _createState;
   applyUserProfile(); // 로그인된 사용자 프로필 적용 (인사말 포함)
   cleanExpiredStickers(); // 하루 지난 스티커 자동 삭제
   renderAll();
+  window._milePerfMark('data-ready');
+  // [PERF D1] 부팅 완료 직후 성능 리포트 출력 (개발기에서만 자동)
+  if(_ENV==='dev') try{ window._milePerfReport(); }catch(_){}
   checkBirthdayBonus(); // 아이 생일 체크 및 보너스 지급
 
   // 부팅 시 초기 탭 theme-color 설정 (자동 로그인 시 reallyGoTab이 호출되지 않아 누락되는 문제 해결)
