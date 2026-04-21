@@ -836,6 +836,33 @@ git add index.html && git commit -m "운영기 배포: ..." && git push
   4. **리로드 플래그는 localStorage 마커 + 부팅 시 가드 쌍**으로 구현. 단순히 리로드 직후 코드에 의존하면 `onAuthStateChanged`가 먼저 fire되어 race가 남음.
   5. 사고 9(캐시 stale) 해결이 사고 10(Auth 잔존)을 노출. **레이어별 캐시 정책을 한 번에 점검하는 프로세스가 필요** — Firestore IndexedDB, Firebase Auth localStorage, Service Worker, HTTP cache, CacheStorage 5개 레이어를 동시에 봐야 "진짜 전체 초기화"가 됨.
 
+### 사고 11: 아이폰 PWA 로그인 불능 원격 진단 채널 신설 (2026-04-21, v0421d)
+- **증상**: v0421a(사고 8), v0421b(사고 9), v0421c(사고 10)까지 세 차례 핫픽스 후에도 **같은 아이폰 PWA에서만** 로그인 실패가 지속. 사용자: "운영기에 c 버전 잘 떴는데, 로컬상태 초기화 보여서 누르고 로그인했는데 로그인은 여전히 안되고 있어." 맥 크롬·아이패드 PWA·다른 기기는 모두 정상. iPhone 사용자 앞에서 USB로 Mac Safari 개발자 도구를 붙여 콘솔을 볼 수 있는 상황이 아님 → 원격 텔레메트리 없이는 더 이상 추측 기반 디버깅이 위험.
+- **사용자 명시 요청**: "진단로그 복사보다는 보내기 버튼을 만들어서 그걸 누르면 디비 테이블에 저장되고 너가 그걸 직접 api로 조회해서 보면 되지 않을까? 그리고 해당 데이터는 시스템관리자페이지(앱에있는 관리자 기능말고 admin.html)에 로그들을 확인 할수 있는 기능도 만들고."
+- **해결 (v0421d)** — 추측성 코드 수정이 아닌 **진단 채널 구축**:
+  - **Part A — 로그인 화면 "🩺 진단 실행" 링크**: 버전 푸터에 링크 추가 → `_runLoginDiagnostic()`가 아래 데이터를 수집:
+    - `clientTime` / `env` / `appVersion` / `userAgent` / `deviceHint`(iPhone PWA/iPad PWA/Mac/Android 등) / `standalone`(display-mode) / viewport
+    - `storage.localStorage`: 전체 키 목록(`firebase:`·`taemin_` 외 키는 이름 마스킹), 샘플 값 일부만
+    - `storage.indexedDB`: `indexedDB.databases()`로 DB 이름/버전 나열 (Safari 16+ 지원 가정)
+    - `storage.cacheStorage`: `caches.keys()` 결과
+    - `firebase.auth`: `fbAuth.currentUser`의 uid/isAnonymous/providerId 스냅샷, `_authWaitPromise`에 50ms race
+    - `registryFetch`: 시도 ID로 `_id_registry` 글로벌 doc을 `getDocFromServer` → 실패 시 `getDoc` 폴백. `method`, `exists`, `entryCount`, `hasAttemptedId`, `errCode` 캡처
+    - `familyFetch`: registry에서 얻은 `familyPath`로 family doc 조회 (`_subCollMigrated`, memberData 카운트)
+    - `networkTest`: `https://firestore.googleapis.com/v1/...listCollectionIds` POST로 순수 네트워크 도달성 검사
+  - **Part B — "📤 진단 전송" 버튼**: 패널에서 사용자가 내용 확인 후 전송. `_sendDiagLog()`가 Firestore `diagLogs` 컬렉션에 `addDoc`. **비밀번호는 저장하지 않음**(`passwordLen`만 저장), 시도 ID는 저장.
+  - **Part C — admin.html 로그인 진단 로그 패널**: 사이드바에 "로그인 진단 로그" 신설 → `diagLogs` 컬렉션을 `orderBy('clientTime','desc')` `limit 100`으로 조회, 각 row에 env/기기/PWA/시도ID/registry 결과/family 결과/auth 상태/네트워크 상태 요약 + JSON 상세 팝업 + 전체 삭제. 챗봇 오류 로그(`chatErrors`)와 동일 패턴.
+  - **Part D — Firestore 규칙**: `match /diagLogs/{docId} { allow read, write: if true; }` (emailVerify와 동일 공개 패턴). PII 없고 로그인 실패 상태의 익명 기기도 기록할 수 있어야 하므로 공개 쓰기 허용.
+- **수집 대상 식별자 위치** (dev/index.html):
+  - `_runLoginDiagnostic` / `_sendDiagLog` / `_closeDiagPanel` / `_buildDiagReport`
+  - `_diagDeviceHint` / `_diagIsStandalone` / `_diagLocalStorageSnapshot` / `_diagIndexedDbSnapshot` / `_diagCacheStorageSnapshot` / `_diagAuthSnapshot` / `_diagRegistryFetch` / `_diagFamilyFetch` / `_diagNetworkTest`
+  - HTML: `#_auth-diag-panel`(모달), `.av-diag`(링크), `#_auth-diag-send-btn`, `#_auth-diag-body`, `#_auth-diag-note`
+- **admin.html 식별자**: `#panel-diag_logs`, `loadDiagLogs()`, `showDiagLogDetail(id)`, `clearDiagLogs()`, `_diagLogsCache`
+- **교훈**:
+  1. **"원인을 모른다"면 추측으로 코드를 더 짜지 말 것** — v0421a/b/c에서 세 번째 같은 기기로 실패가 돌아왔을 때 "네 번째 추측" 대신 **텔레메트리 채널부터 세운** 게 올바른 의사결정. 다음에도 원인이 기기 종속이고 재현이 어려우면 동일 패턴으로 먼저 진단 채널을 만들 것.
+  2. **진단 로그는 복사 붙여넣기 + 클립보드가 아닌 Firestore 자체 테이블이 낫다** — 사용자가 캡처·공유할 필요 없이 내가 admin.html 혹은 Firestore API로 직접 조회 가능. Latency도 사용자 action 기준 1-clickful 대신 3-clickful이 되지만 기밀성·완결성에서 우세.
+  3. **Diag 패킷은 민감정보 없이 설계한다** — 비밀번호는 length만, 토큰은 제외, localStorage 값도 `firebase:`·`taemin_` 외에는 이름만 마스킹. `allow write: if true` 공개 쓰기여도 악용 위험이 낮아야 안전.
+  4. 같은 증상이 반복되면 **레이어 5개(Firestore IndexedDB, Firebase Auth localStorage, SW, HTTP, CacheStorage) + 네트워크 도달성**을 한 번에 스냅샷 찍을 것. 원인이 어느 레이어인지 미리 추측할 수 없다.
+
 ### Firestore 규칙 표준 (2026-04-08 기준, 절대 변경 시 검증 필수)
 ```
 rules_version = '2';
@@ -865,6 +892,9 @@ service cloud.firestore {
     }
     match /chatQueries/{docId} {
       allow read, write: if request.auth != null;
+    }
+    match /diagLogs/{docId} {
+      allow read, write: if true;
     }
   }
 }
