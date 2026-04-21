@@ -814,6 +814,28 @@ git add index.html && git commit -m "운영기 배포: ..." && git push
   4. **로그인 화면에도 버전 표기 필수** — 로그인 불가 상태에서 버전 확인이 안 되면 "v0421a 캐시인지 v0421b 새 코드인지" 구분이 불가능해 진단이 수초→수시간으로 길어짐.
   5. 사고 5·6·7·8·9 모두 iOS PWA의 **레이어별 캐시**(HTTP, Service Worker, Firestore IndexedDB, localStorage)에서 각기 다른 실패를 일으킴. 동기화가 깨지면 어느 레이어든 앱의 근본 로직을 망가뜨릴 수 있음.
 
+### 사고 10: "로컬 상태 초기화" 후 로그인 시 0 마일리지 플래시 — Firebase Auth 자동 복원 + Tier 3 서브컬렉션 미로드 (2026-04-21, v0421c)
+- **증상**: v0421b로 추가된 로그인 화면의 "로컬 상태 초기화" 버튼을 누른 직후 아이디/비번으로 다시 로그인하면 홈 화면에 **0 마일리지**와 빈 활동기록이 잠깐 보임. 앱을 완전히 종료 후 다시 시작하면 정상 마일리지가 복원됨. **Firestore 데이터 자체는 안전** — 단지 "초기화 직후 로그인 세션"에서만 메모리 state가 비어있는 상태로 홈이 렌더링됨.
+- **판별 근거**:
+  - 재부팅 시 정상 복원 → Firestore 원본 데이터는 훼손 없음
+  - 0 마일리지는 **렌더 타이밍** 문제 — `S` 메모리 state가 `defaultState()` 기반 빈 값으로 시작했다가 이후 onSnapshot이 갱신하는 구조
+  - `_authHardReset`은 IndexedDB/Cache/SW는 지우지만 **Firebase Auth 세션은 건드리지 않음** → 리로드 후 `onAuthStateChanged`가 이전 세션을 자동 복원해 홈 화면을 렌더링함
+  - Tier 3 `doLogin` 경로는 `families/{id}` main doc만 `S`에 merge하고, `S.log`·`S.memberData` 등이 들어있는 **서브컬렉션**(`families/{id}/sub/...`, `families/{id}/memberSub/...`)을 로드하지 않음 → 첫 프레임에서 S.log=[], memberData={} 상태로 홈 렌더
+- **근본 원인**:
+  1. **Firebase Auth 세션이 localStorage `firebase:*` prefix에 저장됨** — IndexedDB만 지우면 Auth는 살아남아 리로드 시 `onAuthStateChanged`가 바로 fire → 로그인 화면이 아니라 홈 화면으로 자동 진입 시도
+  2. **Tier 3 로그인이 서브컬렉션을 동기 로드하지 않음** — R-075(v0417d) 이후 `log`/`familyMessages`/`moodLog`/`rewardLog`/`badgeLog`/`stickers`/`challengeHistory`/`memberData`는 서브컬렉션으로 분리. 일반 부팅 경로(`_applyRemoteSnap`)는 `_subCollMigrated=true` 감지 시 `_readSubCollections/_readMemberSubCollections`를 호출하지만 **Tier 3 doLogin 경로에는 같은 로직이 빠져있음**
+  3. 결과적으로 초기화 직후에는 IndexedDB 캐시도 없고 Tier 3 로그인이 main doc만 merge → 홈 렌더 시 서브컬렉션 데이터 전부 0
+- **해결 (v0421c)**:
+  - **Part A — `_authHardReset` 확장**: 기존 단계 전에 `await signOut(fbAuth)` 선행, `localStorage` 삭제 시 `firebase:` prefix 키도 포함, 리로드 전에 `localStorage.setItem('_milely_force_login','1')` 마커 세팅
+  - **Part B — 부팅 시 force-login 가드**: `_setupAuthListener` 함수 시작과 `onAuthStateChanged` 콜백 양쪽에서 `_milely_force_login==='1'` 감지 → 즉시 `signOut(fbAuth)` + 이벤트 무시 → 자동 로그인 차단 → 사용자는 로그인 화면에서 명시적으로 재입력
+  - **Part C — Tier 3 서브컬렉션 동기 로드**: `doLogin` Tier 3의 matched 블록에서 `familyData._subCollMigrated===true` 시 `showLoading` → `Promise.all([_readSubCollections(), _readMemberSubCollections()])` → `S[f]` / `S.memberData` 복원 → `_setupSubColListeners()` 활성화 → `hideAllAuth`/`renderAll` 순. `_applyRemoteSnap` 경로(라인 10447–10456)와 동일한 서브컬렉션 처리 패턴을 Tier 3에도 적용
+- **교훈**:
+  1. **"전체 초기화"는 Firebase Auth까지 포함해야 한다** — IndexedDB만 지우고 Auth를 남기면 자동 로그인이 빈 state 위에서 홈을 렌더함. "로컬 상태 초기화"의 의미론은 "완전한 로그아웃 + 캐시 비움"이어야 함.
+  2. **로그인 경로는 하나가 아니다** — `doLogin` Tier 1/2/3 + `_applyRemoteSnap`(auto-restore) 모두 같은 데이터 로딩 보장을 해야 함. 한 경로에서 서브컬렉션을 로드하면 다른 모든 경로도 동일하게 로드해야 "첫 프레임 빈 state" UX 버그 안 생김.
+  3. **"데이터가 사라진 것처럼 보이는" 증상은 거의 항상 메모리 state 문제** — Firestore 실제 write는 `save()`의 보호 가드(S.log 길이 감소 방지 등)에 걸려 못 일어남. 하지만 **사용자 인식은 "내 데이터 날아갔다"** → UX 측면에서는 치명적. 로딩 오버레이를 깔고 서브컬렉션이 도착한 후에 홈을 보여주는 게 안전.
+  4. **리로드 플래그는 localStorage 마커 + 부팅 시 가드 쌍**으로 구현. 단순히 리로드 직후 코드에 의존하면 `onAuthStateChanged`가 먼저 fire되어 race가 남음.
+  5. 사고 9(캐시 stale) 해결이 사고 10(Auth 잔존)을 노출. **레이어별 캐시 정책을 한 번에 점검하는 프로세스가 필요** — Firestore IndexedDB, Firebase Auth localStorage, Service Worker, HTTP cache, CacheStorage 5개 레이어를 동시에 봐야 "진짜 전체 초기화"가 됨.
+
 ### Firestore 규칙 표준 (2026-04-08 기준, 절대 변경 시 검증 필수)
 ```
 rules_version = '2';
