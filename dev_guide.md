@@ -771,6 +771,28 @@ git add index.html && git commit -m "운영기 배포: ..." && git push
   2. 보안 모델은 App Check + 해시 저장으로 다층 방어. 규칙에 모든 책임을 떠넘기면 핵심 기능이 깨질 수 있다.
   3. 규칙 배포는 즉시 효력 → 사용자 차단 가능. 작은 변경이라도 운영 사용자에게 영향. 변경 후 즉시 로그인 테스트.
 
+### 사고 8: 아이폰 PWA 로그인 불능 — _migratedTo 재로드 실패가 family_id 삭제 (2026-04-21, v0421a)
+- **증상**: 아이폰 PWA 콜드스타트 → 기존 계정(예: nonmarking)으로 로그인 시도 → "아이디 또는 비밀번호가 틀렸어요". 저장된 비번을 그대로 썼고 Mac 등 다른 기기에서는 정상 로그인됨. 한 번 발생 후 종종 재발.
+- **근본 원인**: 부팅 시퀀스의 다음 경로가 트리거
+  1. localStorage의 family_id가 없거나 레거시 포인터 경로를 통해 main doc fetch가 LEGACY_DOC을 먼저 반환
+  2. `dev/index.html` 부팅 IIFE에서 `snap.data()._migratedTo` 감지 → `_familyId=_mt`, `DATA_DOC=getFamilyDoc(_mt)`, localStorage 업데이트
+  3. **family 문서 재로드**: `try{ snap = await getDoc(DATA_DOC); }catch(_e){ snap = {exists:()=>false}; }` — 여기서 App Check/Auth 타이밍 경쟁으로 `permission-denied` 발생. catch가 오류 구분 없이 snap을 "문서 없음"으로 만듦.
+  4. 그 결과 `else if(_familyId){ ... }` 분기 진입 → `localStorage.removeItem(family_id)`, `removeItem(current_user)`, `_familyId=null`, `DATA_DOC=LEGACY_DOC` 실행 → 레거시 문서 로드
+  5. 레거시 문서에는 `_migratedTo`만 있고 `users`/`familyMeta.members`는 비었거나 migrated out 상태. `S.users={}` 또는 `{태민:..., 엄마:...}` 정도만 존재, 실제 계정(`nonmarking`)은 families/{id}에 있으나 이젠 접근 불가
+  6. 사용자 로그인 시도 → Tier 1(S.users) miss, Tier 2(familyMeta.members) miss, Tier 3(_id_registry) — registry는 read 공개라 성공해야 하지만 permission-denied가 계속되면 여기서도 실패
+  7. 화면에 "아이디 또는 비밀번호가 틀렸어요" (실은 권한 오류를 "틀림"으로 오판)
+- **왜 종종 재발하는가**: iPhone PWA + Firebase App Check (reCAPTCHA Enterprise) + Auth가 콜드스타트 시 경쟁 조건으로 permission-denied를 던지는 빈도가 Mac Chrome보다 훨씬 높음. 이는 사고 5(iPhone PWA 콜드스타트 auth race)와 같은 타이밍 이슈의 파생.
+- **해결 (v0421a)**:
+  - **Part A**: `dev/index.html` ~L25246 `snap = await getDoc(DATA_DOC)`를 `_awaitDocWithAuthRetry(getDoc(DATA_DOC))`로 감싸고, 실패 시 `_familyDocLoadFailed=true` 플래그 설정.
+  - **Part B**: `else if(_familyId){...}` 분기에서 `_familyDocLoadFailed`를 먼저 체크. true면 localStorage를 **삭제하지 않고** 로컬 백업(v6_backup)으로 폴백 + 토스트 안내. 다음 재시도에 복구됨.
+  - **Part C**: `_checkLegacyMigrationPointer()`의 `getDoc(LEGACY_DOC)`에도 permission-denied/unauthenticated 시 auth wait 후 1회 재시도 추가.
+  - **Part D (진단)**: `doLogin()`에 3-tier 단계별 콘솔 로그 (`[v0421a-diag]` 프리픽스, 개발기 한정).
+- **교훈**:
+  1. **catch가 "존재하지 않음"으로 오판하지 말 것**: Firestore getDoc의 throw는 대부분 "문서 없음"이 아니라 권한/네트워크 문제. `snap={exists:()=>false}` 대체는 매우 위험.
+  2. **localStorage의 계정 앵커(family_id, current_user)는 삭제 전 반드시 명시적 not-found 확인**. 일시적 오류로 앵커를 지우면 다음 부팅에도 계정 못 찾음 → 사용자 입장에서는 "영구 락아웃".
+  3. **iOS PWA는 App Check/Auth 타이밍을 신뢰할 수 없다** — 모든 getDoc 경로에 auth retry 레이어 필요.
+  4. 사고 5·6·7·8 모두 동일 뿌리(iOS PWA 부팅 시퀀스의 타이밍 경쟁)에서 파생된 서로 다른 증상.
+
 ### Firestore 규칙 표준 (2026-04-08 기준, 절대 변경 시 검증 필수)
 ```
 rules_version = '2';
