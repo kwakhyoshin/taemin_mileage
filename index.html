@@ -3142,7 +3142,7 @@ requestAnimationFrame(function(){
 
 <!-- [v0421b] AUTH: 버전 뱃지 + 로컬 상태 초기화 — 모든 auth 화면 공통 하단 푸터 -->
 <div id="_auth-version-footer" aria-live="polite">
-  <span id="_auth-version-text">v0421b</span>
+  <span id="_auth-version-text">v0421c</span>
   <span>·</span>
   <span class="av-reset" onclick="_authHardReset()" role="button" tabindex="0">로컬 상태 초기화</span>
 </div>
@@ -6839,9 +6839,10 @@ async function _getDocFresh(ref){
   }
 }
 
-// [v0421b] 로그인 화면 "로컬 상태 초기화" — 사고 9 대응
-// localStorage + Service Worker + 캐시 + IndexedDB(Firestore 오프라인 캐시 포함) 전체 삭제 후 강제 리로드.
-// 아이콘 삭제/재설치로도 안 지워지는 iOS PWA 샌드박스 스토리지를 앱 내부에서 정리하는 최후 수단.
+// [v0421c] 로그인 화면 "로컬 상태 초기화" — 사고 9/10 대응
+// localStorage + Service Worker + 캐시 + IndexedDB + Firebase Auth 전체 정리 후 강제 리로드.
+// v0421b에서 IndexedDB만 지우고 Firebase Auth는 유지되어 리로드 시 자동 로그인 → 빈 state로 홈 화면이
+// 잠깐 뜨는 문제(사고 10) 발생. v0421c에서 signOut() 추가하여 리로드 후 반드시 로그인 화면으로 이동.
 async function _authHardReset(){
   const ok = confirm(
     '⚠️ 로컬 상태 초기화\n\n'+
@@ -6851,19 +6852,31 @@ async function _authHardReset(){
     '계속하시겠어요?'
   );
   if(!ok) return;
-  const _log = (...a)=>{try{console.log('[v0421b][hardReset]', ...a);}catch(_){}};
+  const _log = (...a)=>{try{console.log('[v0421c][hardReset]', ...a);}catch(_){}};
   try{
+    // 0) [v0421c] Firebase Auth signOut 먼저 — 리로드 시 자동 로그인 차단
+    //    이게 없으면 리로드 후 fbAuth가 자동 복원되어 빈 state로 홈 화면이 잠깐 뜬다 (사고 10)
+    try{
+      if(typeof fbAuth !== 'undefined' && fbAuth && typeof signOut === 'function'){
+        await signOut(fbAuth);
+        _log('Firebase Auth signOut 완료');
+      }else{
+        _log('Firebase Auth 미초기화 — signOut 스킵');
+      }
+    }catch(e){_log('Firebase Auth signOut 실패(무시):',e);}
     // 1) localStorage 전체 삭제 (앱 prefix만 해당되는 키 위주로, 그 외는 존속)
     try{
       const toDel=[];
       for(let i=0;i<localStorage.length;i++){
         const k=localStorage.key(i);
         if(!k) continue;
-        if(k.startsWith('taemin_') || k.startsWith('taemin_dev_') || k.startsWith('mile_') || k.startsWith('mily_')) toDel.push(k);
+        if(k.startsWith('taemin_') || k.startsWith('taemin_dev_') || k.startsWith('mile_') || k.startsWith('mily_') || k.startsWith('firebase:')) toDel.push(k);
       }
       toDel.forEach(k=>{try{localStorage.removeItem(k);}catch(_){}});
       _log('localStorage 삭제:', toDel.length, '개');
     }catch(e){_log('localStorage 삭제 실패:',e);}
+    // 1b) [v0421c] 재로그인 강제 플래그 — 부팅 시 이 플래그 감지하면 자동 로그인 스킵
+    try{localStorage.setItem('_milely_force_login','1');}catch(_){}
     // 2) sessionStorage 전체 삭제
     try{sessionStorage.clear();_log('sessionStorage 삭제');}catch(e){_log('sessionStorage 삭제 실패:',e);}
     // 3) 모든 Service Worker unregister
@@ -6882,7 +6895,7 @@ async function _authHardReset(){
         _log('caches 삭제:', names.length, '개');
       }
     }catch(e){_log('caches 삭제 실패:',e);}
-    // 5) IndexedDB 전체 삭제 (Firestore 오프라인 캐시 포함)
+    // 5) IndexedDB 전체 삭제 (Firestore 오프라인 캐시 + Firebase Auth DB 포함)
     try{
       if(indexedDB.databases){
         const dbs = await indexedDB.databases();
@@ -6900,7 +6913,7 @@ async function _authHardReset(){
       }
     }catch(e){_log('IndexedDB 삭제 실패:',e);}
     // 6) 강제 리로드 (캐시 우회)
-    _log('초기화 완료 — 2초 후 강제 리로드');
+    _log('초기화 완료 — 잠시 후 강제 리로드');
     setTimeout(()=>{
       try{
         const u = new URL(location.href);
@@ -6916,7 +6929,7 @@ async function _authHardReset(){
       if(f){ f.innerHTML = '<span style="color:#FBBF24">✓ 초기화 완료 — 잠시 후 앱이 다시 시작돼요</span>'; }
     }catch(_){}
   }catch(e){
-    console.error('[v0421b][hardReset] 전체 실패:', e);
+    console.error('[v0421c][hardReset] 전체 실패:', e);
     alert('초기화 중 오류가 발생했어요: '+(e&&e.message||e)+'\n\n앱을 완전히 종료 후 다시 열어주세요.');
   }
 }
@@ -7623,10 +7636,28 @@ async function doLogin(idField, pwdField, errField){
                 if (!S.users) S.users = {};
                 S.users[otherMid] = {id, pwdHash: pwdHashSalted, v: 2};
                 const socialLinked = _applySocialLinkToMemory(otherMid);
+                // [v0421c] 사고 10 대응: hardReset 직후 로그인 시 IndexedDB가 비어있어
+                //   onSnapshot이 도착하기 전까지 S.log 등이 []라 홈 화면에 마일리지 0이 보이는 문제.
+                //   메인 문서에 _subCollMigrated=true면 서브컬렉션을 먼저 동기로 로드 후 화면 전환.
+                try{
+                  if(familyData && familyData._subCollMigrated === true){
+                    _subCollMigrated = true;
+                    try{ showLoading && showLoading('데이터 불러오는 중...'); }catch(_){}
+                    try{
+                      const [subData, memberSubData] = await Promise.all([_readSubCollections(), _readMemberSubCollections()]);
+                      for(const f of _SUBCOL_FIELDS){ if(subData[f]) S[f] = subData[f]; }
+                      if(Object.keys(memberSubData).length > 0) S.memberData = memberSubData;
+                      console.log('[v0421c] Tier 3 로그인 — 서브컬렉션 로드 완료 (log:'+(S.log?S.log.length:0)+'건)');
+                    }catch(_e){ console.warn('[v0421c] 서브컬렉션 로드 실패(무시):', _e); }
+                    try{ hideLoading && hideLoading(); }catch(_){}
+                  }
+                }catch(_e){ console.warn('[v0421c] 서브컬렉션 처리 예외:', _e); }
                 await save();
                 // 리스너를 새 DATA_DOC으로 재연결
                 if(_dataListenerUnsub){try{_dataListenerUnsub();}catch(_e){}}
                 try{_dataListenerUnsub=onSnapshot(DATA_DOC,(snap)=>{_applyRemoteSnap(snap);});}catch(_e){}
+                // [v0421c] 서브컬렉션 리스너도 반드시 설정 (로그인 이후 실시간 반영)
+                try{ if(_subCollMigrated) _setupSubColListeners(); }catch(_e){ console.warn('[v0421c] subCol listener setup:', _e); }
                 currentUser = otherMid;
                 localStorage.setItem(_LS_PREFIX+'current_user', otherMid);
                 syncMemberToGlobal();
@@ -8256,9 +8287,25 @@ let _socialAuthHandled = false; // onAuthStateChanged에서 중복 처리 방지
 // onAuthStateChanged 리스너 설치 — 팝업/리디렉트 결과를 안정적으로 수신
 function _setupAuthListener(){
   if(!fbAuth) return;
+  // [v0421c] 사고 10 대응: _authHardReset 직후 리로드 시 fbAuth 자동 복원을 강제 차단.
+  // _milely_force_login 플래그가 있으면 currentUser가 복원돼도 즉시 signOut → 로그인 화면 유지.
+  try{
+    if(localStorage.getItem('_milely_force_login')==='1'){
+      console.log('[v0421c][forceLogin] _milely_force_login 감지 → 자동 로그인 차단, signOut 강제');
+      try{ localStorage.removeItem('_milely_force_login'); }catch(_){}
+      try{
+        if(fbAuth && typeof signOut==='function'){
+          // 비동기로 신속 signOut — 이미 인증된 상태였다면 아래 onAuthStateChanged 콜백은 무시됨
+          signOut(fbAuth).catch(function(e){ console.warn('[v0421c][forceLogin] signOut 실패(무시):', e); });
+        }
+      }catch(_){}
+    }
+  }catch(_){}
   onAuthStateChanged(fbAuth, async (user)=>{
     if(!user) return; // 로그아웃 이벤트 무시
     if(window._myMenuSocialLink) return; // 나의 메뉴에서 직접 처리 중 — 건너뜀
+    // [v0421c] 사고 10 대응: force-login 처리 중에는 자동 복원된 user 이벤트 무시
+    try{ if(localStorage.getItem('_milely_force_login')==='1') return; }catch(_){}
     const pending = localStorage.getItem(_LS_PREFIX+'social_pending');
     if(!pending || pending === 'handled') return; // 대기 중이 아니거나 이미 처리됨
     if(_socialAuthHandled) return; // 메모리 플래그로도 중복 방지
@@ -9615,7 +9662,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'prod'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0421b';
+const _APP_VERSION = 'v0421c';
 // (v0415i) 운영기에서만 숨길 관리자 섹션 처리 — data-env-only="dev" 요소를 prod에서 숨김
 try{
   if(_ENV!=='dev'){
@@ -19912,6 +19959,12 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.6.4 (v0421c)',date:'2026-04-21',items:[
+    '[FIX] "로컬 상태 초기화" 후 로그인 시 0 마일리지로 홈 화면 표시되는 UX 버그 (사고 10) — v0421b 로컬 상태 초기화로 IndexedDB만 삭제되고 Firebase Auth 세션은 유지되어 리로드 직후 onAuthStateChanged가 자동 로그인을 시도하면서 빈 state로 홈이 렌더링됨. 추가로 Tier 3 로그인 경로가 main doc만 merge하고 서브컬렉션(S.log 등)을 로드하지 않아 onSnapshot이 올 때까지 일시적 0 마일리지 표시',
+    '[FIX] _authHardReset에 Firebase Auth signOut 선행 — IndexedDB/localStorage/SW/CacheStorage 제거 전에 signOut(fbAuth) await. localStorage의 firebase: prefix 키도 함께 제거. _milely_force_login 플래그 세팅 후 리로드',
+    '[FIX] _setupAuthListener에 force-login 가드 — 부팅 시 _milely_force_login 플래그 감지 시 signOut 강제하여 자동 로그인 차단, onAuthStateChanged 콜백에서도 동일 플래그 무시',
+    '[FIX] doLogin Tier 3 서브컬렉션 동기 로드 — matched 후 familyData._subCollMigrated=true이면 _readSubCollections/_readMemberSubCollections Promise.all로 S.log/S.memberData 등을 복원한 다음 홈 화면 전환, _setupSubColListeners도 즉시 설정',
+  ]},
   {ver:'2.6.3 (v0421b)',date:'2026-04-21',items:[
     '[FIX] 아이폰 PWA 로그인 불능 (사고 9, v0421a 핫픽스 미완 후속) — v0421a 배포 후에도 같은 iPhone PWA에서만 로그인 실패 지속. Mac Chrome·iPad PWA는 정상. 원인: Firestore offline persistence가 아이폰 PWA 샌드박스 IndexedDB에 stale한 _id_registry를 유지, 일반 getDoc이 서버 대신 캐시 반환 → 등록부에서 계정을 못 찾아 Tier 3 miss',
     '[FIX] _getDocFresh 헬퍼 신설 — getDocFromServer로 server-source 강제, 실패 시 getDoc 폴백. permission-denied 시 _authWaitPromise await 후 재시도',
