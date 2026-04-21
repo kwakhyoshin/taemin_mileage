@@ -862,6 +862,22 @@ git add index.html && git commit -m "운영기 배포: ..." && git push
   2. **진단 로그는 복사 붙여넣기 + 클립보드가 아닌 Firestore 자체 테이블이 낫다** — 사용자가 캡처·공유할 필요 없이 내가 admin.html 혹은 Firestore API로 직접 조회 가능. Latency도 사용자 action 기준 1-clickful 대신 3-clickful이 되지만 기밀성·완결성에서 우세.
   3. **Diag 패킷은 민감정보 없이 설계한다** — 비밀번호는 length만, 토큰은 제외, localStorage 값도 `firebase:`·`taemin_` 외에는 이름만 마스킹. `allow write: if true` 공개 쓰기여도 악용 위험이 낮아야 안전.
   4. 같은 증상이 반복되면 **레이어 5개(Firestore IndexedDB, Firebase Auth localStorage, SW, HTTP, CacheStorage) + 네트워크 도달성**을 한 번에 스냅샷 찍을 것. 원인이 어느 레이어인지 미리 추측할 수 없다.
+- **v0421e 후속 계측 (2026-04-21)** — v0421d 로그 2건 분석 결과:
+  - `networkTest.ok=true`, `firebase.currentUser` 정상(anon uid 존재), localStorage에 `taemin_family_id` 보유, IndexedDB에 Firestore 캐시 존재. **네트워크/Auth/캐시 레이어는 모두 건강**. 실패는 doLogin 내부 로직에 있음.
+  - v0421d 진단 바디에 `attempt.id: null` — `_runLoginDiagnostic`이 로그인 폼의 `#login-id` 값을 제때 못 읽음(사용자가 패널을 연 시점에 입력값이 비어 있었거나, `#auth-continue` 화면이 활성이라 `#login-id`가 DOM에 없음). `hasAttemptedId=false`는 **등록부에 없다**가 아닌 **측정 불가**를 뜻함.
+  - `_diagFamilyFetch`가 엔트리의 `familyPath`를 읽도록 되어 있으나 실제 레지스트리 스키마는 `{familyId, memberId, createdAt}` — 키 이름 불일치로 familyFetch 블록이 한 번도 실행되지 않음.
+- **해결 (v0421e)**:
+  - **진단 패널 내부에 아이디/비밀번호 입력란 내장** — 패널 오픈 시 로그인 폼 값 자동 프리필, 비어 있으면 명시적 에러. `attempt.id=null` 재발 방지.
+  - **`_runLoginTierTrace(attemptedId, attemptedPw)` 신설** — doLogin의 Tier 1(S.users), Tier 2(S.familyMeta.members), Tier 3(_id_registry + 타 가족 문서)을 read-only로 재현. 각 단계의 `result`(SUCCESS/ID_NOT_FOUND/ID_FOUND_PWD_MISMATCH/MEMBER_NOT_IN_FAMILY/FAMILY_DOC_NOT_EXISTS/REGISTRY_FETCH_FAIL 등), `durationMs`, 에러 코드 캡처. 비밀번호 해시는 앞 8자 prefix만 기록, 실제 로그인 상태는 변경하지 않음.
+  - **`_id_registry` 전체 키 목록을 프라이버시 안전 마스킹** (앞 2자 + `…(전체길이)`)으로 리포트 포함 — 시도 ID가 실제로 레지스트리에 있는지 간접 검증 가능.
+  - **`_diagFamilyFetch` 키 불일치 수정** — `familyId || familyPath` 순으로 폴백.
+  - **진단 요약 본문에 3-tier 결과 줄 추가** — 한눈에 어느 Tier에서 막혔는지 파악.
+- **v0421e 식별자**:
+  - `_openDiagPanel`(신규), `_runLoginTierTrace`(신규), `_runLoginDiagnostic`(인풋 소스 변경), `_buildDiagReport`(attemptedPw 인자 + tierTrace 병합)
+  - HTML: `#_auth-diag-id`, `#_auth-diag-pw`, `#_auth-diag-run-btn`, `.dp-diag-inputs`, `.dp-input`
+- **v0421e 추가 교훈**:
+  5. **진단 입력값은 항상 명시적으로** — 로그인 폼 DOM에서 우회로 읽는 건 취약하다(화면 전환/입력 지연). 진단 패널 자체에 입력란을 두고 자동 프리필 + 명시적 에러를 달아야 항상 값을 확보한다.
+  6. **레지스트리 스키마 문서화가 부족했다** — `{familyId, memberId, createdAt}`이라는 스키마가 코드에 암묵적. 진단 헬퍼가 잘못된 키로 접근해도 조용히 `null`이 되어 한 사이클을 날렸다. ERD 또는 `schemas.md`에 레지스트리 문서 형태를 고정 기록해두면 같은 실수 방지.
 
 ### Firestore 규칙 표준 (2026-04-08 기준, 절대 변경 시 검증 필수)
 ```

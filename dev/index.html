@@ -1304,6 +1304,10 @@ body.auth-active #_auth-version-footer{display:flex;position:fixed;left:0;right:
 #_auth-diag-panel .dp-btn.primary{background:#6366F1;color:#fff}
 #_auth-diag-panel .dp-btn.ghost{background:#E2E8F0;color:#1E293B}
 #_auth-diag-panel textarea.dp-note{width:100%;box-sizing:border-box;margin-top:8px;padding:8px;border:1px solid #CBD5E1;border-radius:8px;font-family:inherit;font-size:13px;resize:vertical;min-height:52px;flex-shrink:0}
+#_auth-diag-panel .dp-diag-inputs{display:flex;flex-direction:column;gap:6px;margin-bottom:8px;flex-shrink:0}
+#_auth-diag-panel .dp-input{width:100%;box-sizing:border-box;padding:9px 10px;border:1px solid #CBD5E1;border-radius:8px;font-family:inherit;font-size:13px;background:#fff;color:#1E293B}
+#_auth-diag-panel .dp-input:focus{outline:none;border-color:#6366F1;box-shadow:0 0 0 3px rgba(99,102,241,.15)}
+#_auth-diag-panel .dp-btn:disabled{opacity:.5;cursor:not-allowed}
 #auth-insight .toss-cta{margin:0 24px;padding-left:0;padding-right:0;padding-top:8px}
 /* social-loading-overlay CSS 제거됨 */
 .auth-card{background:#fff;border-radius:var(--rlg);padding:32px 28px;width:100%;max-width:380px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2);margin:auto;flex-shrink:0}
@@ -3161,25 +3165,30 @@ requestAnimationFrame(function(){
 <!-- [v0421b] AUTH: 버전 뱃지 + 로컬 상태 초기화 — 모든 auth 화면 공통 하단 푸터 -->
 <!-- [v0421d] 🩺 진단 실행 — 로그인 불능 시 authState/storage/registry 상태를 Firestore에 기록 -->
 <div id="_auth-version-footer" aria-live="polite">
-  <span id="_auth-version-text">v0421d</span>
+  <span id="_auth-version-text">v0421e</span>
   <span>·</span>
   <span class="av-reset" onclick="_authHardReset()" role="button" tabindex="0">로컬 상태 초기화</span>
   <span>·</span>
-  <span class="av-diag" onclick="_runLoginDiagnostic()" role="button" tabindex="0">🩺 진단 실행</span>
+  <span class="av-diag" onclick="_openDiagPanel()" role="button" tabindex="0">🩺 진단 실행</span>
 </div>
 
-<!-- [v0421d] 진단 결과 패널 — _runLoginDiagnostic 실행 시 표시 -->
+<!-- [v0421e] 진단 결과 패널 — _runLoginDiagnostic 실행 시 표시. 시도 ID/PW 입력란 내장(v0421d에서 로그인 폼 inputs 값을 못 읽던 버그 우회) -->
 <div id="_auth-diag-panel" role="dialog" aria-live="polite" aria-modal="true">
   <div class="dp-head">
     <div class="dp-title">🩺 로그인 진단</div>
     <button class="dp-close" onclick="_closeDiagPanel()" aria-label="닫기">×</button>
   </div>
-  <div class="dp-status" id="_auth-diag-status">진단 실행 중...</div>
-  <div class="dp-body" id="_auth-diag-body">…</div>
-  <textarea class="dp-note" id="_auth-diag-note" placeholder="전송 시 함께 보낼 메모 (선택): 증상, 시도한 id, 기기 정보 등"></textarea>
+  <div class="dp-diag-inputs">
+    <input type="text" class="dp-input" id="_auth-diag-id" placeholder="시도할 아이디 (로그인 폼에서 자동 채움)" autocomplete="username" inputmode="latin" autocapitalize="none">
+    <input type="password" class="dp-input" id="_auth-diag-pw" placeholder="시도할 비밀번호 (로그인 폼에서 자동 채움)" autocomplete="current-password">
+    <button class="dp-btn primary" id="_auth-diag-run-btn" onclick="_runLoginDiagnostic()">🩺 진단 실행</button>
+  </div>
+  <div class="dp-status" id="_auth-diag-status">아이디/비밀번호를 입력하고 "🩺 진단 실행"을 누르세요. 실제 로그인은 되지 않습니다.</div>
+  <div class="dp-body" id="_auth-diag-body">(진단 미실행)</div>
+  <textarea class="dp-note" id="_auth-diag-note" placeholder="전송 시 함께 보낼 메모 (선택): 증상·시도 횟수·시간 등"></textarea>
   <div class="dp-actions">
     <button class="dp-btn ghost" onclick="_closeDiagPanel()">닫기</button>
-    <button class="dp-btn primary" id="_auth-diag-send-btn" onclick="_sendDiagLog()">📤 진단 전송</button>
+    <button class="dp-btn primary" id="_auth-diag-send-btn" onclick="_sendDiagLog()" disabled>📤 진단 전송</button>
   </div>
 </div>
 
@@ -7138,13 +7147,14 @@ async function _diagRegistryFetch(attemptedId){
 }
 
 async function _diagFamilyFetch(registryEntryData){
+  // [v0421e] 수정: registry entry의 실제 키는 `familyId` (v0421d에서 `familyPath`로 잘못 읽음 → familyFetch 미수행)
   const out = {attempted:false, familyPath:null, ok:false, durationMs:0, exists:false,
     _subCollMigrated:null, memberDataCount:0, hasMemberForId:false,
     errCode:null, errMessage:null};
   try{
     if(!registryEntryData || typeof registryEntryData !== 'object'){ return out; }
-    const familyPath = registryEntryData.familyPath || registryEntryData.path || registryEntryData.family || null;
-    if(!familyPath){ out.errMessage='registry entry has no familyPath'; return out; }
+    const familyPath = registryEntryData.familyId || registryEntryData.familyPath || registryEntryData.path || registryEntryData.family || null;
+    if(!familyPath){ out.errMessage='registry entry has no familyId/familyPath'; return out; }
     out.familyPath = String(familyPath);
     out.attempted = true;
     const ref = doc(db, 'families', out.familyPath);
@@ -7170,6 +7180,187 @@ async function _diagFamilyFetch(registryEntryData){
   return out;
 }
 
+// [v0421e] doLogin 3-tier 경로를 read-only로 재현 — 실제 로그인 상태는 변경하지 않음.
+// 목적: 아이폰 PWA "아이디 또는 비밀번호가 틀렸어요" 에러가 doLogin의 어느 Tier(S.users / familyMeta / _id_registry)에서
+// 어떤 이유(ID 미발견 / 비밀번호 해시 불일치 / 서버 권한 거부 등)로 발생하는지 원격에서 포착하기 위한 계측.
+// 해시값 자체는 기록하지 않고 앞 8자 prefix만 남김(원본 복원 불가).
+async function _runLoginTierTrace(attemptedId, attemptedPw){
+  const trace = {
+    started: new Date().toISOString(),
+    ended: null, totalDurationMs: 0,
+    cachedFamilyId: null, subColMigrated: null,
+    dataDocPath: null, legacyDocPath: null,
+    authUid: null, firebaseReady: null,
+    pwdHashSaltedPrefix: null, pwdHashLegacyPrefix: null,
+    tier1:{attempted:false}, tier2:{attempted:false}, tier3:{attempted:false},
+    finalResult: null,
+  };
+  if(!attemptedId || !attemptedPw){ trace.error='attemptedId 또는 pw 누락'; trace.ended=new Date().toISOString(); return trace; }
+  // 환경 스냅샷
+  try{ trace.cachedFamilyId = localStorage.getItem(_LS_PREFIX+'family_id'); }catch(_){}
+  try{ trace.subColMigrated = (typeof _subCollMigrated !== 'undefined') ? _subCollMigrated : null; }catch(_){}
+  try{ trace.dataDocPath = (typeof DATA_DOC !== 'undefined' && DATA_DOC && DATA_DOC.path) ? DATA_DOC.path : null; }catch(_){}
+  try{ trace.legacyDocPath = (typeof LEGACY_DOC !== 'undefined' && LEGACY_DOC && LEGACY_DOC.path) ? LEGACY_DOC.path : null; }catch(_){}
+  try{ trace.authUid = (typeof fbAuth !== 'undefined' && fbAuth && fbAuth.currentUser) ? (fbAuth.currentUser.uid.slice(0,8)+'…') : null; }catch(_){}
+  try{ trace.firebaseReady = (typeof _firebaseReady !== 'undefined') ? !!_firebaseReady : false; }catch(_){}
+  // 해시 준비
+  let actualSalted = '';
+  let actualLegacy = '';
+  try{ actualSalted = await hashPassword(attemptedPw); trace.pwdHashSaltedPrefix = actualSalted.slice(0,8)+'…'; }
+  catch(e){ trace.pwdHashError = String(e.message||e); }
+  try{
+    if(typeof sha512==='function') actualLegacy = sha512(attemptedPw);
+    else if(typeof window.sha512==='function') actualLegacy = window.sha512(attemptedPw);
+    else{
+      const enc = new TextEncoder().encode(attemptedPw);
+      const buf = await crypto.subtle.digest('SHA-512', enc);
+      actualLegacy = Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+    }
+    trace.pwdHashLegacyPrefix = actualLegacy.slice(0,8)+'…';
+  }catch(e){ trace.pwdHashLegacyError = String(e.message||e); }
+
+  // === Tier 1: S.users ===
+  const t1 = trace.tier1; t1.attempted = true;
+  const t1t0 = Date.now();
+  try{
+    const users = (typeof S !== 'undefined' && S && S.users) ? S.users : {};
+    const memberIds = Object.keys(users);
+    t1.membersCount = memberIds.length;
+    t1.hasAttemptedId = false;
+    t1.passwordWouldMatch = false;
+    for(const mid in users){
+      const u = users[mid];
+      if(u && u.id === attemptedId){
+        t1.hasAttemptedId = true;
+        t1.matchedMemberId = String(mid).slice(0,4)+'…';
+        t1.memberV = u.v || null;
+        t1.pwdHashPrefix = (u.pwdHash||'').slice(0,8)+'…';
+        const matched = (u.v===2 && u.pwdHash===actualSalted) || (!u.v && u.pwdHash===actualLegacy);
+        t1.passwordWouldMatch = !!matched;
+        break;
+      }
+    }
+    t1.durationMs = Date.now()-t1t0;
+    t1.result = t1.passwordWouldMatch ? 'SUCCESS' : (t1.hasAttemptedId ? 'ID_FOUND_PWD_MISMATCH' : 'ID_NOT_FOUND');
+  }catch(e){ t1.error = String(e.message||e); t1.result='ERROR'; t1.durationMs = Date.now()-t1t0; }
+
+  // === Tier 2: S.familyMeta.members ===
+  const t2 = trace.tier2; t2.attempted = true;
+  const t2t0 = Date.now();
+  try{
+    const fm = (typeof S !== 'undefined' && S && S.familyMeta && S.familyMeta.members) ? S.familyMeta.members : {};
+    const memberIds = Object.keys(fm);
+    t2.membersCount = memberIds.length;
+    t2.hasAttemptedId = false;
+    t2.passwordWouldMatch = false;
+    for(const mid in fm){
+      const acc = fm[mid] && fm[mid].account;
+      if(!acc) continue;
+      if(acc.id === attemptedId){
+        t2.hasAttemptedId = true;
+        t2.matchedMemberId = String(mid).slice(0,4)+'…';
+        t2.accountV = acc.v || null;
+        t2.pwdHashPrefix = (acc.pwdHash||'').slice(0,8)+'…';
+        const matched = (acc.v===2 && acc.pwdHash===actualSalted) || (!acc.v && acc.pwdHash===actualLegacy);
+        t2.passwordWouldMatch = !!matched;
+        break;
+      }
+    }
+    t2.durationMs = Date.now()-t2t0;
+    t2.result = t2.passwordWouldMatch ? 'SUCCESS' : (t2.hasAttemptedId ? 'ID_FOUND_PWD_MISMATCH' : 'ID_NOT_FOUND');
+  }catch(e){ t2.error = String(e.message||e); t2.result='ERROR'; t2.durationMs = Date.now()-t2t0; }
+
+  // === Tier 3: _id_registry + 타 가족 문서 ===
+  const t3 = trace.tier3; t3.attempted = true;
+  const t3t0 = Date.now();
+  try{
+    if(typeof _getRegistryRef !== 'function'){ t3.result='NO_REGISTRY_FN'; t3.durationMs=Date.now()-t3t0; }
+    else {
+      const registryRef = _getRegistryRef();
+      if(!registryRef){ t3.result='NO_REGISTRY_REF'; t3.durationMs=Date.now()-t3t0; }
+      else {
+        let snap = null;
+        try{
+          if(typeof _getDocFresh === 'function') snap = await _getDocFresh(registryRef);
+          else snap = await getDoc(registryRef);
+          t3.registryFetchOk = true;
+        }catch(e){
+          t3.registryFetchOk = false;
+          t3.registryFetchErrCode = (e && (e.code||e.name)) ? String(e.code||e.name) : null;
+          t3.registryFetchErrMessage = String(e && e.message || e);
+        }
+        if(snap && snap.exists()){
+          const data = snap.data() || {};
+          const keys = Object.keys(data);
+          t3.registryEntryCount = keys.length;
+          // 프라이버시 안전 키 마스킹: 앞 2자 + 길이
+          t3.registryKeysMasked = keys.map(k => (k && k.length>=2) ? (k.slice(0,2)+'…('+k.length+')') : ('?('+(k?k.length:0)+')'));
+          const regEntry = data[attemptedId];
+          t3.hasAttemptedId = !!regEntry;
+          if(regEntry){
+            t3.entryFamilyId = regEntry.familyId || regEntry.familyPath || null;
+            t3.entryMemberId = String(regEntry.memberId||'').slice(0,4)+'…';
+            t3.entryCreatedAt = regEntry.createdAt || null;
+            // 타 가족 문서 로드
+            try{
+              const fdoc = doc(db, 'families', t3.entryFamilyId);
+              const fsnap = (typeof _getDocFresh === 'function') ? await _getDocFresh(fdoc) : await getDoc(fdoc);
+              t3.familyFetchOk = true;
+              t3.familyExists = fsnap.exists();
+              if(fsnap.exists()){
+                const fdata = fsnap.data() || {};
+                t3.familyHasFamilyMeta = !!(fdata && fdata.familyMeta);
+                t3.familySubCollMigrated = (typeof fdata._subCollMigrated === 'boolean') ? fdata._subCollMigrated : null;
+                const otherUsers = fdata.users || {};
+                const otherMid = regEntry.memberId;
+                const u = otherUsers[otherMid] || (fdata.familyMeta && fdata.familyMeta.members && fdata.familyMeta.members[otherMid] && fdata.familyMeta.members[otherMid].account);
+                t3.targetSource = otherUsers[otherMid] ? 'users' : (u ? 'familyMeta.account' : null);
+                if(u){
+                  t3.targetMemberFound = true;
+                  t3.targetMemberIdMatches = (u.id === attemptedId);
+                  t3.targetMemberV = u.v || null;
+                  t3.targetPwdHashPrefix = (u.pwdHash||'').slice(0,8)+'…';
+                  const matched = (u.v===2 && u.id===attemptedId && u.pwdHash===actualSalted) ||
+                                  (!u.v && u.id===attemptedId && u.pwdHash===actualLegacy);
+                  t3.passwordWouldMatch = !!matched;
+                  t3.result = matched ? 'SUCCESS' : (t3.targetMemberIdMatches ? 'ID_FOUND_PWD_MISMATCH' : 'MEMBERID_OK_ID_FIELD_MISMATCH');
+                } else {
+                  t3.targetMemberFound = false;
+                  t3.result = 'MEMBER_NOT_IN_FAMILY';
+                }
+              } else {
+                t3.result = 'FAMILY_DOC_NOT_EXISTS';
+              }
+            }catch(fe){
+              t3.familyFetchOk = false;
+              t3.familyFetchErrCode = (fe && (fe.code||fe.name)) ? String(fe.code||fe.name) : null;
+              t3.familyFetchErrMessage = String(fe && fe.message || fe);
+              t3.result = 'FAMILY_FETCH_ERROR';
+            }
+          } else {
+            t3.result = 'ID_NOT_IN_REGISTRY';
+          }
+        } else if(snap && !snap.exists()){
+          t3.registryExists = false;
+          t3.result = 'REGISTRY_DOC_NOT_EXISTS';
+        } else {
+          t3.result = 'REGISTRY_FETCH_FAIL';
+        }
+        t3.durationMs = Date.now()-t3t0;
+      }
+    }
+  }catch(e){ t3.error = String(e.message||e); t3.result='ERROR'; t3.durationMs = Date.now()-t3t0; }
+
+  // 최종 판정
+  trace.ended = new Date().toISOString();
+  trace.totalDurationMs = (t1.durationMs||0) + (t2.durationMs||0) + (t3.durationMs||0);
+  if(t1.result==='SUCCESS') trace.finalResult = 'TIER1_SUCCESS';
+  else if(t2.result==='SUCCESS') trace.finalResult = 'TIER2_SUCCESS';
+  else if(t3.result==='SUCCESS') trace.finalResult = 'TIER3_SUCCESS';
+  else trace.finalResult = 'ALL_TIERS_MISS';
+  return trace;
+}
+
 async function _diagNetworkTest(){
   const out = {ok:false, durationMs:0, status:null, error:null};
   const t0 = Date.now();
@@ -7185,7 +7376,7 @@ async function _diagNetworkTest(){
   return out;
 }
 
-async function _buildDiagReport(attemptedId, notes){
+async function _buildDiagReport(attemptedId, attemptedPw, notes){
   const report = {
     clientTime: new Date().toISOString(),
     env: (typeof _ENV !== 'undefined') ? _ENV : 'unknown',
@@ -7203,6 +7394,7 @@ async function _buildDiagReport(attemptedId, notes){
     attempt: {
       id: attemptedId || null,
       idLength: (attemptedId||'').length,
+      pwdLength: (attemptedPw||'').length,
       notes: notes || '',
     },
   };
@@ -7212,64 +7404,130 @@ async function _buildDiagReport(attemptedId, notes){
   try{ report.firebase = _diagAuthSnapshot(); }catch(e){ report.firebase={error:String(e.message||e)}; }
   try{ report.networkTest = await _diagNetworkTest(); }catch(e){ report.networkTest={error:String(e.message||e)}; }
   try{ report.registryFetch = await _diagRegistryFetch(attemptedId); }catch(e){ report.registryFetch={error:String(e.message||e)}; }
-  // 만약 registry에서 attemptedId 엔트리 찾음 → 해당 family 문서도 fetch 시도
+  // 만약 registry에서 attemptedId 엔트리 찾음 → 해당 family 문서도 fetch 시도 (v0421e: familyId 키 수정)
   try{
     if(report.registryFetch && report.registryFetch.hasAttemptedId){
       const ref = _getRegistryRef();
-      const snap = ref ? await getDoc(ref) : null;  // 이미 위에서 서버 읽음, 여기서 data만 필요
+      const snap = ref ? await getDoc(ref) : null;
       if(snap && snap.exists()){
         const entry = snap.data()[attemptedId];
         report.familyFetch = await _diagFamilyFetch(entry);
       }
     }
   }catch(e){ report.familyFetch = {error:String(e.message||e)}; }
+  // [v0421e] doLogin 3-tier 경로 시뮬레이션 (read-only)
+  try{
+    if(attemptedId && attemptedPw){
+      report.tierTrace = await _runLoginTierTrace(attemptedId, attemptedPw);
+    } else {
+      report.tierTrace = {skipped:true, reason:'attemptedId 또는 pw 누락'};
+    }
+  }catch(e){ report.tierTrace = {error:String(e && e.message || e)}; }
   return report;
 }
+
+// [v0421e] 패널 오픈: 로그인 폼의 입력값을 진단 패널 입력란에 프리필
+function _openDiagPanel(){
+  const panel = document.getElementById('_auth-diag-panel');
+  if(!panel) return;
+  panel.classList.add('open');
+  // 로그인 폼 값 자동 채움 (auth-login 우선, 없으면 auth-continue)
+  try{
+    const diagIdEl = document.getElementById('_auth-diag-id');
+    const diagPwEl = document.getElementById('_auth-diag-pw');
+    if(diagIdEl && !diagIdEl.value){
+      const src = document.getElementById('login-id') || document.getElementById('continue-login-id');
+      if(src && src.value) diagIdEl.value = String(src.value).trim();
+    }
+    if(diagPwEl && !diagPwEl.value){
+      const src = document.getElementById('login-pwd') || document.getElementById('continue-login-pwd');
+      if(src && src.value) diagPwEl.value = String(src.value);
+    }
+  }catch(_){}
+  const status = document.getElementById('_auth-diag-status');
+  if(status){ status.className='dp-status'; status.textContent='아이디/비밀번호가 맞는지 확인 후 "🩺 진단 실행"을 누르세요. 실제 로그인은 되지 않습니다.'; }
+  const body = document.getElementById('_auth-diag-body');
+  if(body) body.textContent = '(진단 미실행)';
+  const sendBtn = document.getElementById('_auth-diag-send-btn');
+  if(sendBtn) sendBtn.disabled = true;
+  window._diagLastReport = null;
+}
+window._openDiagPanel = _openDiagPanel;
 
 async function _runLoginDiagnostic(){
   const panel = document.getElementById('_auth-diag-panel');
   const status = document.getElementById('_auth-diag-status');
   const body = document.getElementById('_auth-diag-body');
   const sendBtn = document.getElementById('_auth-diag-send-btn');
+  const runBtn = document.getElementById('_auth-diag-run-btn');
   if(!panel || !status || !body) return;
-  panel.classList.add('open');
+  if(!panel.classList.contains('open')) panel.classList.add('open');
+
+  // [v0421e] 진단 패널 입력란에서 값 읽기 (폴백: 로그인 폼)
+  let attemptedId = '';
+  let attemptedPw = '';
+  try{
+    const diagIdEl = document.getElementById('_auth-diag-id');
+    const diagPwEl = document.getElementById('_auth-diag-pw');
+    if(diagIdEl && diagIdEl.value) attemptedId = String(diagIdEl.value).trim();
+    if(diagPwEl && diagPwEl.value) attemptedPw = String(diagPwEl.value);
+    if(!attemptedId){
+      const src = document.getElementById('login-id') || document.getElementById('continue-login-id');
+      if(src && src.value) attemptedId = String(src.value).trim();
+    }
+    if(!attemptedPw){
+      const src = document.getElementById('login-pwd') || document.getElementById('continue-login-pwd');
+      if(src && src.value) attemptedPw = String(src.value);
+    }
+  }catch(_){}
+  if(!attemptedId || !attemptedPw){
+    status.className='dp-status err';
+    status.textContent='아이디와 비밀번호를 입력해주세요. (로그인 폼에 값이 있으면 자동 채워집니다)';
+    return;
+  }
+
   status.className = 'dp-status';
-  status.textContent = '진단 실행 중...';
+  status.textContent = '진단 실행 중... (3-tier 시뮬레이션 진행)';
   body.textContent = '…';
   if(sendBtn) sendBtn.disabled = true;
-
-  // 로그인 폼의 id 입력값 추출 (있으면)
-  let attemptedId = '';
-  try{
-    const el = document.getElementById('login-id') || document.querySelector('#auth-login .auth-input[type="text"]');
-    if(el && el.value) attemptedId = String(el.value).trim();
-  }catch(_){}
+  if(runBtn) runBtn.disabled = true;
 
   try{
-    const report = await _buildDiagReport(attemptedId, '');
+    const report = await _buildDiagReport(attemptedId, attemptedPw, '');
     window._diagLastReport = report;
-    // 요약 한 줄
+    // 요약
     const rf = report.registryFetch || {};
     const ff = report.familyFetch || {};
     const au = (report.firebase && report.firebase.currentUser) || null;
+    const tt = report.tierTrace || {};
+    const t1 = tt.tier1 || {}, t2 = tt.tier2 || {}, t3 = tt.tier3 || {};
     const summary = [
       '기기: ' + (report.client.deviceType) + (report.client.isStandalone?' (PWA)':''),
+      '앱: ' + report.env + ' ' + report.appVersion,
       'FirebaseAuth uid: ' + (au ? (au.uid.slice(0,8)+'… anon='+au.isAnonymous) : '<없음>'),
       '네트워크: ' + (report.networkTest.ok ? 'OK '+report.networkTest.status+' ('+report.networkTest.durationMs+'ms)' : '실패: '+(report.networkTest.error||'?')),
-      'registry fetch: ' + (rf.ok ? (rf.method+' exists='+rf.exists+' entries='+rf.entryCount+' hasId='+rf.hasAttemptedId) : ('실패 '+(rf.errCode||'')+' '+(rf.errMessage||''))),
+      'registry: ' + (rf.ok ? (rf.method+' exists='+rf.exists+' n='+rf.entryCount+' hasId='+rf.hasAttemptedId) : ('실패 '+(rf.errCode||'')+' '+(rf.errMessage||''))),
     ];
     if(ff.attempted){
-      summary.push('family fetch: ' + (ff.ok ? ('exists='+ff.exists+' subColl='+ff._subCollMigrated+' members='+ff.memberDataCount) : ('실패 '+(ff.errCode||'')+' '+(ff.errMessage||''))));
+      summary.push('family: ' + (ff.ok ? ('exists='+ff.exists+' subColl='+ff._subCollMigrated+' memberData='+ff.memberDataCount) : ('실패 '+(ff.errCode||'')+' '+(ff.errMessage||''))));
     }
+    summary.push('── 3-tier 시뮬레이션 ('+(tt.finalResult||'?')+', '+(tt.totalDurationMs||0)+'ms) ──');
+    summary.push('Tier1 S.users: '+(t1.result||'?')+' (n='+(t1.membersCount||0)+' hasId='+!!t1.hasAttemptedId+' pwMatch='+!!t1.passwordWouldMatch+')');
+    summary.push('Tier2 familyMeta: '+(t2.result||'?')+' (n='+(t2.membersCount||0)+' hasId='+!!t2.hasAttemptedId+' pwMatch='+!!t2.passwordWouldMatch+')');
+    summary.push('Tier3 registry: '+(t3.result||'?')+' (hasId='+!!t3.hasAttemptedId+' familyExists='+!!t3.familyExists+' pwMatch='+!!t3.passwordWouldMatch+')');
+    if(t3.registryFetchErrCode) summary.push('  └ registry fetch err: '+t3.registryFetchErrCode+' '+(t3.registryFetchErrMessage||''));
+    if(t3.familyFetchErrCode) summary.push('  └ family fetch err: '+t3.familyFetchErrCode+' '+(t3.familyFetchErrMessage||''));
     status.className = 'dp-status ok';
-    status.textContent = '✓ 진단 완료 — 아래 결과 확인 후 [진단 전송]을 눌러주세요.';
-    body.textContent = summary.join('\n') + '\n\n─ 전체 ─\n' + JSON.stringify(report, null, 2);
+    status.textContent = '✓ 진단 완료 — 결과 확인 후 [📤 진단 전송]을 눌러주세요.';
+    body.textContent = summary.join('\n') + '\n\n─ 전체 JSON ─\n' + JSON.stringify(report, null, 2);
     if(sendBtn) sendBtn.disabled = false;
+    if(runBtn) runBtn.disabled = false;
   }catch(e){
     status.className = 'dp-status err';
     status.textContent = '진단 실패: ' + (e && e.message || e);
     body.textContent = String(e && e.stack || e);
     if(sendBtn) sendBtn.disabled = false;
+    if(runBtn) runBtn.disabled = false;
   }
 }
 window._runLoginDiagnostic = _runLoginDiagnostic;
@@ -7304,7 +7562,7 @@ async function _sendDiagLog(){
     const colRef = _fsCollection(db, 'diagLogs');
     const payload = Object.assign({}, window._diagLastReport, {
       serverTime: new Date().toISOString(),  // 서버 타임스탬프는 Firestore Rules 제약으로 ISO 문자열
-      _v: 'v0421d',
+      _v: 'v0421e',
     });
     const docRef = await _fsAddDoc(colRef, payload);
     if(status){ status.className='dp-status ok'; status.textContent='✅ 전송 완료 — 진단 ID: ' + (docRef && docRef.id || '?'); }
@@ -10047,7 +10305,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0421d';
+const _APP_VERSION = 'v0421e';
 // (v0415i) 운영기에서만 숨길 관리자 섹션 처리 — data-env-only="dev" 요소를 prod에서 숨김
 try{
   if(_ENV!=='dev'){
@@ -20344,6 +20602,14 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.6.6 (v0421e)',date:'2026-04-21',items:[
+    '[DIAG] 아이폰 PWA 로그인 불능 원격 진단 — v0421d 로그 수집 결과 Firestore 연결/Auth/네트워크는 모두 정상임을 확인. 실제 doLogin 3-tier(S.users/familyMeta/_id_registry) 어느 단계에서 어떤 이유로 miss되는지 추가 계측이 필요해 본 버전에서 시뮬레이션 트레이스 신설',
+    '[FEAT] 진단 패널 내 시도 아이디·비밀번호 입력란 추가 — v0421d에서 로그인 폼 값이 attempt.id=null로 기록되던 문제 해결. 패널 오픈 시 로그인 폼 값 자동 프리필, 미입력 시 에러 처리',
+    '[FEAT] _runLoginTierTrace — doLogin의 Tier 1/2/3 경로를 read-only로 재현해 각 단계 결과(SUCCESS/ID_NOT_FOUND/ID_FOUND_PWD_MISMATCH/FAMILY_FETCH_ERROR 등)·duration·에러코드를 캡처. 실제 로그인 상태는 변경하지 않으며, 비밀번호 해시는 앞 8자 prefix만 기록',
+    '[FEAT] _id_registry 전체 키 목록을 프라이버시 안전 마스킹(앞 2자 + 길이)으로 리포트 포함 — attemptedId가 registry에 실제로 존재하는지 간접 확인 가능',
+    '[FIX] _diagFamilyFetch 키 불일치 수정 — registry entry의 실제 키는 familyId인데 v0421d에서 familyPath로 잘못 읽어 familyFetch가 수행되지 않던 문제',
+    '[FEAT] 진단 요약 본문에 3-tier 결과 줄 추가 — 한눈에 어느 Tier에서 막혔는지 확인 가능',
+  ]},
   {ver:'2.6.5 (v0421d)',date:'2026-04-21',items:[
     '[DIAG] 아이폰 PWA 로그인 불능 원격 진단 (사고 11) — v0421a/b/c 세 차례 핫픽스 후에도 동일 기기에서 로그인 실패 지속. 디바이스 콘솔에 접근할 수 없는 상태라 원격 텔레메트리 수집 채널 신설',
     '[FEAT] 로그인 화면 "🩺 진단 실행" 링크 추가 — 인증 상태, storage(localStorage/IndexedDB/CacheStorage) 인벤토리, _id_registry/family 문서 서버 fetch 결과, 네트워크 도달성을 수집해 진단 패널에 표시',
