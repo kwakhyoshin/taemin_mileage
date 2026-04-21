@@ -1281,6 +1281,11 @@ body.dark .pin-key.ck{background:transparent}
 .auth-screen.hidden{display:none;pointer-events:none}
 body.auth-active{background:linear-gradient(135deg,var(--pu-dk),var(--pu-bright));overflow:hidden}
 html:has(body.auth-active){min-height:calc(100% + env(safe-area-inset-top));padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);background:linear-gradient(135deg,var(--pu-dk),var(--pu-bright))!important;overflow:hidden}
+/* [v0421b] 로그인/인증 화면 하단 버전 뱃지 — body.auth-active 상태에서만 표시 */
+#_auth-version-footer{display:none}
+body.auth-active #_auth-version-footer{display:flex;position:fixed;left:0;right:0;bottom:max(8px,env(safe-area-inset-bottom,0px));z-index:1001;justify-content:center;align-items:center;gap:8px;font-size:11px;color:rgba(255,255,255,.85);pointer-events:auto;font-weight:600;letter-spacing:.02em}
+#_auth-version-footer .av-reset{cursor:pointer;text-decoration:underline;padding:4px 6px;border-radius:4px}
+#_auth-version-footer .av-reset:active{background:rgba(255,255,255,.1)}
 #auth-insight .toss-cta{margin:0 24px;padding-left:0;padding-right:0;padding-top:8px}
 /* social-loading-overlay CSS 제거됨 */
 .auth-card{background:#fff;border-radius:var(--rlg);padding:32px 28px;width:100%;max-width:380px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2);margin:auto;flex-shrink:0}
@@ -3134,6 +3139,13 @@ requestAnimationFrame(function(){
   // body 안에서 중복 실행하지 않음
 })();
 </script>
+
+<!-- [v0421b] AUTH: 버전 뱃지 + 로컬 상태 초기화 — 모든 auth 화면 공통 하단 푸터 -->
+<div id="_auth-version-footer" aria-live="polite">
+  <span id="_auth-version-text">v0421b</span>
+  <span>·</span>
+  <span class="av-reset" onclick="_authHardReset()" role="button" tabindex="0">로컬 상태 초기화</span>
+</div>
 
 <!-- AUTH: 로그인 화면 -->
 <div class="auth-screen hidden" id="auth-login">
@@ -6806,6 +6818,110 @@ function _getRegistryRef() {
   return doc(db, 'families', _ENV==='dev'?'_dev_id_registry':'_id_registry');
 }
 
+// [v0421b] Fresh getDoc — Firestore IndexedDB offline 캐시 우회 (server-source 강제)
+// 사고 9: 아이폰 PWA에서 stale한 _id_registry 캐시가 남아있어 로그인 시 해당 계정을 찾지 못하는 문제.
+// 서버 fetch 실패(오프라인/네트워크) 시 기존 getDoc으로 폴백, permission-denied는 auth wait 후 재시도.
+async function _getDocFresh(ref){
+  if(typeof getDocFromServer !== 'function'){
+    return await getDoc(ref);
+  }
+  try {
+    return await getDocFromServer(ref);
+  } catch(e) {
+    const code = e && e.code;
+    console.warn('[mile.ly][v0421b] getDocFromServer 실패, 폴백 진행:', code, e && e.message);
+    if(code === 'permission-denied' || code === 'unauthenticated'){
+      try { if(window._authWaitPromise) await window._authWaitPromise; } catch(_){}
+      try { return await getDocFromServer(ref); } catch(_e2){ /* 아래 폴백으로 */ }
+    }
+    // unavailable / network error / 그 외 → 캐시 폴백 허용
+    return await getDoc(ref);
+  }
+}
+
+// [v0421b] 로그인 화면 "로컬 상태 초기화" — 사고 9 대응
+// localStorage + Service Worker + 캐시 + IndexedDB(Firestore 오프라인 캐시 포함) 전체 삭제 후 강제 리로드.
+// 아이콘 삭제/재설치로도 안 지워지는 iOS PWA 샌드박스 스토리지를 앱 내부에서 정리하는 최후 수단.
+async function _authHardReset(){
+  const ok = confirm(
+    '⚠️ 로컬 상태 초기화\n\n'+
+    '이 기기에 저장된 모든 앱 데이터(로그인 정보, 캐시, 오프라인 저장소)를 삭제하고 새로고침해요.\n\n'+
+    '※ 서버의 가족/마일리지 데이터는 삭제되지 않습니다.\n'+
+    '※ 초기화 후 다시 로그인이 필요해요.\n\n'+
+    '계속하시겠어요?'
+  );
+  if(!ok) return;
+  const _log = (...a)=>{try{console.log('[v0421b][hardReset]', ...a);}catch(_){}};
+  try{
+    // 1) localStorage 전체 삭제 (앱 prefix만 해당되는 키 위주로, 그 외는 존속)
+    try{
+      const toDel=[];
+      for(let i=0;i<localStorage.length;i++){
+        const k=localStorage.key(i);
+        if(!k) continue;
+        if(k.startsWith('taemin_') || k.startsWith('taemin_dev_') || k.startsWith('mile_') || k.startsWith('mily_')) toDel.push(k);
+      }
+      toDel.forEach(k=>{try{localStorage.removeItem(k);}catch(_){}});
+      _log('localStorage 삭제:', toDel.length, '개');
+    }catch(e){_log('localStorage 삭제 실패:',e);}
+    // 2) sessionStorage 전체 삭제
+    try{sessionStorage.clear();_log('sessionStorage 삭제');}catch(e){_log('sessionStorage 삭제 실패:',e);}
+    // 3) 모든 Service Worker unregister
+    try{
+      if('serviceWorker' in navigator){
+        const regs = await navigator.serviceWorker.getRegistrations();
+        for(const r of regs){ try{ await r.unregister(); }catch(_){} }
+        _log('SW unregister:', regs.length, '개');
+      }
+    }catch(e){_log('SW unregister 실패:',e);}
+    // 4) 모든 Cache Storage 삭제
+    try{
+      if('caches' in self){
+        const names = await caches.keys();
+        for(const n of names){ try{ await caches.delete(n); }catch(_){} }
+        _log('caches 삭제:', names.length, '개');
+      }
+    }catch(e){_log('caches 삭제 실패:',e);}
+    // 5) IndexedDB 전체 삭제 (Firestore 오프라인 캐시 포함)
+    try{
+      if(indexedDB.databases){
+        const dbs = await indexedDB.databases();
+        for(const d of (dbs||[])){
+          if(!d || !d.name) continue;
+          try{ indexedDB.deleteDatabase(d.name); }catch(_){}
+        }
+        _log('IndexedDB 삭제:', (dbs||[]).length, '개');
+      }else{
+        // Safari 구버전: databases() 미지원 → 알려진 이름들만 직접 삭제
+        ['firestore/[DEFAULT]/taemin-mileage/main','firebaseLocalStorageDb','firebase-installations-database','firebase-heartbeat-database','firestore'].forEach(n=>{
+          try{ indexedDB.deleteDatabase(n); }catch(_){}
+        });
+        _log('IndexedDB (known names) 삭제 시도');
+      }
+    }catch(e){_log('IndexedDB 삭제 실패:',e);}
+    // 6) 강제 리로드 (캐시 우회)
+    _log('초기화 완료 — 2초 후 강제 리로드');
+    setTimeout(()=>{
+      try{
+        const u = new URL(location.href);
+        u.searchParams.set('_reset', String(Date.now()));
+        location.replace(u.toString());
+      }catch(_){
+        location.reload();
+      }
+    }, 1500);
+    // 사용자 알림
+    try{
+      const f = document.getElementById('_auth-version-footer');
+      if(f){ f.innerHTML = '<span style="color:#FBBF24">✓ 초기화 완료 — 잠시 후 앱이 다시 시작돼요</span>'; }
+    }catch(_){}
+  }catch(e){
+    console.error('[v0421b][hardReset] 전체 실패:', e);
+    alert('초기화 중 오류가 발생했어요: '+(e&&e.message||e)+'\n\n앱을 완전히 종료 후 다시 열어주세요.');
+  }
+}
+window._authHardReset = _authHardReset;
+
 async function checkGlobalIdExists(loginId) {
   try {
     const ref = _getRegistryRef();
@@ -7475,8 +7591,9 @@ async function doLogin(idField, pwdField, errField){
     try {
       const registryRef = _getRegistryRef();
       if(!registryRef){console.warn('[mile.ly] Firebase not ready — registry lookup skipped');throw new Error('Firebase not ready');}
-      const snap = await getDoc(registryRef);
-      if(_DIAG) console.log('[v0421a-diag] registry snap.exists:', snap.exists(), 'entry for id:', snap.exists() ? !!snap.data()[id] : null);
+      // [v0421b] 핫픽스: stale한 IndexedDB 캐시 우회 — server-source 강제 (사고 9)
+      const snap = await _getDocFresh(registryRef);
+      if(_DIAG) console.log('[v0421b-diag] registry snap.exists:', snap.exists(), 'entry for id:', snap.exists() ? !!snap.data()[id] : null);
       if (snap.exists()) {
         const data = snap.data();
         const regEntry = data[id];
@@ -7484,7 +7601,8 @@ async function doLogin(idField, pwdField, errField){
           // 해당 가족 문서를 로드
           const otherFamilyPath = regEntry.familyId;
           const familyDoc = doc(db, 'families', otherFamilyPath);
-          const familySnap = await getDoc(familyDoc);
+          // [v0421b] 가족 문서도 server-source로 fresh fetch
+          const familySnap = await _getDocFresh(familyDoc);
           if (familySnap.exists()) {
             const familyData = familySnap.data();
             if(!familyData || !familyData.familyMeta){errEl.textContent='가족 데이터가 손상되었어요';return;}
@@ -9497,7 +9615,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'prod'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0421a';
+const _APP_VERSION = 'v0421b';
 // (v0415i) 운영기에서만 숨길 관리자 섹션 처리 — data-env-only="dev" 요소를 prod에서 숨김
 try{
   if(_ENV!=='dev'){
@@ -9565,9 +9683,12 @@ if(_ENV==='dev'){const _di=document.getElementById('dev-indicator');if(_di){_di.
   // 나의메뉴 버전 표시
   const vi=document.getElementById('my-app-version');
   if(vi) vi.textContent=(_ENV==='dev'?'DEV ':'')+ _APP_VERSION;
+  // [v0421b] 로그인 화면 하단 푸터 버전 표시
+  const avt=document.getElementById('_auth-version-text');
+  if(avt) avt.textContent=(_ENV==='dev'?'DEV ':'PROD ')+ _APP_VERSION;
 })();
 
-let initializeApp, getFirestore, doc, getDoc, setDoc, deleteDoc, onSnapshot, runTransaction, _fsCollection, _fsAddDoc, _fsGetDocs, _fsUpdateDoc, _fsDeleteField;
+let initializeApp, getFirestore, doc, getDoc, getDocFromServer, setDoc, deleteDoc, onSnapshot, runTransaction, _fsCollection, _fsAddDoc, _fsGetDocs, _fsUpdateDoc, _fsDeleteField;
 let getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider, OAuthProvider, signInWithCustomToken;
 let fbApp, db, fbAuth, LEGACY_DOC, DATA_DOC;
 let _firebaseReady = false;
@@ -9590,7 +9711,7 @@ async function _initFirebase(){
       import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check.js")
     ]);
     initializeApp = fbAppMod.initializeApp;
-    ({getFirestore, doc, getDoc, setDoc, deleteDoc, onSnapshot, runTransaction, collection: _fsCollection, addDoc: _fsAddDoc, getDocs: _fsGetDocs, updateDoc: _fsUpdateDoc, deleteField: _fsDeleteField} = fbFsMod);
+    ({getFirestore, doc, getDoc, getDocFromServer, setDoc, deleteDoc, onSnapshot, runTransaction, collection: _fsCollection, addDoc: _fsAddDoc, getDocs: _fsGetDocs, updateDoc: _fsUpdateDoc, deleteField: _fsDeleteField} = fbFsMod);
     // (PERF ①) 오프라인 IndexedDB 캐시를 위한 추가 API 추출 (SDK 버전이 낮아 없을 경우 undefined)
     const _initializeFirestore = fbFsMod.initializeFirestore;
     const _persistentLocalCache = fbFsMod.persistentLocalCache;
@@ -19791,6 +19912,14 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.6.3 (v0421b)',date:'2026-04-21',items:[
+    '[FIX] 아이폰 PWA 로그인 불능 (사고 9, v0421a 핫픽스 미완 후속) — v0421a 배포 후에도 같은 iPhone PWA에서만 로그인 실패 지속. Mac Chrome·iPad PWA는 정상. 원인: Firestore offline persistence가 아이폰 PWA 샌드박스 IndexedDB에 stale한 _id_registry를 유지, 일반 getDoc이 서버 대신 캐시 반환 → 등록부에서 계정을 못 찾아 Tier 3 miss',
+    '[FIX] _getDocFresh 헬퍼 신설 — getDocFromServer로 server-source 강제, 실패 시 getDoc 폴백. permission-denied 시 _authWaitPromise await 후 재시도',
+    '[FIX] doLogin Tier 3 글로벌 레지스트리 getDoc → _getDocFresh 교체 — stale IndexedDB 캐시 우회',
+    '[FIX] doLogin Tier 3 다른 가족 문서 로드도 _getDocFresh로 교체',
+    '[FEAT] 로그인/인증 화면 하단 버전 푸터 추가 — DEV/PROD + 버전 (예: PROD v0421b) 항상 노출. 로그인 불가 상태에서도 현재 실행 중인 코드 버전 즉시 확인',
+    '[FEAT] 로그인 화면 "로컬 상태 초기화" 버튼 — localStorage/sessionStorage/ServiceWorker/Cache Storage/IndexedDB(Firestore 오프라인 캐시 포함) 전체 삭제 후 강제 리로드. iOS PWA 샌드박스가 Safari "웹사이트 데이터 삭제"로 안 비워지는 경우의 최후 수단',
+  ]},
   {ver:'2.6.2 (v0421a)',date:'2026-04-21',items:[
     '[FIX] 로그인 불능 버그 수정 (사고 8) — 아이폰 PWA 콜드스타트 시 _migratedTo 포인터 따라가 family 문서 재로드할 때 permission-denied가 나면 catch가 "문서 없음"으로 오판해 localStorage.family_id를 삭제, 다음 로그인에서 "아이디 또는 비밀번호가 틀렸어요" 반복',
     '[FIX] Part A: family 문서 재로드(line ~25246)를 _awaitDocWithAuthRetry로 감쌈 — auth 완료 후 1회 자동 재시도',
