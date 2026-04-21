@@ -4726,14 +4726,14 @@ requestAnimationFrame(function(){
 
 <!-- CHANGELOG / WHAT'S NEW POPUP -->
 <div class="overlay" id="m-changelog" style="z-index:600">
-  <div class="sheet" style="max-height:80vh">
-    <div class="sheet-body" style="padding-bottom:env(safe-area-inset-bottom,0)">
+  <div class="sheet" style="max-height:80vh;overflow-x:hidden">
+    <div class="sheet-body" style="padding-bottom:env(safe-area-inset-bottom,0);overflow-x:hidden">
       <div class="handle"></div>
       <div class="sheet-title" style="display:flex;align-items:center;gap:8px">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         업데이트 내역
       </div>
-      <div id="changelog-list" style="padding:8px 0 16px;max-height:60vh;overflow-y:auto;-webkit-overflow-scrolling:touch"></div>
+      <div id="changelog-list" style="padding:8px 0 16px;max-height:60vh;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;word-break:break-word;overflow-wrap:anywhere"></div>
       <button class="btn-primary" onclick="closeChangelog()" style="width:100%;padding:14px;border-radius:14px;font-size:15px;font-weight:700;border:none;color:#fff;background:var(--ac,#6366F1);cursor:pointer">확인</button>
     </div>
   </div>
@@ -6758,11 +6758,11 @@ async function saveFamilyToFirestore(){
     else { localStorage.setItem(_LS_PREFIX+'v6_backup', sanitizeForBackup(newState)); console.warn('Firebase offline — saved to localStorage'); }
 
     // ★ 사고7 재발 방지: 레거시 문서에 _migratedTo 포인터 설정
-    // 다른 기기가 localStorage.family_id를 잃어도 레거시 문서에서 가족 문서를 찾을 수 있도록
+    //   (v0421f 사고 12 가드) _safeSetMigratedTo로 덮어쓰기 방지 — 기존 값이 다르면 차단 + diagLogs 감사
     try{
       if(LEGACY_DOC && LEGACY_DOC.path){
-        await setDoc(LEGACY_DOC, {_migratedTo: docPath}, {merge:true});
-        console.log('[saveFamilyToFirestore] _migratedTo set on legacy doc:', docPath);
+        const _ok = await _safeSetMigratedTo(docPath, 'saveFamilyToFirestore');
+        console.log('[saveFamilyToFirestore] _migratedTo guard:', _ok?'OK':'BLOCKED/SKIP', docPath);
       }
     }catch(_migErr){ console.warn('[saveFamilyToFirestore] Legacy _migratedTo write failed:', _migErr); }
 
@@ -6881,6 +6881,68 @@ async function _getDocFresh(ref){
     }
     // unavailable / network error / 그 외 → 캐시 폴백 허용
     return await getDoc(ref);
+  }
+}
+
+// [v0421f] _migratedTo 덮어쓰기 가드 — 사고 12 재발 방지
+// 배경: 앱 내 4개 경로(saveFamilyToFirestore / linkSocialFromMyMenu / _checkAuthRegistryOnBoot / sendFamilyInvite)가
+//       `setDoc(LEGACY_DOC, {_migratedTo: <현재세션의 familyPath>}, {merge:true})`를 조건 없이 수행.
+//       현재 세션의 _familyId가 일시적으로 다른 가족(초대/테스트/가족생성 도우미 등)으로 세팅되면
+//       그 값이 그대로 레거시 포인터를 덮어써 다른 기기 부팅이 남의 가족 데이터를 캐싱하게 됨.
+// 동작:
+//   (a) LEGACY_DOC이 존재하지 않으면 최초 쓰기 허용
+//   (b) 기존 _migratedTo가 없으면(undefined/null/'') 허용 (최초 마이그레이션)
+//   (c) 기존 값 === 시도값이면 no-op (불필요한 쓰기 방지)
+//   (d) 기존 값 !== 시도값이면 **쓰기 차단** + 콘솔 ERROR + diagLogs에 감사 기록
+//   (e) 내부적으로 발생하는 오류는 기존 write 호출부와 동일하게 try/catch 밖으로 던지지 않음 (저장 실패로 UX 방해 금지)
+async function _safeSetMigratedTo(targetDocPath, contextLabel){
+  const _log = (...a)=>{try{console.log('[v0421f][migGuard]', ...a);}catch(_){}};
+  const _err = (...a)=>{try{console.error('[v0421f][migGuard]', ...a);}catch(_){}};
+  try{
+    if(!LEGACY_DOC || !LEGACY_DOC.path){ _log('LEGACY_DOC 미초기화 — skip'); return false; }
+    if(!targetDocPath || typeof targetDocPath !== 'string'){ _log('targetDocPath invalid — skip', targetDocPath); return false; }
+    // 기존 값 확인 (캐시 폴백 허용, 네트워크 실패 시에도 보수적으로 쓰기 차단)
+    let curVal = null;
+    let curReadOk = false;
+    try{
+      const curSnap = await getDoc(LEGACY_DOC);
+      if(curSnap.exists()){ curVal = curSnap.data()?._migratedTo || null; }
+      curReadOk = true;
+    }catch(readErr){
+      _err('현재 _migratedTo 읽기 실패 — 보수적으로 쓰기 차단:', readErr?.code, readErr?.message);
+      return false;
+    }
+    if(!curReadOk) return false;
+    // (b) 최초 설정
+    if(!curVal){
+      try{ await setDoc(LEGACY_DOC, {_migratedTo: targetDocPath, _migratedTo_setAt: Date.now(), _migratedTo_setBy: contextLabel||'unknown'}, {merge:true}); }
+      catch(wErr){ _err('최초 _migratedTo 쓰기 실패:', wErr?.code, wErr?.message); return false; }
+      _log('최초 _migratedTo 설정:', targetDocPath, '[' + (contextLabel||'unknown') + ']');
+      return true;
+    }
+    // (c) 동일
+    if(curVal === targetDocPath){ _log('_migratedTo 이미 동일 — no-op'); return true; }
+    // (d) 불일치 → 쓰기 차단 + diagLogs 감사 기록
+    _err('⛔ _migratedTo 덮어쓰기 차단 — existing=', curVal, 'attempted=', targetDocPath, 'context=', contextLabel);
+    try{
+      const _id = 'mt_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
+      await setDoc(doc(db,'diagLogs',_id), {
+        _type: 'MIGRATED_TO_BLOCKED',
+        _v: _APP_VERSION,
+        _env: _ENV,
+        ts: Date.now(),
+        existing: curVal,
+        attempted: targetDocPath,
+        context: contextLabel || 'unknown',
+        legacyPath: LEGACY_DOC.path,
+        currentFamilyId: (typeof _familyId !== 'undefined' ? _familyId : null),
+        currentUser: (function(){ try{ return localStorage.getItem(_LS_PREFIX+'current_user')||null; }catch(_){ return null; } })(),
+      });
+    }catch(_auditErr){ _err('diagLogs audit 쓰기 실패:', _auditErr?.code, _auditErr?.message); }
+    return false;
+  }catch(fatalErr){
+    _err('fatal:', fatalErr?.code, fatalErr?.message);
+    return false;
   }
 }
 
@@ -7892,7 +7954,8 @@ async function linkSocialFromMyMenu(){
         _lastSavedJSON=JSON.stringify(S);
         _lastSaveTime=Date.now();
         // 레거시 문서에 포인터 저장 (다른 기기에서 찾을 수 있도록)
-        try{ if(LEGACY_DOC && LEGACY_DOC.path) await setDoc(LEGACY_DOC,{_migratedTo:docPath},{merge:true}); }catch(_e){ console.warn('[linkSocialFromMyMenu] Legacy pointer write failed:', _e); }
+        //   (v0421f 사고 12 가드) _safeSetMigratedTo로 덮어쓰기 방지
+        try{ if(LEGACY_DOC && LEGACY_DOC.path) await _safeSetMigratedTo(docPath,'linkSocialFromMyMenu'); }catch(_e){ console.warn('[linkSocialFromMyMenu] Legacy pointer write failed:', _e); }
         console.log('[linkSocialFromMyMenu] ✅ Legacy → families/ migration OK:', docPath);
       }
     }catch(e){
@@ -10305,7 +10368,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0421e';
+const _APP_VERSION = 'v0421f';
 // (v0415i) 운영기에서만 숨길 관리자 섹션 처리 — data-env-only="dev" 요소를 prod에서 숨김
 try{
   if(_ENV!=='dev'){
@@ -10595,11 +10658,64 @@ async function _checkAuthRegistryOnBoot(){
       localStorage.setItem(_LS_PREFIX+'family_id', entry.familyId);
       if(entry.memberId) localStorage.setItem(_LS_PREFIX+'current_user', entry.memberId);
       // 레거시 문서에도 _migratedTo 설정 (다음번엔 레거시 포인터로 바로 찾도록)
+      // ⚠️ v0421f: 직접 setDoc 대신 가드 헬퍼 사용 — 다른 가족으로 덮어쓰기 차단
       try{
-        if(LEGACY_DOC && LEGACY_DOC.path) await setDoc(LEGACY_DOC, {_migratedTo: entry.familyId}, {merge:true});
+        if(LEGACY_DOC && LEGACY_DOC.path) await _safeSetMigratedTo(entry.familyId, '_checkAuthRegistryOnBoot');
       }catch(_e){}
     }
   }catch(e){ console.warn('[_checkAuthRegistryOnBoot]', e); }
+}
+
+// ★ v0421f 사고 12 재발 방지: 부팅 시 _familyId가 결정된 후 auth registry로 cross-validation
+// — 시나리오: localStorage.family_id 또는 LEGACY_DOC._migratedTo 가 다른 가족(예: 이전에 누군가가 잘못 덮어쓴 값)을
+//   가리키고 있으면, 인증된 사용자의 진짜 소속 가족과 mismatch가 발생한다.
+// — 해결: _id_registry/{email} 의 familyId 가 우선 (source of truth). 불일치 시 즉시 차단하고 진짜 가족으로 교정.
+async function _crossValidateFamilyOnBoot(){
+  if(!_familyId || !_firebaseReady || !db || !fbAuth || !fbAuth.currentUser) return;
+  try{
+    const email = (fbAuth.currentUser.email||'').toLowerCase();
+    if(!email) return;
+    // _id_registry는 점(.)을 안전 키로 변환해서 저장됨
+    const safeKey = email.replace(/\./g,'__DOT__');
+    const regRef = doc(db,'_id_registry',safeKey);
+    let regSnap;
+    try{
+      regSnap = (typeof _getDocFresh==='function') ? await _getDocFresh(regRef) : await getDoc(regRef);
+    }catch(e){
+      const code = e && e.code;
+      if(code==='permission-denied' || code==='unauthenticated'){
+        try{ if(window._authWaitPromise) await window._authWaitPromise; }catch(_){}
+        try{ regSnap = await getDoc(regRef); }catch(e2){ console.warn('[_crossValidateFamilyOnBoot] registry retry failed', e2); return; }
+      } else { console.warn('[_crossValidateFamilyOnBoot] registry get failed', e); return; }
+    }
+    if(!regSnap || !regSnap.exists()) return; // registry 엔트리 없으면 검증 보류
+    const regFamilyId = regSnap.data()?.familyId;
+    if(!regFamilyId) return;
+    if(regFamilyId === _familyId) return; // 일치 → 정상
+    // ⚠️ 불일치 감지! cross-contamination 의심
+    console.error('[_crossValidateFamilyOnBoot] ⚠️ FAMILY MISMATCH DETECTED — registry says', regFamilyId, 'but boot resolved', _familyId);
+    // diagLogs 감사 (collect: 누구의 어느 기기에서, 어떤 값이 어떻게 잘못됐는지)
+    try{
+      const diagRef = doc(collection(db,'diagLogs'));
+      await setDoc(diagRef, {
+        type:'CROSS_VALIDATION_FAIL',
+        ts: Date.now(),
+        email: email,
+        uid: fbAuth.currentUser.uid,
+        registryFamilyId: regFamilyId,
+        bootResolvedFamilyId: _familyId,
+        localStorageFamilyId: localStorage.getItem(_LS_PREFIX+'family_id')||null,
+        userAgent: navigator.userAgent||''
+      });
+    }catch(_e){ console.warn('[_crossValidateFamilyOnBoot] diag write failed', _e); }
+    // 진짜 가족으로 즉시 교정
+    _familyId = regFamilyId;
+    DATA_DOC = getFamilyDoc(regFamilyId);
+    localStorage.setItem(_LS_PREFIX+'family_id', regFamilyId);
+    // 레거시 _migratedTo 도 가드 헬퍼로 교정 시도 (실패해도 진행)
+    try{ if(LEGACY_DOC && LEGACY_DOC.path) await _safeSetMigratedTo(regFamilyId, '_crossValidateFamilyOnBoot'); }catch(_e){}
+    console.warn('[_crossValidateFamilyOnBoot] ✅ Corrected to', regFamilyId);
+  }catch(e){ console.warn('[_crossValidateFamilyOnBoot] outer', e); }
 }
 
 // 캐시된 사용자 데이터 (S.users에서 로드)
@@ -18680,7 +18796,8 @@ async function sendFamilyInvite(memberId) {
         _lastSavedJSON=JSON.stringify(S);
         _lastSaveTime=Date.now();
         // 레거시 문서에 포인터 저장 (다른 기기에서 찾을 수 있도록)
-        try{ if(LEGACY_DOC && LEGACY_DOC.path) await setDoc(LEGACY_DOC,{_migratedTo:docPath},{merge:true}); }catch(_e){ console.warn('[sendFamilyInvite] Legacy pointer write failed:', _e); }
+        // ⚠️ v0421f: 직접 setDoc 대신 가드 헬퍼 사용 — 다른 가족으로 덮어쓰기 차단
+        try{ if(LEGACY_DOC && LEGACY_DOC.path) await _safeSetMigratedTo(docPath, 'sendFamilyInvite'); }catch(_e){ console.warn('[sendFamilyInvite] Legacy pointer write failed:', _e); }
         console.log('[sendFamilyInvite] ✅ Legacy → families/ migration OK:', docPath);
         toast('✅ 데이터 이전 완료: '+docPath.slice(0,12)+'...');
       }catch(e){
@@ -20602,6 +20719,11 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.6.7 (v0421f)',date:'2026-04-21',items:[
+    {type:'fix',text:'[사고 12] 가족 데이터 cross-contamination 차단 — users/taemin._migratedTo 를 다른 가족(YPGnQ2kx)으로 덮어쓰는 4개 write site(saveFamilyToFirestore / linkSocialFromMyMenu / _checkAuthRegistryOnBoot / sendFamilyInvite)를 모두 _safeSetMigratedTo 가드 헬퍼로 교체. 기존 값이 다르면 쓰기를 차단하고 diagLogs(MIGRATED_TO_BLOCKED)에 감사 기록'},
+    {type:'fix',text:'[가드] 부팅 cross-validation — _crossValidateFamilyOnBoot 신설. localStorage.family_id 또는 LEGACY_DOC._migratedTo 가 오염되어도 _id_registry/{email} 기준으로 교정. 불일치 감지 시 diagLogs(CROSS_VALIDATION_FAIL) 기록 후 실제 소속 가족으로 전환'},
+    {type:'fix',text:'[UI] 업데이트 내역(changelog) 모달 가로 스크롤 제거 — 긴 한 줄 문자열이 시트 너비를 밀어내는 현상을 sheet/sheet-body/#changelog-list 의 overflow-x:hidden 과 아이템 텍스트의 min-width:0 + word-break:break-word 로 해결'},
+  ]},
   {ver:'2.6.6 (v0421e)',date:'2026-04-21',items:[
     '[DIAG] 아이폰 PWA 로그인 불능 원격 진단 — v0421d 로그 수집 결과 Firestore 연결/Auth/네트워크는 모두 정상임을 확인. 실제 doLogin 3-tier(S.users/familyMeta/_id_registry) 어느 단계에서 어떤 이유로 miss되는지 추가 계측이 필요해 본 버전에서 시뮬레이션 트레이스 신설',
     '[FEAT] 진단 패널 내 시도 아이디·비밀번호 입력란 추가 — v0421d에서 로그인 폼 값이 attempt.id=null로 기록되던 문제 해결. 패널 오픈 시 로그인 폼 값 자동 프리필, 미입력 시 에러 처리',
@@ -21432,7 +21554,7 @@ function openChangelog(){
         const bg=badgeColors[tp]||'#6366F1';
         const lbl=badgeLabels[tp]||'신규';
         const badge=`<span style="flex-shrink:0;display:inline-block;background:${bg};color:#fff;font-size:10px;font-weight:800;padding:1px 6px;border-radius:8px;white-space:nowrap;margin-top:3px">${lbl}</span>`;
-        return `<div style="display:flex;align-items:flex-start;gap:6px;padding:6px 0;font-size:13px;color:var(--tx2);line-height:1.5">${badge}<span>${txt}</span></div>`;
+        return `<div style="display:flex;align-items:flex-start;gap:6px;padding:6px 0;font-size:13px;color:var(--tx2);line-height:1.5">${badge}<span style="flex:1;min-width:0;word-break:break-word;overflow-wrap:anywhere">${txt}</span></div>`;
       }).join('');
       const latestTag=isLatest?'<span style="display:inline-block;background:#F43F5E;color:#fff;font-size:9px;font-weight:800;padding:1px 5px;border-radius:6px;margin-left:4px;vertical-align:middle">최신</span>':'';
       const separator=idx>0?'<div style="border-top:1px solid var(--bd);margin-bottom:16px"></div>':'';
@@ -26099,6 +26221,11 @@ window._milePerfReport = function(){
     // auth registry fallback: _migratedTo도 없고 family_id도 없을 때 인증된 사용자면 registry 확인
     if(!_familyId) await _checkAuthRegistryOnBoot();
   }
+
+  // ★ v0421f 사고 12 재발 방지: _familyId 결정 직후 auth registry로 cross-validation
+  // — localStorage.family_id 또는 LEGACY_DOC._migratedTo 가 오염된 경우(다른 가족 가리킴) 여기서 교정
+  // — 인증된 사용자의 registry 엔트리를 source of truth로 간주
+  try{ if(_firebaseReady && _familyId) await _crossValidateFamilyOnBoot(); }catch(_e){ console.warn('[mile.ly][boot] _crossValidateFamilyOnBoot failed', _e); }
 
   // [PERF A4] getDoc 결과를 기다리되, permission-denied인 경우 auth wait 완료 후 1회 재시도
   const _awaitDocWithAuthRetry = async function(p){
