@@ -7386,6 +7386,19 @@ async function doLogin(idField, pwdField, errField){
   }
 
   let _fbNetworkError=false;
+  // [v0421a] Part D: 로그인 진단 로깅 — 아이폰 PWA에서 "아이디 또는 비밀번호가 틀렸어요" 반복 이슈 추적
+  const _DIAG = (window && window.console && _ENV === 'dev');
+  if(_DIAG){
+    try{
+      console.group('[v0421a-diag] doLogin 시작');
+      console.log('id:', id, 'firebaseReady:', _firebaseReady, 'familyId:', _familyId);
+      console.log('S.users 수:', Object.keys(S.users||{}).length, 'keys:', Object.keys(S.users||{}));
+      console.log('S.familyMeta.members 수:', Object.keys(S.familyMeta?.members||{}).length);
+      console.log('DATA_DOC.path:', DATA_DOC && DATA_DOC.path, 'LEGACY_DOC.path:', LEGACY_DOC && LEGACY_DOC.path);
+      console.log('auth_uid:', fbAuth && fbAuth.currentUser && fbAuth.currentUser.uid);
+      console.log('localStorage family_id:', localStorage.getItem(_LS_PREFIX+'family_id'));
+    }catch(_){}
+  }
   try{
     const pwdHashSalted=await hashPassword(pwd);
     // 레거시 해시도 시도 (마이그레이션 지원)
@@ -7398,6 +7411,7 @@ async function doLogin(idField, pwdField, errField){
 
     // 현재 로드된 가족 데이터에서 사용자 검색
     const users=S.users||{};
+    if(_DIAG) console.log('[v0421a-diag] Tier 1: S.users 검색 — 대상', Object.keys(users).length, '명');
     for(const memberId in users){
       const u=users[memberId];
       const matched=(u.v===2&&u.id===id&&u.pwdHash===pwdHashSalted)||
@@ -7422,8 +7436,11 @@ async function doLogin(idField, pwdField, errField){
       }
     }
 
+    if(_DIAG) console.log('[v0421a-diag] Tier 1 결과: miss');
+
     // familyMeta.members에서도 검색 (account 필드)
     const fm=S.familyMeta?.members||{};
+    if(_DIAG) console.log('[v0421a-diag] Tier 2: familyMeta.members 검색 — 대상', Object.keys(fm).length, '명');
     for(const mid in fm){
       const acc=fm[mid].account;
       if(!acc)continue;
@@ -7451,11 +7468,15 @@ async function doLogin(idField, pwdField, errField){
       }
     }
 
+    if(_DIAG) console.log('[v0421a-diag] Tier 2 결과: miss');
+
     // 글로벌 레지스트리에서 검색 (다른 가족의 사용자)
+    if(_DIAG) console.log('[v0421a-diag] Tier 3: 글로벌 레지스트리 검색 시작');
     try {
       const registryRef = _getRegistryRef();
       if(!registryRef){console.warn('[mile.ly] Firebase not ready — registry lookup skipped');throw new Error('Firebase not ready');}
       const snap = await getDoc(registryRef);
+      if(_DIAG) console.log('[v0421a-diag] registry snap.exists:', snap.exists(), 'entry for id:', snap.exists() ? !!snap.data()[id] : null);
       if (snap.exists()) {
         const data = snap.data();
         const regEntry = data[id];
@@ -7511,13 +7532,17 @@ async function doLogin(idField, pwdField, errField){
     }
 
     if(_fbNetworkError){
+      if(_DIAG) console.log('[v0421a-diag] Tier 3 결과: network error');
       errEl.textContent='서버 연결을 확인 후 다시 시도해주세요';
     } else {
+      if(_DIAG) console.log('[v0421a-diag] Tier 3 결과: miss (계정 없음 또는 비번 불일치)');
       errEl.textContent='아이디 또는 비밀번호가 틀렸어요';
     }
+    if(_DIAG){ try{ console.groupEnd(); }catch(_){} }
   }catch(e){
     console.error('Login failed:',e);
     errEl.textContent='로그인 중 오류가 발생했어요';
+    if(_DIAG){ try{ console.groupEnd(); }catch(_){} }
   }finally{
     // (v0415k) 로그인 버튼 복원 — 성공 시는 화면 전환되므로 보이지 않고, 실패 시만 의미있음
     if(_btnRestore) _btnRestore();
@@ -9472,7 +9497,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'prod'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0420b';
+const _APP_VERSION = 'v0421a';
 // (v0415i) 운영기에서만 숨길 관리자 섹션 처리 — data-env-only="dev" 요소를 prod에서 숨김
 try{
   if(_ENV!=='dev'){
@@ -9712,9 +9737,24 @@ function updateDataDoc(){
 // 레거시 문서에 마이그레이션 포인터(_migratedTo)가 있으면 families/ 문서로 전환
 async function _checkLegacyMigrationPointer(){
   if(_familyId || !_firebaseReady || !LEGACY_DOC || !LEGACY_DOC.path) return;
+  // [v0421a] Part C: permission-denied 시 auth wait 후 1회 재시도
+  // (PWA 콜드스타트에서 App Check/Auth 타이밍 경쟁으로 종종 실패 → 재시도로 복구)
+  let snap;
   try{
-    const snap=await getDoc(LEGACY_DOC);
-    if(!snap.exists()) return;
+    snap = await getDoc(LEGACY_DOC);
+  }catch(e){
+    const code = e && e.code;
+    if(code === 'permission-denied' || code === 'unauthenticated'){
+      console.warn('[_checkLegacyMigrationPointer][v0421a] permission-denied — awaiting auth then retrying');
+      try{ if(window._authWaitPromise) await window._authWaitPromise; }catch(_){}
+      try{ snap = await getDoc(LEGACY_DOC); }catch(e2){ console.warn('[_checkLegacyMigrationPointer] retry failed', e2); return; }
+    } else {
+      console.warn('[_checkLegacyMigrationPointer]', e);
+      return;
+    }
+  }
+  try{
+    if(!snap || !snap.exists()) return;
     const mt=snap.data()?._migratedTo;
     if(mt){
       console.log('[_checkLegacyMigrationPointer] Found pointer:', mt);
@@ -9724,7 +9764,7 @@ async function _checkLegacyMigrationPointer(){
       // 레거시에서 마이그레이션됨 마커 (데이터 로드 후 familyMeta에 설정)
       window._pendingFromLegacy=true;
     }
-  }catch(e){ console.warn('[_checkLegacyMigrationPointer]', e); }
+  }catch(e){ console.warn('[_checkLegacyMigrationPointer] post-snap', e); }
 }
 
 // ★ 사고7 재발 방지: cold start에서 Firebase 인증 사용자의 auth registry를 체크
@@ -19751,6 +19791,13 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.6.2 (v0421a)',date:'2026-04-21',items:[
+    '[FIX] 로그인 불능 버그 수정 (사고 8) — 아이폰 PWA 콜드스타트 시 _migratedTo 포인터 따라가 family 문서 재로드할 때 permission-denied가 나면 catch가 "문서 없음"으로 오판해 localStorage.family_id를 삭제, 다음 로그인에서 "아이디 또는 비밀번호가 틀렸어요" 반복',
+    '[FIX] Part A: family 문서 재로드(line ~25246)를 _awaitDocWithAuthRetry로 감쌈 — auth 완료 후 1회 자동 재시도',
+    '[FIX] Part B: "Family doc not found" 분기에 일시적 오류 플래그(_familyDocLoadFailed) 체크 추가 — 네트워크/권한 오류 시 family_id 유지 + 로컬 백업 복구 + 토스트 안내',
+    '[FIX] Part C: _checkLegacyMigrationPointer getDoc에도 permission-denied 재시도 로직 적용',
+    '[DIAG] Part D: doLogin 3-tier 검색 단계별 진단 로그 (개발기 한정, [v0421a-diag] 프리픽스)',
+  ]},
   {ver:'2.6.1 (v0420b)',date:'2026-04-20',items:[
     '[PERF A4] 재방문(캐시된 family_id 있음)에서는 auth wait 1200ms 차단 제거 — critical path에서 최대 1.2초 단축. 첫 방문/초대 경로는 기존 동기 대기 유지.',
     '[PERF A4] getDoc permission-denied 발생 시 _authWaitPromise await 후 1회 자동 재시도 — A4 비차단 모드의 안전망',
@@ -25236,14 +25283,24 @@ window._milePerfReport = function(){
 
     // ★ 레거시 데이터 표시 차단: 로드한 문서에 _migratedTo가 있으면 레거시 데이터 → family로 전환
     // 이 safety check는 _checkLegacyMigrationPointer가 어떤 이유로 실패했을 때의 최후 방어선
+    let _familyDocLoadFailed = false; // [v0421a] Part A/B: family 문서 로드 중 일시적 오류 여부
     if(snap.exists() && snap.data()._migratedTo && (!_familyId || DATA_DOC === LEGACY_DOC)){
       const _mt = snap.data()._migratedTo;
       console.warn('[mile.ly] 레거시 데이터에 _migratedTo 발견 — family 문서로 전환:', _mt);
       _familyId = _mt;
       DATA_DOC = getFamilyDoc(_mt);
       localStorage.setItem(_LS_PREFIX+'family_id', _mt);
-      // family 문서 다시 로드
-      try{ snap = await getDoc(DATA_DOC); }catch(_e){ snap = {exists:()=>false}; }
+      // [v0421a] Part A: family 문서 재로드 시 auth retry 적용 + 일시적 오류 플래그 설정
+      // (이전 버전은 catch에서 snap={exists:()=>false}로 처리 → "가족 문서 없음" 분기에서
+      //  localStorage.family_id가 삭제되어 로그인 불능 상태가 되는 버그. 사고 8 참고.)
+      try{
+        snap = await _awaitDocWithAuthRetry(getDoc(DATA_DOC));
+      }catch(_e){
+        const _ec = _e && _e.code;
+        console.warn('[mile.ly][v0421a] family 문서 재로드 실패:', _ec, _e && _e.message);
+        _familyDocLoadFailed = true;
+        snap = {exists:()=>false};
+      }
     }
 
     if(snap.exists()){
@@ -25291,17 +25348,32 @@ window._milePerfReport = function(){
       _lastSavedJSON = JSON.stringify(S); // Firestore 로드 직후 상태 기록 (불필요한 save 방지)
       _lastSaveTime = Date.now();
     } else if(_familyId) {
-      // 가족 문서가 없어짐 — stale localStorage 정리 후 레거시 doc으로 폴백
-      console.warn('[mile.ly] Family doc not found, clearing stale family_id:', _familyId);
-      localStorage.removeItem(_LS_PREFIX+'family_id');
-      localStorage.removeItem(_LS_PREFIX+'current_user');
-      _familyId = null;
-      DATA_DOC = LEGACY_DOC;
-      try {
-        const legSnap = _firebaseReady ? await getDoc(LEGACY_DOC) : {exists:()=>false};
-        if(legSnap.exists()) S = Object.assign(defaultState(), legSnap.data());
-        else S = defaultState();
-      } catch(_e) { S = defaultState(); }
+      // [v0421a] Part B: family 문서 로드 실패를 "문서 없음"으로 오판하면 안 됨
+      // permission-denied / unavailable / 네트워크 오류 등 일시적 이유로 실패했을 수 있음
+      // 이런 경우 localStorage.family_id를 삭제하면 다음 부팅에도 계정을 못 찾음 → 로그인 불능
+      if(_familyDocLoadFailed){
+        console.warn('[mile.ly][v0421a] family 문서 로드가 실패했지만 "문서 없음"이 아닐 수 있음 — family_id 유지, 오프라인 모드로 진입');
+        // family_id는 유지. S는 로컬 백업 또는 defaultState로 시작하되,
+        // 다음 부팅/재시도에서 family 문서를 다시 읽으면 복구됨.
+        try{
+          const backup = localStorage.getItem(_LS_PREFIX+'v6_backup');
+          if(backup) S = Object.assign(defaultState(), JSON.parse(backup));
+          else S = defaultState();
+        }catch(_bkErr){ S = defaultState(); }
+        toast('⚠️ 네트워크 오류로 가족 데이터를 불러올 수 없어요. 잠시 후 다시 시도해주세요.');
+      } else {
+        // 실제로 가족 문서가 없어짐 (명시적 not-found) — stale localStorage 정리 후 레거시 doc으로 폴백
+        console.warn('[mile.ly] Family doc not found, clearing stale family_id:', _familyId);
+        localStorage.removeItem(_LS_PREFIX+'family_id');
+        localStorage.removeItem(_LS_PREFIX+'current_user');
+        _familyId = null;
+        DATA_DOC = LEGACY_DOC;
+        try {
+          const legSnap = _firebaseReady ? await getDoc(LEGACY_DOC) : {exists:()=>false};
+          if(legSnap.exists()) S = Object.assign(defaultState(), legSnap.data());
+          else S = defaultState();
+        } catch(_e) { S = defaultState(); }
+      }
     } else {
       // 레거시 첫 실행 또는 신규 — 웰컴 화면 표시
       S = defaultState();
