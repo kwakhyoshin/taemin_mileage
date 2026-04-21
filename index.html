@@ -1286,6 +1286,24 @@ html:has(body.auth-active){min-height:calc(100% + env(safe-area-inset-top));padd
 body.auth-active #_auth-version-footer{display:flex;position:fixed;left:0;right:0;bottom:max(8px,env(safe-area-inset-bottom,0px));z-index:1001;justify-content:center;align-items:center;gap:8px;font-size:11px;color:rgba(255,255,255,.85);pointer-events:auto;font-weight:600;letter-spacing:.02em}
 #_auth-version-footer .av-reset{cursor:pointer;text-decoration:underline;padding:4px 6px;border-radius:4px}
 #_auth-version-footer .av-reset:active{background:rgba(255,255,255,.1)}
+/* [v0421d] 진단 실행 링크 */
+#_auth-version-footer .av-diag{cursor:pointer;text-decoration:underline;padding:4px 6px;border-radius:4px}
+#_auth-version-footer .av-diag:active{background:rgba(255,255,255,.1)}
+/* [v0421d] 진단 결과 패널 */
+#_auth-diag-panel{display:none;position:fixed;inset:16px 16px auto 16px;top:50%;transform:translateY(-50%);max-height:72vh;z-index:1002;background:#fff;color:#1E293B;border-radius:16px;box-shadow:0 24px 80px rgba(0,0,0,.35);padding:16px 16px 12px;overflow:hidden;font-family:inherit}
+#_auth-diag-panel.open{display:flex;flex-direction:column}
+#_auth-diag-panel .dp-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-shrink:0}
+#_auth-diag-panel .dp-title{font-weight:800;font-size:15px;color:#1E293B}
+#_auth-diag-panel .dp-close{background:none;border:none;font-size:22px;line-height:1;cursor:pointer;color:#64748B;padding:0 4px}
+#_auth-diag-panel .dp-status{font-size:12px;color:#64748B;margin-bottom:8px;flex-shrink:0}
+#_auth-diag-panel .dp-status.ok{color:#16A34A;font-weight:700}
+#_auth-diag-panel .dp-status.err{color:#DC2626;font-weight:700}
+#_auth-diag-panel .dp-body{overflow-y:auto;-webkit-overflow-scrolling:touch;background:#F1F5F9;border-radius:10px;padding:10px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:1.55;white-space:pre-wrap;word-break:break-all;flex:1;min-height:0}
+#_auth-diag-panel .dp-actions{display:flex;gap:8px;margin-top:10px;flex-shrink:0}
+#_auth-diag-panel .dp-btn{flex:1;padding:10px;border-radius:8px;border:none;font-weight:800;cursor:pointer;font-family:inherit;font-size:13px}
+#_auth-diag-panel .dp-btn.primary{background:#6366F1;color:#fff}
+#_auth-diag-panel .dp-btn.ghost{background:#E2E8F0;color:#1E293B}
+#_auth-diag-panel textarea.dp-note{width:100%;box-sizing:border-box;margin-top:8px;padding:8px;border:1px solid #CBD5E1;border-radius:8px;font-family:inherit;font-size:13px;resize:vertical;min-height:52px;flex-shrink:0}
 #auth-insight .toss-cta{margin:0 24px;padding-left:0;padding-right:0;padding-top:8px}
 /* social-loading-overlay CSS 제거됨 */
 .auth-card{background:#fff;border-radius:var(--rlg);padding:32px 28px;width:100%;max-width:380px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2);margin:auto;flex-shrink:0}
@@ -3141,10 +3159,28 @@ requestAnimationFrame(function(){
 </script>
 
 <!-- [v0421b] AUTH: 버전 뱃지 + 로컬 상태 초기화 — 모든 auth 화면 공통 하단 푸터 -->
+<!-- [v0421d] 🩺 진단 실행 — 로그인 불능 시 authState/storage/registry 상태를 Firestore에 기록 -->
 <div id="_auth-version-footer" aria-live="polite">
-  <span id="_auth-version-text">v0421c</span>
+  <span id="_auth-version-text">v0421d</span>
   <span>·</span>
   <span class="av-reset" onclick="_authHardReset()" role="button" tabindex="0">로컬 상태 초기화</span>
+  <span>·</span>
+  <span class="av-diag" onclick="_runLoginDiagnostic()" role="button" tabindex="0">🩺 진단 실행</span>
+</div>
+
+<!-- [v0421d] 진단 결과 패널 — _runLoginDiagnostic 실행 시 표시 -->
+<div id="_auth-diag-panel" role="dialog" aria-live="polite" aria-modal="true">
+  <div class="dp-head">
+    <div class="dp-title">🩺 로그인 진단</div>
+    <button class="dp-close" onclick="_closeDiagPanel()" aria-label="닫기">×</button>
+  </div>
+  <div class="dp-status" id="_auth-diag-status">진단 실행 중...</div>
+  <div class="dp-body" id="_auth-diag-body">…</div>
+  <textarea class="dp-note" id="_auth-diag-note" placeholder="전송 시 함께 보낼 메모 (선택): 증상, 시도한 id, 기기 정보 등"></textarea>
+  <div class="dp-actions">
+    <button class="dp-btn ghost" onclick="_closeDiagPanel()">닫기</button>
+    <button class="dp-btn primary" id="_auth-diag-send-btn" onclick="_sendDiagLog()">📤 진단 전송</button>
+  </div>
 </div>
 
 <!-- AUTH: 로그인 화면 -->
@@ -6935,6 +6971,355 @@ async function _authHardReset(){
 }
 window._authHardReset = _authHardReset;
 
+// ============================================================================
+// [v0421d] 로그인 진단 (사고 11 — 사고 9 후에도 iPhone PWA 로그인 불능 지속)
+// ============================================================================
+// 사용자 클릭 → authState / storage / registry / familyDoc fetch 결과 캡처
+// → Firestore `diagLogs/{auto}` 문서로 전송 → 시스템 관리자가 admin.html에서 조회
+//
+// 목표: iPhone PWA의 어느 단계에서 로그인 실패가 발생하는지 "기기에 서버 인스펙터 없이"도
+// 확보. 비밀번호는 절대 저장하지 않고 길이만 기록.
+// ============================================================================
+
+window._diagLastReport = null;
+
+function _diagDeviceHint(){
+  try{
+    const ua = navigator.userAgent || '';
+    if(/iPhone/.test(ua)) return 'iPhone';
+    if(/iPad/.test(ua)) return 'iPad';
+    if(/Macintosh/.test(ua)) return 'Mac';
+    if(/Android/.test(ua)) return 'Android';
+    return 'Other';
+  }catch(_){ return 'Unknown'; }
+}
+
+function _diagIsStandalone(){
+  try{
+    if(window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) return true;
+    if(typeof window.navigator.standalone === 'boolean') return !!window.navigator.standalone;
+    return false;
+  }catch(_){ return false; }
+}
+
+function _diagLocalStorageSnapshot(){
+  const out = {keys:[], totalBytes:0, error:null};
+  try{
+    for(let i=0;i<localStorage.length;i++){
+      const k = localStorage.key(i);
+      if(!k) continue;
+      const v = localStorage.getItem(k) || '';
+      // Firebase/mile.ly 관련 키만 이름 포함, 나머지는 prefix로 요약
+      const isOfInterest = /^(firebase:|taemin_|_milely_|mily_|_LS_|fb_)/.test(k);
+      out.keys.push({
+        name: isOfInterest ? k : ('['+k.slice(0,20)+'…]'),
+        len: v.length,
+        ofInterest: isOfInterest,
+      });
+      out.totalBytes += k.length + v.length;
+    }
+  }catch(e){ out.error = String(e && e.message || e); }
+  return out;
+}
+
+async function _diagIndexedDbSnapshot(){
+  const out = {supported:false, databases:[], error:null};
+  try{
+    if(typeof indexedDB === 'undefined'){ out.error='indexedDB undefined'; return out; }
+    if(typeof indexedDB.databases === 'function'){
+      out.supported = true;
+      const dbs = await indexedDB.databases();
+      out.databases = (dbs||[]).map(d=>({name:d && d.name, version:d && d.version}));
+    }else{
+      out.error = 'databases() API unsupported (Safari <16)';
+    }
+  }catch(e){ out.error = String(e && e.message || e); }
+  return out;
+}
+
+async function _diagCacheStorageSnapshot(){
+  const out = {supported:false, cacheNames:[], swCount:0, error:null};
+  try{
+    if('caches' in window){
+      out.supported = true;
+      out.cacheNames = await caches.keys();
+    }
+    if('serviceWorker' in navigator){
+      const regs = await navigator.serviceWorker.getRegistrations();
+      out.swCount = (regs||[]).length;
+    }
+  }catch(e){ out.error = String(e && e.message || e); }
+  return out;
+}
+
+function _diagAuthSnapshot(){
+  const out = {fbAuthReady:false, currentUser:null, authWaitResolved:null};
+  try{
+    out.fbAuthReady = (typeof fbAuth !== 'undefined' && !!fbAuth);
+    if(out.fbAuthReady){
+      const u = fbAuth.currentUser;
+      if(u){
+        out.currentUser = {
+          uid: u.uid || null,
+          isAnonymous: !!u.isAnonymous,
+          providerId: u.providerId || null,
+          emailVerified: !!u.emailVerified,
+          hasEmail: !!u.email,
+        };
+      }
+    }
+  }catch(e){ out.error = String(e && e.message || e); }
+  // _authWaitPromise 상태는 직접 알 수 없으므로 race로 탐지 (50ms)
+  try{
+    if(window._authWaitPromise){
+      out.authWaitResolved = 'pending';
+      Promise.race([
+        window._authWaitPromise.then(()=>true),
+        new Promise(r=>setTimeout(()=>r(false),50))
+      ]).then(r=>{ out.authWaitResolved = r ? 'resolved' : 'pending-50ms'; }).catch(()=>{});
+    }
+  }catch(_){}
+  return out;
+}
+
+async function _diagRegistryFetch(attemptedId){
+  const out = {
+    attempted:false, ok:false, durationMs:0, exists:false, entryCount:0,
+    hasAttemptedId:false, attemptedIdValueKeys:null,
+    method:null, errCode:null, errMessage:null,
+  };
+  try{
+    if(typeof _getRegistryRef !== 'function'){ out.errMessage='_getRegistryRef undefined'; return out; }
+    const ref = _getRegistryRef();
+    if(!ref){ out.errMessage='registryRef null (firebaseReady?)'; return out; }
+    out.attempted = true;
+    const t0 = Date.now();
+    let snap = null;
+    try{
+      if(typeof getDocFromServer === 'function'){
+        snap = await getDocFromServer(ref);
+        out.method = 'getDocFromServer';
+      }else{
+        snap = await getDoc(ref);
+        out.method = 'getDoc-no-server-api';
+      }
+    }catch(e){
+      const code = e && (e.code||e.name) || '';
+      out.errCode = String(code);
+      out.errMessage = String(e && e.message || e);
+      // 폴백: getDoc
+      try{
+        snap = await getDoc(ref);
+        out.method = 'getDoc-fallback';
+        out.errMessage = out.errMessage + ' (fallback succeeded)';
+      }catch(e2){
+        out.durationMs = Date.now()-t0;
+        out.errMessage = out.errMessage + ' | fallback:' + String(e2 && e2.message || e2);
+        return out;
+      }
+    }
+    out.durationMs = Date.now()-t0;
+    out.ok = true;
+    out.exists = snap.exists();
+    if(out.exists){
+      const data = snap.data() || {};
+      const keys = Object.keys(data);
+      out.entryCount = keys.length;
+      if(attemptedId && data[attemptedId]){
+        out.hasAttemptedId = true;
+        const v = data[attemptedId];
+        out.attemptedIdValueKeys = (v && typeof v==='object') ? Object.keys(v) : ['<primitive>'];
+      }
+    }
+  }catch(e){
+    out.errMessage = (out.errMessage||'')+' | outer:'+String(e && e.message || e);
+  }
+  return out;
+}
+
+async function _diagFamilyFetch(registryEntryData){
+  const out = {attempted:false, familyPath:null, ok:false, durationMs:0, exists:false,
+    _subCollMigrated:null, memberDataCount:0, hasMemberForId:false,
+    errCode:null, errMessage:null};
+  try{
+    if(!registryEntryData || typeof registryEntryData !== 'object'){ return out; }
+    const familyPath = registryEntryData.familyPath || registryEntryData.path || registryEntryData.family || null;
+    if(!familyPath){ out.errMessage='registry entry has no familyPath'; return out; }
+    out.familyPath = String(familyPath);
+    out.attempted = true;
+    const ref = doc(db, 'families', out.familyPath);
+    const t0 = Date.now();
+    let snap = null;
+    try{
+      snap = (typeof getDocFromServer === 'function') ? await getDocFromServer(ref) : await getDoc(ref);
+    }catch(e){
+      out.errCode = String(e && (e.code||e.name) || '');
+      out.errMessage = String(e && e.message || e);
+      return out;
+    }
+    out.durationMs = Date.now()-t0;
+    out.ok = true;
+    out.exists = snap.exists();
+    if(out.exists){
+      const d = snap.data() || {};
+      out._subCollMigrated = (typeof d._subCollMigrated === 'boolean') ? d._subCollMigrated : null;
+      const md = d.memberData || {};
+      out.memberDataCount = Object.keys(md).length;
+    }
+  }catch(e){ out.errMessage = (out.errMessage||'')+' | outer:'+String(e && e.message || e); }
+  return out;
+}
+
+async function _diagNetworkTest(){
+  const out = {ok:false, durationMs:0, status:null, error:null};
+  const t0 = Date.now();
+  try{
+    // Firestore REST ping (projects 노드 루트 — 인증 불필요하나 404 응답도 "도달"로 간주)
+    const r = await fetch('https://firestore.googleapis.com/v1/projects/taemin-mileage/databases/(default)/documents:listCollectionIds?pageSize=1',{
+      method:'POST', headers:{'Content-Type':'application/json'}, body:'{}'
+    });
+    out.status = r.status;
+    out.ok = r.status > 0 && r.status < 600;
+  }catch(e){ out.error = String(e && e.message || e); }
+  out.durationMs = Date.now()-t0;
+  return out;
+}
+
+async function _buildDiagReport(attemptedId, notes){
+  const report = {
+    clientTime: new Date().toISOString(),
+    env: (typeof _ENV !== 'undefined') ? _ENV : 'unknown',
+    appVersion: (typeof _APP_VERSION !== 'undefined') ? _APP_VERSION : 'unknown',
+    client: {
+      userAgent: navigator.userAgent,
+      platform: navigator.platform || null,
+      language: navigator.language || null,
+      deviceType: _diagDeviceHint(),
+      isStandalone: _diagIsStandalone(),
+      online: !!navigator.onLine,
+      cookieEnabled: !!navigator.cookieEnabled,
+      screen: {w: screen.width, h: screen.height, dpr: window.devicePixelRatio||1},
+    },
+    attempt: {
+      id: attemptedId || null,
+      idLength: (attemptedId||'').length,
+      notes: notes || '',
+    },
+  };
+  try{ report.storage = {localStorage:_diagLocalStorageSnapshot()}; }catch(e){ report.storage={error:String(e.message||e)}; }
+  try{ report.storage.indexedDB = await _diagIndexedDbSnapshot(); }catch(e){ report.storage.indexedDB={error:String(e.message||e)}; }
+  try{ report.storage.cacheStorage = await _diagCacheStorageSnapshot(); }catch(e){ report.storage.cacheStorage={error:String(e.message||e)}; }
+  try{ report.firebase = _diagAuthSnapshot(); }catch(e){ report.firebase={error:String(e.message||e)}; }
+  try{ report.networkTest = await _diagNetworkTest(); }catch(e){ report.networkTest={error:String(e.message||e)}; }
+  try{ report.registryFetch = await _diagRegistryFetch(attemptedId); }catch(e){ report.registryFetch={error:String(e.message||e)}; }
+  // 만약 registry에서 attemptedId 엔트리 찾음 → 해당 family 문서도 fetch 시도
+  try{
+    if(report.registryFetch && report.registryFetch.hasAttemptedId){
+      const ref = _getRegistryRef();
+      const snap = ref ? await getDoc(ref) : null;  // 이미 위에서 서버 읽음, 여기서 data만 필요
+      if(snap && snap.exists()){
+        const entry = snap.data()[attemptedId];
+        report.familyFetch = await _diagFamilyFetch(entry);
+      }
+    }
+  }catch(e){ report.familyFetch = {error:String(e.message||e)}; }
+  return report;
+}
+
+async function _runLoginDiagnostic(){
+  const panel = document.getElementById('_auth-diag-panel');
+  const status = document.getElementById('_auth-diag-status');
+  const body = document.getElementById('_auth-diag-body');
+  const sendBtn = document.getElementById('_auth-diag-send-btn');
+  if(!panel || !status || !body) return;
+  panel.classList.add('open');
+  status.className = 'dp-status';
+  status.textContent = '진단 실행 중...';
+  body.textContent = '…';
+  if(sendBtn) sendBtn.disabled = true;
+
+  // 로그인 폼의 id 입력값 추출 (있으면)
+  let attemptedId = '';
+  try{
+    const el = document.getElementById('login-id') || document.querySelector('#auth-login .auth-input[type="text"]');
+    if(el && el.value) attemptedId = String(el.value).trim();
+  }catch(_){}
+
+  try{
+    const report = await _buildDiagReport(attemptedId, '');
+    window._diagLastReport = report;
+    // 요약 한 줄
+    const rf = report.registryFetch || {};
+    const ff = report.familyFetch || {};
+    const au = (report.firebase && report.firebase.currentUser) || null;
+    const summary = [
+      '기기: ' + (report.client.deviceType) + (report.client.isStandalone?' (PWA)':''),
+      'FirebaseAuth uid: ' + (au ? (au.uid.slice(0,8)+'… anon='+au.isAnonymous) : '<없음>'),
+      '네트워크: ' + (report.networkTest.ok ? 'OK '+report.networkTest.status+' ('+report.networkTest.durationMs+'ms)' : '실패: '+(report.networkTest.error||'?')),
+      'registry fetch: ' + (rf.ok ? (rf.method+' exists='+rf.exists+' entries='+rf.entryCount+' hasId='+rf.hasAttemptedId) : ('실패 '+(rf.errCode||'')+' '+(rf.errMessage||''))),
+    ];
+    if(ff.attempted){
+      summary.push('family fetch: ' + (ff.ok ? ('exists='+ff.exists+' subColl='+ff._subCollMigrated+' members='+ff.memberDataCount) : ('실패 '+(ff.errCode||'')+' '+(ff.errMessage||''))));
+    }
+    status.className = 'dp-status ok';
+    status.textContent = '✓ 진단 완료 — 아래 결과 확인 후 [진단 전송]을 눌러주세요.';
+    body.textContent = summary.join('\n') + '\n\n─ 전체 ─\n' + JSON.stringify(report, null, 2);
+    if(sendBtn) sendBtn.disabled = false;
+  }catch(e){
+    status.className = 'dp-status err';
+    status.textContent = '진단 실패: ' + (e && e.message || e);
+    body.textContent = String(e && e.stack || e);
+    if(sendBtn) sendBtn.disabled = false;
+  }
+}
+window._runLoginDiagnostic = _runLoginDiagnostic;
+
+function _closeDiagPanel(){
+  const panel = document.getElementById('_auth-diag-panel');
+  if(panel) panel.classList.remove('open');
+}
+window._closeDiagPanel = _closeDiagPanel;
+
+async function _sendDiagLog(){
+  const status = document.getElementById('_auth-diag-status');
+  const sendBtn = document.getElementById('_auth-diag-send-btn');
+  const noteEl = document.getElementById('_auth-diag-note');
+  if(!window._diagLastReport){
+    if(status){ status.className='dp-status err'; status.textContent='먼저 진단 실행을 완료해주세요.'; }
+    return;
+  }
+  if(sendBtn) sendBtn.disabled = true;
+  if(status){ status.className='dp-status'; status.textContent='전송 중...'; }
+  try{
+    // 최신 메모 반영
+    const note = noteEl ? String(noteEl.value||'').slice(0,500) : '';
+    window._diagLastReport.attempt = window._diagLastReport.attempt || {};
+    window._diagLastReport.attempt.notes = note;
+    // Firebase SDK 준비 확인
+    if(!db || typeof _fsCollection !== 'function' || typeof _fsAddDoc !== 'function'){
+      throw new Error('Firestore SDK 미준비 — 앱 로딩이 완료된 뒤 다시 시도');
+    }
+    // auth wait 가능하면 대기 (permission-denied 회피)
+    try{ if(window._authWaitPromise) await Promise.race([window._authWaitPromise, new Promise(r=>setTimeout(r,3000))]); }catch(_){}
+    const colRef = _fsCollection(db, 'diagLogs');
+    const payload = Object.assign({}, window._diagLastReport, {
+      serverTime: new Date().toISOString(),  // 서버 타임스탬프는 Firestore Rules 제약으로 ISO 문자열
+      _v: 'v0421d',
+    });
+    const docRef = await _fsAddDoc(colRef, payload);
+    if(status){ status.className='dp-status ok'; status.textContent='✅ 전송 완료 — 진단 ID: ' + (docRef && docRef.id || '?'); }
+    // 결과 본문 앞에 ID 삽입
+    try{
+      const body = document.getElementById('_auth-diag-body');
+      if(body){ body.textContent = '진단 ID: ' + (docRef.id) + '\n(이 ID를 개발자에게 알려주세요)\n\n' + body.textContent; }
+    }catch(_){}
+  }catch(e){
+    if(status){ status.className='dp-status err'; status.textContent='전송 실패: '+(e && e.message || e)+' (rules 설정 필요할 수 있음)'; }
+    if(sendBtn) sendBtn.disabled = false;
+  }
+}
+window._sendDiagLog = _sendDiagLog;
+
 async function checkGlobalIdExists(loginId) {
   try {
     const ref = _getRegistryRef();
@@ -9662,7 +10047,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'prod'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0421c';
+const _APP_VERSION = 'v0421d';
 // (v0415i) 운영기에서만 숨길 관리자 섹션 처리 — data-env-only="dev" 요소를 prod에서 숨김
 try{
   if(_ENV!=='dev'){
@@ -19959,6 +20344,12 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.6.5 (v0421d)',date:'2026-04-21',items:[
+    '[DIAG] 아이폰 PWA 로그인 불능 원격 진단 (사고 11) — v0421a/b/c 세 차례 핫픽스 후에도 동일 기기에서 로그인 실패 지속. 디바이스 콘솔에 접근할 수 없는 상태라 원격 텔레메트리 수집 채널 신설',
+    '[FEAT] 로그인 화면 "🩺 진단 실행" 링크 추가 — 인증 상태, storage(localStorage/IndexedDB/CacheStorage) 인벤토리, _id_registry/family 문서 서버 fetch 결과, 네트워크 도달성을 수집해 진단 패널에 표시',
+    '[FEAT] 진단 결과 Firestore 전송 — 🩺 진단 전송 버튼으로 diagLogs 컬렉션에 익명 기록(비밀번호는 length만 캡처). admin.html에서 로그 목록/상세 조회 가능',
+    '[FEAT] admin.html 로그인 진단 로그 패널 — diagLogs 컬렉션 최근 50건을 시간순으로 표시, JSON 전체 펼치기 지원',
+  ]},
   {ver:'2.6.4 (v0421c)',date:'2026-04-21',items:[
     '[FIX] "로컬 상태 초기화" 후 로그인 시 0 마일리지로 홈 화면 표시되는 UX 버그 (사고 10) — v0421b 로컬 상태 초기화로 IndexedDB만 삭제되고 Firebase Auth 세션은 유지되어 리로드 직후 onAuthStateChanged가 자동 로그인을 시도하면서 빈 state로 홈이 렌더링됨. 추가로 Tier 3 로그인 경로가 main doc만 merge하고 서브컬렉션(S.log 등)을 로드하지 않아 onSnapshot이 올 때까지 일시적 0 마일리지 표시',
     '[FIX] _authHardReset에 Firebase Auth signOut 선행 — IndexedDB/localStorage/SW/CacheStorage 제거 전에 signOut(fbAuth) await. localStorage의 firebase: prefix 키도 함께 제거. _milely_force_login 플래그 세팅 후 리로드',
