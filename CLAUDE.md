@@ -77,6 +77,19 @@
   4. **서브컬렉션 마이그레이션 이후에는 마이그레이션 전 코드로 롤백 불가** — 롤백 대상은 반드시 서브컬렉션을 읽을 수 있는 버전이어야 함
   5. **배포 후 브라우저 콘솔 확인 필수** — `ReferenceError`, `TypeError` 등 에러가 없는지 확인. 이번 사고는 콘솔을 한번만 봤어도 즉시 발견 가능했음
 
+### 사고 12: 가족 데이터 cross-contamination — `users/taemin._migratedTo` 타가족 오염 (2026-04-21, v0421f)
+- **증상**: nonmarking@gmail.com(곽효신 가족) 로그인 직후 홈에 윤기재 가족 자녀(윤서지)의 생일 축하 이벤트가 떠버림. 사용자는 자기 폰에서 윤기재 계정으로 로그인한 적이 전혀 없음.
+- **원인**: 앱 내 4개 코드 경로가 공유 LEGACY 포인터 `users/taemin._migratedTo` 를 **조건 없이** `setDoc(merge:true)` 로 덮어씀(saveFamilyToFirestore / linkSocialFromMyMenu / _checkAuthRegistryOnBoot / sendFamilyInvite). 다른 기기에서 다른 가족으로 로그인된 세션이 위 경로 중 하나라도 hit하면 LEGACY 포인터가 그 가족으로 갈아탐 → 다른 기기의 부팅 `_checkLegacyMigrationPointer` 가 그 포인터를 따라 엉뚱한 가족 데이터를 자동 로드.
+- **해결 (v0421f)**:
+  1. `_safeSetMigratedTo(targetDocPath, contextLabel)` 가드 헬퍼 — read-then-write 로 다른 가족 덮어쓰기 차단 + diagLogs 감사
+  2. 4개 write site 전부 헬퍼 경유로 교체 (직접 `setDoc(LEGACY_DOC,{_migratedTo:...})` 호출 금지)
+  3. 부팅 시 `_crossValidateFamilyOnBoot` — `_id_registry/{email}` 와 `_familyId` mismatch 검증, 불일치 시 즉시 진짜 가족으로 교정
+- **교훈**:
+  1. **공유 LEGACY 포인터는 항상 read-then-write 가드** — merge 는 "있으면 건드리지 않기"가 아니라 "있으면 덮어쓰기"임
+  2. **부팅 시 identity invariant 검증** — 로컬 캐시·포인터는 오염될 수 있다는 전제로 인증 사용자의 registry 와 매 부팅 1회 cross-check
+  3. **모든 공유 필드 write 에 `_setBy=contextLabel` 메타 기록** — 다음 오염 발생 시 즉시 코드 경로 추적 가능
+  4. 직접 `setDoc(LEGACY_DOC,{_migratedTo:...})` 호출은 앞으로 금지. 새 기능에서도 반드시 `_safeSetMigratedTo` 만 사용
+
 ---
 
 ## 📄 공식 문서

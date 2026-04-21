@@ -879,6 +879,39 @@ git add index.html && git commit -m "운영기 배포: ..." && git push
   5. **진단 입력값은 항상 명시적으로** — 로그인 폼 DOM에서 우회로 읽는 건 취약하다(화면 전환/입력 지연). 진단 패널 자체에 입력란을 두고 자동 프리필 + 명시적 에러를 달아야 항상 값을 확보한다.
   6. **레지스트리 스키마 문서화가 부족했다** — `{familyId, memberId, createdAt}`이라는 스키마가 코드에 암묵적. 진단 헬퍼가 잘못된 키로 접근해도 조용히 `null`이 되어 한 사이클을 날렸다. ERD 또는 `schemas.md`에 레지스트리 문서 형태를 고정 기록해두면 같은 실수 방지.
 
+### 사고 12: 가족 데이터 cross-contamination — users/taemin._migratedTo 타가족으로 오염 (2026-04-21, v0421f)
+- **증상**: `nonmarking@gmail.com`(곽효신 가족, `wwec8f4hpemnfki8fo`) 계정으로 로그인 성공한 직후, 홈 화면에 다른 가족(윤기재 가족, `YPGnQ2kx`)의 자녀 윤서지 생일 축하 이벤트가 표시됨. 사용자는 자기 폰에서 윤기재 계정으로 로그인한 적이 전혀 없음.
+- **진단**:
+  - Firestore `users/taemin._migratedTo` 값이 `YPGnQ2kx`(윤기재 가족)로 되어 있었음. 진짜 소속 가족은 `wwec8f4hpemnfki8fo`.
+  - 부팅 시 nonmarking 의 PWA가 로컬에 `family_id` 가 없으면 `_checkLegacyMigrationPointer`가 `LEGACY_DOC(users/taemin)._migratedTo` 를 읽어 그 가족을 자동 로드. 결과적으로 윤기재 가족 데이터가 렌더됨.
+  - 즉 로그인 자격증명 검증과는 무관하게, **공유 LEGACY_DOC 포인터 한 개의 오염만으로도 전혀 다른 가족 데이터가 다른 사용자의 홈 화면에 노출**되는 구조.
+- **근본 원인**: 앱 내 4개 코드 경로가 `_migratedTo` 를 **조건 없이** `setDoc(merge:true)` 로 덮어씀:
+  - `saveFamilyToFirestore` — 마이그레이션 후 일반 저장 루프에서 매 저장마다 덮어씀
+  - `linkSocialFromMyMenu` — 내 메뉴 소셜 연결 플로우
+  - `_checkAuthRegistryOnBoot` — 부팅 registry 폴백에서 마지막에 포인터 set
+  - `sendFamilyInvite` — 가족 초대 발송 직전 마이그레이션
+  네 경로 모두 "현재 세션의 familyPath" 를 무조건 기록함. 다른 기기에서 다른 가족(테스트 가족 포함)으로 로그인된 세션이 단 한 번이라도 위 경로를 타면 LEGACY_DOC이 그 가족으로 조용히 갈아탐. 토요일(2026-04-18) 오후 admin.html에서 윤기재 가족 프로등급 승인 작업 및 부수적인 세션 활동 중 한 번 트리거된 것으로 추정.
+- **수동 복구 (즉시)**: Chrome MCP `javascript_tool` 로 `users/taemin._migratedTo` 를 `wwec8f4hpemnfki8fo` 로 교정. iPhone PWA 로그아웃 + 로컬 상태 초기화 후 정상 복귀 확인.
+- **재발 방지 (v0421f)**:
+  1. **`_safeSetMigratedTo(targetDocPath, contextLabel)` 가드 헬퍼 신설**
+     - 기존 `_migratedTo` 값을 먼저 server-source(`_getDocFresh`)로 읽음.
+     - 비어있거나 동일 가족이면 정상 set — 이때 첫 set인 경우 `_migratedTo_setAt`/`_migratedTo_setBy=contextLabel` 메타 필드 기록으로 추후 포렌식 가능.
+     - 기존 값이 **다른 가족**이면 쓰기 차단 + `diagLogs` 컬렉션에 `type=MIGRATED_TO_BLOCKED` 감사 entry 기록(existing/attempted/context/uid/email/ua 포함). 콘솔에도 `[_safeSetMigratedTo] ⚠️ BLOCKED ...` 경고.
+     - 헬퍼 반환값: `true`(성공/이미 설정됨) / `false`(차단됨).
+  2. **4개 write site 전부 헬퍼 경유로 교체** — 직접 `setDoc(LEGACY_DOC, {_migratedTo:...})` 호출은 앞으로 금지. 남은 유일한 direct write는 헬퍼 내부 1곳 뿐이며 grep 으로 감시 가능.
+  3. **부팅 cross-validation 가드 (`_crossValidateFamilyOnBoot`) 신설**
+     - 부팅 플로우에서 `_familyId` 가 결정된 직후(로컬 캐시·LEGACY pointer·auth registry 중 어디에서 왔든) 호출.
+     - `_id_registry/{email}` 를 source of truth로 간주하여 `regFamilyId !== _familyId` 이면 mismatch 처리.
+     - mismatch 시 `diagLogs` 에 `type=CROSS_VALIDATION_FAIL` 기록 후 진짜 가족(`regFamilyId`)으로 `_familyId`/`DATA_DOC`/`localStorage.family_id` 즉시 교정 + `_safeSetMigratedTo` 로 레거시 포인터도 교정.
+     - 이로써 LEGACY_DOC이 어떤 이유로 오염돼도 해당 사용자 세션에서는 최대 부팅 한 번 안에 복구됨.
+  4. **감사 로그 체계**: `diagLogs` 에 `MIGRATED_TO_BLOCKED` / `CROSS_VALIDATION_FAIL` 두 타입이 누적 — 다음 오염 발생 시 주체·시점·기기·contextLabel 을 즉시 특정 가능. admin.html 로그인 진단 패널(v0421d)에서 조회 가능.
+- **교훈**:
+  1. **공유 LEGACY 포인터는 항상 write-read-verify**. "내가 가진 familyId 를 merge 로 쓰면 무해하다"는 가정은 다른 기기·다른 사용자 관점에서 성립하지 않는다. merge 는 "없으면 생성, 있으면 덮어쓰기"이며 "있으면 건드리지 않기"가 아니다.
+  2. **중요 공유 필드는 쓰기 경로를 단일화**. v0421f 의 `_safeSetMigratedTo` 패턴을 앞으로 다른 공유 필드(예: `families/_id_registry`·`familyMeta.members` 등)에도 확장 검토.
+  3. **부팅 시 identity invariant 검증**. 로컬 캐시/포인터는 오염될 수 있다는 전제로, 인증된 사용자의 registry 엔트리를 매 부팅 1회 재검증하는 최소 비용 가드를 두는 게 값싸고 효과적.
+  4. **모든 `_migratedTo` write 에 `_setBy=contextLabel` 을 남긴다** — 다음 오염이 발생해도 어느 코드 경로에서 언제 쓰였는지 즉시 추적 가능. 감사 필드는 비용이 거의 없으니 기본으로 넣는다.
+  5. **사후 대응이 아닌 사전 차단이 필요한 클래스의 버그가 있다** — 로그인 실패(v0421a/b/c/d/e)는 "누가 못 들어옴" 문제였지만 본 사고는 "엉뚱한 가족 데이터가 노출됨" 문제. 프라이버시 리스크가 훨씬 커서 텔레메트리만으로는 부족하고 가드가 필요하다.
+
 ### Firestore 규칙 표준 (2026-04-08 기준, 절대 변경 시 검증 필수)
 ```
 rules_version = '2';
