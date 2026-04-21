@@ -793,6 +793,27 @@ git add index.html && git commit -m "운영기 배포: ..." && git push
   3. **iOS PWA는 App Check/Auth 타이밍을 신뢰할 수 없다** — 모든 getDoc 경로에 auth retry 레이어 필요.
   4. 사고 5·6·7·8 모두 동일 뿌리(iOS PWA 부팅 시퀀스의 타이밍 경쟁)에서 파생된 서로 다른 증상.
 
+### 사고 9: v0421a 배포 후에도 아이폰 PWA 로그인 불능 지속 — Firestore IndexedDB stale 캐시 (2026-04-21, v0421b)
+- **증상**: v0421a 운영 배포 후에도 같은 iPhone PWA에서 `nonmarking` 로그인 시 "아이디 또는 비밀번호가 틀렸어요" 지속. 같은 계정이 Mac Chrome(prod)·iPad PWA(prod)에서는 정상 로그인됨. Step A(cachebust URL), Step B(PWA 삭제 + Safari 웹사이트 데이터 삭제 + 재설치)로도 증상 동일.
+- **판별 근거**:
+  - Mac Chrome, iPad PWA는 됨 → Firestore 데이터 자체는 정상, v0421a 코드도 정상 동작
+  - PWA 여부가 아니라(iPad도 PWA) 해당 iPhone만 실패 → iPhone 기기에 남은 **잔존 상태**가 원인
+  - 로그인 실패 메시지가 "아이디/비번 틀림" → doLogin Tier 1·2 miss 후 Tier 3(`_id_registry`)에서 계정 엔트리를 못 찾음을 의미
+- **근본 원인**: Firebase Firestore SDK의 offline persistence(IndexedDB localCache) 기능이 활성화되어 있어(`_initializeFirestore + persistentLocalCache`), `getDoc(_id_registry)`가 **서버가 아닌 IndexedDB 캐시를 먼저 반환**함. iPhone PWA의 IndexedDB에 `_id_registry`의 stale한 스냅(해당 계정이 아직 등록되지 않은 시점의 것)이 남아있으면, 서버의 최신 레지스트리와 달라 계정을 못 찾음.
+  - iOS는 PWA(standalone mode) 샌드박스 스토리지가 Safari 브라우저와 분리되어 있어, Safari "웹사이트 데이터 삭제"와 홈 아이콘 삭제만으로는 PWA IndexedDB가 **안 지워지는 케이스가 있음** (iOS 버전/설정에 따라 다름). → 오래 전 캐시된 stale `_id_registry` 문서가 계속 살아남음.
+  - Firestore SDK는 네트워크 요청을 최적화하기 위해 IndexedDB 캐시가 있으면 "캐시 fresh 판정" 하에 서버 round-trip을 건너뛸 수 있음.
+- **해결 (v0421b)**:
+  - `_getDocFresh(ref)` 헬퍼 신설 — `getDocFromServer(ref)`로 server-source 강제. 실패 시 `getDoc(ref)` 폴백, permission-denied는 `_authWaitPromise` await 후 1회 재시도.
+  - `doLogin` Tier 3의 `getDoc(registryRef)` → `_getDocFresh(registryRef)` 교체. 다른 가족 문서 로드(`getDoc(familyDoc)`)도 동일 교체.
+  - 로그인/인증 화면에 **하단 버전 푸터** 추가 (`#_auth-version-footer`) — 로그인 불가 상태에서도 현재 실행 중인 버전(DEV/PROD + vXXXX) 즉시 확인 가능. `body.auth-active` 상태에서만 표시.
+  - 로그인 화면에 **"로컬 상태 초기화"** 버튼 (`_authHardReset`) — localStorage + sessionStorage + 모든 SW unregister + Cache Storage 전삭제 + IndexedDB.databases() 전삭제(Firestore 오프라인 캐시 포함) 후 강제 리로드. iOS PWA 샌드박스가 Safari 웹사이트 데이터 삭제로 안 비워지는 경우의 최후 수단.
+- **교훈**:
+  1. **Firestore persistent cache는 "캐시가 소스 오브 트루스"가 되는 순간을 만든다** — read가 많은 공유 문서(`_id_registry` 같은)에서 stale한 클라이언트 캐시가 서버와 불일치하면 로그인 같은 판정 로직이 잘못됨. 이런 문서는 무조건 `getDocFromServer`로 읽을 것.
+  2. **iOS PWA의 스토리지 샌드박스는 Safari와 분리** — "PWA 삭제 + 웹사이트 데이터 삭제"로도 PWA 샌드박스 IndexedDB가 남을 수 있음. 앱 자체에 "로컬 상태 초기화" 기능을 두는 것이 유일한 신뢰 가능 우회.
+  3. **기기간 동작 차이 = 잔존 상태 차이**. 같은 URL/코드에서 Mac/iPad는 되고 특정 iPhone만 안 되면 코드 버그가 아니라 그 기기의 저장소에 남은 잔존 상태가 원인일 가능성 크다.
+  4. **로그인 화면에도 버전 표기 필수** — 로그인 불가 상태에서 버전 확인이 안 되면 "v0421a 캐시인지 v0421b 새 코드인지" 구분이 불가능해 진단이 수초→수시간으로 길어짐.
+  5. 사고 5·6·7·8·9 모두 iOS PWA의 **레이어별 캐시**(HTTP, Service Worker, Firestore IndexedDB, localStorage)에서 각기 다른 실패를 일으킴. 동기화가 깨지면 어느 레이어든 앱의 근본 로직을 망가뜨릴 수 있음.
+
 ### Firestore 규칙 표준 (2026-04-08 기준, 절대 변경 시 검증 필수)
 ```
 rules_version = '2';
