@@ -1351,6 +1351,56 @@ account: {
 
 ## 변경 이력 (Change Log)
 
+### 2026-04-22 세션 — 나의 메뉴 탭 hero 통계 3종 + 확인 필요 알림 시트 (R-087, v0422b)
+
+**적용 범위: 개발기 (v0422b)** — 운영 미반영
+
+#### 배경
+- 홈탭을 제외한 다른 탭(활동기록/보상/성과)은 hero 영역에 `hdr-stats` 로 통계 3종을 표시하여 헤더 높이가 동일하게 유지됨
+- 반면 **나의 메뉴** 탭은 제목과 서브타이틀만 있어서 헤더가 혼자 짧게 보이는 시각적 불균형이 있었음
+- 사용자 요청: (1) 다른 탭과 동일한 높이로 맞추기 (2) 빈 자리에 "나의 메뉴 탭에 어울리는 숫자 통계" 를 넣기
+
+#### 수정 내역 — 3종 통계 + 클릭 가능한 알림 집계
+
+1. **가입 일수 (`my-hdr-joined`)** — `S.familyMeta.createdAt` 부터 오늘까지의 경과일 + 1 (가입 당일 = 1일째)
+2. **연속 접속 (`my-hdr-streak`)** — `S.log` 중 현재 사용자 활동이 있는 날짜 set 기준으로 오늘 (또는 어제) 부터 역순으로 연속된 일수
+3. **확인 필요 (`my-hdr-notif`)** — 탭 시 `m-my-notif` 시트 오픈. 역할별 집계:
+   - **공통**: `S.familyMessages` 중 `to===currentUser && !read` 개수
+   - **양육자**: + `S.actVerifyRequests` `status==='pending'` + `S.rewardRequests` `status==='pending'`
+   - **자녀**: + `S.badges[id].claimed===false` + `S.challenges` 중 `completed && !claimed`
+4. **0건 상태**: 숫자 대신 `✓` 체크 아이콘 + 라벨 "확인 필요" → "모두 확인" 변경 (긍정 피드백)
+5. **알림 시트(`#m-my-notif`) 구조** — 옵션 A (섹션 분리):
+   - 상단 **🔔 처리 필요**: pending 항목 리스트 + 건수 배지. 클릭 시 관련 탭/섹션으로 이동
+     - 활동/보상 승인 대기 → `goTab('my')` + `#adm-p4` 스크롤
+     - 미수령 뱃지 → `goTab('hist')`
+     - 미수령 챌린지 → `goTab('home')`
+   - 하단 **💌 받은 메시지**: 발신자별 최근 메시지 프리뷰 + 미읽 배지. 미읽 우선 → 최신순 정렬. 클릭 시 기존 `openMsgList(fromId)` 오픈 (기존 메시지 플로우 재사용)
+
+#### CSS (L397~)
+
+```css
+.my-header.compact .hdr-stats{margin-top:6px;padding:6px 8px;border-radius:var(--rsm)}
+.my-header.compact .hdr-stat-num{font-size:var(--fs-lg)}
+.my-header.compact .hdr-stat-lbl{font-size:var(--fs-xs)}
+.my-header.compact .hdr-stat-divider{height:20px}
+.hdr-stat.clickable{cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .15s}
+.hdr-stat.clickable:active{transform:scale(.94)}
+.hdr-stat.clickable .hdr-stat-num.has-alert::after{content:'';position:absolute;top:-2px;right:-8px;width:8px;height:8px;background:var(--rd,#ef4444);border-radius:50%;box-shadow:0 0 0 2px rgba(255,255,255,.25);animation:myNotifPulse 1.6s ease-in-out infinite}
+@keyframes myNotifPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(.85)}}
+.hdr-stat-check{font-size:var(--fs-xl);color:rgba(255,255,255,.95);line-height:1.2;font-weight:900}
+```
+
+#### 호출 흐름
+- `renderMyTab()` 말미에 `renderMyHeaderStats()` 호출 → 현재 역할에 맞춰 3개 DOM 숫자 갱신 + has-alert 클래스 토글
+- 사용자 액션(메시지 읽기, 승인, 뱃지 클레임 등) 후 `renderAll()` → 기존 파이프라인이 `renderMyTab()` 을 호출하는 시점에 자동 갱신
+
+#### 설계 근거
+- 다른 탭들과 **동일한 `.hdr-stats` 디자인 시스템** 재사용으로 시각적 일관성 확보
+- "확인 필요" 숫자를 단독으로 표시하지 않고, **양육자/자녀 각 역할에 의미 있는** 항목을 합산하여 한 번의 탭으로 모든 "할 일" 을 조회 가능
+- 0건 상태의 체크 표시는 "확인 안 한 알림이 있을 수도 있다" 는 불안을 **완료감**으로 전환
+
+---
+
 ### 2026-04-22 세션 — Android 느린 스크롤 hero compact 무한 토글 수정 (R-086, v0422a)
 
 **적용 범위: 개발기 (v0422a)** — 운영 미반영
