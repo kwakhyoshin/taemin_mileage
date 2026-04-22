@@ -401,6 +401,17 @@ body.dark .dtog-in{transform:translateX(20px)}
 .my-header.compact{padding:10px 20px 10px;padding-top:calc(10px + env(safe-area-inset-top))}
 .my-header.compact h2{font-size:var(--fs-lg)}
 .my-header.compact .my-header-sub{font-size:0;margin:0;opacity:0;max-height:0;overflow:hidden}
+/* 나의 메뉴 hero 통계 영역 (v0422b) — 다른 탭들과 동일한 .hdr-stats 재사용 + compact 규칙 */
+.my-header.compact .hdr-stats{margin-top:6px;padding:6px 8px;border-radius:var(--rsm)}
+.my-header.compact .hdr-stat-num{font-size:var(--fs-lg)}
+.my-header.compact .hdr-stat-lbl{font-size:var(--fs-xs)}
+.my-header.compact .hdr-stat-divider{height:20px}
+.hdr-stat.clickable{cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .15s}
+.hdr-stat.clickable:active{transform:scale(.94)}
+.hdr-stat.clickable .hdr-stat-num{position:relative;display:inline-flex;align-items:center;justify-content:center;min-width:1.5em}
+.hdr-stat.clickable .hdr-stat-num.has-alert::after{content:'';position:absolute;top:-2px;right:-8px;width:8px;height:8px;background:var(--rd,#ef4444);border-radius:50%;box-shadow:0 0 0 2px rgba(255,255,255,.25);animation:myNotifPulse 1.6s ease-in-out infinite}
+@keyframes myNotifPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(.85)}}
+.hdr-stat-check{font-size:var(--fs-xl);color:rgba(255,255,255,.95);line-height:1.2;font-weight:900}
 .my-profile-card{display:flex;align-items:center;gap:14px;background:var(--card);border-radius:var(--rmd);margin:16px 16px 0;padding:16px 18px;box-shadow:0 1px 4px rgba(0,0,0,.06);position:relative;border:1.5px solid transparent;transition:border-color .3s,box-shadow .3s,background .3s}
 .my-profile-card.tier-pro{border-color:rgba(245,158,11,.35);box-shadow:0 2px 12px rgba(245,158,11,.12),0 1px 4px rgba(0,0,0,.06);background:linear-gradient(135deg,var(--card) 60%,rgba(254,243,199,.25))}
 body.dark .my-profile-card.tier-pro{border-color:rgba(245,158,11,.3);box-shadow:0 2px 12px rgba(245,158,11,.08),0 1px 4px rgba(0,0,0,.15);background:linear-gradient(135deg,var(--card) 60%,rgba(245,158,11,.08))}
@@ -4554,6 +4565,14 @@ requestAnimationFrame(function(){
       <h2 style="margin:0">나의 메뉴 <svg class="hdr-ico" viewBox="0 0 24 24" style="width:24px;height:24px"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></h2>
     </div>
     <p class="my-header-sub" id="my-header-sub">내 정보</p>
+    <!-- v0422b: my-header 통계 3종 (가입일수 / 연속접속 / 확인필요) — 확인필요 클릭 시 알림 시트 열림 -->
+    <div class="hdr-stats" id="my-hdr-stats">
+      <div class="hdr-stat"><div class="hdr-stat-num" id="my-hdr-joined">0</div><div class="hdr-stat-lbl">가입 일수</div></div>
+      <div class="hdr-stat-divider"></div>
+      <div class="hdr-stat"><div class="hdr-stat-num" id="my-hdr-streak">0</div><div class="hdr-stat-lbl">연속 접속</div></div>
+      <div class="hdr-stat-divider"></div>
+      <div class="hdr-stat clickable" id="my-hdr-notif-wrap" role="button" tabindex="0" aria-label="확인 필요 알림 열기" onclick="openMyNotifSheet()"><div class="hdr-stat-num" id="my-hdr-notif">0</div><div class="hdr-stat-lbl">확인 필요</div></div>
+    </div>
   </div>
   <div class="my-section-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> 나의 계정</div>
   <div class="my-profile-card" id="my-profile-card">
@@ -5174,6 +5193,23 @@ requestAnimationFrame(function(){
   <div class="msglist-body" id="msglist-body"></div>
   <div class="msglist-footer" id="msglist-footer" style="display:none"></div>
   <div class="msglist-detail" id="msglist-detail" style="display:none"></div>
+</div>
+
+<!-- v0422b: 나의 메뉴 확인 필요 알림 시트 -->
+<div class="overlay" id="m-my-notif" style="z-index:620">
+  <div class="sheet" style="max-height:80vh">
+    <div class="sheet-body" style="padding-bottom:env(safe-area-inset-bottom,0)">
+      <div class="handle"></div>
+      <div class="sheet-title" style="display:flex;align-items:center;gap:8px;justify-content:space-between">
+        <span style="display:flex;align-items:center;gap:8px">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          확인 필요
+        </span>
+        <button onclick="closeMyNotifSheet()" style="background:var(--bg2);border:none;border-radius:20px;padding:6px 14px;font-size:13px;font-weight:800;color:var(--tx2);cursor:pointer;font-family:inherit;flex-shrink:0">닫기</button>
+      </div>
+      <div id="my-notif-body" style="padding:4px 0 16px;max-height:60vh;overflow-y:auto;-webkit-overflow-scrolling:touch"></div>
+    </div>
+  </div>
 </div>
 
 <!-- EMOJI PICKER -->
@@ -10370,7 +10406,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0422a';
+const _APP_VERSION = 'v0422b';
 // (v0415i) 운영기에서만 숨길 관리자 섹션 처리 — data-env-only="dev" 요소를 prod에서 숨김
 try{
   if(_ENV!=='dev'){
@@ -20476,7 +20512,247 @@ function renderMyTab(){
     }
   }
   }catch(e){console.warn('[renderMyTab] family row err:',e);}
+  // v0422b: my-header 통계 갱신
+  try{renderMyHeaderStats();}catch(e){console.warn('[renderMyTab] header stats err:',e);}
 }
+
+// ───────────────────────────────────────────────────────
+// v0422b: 나의 메뉴 탭 헤더 통계 (가입일수 / 연속접속 / 확인필요)
+// ───────────────────────────────────────────────────────
+function _calcJoinDays(){
+  try{
+    const ts=(S.familyMeta&&S.familyMeta.createdAt)||null;
+    if(!ts)return 0;
+    const diff=Date.now()-ts;
+    const days=Math.floor(diff/86400000)+1; // 가입 당일을 1일째로
+    return Math.max(1,days);
+  }catch(e){return 0;}
+}
+
+function _calcLoginStreak(){
+  // S.log 기반으로 현재 사용자가 활동한 날짜 set을 만들고,
+  // 오늘 또는 어제부터 연속으로 몇 일 연속인지 계산
+  try{
+    if(!currentUser||!Array.isArray(S.log)||S.log.length===0)return 0;
+    const dates=new Set();
+    for(const l of S.log){
+      const u=l.user||_globalDataOwner;
+      if(u&&u!==currentUser)continue;
+      const d=new Date(l.ts||0);
+      if(isNaN(d.getTime()))continue;
+      const ymd=d.getFullYear()+'-'+(d.getMonth()+1).toString().padStart(2,'0')+'-'+d.getDate().toString().padStart(2,'0');
+      dates.add(ymd);
+    }
+    if(dates.size===0)return 0;
+    // 오늘부터 역순으로 확인
+    const today=new Date();
+    today.setHours(0,0,0,0);
+    let streak=0;
+    let cur=new Date(today);
+    // 오늘 활동이 없어도 어제부터 셈
+    const todayYmd=cur.getFullYear()+'-'+(cur.getMonth()+1).toString().padStart(2,'0')+'-'+cur.getDate().toString().padStart(2,'0');
+    if(!dates.has(todayYmd)){
+      cur.setDate(cur.getDate()-1);
+    }
+    for(let i=0;i<3650;i++){
+      const y=cur.getFullYear()+'-'+(cur.getMonth()+1).toString().padStart(2,'0')+'-'+cur.getDate().toString().padStart(2,'0');
+      if(dates.has(y)){streak++;cur.setDate(cur.getDate()-1);}
+      else break;
+    }
+    return streak;
+  }catch(e){console.warn('[_calcLoginStreak]',e);return 0;}
+}
+
+function _calcMyNotifCount(){
+  // 메시지 미읽 + 역할별 pending
+  try{
+    if(!currentUser)return {total:0,msg:0,pending:0,items:[]};
+    const items=[];
+    // 1) 받은 메시지 중 미읽
+    let msgUnread=0;
+    if(Array.isArray(S.familyMessages)){
+      msgUnread=S.familyMessages.filter(m=>m&&m.to===currentUser&&m.from!==currentUser&&!m.read).length;
+    }
+    // 2) 역할별 pending
+    let pending=0;
+    const isParent=typeof isCaregiverUser==='function'&&isCaregiverUser();
+    if(isParent){
+      // 활동 승인 대기
+      const actPend=(S.actVerifyRequests||[]).filter(r=>r&&r.status==='pending');
+      if(actPend.length>0){
+        items.push({type:'actVerify',count:actPend.length,label:'활동 승인 대기',tab:'my',adm:'act'});
+      }
+      // 보상 요청 대기
+      const rwdPend=(S.rewardRequests||[]).filter(r=>r&&r.status==='pending');
+      if(rwdPend.length>0){
+        items.push({type:'rewardReq',count:rwdPend.length,label:'보상 요청 대기',tab:'my',adm:'rwd'});
+      }
+      pending=actPend.length+rwdPend.length;
+    }else{
+      // 자녀: 미수령 뱃지
+      const unclaimedBadges=Object.keys(S.badges||{}).filter(id=>{
+        const b=(S.badges||{})[id];
+        return b&&!b.claimed;
+      });
+      if(unclaimedBadges.length>0){
+        items.push({type:'badge',count:unclaimedBadges.length,label:'미수령 뱃지 보상',tab:'hist'});
+      }
+      // 자녀: 미수령 챌린지 보상
+      const unclaimedCh=(S.challenges||[]).filter(c=>c&&c.completed&&!c.claimed);
+      if(unclaimedCh.length>0){
+        items.push({type:'challenge',count:unclaimedCh.length,label:'미수령 챌린지 보상',tab:'home'});
+      }
+      pending=unclaimedBadges.length+unclaimedCh.length;
+    }
+    return {total:msgUnread+pending,msg:msgUnread,pending:pending,items:items};
+  }catch(e){console.warn('[_calcMyNotifCount]',e);return {total:0,msg:0,pending:0,items:[]};}
+}
+
+function renderMyHeaderStats(){
+  try{
+    if(!currentUser)return;
+    const joinedEl=document.getElementById('my-hdr-joined');
+    const streakEl=document.getElementById('my-hdr-streak');
+    const notifEl=document.getElementById('my-hdr-notif');
+    if(!joinedEl||!streakEl||!notifEl)return;
+    const days=_calcJoinDays();
+    const streak=_calcLoginStreak();
+    const notif=_calcMyNotifCount();
+    joinedEl.textContent=days;
+    streakEl.textContent=streak;
+    // 확인 필요: 0 이면 체크 표시
+    if(notif.total>0){
+      notifEl.textContent=notif.total;
+      notifEl.classList.add('has-alert');
+      notifEl.classList.remove('hdr-stat-check');
+    }else{
+      notifEl.innerHTML='<span class="hdr-stat-check">✓</span>';
+      notifEl.classList.remove('has-alert');
+    }
+    // 라벨 갱신 (0이면 "모두 확인")
+    const notifWrap=document.getElementById('my-hdr-notif-wrap');
+    if(notifWrap){
+      const lbl=notifWrap.querySelector('.hdr-stat-lbl');
+      if(lbl)lbl.textContent=notif.total>0?'확인 필요':'모두 확인';
+    }
+  }catch(e){console.warn('[renderMyHeaderStats]',e);}
+}
+
+function openMyNotifSheet(){
+  try{
+    _renderMyNotifSheet();
+    const ov=document.getElementById('m-my-notif');
+    if(ov)ov.classList.add('open');
+  }catch(e){console.warn('[openMyNotifSheet]',e);}
+}
+function closeMyNotifSheet(){
+  const ov=document.getElementById('m-my-notif');
+  if(ov)ov.classList.remove('open');
+}
+window.openMyNotifSheet=openMyNotifSheet;
+window.closeMyNotifSheet=closeMyNotifSheet;
+
+function _renderMyNotifSheet(){
+  const body=document.getElementById('my-notif-body');
+  if(!body)return;
+  const notif=_calcMyNotifCount();
+  const sections=[];
+  // 상단: 처리 필요
+  if(notif.items&&notif.items.length>0){
+    let html='<div style="font-size:var(--fs-sm);font-weight:900;color:var(--tx2);margin:8px 2px 8px">🔔 처리 필요</div>';
+    html+='<div style="display:flex;flex-direction:column;gap:8px">';
+    for(const it of notif.items){
+      const icon=it.type==='actVerify'?'✅':(it.type==='rewardReq'?'🎁':(it.type==='badge'?'🏅':'🏆'));
+      const handler="closeMyNotifSheet();_handleMyNotifItem('"+it.type+"')";
+      html+=`<div class="my-notif-row" role="button" tabindex="0" onclick="${handler}" style="display:flex;align-items:center;gap:12px;padding:14px 14px;background:var(--bg2);border-radius:14px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .12s">
+        <div style="font-size:22px;line-height:1">${icon}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:var(--fs-base);font-weight:800;color:var(--tx)">${escapeHtml(it.label)}</div>
+          <div style="font-size:var(--fs-xs);color:var(--tx3);margin-top:2px">${it.count}건 대기 중</div>
+        </div>
+        <div style="font-size:var(--fs-lg);font-weight:900;color:var(--ac,#6366F1);padding:4px 10px;background:rgba(99,102,241,.1);border-radius:10px">${it.count}</div>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="color:var(--tx3);flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>`;
+    }
+    html+='</div>';
+    sections.push(html);
+  }
+  // 하단: 받은 메시지 (미읽 + 최근 몇 개)
+  const msgsRaw=Array.isArray(S.familyMessages)?S.familyMessages:[];
+  const myMsgs=msgsRaw.filter(m=>m&&m.to===currentUser&&m.from!==currentUser);
+  if(myMsgs.length>0){
+    // 발신자별 그룹
+    const byFrom={};
+    myMsgs.forEach(m=>{
+      if(!byFrom[m.from])byFrom[m.from]={unread:0,lastTs:0,lastText:''};
+      const g=byFrom[m.from];
+      if(!m.read)g.unread++;
+      if((m.ts||0)>g.lastTs){g.lastTs=m.ts||0;g.lastText=m.text||'';}
+    });
+    const sendersSorted=Object.keys(byFrom).sort((a,b)=>{
+      // 미읽 우선 → 최신순
+      const A=byFrom[a],B=byFrom[b];
+      if((A.unread>0)!==(B.unread>0))return A.unread>0?-1:1;
+      return B.lastTs-A.lastTs;
+    });
+    let html='<div style="font-size:var(--fs-sm);font-weight:900;color:var(--tx2);margin:20px 2px 8px">💌 받은 메시지</div>';
+    html+='<div style="display:flex;flex-direction:column;gap:8px">';
+    for(const fromId of sendersSorted){
+      const g=byFrom[fromId];
+      const name=(MEMBERS[fromId]&&MEMBERS[fromId].name)||(S.familyMeta&&S.familyMeta.members&&S.familyMeta.members[fromId]&&S.familyMeta.members[fromId].name)||'가족';
+      const avatar=typeof getAvatarHTML==='function'?getAvatarHTML(fromId,36):'';
+      const date=new Date(g.lastTs);
+      const timeStr=isNaN(date.getTime())?'':((date.getMonth()+1)+'/'+date.getDate()+' '+date.getHours()+':'+String(date.getMinutes()).padStart(2,'0'));
+      const unreadBadge=g.unread>0?`<span style="flex-shrink:0;min-width:22px;height:22px;padding:0 7px;background:var(--rd,#ef4444);color:#fff;font-size:var(--fs-xs);font-weight:900;border-radius:11px;display:inline-flex;align-items:center;justify-content:center">${g.unread}</span>`:'';
+      const preview=(g.lastText||'').replace(/\n/g,' ').slice(0,40);
+      html+=`<div class="my-notif-row" role="button" tabindex="0" onclick="closeMyNotifSheet();_openMsgFromMyNotif('${escapeHtml(fromId)}')" style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--bg2);border-radius:14px;cursor:pointer;-webkit-tap-highlight-color:transparent">
+        <div style="flex-shrink:0">${avatar}</div>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:6px"><div style="font-size:var(--fs-base);font-weight:800;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(name)}</div><div style="font-size:var(--fs-xs);color:var(--tx3)">${timeStr}</div></div>
+          <div style="font-size:var(--fs-sm);color:var(--tx2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(preview)}</div>
+        </div>
+        ${unreadBadge}
+      </div>`;
+    }
+    html+='</div>';
+    sections.push(html);
+  }
+  if(sections.length===0){
+    body.innerHTML='<div style="padding:40px 20px;text-align:center;color:var(--tx3)"><div style="font-size:48px;margin-bottom:8px">✓</div><div style="font-size:var(--fs-base);font-weight:800;color:var(--tx2)">모두 확인했어요</div><div style="font-size:var(--fs-sm);margin-top:4px">확인할 알림이 없습니다</div></div>';
+  }else{
+    body.innerHTML=sections.join('');
+  }
+}
+window._renderMyNotifSheet=_renderMyNotifSheet;
+
+function _handleMyNotifItem(type){
+  try{
+    if(type==='actVerify'||type==='rewardReq'){
+      // 관리 탭(나의메뉴 내부)로 이동
+      if(typeof goTab==='function')goTab('my');
+      // 관리자 섹션으로 스크롤 시도
+      setTimeout(function(){
+        const target=document.getElementById('adm-p4');
+        if(target&&target.scrollIntoView)target.scrollIntoView({behavior:'smooth',block:'start'});
+      },100);
+    }else if(type==='badge'){
+      if(typeof goTab==='function')goTab('hist');
+    }else if(type==='challenge'){
+      if(typeof goTab==='function')goTab('home');
+    }
+  }catch(e){console.warn('[_handleMyNotifItem]',e);}
+}
+window._handleMyNotifItem=_handleMyNotifItem;
+
+function _openMsgFromMyNotif(fromId){
+  try{
+    if(typeof openMsgList==='function'){
+      openMsgList(fromId,false);
+    }
+  }catch(e){console.warn('[_openMsgFromMyNotif]',e);}
+}
+window._openMsgFromMyNotif=_openMsgFromMyNotif;
+
 function _renderBugPicker(){
   const wrap=document.getElementById('bug-picker');if(!wrap)return;
   const cur=(S&&S.settings&&S.settings.challengeBug)||'random';
@@ -20721,6 +20997,9 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.6.9 (v0422b)',date:'2026-04-22',items:[
+    {type:'new',text:'[나의 메뉴] 탭 헤더 높이를 다른 탭(활동기록/보상/성과)과 동일하게 맞추고, 3종 통계(가입 일수 / 연속 접속 / 확인 필요)를 표시. "확인 필요"는 역할별로 집계 — 양육자는 활동/보상 승인 대기, 자녀는 미수령 뱃지·챌린지 보상. 숫자 탭 시 "처리 필요" + "받은 메시지" 통합 시트가 열려 바로 해당 영역으로 이동 가능. 0건일 때는 "모두 확인 ✓" 긍정 피드백'},
+  ]},
   {ver:'2.6.8 (v0422a)',date:'2026-04-22',items:[
     {type:'fix',text:'[Android] 갤럭시에서 홈탭 느린 스크롤 시 mily 인사말 영역이 사라지지 않고 헤더 축소가 중단되는 문제 수정 — Chromium의 scroll anchoring이 hero compact 전환으로 인한 높이 변화를 상쇄하려 scrollY를 역보정하면서 compact on/off가 무한 토글되던 피드백 루프 차단. html/body/#s-home/.scr에 overflow-anchor:none 적용'},
   ]},
