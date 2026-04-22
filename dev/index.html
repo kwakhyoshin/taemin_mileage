@@ -313,8 +313,10 @@ body.dark .c1-role-type-card-title{color:#F1F5F9}
 /* Activity card state transitions */
 .act-card.done,.act-card.partial,.act-card.exhausted{transition:background .25s,transform .15s}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html{background:var(--bg);touch-action:pan-y;overscroll-behavior:none}
-body{touch-action:pan-y;overscroll-behavior:none}
+html{background:var(--bg);touch-action:pan-y;overscroll-behavior:none;overflow-anchor:none}
+body{touch-action:pan-y;overscroll-behavior:none;overflow-anchor:none}
+/* Android Chromium scroll anchoring 비활성화 — 느린 스크롤 시 hero compact 토글 무한 깜박임 방지 (v0422a) */
+#s-home,.scr{overflow-anchor:none}
 /* 빠른 스크롤 중 헤더 transition 끄기 — Android 깜빡거림 방지 */
 body.is-scrolling .hero,body.is-scrolling .log-header-sticky,body.is-scrolling .rwd-header-sticky,body.is-scrolling .hist-hero,body.is-scrolling .my-header,body.is-scrolling .adm-top{transition:none!important}
 body.is-scrolling .hero *,body.is-scrolling .log-header-sticky *,body.is-scrolling .rwd-header-sticky *,body.is-scrolling .hist-hero *,body.is-scrolling .my-header *,body.is-scrolling .adm-top *{transition:none!important}
@@ -10368,7 +10370,7 @@ const BADGES = [
 
 // ── FIREBASE (dynamic import — 실패해도 앱 UI는 동작) ──
 const _ENV = 'dev'; // 'prod' = 운영, 'dev' = 개발
-const _APP_VERSION = 'v0421f';
+const _APP_VERSION = 'v0422a';
 // (v0415i) 운영기에서만 숨길 관리자 섹션 처리 — data-env-only="dev" 요소를 prod에서 숨김
 try{
   if(_ENV!=='dev'){
@@ -20719,6 +20721,9 @@ window.pfMenuAction=pfMenuAction;
 
 // ── CHANGELOG / WHAT'S NEW ──────────────────
 const APP_CHANGELOG=[
+  {ver:'2.6.8 (v0422a)',date:'2026-04-22',items:[
+    {type:'fix',text:'[Android] 갤럭시에서 홈탭 느린 스크롤 시 mily 인사말 영역이 사라지지 않고 헤더 축소가 중단되는 문제 수정 — Chromium의 scroll anchoring이 hero compact 전환으로 인한 높이 변화를 상쇄하려 scrollY를 역보정하면서 compact on/off가 무한 토글되던 피드백 루프 차단. html/body/#s-home/.scr에 overflow-anchor:none 적용'},
+  ]},
   {ver:'2.6.7 (v0421f)',date:'2026-04-21',items:[
     {type:'fix',text:'[사고 12] 가족 데이터 cross-contamination 차단 — users/taemin._migratedTo 를 다른 가족(YPGnQ2kx)으로 덮어쓰는 4개 write site(saveFamilyToFirestore / linkSocialFromMyMenu / _checkAuthRegistryOnBoot / sendFamilyInvite)를 모두 _safeSetMigratedTo 가드 헬퍼로 교체. 기존 값이 다르면 쓰기를 차단하고 diagLogs(MIGRATED_TO_BLOCKED)에 감사 기록'},
     {type:'fix',text:'[가드] 부팅 cross-validation — _crossValidateFamilyOnBoot 신설. localStorage.family_id 또는 LEGACY_DOC._migratedTo 가 오염되어도 _id_registry/{email} 기준으로 교정. 불일치 감지 시 diagLogs(CROSS_VALIDATION_FAIL) 기록 후 실제 소속 가족으로 전환'},
