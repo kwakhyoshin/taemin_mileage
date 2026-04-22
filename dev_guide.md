@@ -1351,6 +1351,47 @@ account: {
 
 ## 변경 이력 (Change Log)
 
+### 2026-04-22 세션 — Android 느린 스크롤 hero compact 무한 토글 수정 (R-086, v0422a)
+
+**적용 범위: 개발기 (v0422a)** — 운영 미반영
+
+#### 증상
+- iPhone에서는 정상, 갤럭시(Android Chromium WebView/Chrome)에서만 발생
+- 홈탭에서 **느리게** 스크롤 내릴 경우 상단 hero 제목 영역이 조금씩 줄어들다가 mily 아이콘/인사말 영역이 사라져야 하는 시점에서 **계속 걸려서 사라지지 않음**
+- 인사말 영역이 남은 채로 헤더가 더 이상 축소되지 않고, 스크롤을 끝까지 내릴 때까지 그 상태가 유지됨
+- 반면 **빠르게** 스크롤하면 정상적으로 compact 전환이 동작하여 인사말 영역이 사라짐
+
+#### 근본 원인 — Chromium Scroll Anchoring 피드백 루프
+1. 사용자가 천천히 스크롤하여 `effScrollY` 가 threshold(60) 를 넘는 순간 `hero.classList.add('compact')` 호출
+2. compact 클래스로 hero 높이가 축소됨 (`.hero.compact .mily-greeting-hero{display:none}`, padding 감소 등)
+3. **Chromium scroll anchoring** 이 DOM 높이 변화로 인한 viewport 흔들림을 방지하려 자동으로 `scrollY` 를 **역보정**(줄어든 높이만큼 scrollY 를 감소)
+4. 보정된 scrollY 로 재계산된 `effScrollY` 가 thresholdOff(40) 아래로 떨어짐 → compact 제거
+5. hero 가 다시 커지면서 scrollY 가 원래대로 복귀 → 다시 threshold(60) 넘어 compact add
+6. 2~5 가 무한 반복되며 헤더가 "걸린" 상태처럼 보임
+
+빠른 스크롤이 정상인 이유: 스크롤 속도가 anchoring 의 scrollY 보정폭을 초과하면 1회 add 후 effScrollY 가 thresholdOff 위로 유지됨. iPhone Safari 에는 scroll anchoring 이 없거나 매우 약하므로 증상 없음.
+
+#### 수정 내역
+```css
+/* dev/index.html L316-319 */
+html{background:var(--bg);touch-action:pan-y;overscroll-behavior:none;overflow-anchor:none}
+body{touch-action:pan-y;overscroll-behavior:none;overflow-anchor:none}
+/* Android Chromium scroll anchoring 비활성화 — 느린 스크롤 시 hero compact 전환 무한 토글 방지 (v0422a) */
+#s-home,.scr{overflow-anchor:none}
+```
+
+`overflow-anchor:none` 은 Chromium 이 DOM 높이 변화를 상쇄하기 위해 자동으로 scrollY 를 보정하는 동작을 완전히 끈다. 보정이 없으므로 compact 전환 후에도 scrollY 가 유지되어 thresholdOff 이하로 내려가지 않음 → 무한 토글 루프 차단.
+
+#### 영향 범위
+- 홈탭(`#s-home`)의 hero compact 전환이 주 타겟이지만, 기타 탭도 동일 원리의 sticky header 축소 패턴을 갖고 있어 `.scr` 전체에 적용
+- 현재 `html`/`body` 레벨에도 적용하여 브라우저 기본 scroll anchoring 동작을 앱 전역에서 비활성화
+- 브라우저가 DOM 높이 변화 시 viewport 를 고정해 주지 않으므로, 콘텐츠 로드/이미지 lazy-decode 로 인해 약간의 jumping 가능성 존재 — 현재 앱에서는 hero 외에는 스크롤 중 동적 높이 변화가 거의 없어 체감 문제 없음
+
+#### 교훈
+1. **position:sticky + transition 으로 높이 변화 + scroll threshold 토글** 조합은 Chromium scroll anchoring 과 피드백 루프를 형성할 수 있음
+2. Android 와 iOS 스크롤 차이 증상이 나타나면 scroll anchoring 을 의심할 것
+3. `overflow-anchor:none` 은 가장 안전하고 핀포인트한 해결책 — hysteresis 범위 확대보다 근본 원인을 제거하는 편이 낫다
+
 ### 2026-04-15 세션 — 안드로이드 APK edge-to-edge 시스템 바 inset 반영 (R-061, v0415n → v0415o → 운영반영)
 
 **적용 범위: 개발기 (v0415n, v0415o) + 운영기 (v0415o, release/v0415o)**
