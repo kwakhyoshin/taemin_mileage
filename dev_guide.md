@@ -1351,6 +1351,48 @@ account: {
 
 ## 변경 이력 (Change Log)
 
+### 2026-04-24 세션 — 나의 메뉴 "확인 필요" 자가치유 + UX 수정 (R-088, v0422c)
+
+**적용 범위: 개발기 (v0422c)** — 운영 미반영
+
+#### 증상
+- nonmarking 계정으로 개발기 로그인 시 "확인 필요 = 1" 배지가 표시됨
+- 탭하여 열린 시트에서 "활동 승인 대기 1건" 행이 보임
+- 해당 행을 클릭해도 **아무 반응 없음** (goTab('my') 이 이미 my 탭이어서 no-op, scrollIntoView 는 `#adm-p4` 가 닫혀 있어 효과 없음)
+- 실제 메시지 리스트를 열어봐도 `activity_verify_request` 상태인 메시지가 보이지 않음 → **S.actVerifyRequests 에는 pending 인데 매칭 familyMessages 는 없는 고아(orphan) 데이터**
+- 사용자 제안: "실제로 미확인 메시지가 없는 상태라면 누르는 순간 완료 처리되면서 저런 건들을 0로 만들어야 할 것 같은데?"
+
+#### 원인
+1. **UX 버그** — `_handleMyNotifItem` 의 `goTab('my')` 이 이미 my 탭일 때 visible 변화가 없고, `#adm-p4` 는 관리자 패널이 열려있지 않으면 `display:none` 상태라 scrollIntoView 도 무반응
+2. **고아 데이터** — `S.actVerifyRequests[]` 의 `status==='pending'` 레코드는 정상적으로 `S.familyMessages[]` 의 `activity_verify_request` 메시지와 매칭되어야 하지만, 과거 버전의 버그/마이그레이션/수동 편집 등으로 매칭 메시지가 사라진 채 pending 이 남아있는 케이스 발견
+
+#### 수정 내역
+
+1. **`_cleanOrphanRequests()` 헬퍼 추가** — `S.familyMessages` 에서 현재 사용자 수신 + `activity_verify_request`/`reward_request` 타입 + requestId 를 추출해 Set 구성. pending 요청 중 그 Set 에 없는 것은 `status='expired'`, `expiredAt`, `expiredReason='no_matching_message'` 로 전환
+2. **렌더링 시점 자동 정리** — `renderMyHeaderStats()` 진입 시 `_cleanOrphanRequests()` 호출. 변경 시 save(). 즉, 앱을 열기만 해도 고아 데이터가 자동 정리되어 카운트가 정확해짐
+3. **클릭 시 자가치유 + 메시지 리스트 오픈** — `_handleMyNotifItem('actVerify'|'rewardReq')` 재작성:
+   - 먼저 `_cleanOrphanRequests()` 호출 → orphan 정리
+   - 정리 후 살아있는 pending 이 있고, 그 pending 에 매칭되는 familyMessage 가 있으면 → 가장 최근 메시지 발신자 기준 `openMsgList(fromId, false)` 오픈 (여기서 "승인대기" 칩이 붙은 리스트 + 승인/반려 버튼 바로 접근)
+   - 살아있는 pending 이 없으면: `totalCleaned>0` 이면 "이미 처리된 요청이라 정리했어요" 토스트, 아니면 "대기 중인 요청이 없어요" 토스트. `renderMyHeaderStats()` 재호출로 숫자 즉시 0 으로 갱신
+
+#### 테스트 포인트
+- [x] JS 구문 검증 (`new Function`)
+- [ ] nonmarking 계정 로그인 → 헤더 "확인 필요" 카운트가 자동 정리되어 0 으로 감소하는지
+- [ ] 실제 pending 요청이 있는 상태에서 클릭 시 해당 요청의 발신자 메시지 리스트가 열리는지
+- [ ] 모바일에서 시트 → 메시지 리스트 전환 시 body scroll 잠금이 올바르게 동작하는지
+
+#### 데이터 안전성
+- `_cleanOrphanRequests()` 는 `S.actVerifyRequests`/`S.rewardRequests` 의 기존 레코드를 **삭제하지 않고** 상태만 `expired` 로 전환 — 히스토리 추적 가능
+- 정리 이유는 `expiredReason='no_matching_message'` 로 명시하여 추후 디버깅 시 구분 용이
+- save() 호출은 정리가 실제로 발생했을 때만 (카운트 > 0) 수행하여 불필요한 Firestore write 회피
+
+#### 교훈
+- **UX 액션의 "아무 반응 없음" 은 실패 시나리오** — 같은 탭 이동 등 no-op 경로는 항상 fallback(토스트/하이라이트/스크롤)을 둘 것
+- **데이터 무결성 체크는 렌더링 경로에서** — 백엔드 트리거를 추가하기 전까지는 프런트가 스스로 고아 상태를 정리하는 방어 로직이 현실적
+- **status 전이는 soft-delete 패턴** — `expired` 상태를 추가해 데이터 보존 + 카운트 제외 모두 달성
+
+---
+
 ### 2026-04-22 세션 — 나의 메뉴 탭 hero 통계 3종 + 확인 필요 알림 시트 (R-087, v0422b)
 
 **적용 범위: 개발기 (v0422b)** — 운영 미반영
